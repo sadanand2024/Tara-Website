@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 // material-ui
 import { useTheme } from '@mui/material/styles';
@@ -42,11 +43,11 @@ import useConfig from 'hooks/useConfig';
 export default function ProfileSection() {
   const theme = useTheme();
   const { mode, borderRadius } = useConfig();
-
+  const navigate = useNavigate();
   const [sdm, setSdm] = useState(true);
   const [value, setValue] = useState('');
   const [notification, setNotification] = useState(false);
-  const [selectedIndex] = useState(-1);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
   const { logout, user } = useAuth();
   const [open, setOpen] = useState(false);
 
@@ -59,6 +60,15 @@ export default function ProfileSection() {
       await logout();
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const handleListItemClick = (event, index, route = '') => {
+    setSelectedIndex(index);
+    handleClose(event);
+
+    if (route && route !== '') {
+      navigate(route);
     }
   };
 
@@ -228,7 +238,11 @@ export default function ProfileSection() {
                           '& .MuiListItemButton-root': { mt: 0.5 }
                         }}
                       >
-                        <ListItemButton sx={{ borderRadius: `${borderRadius}px` }} selected={selectedIndex === 0}>
+                        <ListItemButton
+                          sx={{ borderRadius: `${borderRadius}px` }}
+                          selected={selectedIndex === 0}
+                          onClick={(event) => handleListItemClick(event, 0, '/apps/user/profile')}
+                        >
                           <ListItemIcon>
                             <IconSettings stroke={1.5} size="20px" />
                           </ListItemIcon>
