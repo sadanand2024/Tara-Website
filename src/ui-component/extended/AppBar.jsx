@@ -65,9 +65,28 @@ export default function AppBar({ ...others }) {
       <MuiAppBar>
         <Container>
           <Toolbar sx={{ py: 2.5, px: `0 !important` }}>
-            <Typography component={RouterLink} to="/" sx={{ flexGrow: 1, textAlign: 'left' }}>
-              <Logo />
+            {/* <Logo /> */}
+
+            <Typography
+              component={RouterLink}
+              to="/"
+              variant="h1"
+              sx={{
+                flexGrow: 1,
+                textAlign: 'left',
+                fontWeight: 900,
+                fontFamily: 'Roboto, Poppins, sans-serif',
+                color: 'primary.main',
+                textDecoration: 'none',
+                letterSpacing: 1.2
+              }}
+            >
+              Tara{' '}
+              <Box component="span" sx={{ color: 'secondary.main', fontWeight: 800 }}>
+                First
+              </Box>
             </Typography>
+
             <Stack direction="row" spacing={{ xs: 1.5, md: 3 }}>
               <Stack direction="row" sx={{ display: { xs: 'none', sm: 'block' } }} spacing={{ xs: 1.5, md: 2.5 }}>
                 <Button color="inherit" onClick={handleToggle}>
@@ -85,12 +104,12 @@ export default function AppBar({ ...others }) {
                 <Button color="inherit" onClick={handleToggle}>
                   Book Consultation
                 </Button>
-                <Button color="inherit" component={Link} href="#">
+                {/* <Button color="inherit" component={Link} href="#">
                   Home
-                </Button>
-                <Button color="inherit" component={RouterLink} to="/login">
+                </Button> */}
+                {/* <Button color="inherit" component={RouterLink} to="/login">
                   Dashboard
-                </Button>
+                </Button> */}
                 <Button color="inherit" component={Link} href="https://codedthemes.gitbook.io/berry" target="_blank">
                   Knowledge
                 </Button>

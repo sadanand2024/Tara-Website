@@ -1,12 +1,12 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { Box, Typography } from '@mui/material';
-import servicesMoreData from 'data/servicesMoreData';
+import servicesData from 'data/servicesData';
 import ErrorPage from 'views/pages/maintenance/Error';
 
 const ServiceCategory = () => {
   const { category } = useParams();
-  const categoryData = servicesMoreData[category];
+  const categoryData = servicesData[category];
 
   if (!categoryData) {
     return <ErrorPage />;
