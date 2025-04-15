@@ -93,7 +93,7 @@ export default function HeaderSection() {
               >
                 <Stack spacing={1}>
                   <Typography variant="h1" sx={{ textAlign: { xs: 'center', md: 'left' }, ...headerSX }}>
-                    Use Berry to Power Your Next
+                    Use Tara to Power Your Next
                   </Typography>
 
                   <Typography variant="h1" color="primary" sx={{ textAlign: { xs: 'center', md: 'left' }, ...headerSX }}>
@@ -112,7 +112,7 @@ export default function HeaderSection() {
                   variant="body1"
                   sx={{ textAlign: { xs: 'center', md: 'left' }, color: 'text.primary', fontSize: { xs: '1rem', md: '1.125rem' } }}
                 >
-                  Berry is React based Dashboard template which helps you to build faster and beautiful web applications.
+                  Tara is React based Dashboard template which helps you to build faster and beautiful web applications.
                 </Typography>
               </motion.div>
             </Grid>
@@ -156,7 +156,7 @@ export default function HeaderSection() {
                   <CardMedia
                     component="img"
                     image={mode === ThemeMode.DARK ? TechDark : TechLight}
-                    alt="Berry Tech"
+                    alt="Tara Tech"
                     sx={{ width: { xs: '75%', sm: '50%', md: '75%' } }}
                   />
                 </Stack>
@@ -166,7 +166,7 @@ export default function HeaderSection() {
         </Grid>
         <Grid sx={{ display: { xs: 'none', md: 'flex' } }} size={{ xs: 12, md: 7 }}>
           <Box sx={{ position: 'relative', mt: 8.75, zIndex: 9 }}>
-            <HeaderImage src={dashboard} alt="Berry" />
+            <HeaderImage src={dashboard} alt="Tara" />
             <Box
               sx={{
                 position: 'absolute',
@@ -181,7 +181,7 @@ export default function HeaderSection() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ type: 'spring', stiffness: 150, damping: 30, delay: 0.2 }}
               >
-                <HeaderAnimationImage src={widget1} alt="Berry" />
+                <HeaderAnimationImage src={widget1} alt="Tara" />
               </motion.div>
             </Box>
             <Box
@@ -199,7 +199,7 @@ export default function HeaderSection() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ type: 'spring', stiffness: 150, damping: 30, delay: 0.4 }}
               >
-                <HeaderAnimationImage src={widget2} alt="Berry" />
+                <HeaderAnimationImage src={widget2} alt="Tara" />
               </motion.div>
             </Box>
           </Box>
