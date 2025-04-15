@@ -16,8 +16,8 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Stack from '@mui/material/Stack';
-import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
+import Toolbar from '@mui/material/Toolbar';
 import Box from '@mui/material/Box';
 
 // project imports
@@ -27,7 +27,7 @@ import Logo from 'ui-component/Logo';
 // assets
 import { IconBook, IconCreditCard, IconDashboard, IconHome2 } from '@tabler/icons-react';
 import MenuIcon from '@mui/icons-material/Menu';
-
+import ServicesPanel from './ServicesPanel';
 function ElevationScroll({ children, window }) {
   const theme = useTheme();
   const trigger = useScrollTrigger({
@@ -49,7 +49,10 @@ function ElevationScroll({ children, window }) {
 
 export default function AppBar({ ...others }) {
   const [drawerToggle, setDrawerToggle] = useState(false);
+  const [openServices, setOpenServices] = useState(false);
 
+  const handleToggle = () => setOpenServices(!openServices);
+  const handleClose = () => setOpenServices(false);
   const drawerToggler = (open) => (event) => {
     if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
       return;
@@ -65,19 +68,41 @@ export default function AppBar({ ...others }) {
             <Typography component={RouterLink} to="/" sx={{ flexGrow: 1, textAlign: 'left' }}>
               <Logo />
             </Typography>
-            <Stack direction="row" sx={{ display: { xs: 'none', sm: 'block' } }} spacing={{ xs: 1.5, md: 2.5 }}>
-              <Button color="inherit" component={Link} href="#">
-                Home
-              </Button>
-              <Button color="inherit" component={RouterLink} to="/login" target="_blank">
-                Dashboard
-              </Button>
-              <Button color="inherit" component={Link} href="https://codedthemes.gitbook.io/berry" target="_blank">
-                Documentation
-              </Button>
-              <Button component={Link} href="https://links.codedthemes.com/hsqll" disableElevation variant="contained" color="secondary">
-                Purchase Now
-              </Button>
+            <Stack direction="row" spacing={{ xs: 1.5, md: 3 }}>
+              <Stack direction="row" sx={{ display: { xs: 'none', sm: 'block' } }} spacing={{ xs: 1.5, md: 2.5 }}>
+                <Button color="inherit" onClick={handleToggle}>
+                  Services
+                </Button>
+                <Button color="inherit" onClick={handleToggle}>
+                  Products
+                </Button>
+                <Button color="inherit" onClick={handleToggle}>
+                  Knowledge
+                </Button>
+                <Button color="inherit" onClick={handleToggle}>
+                  Company
+                </Button>
+                <Button color="inherit" onClick={handleToggle}>
+                  Book Consultation
+                </Button>
+                <Button color="inherit" component={Link} href="#">
+                  Home
+                </Button>
+                <Button color="inherit" component={RouterLink} to="/login">
+                  Dashboard
+                </Button>
+                <Button color="inherit" component={Link} href="https://codedthemes.gitbook.io/berry" target="_blank">
+                  Knowledge
+                </Button>
+              </Stack>
+              <Stack direction="row" sx={{ display: { xs: 'none', sm: 'block' } }} spacing={{ xs: 0.5, md: 0.5 }}>
+                <Button component={Link} href="https://links.codedthemes.com/hsqll" disableElevation color="secondary">
+                  Signup
+                </Button>
+                <Button component={RouterLink} to="/login" variant="contained" color="secondary">
+                  Login
+                </Button>
+              </Stack>
             </Stack>
             <Box sx={{ display: { xs: 'block', sm: 'none' } }}>
               <IconButton color="inherit" onClick={drawerToggler(true)} size="large">
@@ -125,6 +150,11 @@ export default function AppBar({ ...others }) {
               </Drawer>
             </Box>
           </Toolbar>
+          {openServices && (
+            <Box sx={{ position: 'absolute', top: '100%', left: 0, right: 0 }}>
+              <ServicesPanel onClose={handleClose} />
+            </Box>
+          )}
         </Container>
       </MuiAppBar>
     </ElevationScroll>
