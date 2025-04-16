@@ -39,7 +39,7 @@ export default function Landing() {
         }}
       >
         <AppBar />
-        <h1>kjhhgk</h1>
+
         <HeaderSection />
       </Box>
 

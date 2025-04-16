@@ -49,7 +49,7 @@ const servicesData = {
           { label: 'Talk to Expert', link: '/contact' }
         ],
         intro:
-          "We don't just register companies. We help you build business foundations. Here's everything you get when you choose TARA FIRST.",
+          "We don't just register companies. We help you build business foundations. Here's everything you get when you choose TARAFIRST.",
         sections: [
           {
             title: 'Incorporation Essentials',

@@ -28,6 +28,7 @@ import Logo from 'ui-component/Logo';
 import { IconBook, IconCreditCard, IconDashboard, IconHome2 } from '@tabler/icons-react';
 import MenuIcon from '@mui/icons-material/Menu';
 import ServicesPanel from './ServicesPanel';
+import ProductsPanel from './ProductsPanel';
 function ElevationScroll({ children, window }) {
   const theme = useTheme();
   const trigger = useScrollTrigger({
@@ -50,9 +51,14 @@ function ElevationScroll({ children, window }) {
 export default function AppBar({ ...others }) {
   const [drawerToggle, setDrawerToggle] = useState(false);
   const [openServices, setOpenServices] = useState(false);
+  const [openProducts, setOpenProducts] = useState(false);
 
   const handleToggle = () => setOpenServices(!openServices);
   const handleClose = () => setOpenServices(false);
+
+  const handleProductsToggle = () => setOpenProducts(!openProducts);
+  const handleProductsClose = () => setOpenProducts(false);
+
   const drawerToggler = (open) => (event) => {
     if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
       return;
@@ -66,7 +72,6 @@ export default function AppBar({ ...others }) {
         <Container>
           <Toolbar sx={{ py: 2.5, px: `0 !important` }}>
             {/* <Logo /> */}
-
             <Typography
               component={RouterLink}
               to="/"
@@ -81,10 +86,7 @@ export default function AppBar({ ...others }) {
                 letterSpacing: 1.2
               }}
             >
-              Tara{' '}
-              <Box component="span" sx={{ color: 'secondary.main', fontWeight: 800 }}>
-                First
-              </Box>
+              Tarafirst
             </Typography>
 
             <Stack direction="row" spacing={{ xs: 1.5, md: 3 }}>
@@ -92,9 +94,10 @@ export default function AppBar({ ...others }) {
                 <Button color="inherit" onClick={handleToggle}>
                   Services
                 </Button>
-                <Button color="inherit" onClick={handleToggle}>
+                <Button color="inherit" onClick={handleProductsToggle}>
                   Products
                 </Button>
+
                 <Button color="inherit" onClick={handleToggle}>
                   Knowledge
                 </Button>
@@ -172,6 +175,11 @@ export default function AppBar({ ...others }) {
           {openServices && (
             <Box sx={{ position: 'absolute', top: '100%', left: 0, right: 0 }}>
               <ServicesPanel onClose={handleClose} />
+            </Box>
+          )}
+          {openProducts && (
+            <Box sx={{ position: 'absolute', top: '100%', left: 0, right: 0 }}>
+              <ProductsPanel onClose={handleProductsClose} />
             </Box>
           )}
         </Container>

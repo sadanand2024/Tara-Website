@@ -93,7 +93,7 @@ export default function HeaderSection() {
               >
                 <Stack spacing={1}>
                   <Typography variant="h1" sx={{ textAlign: { xs: 'center', md: 'left' }, ...headerSX }}>
-                    Think Finance
+                    Power Your Finance with
                   </Typography>
 
                   <Typography
@@ -105,7 +105,7 @@ export default function HeaderSection() {
                       ...headerSX
                     }}
                   >
-                    Think Tara First
+                    Tarafirst
                   </Typography>
                 </Stack>
               </motion.div>
