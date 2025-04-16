@@ -1,8 +1,12 @@
+import React from 'react';
 // material-ui
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
 
 // project imports
 import LogoSection from '../LogoSection';
@@ -31,6 +35,11 @@ export default function Header() {
   const { menuMaster } = useGetMenuMaster();
   const drawerOpen = menuMaster.isDashboardDrawerOpened;
   const isHorizontal = menuOrientation === MenuOrientation.HORIZONTAL && !downMD;
+  const [viewType, setViewType] = React.useState('personal');
+
+  const handleViewChange = (event) => {
+    setViewType(event.target.value);
+  };
 
   return (
     <>
@@ -83,6 +92,31 @@ export default function Header() {
       {/* full sceen toggler */}
       <Box sx={{ display: { xs: 'none', lg: 'block' } }}>
         <FullScreenSection />
+      </Box>
+
+      {/* view type selector */}
+      <Box sx={{ display: { xs: 'none', sm: 'block' }, mx: 1 }}>
+        <FormControl size="small">
+          <Select
+            value={viewType}
+            onChange={handleViewChange}
+            sx={{
+              minWidth: 120,
+              height: '35px',
+              bgcolor: mode === ThemeMode.DARK ? 'dark.main' : 'secondary.light',
+              color: mode === ThemeMode.DARK ? 'secondary.main' : 'secondary.dark',
+              '& .MuiOutlinedInput-notchedOutline': {
+                borderColor: 'rgba(111, 66, 193, 0.2)'
+              },
+              '&:hover .MuiOutlinedInput-notchedOutline': {
+                borderColor: 'secondary.main'
+              }
+            }}
+          >
+            <MenuItem value="personal">Personal</MenuItem>
+            <MenuItem value="business">Business</MenuItem>
+          </Select>
+        </FormControl>
       </Box>
 
       {/* profile */}

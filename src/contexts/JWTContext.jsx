@@ -98,7 +98,7 @@ export function JWTProvider({ children }) {
     });
   };
 
-  const register = async (email, password, firstName, lastName) => {
+  const register = async (email, password, firstName, lastName) => { 
     // todo: this flow need to be recode as it not verified
     const id = chance.bb_pin();
     const response = await axios.post('/api/account/register', {
@@ -125,7 +125,7 @@ export function JWTProvider({ children }) {
 
     window.localStorage.setItem('users', JSON.stringify(users));
   };
-
+ 
   const logout = () => {
     setSession(null);
     dispatch({ type: LOGOUT });

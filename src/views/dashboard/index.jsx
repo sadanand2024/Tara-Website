@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogTitle, DialogContent, Typography, Box, Grid, Button, Paper } from '@mui/material';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
@@ -6,9 +7,14 @@ import { useTheme } from '@mui/material/styles';
 
 export default function Dashboard() {
   const [accDialog, setAccDialog] = useState(true);
+  const navigate = useNavigate();
 
   function onContinue(selected) {
-    console.log(selected);
+    if (selected === 'business') {
+      navigate('/dashboard/business');
+    } else {
+      navigate('/dashboard/personal');
+    }
     closeDiag();
   }
 
