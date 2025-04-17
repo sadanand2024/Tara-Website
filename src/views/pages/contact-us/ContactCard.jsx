@@ -83,10 +83,11 @@ export default function ContactCard() {
                   fontSize: { xs: '1.8125rem', md: '3.5rem' },
                   fontWeight: 900,
                   lineHeight: 1.4,
-                  mt: { xs: 10, md: 0 }
+                  mt: { xs: 10, md: 0 },
+                  whiteSpace: 'nowrap'
                 }}
               >
-                Talk to our account expert
+                We’d love to hear from you
               </Typography>
             </Grid>
             <Grid size={12}>
@@ -95,7 +96,7 @@ export default function ContactCard() {
                 sx={{ fontWeight: 400, lineHeight: 1.4, my: { xs: 'auto', md: 0 }, mx: { xs: 'auto', md: 12.5 } }}
                 color="white"
               >
-                The starting point for your next project based on easy-to-customize Material-UI © helps you build apps faster and better.
+                Explore key statistics and trends shaping our understanding of the current landscape.
               </Typography>
             </Grid>
           </Grid>

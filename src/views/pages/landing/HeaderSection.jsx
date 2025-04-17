@@ -93,11 +93,19 @@ export default function HeaderSection() {
               >
                 <Stack spacing={1}>
                   <Typography variant="h1" sx={{ textAlign: { xs: 'center', md: 'left' }, ...headerSX }}>
-                    Use Tara to Power Your Next
+                    Power Your Finance with
                   </Typography>
 
-                  <Typography variant="h1" color="primary" sx={{ textAlign: { xs: 'center', md: 'left' }, ...headerSX }}>
-                    React Project
+                  <Typography
+                    variant="h1"
+                    color="primary"
+                    sx={{
+                      textAlign: { xs: 'center', md: 'left' },
+
+                      ...headerSX
+                    }}
+                  >
+                    Tarafirst
                   </Typography>
                 </Stack>
               </motion.div>
@@ -112,7 +120,36 @@ export default function HeaderSection() {
                   variant="body1"
                   sx={{ textAlign: { xs: 'center', md: 'left' }, color: 'text.primary', fontSize: { xs: '1rem', md: '1.125rem' } }}
                 >
-                  Tara is React based Dashboard template which helps you to build faster and beautiful web applications.
+                  Level up your business with unified software and professional service support — your trusted partner for all financial
+                  needs,&nbsp;
+                  <Button
+                    component={RouterLink}
+                    to={DASHBOARD_PATH}
+                    target="_blank"
+                    size="large"
+                    // variant="outlined"
+                    color="secondary"
+                    // startIcon={<PlayArrowIcon />}
+                    sx={{ mx: 1, mb: { xs: 1, md: 0 } }}
+                  >
+                    Personal
+                  </Button>
+                  or
+                  <Button
+                    component={RouterLink}
+                    to={DASHBOARD_PATH}
+                    target="_blank"
+                    size="large"
+                    // variant="contained"
+                    // color="secondary"
+                    // startIcon={<PlayArrowIcon />}
+                    sx={{ mx: 1, mb: { xs: 1, md: 0 } }}
+                  >
+                    Business
+                  </Button>
+                  . Embrace complete financial clarity and take control like never before with an all-in-one suite designed to manage your
+                  finances effortlessly.
+
                 </Typography>
               </motion.div>
             </Grid>
@@ -134,20 +171,20 @@ export default function HeaderSection() {
                         color="secondary"
                         startIcon={<PlayArrowIcon />}
                       >
-                        Live Preview
+                        Get started for free
                       </Button>
                     </AnimateButton>
                   </Grid>
                   <Grid>
-                    <Button component={Link} href="https://links.codedthemes.com/hsqll" target="_blank" size="large">
+                    {/* <Button component={Link} href="https://links.codedthemes.com/hsqll" target="_blank" size="large">
                       Purchase Now
-                    </Button>
+                    </Button> */}
                   </Grid>
                 </Grid>
               </motion.div>
             </Grid>
             <Grid size={12}>
-              <motion.div
+              {/* <motion.div
                 initial={{ opacity: 0, translateY: 550 }}
                 animate={{ opacity: 1, translateY: 0 }}
                 transition={{ type: 'spring', stiffness: 150, damping: 30, delay: 0.6 }}
@@ -160,7 +197,7 @@ export default function HeaderSection() {
                     sx={{ width: { xs: '75%', sm: '50%', md: '75%' } }}
                   />
                 </Stack>
-              </motion.div>
+              </motion.div> */}
             </Grid>
           </Grid>
         </Grid>

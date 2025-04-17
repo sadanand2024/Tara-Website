@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Typography, Grid, Paper, ClickAwayListener } from '@mui/material';
+import { Box, Typography, Grid2, Paper, ClickAwayListener, Container } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link as RouterLink } from 'react-router-dom';
 
@@ -121,68 +121,74 @@ const ServicesPanel = ({ onClose }) => {
     <AnimatePresence>
       <ClickAwayListener onClickAway={onClose}>
         <MotionPaper
-          elevation={6}
+          //   elevation={6}
           variants={panelVariants}
           initial="hidden"
           animate="visible"
           exit="exit"
-          transition={{ duration: 0.3, ease: 'easeOut' }}
+          transition={{ duration: 0.2, ease: 'easeOut' }}
           sx={{
             position: 'absolute',
+            maxHeight: '80vh', // ✅ restrict height
+            overflowY: 'auto', // ✅ allow scroll
             top: '100%',
             left: 0,
             width: '100vw',
             zIndex: 1100,
             backgroundColor: 'background.paper',
+            // backgroundColor: 'rgba(0,0,0,0.3)', // 👈 Dimmed background
+
             px: { xs: 2, sm: 4, md: 10 },
             py: { xs: 3, sm: 5 },
             borderTop: (theme) => `1px solid ${theme.palette.divider}`
           }}
         >
-          <Grid container spacing={4}>
-            {servicesData.map((section, index) => (
-              <Grid item xs={12} sm={6} md={3} key={index}>
-                <Typography
-                  variant="subtitle2"
-                  gutterBottom
-                  sx={{
-                    fontWeight: 'bold',
-                    color: section.color,
-                    textTransform: 'uppercase',
-                    borderBottom: '1px solid',
-                    borderColor: 'divider',
-                    pb: 1,
-                    mb: 1
-                  }}
-                >
-                  {section.title}
-                </Typography>
-                {section.items.map((item, i) => (
+          <Container>
+            <Grid2 container spacing={4}>
+              {servicesData.map((section, index) => (
+                <Grid2 size={{ xs: 12, sm: 6, md: 3 }} key={index}>
                   <Typography
-                    key={i}
-                    component={RouterLink}
-                    to={item.path}
-                    onClick={onClose}
-                    variant="body2"
+                    variant="subtitle2"
+                    gutterBottom
                     sx={{
-                      display: 'block',
-                      mb: 1,
-                      cursor: 'pointer',
-                      textDecoration: 'none',
-                      color: 'text.primary',
-                      transition: 'color 0.2s ease',
-                      '&:hover': {
-                        textDecoration: 'underline',
-                        color: section.color
-                      }
+                      fontWeight: 'bold',
+                      color: section.color,
+                      textTransform: 'uppercase',
+                      borderBottom: '1px solid',
+                      borderColor: 'divider',
+                      pb: 1,
+                      mb: 1
                     }}
                   >
-                    {item.label}
+                    {section.title}
                   </Typography>
-                ))}
-              </Grid>
-            ))}
-          </Grid>
+                  {section.items.map((item, i) => (
+                    <Typography
+                      key={i}
+                      component={RouterLink}
+                      to={item.path}
+                      onClick={onClose}
+                      variant="body2"
+                      sx={{
+                        display: 'block',
+                        mb: 1,
+                        cursor: 'pointer',
+                        textDecoration: 'none',
+                        color: 'text.primary',
+                        transition: 'color 0.2s ease',
+                        '&:hover': {
+                          textDecoration: 'underline',
+                          color: section.color
+                        }
+                      }}
+                    >
+                      {item.label}
+                    </Typography>
+                  ))}
+                </Grid2>
+              ))}
+            </Grid2>
+          </Container>
         </MotionPaper>
       </ClickAwayListener>
     </AnimatePresence>

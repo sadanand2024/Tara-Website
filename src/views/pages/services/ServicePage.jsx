@@ -1,18 +1,21 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { Box, Typography, Grid, Paper, Button } from '@mui/material';
-import servicesMoreData from 'data/servicesMoreData';
+import servicesData from 'data/servicesData';
 import ErrorPage from 'views/pages/maintenance/Error';
+import PrivateLimitedPage from './custom/PrivateLimitedPage';
 
 const ServicePage = () => {
   const { category, slug } = useParams();
-  const categoryData = servicesMoreData[category];
+  const categoryData = servicesData[category];
   const pageData = categoryData?.pages[slug];
 
   if (!categoryData || !pageData) {
     return <ErrorPage />;
   }
-
+  if (pageData?.customComponent === 'PrivateLimitedPage') {
+    return <PrivateLimitedPage />;
+  }
   return (
     <Box sx={{ px: { xs: 2, md: 8 }, py: { xs: 4, md: 10 } }}>
       {/* Hero Section */}

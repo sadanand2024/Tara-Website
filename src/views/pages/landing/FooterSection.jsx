@@ -11,7 +11,9 @@ import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import Link from '@mui/material/Link';
 import Box from '@mui/material/Box';
-
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import PhoneIcon from '@mui/icons-material/Phone';
+import EmailIcon from '@mui/icons-material/Email';
 // project imports
 import { frameworks } from './FrameworkSection';
 import { ThemeMode } from 'config';
@@ -52,23 +54,66 @@ export default function FooterSection() {
             <Grid container spacing={8}>
               <Grid size={{ xs: 12, md: 4 }}>
                 <Stack spacing={{ xs: 2, md: 5 }}>
-                  <Typography component={RouterLink} to="/" aria-label="theme-logo">
+                  {/* <Typography component={RouterLink} to="/" aria-label="theme-logo">
                     <CardMedia component="img" src={LogoDark} alt="defaultLayout" sx={{ width: 'auto' }} />
+                  </Typography> */}
+                  <Typography variant="h2" color={textColor} sx={{ fontWeight: 500 }}>
+                    Tarafirst
                   </Typography>
                   <Typography variant="body2" color={textColor}>
-                    Berry React is a dashboard template that utilizes the Material-UI framework and the React JavaScript library. It offers
-                    a range of features and customization options to help you create a powerful and user-friendly admin panel.
+                    Tarafirst is a unified fintech platform for managing personal and business finances. From company registration to GST,
+                    payroll, and more — we combine smart software with expert support to simplify your financial journey.
                   </Typography>
                 </Stack>
               </Grid>
+
               <Grid size={{ xs: 12, md: 8 }}>
                 <Grid container spacing={{ xs: 5, md: 2 }}>
+                  <Grid size={{ xs: 6, sm: 3 }}>
+                    <Stack spacing={{ xs: 3, md: 3 }}>
+                      <Typography variant="h4" color={textColor} sx={{ fontWeight: 500 }}>
+                        Our Address
+                      </Typography>
+                      <Stack spacing={{ xs: 1.5, md: 2.5 }}>
+                        <Stack direction="row" spacing={1} alignItems="center">
+                          <LocationOnIcon color="primary" />
+                          <Typography variant="body2" color={textColor}>
+                            Tarafirst Technologies Pvt. Ltd.
+                          </Typography>
+                        </Stack>
+                        <Typography variant="body2" color={textColor} sx={{ pl: 4 }}>
+                          White Waters @ Y, Kukatpally,
+                          <br />
+                          Hyderabad, Telangana - 500072
+                        </Typography>
+                        <Stack direction="row" spacing={1} alignItems="center">
+                          <PhoneIcon color="primary" />
+                          <Link href="tel:+919876543210" color={textColor} underline="none">
+                            +91 98765 43210
+                          </Link>
+                        </Stack>
+                        <Stack direction="row" spacing={1} alignItems="center">
+                          <EmailIcon color="primary" />
+                          <Link href="mailto:support@tarafirst.in" color={textColor} underline="none">
+                            support@tarafirst.in
+                          </Link>
+                        </Stack>
+                      </Stack>
+                    </Stack>
+                  </Grid>
+
                   <Grid size={{ xs: 6, sm: 3 }}>
                     <Stack spacing={{ xs: 3, md: 5 }}>
                       <Typography variant="h4" color={textColor} sx={{ fontWeight: 500 }}>
                         Help
                       </Typography>
                       <Stack spacing={{ xs: 1.5, md: 2.5 }}>
+                        <FooterLink to={'/pages/about-us'} component={RouterLink} underline="none">
+                          About Us
+                        </FooterLink>
+                        <FooterLink to={'/pages/contact-us'} component={RouterLink} underline="none">
+                          Contact Us
+                        </FooterLink>
                         <FooterLink href="https://links.codedthemes.com/HTIBc" target="_blank" underline="none">
                           Blog
                         </FooterLink>
@@ -84,7 +129,7 @@ export default function FooterSection() {
                       </Stack>
                     </Stack>
                   </Grid>
-                  <Grid size={{ xs: 6, sm: 3 }}>
+                  {/* <Grid size={{ xs: 6, sm: 3 }}>
                     <Stack spacing={{ xs: 3, md: 5 }}>
                       <Typography variant="h4" color={textColor} sx={{ fontWeight: 500 }}>
                         Store Help
@@ -105,7 +150,7 @@ export default function FooterSection() {
                         </FooterLink>
                       </Stack>
                     </Stack>
-                  </Grid>
+                  </Grid> */}
                   <Grid size={{ xs: 6, sm: 3 }}>
                     <Stack spacing={{ xs: 3, md: 5 }}>
                       <Typography variant="h4" color={textColor} sx={{ fontWeight: 500 }}>
