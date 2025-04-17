@@ -122,37 +122,33 @@ export default function HeaderSection() {
                 >
                   Level up your business with unified software and professional service support — your trusted partner for all financial
                   needs,&nbsp;
-                  <Button
+                  <Link
                     component={RouterLink}
                     to={DASHBOARD_PATH}
                     target="_blank"
-                    size="large"
-                    // variant="outlined"
                     color="secondary"
-                    // startIcon={<PlayArrowIcon />}
-                    sx={{ mx: 1, mb: { xs: 1, md: 0 } }}
+                    underline="hover"
+                    sx={{ fontWeight: 600, mx: 0.5 }}
                   >
                     Personal
-                  </Button>
+                  </Link>
                   or
-                  <Button
+                  <Link
                     component={RouterLink}
                     to={DASHBOARD_PATH}
                     target="_blank"
-                    size="large"
-                    // variant="contained"
-                    // color="secondary"
-                    // startIcon={<PlayArrowIcon />}
-                    sx={{ mx: 1, mb: { xs: 1, md: 0 } }}
+                    color="secondary"
+                    underline="hover"
+                    sx={{ fontWeight: 600, mx: 0.5 }}
                   >
                     Business
-                  </Button>
+                  </Link>
                   . Embrace complete financial clarity and take control like never before with an all-in-one suite designed to manage your
                   finances effortlessly.
-
                 </Typography>
               </motion.div>
             </Grid>
+
             <Grid size={12}>
               <motion.div
                 initial={{ opacity: 0, translateY: 550 }}
