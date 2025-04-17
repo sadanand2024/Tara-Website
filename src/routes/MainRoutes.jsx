@@ -11,7 +11,8 @@ const DashboardDefault = Loadable(lazy(() => import('views/dashboard/Default')))
 const DashboardPersonal = Loadable(lazy(() => import('views/dashboard/Personal')));
 const DashboardBusiness = Loadable(lazy(() => import('views/dashboard/Business')));
 const MyServices = Loadable(lazy(() => import('views/Services')));
-const ITRSummary = Loadable(lazy(() => import('views/Services/ITRSummary.jsx')));
+const ITRSummary = Loadable(lazy(() => import('views/Services/ITR')));
+const ITRFilingDetails = Loadable(lazy(() => import('views/Services/ITR/ITRFilingDetails.jsx')));
 
 // application - user social & account profile routing
 const AppUserAccountProfile2 = Loadable(lazy(() => import('views/application/users/Profile')));
@@ -51,8 +52,12 @@ const MainRoutes = {
       element: <MyServices />
     },
     {
-      path: '/app/my-services/itr-summary',
+      path: '/app/my-services/itr-dashboard',
       element: <ITRSummary />
+    },
+    {
+      path: '/app/my-services/itr-dashboard/summary',
+      element: <ITRFilingDetails />
     }
   ]
 };

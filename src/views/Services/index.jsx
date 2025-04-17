@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Typography,
@@ -36,7 +37,6 @@ import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 
 // Styled Components
-
 
 const AnimatedCard = styled(Card)(({ theme }) => ({
   transition: 'all 0.3s ease-in-out',
@@ -143,6 +143,7 @@ const StatusCard = styled(AnimatedCard)(({ theme }) => ({
 
 export default function Services() {
   const [filter, setFilter] = React.useState('all');
+  const navigate = useNavigate();
 
   const serviceCards = [
     {
@@ -385,7 +386,7 @@ export default function Services() {
                             }}
                           >
                             {service.progress}%
-                          </Typography>
+                          </Typography> 
                         </ProgressWrapper>
                       </Box>
                       <Box sx={{ ml: 3, minWidth: 120 }}>
@@ -402,7 +403,13 @@ export default function Services() {
 
                     <Stack direction="row" spacing={2} sx={{ mt: 'auto' }}>
                       <Tooltip title="View service details" arrow>
-                        <AnimatedButton startIcon={<VisibilityIcon />} variant="outlined" color="secondary" fullWidth>
+                        <AnimatedButton
+                          startIcon={<VisibilityIcon />}
+                          onClick={() => navigate('/app/my-services/itr-dashboard')}
+                          variant="outlined"
+                          color="secondary"
+                          fullWidth
+                        >
                           View Details
                         </AnimatedButton>
                       </Tooltip>
