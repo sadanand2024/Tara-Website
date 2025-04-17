@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogTitle, DialogContent, Typography, Box, Grid, Button, Paper } from '@mui/material';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
@@ -6,9 +7,14 @@ import { useTheme } from '@mui/material/styles';
 
 export default function Dashboard() {
   const [accDialog, setAccDialog] = useState(true);
+  const navigate = useNavigate();
 
   function onContinue(selected) {
-    console.log(selected);
+    if (selected === 'business') {
+      navigate('/dashboard/business');
+    } else {
+      navigate('/dashboard/personal');
+    }
     closeDiag();
   }
 
@@ -33,19 +39,31 @@ const ChooseAccountDialog = ({ open, onClose, onContinue }) => {
       key: 'personal',
       title: 'Personal Account',
       icon: <PersonOutlineIcon fontSize="large" />,
-      description: 'If you need more info, please check it out.'
+      description: 'For individual use. Simple and secure experience.'
     },
     {
       key: 'business',
       title: 'Business Account',
       icon: <BusinessCenterIcon fontSize="large" />,
-      description: 'Create Business account to use services.'
+      description: 'For companies and teams. Manage business tools and access.'
     }
   ];
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle textAlign="center">Choose Account Type</DialogTitle>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      PaperProps={{
+        sx: {
+          width: '28vw', 
+          maxWidth: '28vw'
+        }
+      }}
+      fullWidth
+    >
+      <DialogTitle textAlign="center" sx={{ color: theme.palette.secondary['800'], pb: 0.5 }}>
+        Choose Account Type
+      </DialogTitle>
       <DialogContent>
         <Typography textAlign="center" mb={3} fontSize={14}>
           {/* If you need more info, please check out <a href="#">Help Page</a>. */}
