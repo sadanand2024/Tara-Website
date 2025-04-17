@@ -81,7 +81,8 @@ export default function Palette(mode, presetColor) {
         light: colors.successLight,
         200: colors.success200,
         main: colors.successMain,
-        dark: colors.successDark
+        dark: colors.successDark,
+        darker: colors.successDarker
       },
       grey: {
         50: colors.grey50,

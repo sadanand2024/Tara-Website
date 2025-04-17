@@ -39,108 +39,108 @@ const dashboard = {
   children: [
     {
       id: 'dashboard',
-      title: 'Dashboard',
+      title: 'dashboard',
       type: 'item',
-      url: '/dashboard/default',
+      url: '/dashboard/personal',
       icon: icons.IconDashboard,
       breadcrumbs: false,
       caption: ''
     },
     {
       id: 'my-services',
-      title: 'My Services',
+      title: 'my-services',
       type: 'item',
-      url: '/dashboard/services',
+      url: '/app/my-services',
       icon: icons.IconBriefcase,
       breadcrumbs: false,
       caption: ''
     },
     {
       id: 'task-manager',
-      title: 'Task Manager',
+      title: 'task-manager',
       type: 'item',
-      url: '/dashboard/tasks',
+      url: '/app/tasks',
       icon: icons.IconClipboardList,
       breadcrumbs: false,
       caption: ''
     },
     {
       id: 'document-wallet',
-      title: 'Document Wallet',
+      title: 'document-wallet',
       type: 'item',
-      url: '/dashboard/documents',
+      url: '/app/documents',
       icon: icons.IconFolder,
       breadcrumbs: false,
       caption: ''
     },
     {
       id: 'document-drafting',
-      title: 'Document Drafting',
+      title: 'document-drafting',
       type: 'item',
-      url: '/dashboard/drafting',
+      url: '/app/drafting',
       icon: icons.IconFileText,
       breadcrumbs: false,
       caption: ''
     },
     {
       id: 'income-tax',
-      title: 'Income Tax',
+      title: 'income-tax',
       type: 'item',
-      url: '/dashboard/income-tax',
+      url: '/app/income-tax',
       icon: icons.IconReceipt2,
       breadcrumbs: false,
       caption: ''
     },
     {
       id: 'tds',
-      title: 'TDS',
+      title: 'tds',
       type: 'item',
-      url: '/dashboard/tds',
+      url: '/app/tds',
       icon: icons.IconReceiptTax,
       breadcrumbs: false,
       caption: ''
     },
     {
       id: 'insurance',
-      title: 'Insurance',
+      title: 'insurance',
       type: 'item',
-      url: '/dashboard/insurance',
+      url: '/app/insurance',
       icon: icons.IconShieldCheck,
       breadcrumbs: false,
       caption: ''
     },
     {
       id: 'loan',
-      title: 'Loan',
+      title: 'loan',
       type: 'item',
-      url: '/dashboard/loan',
+      url: '/app/loan',
       icon: icons.IconCoin,
       breadcrumbs: false,
       caption: ''
     },
     {
       id: 'investments',
-      title: 'Investments',
+      title: 'investments',
       type: 'item',
-      url: '/dashboard/investments',
+      url: '/app/investments',
       icon: icons.IconPigMoney,
       breadcrumbs: false,
       caption: ''
     },
     {
       id: 'subscriptions',
-      title: 'Subscriptions & Payments',
+      title: 'subscriptions',
       type: 'item',
-      url: '/dashboard/subscriptions',
+      url: '/app/subscriptions',
       icon: icons.IconCreditCard,
       breadcrumbs: false,
       caption: ''
     },
     {
-      id: 'support',
-      title: 'Support & Chat',
+      id: 'support&chat',
+      title: 'support&chat',
       type: 'item',
-      url: '/dashboard/support',
+      url: '/app/support-chat',
       icon: icons.IconHeadset,
       breadcrumbs: false,
       caption: ''

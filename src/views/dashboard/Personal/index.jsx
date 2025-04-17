@@ -1,6 +1,8 @@
 import React from 'react';
 import { Box, Typography, Card, CardContent, Button, Stack } from '@mui/material';
 import Grid from '@mui/material/Grid2';
+
+// Icons
 import DescriptionIcon from '@mui/icons-material/Description';
 import TaskIcon from '@mui/icons-material/Task';
 import UpdateIcon from '@mui/icons-material/Update';
@@ -16,10 +18,30 @@ import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 
 export default function Personal() {
   const services = [
-    { title: 'Active Services', count: '3', icon: <DescriptionIcon fontSize="large" /> },
-    { title: 'Tasks Pending', count: '2', icon: <TaskIcon fontSize="large" /> },
-    { title: 'Docs Uploaded', count: '7', icon: <UpdateIcon fontSize="large" /> },
-    { title: 'Due Soon', count: '1', icon: <EventIcon fontSize="large" /> }
+    {
+      title: 'Active Services',
+      count: '3',
+      icon: <DescriptionIcon fontSize="large" />,
+      color: 'background.paper'
+    },
+    {
+      title: 'Tasks Pending',
+      count: '2',
+      icon: <TaskIcon fontSize="large" />,
+      color: 'warning'
+    },
+    {
+      title: 'Docs Uploaded',
+      count: '7',
+      icon: <UpdateIcon fontSize="large" />,
+      color: 'info'
+    },
+    {
+      title: 'Due Soon',
+      count: '1',
+      icon: <EventIcon fontSize="large" />,
+      color: 'error'
+    }
   ];
 
   const taraAssistButtons = [
@@ -57,47 +79,60 @@ export default function Personal() {
                 height: '100%',
                 transition: 'all 0.3s ease',
                 border: '1px solid rgba(111, 66, 193, 0.2)',
+                borderBottom: 3,
+                borderBottomColor: `${service.color}.dark`,
                 boxShadow: 'none',
                 cursor: 'pointer',
+                bgcolor: `${service.color}.lighter`,
                 '&:hover': {
                   transform: 'translateY(-4px)',
-                  boxShadow: '0 4px 20px rgba(111, 66, 193, 0.15)',
-                  borderColor: 'secondary.main',
+                  boxShadow: `0 4px 20px ${(theme) => theme.palette[service.color].main}25`,
                   '& .icon-box': {
                     transform: 'scale(1.1)',
-                    color: 'secondary.dark'
+                    color: `${service.color}.dark`
                   },
                   '& .count-text': {
-                    color: 'secondary.main'
+                    color: `${service.color}.dark`
                   }
                 }
               }}
             >
-              <CardContent>
-                <Box
-                  className="icon-box"
-                  sx={{
-                    color: 'secondary.main',
-                    mb: 1,
-                    transition: 'all 0.3s ease'
-                  }}
-                >
-                  {service.icon}
-                </Box>
-                <Typography
-                  className="count-text"
-                  variant="h3"
-                  sx={{
-                    mb: 1,
-                    fontWeight: 'bold',
-                    transition: 'color 0.3s ease'
-                  }}
-                >
-                  {service.count}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {service.title}
-                </Typography>
+              <CardContent sx={{ py: 2 }}>
+                <Stack sx={{ alignItems: 'center', gap: 2, justifyContent: 'space-between' }}>
+                  <Stack
+                    className="icon-box"
+                    sx={{
+                      color: `${service.color}.dark`,
+                      transition: 'all 0.3s ease'
+                    }}
+                  >
+                    {service.icon}
+                  </Stack>
+                  <Stack direction="row" sx={{ alignItems: 'center', gap: 0 }}>
+                    <Typography
+                      className="count-text"
+                      variant="h3"
+                      sx={{
+                        fontWeight: 'bold',
+                        color: `${service.color}.dark`,
+                        transition: 'color 0.3s ease',
+                        lineHeight: 1,
+                        mr: 1
+                      }}
+                    >
+                      {service.count}
+                    </Typography>
+                    <Typography
+                      variant="h4"
+                      sx={{
+                        color: `${service.color}.dark`,
+                        fontWeight: 500
+                      }}
+                    >
+                      {service.title}
+                    </Typography>
+                  </Stack>
+                </Stack>
               </CardContent>
             </Card>
           </Grid>
@@ -176,13 +211,13 @@ export default function Personal() {
                     '&:hover': {
                       transform: 'translateY(-4px)',
                       boxShadow: '0 4px 20px rgba(111, 66, 193, 0.15)',
-                      borderColor: 'secondary.main',
+                      borderColor: 'primary.main',
                       '& .icon-box': {
                         transform: 'scale(1.1)',
-                        color: 'secondary.dark'
+                        color: 'primary.dark'
                       },
                       '& .count-text': {
-                        color: 'secondary.main'
+                        color: 'primary.main'
                       }
                     }
                   }}
@@ -191,7 +226,7 @@ export default function Personal() {
                     <Box
                       className="icon-box"
                       sx={{
-                        color: 'secondary.main',
+                        color: 'primary.main',
                         mb: 1,
                         transition: 'all 0.3s ease'
                       }}
