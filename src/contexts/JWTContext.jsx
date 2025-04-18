@@ -1,13 +1,15 @@
 import PropTypes from 'prop-types';
 import React, { createContext, useEffect, useReducer } from 'react';
+import { useDispatch as useReduxDispatch } from 'react-redux';
 
 // third party
 import { Chance } from 'chance';
 import { jwtDecode } from 'jwt-decode';
 
-// reducer - state management
+// reducer - local state management
 import { LOGIN, LOGOUT } from 'store/actions';
-import accountReducer from 'store/accountReducer';
+import accountReducer from 'store/accountReducer'; // local reducer
+import { storeUser } from 'store/slices/account'; // redux slice
 
 // project imports
 import Loader from 'ui-component/Loader';
@@ -15,34 +17,32 @@ import axios from 'utils/axios';
 
 const chance = new Chance();
 
-// constant
+// initial state for useReducer
 const initialState = {
   isLoggedIn: false,
   isInitialized: false,
   user: null
 };
 
+// ==============================|| HELPERS ||============================== //
+
 function verifyToken(serviceToken) {
-  if (!serviceToken) {
-    return false;
-  }
+  if (!serviceToken) return false;
 
   const decoded = jwtDecode(serviceToken);
-
-  // Ensure 'exp' exists and compare it to the current timestamp
-  if (!decoded.exp) {
-    throw new Error("Token does not contain 'exp' property.");
-  }
+  if (!decoded.exp) throw new Error("Token does not contain 'exp' property.");
 
   return decoded.exp > Date.now() / 1000;
 }
 
-function setSession(serviceToken) {
+function setSession(serviceToken, user) {
   if (serviceToken) {
     localStorage.setItem('serviceToken', serviceToken);
+    localStorage.setItem('user', JSON.stringify(user));
     axios.defaults.headers.common.Authorization = `Bearer ${serviceToken}`;
   } else {
     localStorage.removeItem('serviceToken');
+    localStorage.removeItem('user');
     delete axios.defaults.headers.common.Authorization;
   }
 }
@@ -52,33 +52,30 @@ function setSession(serviceToken) {
 const JWTContext = createContext(null);
 
 export function JWTProvider({ children }) {
-  const [state, dispatch] = useReducer(accountReducer, initialState);
+  const reduxDispatch = useReduxDispatch(); // ✅ Redux dispatcher
+  const [state, dispatch] = useReducer(accountReducer, initialState); // ✅ Local reducer
 
   useEffect(() => {
     const init = async () => {
       try {
         const serviceToken = window.localStorage.getItem('serviceToken');
+        let userData = JSON.parse(window.localStorage.getItem('user'));
+
         if (serviceToken && verifyToken(serviceToken)) {
-          setSession(serviceToken);
-          const response = await axios.get('/api/account/me');
-          const { user } = response.data;
+          setSession(serviceToken, userData);
           dispatch({
             type: LOGIN,
             payload: {
               isLoggedIn: true,
-              user
+              user: userData
             }
           });
         } else {
-          dispatch({
-            type: LOGOUT
-          });
+          dispatch({ type: LOGOUT });
         }
       } catch (err) {
         console.error(err);
-        dispatch({
-          type: LOGOUT
-        });
+        dispatch({ type: LOGOUT });
       }
     };
 
@@ -86,20 +83,23 @@ export function JWTProvider({ children }) {
   }, []);
 
   const login = async (email, password) => {
-    const response = await axios.post('/api/account/login', { email, password });
-    const { serviceToken, user } = response.data;
-    setSession(serviceToken);
+    const response = await axios.post('/user_management/auth/login', { email, password });
+    const serviceToken = response.data.access_token;
+    const user = response.data;
+
+    setSession(serviceToken, user);
+
+    reduxDispatch(storeUser(user)); // ✅ Send user to Redux
     dispatch({
       type: LOGIN,
       payload: {
         isLoggedIn: true,
         user
       }
-    });
+    }); // ✅ Update local context state
   };
 
-  const register = async (email, password, firstName, lastName) => { 
-    // todo: this flow need to be recode as it not verified
+  const register = async (email, password, firstName, lastName) => {
     const id = chance.bb_pin();
     const response = await axios.post('/api/account/register', {
       id,
@@ -108,10 +108,11 @@ export function JWTProvider({ children }) {
       firstName,
       lastName
     });
+
     let users = response.data;
 
-    if (window.localStorage.getItem('users') !== undefined && window.localStorage.getItem('users') !== null) {
-      const localUsers = window.localStorage.getItem('users');
+    const localUsers = window.localStorage.getItem('users');
+    if (localUsers) {
       users = [
         ...JSON.parse(localUsers),
         {
@@ -125,23 +126,42 @@ export function JWTProvider({ children }) {
 
     window.localStorage.setItem('users', JSON.stringify(users));
   };
- 
+
   const logout = () => {
     setSession(null);
     dispatch({ type: LOGOUT });
   };
 
-  const resetPassword = async (email) => {};
+  const resetPassword = async (email) => {
+    // Implement reset password logic
+  };
 
-  const updateProfile = () => {};
+  const updateProfile = () => {
+    // Implement profile update logic
+  };
 
-  if (state.isInitialized !== undefined && !state.isInitialized) {
+  if (!state.isInitialized) {
     return <Loader />;
   }
 
-  return <JWTContext.Provider value={{ ...state, login, logout, register, resetPassword, updateProfile }}>{children}</JWTContext.Provider>;
+  return (
+    <JWTContext.Provider
+      value={{
+        ...state,
+        login,
+        logout,
+        register,
+        resetPassword,
+        updateProfile
+      }}
+    >
+      {children}
+    </JWTContext.Provider>
+  );
 }
 
-export default JWTContext;
+JWTProvider.propTypes = {
+  children: PropTypes.node
+};
 
-JWTProvider.propTypes = { children: PropTypes.node };
+export default JWTContext;

@@ -45,7 +45,7 @@ const ChooseAccountDialog = ({ open, onClose, onContinue }) => {
       key: 'business',
       title: 'Business Account',
       icon: <BusinessCenterIcon fontSize="large" />,
-      description: 'For companies and teams. Manage business tools and access.'
+      description: 'For companies and teams. Manage business tools..'
     }
   ];
 

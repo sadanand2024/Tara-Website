@@ -20,10 +20,7 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 
 // Convert makeStyles to styled components
 const Root = styled(Box)(({ theme }) => ({
-  padding: theme.spacing(2),
-  [theme.breakpoints.up('md')]: {
-    padding: theme.spacing(4)
-  }
+  padding: theme.spacing(0),
 }));
 
 const GreetingSection = styled(Box)(({ theme }) => ({

@@ -52,7 +52,9 @@ const AnimatedCard = styled(Card)(({ theme }) => ({
   }
 }));
 
-const AnimatedButton = styled(Button)(({ theme }) => ({
+const AnimatedButton = styled((props) => (
+  <Button size="small" {...props} />
+))(({ theme }) => ({
   opacity: 0.9,
   transform: 'translateY(10px)',
   transition: 'all 0.3s ease-in-out',
@@ -61,6 +63,8 @@ const AnimatedButton = styled(Button)(({ theme }) => ({
     boxShadow: theme.shadows[4]
   }
 }));
+
+
 
 const ProgressWrapper = styled(Box)(({ theme }) => ({
   position: 'relative',
@@ -105,7 +109,7 @@ const ActiveBadge = styled(Box)(({ theme }) => ({
   alignItems: 'center',
   gap: theme.spacing(1),
   backgroundColor: theme.palette.success.lighter,
-  color: theme.palette.success.dark,
+  color: theme.palette.success.darker,
   padding: theme.spacing(0.5, 2),
   borderRadius: theme.shape.borderRadius * 2,
   fontSize: '1.1rem',
@@ -152,15 +156,39 @@ export default function Services() {
       progress: 60,
       tasks: '2 Pending',
       docs: '3/4 uploaded',
-      icon: <AssignmentIcon color="secondary" sx={{ fontSize: 40 }} />
+      icon: <AssignmentIcon color="primary" sx={{ fontSize: 40 }} />
     },
     {
       title: 'ITR Filing - FY: 2024-25 (Business)',
       status: 'In Progress',
-      progress: 40,
+      progress: 20,
       tasks: '3 Pending',
       docs: '2/5 uploaded',
-      icon: <DescriptionIcon color="secondary" sx={{ fontSize: 40 }} />
+      icon: <DescriptionIcon color="primary" sx={{ fontSize: 40 }} />
+    },
+    {
+      title: 'Company Incorporation - FY: 2024-25 (Business)',
+      status: 'In Progress',
+      progress: 80,
+      tasks: '3 Pending',
+      docs: '2/5 uploaded',
+      icon: <DescriptionIcon color="primary" sx={{ fontSize: 40 }} />
+    },
+    {
+      title: 'Auditing - FY: 2024-25 (Business)',
+      status: 'In Progress',
+      progress: 90,
+      tasks: '4 Pending',
+      docs: '1/5 uploaded',
+      icon: <DescriptionIcon color="primary" sx={{ fontSize: 40 }} />
+    },
+    {
+      title: 'Business Loan - FY: 2024-25 (Business)',
+      status: 'In Progress',
+      progress: 10,
+      tasks: '6 Pending',
+      docs: '2/8 uploaded',
+      icon: <DescriptionIcon color="primary" sx={{ fontSize: 40 }} />
     }
   ];
 
@@ -198,24 +226,24 @@ export default function Services() {
       icon: <CheckCircleIcon sx={{ fontSize: 35 }} />,
       trend: 'Last week',
       trendIcon: <CheckCircleOutlineIcon color="success" />,
-      color: 'success.main',
+      color: 'success.dark',
       bgColor: 'success.lighter'
     }
   ];
 
   return (
-    <Box sx={{ p: 3 }}>
+    <Box>
       {/* Header Section */}
       <Fade in timeout={800}>
         <Box
           sx={{
             display: 'flex',
             alignItems: 'center',
-            mb: 4,
+            mb: 3,
             gap: 2,
             borderBottom: '1px solid',
             borderColor: 'divider',
-            pb: 2
+            pb: 1
           }}
         >
           <Typography
@@ -337,14 +365,11 @@ export default function Services() {
       </Fade>
 
       {/* Service Cards */}
-      <SectionTitle>
-        <AssignmentIcon /> Service Overview
-      </SectionTitle>
 
-      <Box sx={{ mb: 6 }}>
+      <Box sx={{ mb: 4 }}>
         <Grid container spacing={4}>
           {serviceCards.map((service, index) => (
-            <Grid size={{ xs: 12, md: 6 }} key={index}>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={index}>
               <Zoom in timeout={500 + index * 200}>
                 <AnimatedCard>
                   <CardContent sx={{ p: 3 }}>
@@ -386,7 +411,7 @@ export default function Services() {
                             }}
                           >
                             {service.progress}%
-                          </Typography> 
+                          </Typography>
                         </ProgressWrapper>
                       </Box>
                       <Box sx={{ ml: 3, minWidth: 120 }}>
@@ -437,7 +462,7 @@ export default function Services() {
         <Typography
           variant="h5"
           sx={{
-            mb: 3,
+            mb: 2,
             color: 'text.primary',
             display: 'flex',
             alignItems: 'center',
@@ -492,7 +517,7 @@ export default function Services() {
         <Typography
           variant="body1"
           sx={{
-            mb: 3,
+            mb: 0,
             fontStyle: 'italic',
             color: 'text.secondary',
             textAlign: 'center'
@@ -501,7 +526,7 @@ export default function Services() {
           Let's get one step closer to finishing everything.
         </Typography>
 
-        <Stack direction="row" spacing={3} justifyContent="center" sx={{ mt: 4 }}>
+        <Stack direction="row" spacing={3} justifyContent="center" sx={{ mt: 3 }}>
           <Tooltip title="Start a new service request" arrow>
             <AnimatedButton startIcon={<AddIcon />} variant="contained" color="secondary" sx={{ px: 4, py: 1 }}>
               New Service

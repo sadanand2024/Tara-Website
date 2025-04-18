@@ -27,7 +27,11 @@ import { IconMenu2 } from '@tabler/icons-react';
 
 // ==============================|| MAIN NAVBAR / HEADER ||============================== //
 
+
+import { useSelector } from 'store';
+  
 export default function Header() {
+  const userData  = useSelector((state) => state);
   const theme = useTheme();
   const downMD = useMediaQuery(theme.breakpoints.down('md'));
 
@@ -41,6 +45,8 @@ export default function Header() {
     setViewType(event.target.value);
   };
 
+
+  console.log(userData);
   return (
     <>
       {/* logo & toggler button */}
