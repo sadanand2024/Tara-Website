@@ -37,7 +37,7 @@ export default function Login() {
   const [AuthLoginComponent, setAuthLoginComponent] = useState(null);
 
   const [searchParams] = useSearchParams();
-  const authParam = searchParams.get('auth') || '';
+  const authParam = searchParams.get('auth') || ''; 
 
   useEffect(() => {
     const selectedAuth = authParam || APP_AUTH;

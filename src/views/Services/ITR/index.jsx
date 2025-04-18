@@ -3,364 +3,601 @@ import {
   Box,
   Typography,
   Paper,
-  LinearProgress,
-  Stack,
   Button,
-  Chip,
-  Divider,
+  Stack,
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
-  Grid,
-  alpha
+  Divider,
+  IconButton,
+  LinearProgress,
+  alpha,
+  Card
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
+import ChatIcon from '@mui/icons-material/Chat';
+import UploadFileIcon from '@mui/icons-material/UploadFile';
+import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
+import EventIcon from '@mui/icons-material/Event';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import PendingIcon from '@mui/icons-material/Pending';
-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import ChatIcon from '@mui/icons-material/Chat';
-import DownloadIcon from '@mui/icons-material/Download';
-import CancelIcon from '@mui/icons-material/Cancel';
-import AssignmentIcon from '@mui/icons-material/Assignment';
-import PersonIcon from '@mui/icons-material/Person';
 
-const StatusChip = styled(Chip)(({ theme, status }) => ({
+const StyledCard = styled(Card)(({ theme }) => ({
+  position: 'relative',
+  overflow: 'hidden',
   borderRadius: theme.shape.borderRadius * 2,
-  fontWeight: 600,
-  textTransform: 'capitalize',
-  padding: '0 12px',
-  height: 24,
-  '& .MuiChip-label': {
-    padding: '0 8px'
-  },
+  border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    width: '40%',
+    height: '100%',
+    background: (theme) => `linear-gradient(135deg, transparent 40%, ${alpha(theme.palette.primary.light, 0.1)})`,
+    clipPath: 'path("M 100 0 Q 50 50 100 100")',
+    transition: 'all 0.3s ease',
+    opacity: 0.8,
+    zIndex: 0
+  }
+}));
+
+const StatusChip = styled(Box)(({ theme, status }) => ({
+  display: 'inline-flex',
+  alignItems: 'center',
+  padding: theme.spacing(0.5, 1.5),
+  borderRadius: theme.shape.borderRadius * 4,
+  fontSize: '0.8rem',
+  fontWeight: 500,
   ...(status === 'completed' && {
-    backgroundColor: theme.palette.success.lighter,
-    color: theme.palette.success.dark,
-    border: `1px solid ${theme.palette.success.light}`
-  }),
-  ...(status === 'in-progress' && {
-    backgroundColor: theme.palette.warning.lighter,
-    color: theme.palette.warning.dark,
-    border: `1px solid ${theme.palette.warning.light}`
+    backgroundColor: alpha(theme.palette.success.dark, 0.1),
+    color: theme.palette.text.primary,
+    border: `1px solid ${theme.palette.success.dark}`
   }),
   ...(status === 'pending' && {
-    backgroundColor: theme.palette.info.lighter,
-    color: theme.palette.info.dark,
-    border: `1px solid ${theme.palette.info.light}`
+    backgroundColor: alpha(theme.palette.warning.dark, 0.1),
+    color: theme.palette.text.primary,
+    border: `1px solid ${theme.palette.warning.dark}`
   })
 }));
 
-const InfoCard = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  gap: theme.spacing(1.5),
-  padding: theme.spacing(2),
-  borderRadius: theme.shape.borderRadius * 2,
-  backgroundColor: theme.palette.background.neutral,
-  border: `1px solid ${theme.palette.divider}`,
-  transition: 'all 0.2s ease-in-out',
-  '&:hover': {
-    backgroundColor: theme.palette.background.default,
-    transform: 'translateY(-2px)',
-    boxShadow: theme.shadows[2]
-  },
-  '& .MuiSvgIcon-root': {
-    color: theme.palette.primary.main
+const TimelineItem = styled(ListItem)(({ theme, completed }) => ({
+  position: 'relative',
+  '&:not(:last-child)': {
+    marginBottom: theme.spacing(2)
   }
 }));
 
-const TaskItem = ({ title, status, children }) => (
-  <Box sx={{ mb: 3 }}>
-    <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
-      <AssignmentIcon color="primary" />
-      <Typography variant="h5" sx={{ fontWeight: 600, flex: 1 }}>
-        {title}
-      </Typography>
-      <StatusChip label={status} status={status.toLowerCase()} size="small" />
-    </Stack>
-    <Box sx={{ pl: 4 }}>{children}</Box>
-  </Box>
-);
-
-const ActionButton = styled(Button)(({ theme }) => ({
-  borderRadius: theme.shape.borderRadius * 2,
-  textTransform: 'none',
-  fontWeight: 600,
-  padding: theme.spacing(1.5, 2),
-  borderWidth: 1.5,
-  transition: 'all 0.2s ease-in-out',
-  '&:hover': {
-    borderWidth: 1.5,
-    transform: 'translateY(-2px)',
-    boxShadow: theme.shadows[2]
-  }
-}));
-
-export default function ITRSummary() {
+export default function ITRFilingDetails() {
   const progress = 60;
-
+  
   return (
-    <Box sx={{ p: 4 }}>
+    <Box>
       {/* Header Section */}
       <Stack spacing={1} sx={{ mb: 4 }}>
-        <Typography variant="h2" sx={{ 
-          fontWeight: 700, 
-          color: 'primary.main',
-          letterSpacing: '-0.5px'
-        }}>
-          ITR Filing Summary
+        <Typography
+          variant="h2"
+          sx={{
+            fontWeight: 700,
+            color: 'secondary.main',
+            letterSpacing: '-0.5px'
+          }}
+        >
+          ITR Filing Details
         </Typography>
         <Typography variant="h4" color="text.secondary" sx={{ opacity: 0.8 }}>
-          Financial Year: 2023-24 (Personal)
-        </Typography>
+          Financial Year: 2023-24 (Salaried)
+      </Typography>
       </Stack>
 
-      <Grid container spacing={4}>
-        {/* Left Column - Main Content */}
-        <Grid item xs={12} md={8}>
-          <Paper 
-            elevation={0} 
-            sx={{ 
-              p: 3, 
-              height: '100%',
-              border: 1, 
-              borderColor: 'divider', 
-              borderRadius: 3,
-              bgcolor: '#fff',
-              transition: 'all 0.2s ease-in-out',
-              '&:hover': {
-                boxShadow: (theme) => theme.shadows[4]
-              }
-            }}
-          >
-            <Stack spacing={4}>
-              {/* Progress Bar */}
-              <Box sx={{ 
-                p: 3, 
-                borderRadius: 3, 
-                bgcolor: (theme) => alpha(theme.palette.secondary.main, 0.04),
-                border: 1,
-                borderColor: (theme) => alpha(theme.palette.secondary.main, 0.1),
-                transition: 'all 0.2s ease-in-out',
-                '&:hover': {
-                  bgcolor: (theme) => alpha(theme.palette.secondary.main, 0.06),
-                  borderColor: (theme) => alpha(theme.palette.secondary.main, 0.2)
-                }
-              }}>
-                <Stack spacing={2}>
-                  <Stack direction="row" alignItems="center" spacing={2}>
-                    <Typography variant="h5" fontWeight={600}>
-                      Overall Progress
-                    </Typography>
-                    <Typography variant="h5" color="secondary.main" fontWeight={700}>
-                      {progress}%
-                    </Typography>
-                  </Stack>
-                  <LinearProgress 
-                    variant="determinate" 
-                    value={progress} 
-                    sx={{ 
-                      height: 8, 
-                      borderRadius: 2,
-                      bgcolor: (theme) => alpha(theme.palette.secondary.main, 0.1),
-                      '& .MuiLinearProgress-bar': {
-                        bgcolor: 'secondary.main',
-                        borderRadius: 2
-                      }
-                    }}
-                  />
-                </Stack>
-              </Box>
-
-              {/* Tasks Section */}
-              <Stack spacing={3}>
-                <Typography variant="h5" fontWeight={600}>
-                  Tasks Overview
-                </Typography>
-                
-                <TaskItem title="Document Collection" status="Completed">
-                  <List dense sx={{ pl: 2 }}>
-                    <ListItem sx={{ py: 1 }}>
-                      <ListItemIcon>
-                        <CheckCircleIcon color="success" />
-                      </ListItemIcon>
-                      <ListItemText 
-                        primary={<Typography fontWeight={500}>Upload PAN</Typography>}
-                        secondary={
-                          <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }}>
-                            Completed on 05 April 2025
-                          </Typography>
-                        }
-                      />
-                    </ListItem>
-                    <ListItem sx={{ py: 1 }}>
-                      <ListItemIcon>
-                        <CheckCircleIcon color="success" />
-                      </ListItemIcon>
-                      <ListItemText 
-                        primary={<Typography fontWeight={500}>Upload Form 16</Typography>}
-                        secondary={
-                          <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }}>
-                            Completed on 06 April 2025
-                          </Typography>
-                        }
-                      />
-                    </ListItem>
-                    <ListItem sx={{ py: 1 }}>
-                      <ListItemIcon>
-                        <CancelIcon color="error" />
-                      </ListItemIcon>
-                      <ListItemText 
-                        primary={<Typography fontWeight={500}>Upload 26AS</Typography>}
-                        secondary={
-                          <Typography variant="body2" sx={{ color: 'error.light', mt: 0.5 }}>
-                            Pending - Required for processing
-                          </Typography>
-                        }
-                      />
-                    </ListItem>
-                  </List>
-                </TaskItem>
-
-                <TaskItem title="Prepare Draft Return" status="In Progress">
-                  <Box sx={{ pl: 2 }}>
-                    <Stack direction="row" spacing={2} alignItems="center" sx={{
-                      p: 1.5,
-                      bgcolor: 'background.neutral',
-                      borderRadius: 2
-                    }}>
-                      <PersonIcon color="primary" />
-                      <Stack spacing={0.5}>
-                        <Typography variant="body2" color="text.secondary">
-                          Assigned to
-                        </Typography>
-                        <Typography fontWeight={600}>
-                          TARA FIRST
-                        </Typography>
-                      </Stack>
-                    </Stack>
-                  </Box>
-                </TaskItem>
-
-                <TaskItem title="Review Draft with User" status="Pending" />
-                <TaskItem title="Final Filing" status="Pending" />
-                <TaskItem title="Share Acknowledgement" status="Pending" />
-              </Stack>
-            </Stack>
-          </Paper>
-        </Grid>
-
-        {/* Right Column - Status and Actions */}
-        <Grid item xs={12} md={4}>
-          <Paper 
-            elevation={0} 
-            sx={{ 
-              p: 3, 
-              height: '100%',
-              border: 1, 
-              borderColor: 'divider', 
-              borderRadius: 3,
-              bgcolor: '#fff',
-              transition: 'all 0.2s ease-in-out',
-              '&:hover': {
-                boxShadow: (theme) => theme.shadows[4]
-              }
-            }}
-          >
-            <Stack spacing={4} sx={{ height: '100%' }}>
-              {/* Status Cards */}
-              <Stack spacing={2}>
-                <Typography variant="h5" fontWeight={600}>
-                  Status Information
-                </Typography>
-                <InfoCard>
-                  <AccessTimeIcon />
-                  <Stack spacing={0.5}>
-                    <Typography variant="body2" color="text.secondary">
-                      Status
-                    </Typography>
-                    <Typography variant="subtitle1" fontWeight={600}>
+      <Stack direction={{ xs: 'column', lg: 'row' }} spacing={3}>
+        {/* Left Section */}
+        <Box sx={{ flex: 2 }}>
+          {/* Progress Overview */}
+          <StyledCard sx={{ mb: 3 }}>
+            <Box sx={{ p: 3 }}>
+              <Typography variant="h4" sx={{ fontWeight: 600, color: 'text.primary', mb: 3 }}>
+                Service Filling - FY 2023-24 (Salaried)
+              </Typography>
+              <Stack direction="row" alignItems="center">
+                <Stack spacing={0.5} sx={{ borderRight: '1px solid #e0e0e0', pr: 4 }}>
+                  <Typography color="text.secondary" variant="body2">
+                    Status:
+                  </Typography>
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <CheckCircleIcon sx={{ color: 'success.main', fontSize: 16 }} />
+                    <Typography variant="subtitle1" fontWeight={500}>
                       In Progress
                     </Typography>
                   </Stack>
-                </InfoCard>
-                <InfoCard>
-                  <CalendarTodayIcon />
-                  <Stack spacing={0.5}>
-                    <Typography variant="body2" color="text.secondary">
-                      Started on
-                    </Typography>
-                    <Typography variant="subtitle1" fontWeight={600}>
-                      05 April 2025
-                    </Typography>
-                  </Stack>
-                </InfoCard>
-                <InfoCard>
-                  <CalendarTodayIcon />
-                  <Stack spacing={0.5}>
-                    <Typography variant="body2" color="text.secondary">
-                      Last updated
-                    </Typography>
-                    <Typography variant="subtitle1" fontWeight={600}>
-                      08 April 2025
-                    </Typography>
-                  </Stack>
-                </InfoCard>
-                <InfoCard>
-                  <CalendarTodayIcon />
-                  <Stack spacing={0.5}>
-                    <Typography variant="body2" color="text.secondary">
-                      Est. completion
-                    </Typography>
-                    <Typography variant="subtitle1" fontWeight={600}>
-                      12 April 2025
-                    </Typography>
-                  </Stack>
-                </InfoCard>
-              </Stack>
-
-              {/* Quick Actions */}
-              <Stack spacing={3}>
-                <Typography variant="h4" fontWeight={600}>
-                  Quick Actions
-                </Typography>
-                <Stack spacing={2}>
-                  <ActionButton 
-                    startIcon={<CloudUploadIcon />} 
-                    variant="outlined" 
-                    color="secondary"
-                    fullWidth
-                    sx={{ py: 1.25 }}
-                  >
-                    Upload Documents (3/4)
-                  </ActionButton>
-                  <ActionButton 
-                    startIcon={<ChatIcon />} 
-                    variant="outlined" 
-                    color="secondary"
-                    fullWidth
-                    sx={{ py: 1.25 }}
-                  >
-                    Chat Support
-                  </ActionButton>
-                  <ActionButton 
-                    startIcon={<DownloadIcon />} 
-                    variant="outlined" 
-                    color="secondary"
-                    fullWidth
-                    sx={{ py: 1.25 }}
-                  >
-                    Download Format
-                  </ActionButton>
                 </Stack>
+                <Stack spacing={0.5} sx={{ borderRight: '1px solid #e0e0e0', px: 4 }}>
+                  <Typography color="text.secondary" variant="body2">
+                    Progress:
+                  </Typography>
+                  <Typography variant="subtitle1" fontWeight={500}>
+                    3/5 Tasks Done
+                  </Typography>
+                </Stack>
+                <Stack spacing={0.5} sx={{ px: 4 }}>
+                  <Typography color="text.secondary" variant="body2">
+                    Started On
+                  </Typography>
+                  <Typography variant="subtitle1" fontWeight={500}>
+                    12 Apr 2025
+            </Typography>
+                </Stack>
+                <Button
+                  variant="outlined"
+                  startIcon={<ChatIcon />}
+                  size="medium"
+                  sx={{
+                    ml: 'auto',
+                    borderRadius: 1,
+                    textTransform: 'none',
+                    px: 2
+                  }}
+                >
+                  Chat with Support
+                </Button>
               </Stack>
-            </Stack>
-          </Paper>
-        </Grid>
-      </Grid>
-    </Box>
+          </Box>
+          </StyledCard>
+
+          {/* Task Timeline */}
+          <StyledCard>
+            <Box sx={{ p: 3 }}>
+              <Typography variant="h4" fontWeight={600} sx={{ mb: 1 }}>
+                Filing Timeline
+              </Typography>
+              <List sx={{ '& .MuiListItem-root': { px: 0 } }}>
+                {/* Document Collection */}
+                <TimelineItem completed>
+                  <ListItemText
+                    primary={
+                      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
+                        <Stack spacing={0.5}>
+                          <Stack direction="row" spacing={1} alignItems="center">
+                            <CheckCircleIcon color="success" />
+                            <Typography variant="subtitle1" fontWeight={600}>
+                              Document Collection
+                            </Typography>
+                          </Stack>
+                          <Typography variant="body2" color="text.secondary">
+                            All required documents for ITR filing
+                          </Typography>
+                        </Stack>
+                        <Stack direction="row" spacing={1} alignItems="center">
+                          <StatusChip status="completed">Completed</StatusChip>
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            startIcon={<CloudUploadIcon />}
+                            sx={{
+                              borderColor: (theme) => alpha(theme.palette.success.main, 0.5),
+                              color: 'success.darker',
+                              '&:hover': {
+                                borderColor: 'success.main',
+                                bgcolor: (theme) => alpha(theme.palette.success.main, 0.04)
+                              }
+                            }}
+                          >
+                            View Files
+                          </Button>
+                        </Stack>
+                      </Stack>
+                    }
+                    secondary={
+                      <Box sx={{ mt: 1, ml: 4 }}>
+                        <Stack spacing={2}>
+                          {['PAN Card', 'Form 16', '26AS'].map((doc, index) => (
+                            <Stack key={index} direction="row" alignItems="center" spacing={2}>
+                              <CheckCircleIcon color="success" fontSize="small" />
+                              <Typography variant="body2" sx={{ flex: 1 }}>
+                                {doc}
+                              </Typography>
+                              <Typography variant="caption" color="success.darker">
+                                Verified
+            </Typography>
+                            </Stack>
+                          ))}
+                        </Stack>
+          </Box>
+                    }
+                  />
+                </TimelineItem>
+
+                {/* Prepare Draft Return */}
+                <TimelineItem>
+                  <ListItemText
+                    primary={
+                      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
+                        <Stack spacing={0.5}>
+                          <Stack direction="row" spacing={1} alignItems="center">
+                            <RadioButtonUncheckedIcon color="primary" />
+                            <Typography variant="subtitle1" fontWeight={600}>
+                              Prepare Draft Return
+                            </Typography>
+                          </Stack>
+                          <Typography variant="body2" color="text.secondary">
+                            Our experts are preparing your draft return
+                          </Typography>
+                        </Stack>
+                        <Stack direction="row" spacing={1} alignItems="center">
+                          <StatusChip status="pending">In Progress</StatusChip>
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            startIcon={<CloudUploadIcon />}
+                            sx={{
+                              borderColor: (theme) => alpha(theme.palette.primary.main, 0.5),
+                              color: 'primary.main',
+                              '&:hover': {
+                                borderColor: 'primary.main',
+                                bgcolor: (theme) => alpha(theme.palette.primary.main, 0.04)
+                              }
+                            }}
+                          >
+                            Upload Additional Docs
+                          </Button>
+                        </Stack>
+                      </Stack>
+                    }
+                  />
+                </TimelineItem>
+
+                {/* Review Draft with User */}
+                <TimelineItem>
+                  <ListItemText
+                    primary={
+                      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
+                        <Stack spacing={0.5}>
+                          <Stack direction="row" spacing={1} alignItems="center">
+                            <RadioButtonUncheckedIcon color="disabled" />
+                            <Typography variant="subtitle1" fontWeight={600}>
+                              Review Draft with User
+                            </Typography>
+                          </Stack>
+                          <Typography variant="body2" color="text.secondary">
+                            Schedule a call to review your draft return
+                          </Typography>
+                        </Stack>
+                        <Stack direction="row" spacing={1} alignItems="center">
+                          <StatusChip status="pending">Pending</StatusChip>
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            startIcon={<EventIcon />}
+                            sx={{
+                              borderColor: (theme) => alpha(theme.palette.secondary.main, 0.5),
+                              color: 'secondary.main',
+                              '&:hover': {
+                                borderColor: 'secondary.main',
+                                bgcolor: (theme) => alpha(theme.palette.secondary.main, 0.04)
+                              }
+                            }}
+                          >
+                            Schedule Review
+                          </Button>
+                        </Stack>
+                      </Stack>
+                    }
+                  />
+                </TimelineItem>
+
+                {/* File the Return */}
+                <TimelineItem>
+                  <ListItemText
+                    primary={
+                      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
+                        <Stack spacing={0.5}>
+                          <Stack direction="row" spacing={1} alignItems="center">
+                            <RadioButtonUncheckedIcon color="disabled" />
+                            <Typography variant="subtitle1" fontWeight={600}>
+                              File the Return
+            </Typography>
+                          </Stack>
+                          <Typography variant="body2" color="text.secondary">
+                            Final submission of your ITR
+            </Typography>
+                        </Stack>
+                        <StatusChip status="pending">Pending</StatusChip>
+                      </Stack>
+                    }
+                  />
+                </TimelineItem>
+
+                {/* Share Acknowledgement */}
+                <TimelineItem>
+                  <ListItemText
+                    primary={
+                      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
+                        <Stack spacing={0.5}>
+                          <Stack direction="row" spacing={1} alignItems="center">
+                            <RadioButtonUncheckedIcon color="disabled" />
+                            <Typography variant="subtitle1" fontWeight={600}>
+                              Share Acknowledgement
+          </Typography>
+                          </Stack>
+                          <Typography variant="body2" color="text.secondary">
+                            Download your ITR acknowledgement
+          </Typography>
+                        </Stack>
+                        <StatusChip status="pending">Pending</StatusChip>
+                      </Stack>
+                    }
+                  />
+                </TimelineItem>
+              </List>
+            </Box>
+          </StyledCard>
+        </Box>
+
+        {/* Right Section */}
+        <Box sx={{ flex: 1 }}>
+          <StyledCard>
+            <Box sx={{ p: 3 }}>
+              <Typography variant="h4" fontWeight={600} sx={{ mb: 3 }}>
+                Document Summary
+              </Typography>
+
+              <Stack spacing={4}>
+                {/* Document Stats */}
+                <Stack direction="row" spacing={3}>
+                  <Stack
+                    direction="row"
+                    alignItems="center"
+                    justifyContent="center"
+                    sx={{
+                      p: 2,
+                      borderRadius: 2,
+                      bgcolor: (theme) => alpha(theme.palette.success.main, 0.1),
+                      justifyContent: 'space-between',
+                      flex: 1
+                    }}
+                  >
+                    <Typography variant="h4" color="success.darker" fontWeight={700}>
+                      3
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Uploaded
+                    </Typography>
+                  </Stack>
+                  <Stack
+                    direction="row"
+                    sx={{
+                      p: 2,
+                      borderRadius: 2,
+                      bgcolor: (theme) => alpha(theme.palette.warning.main, 0.1),
+                      justifyContent: 'space-between',
+                      flex: 1
+                    }}
+                  >
+                    <Typography variant="h4" color="warning.dark" fontWeight={700}>
+                      1
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Pending
+                    </Typography>
+                  </Stack>
+                  <Stack
+                    direction="row"
+                    sx={{
+                      p: 2,
+                      borderRadius: 2,
+                      bgcolor: (theme) => alpha(theme.palette.error.main, 0.1),
+                      justifyContent: 'space-between',
+                      flex: 1
+                    }}
+                  >
+                    <Typography variant="h4" color="error.dark" fontWeight={700}>
+                      2
+                    </Typography>
+                    <Typography variant="body2" color="error.secondary">
+                      Missing
+                    </Typography>
+                  </Stack>
+                </Stack>
+
+                {/* Missing Documents */}
+                <Box>
+                  <Typography variant="h4" fontWeight={600} sx={{ mb: 2 }}>
+                    Missing Documents
+                  </Typography>
+                  <Box
+                    sx={{
+                      p: 2,
+                      borderRadius: 2,
+                      bgcolor: (theme) => alpha(theme.palette.error.main, 0.04),
+                      border: 1,
+                      borderColor: (theme) => alpha(theme.palette.error.main, 0.1)
+                    }}
+                  >
+                    <Stack spacing={2}>
+                      <Stack direction="row" alignItems="center" spacing={2}>
+                        <Box
+          sx={{ 
+                            width: 8,
+            height: 8, 
+                            borderRadius: '50%',
+                            bgcolor: 'error.main'
+                          }}
+                        />
+                        <Box flex={1}>
+                          <Typography variant="body2" fontWeight={500}>
+                            Form 26AS
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            Required for income verification
+                          </Typography>
+                        </Box>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          startIcon={<CloudUploadIcon />}
+                          sx={{
+                            borderColor: (theme) => alpha(theme.palette.error.main, 0.5),
+                            color: 'error.main',
+                            '&:hover': {
+                              borderColor: 'error.main',
+                              bgcolor: (theme) => alpha(theme.palette.error.main, 0.04)
+                            }
+                          }}
+                        >
+                          Upload
+                        </Button>
+                      </Stack>
+                      <Stack direction="row" alignItems="center" spacing={2}>
+                        <Box
+                          sx={{
+                            width: 8,
+                            height: 8,
+                            borderRadius: '50%',
+                            bgcolor: 'error.main'
+                          }}
+                        />
+                        <Box flex={1}>
+                          <Typography variant="body2" fontWeight={500}>
+                            Bank Statement
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            Required for bank interest details
+                          </Typography>
+                        </Box>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          startIcon={<CloudUploadIcon />}
+                          sx={{
+                            borderColor: (theme) => alpha(theme.palette.error.main, 0.5),
+                            color: 'error.main',
+                            '&:hover': {
+                              borderColor: 'error.main',
+                              bgcolor: (theme) => alpha(theme.palette.error.main, 0.04)
+                            }
+                          }}
+                        >
+                          Upload
+                        </Button>
+                      </Stack>
+                    </Stack>
+                  </Box>
+      </Box>
+
+                {/* Recent Uploads */}
+                <Box>
+                  <Typography variant="h4" fontWeight={600} sx={{ mb: 2 }}>
+                    Recent Uploads
+                  </Typography>
+                  <Stack spacing={2}>
+                    {['PAN Card.pdf', 'Form 16.pdf', 'Aadhaar.jpg'].map((doc, index) => (
+                      <Stack
+                        key={index}
+                        direction="row"
+                        spacing={2}
+                        alignItems="center"
+                        sx={{
+                          p: 0.3,
+                          borderRadius: 1,
+                          bgcolor: 'background.neutral'
+                        }}
+                      >
+                        <InsertDriveFileIcon sx={{ color: 'primary.main' }} />
+                        <Box flex={1}>
+                          <Typography variant="body2" fontWeight={500}>
+                            {doc}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            Uploaded on 04 Apr
+            </Typography>
+          </Box>
+                      </Stack>
+                    ))}
+                  </Stack>
+      </Box>
+
+                {/* Action Buttons */}
+                <Stack spacing={2}>
+          <Button 
+                    variant="contained"
+            startIcon={<CloudUploadIcon />} 
+                    sx={{
+                      py: 1.5,
+                      borderRadius: 2,
+                      textTransform: 'none',
+                      fontWeight: 600
+                    }}
+                  >
+                    Upload Documents
+          </Button>
+          <Button 
+                    variant="outlined"
+            startIcon={<ChatIcon />} 
+                    sx={{
+                      py: 1.5,
+                      borderRadius: 2,
+                      textTransform: 'none',
+                      fontWeight: 600
+                    }}
+                  >
+                    View All Uploads
+                  </Button>
+                </Stack>
+
+                {/* Help Section */}
+                <Box
+                  sx={{
+                    p: 2.5,
+                    borderRadius: 2,
+                    bgcolor: (theme) => alpha(theme.palette.primary.main, 0.04),
+                    border: 1,
+                    borderColor: (theme) => alpha(theme.palette.primary.main, 0.1)
+                  }}
+                >
+                  <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 1 }}>
+                    Need Assistance?
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    Our experts are here to help you with your ITR filing
+                  </Typography>
+                  <Stack spacing={1}>
+                    <Button
+                      fullWidth
+            variant="outlined" 
+                      startIcon={<QuestionAnswerIcon />}
+                      sx={{
+                        justifyContent: 'flex-start',
+                        py: 1,
+                        textTransform: 'none'
+                      }}
+                    >
+                      Ask a Question
+          </Button>
+          <Button 
+                      fullWidth
+            variant="outlined" 
+                      startIcon={<EventIcon />}
+                      sx={{
+                        justifyContent: 'flex-start',
+                        py: 1,
+                        textTransform: 'none'
+                      }}
+                    >
+                      Schedule a Call
+          </Button>
+                  </Stack>
+                </Box>
+              </Stack>
+        </Box>
+          </StyledCard>
+        </Box>
+      </Stack>
+      </Box>
   );
 }

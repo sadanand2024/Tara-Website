@@ -34,7 +34,7 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff';
 export default function JWTLogin({ ...others }) {
   const theme = useTheme();
 
-  const { login, isLoggedIn } = useAuth();
+  const { login, isLoggedIn } = useAuth(); 
   const scriptedRef = useScriptRef();
 
   const [checked, setChecked] = useState(true);
@@ -54,8 +54,10 @@ export default function JWTLogin({ ...others }) {
   return (
     <Formik
       initialValues={{
-        email: 'info@codedthemes.com',
-        password: '123456',
+        // email: 'info@codedthemes.com',
+        // password: '123456',
+        email: '',
+        password: '',
         submit: null
       }}
       validationSchema={Yup.object().shape({
@@ -63,7 +65,6 @@ export default function JWTLogin({ ...others }) {
         password: Yup.string()
           .required('Password is required')
           .test('no-leading-trailing-whitespace', 'Password can not start or end with spaces', (value) => value === value.trim())
-          .max(10, 'Password must be less than 10 characters')
       })}
       onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
         try {
@@ -79,7 +80,7 @@ export default function JWTLogin({ ...others }) {
           if (scriptedRef.current) {
             setStatus({ success: false });
             setErrors({ submit: err.message });
-            setSubmitting(false);
+            setSubmitting(false); 
           }
         }
       }}
