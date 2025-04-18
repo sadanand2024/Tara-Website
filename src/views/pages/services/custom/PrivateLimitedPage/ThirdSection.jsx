@@ -1,8 +1,11 @@
 import React from 'react';
-import { Box, Container, Grid2, Typography, Stack, Paper, Divider } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import IncorporationJourneyStepper from './IncorporationJourneyStepper';
+import { useTheme, useMediaQuery, Paper, Typography, Box, Fade, Container, Grid2, Divider, Stack } from '@mui/material';
 
-const FirstSection = () => {
+const ThirdSection = () => {
+  const theme = useTheme();
+
   const sections = [
     {
       title: 'For Directors',
@@ -41,7 +44,12 @@ const FirstSection = () => {
         backgroundColor: 'background.paper',
         display: 'flex',
         flexDirection: 'column',
-        height: '100%'
+        height: '100%',
+        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+        '&:hover': {
+          transform: 'translateY(-6px)',
+          boxShadow: '0 12px 24px rgba(0, 0, 0, 0.1)'
+        }
       }}
     >
       <Typography variant="h4" fontWeight={700} gutterBottom>
@@ -62,7 +70,7 @@ const FirstSection = () => {
   );
 
   return (
-    <Container sx={{ py: 8 }}>
+    <Container>
       <Box sx={{ textAlign: 'center', mb: 6 }}>
         <Typography variant="h1" fontWeight={700} gutterBottom>
           Documents Required
@@ -80,8 +88,19 @@ const FirstSection = () => {
           </Grid2>
         ))}
       </Grid2>
+
+      <Box sx={{ textAlign: 'center', mt: 10, mb: 6 }}>
+        <Typography variant="h1" fontWeight={700} gutterBottom>
+          Your Incorporation Journey With Tara First
+        </Typography>
+        <Typography variant="h3" color="text.secondary" gutterBottom>
+          Here's how your company goes from an idea to a registered entity — step-by-step with us.
+        </Typography>
+      </Box>
+
+      <IncorporationJourneyStepper />
     </Container>
   );
 };
 
-export default FirstSection;
+export default ThirdSection;

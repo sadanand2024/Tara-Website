@@ -60,7 +60,12 @@ const FirstSection = () => {
         backgroundColor: 'background.paper',
         display: 'flex',
         flexDirection: 'column',
-        height: '100%'
+        height: '100%',
+        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+        '&:hover': {
+          transform: 'translateY(-6px)',
+          boxShadow: '0 12px 24px rgba(0, 0, 0, 0.1)'
+        }
       }}
     >
       <Typography variant="h4" fontWeight={700} gutterBottom>

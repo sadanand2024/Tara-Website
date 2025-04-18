@@ -1,7 +1,9 @@
 import React from 'react';
 import FirstSection from './FirstSection';
 import SecondSection from './SecondSection';
-import DocumentBlock from './DocumentBlock';
+import ThirdSection from './ThirdSection';
+import FourthSection from './FourthSection';
+import FAQs from './FAQs';
 import { useTheme } from '@mui/material/styles';
 import { Box } from '@mui/material';
 import { ThemeMode } from 'config';
@@ -12,11 +14,17 @@ const PrivateLimitedPage = () => {
   return (
     <>
       <FirstSection />
-      <Box sx={{ bgcolor: theme.palette.mode === ThemeMode.DARK ? 'background.default' : '#fde9e0' }}>
+      <Box sx={{ py: 12.5, bgcolor: theme.palette.mode === ThemeMode.DARK ? 'background.default' : '#fde9e0' }}>
         <SecondSection />
       </Box>
-      <Box sx={{ bgcolor: theme.palette.mode === ThemeMode.DARK ? 'background.default' : 'grey.100' }}>
-        <DocumentBlock />
+      <Box sx={{ py: 12.5, bgcolor: theme.palette.mode === ThemeMode.DARK ? 'background.default' : 'grey.100' }}>
+        <ThirdSection />
+      </Box>
+      <Box sx={{ py: 12.5, bgcolor: theme.palette.mode === ThemeMode.DARK ? 'dark.dark' : 'background.default' }}>
+        <FAQs />
+      </Box>
+      <Box sx={{ py: 12.5, bgcolor: theme.palette.mode === ThemeMode.DARK ? 'background.default' : '#fde9e0' }}>
+        <FourthSection />
       </Box>
     </>
   );

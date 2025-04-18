@@ -62,7 +62,7 @@ const plans = [
 ];
 
 const SecondSection = () => (
-  <Box sx={{ py: 5 }}>
+  <Box>
     <Typography variant="h1" textAlign="center" gutterBottom>
       Pricing & Plans
     </Typography>
