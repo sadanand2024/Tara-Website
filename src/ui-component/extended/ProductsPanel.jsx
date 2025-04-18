@@ -84,7 +84,8 @@ const ProductsPanel = ({ onClose }) => {
             backgroundColor: 'background.paper',
             px: { xs: 2, sm: 4, md: 10 },
             py: { xs: 3, sm: 5 },
-            borderTop: (theme) => `1px solid ${theme.palette.divider}`
+            borderTop: (theme) => `1px solid ${theme.palette.divider}`,
+            boxShadow: '0 8px 12px -4px rgba(0, 0, 0, 0.45)' // ✅ bottom shadow only
           }}
         >
           <Container>

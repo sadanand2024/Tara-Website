@@ -121,7 +121,6 @@ const ServicesPanel = ({ onClose }) => {
     <AnimatePresence>
       <ClickAwayListener onClickAway={onClose}>
         <MotionPaper
-          //   elevation={6}
           variants={panelVariants}
           initial="hidden"
           animate="visible"
@@ -129,18 +128,17 @@ const ServicesPanel = ({ onClose }) => {
           transition={{ duration: 0.2, ease: 'easeOut' }}
           sx={{
             position: 'absolute',
-            maxHeight: '80vh', // ✅ restrict height
-            overflowY: 'auto', // ✅ allow scroll
+            maxHeight: '80vh',
+            overflowY: 'auto',
             top: '100%',
             left: 0,
             width: '100vw',
             zIndex: 1100,
             backgroundColor: 'background.paper',
-            // backgroundColor: 'rgba(0,0,0,0.3)', // 👈 Dimmed background
-
             px: { xs: 2, sm: 4, md: 10 },
             py: { xs: 3, sm: 5 },
-            borderTop: (theme) => `1px solid ${theme.palette.divider}`
+            borderTop: (theme) => `1px solid ${theme.palette.divider}`,
+            boxShadow: '0 8px 12px -4px rgba(0, 0, 0, 0.45)' // ✅ bottom shadow only
           }}
         >
           <Container>

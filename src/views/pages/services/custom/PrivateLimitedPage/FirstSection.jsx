@@ -2,8 +2,9 @@ import React from 'react';
 import { Box, Button, CardMedia, Container, Grid2, Link, Stack, Typography, Paper, Divider } from '@mui/material';
 import { IconCircleCheck } from '@tabler/icons-react';
 import LayerRight from 'assets/images/landing/customization-right.png';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
-const PrivateLimitedPage = () => {
+const FirstSection = () => {
   const listSX = {
     display: 'flex',
     alignItems: 'center',
@@ -52,32 +53,32 @@ const PrivateLimitedPage = () => {
 
   const SectionCard = ({ title, items }) => (
     <Paper
-      elevation={6}
+      elevation={4}
       sx={{
-        p: 4,
+        p: 3,
         borderRadius: 3,
-        backgroundColor: 'white',
+        backgroundColor: 'background.paper',
         display: 'flex',
         flexDirection: 'column',
-        textAlign: 'center',
         height: '100%'
       }}
     >
-      <Typography variant="h4" fontWeight="bold" gutterBottom>
+      <Typography variant="h4" fontWeight={700} gutterBottom>
         {title}
       </Typography>
-      <Divider sx={{ my: 2 }} />
+      <Divider sx={{ mb: 2 }} />
       <Stack spacing={1}>
         {items.map((item, index) => (
-          <Box key={index} sx={listSX}>
-            <IconCircleCheck size={20} />
-            <Typography variant="body2">{item}</Typography>
+          <Box key={index} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+            <CheckCircleIcon fontSize="small" color="primary" sx={{ mt: '3px' }} />
+            <Typography variant="subtitle1" color="text.secondary">
+              {item}
+            </Typography>
           </Box>
         ))}
       </Stack>
     </Paper>
   );
-
   return (
     <Container sx={{ py: 10 }}>
       <Grid2 container spacing={8} alignItems="center">
@@ -137,4 +138,4 @@ const PrivateLimitedPage = () => {
   );
 };
 
-export default PrivateLimitedPage;
+export default FirstSection;
