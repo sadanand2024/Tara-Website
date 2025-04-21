@@ -96,8 +96,7 @@ export default function JWTRegister({ ...others }) {
         onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
           try {
             const trimmedEmail = values.email.trim();
-
-            await register(trimmedEmail, values.password, values.organizationName, moduleId);
+            const response = await register(trimmedEmail, values.password, values.organizationName, moduleId);
 
             setStatus({ success: true });
             setSubmitting(false);
@@ -105,7 +104,7 @@ export default function JWTRegister({ ...others }) {
             dispatch(
               openSnackbar({
                 open: true,
-                message: 'Your registration has been successfully completed.',
+                message: response.message || 'Your registration has been successfully completed.',
                 variant: 'alert',
                 alert: { color: 'success' },
                 close: false

@@ -108,6 +108,21 @@ export function JWTProvider({ children }) {
         module_id: moduleId
       });
       const user = response.data;
+      // hey Krishna, if u want the user to auto-login after registration pls uncomment below code ---Anand
+
+      // const serviceToken = user.access_token;
+      // if (serviceToken) {
+      //   setSession(serviceToken, user);
+      //   reduxDispatch(storeUser(user));
+      //   dispatch({
+      //     type: LOGIN,
+      //     payload: {
+      //       isLoggedIn: true,
+      //       user
+      //     }
+      //   });
+      // }
+
       return user;
     } catch (error) {
       // console.error('Registration failed:', error);
