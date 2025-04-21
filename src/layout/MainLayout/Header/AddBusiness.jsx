@@ -21,43 +21,80 @@ import {
 } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import CloseIcon from '@mui/icons-material/Close';
+import Factory from 'utils/Factory';
 
 const validationSchema = Yup.object({
-  businessName: Yup.string().required('Business name is required'),
-  businessType: Yup.string().required('Business type is required'),
-  gstNumber: Yup.string()
-    .matches(/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/, 'Invalid GST Number')
-    .required('GST number is required'),
-  address: Yup.string().required('Address is required'),
+  business_name: Yup.string().required('Business name is required'),
+  registration_number: Yup.string().required('Registration number is required'),
+  entity_type: Yup.string().required('Entity type is required'),
+  head_office: Yup.object().shape({
+    address: Yup.string().required('Address is required'),
+    city: Yup.string().required('City is required'),
+    state: Yup.string().required('State is required'),
+    country: Yup.string().required('Country is required'),
+    pincode: Yup.string().required('Pincode is required')
+  }),
+  pan: Yup.string()
+    .matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN Number')
+    .required('PAN is required'),
+  business_nature: Yup.string().required('Business nature is required'),
+  trade_name: Yup.string().required('Trade name is required'),
+  mobile_number: Yup.string()
+    .matches(/^\+?[1-9]\d{1,14}$/, 'Invalid phone number')
+    .required('Mobile number is required'),
   email: Yup.string().email('Invalid email format').required('Email is required'),
-  phone: Yup.string()
-    .matches(/^[0-9]{10}$/, 'Phone number must be 10 digits')
-    .required('Phone number is required')
+  dob_or_incorp_date: Yup.date().required('Date of incorporation is required').max(new Date(), 'Date cannot be in the future')
 });
 
-const businessTypes = [
+const entityTypes = [
   { value: 'proprietorship', label: 'Proprietorship' },
   { value: 'partnership', label: 'Partnership' },
-  { value: 'llp', label: 'Limited Liability Partnership' },
-  { value: 'pvt_ltd', label: 'Private Limited Company' },
-  { value: 'public_ltd', label: 'Public Limited Company' }
+  { value: 'privateLimitedCompany', label: 'Private Limited Company' },
+  { value: 'publicLimitedCompany', label: 'Public Limited Company' },
+  { value: 'llp', label: 'Limited Liability Partnership' }
 ];
 
-const AddBusiness = ({ open, onClose }) => {
+const AddBusiness = ({ open, onClose, activeContext, setActiveContext, userData }) => {
   const formik = useFormik({
     initialValues: {
-      businessName: '',
-      businessType: '',
-      gstNumber: '',
-      address: '',
+      user_id: userData.user.id,
+      business_name: '',
+      registration_number: '',
+      entity_type: '',
+      head_office: {
+        address: '',
+        city: '',
+        state: '',
+        country: '',
+        pincode: ''
+      },
+      pan: '',
+      business_nature: '',
+      trade_name: '',
+      mobile_number: '',
       email: '',
-      phone: ''
+      dob_or_incorp_date: ''
     },
     validationSchema,
-    onSubmit: (values, { resetForm }) => {
-      console.log('Business Details:', values);
-      resetForm();
-      onClose();
+    onSubmit: async (values, { setSubmitting, resetForm }) => {
+      console.log(values);
+      try {
+        const response = await Factory('post', 'user_management/business/create/', values);
+        console.log(response);
+
+        if (response.res.status_cd === 0) {
+          resetForm();
+          onClose();
+          consol.elog(response);
+          // You might want to add a success notification here
+        }
+      } catch (error) {
+        console.error('Error registering business:', error);
+        // You might want to add an error notification here
+      } finally {
+        console.log('values');
+        setSubmitting(false);
+      }
     }
   });
 
@@ -67,8 +104,8 @@ const AddBusiness = ({ open, onClose }) => {
   };
 
   return (
-    <Dialog 
-      open={open} 
+    <Dialog
+      open={open}
       onClose={handleClose}
       maxWidth="md"
       fullWidth
@@ -100,63 +137,104 @@ const AddBusiness = ({ open, onClose }) => {
             <Grid size={6}>
               <TextField
                 fullWidth
-                id="businessName"
-                name="businessName"
+                size="small"
+                id="business_name"
+                name="business_name"
                 label="Business Name"
-                value={formik.values.businessName}
+                value={formik.values.business_name}
                 onChange={formik.handleChange}
-                error={formik.touched.businessName && Boolean(formik.errors.businessName)}
-                helperText={formik.touched.businessName && formik.errors.businessName}
+                error={formik.touched.business_name && Boolean(formik.errors.business_name)}
+                helperText={formik.touched.business_name && formik.errors.business_name}
               />
             </Grid>
             <Grid size={6}>
-              <FormControl fullWidth error={formik.touched.businessType && Boolean(formik.errors.businessType)}>
-                <InputLabel>Business Type</InputLabel>
+              <TextField
+                fullWidth
+                size="small"
+                id="registration_number"
+                name="registration_number"
+                label="Registration Number"
+                value={formik.values.registration_number}
+                onChange={formik.handleChange}
+                error={formik.touched.registration_number && Boolean(formik.errors.registration_number)}
+                helperText={formik.touched.registration_number && formik.errors.registration_number}
+              />
+            </Grid>
+            <Grid size={6}>
+              <FormControl fullWidth size="small" error={formik.touched.entity_type && Boolean(formik.errors.entity_type)}>
+                <InputLabel>Entity Type</InputLabel>
                 <Select
-                  id="businessType"
-                  name="businessType"
-                  value={formik.values.businessType}
-                  label="Business Type"
+                  id="entity_type"
+                  name="entity_type"
+                  value={formik.values.entity_type}
+                  label="Entity Type"
                   onChange={formik.handleChange}
                 >
-                  {businessTypes.map((type) => (
+                  {entityTypes.map((type) => (
                     <MenuItem key={type.value} value={type.value}>
                       {type.label}
                     </MenuItem>
                   ))}
                 </Select>
-                {formik.touched.businessType && formik.errors.businessType && (
-                  <FormHelperText>{formik.errors.businessType}</FormHelperText>
-                )}
+                {formik.touched.entity_type && formik.errors.entity_type && <FormHelperText>{formik.errors.entity_type}</FormHelperText>}
               </FormControl>
             </Grid>
             <Grid size={6}>
               <TextField
                 fullWidth
-                id="gstNumber"
-                name="gstNumber"
-                label="GST Number"
-                value={formik.values.gstNumber}
+                size="small"
+                id="pan"
+                name="pan"
+                label="PAN Number"
+                value={formik.values.pan}
                 onChange={formik.handleChange}
-                error={formik.touched.gstNumber && Boolean(formik.errors.gstNumber)}
-                helperText={formik.touched.gstNumber && formik.errors.gstNumber}
+                error={formik.touched.pan && Boolean(formik.errors.pan)}
+                helperText={formik.touched.pan && formik.errors.pan}
               />
             </Grid>
             <Grid size={6}>
               <TextField
                 fullWidth
-                id="phone"
-                name="phone"
-                label="Phone Number"
-                value={formik.values.phone}
+                size="small"
+                id="business_nature"
+                name="business_nature"
+                label="Nature of Business"
+                value={formik.values.business_nature}
                 onChange={formik.handleChange}
-                error={formik.touched.phone && Boolean(formik.errors.phone)}
-                helperText={formik.touched.phone && formik.errors.phone}
+                error={formik.touched.business_nature && Boolean(formik.errors.business_nature)}
+                helperText={formik.touched.business_nature && formik.errors.business_nature}
               />
             </Grid>
-            <Grid size={12}>
+            <Grid size={6}>
               <TextField
                 fullWidth
+                size="small"
+                id="trade_name"
+                name="trade_name"
+                label="Trade Name"
+                value={formik.values.trade_name}
+                onChange={formik.handleChange}
+                error={formik.touched.trade_name && Boolean(formik.errors.trade_name)}
+                helperText={formik.touched.trade_name && formik.errors.trade_name}
+              />
+            </Grid>
+            <Grid size={6}>
+              <TextField
+                fullWidth
+                size="small"
+                id="mobile_number"
+                name="mobile_number"
+                label="Mobile Number"
+                value={formik.values.mobile_number}
+                onChange={formik.handleChange}
+                error={formik.touched.mobile_number && Boolean(formik.errors.mobile_number)}
+                helperText={formik.touched.mobile_number && formik.errors.mobile_number}
+              />
+            </Grid>
+            <Grid size={6}>
+              <TextField
+                fullWidth
+                size="small"
                 id="email"
                 name="email"
                 label="Business Email"
@@ -169,15 +247,90 @@ const AddBusiness = ({ open, onClose }) => {
             <Grid size={12}>
               <TextField
                 fullWidth
-                id="address"
-                name="address"
-                label="Business Address"
-                multiline
-                rows={3}
-                value={formik.values.address}
+                size="small"
+                id="dob_or_incorp_date"
+                name="dob_or_incorp_date"
+                label="Date of Incorporation"
+                type="date"
+                value={formik.values.dob_or_incorp_date}
                 onChange={formik.handleChange}
-                error={formik.touched.address && Boolean(formik.errors.address)}
-                helperText={formik.touched.address && formik.errors.address}
+                error={formik.touched.dob_or_incorp_date && Boolean(formik.errors.dob_or_incorp_date)}
+                helperText={formik.touched.dob_or_incorp_date && formik.errors.dob_or_incorp_date}
+                InputLabelProps={{
+                  shrink: true
+                }}
+              />
+            </Grid>
+            <Grid size={12}>
+              <Typography variant="subtitle1" gutterBottom>
+                Head Office Address
+              </Typography>
+            </Grid>
+            <Grid size={12}>
+              <TextField
+                fullWidth
+                size="small"
+                id="head_office.address"
+                name="head_office.address"
+                label="Address"
+                multiline
+                rows={2}
+                value={formik.values.head_office.address}
+                onChange={formik.handleChange}
+                error={formik.touched.head_office?.address && Boolean(formik.errors.head_office?.address)}
+                helperText={formik.touched.head_office?.address && formik.errors.head_office?.address}
+              />
+            </Grid>
+            <Grid size={6}>
+              <TextField
+                fullWidth
+                size="small"
+                id="head_office.city"
+                name="head_office.city"
+                label="City"
+                value={formik.values.head_office.city}
+                onChange={formik.handleChange}
+                error={formik.touched.head_office?.city && Boolean(formik.errors.head_office?.city)}
+                helperText={formik.touched.head_office?.city && formik.errors.head_office?.city}
+              />
+            </Grid>
+            <Grid size={6}>
+              <TextField
+                fullWidth
+                size="small"
+                id="head_office.state"
+                name="head_office.state"
+                label="State"
+                value={formik.values.head_office.state}
+                onChange={formik.handleChange}
+                error={formik.touched.head_office?.state && Boolean(formik.errors.head_office?.state)}
+                helperText={formik.touched.head_office?.state && formik.errors.head_office?.state}
+              />
+            </Grid>
+            <Grid size={6}>
+              <TextField
+                fullWidth
+                size="small"
+                id="head_office.country"
+                name="head_office.country"
+                label="Country"
+                value={formik.values.head_office.country}
+                onChange={formik.handleChange}
+                error={formik.touched.head_office?.country && Boolean(formik.errors.head_office?.country)}
+                helperText={formik.touched.head_office?.country && formik.errors.head_office?.country}
+              />
+            </Grid>
+            <Grid size={6}>
+              <TextField
+                fullWidth
+                size="small"
+                id="head_office.pincode"
+                name="head_office.pincode"
+                label="Pincode"
+                value={formik.values.head_office.pincode}
+                onChange={formik.handleChange}
+                error={formik.touched.head_office?.pincode && Boolean(formik.errors.head_office?.pincode)}
+                helperText={formik.touched.head_office?.pincode && formik.errors.head_office?.pincode}
               />
             </Grid>
           </Grid>
@@ -186,12 +339,7 @@ const AddBusiness = ({ open, onClose }) => {
           <Button onClick={handleClose} color="error" variant="outlined">
             Cancel
           </Button>
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            disabled={formik.isSubmitting}
-          >
+          <Button type="submit" variant="contained" color="primary" disabled={formik.isSubmitting}>
             Add Business
           </Button>
         </DialogActions>
@@ -205,4 +353,4 @@ AddBusiness.propTypes = {
   onClose: PropTypes.func.isRequired
 };
 
-export default AddBusiness; 
+export default AddBusiness;

@@ -23,6 +23,7 @@ import AddBusiness from './AddBusiness';
 import { handlerDrawerOpen, useGetMenuMaster } from 'api/menu';
 import { MenuOrientation, ThemeMode } from 'config';
 import useConfig from 'hooks/useConfig';
+import Factory from 'utils/Factory';
 
 // assets
 import { IconMenu2 } from '@tabler/icons-react';
@@ -45,13 +46,26 @@ export default function Header() {
 
   const [selectedOption, setSelectedOption] = React.useState(userData.active_context || null);
   const [openAddDialog, setOpenAddDialog] = React.useState(false);
+  const [activeContext, setActiveContext] = React.useState(userData.active_context || null);
 
-  const handleOptionChange = (event, newValue) => {
+  const handleOptionChange = async (event, newValue) => {
     if (newValue?.isAddOption) {
       setOpenAddDialog(true);
       return;
     }
-    setSelectedOption(newValue);
+
+    try {
+      // Call API to switch context
+      const response = await Factory('post', '/api/v1/switch-context/', { context_id: newValue.id });
+
+      if (response.res.status_cd === 0) {
+        setSelectedOption(newValue);
+        // Optionally reload the page or update necessary states
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error('Error switching context:', error);
+    }
   };
 
   const handleAddDialogClose = () => {
@@ -136,7 +150,7 @@ export default function Header() {
           }}
           renderOption={(props, option) => {
             const { key, ...otherProps } = props;
-            
+
             if (option.isAddOption) {
               return [
                 <Divider key="divider" sx={{ my: 1 }} />,
@@ -156,13 +170,9 @@ export default function Header() {
                 </Box>
               ];
             }
-            
+
             return (
-              <Box
-                {...otherProps}
-                component="li"
-                key={option.id}
-              >
+              <Box {...otherProps} component="li" key={option.id}>
                 <BusinessIcon fontSize="small" sx={{ mr: 1 }} />
                 {option.name}
               </Box>
@@ -186,7 +196,13 @@ export default function Header() {
       </Box>
 
       {/* Add Business Dialog */}
-      <AddBusiness open={openAddDialog} onClose={handleAddDialogClose} />
+      <AddBusiness
+        open={openAddDialog}
+        onClose={handleAddDialogClose}
+        activeContext={activeContext}
+        setActiveContext={setActiveContext}
+        userData={userData}
+      />
     </>
   );
 }
