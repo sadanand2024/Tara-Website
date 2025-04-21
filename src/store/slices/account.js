@@ -11,8 +11,6 @@ const account = createSlice({
   initialState,
   reducers: {
     storeUser(state, action) {
-      //   const data = action.payload;
-      console.log(action.payload);
       state.user = action.payload;
     }
   }

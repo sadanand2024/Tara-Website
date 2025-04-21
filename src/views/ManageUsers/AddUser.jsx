@@ -12,14 +12,24 @@ import {
   DialogActions,
   TextField,
   Grid,
-  FormControl,
-  FormHelperText,
-  InputLabel,
-  Select,
-  MenuItem,
-  IconButton
+  IconButton,
+  Autocomplete,
+  Paper
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+
+const roles = [
+  { label: 'Admin', value: 'admin' },
+  { label: 'Manager', value: 'manager' },
+  { label: 'User', value: 'user' }
+];
+
+const departments = [
+  { label: 'IT', value: 'it' },
+  { label: 'HR', value: 'hr' },
+  { label: 'Finance', value: 'finance' },
+  { label: 'Sales', value: 'sales' }
+];
 
 const validationSchema = Yup.object({
   firstName: Yup.string().required('First Name is required'),
@@ -135,45 +145,43 @@ const AddUser = ({ open, onClose }) => {
               />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <FormControl fullWidth error={formik.touched.role && Boolean(formik.errors.role)}>
-                <InputLabel id="role-label">Role</InputLabel>
-                <Select
-                  labelId="role-label"
-                  id="role"
-                  name="role"
-                  value={formik.values.role}
-                  label="Role"
-                  onChange={formik.handleChange}
-                >
-                  <MenuItem value="admin">Admin</MenuItem>
-                  <MenuItem value="manager">Manager</MenuItem>
-                  <MenuItem value="user">User</MenuItem>
-                </Select>
-                {formik.touched.role && formik.errors.role && (
-                  <FormHelperText>{formik.errors.role}</FormHelperText>
+              <Autocomplete
+                id="role"
+                options={roles}
+                getOptionLabel={(option) => option.label || ''}
+                value={roles.find(role => role.value === formik.values.role) || null}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('role', newValue ? newValue.value : '');
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Role"
+                    error={formik.touched.role && Boolean(formik.errors.role)}
+                    helperText={formik.touched.role && formik.errors.role}
+                  />
                 )}
-              </FormControl>
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <FormControl fullWidth error={formik.touched.department && Boolean(formik.errors.department)}>
-                <InputLabel id="department-label">Department</InputLabel>
-                <Select
-                  labelId="department-label"
-                  id="department"
-                  name="department"
-                  value={formik.values.department}
-                  label="Department"
-                  onChange={formik.handleChange}
-                >
-                  <MenuItem value="it">IT</MenuItem>
-                  <MenuItem value="hr">HR</MenuItem>
-                  <MenuItem value="finance">Finance</MenuItem>
-                  <MenuItem value="sales">Sales</MenuItem>
-                </Select>
-                {formik.touched.department && formik.errors.department && (
-                  <FormHelperText>{formik.errors.department}</FormHelperText>
+              <Autocomplete
+                id="department"
+                options={departments}
+                getOptionLabel={(option) => option.label || ''}
+                value={departments.find(dept => dept.value === formik.values.department) || null}
+                onChange={(_, newValue) => {
+                  formik.setFieldValue('department', newValue ? newValue.value : '');
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Department"
+                    error={formik.touched.department && Boolean(formik.errors.department)}
+                    helperText={formik.touched.department && formik.errors.department}
+                  />
                 )}
-              </FormControl>
+
+              />
             </Grid>
           </Grid>
         </DialogContent>

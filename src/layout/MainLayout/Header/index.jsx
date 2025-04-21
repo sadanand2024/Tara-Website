@@ -4,9 +4,10 @@ import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
-import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
+import Divider from '@mui/material/Divider';
+import Typography from '@mui/material/Typography';
+import Autocomplete from '@mui/material/Autocomplete';
+import TextField from '@mui/material/TextField';
 
 // project imports
 import LogoSection from '../LogoSection';
@@ -17,6 +18,7 @@ import LocalizationSection from './LocalizationSection';
 import MegaMenuSection from './MegaMenuSection';
 import FullScreenSection from './FullScreenSection';
 import NotificationSection from './NotificationSection';
+import AddBusiness from './AddBusiness';
 
 import { handlerDrawerOpen, useGetMenuMaster } from 'api/menu';
 import { MenuOrientation, ThemeMode } from 'config';
@@ -24,14 +26,15 @@ import useConfig from 'hooks/useConfig';
 
 // assets
 import { IconMenu2 } from '@tabler/icons-react';
+import BusinessIcon from '@mui/icons-material/Business';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 
 // ==============================|| MAIN NAVBAR / HEADER ||============================== //
 
-
 import { useSelector } from 'store';
-  
+
 export default function Header() {
-  const userData  = useSelector((state) => state);
+  const userData = useSelector((state) => state).accountReducer.user;
   const theme = useTheme();
   const downMD = useMediaQuery(theme.breakpoints.down('md'));
 
@@ -39,14 +42,25 @@ export default function Header() {
   const { menuMaster } = useGetMenuMaster();
   const drawerOpen = menuMaster.isDashboardDrawerOpened;
   const isHorizontal = menuOrientation === MenuOrientation.HORIZONTAL && !downMD;
-  const [viewType, setViewType] = React.useState('personal');
 
-  const handleViewChange = (event) => {
-    setViewType(event.target.value);
+  const [selectedOption, setSelectedOption] = React.useState(userData.active_context || null);
+  const [openAddDialog, setOpenAddDialog] = React.useState(false);
+
+  const handleOptionChange = (event, newValue) => {
+    if (newValue?.isAddOption) {
+      setOpenAddDialog(true);
+      return;
+    }
+    setSelectedOption(newValue);
   };
 
+  const handleAddDialogClose = () => {
+    setOpenAddDialog(false);
+  };
 
-  console.log(userData);
+  // Create options array with all contexts
+  const options = [...userData.all_contexts, { id: 'add_business', name: 'Add Business', isAddOption: true }];
+
   return (
     <>
       {/* logo & toggler button */}
@@ -80,7 +94,6 @@ export default function Header() {
       {/* header search */}
       <SearchSection />
       <Box sx={{ flexGrow: 1 }} />
-      <Box sx={{ flexGrow: 1 }} />
 
       {/* mega-menu */}
       <Box sx={{ display: { xs: 'none', md: 'block' } }}>
@@ -95,34 +108,73 @@ export default function Header() {
       {/* notification */}
       <NotificationSection />
 
-      {/* full sceen toggler */}
+      {/* full screen toggler */}
       <Box sx={{ display: { xs: 'none', lg: 'block' } }}>
         <FullScreenSection />
       </Box>
 
-      {/* view type selector */}
-      <Box sx={{ display: { xs: 'none', sm: 'block' }, mx: 1 }}>
-        <FormControl size="small">
-          <Select
-            value={viewType}
-            onChange={handleViewChange}
-            sx={{
-              minWidth: 120,
-              height: '35px',
-              bgcolor: mode === ThemeMode.DARK ? 'dark.main' : 'secondary.light',
-              color: mode === ThemeMode.DARK ? 'secondary.main' : 'secondary.dark',
-              '& .MuiOutlinedInput-notchedOutline': {
-                borderColor: 'rgba(111, 66, 193, 0.2)'
+      {/* business selector */}
+      <Box sx={{ display: { xs: 'none', sm: 'block' }, mx: 2, width: 300 }}>
+        <Autocomplete
+          value={selectedOption}
+          onChange={handleOptionChange}
+          options={options}
+          getOptionLabel={(option) => option.name}
+          size="small"
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              '& fieldset': {
+                borderColor: 'primary.light'
               },
-              '&:hover .MuiOutlinedInput-notchedOutline': {
-                borderColor: 'secondary.main'
+              '&:hover fieldset': {
+                borderColor: 'primary.main'
+              },
+              '&.Mui-focused fieldset': {
+                borderColor: 'primary.main'
               }
-            }}
-          >
-            <MenuItem value="personal">Personal</MenuItem>
-            <MenuItem value="business">Business</MenuItem>
-          </Select>
-        </FormControl>
+            }
+          }}
+          renderOption={(props, option) => {
+            const { key, ...otherProps } = props;
+            
+            if (option.isAddOption) {
+              return [
+                <Divider key="divider" sx={{ my: 1 }} />,
+                <Box
+                  {...otherProps}
+                  component="li"
+                  key={option.id}
+                  sx={{
+                    color: 'primary.main',
+                    '&:hover': {
+                      bgcolor: 'primary.lighter'
+                    }
+                  }}
+                >
+                  <AddCircleOutlineIcon fontSize="small" sx={{ mr: 1 }} />
+                  Add Business
+                </Box>
+              ];
+            }
+            
+            return (
+              <Box
+                {...otherProps}
+                component="li"
+                key={option.id}
+              >
+                <BusinessIcon fontSize="small" sx={{ mr: 1 }} />
+                {option.name}
+              </Box>
+            );
+          }}
+          renderInput={(params) => <TextField {...params} size="small" placeholder="Select Business" />}
+          disableClearable
+          ListboxProps={{
+            sx: { maxHeight: 250 }
+          }}
+          isOptionEqualToValue={(option, value) => option.id === value.id}
+        />
       </Box>
 
       {/* profile */}
@@ -132,6 +184,9 @@ export default function Header() {
       <Box sx={{ display: { xs: 'block', sm: 'none' } }}>
         <MobileSection />
       </Box>
+
+      {/* Add Business Dialog */}
+      <AddBusiness open={openAddDialog} onClose={handleAddDialogClose} />
     </>
   );
 }
