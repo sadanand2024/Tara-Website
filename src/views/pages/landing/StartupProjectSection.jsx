@@ -78,27 +78,27 @@ export default function RtlInfoSection() {
                   mt: { xs: 2, sm: 3.75, md: 5.5, xl: 7 }
                 }}
               >
-                Choose Berry for
+                Choose Tara First for
               </Typography>
             </Box>
             <Slider {...settings}>
               <Typography variant="h2" sx={{ color: 'text.hint' }}>
-                Easy Customizability
+                GST & Tax
               </Typography>
               <Typography variant="h2" sx={{ color: 'text.hint' }}>
-                Highly Responsive
+                Smart Bookkeeping
               </Typography>
               <Typography variant="h2" sx={{ color: 'text.hint' }}>
-                Design Consistency
+                Automated Payroll
               </Typography>
               <Typography variant="h2" sx={{ color: 'text.hint' }}>
-                Effective Support
+                Compliance
               </Typography>
               <Typography variant="h2" sx={{ color: 'text.hint' }}>
-                Standardization
+                Company Incorporation
               </Typography>
               <Typography variant="h2" sx={{ color: 'text.hint' }}>
-                Compatibility
+                Advisory Support
               </Typography>
             </Slider>
           </Stack>

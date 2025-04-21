@@ -22,7 +22,10 @@ import Box from '@mui/material/Box';
 
 // project imports
 import { ThemeMode } from 'config';
-import Logo from 'ui-component/Logo';
+import tarafirstLogo from 'assets/images/Svgtarafirst.svg';
+// import Logo from 'ui-component/Logo';
+import Tarafirstlogo_png from 'assets/images/Tarafirstlogo_png.png'; // Tarafirstlogo_png
+import CardMedia from '@mui/material/CardMedia';
 
 // assets
 import { IconBook, IconCreditCard, IconDashboard, IconHome2 } from '@tabler/icons-react';
@@ -52,6 +55,7 @@ export default function AppBar({ ...others }) {
   const [drawerToggle, setDrawerToggle] = useState(false);
   const [openServices, setOpenServices] = useState(false);
   const [openProducts, setOpenProducts] = useState(false);
+  const theme = useTheme();
 
   const handleToggle = () => setOpenServices(!openServices);
   const handleClose = () => setOpenServices(false);
@@ -72,23 +76,9 @@ export default function AppBar({ ...others }) {
         <Container>
           <Toolbar sx={{ py: 2.5, px: `0 !important` }}>
             {/* <Logo /> */}
-            <Typography
-              component={RouterLink}
-              to="/"
-              variant="h1"
-              sx={{
-                flexGrow: 1,
-                textAlign: 'left',
-                fontWeight: 900,
-                fontFamily: 'Roboto, Poppins, sans-serif',
-                color: 'primary.main',
-                textDecoration: 'none',
-                letterSpacing: 1.2
-              }}
-            >
-              Tarafirst
-            </Typography>
-
+            <RouterLink to="/">
+              <CardMedia component="img" src={Tarafirstlogo_png} alt="defaultLayout" sx={{ width: 200 }} />
+            </RouterLink>
             <Stack direction="row" spacing={{ xs: 1.5, md: 3 }}>
               <Stack direction="row" sx={{ display: { xs: 'none', sm: 'block' } }} spacing={{ xs: 1.5, md: 2.5 }}>
                 <Button color="inherit" onClick={handleToggle}>

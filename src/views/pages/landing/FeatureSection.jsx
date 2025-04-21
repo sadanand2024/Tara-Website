@@ -63,13 +63,13 @@ export default function FeatureSection() {
           <Grid container spacing={1.5}>
             <Grid size={12}>
               <Typography variant="h2" sx={{ fontSize: { xs: '1.5rem', sm: '2.125rem' } }}>
-                What does Berry offer?
+                What does TaraFirst offer?
               </Typography>
             </Grid>
             <Grid size={12}>
               <Typography variant="body2" sx={{ fontSize: '1rem' }}>
-                Berry is a reliable choice for your admin panel needs, offering a wide range of features to easily manage your backendBerry
-                is a reliable choice for your admin panel needs, offering a wide range of features to easily manage your backend panel
+                TaraFirst is your one-stop fintech platform — from company incorporation to compliance, invoicing, payroll, and reporting.
+                We simplify complex financial processes so you can focus on growing your business.
               </Typography>
             </Grid>
           </Grid>
@@ -78,43 +78,43 @@ export default function FeatureSection() {
           <Grid container spacing={5} sx={{ justifyContent: 'center', '&> .MuiGrid-root > div': { height: '100%' } }}>
             <Grid size={{ md: 4, sm: 6 }}>
               <OfferCard
-                title="Beautiful User Interface"
-                caption="Berry can improve the user experience of your web application by providing a clear and intuitive layout, and consistent look and feel."
+                title="Smart Company Incorporation"
+                caption="TaraFirst simplifies your business formation with automated filing, expert validation, and transparent timelines."
                 image={Offer1}
               />
             </Grid>
             <Grid size={{ md: 4, sm: 6 }}>
               <OfferCard
-                title="Time and Cost Savings"
-                caption="Berry can save developers time and effort by providing a pre-built user interface, allowing them to focus on other aspects of the project."
+                title="End-to-End Compliance"
+                caption="Stay on top of GST, TDS, MCA, and other statutory filings with our intelligent compliance tracker and real-time alerts."
                 image={Offer2}
               />
             </Grid>
             <Grid size={{ md: 4, sm: 6 }}>
               <OfferCard
-                title="Reduce Development Complexity"
-                caption="Berry simplifies admin panel development with easy theme setup and clear code with flexible layouts options."
+                title="Unified Invoicing & Payments"
+                caption="Generate professional invoices, auto-apply GST, track dues, and integrate with payment gateways — all in one place."
                 image={Offer3}
               />
             </Grid>
             <Grid size={{ md: 4, sm: 6 }}>
               <OfferCard
-                title="Improved Scalability"
-                caption="Berry uses scalable technologies and resources to ensure that your admin panel remains efficient and effective as your needs evolve."
+                title="Payroll & Employee Management"
+                caption="Process salaries, handle compliance, and generate payslips effortlessly with our smart payroll engine."
                 image={Offer4}
               />
             </Grid>
             <Grid size={{ md: 4, sm: 6 }}>
               <OfferCard
-                title=" Well-Documented and Supported"
-                caption="With a range of resources including user guides, tutorials, and FAQs to help users understand and effectively use the Berry."
+                title="Virtual CFO & Dashboards"
+                caption="Track KPIs, financial health, and burn rate in real-time with actionable dashboards curated by finance experts."
                 image={Offer5}
               />
             </Grid>
             <Grid size={{ md: 4, sm: 6 }}>
               <OfferCard
-                title="Performance Centric"
-                caption="Berry is a performance-centric dashboard template that is designed to deliver optimal performance for your admin panel."
+                title="Secure Document Vault"
+                caption="Organize all your financial documents in one secure place with smart search, tagging, and sharing controls."
                 image={Offer6}
               />
             </Grid>
