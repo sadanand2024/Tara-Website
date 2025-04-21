@@ -60,9 +60,9 @@ export function JWTProvider({ children }) {
       try {
         const serviceToken = window.localStorage.getItem('serviceToken');
         let userData = JSON.parse(window.localStorage.getItem('user'));
-
         if (serviceToken && verifyToken(serviceToken)) {
           setSession(serviceToken, userData);
+          reduxDispatch(storeUser(userData));
           dispatch({
             type: LOGIN,
             payload: {
