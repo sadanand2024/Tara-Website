@@ -17,7 +17,7 @@ import EmailIcon from '@mui/icons-material/Email';
 // project imports
 import { frameworks } from './FrameworkSection';
 import { ThemeMode } from 'config';
-
+import taralogoWhite from 'assets/images/taralogoWhite.png'; // Tarafirstlogo_png
 // assets
 import LogoDark from 'assets/images/logo-dark.svg';
 import { IconBrandDiscord } from '@tabler/icons-react';
@@ -54,12 +54,13 @@ export default function FooterSection() {
             <Grid container spacing={8}>
               <Grid size={{ xs: 12, md: 4 }}>
                 <Stack spacing={{ xs: 2, md: 5 }}>
-                  {/* <Typography component={RouterLink} to="/" aria-label="theme-logo">
-                    <CardMedia component="img" src={LogoDark} alt="defaultLayout" sx={{ width: 'auto' }} />
-                  </Typography> */}
+                  <Typography component={RouterLink} to="/" aria-label="theme-logo">
+                    <CardMedia component="img" src={taralogoWhite} alt="defaultLayout" sx={{ width: 200 }} />
+                  </Typography>
+                  {/* 
                   <Typography variant="h2" color={textColor} sx={{ fontWeight: 500 }}>
                     Tarafirst
-                  </Typography>
+                  </Typography> */}
                   <Typography variant="body2" color={textColor}>
                     Tarafirst is a unified fintech platform for managing personal and business finances. From company registration to GST,
                     payroll, and more — we combine smart software with expert support to simplify your financial journey.

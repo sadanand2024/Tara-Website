@@ -105,7 +105,7 @@ export default function CustomizeSection() {
                   </Typography>
                   <Typography sx={listSX}>
                     <IconCircleCheck size={20} />
-                    *Figma file included only in Plus & Extended Licenses.
+                    Figma file included only in Plus & Extended Licenses.
                   </Typography>
                   <Typography sx={listSX}>
                     <IconCircleCheck size={20} />A theme that can be easily configured on a single page.

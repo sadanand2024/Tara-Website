@@ -1,5 +1,7 @@
 import { Link, useSearchParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import CardMedia from '@mui/material/CardMedia';
+import { Link as RouterLink } from 'react-router-dom';
 
 import useMediaQuery from '@mui/material/useMediaQuery';
 import Divider from '@mui/material/Divider';
@@ -7,7 +9,7 @@ import Grid from '@mui/material/Grid2';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-
+import TarapngLogo from '../../../ui-component/TarapngLogo';
 // project imports
 import AuthWrapper1 from './AuthWrapper1';
 import AuthCardWrapper from './AuthCardWrapper';
@@ -62,7 +64,8 @@ export default function Register() {
                     {/* <Link to="#" aria-label="theme logo">
                       <Logo />
                     </Link> */}
-                    <Typography variant="h1">Tara First</Typography>
+                    {/* <Typography variant="h1">Tara First</Typography> */}
+                    <TarapngLogo />
                   </Grid>
                   <Grid size={12}>
                     <Grid container direction={{ xs: 'column-reverse', md: 'row' }} sx={{ alignItems: 'center', justifyContent: 'center' }}>

@@ -14,16 +14,16 @@ const PrivateLimitedPage = () => {
   return (
     <>
       <FirstSection />
-      <Box sx={{ py: 12.5, bgcolor: theme.palette.mode === ThemeMode.DARK ? 'background.default' : '#fde9e0' }}>
+      <Box sx={{ py: 12.5, bgcolor: theme.palette.mode === ThemeMode.DARK ? 'background.default' : 'grey.100' }}>
         <SecondSection />
       </Box>
-      <Box sx={{ py: 12.5, bgcolor: theme.palette.mode === ThemeMode.DARK ? 'background.default' : 'grey.100' }}>
+      <Box sx={{ py: 12.5 }}>
         <ThirdSection />
       </Box>
-      <Box sx={{ py: 12.5, bgcolor: theme.palette.mode === ThemeMode.DARK ? 'dark.dark' : 'background.default' }}>
+      <Box sx={{ py: 12.5, bgcolor: theme.palette.mode === ThemeMode.DARK ? 'background.default' : 'grey.100' }}>
         <FAQs />
       </Box>
-      <Box sx={{ py: 12.5, bgcolor: theme.palette.mode === ThemeMode.DARK ? 'background.default' : '#fde9e0' }}>
+      <Box sx={{ py: 12.5 }}>
         <FourthSection />
       </Box>
     </>

@@ -19,7 +19,7 @@ import AuthFooter from 'ui-component/cards/AuthFooter';
 
 import useAuth from 'hooks/useAuth';
 import { APP_AUTH } from 'config';
-
+import TarapngLogo from '../../../ui-component/TarapngLogo';
 // A mapping of auth types to dynamic imports
 const authLoginImports = {
   firebase: () => import('./firebase/AuthLogin'),
@@ -37,7 +37,7 @@ export default function Login() {
   const [AuthLoginComponent, setAuthLoginComponent] = useState(null);
 
   const [searchParams] = useSearchParams();
-  const authParam = searchParams.get('auth') || ''; 
+  const authParam = searchParams.get('auth') || '';
 
   useEffect(() => {
     const selectedAuth = authParam || APP_AUTH;
@@ -62,7 +62,7 @@ export default function Login() {
                 <Grid container spacing={2} sx={{ alignItems: 'center', justifyContent: 'center' }}>
                   <Grid sx={{ mb: 3 }}>
                     <Link to="#" aria-label="logo">
-                      <Logo />
+                      <TarapngLogo />
                     </Link>
                   </Grid>
                   <Grid size={12}>
