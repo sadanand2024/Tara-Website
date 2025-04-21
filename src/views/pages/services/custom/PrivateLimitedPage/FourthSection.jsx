@@ -77,7 +77,7 @@ const ThirdSection = () => {
   return (
     <Container>
       <Box sx={{ textAlign: 'center', mb: 6 }}>
-        <Typography variant="h4" sm={{ variant: 'h3' }} md={{ variant: 'h1' }} fontWeight={700}>
+        <Typography variant="h1" fontWeight={700} gutterBottom>
           What Next? 🚀 Power Up Your Company
         </Typography>
 

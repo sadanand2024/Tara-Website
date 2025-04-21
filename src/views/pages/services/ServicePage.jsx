@@ -4,6 +4,7 @@ import { Box, Typography, Grid, Paper, Button } from '@mui/material';
 import servicesData from 'data/servicesData';
 import ErrorPage from 'views/pages/maintenance/Error';
 import PrivateLimitedPage from './custom/PrivateLimitedPage';
+import ITR from './custom/ITR';
 
 const ServicePage = () => {
   const { category, slug } = useParams();
@@ -16,6 +17,10 @@ const ServicePage = () => {
   if (pageData?.customComponent === 'PrivateLimitedPage') {
     return <PrivateLimitedPage />;
   }
+  if (pageData?.customComponent === 'ITRFiling') {
+    return <ITR />;
+  }
+
   return (
     <Box sx={{ px: { xs: 2, md: 8 }, py: { xs: 4, md: 10 } }}>
       {/* Hero Section */}

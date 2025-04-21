@@ -4,6 +4,7 @@ const servicesData = {
     pages: {
       'itr-filing': {
         heroTitle: 'File Your Income Tax Return (ITR) Easily',
+        customComponent: 'ITRFiling',
         heroSubtitle: 'Fast, secure, and hassle-free ITR filing experience with expert support.',
         cta: {
           label: 'Start Filing Now',
