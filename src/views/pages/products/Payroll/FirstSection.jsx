@@ -19,6 +19,7 @@ import { ThemeMode } from 'config';
 
 // assets
 import { IconChevronRight, IconChevronLeft, IconLink } from '@tabler/icons-react';
+import { useSearchParams } from 'react-router-dom';
 
 import SliderLight1 from 'assets/images/landing/pre-apps/slider-light-1.png';
 import SliderDark1 from 'assets/images/landing/pre-apps/slider-dark-1.png';
@@ -27,6 +28,7 @@ import SliderDark2 from 'assets/images/landing/pre-apps/slider-dark-2.png';
 import SliderLight3 from 'assets/images/landing/pre-apps/slider-light-3.png';
 import SliderDark3 from 'assets/images/landing/pre-apps/slider-dark-3.png';
 import { Button } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
 // styles
 const Images = styled('img')({
@@ -152,6 +154,9 @@ function Items({ title, caption, image, link }) {
 export default function PreBuildDashBoard() {
   const theme = useTheme();
   const downMD = useMediaQuery(theme.breakpoints.down('md'));
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const moduleId = searchParams.get('id');
 
   return (
     <>
@@ -173,7 +178,13 @@ export default function PreBuildDashBoard() {
             </Grid>
             <Grid size={12}>
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="center" sx={{ mt: 3 }}>
-                <Button size="large" variant="contained" color="primary" startIcon={<AddCircleOutlineIcon />}>
+                <Button
+                  size="large"
+                  variant="contained"
+                  color="primary"
+                  startIcon={<AddCircleOutlineIcon />}
+                  onClick={() => navigate(`/register?id=${moduleId}`)}
+                >
                   Get Started with Payroll
                 </Button>
                 <Button size="large" variant="contained" color="secondary">

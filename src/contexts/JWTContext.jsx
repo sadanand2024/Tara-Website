@@ -99,32 +99,35 @@ export function JWTProvider({ children }) {
     }); // ✅ Update local context state
   };
 
-  const register = async (email, password, firstName, lastName) => {
-    const id = chance.bb_pin();
-    const response = await axios.post('/api/account/register', {
-      id,
-      email,
-      password,
-      firstName,
-      lastName
-    });
+  const register = async (email, password, organizationName, moduleId) => {
+    try {
+      const response = await axios.post('/user_management/register/business-with-module/', {
+        email,
+        password,
+        business_name: organizationName,
+        module_id: moduleId
+      });
+      const user = response.data;
+      // hey Krishna, if u want the user to auto-login after registration pls uncomment below code ---Anand
 
-    let users = response.data;
+      // const serviceToken = user.access_token;
+      // if (serviceToken) {
+      //   setSession(serviceToken, user);
+      //   reduxDispatch(storeUser(user));
+      //   dispatch({
+      //     type: LOGIN,
+      //     payload: {
+      //       isLoggedIn: true,
+      //       user
+      //     }
+      //   });
+      // }
 
-    const localUsers = window.localStorage.getItem('users');
-    if (localUsers) {
-      users = [
-        ...JSON.parse(localUsers),
-        {
-          id,
-          email,
-          password,
-          name: `${firstName} ${lastName}`
-        }
-      ];
+      return user;
+    } catch (error) {
+      // console.error('Registration failed:', error);
+      throw error;
     }
-
-    window.localStorage.setItem('users', JSON.stringify(users));
   };
 
   const logout = () => {

@@ -59,9 +59,10 @@ export default function Register() {
               <AuthCardWrapper>
                 <Grid container spacing={2} sx={{ alignItems: 'center', justifyContent: 'center' }}>
                   <Grid sx={{ mb: 3 }}>
-                    <Link to="#" aria-label="theme logo">
+                    {/* <Link to="#" aria-label="theme logo">
                       <Logo />
-                    </Link>
+                    </Link> */}
+                    <Typography variant="h1">Tara First</Typography>
                   </Grid>
                   <Grid size={12}>
                     <Grid container direction={{ xs: 'column-reverse', md: 'row' }} sx={{ alignItems: 'center', justifyContent: 'center' }}>

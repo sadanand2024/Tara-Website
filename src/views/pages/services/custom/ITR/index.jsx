@@ -12,7 +12,7 @@ const ITRFilingPage = () => {
   return (
     <>
       <FirstSection />
-      <Box sx={{ py: 12.5, bgcolor: theme.palette.mode === ThemeMode.DARK ? 'background.default' : '#fde9e0' }}>
+      <Box sx={{ py: 12.5 }}>
         <SecondSection />
       </Box>
 
