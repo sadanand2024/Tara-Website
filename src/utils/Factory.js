@@ -1,9 +1,9 @@
 import axios from 'axios';
-import { BASE_URL } from 'constants';
-import { logout } from '@/utils/api';
 
-function Factory(api, URL, payload, headers = {}) {
-  const tokens = JSON.parse(localStorage.getItem('auth-user'));
+// import { logout } from '@/utils/api';
+
+const Factory = (api, URL, payload, headers = {}) => {
+  const TOKEN = localStorage.getItem('serviceToken');
   const getErrorMessage = (api) => {
     switch (api) {
       case 'put':
@@ -23,9 +23,9 @@ function Factory(api, URL, payload, headers = {}) {
 
   return axios({
     method: api,
-    url: BASE_URL + URL,
+    url: import.meta.env.VITE_APP_BASE_URL + URL,
     headers: {
-      Authorization: `Bearer ${tokens.access_token}`,
+      Authorization: `Bearer ${TOKEN}`,
       ...headers
     },
     data: payload
@@ -59,7 +59,7 @@ function Factory(api, URL, payload, headers = {}) {
     .catch((e) => {
       if (e?.response?.status == 401) {
         if (e?.response?.data.code === 'token_not_valid') {
-          logout();
+          // logout();
         }
       } else if (e?.response?.status == 404) {
         if (e?.response?.data.status_cd === 2) {
@@ -94,6 +94,6 @@ function Factory(api, URL, payload, headers = {}) {
         };
       }
     });
-}
+};
 
 export default Factory;
