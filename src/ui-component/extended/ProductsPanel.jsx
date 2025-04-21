@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Typography, Grid2, Paper, ClickAwayListener, Stack, Button, Container } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link as RouterLink } from 'react-router-dom';
+import axios from 'utils/axios';
 
 import CreditCardIcon from '@mui/icons-material/CreditCard';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
@@ -10,50 +11,33 @@ import FolderZipIcon from '@mui/icons-material/FolderZip';
 import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
 import CalculateIcon from '@mui/icons-material/Calculate';
 
-const productsData = [
-  {
-    name: 'Payroll',
-    description: 'Automated payroll with TDS, EPF/ESI, payslips & more.',
+const productUIConfig = {
+  Payroll: {
     icon: <CreditCardIcon sx={{ fontSize: { xs: 28, sm: 36 }, color: '#FF6B6B' }} />,
-    path: '/products/payroll',
-    cta: 'Try Now'
+    path: '/products/payroll'
   },
-  {
-    name: 'Invoicing',
-    description: 'Smart invoicing with GST, reminders, and online payments.',
+  Invoice: {
     icon: <ReceiptLongIcon sx={{ fontSize: { xs: 28, sm: 36 }, color: '#5C7AEA' }} />,
-    path: '/products/invoicing',
-    cta: 'Try Now'
+    path: '/products/invoicing'
   },
-  {
-    name: 'Accounting',
-    description: 'Track income, expenses, and manage books easily.',
+  Accounting: {
     icon: <AccountBalanceIcon sx={{ fontSize: { xs: 28, sm: 36 }, color: '#00C9A7' }} />,
-    path: '/products/accounting',
-    cta: 'Try Now'
+    path: '/products/accounting'
   },
-  {
-    name: 'Document Vault',
-    description: 'Securely store and access all your financial documents.',
+
+  'Document Vault': {
     icon: <FolderZipIcon sx={{ fontSize: { xs: 28, sm: 36 }, color: '#FFA94D' }} />,
-    path: '/products/document-vault',
-    cta: 'Try Now'
+    path: '/products/document-vault'
   },
-  {
-    name: 'Compliance Tracker',
-    description: 'Auto reminders and status for ITR, GST, and ROC filings.',
+  'Compliance Tracker': {
     icon: <VerifiedUserIcon sx={{ fontSize: { xs: 28, sm: 36 }, color: '#845EF7' }} />,
-    path: '/products/compliance-tracker',
-    cta: 'Try for Free'
+    path: '/products/compliance-tracker'
   },
-  {
-    name: 'Tax Calculators',
-    description: 'Calculate tax liability, HRA, capital gains & more.',
+  'Tax Calculators': {
     icon: <CalculateIcon sx={{ fontSize: { xs: 28, sm: 36 }, color: '#2EB67D' }} />,
-    path: '/products/tax-calculators',
-    cta: 'Explore'
+    path: '/products/tax-calculators'
   }
-];
+};
 
 const MotionPaper = motion(Paper);
 
@@ -62,8 +46,32 @@ const panelVariants = {
   visible: { opacity: 1, y: 0 },
   exit: { opacity: 0, y: -20 }
 };
-
 const ProductsPanel = ({ onClose }) => {
+  const [products, setProducts] = useState([]);
+
+  const getProductsList = async () => {
+    try {
+      const response = await axios.get('/user_management/modules/list?context_type=business');
+
+      const enhancedProducts = (response.data.modules || []).map((product) => {
+        const uiConfig = productUIConfig[product.name] || {};
+        return {
+          ...product,
+          ...uiConfig,
+          disabled: !product.is_active // 🔥 Set disabled based on API response
+        };
+      });
+
+      setProducts(enhancedProducts);
+    } catch (err) {
+      console.error('Failed to fetch products/modules:', err);
+    }
+  };
+
+  useEffect(() => {
+    getProductsList();
+  }, []);
+  console.log(products);
   return (
     <AnimatePresence>
       <ClickAwayListener onClickAway={onClose}>
@@ -90,8 +98,8 @@ const ProductsPanel = ({ onClose }) => {
         >
           <Container>
             <Grid2 container spacing={3} justifyContent="flex-start">
-              {productsData.map((product, index) => (
-                <Grid2 key={index} size={{ xs: 12, sm: 6, md: 3 }} sx={{ display: 'flex', justifyContent: 'center' }}>
+              {products.map((product) => (
+                <Grid2 key={product.id} size={{ xs: 12, sm: 6, md: 3 }} sx={{ display: 'flex', justifyContent: 'center' }}>
                   <Paper
                     elevation={3}
                     sx={{
@@ -105,10 +113,14 @@ const ProductsPanel = ({ onClose }) => {
                       justifyContent: 'space-between',
                       flex: 1,
                       transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-                      '&:hover': {
-                        transform: 'translateY(-6px)',
-                        boxShadow: '0 12px 20px rgba(0,0,0,0.08)'
-                      }
+                      ...(product.disabled
+                        ? { opacity: 0.5, pointerEvents: 'none' }
+                        : {
+                            '&:hover': {
+                              transform: 'translateY(-6px)',
+                              boxShadow: '0 12px 20px rgba(0,0,0,0.08)'
+                            }
+                          })
                     }}
                   >
                     <Stack spacing={1} alignItems="center" textAlign="center">
@@ -120,13 +132,15 @@ const ProductsPanel = ({ onClose }) => {
                         {product.description}
                       </Typography>
                     </Stack>
+
                     <Box sx={{ mt: 'auto', pt: 1 }}>
                       <Button
                         variant="text"
                         color="primary"
                         component={RouterLink}
-                        to={product.path}
-                        onClick={onClose} // ✅ CLOSE DRAWER ON CLICK
+                        to={`${product.path}?id=${product.id}`}
+                        disabled={product.disabled}
+                        onClick={onClose}
                         sx={{
                           fontWeight: 500,
                           fontSize: '0.8rem',
@@ -138,7 +152,7 @@ const ProductsPanel = ({ onClose }) => {
                         }}
                         endIcon={<span>&rarr;</span>}
                       >
-                        {product.cta}
+                        Try Now
                       </Button>
                     </Box>
                   </Paper>

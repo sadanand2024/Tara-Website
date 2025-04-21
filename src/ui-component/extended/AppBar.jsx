@@ -118,7 +118,7 @@ export default function AppBar({ ...others }) {
                 </Button>
               </Stack>
               <Stack direction="row" sx={{ display: { xs: 'none', sm: 'block' } }} spacing={{ xs: 0.5, md: 0.5 }}>
-                <Button component={Link} href="https://links.codedthemes.com/hsqll" disableElevation color="secondary">
+                <Button component={RouterLink} to="/register" disableElevation color="secondary">
                   Signup
                 </Button>
                 <Button component={RouterLink} to="/login" variant="contained" color="secondary">

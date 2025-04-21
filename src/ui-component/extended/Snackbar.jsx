@@ -88,7 +88,7 @@ export default function Snackbar() {
           TransitionComponent={animation[transition]}
           anchorOrigin={anchorOrigin}
           open={open}
-          autoHideDuration={1500}
+          autoHideDuration={4000}
           onClose={handleClose}
         >
           <Alert

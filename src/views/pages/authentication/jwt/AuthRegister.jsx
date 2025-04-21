@@ -17,7 +17,6 @@ import OutlinedInput from '@mui/material/OutlinedInput';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-
 // third party
 import * as Yup from 'yup';
 import { Formik } from 'formik';
@@ -40,7 +39,6 @@ export default function JWTRegister({ ...others }) {
   const navigate = useNavigate();
   const scriptedRef = useScriptRef();
   const dispatch = useDispatch();
-
   const [showPassword, setShowPassword] = useState(false);
   const [checked, setChecked] = useState(true);
 
@@ -58,6 +56,7 @@ export default function JWTRegister({ ...others }) {
 
   const [searchParams] = useSearchParams();
   const authParam = searchParams.get('auth');
+  const moduleId = searchParams.get('id');
 
   const changePassword = (value) => {
     const temp = strengthIndicator(value);
@@ -82,11 +81,12 @@ export default function JWTRegister({ ...others }) {
         initialValues={{
           email: '',
           password: '',
-          firstName: '',
-          lastName: '',
+          organizationName: '',
+          moduleId: moduleId,
           submit: null
         }}
         validationSchema={Yup.object().shape({
+          organizationName: Yup.string().max(255).required('Organization name is required'),
           email: Yup.string().email('Must be a valid email').max(255).required('Email is required'),
           password: Yup.string()
             .required('Password is required')
@@ -96,68 +96,74 @@ export default function JWTRegister({ ...others }) {
         onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
           try {
             const trimmedEmail = values.email.trim();
-            await register?.(trimmedEmail, values.password, values.firstName, values.lastName);
-            if (scriptedRef.current) {
-              setStatus({ success: true });
-              setSubmitting(false);
-              dispatch(
-                openSnackbar({
-                  open: true,
-                  message: 'Your registration has been successfully completed.',
-                  variant: 'alert',
-                  alert: {
-                    color: 'success'
-                  },
-                  close: false
-                })
-              );
 
-              setTimeout(() => {
-                navigate(authParam ? `/login?auth=${authParam}` : '/login', {
-                  replace: true
-                });
-              }, 1500);
-            }
+            await register(trimmedEmail, values.password, values.organizationName, moduleId);
+
+            setStatus({ success: true });
+            setSubmitting(false);
+
+            dispatch(
+              openSnackbar({
+                open: true,
+                message: 'Your registration has been successfully completed.',
+                variant: 'alert',
+                alert: { color: 'success' },
+                close: false
+              })
+            );
+
+            setTimeout(() => {
+              navigate(authParam ? `/login?auth=${authParam}` : '/login', { replace: true });
+            }, 1500);
           } catch (err) {
-            console.error(err);
-            if (scriptedRef.current) {
-              setStatus({ success: false });
-              setErrors({ submit: err.message });
-              setSubmitting(false);
+            console.error('Registration failed:', err);
+
+            setStatus({ success: false });
+
+            let errorMsg = err.error || 'Registration failed. Please try again.';
+            if (err.error) {
+              errorMsg = err.error;
             }
+
+            setErrors({ submit: errorMsg });
+            setSubmitting(false);
+
+            dispatch(
+              openSnackbar({
+                open: true,
+                message: errorMsg,
+                variant: 'alert',
+                alert: { color: 'error' },
+                close: false
+              })
+            );
           }
         }}
       >
         {({ errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values }) => (
           <form noValidate onSubmit={handleSubmit} {...others}>
-            <Grid container spacing={{ xs: 0, sm: 2 }}>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField
-                  fullWidth
-                  label="First Name"
-                  margin="normal"
-                  name="firstName"
-                  type="text"
-                  value={values.firstName}
-                  onBlur={handleBlur}
-                  onChange={handleChange}
-                  sx={{ ...theme.typography.customInput }}
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField
-                  fullWidth
-                  label="Last Name"
-                  margin="normal"
-                  name="lastName"
-                  type="text"
-                  value={values.lastName}
-                  onBlur={handleBlur}
-                  onChange={handleChange}
-                  sx={{ ...theme.typography.customInput }}
-                />
-              </Grid>
-            </Grid>
+            <FormControl
+              fullWidth
+              error={Boolean(touched.organizationName && errors.organizationName)}
+              sx={{ ...theme.typography.customInput }}
+            >
+              <InputLabel htmlFor="organization-name">Organization Name</InputLabel>
+              <OutlinedInput
+                id="organization-name"
+                type="text"
+                value={values.organizationName}
+                name="organizationName"
+                onBlur={handleBlur}
+                onChange={handleChange}
+                label="Organization Name"
+              />
+              {touched.organizationName && errors.organizationName && (
+                <FormHelperText error id="helper-text-organization-name">
+                  {errors.organizationName}
+                </FormHelperText>
+              )}
+            </FormControl>
+
             <FormControl fullWidth error={Boolean(touched.email && errors.email)} sx={{ ...theme.typography.customInput }}>
               <InputLabel htmlFor="outlined-adornment-email-register">Email Address / Username</InputLabel>
               <OutlinedInput
