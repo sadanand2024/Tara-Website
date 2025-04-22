@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 // material-ui
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
@@ -8,6 +8,7 @@ import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
 import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
+import IconButton from '@mui/material/IconButton';
 
 // project imports
 import LogoSection from '../LogoSection';
@@ -19,6 +20,7 @@ import MegaMenuSection from './MegaMenuSection';
 import FullScreenSection from './FullScreenSection';
 import NotificationSection from './NotificationSection';
 import AddBusiness from './AddBusiness';
+import { useDispatch as useReduxDispatch } from 'react-redux';
 
 import { handlerDrawerOpen, useGetMenuMaster } from 'api/menu';
 import { MenuOrientation, ThemeMode } from 'config';
@@ -28,14 +30,21 @@ import Factory from 'utils/Factory';
 // assets
 import { IconMenu2 } from '@tabler/icons-react';
 import BusinessIcon from '@mui/icons-material/Business';
+import EditIcon from '@mui/icons-material/Edit';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import { storeUser } from 'store/slices/account'; // redux slice
+import { useDispatch } from 'store';
+import { openSnackbar } from 'store/slices/snackbar';
 
 // ==============================|| MAIN NAVBAR / HEADER ||============================== //
 
 import { useSelector } from 'store';
+import { Stack } from '@mui/material';
 
 export default function Header() {
-  const userData = useSelector((state) => state).accountReducer.user;
+  const dispatch = useDispatch();
+  const reduxDispatch = useReduxDispatch(); // ✅ Redux dispatcher
+  const user = useSelector((state) => state).accountReducer.user;
   const theme = useTheme();
   const downMD = useMediaQuery(theme.breakpoints.down('md'));
 
@@ -44,9 +53,20 @@ export default function Header() {
   const drawerOpen = menuMaster.isDashboardDrawerOpened;
   const isHorizontal = menuOrientation === MenuOrientation.HORIZONTAL && !downMD;
 
-  const [selectedOption, setSelectedOption] = React.useState(userData.active_context || null);
+  const [selectedOption, setSelectedOption] = React.useState(user.active_context || null);
   const [openAddDialog, setOpenAddDialog] = React.useState(false);
-  const [activeContext, setActiveContext] = React.useState(userData.active_context || null);
+  const [userData, setUserData] = React.useState(user || null);
+
+  const getContext = async () => {
+    const response = await Factory('get', '/user_management/user/contexts?user_id=' + userData.user.id, {}, {});
+    if (response.res.status_cd === 0) {
+      let data = response.res.data;
+      let __storedData = { ...user };
+      __storedData.all_contexts = data.contexts;
+      setUserData(__storedData);
+      localStorage.setItem('user', JSON.stringify(__storedData));
+    }
+  };
 
   const handleOptionChange = async (event, newValue) => {
     if (newValue?.isAddOption) {
@@ -55,17 +75,33 @@ export default function Header() {
     }
 
     try {
-      // Call API to switch context
-      const response = await Factory('post', '/api/v1/switch-context/', { context_id: newValue.id });
-
+      const response = await Factory('post', '/user_management/switch-context/', { context_id: newValue.id, user_id: userData.user.id });
       if (response.res.status_cd === 0) {
         setSelectedOption(newValue);
-        // Optionally reload the page or update necessary states
-        window.location.reload();
+        let data = { ...user };
+        data.active_context = response.res.data.active_context;
+        localStorage.setItem('user', JSON.stringify(data));
+        reduxDispatch(storeUser(data));
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'Switched to ' + response.res.data.active_context.name,
+            variant: 'alert',
+            anchorOrigin: { vertical: 'top', horizontal: 'right' },
+            alert: { color: 'success' },
+            close: false,
+            severity: 'success'
+          })
+        );
       }
     } catch (error) {
       console.error('Error switching context:', error);
     }
+  };
+
+  const handleEditBusiness = (option) => {
+    console.log(option);
+    setOpenAddDialog(true);
   };
 
   const handleAddDialogClose = () => {
@@ -133,7 +169,7 @@ export default function Header() {
           value={selectedOption}
           onChange={handleOptionChange}
           options={options}
-          getOptionLabel={(option) => option.name}
+          getOptionLabel={(option) => option.name || option.context_name || 'Unnamed Option'}
           size="small"
           sx={{
             '& .MuiOutlinedInput-root': {
@@ -174,7 +210,19 @@ export default function Header() {
             return (
               <Box {...otherProps} component="li" key={option.id}>
                 <BusinessIcon fontSize="small" sx={{ mr: 1 }} />
-                {option.name}
+                <Stack direction="row" alignItems="center" sx={{ justifyContent: 'space-between', width: '100%' }}>
+                  {option.name || option.context_name || 'Unnamed Option'}
+                  <IconButton
+                    sx={{ p: 0.5 }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      handleEditBusiness(option);
+                    }}
+                  >
+                    <EditIcon fontSize="small" sx={{ ml: 1 }} />
+                  </IconButton>
+                </Stack>
               </Box>
             );
           }}
@@ -199,9 +247,9 @@ export default function Header() {
       <AddBusiness
         open={openAddDialog}
         onClose={handleAddDialogClose}
-        activeContext={activeContext}
-        setActiveContext={setActiveContext}
         userData={userData}
+        setUserData={setUserData}
+        getContext={getContext}
       />
     </>
   );

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 // material-ui
 import Chip from '@mui/material/Chip';
@@ -10,197 +10,189 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
+import TablePagination from '@mui/material/TablePagination';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
+import CircularProgress from '@mui/material/CircularProgress';
+import Box from '@mui/material/Box';
 
 // project imports
 import Avatar from 'ui-component/extended/Avatar';
-import { ImagePath, getImageUrl } from 'utils/getImageUrl';
+import Factory from 'utils/Factory';
 
 // assets
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import ChatBubbleTwoToneIcon from '@mui/icons-material/ChatBubbleTwoTone';
+import EditTwoToneIcon from '@mui/icons-material/EditTwoTone';
 import BlockTwoToneIcon from '@mui/icons-material/BlockTwoTone';
+import PersonIcon from '@mui/icons-material/Person';
+import { useSelector } from 'store';
 
-// ==============================|| USER LIST 1 ||============================== //
+// ==============================|| USER LIST ||============================== //
+
+const getInitials = (firstName, lastName, email) => {
+  if (firstName && lastName) {
+    return `${firstName[0]}${lastName[0]}`.toUpperCase();
+  }
+  return email ? email[0].toUpperCase() : 'U';
+};
+
+const getFullName = (firstName, lastName, email) => {
+  if (firstName && lastName) {
+    return `${firstName} ${lastName}`;
+  }
+  return email.split('@')[0];
+};
 
 export default function UserList() {
   const [data, setData] = React.useState([]);
-  const usersS1 = [
-    {
-      id: '01',
-      avatar: 'avatar-1.png',
-      name: 'Curtis',
-      verify: 1,
-      email: 'wiegand@hotmail.com',
-      location: 'Saucerize',
-      friends: 834,
-      followers: 3645,
-      status: 'Active'
-    },
-    {
-      id: '02',
-      avatar: 'avatar-2.png',
-      name: 'Xavier',
-      verify: 1,
-      email: 'tyrell86@company.com',
-      location: 'South Bradfordstad',
-      friends: 634,
-      followers: 2345,
-      status: 'Pending'
-    },
-    {
-      id: '03',
-      avatar: 'avatar-3.png',
-      name: 'Lola',
-      verify: 1,
-      email: 'aufderhar56@yahoo.com',
-      location: 'North Tannermouth',
-      friends: 164,
-      followers: 9345,
-      status: 'Rejected'
-    },
-    {
-      id: '04',
-      avatar: 'avatar-4.png',
-      name: 'Milton',
-      verify: 1,
-      email: 'dikinson49@hotmail.com',
-      location: 'North Anika',
-      friends: 684,
-      followers: 3654,
-      status: 'Pending'
-    },
-    {
-      id: '05',
-      avatar: 'avatar-5.png',
-      name: 'Lysanne',
-      verify: 0,
-      email: 'zack.turner49@company.com',
-      location: 'Betteland',
-      friends: 842,
-      followers: 5863,
-      status: 'Active'
-    },
-    {
-      id: '06',
-      avatar: 'avatar-6.png',
-      name: 'Bonita',
-      verify: 1,
-      email: 'keebler57@company.com',
-      location: 'Alexburgh',
-      friends: 543,
-      followers: 8965,
-      status: 'Rejected'
-    },
-    {
-      id: '07',
-      avatar: 'avatar-7.png',
-      name: 'Retta',
-      verify: 1,
-      email: 'mathew92@yahoo.com',
-      location: 'East Bryceland',
-      friends: 871,
-      followers: 9321,
-      status: 'Active'
-    },
-    {
-      id: '08',
-      avatar: 'avatar-8.png',
-      name: 'Zoie',
-      verify: 1,
-      email: 'hulda1@hotmail.com',
-      location: 'Beattytown',
-      friends: 354,
-      followers: 1686,
-      status: 'Pending'
-    },
-    {
-      id: '09',
-      avatar: 'avatar-9.png',
-      name: 'Easton',
-      verify: 1,
-      email: 'hilpert66@hotmail.com',
-      location: 'North Pedromouth',
-      friends: 546,
-      followers: 9562,
-      status: 'Active'
-    },
-    {
-      id: '10',
-      avatar: 'avatar-10.png',
-      name: 'Brianne',
-      verify: 1,
-      email: 'noe45@hotmail.com',
-      location: 'New Alexanderborough',
-      friends: 1482,
-      followers: 10865,
-      status: 'Active'
-    }
-  ];
+  const [loading, setLoading] = React.useState(true);
+  const [page, setPage] = React.useState(0);
+  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  const user = useSelector((state) => state).accountReducer.user;
 
-  React.useEffect(() => {
-    setData(usersS1);
-  }, [usersS1]);
+  useEffect(() => {
+    const context_id = user.active_context.id;
+    const getUsers = async () => {
+      try {
+        setLoading(true);
+        const response = await Factory('get', '/user_management/context/users?context_id=' + context_id, {}, {});
+        if (response.res.status_cd === 0) {
+          setData(response.res.data.users);
+        } else {
+          setData([]);
+        }
+      } catch (error) {
+        console.error('Error fetching users:', error);
+        setData([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    getUsers();
+  }, [user]);
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 400 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (!data.length) {
+    return (
+      <Box 
+        sx={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          minHeight: 400,
+          flexDirection: 'column',
+          gap: 2
+        }}
+      >
+        <PersonIcon sx={{ fontSize: 48, color: 'text.secondary', opacity: 0.5 }} />
+        <Typography variant="h6" color="text.secondary">
+          No users found
+        </Typography>
+      </Box>
+    );
+  }
+
+  // Get current page data
+  const currentPageData = data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
   return (
-    <TableContainer>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell sx={{ pl: 3 }}>#</TableCell>
-            <TableCell>User Profile</TableCell>
-            <TableCell>Country</TableCell>
-            <TableCell>Friends</TableCell>
-            <TableCell>Followers</TableCell>
-            <TableCell>Status</TableCell>
-            <TableCell align="center" sx={{ pr: 3 }}>
-              Actions
-            </TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {data &&
-            data.map((row, index) => (
-              <TableRow hover key={index}>
-                <TableCell sx={{ pl: 3 }}>{row.id}</TableCell>
+    <Box>
+      <TableContainer>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell sx={{ pl: 3 }}>ID</TableCell>
+              <TableCell>User Profile</TableCell>
+              <TableCell>Role</TableCell>
+              <TableCell>Mobile</TableCell>
+              <TableCell>Status</TableCell>
+              <TableCell align="center" sx={{ pr: 3 }}>
+                Actions
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {currentPageData.map((user) => (
+              <TableRow hover key={user.user_id}>
+                <TableCell sx={{ pl: 3 }}>{user.user_id}</TableCell>
                 <TableCell>
                   <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
-                    <Avatar alt="User 1" src={getImageUrl(`${row.avatar}`, ImagePath.USERS)} />
+                    <Avatar 
+                      color="primary"
+                      sx={{ 
+                        width: 40, 
+                        height: 40,
+                        bgcolor: (theme) => theme.palette.primary.light,
+                        color: (theme) => theme.palette.primary.dark
+                      }}
+                    >
+                      {getInitials(user.first_name, user.last_name, user.email)}
+                    </Avatar>
                     <Stack>
                       <Stack direction="row" spacing={0.25} sx={{ alignItems: 'center' }}>
-                        <Typography variant="subtitle1">{row.name}</Typography>
-                        {row.status === 'Active' && <CheckCircleIcon sx={{ color: 'success.dark', width: 14, height: 14 }} />}
+                        <Typography variant="subtitle1">{getFullName(user.first_name, user.last_name, user.email)}</Typography>
+                        {user.status === 'active' && <CheckCircleIcon sx={{ color: 'success.dark', width: 14, height: 14 }} />}
                       </Stack>
-
                       <Typography variant="subtitle2" noWrap>
-                        {row.email}
+                        {user.email}
                       </Typography>
                     </Stack>
                   </Stack>
                 </TableCell>
-                <TableCell>{row.location}</TableCell>
-                <TableCell>{row.friends}</TableCell>
-                <TableCell>{row.followers}</TableCell>
                 <TableCell>
-                  {row.status === 'Active' && <Chip label="Active" size="small" color="success" />}
-                  {row.status === 'Rejected' && <Chip label="Rejected" size="small" color="error" />}
-                  {row.status === 'Pending' && <Chip label="Pending" size="small" color="warning" />}
+                  {user.roles && user.roles.length > 0 && (
+                    <Chip 
+                      label={user.roles[0].role_name} 
+                      size="small" 
+                      color={user.roles[0].role_type === 'owner' ? 'primary' : 'secondary'}
+                    />
+                  )}
+                </TableCell>
+                <TableCell>{user.mobile_number || '-'}</TableCell>
+                <TableCell>
+                  {user.status === 'active' && <Chip label="Active" size="small" color="success" />}
+                  {user.status !== 'active' && <Chip label="Inactive" size="small" color="error" />}
                 </TableCell>
                 <TableCell align="center" sx={{ pr: 3 }}>
                   <Stack direction="row" sx={{ justifyContent: 'center', alignItems: 'center' }}>
-                    <Tooltip placement="top" title="Message">
-                      <IconButton color="primary" aria-label="delete" size="large">
-                        <ChatBubbleTwoToneIcon sx={{ fontSize: '1.1rem' }} />
+                    <Tooltip placement="top" title="Edit User">
+                      <IconButton 
+                        color="primary" 
+                        aria-label="edit user" 
+                        size="large"
+                        sx={{
+                          color: 'primary.main',
+                          '&:hover': {
+                            bgcolor: 'primary.lighter'
+                          }
+                        }}
+                      >
+                        <EditTwoToneIcon sx={{ fontSize: '1.1rem' }} />
                       </IconButton>
                     </Tooltip>
-                    <Tooltip placement="top" title="Block">
+                    <Tooltip placement="top" title={user.status === 'active' ? 'Mark as Inactive' : 'Mark as Active'}>
                       <IconButton
                         color="primary"
                         sx={{
-                          color: 'orange.dark',
-                          borderColor: 'orange.main',
-                          '&:hover ': { bgcolor: 'orange.light' }
+                          color: user.status === 'active' ? 'error.light' : 'success.dark',
+                          borderColor: user.status === 'active' ? 'error.main' : 'success.main',
+                          '&:hover ': { bgcolor: user.status === 'active' ? 'error.lighter' : 'success.lighter' }
                         }}
                         size="large"
                       >
@@ -211,8 +203,24 @@ export default function UserList() {
                 </TableCell>
               </TableRow>
             ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+          </TableBody>
+        </Table>
+      </TableContainer>
+      <TablePagination
+        component="div"
+        count={data.length}
+        page={page}
+        onPageChange={handleChangePage}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+        rowsPerPageOptions={[5, 10, 25]}
+        sx={{
+          borderTop: (theme) => `1px solid ${theme.palette.divider}`,
+          '& .MuiTablePagination-select': {
+            paddingY: 1
+          }
+        }}
+      />
+    </Box>
   );
 }

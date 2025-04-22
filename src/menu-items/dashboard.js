@@ -11,7 +11,8 @@ import {
   IconCoin,
   IconPigMoney,
   IconCreditCard,
-  IconHeadset
+  IconHeadset,
+  IconUsers
 } from '@tabler/icons-react';
 
 // constant
@@ -27,7 +28,8 @@ const icons = {
   IconCoin,
   IconPigMoney,
   IconCreditCard,
-  IconHeadset
+  IconHeadset,
+  IconUsers
 };
 
 // ==============================|| DASHBOARD MENU ITEMS ||============================== //
@@ -61,6 +63,15 @@ const dashboard = {
       type: 'item',
       url: '/app/tasks',
       icon: icons.IconClipboardList,
+      breadcrumbs: false,
+      caption: ''
+    },
+    {
+      id: 'manage-team',
+      title: 'manage-team',
+      type: 'item',
+      url: '/app/users',
+      icon: icons.IconUsers,
       breadcrumbs: false,
       caption: ''
     },
