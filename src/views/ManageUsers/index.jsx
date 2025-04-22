@@ -24,7 +24,7 @@ import AddIcon from '@mui/icons-material/Add';
 
 // ==============================|| USER LIST STYLE 1 ||============================== //
 
-export default function ListStylePage1() {
+export default function ManageUsers() {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [openAddDialog, setOpenAddDialog] = React.useState(false);
 

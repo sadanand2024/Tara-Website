@@ -11,6 +11,7 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 
 // project imports
+import { ThemeMode } from 'config';
 import MainCard from 'ui-component/cards/MainCard';
 import TotalIncomeCard from 'ui-component/cards/Skeleton/TotalIncomeCard';
 
@@ -58,7 +59,12 @@ export default function TotalIncomeLightCard({ isLoading, total, icon, label }) 
                     sx={{
                       ...theme.typography.commonAvatar,
                       ...theme.typography.largeAvatar,
-                      bgcolor: label === 'Meeting attends' ? alpha(theme.palette.error.light, 0.25) : 'warning.light',
+                      bgcolor:
+                        theme.palette.mode === ThemeMode.DARK
+                          ? 'dark.main'
+                          : label === 'Meeting attends'
+                            ? alpha(theme.palette.error.light, 0.25)
+                            : 'warning.light',
                       color: label === 'Meeting attends' ? 'error.dark' : 'warning.dark'
                     }}
                   >

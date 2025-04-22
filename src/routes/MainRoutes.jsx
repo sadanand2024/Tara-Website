@@ -13,6 +13,7 @@ const DashboardBusiness = Loadable(lazy(() => import('views/dashboard/Business')
 const MyServices = Loadable(lazy(() => import('views/Services')));
 const ITRSummary = Loadable(lazy(() => import('views/Services/ITR')));
 const ManageUsers = Loadable(lazy(() => import('views/ManageUsers')));
+const ManageSubscriptions = Loadable(lazy(() => import('views/ManageSubscriptions')));
 
 // application - user social & account profile routing
 const AppUserAccountProfile2 = Loadable(lazy(() => import('views/application/users/Profile')));
@@ -58,6 +59,10 @@ const MainRoutes = {
     {
       path: '/app/users',
       element: <ManageUsers />
+    },
+    {
+      path: '/app/subscriptions',
+      element: <ManageSubscriptions />
     }
   ]
 };

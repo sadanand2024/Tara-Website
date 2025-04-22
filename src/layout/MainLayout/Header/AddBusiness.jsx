@@ -2,6 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
+import useAuth from 'hooks/useAuth';
+import { useDispatch } from 'store';
+import { openSnackbar } from 'store/slices/snackbar';
 
 // material-ui
 import {
@@ -17,11 +20,13 @@ import {
   FormHelperText,
   FormControl,
   Select,
-  MenuItem
+  MenuItem,
+  Box
 } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import CloseIcon from '@mui/icons-material/Close';
 import Factory from 'utils/Factory';
+import { __IndianStates } from '../../../utils/indianStates';
 
 const validationSchema = Yup.object({
   business_name: Yup.string().required('Business name is required'),
@@ -54,7 +59,8 @@ const entityTypes = [
   { value: 'llp', label: 'Limited Liability Partnership' }
 ];
 
-const AddBusiness = ({ open, onClose, activeContext, setActiveContext, userData }) => {
+const AddBusiness = ({ open, onClose, userData, setUserData, getContext }) => {
+  const dispatch = useDispatch();
   const formik = useFormik({
     initialValues: {
       user_id: userData.user.id,
@@ -65,7 +71,7 @@ const AddBusiness = ({ open, onClose, activeContext, setActiveContext, userData 
         address: '',
         city: '',
         state: '',
-        country: '',
+        country: 'India',
         pincode: ''
       },
       pan: '',
@@ -75,24 +81,32 @@ const AddBusiness = ({ open, onClose, activeContext, setActiveContext, userData 
       email: '',
       dob_or_incorp_date: ''
     },
+
     validationSchema,
     onSubmit: async (values, { setSubmitting, resetForm }) => {
-      console.log(values);
       try {
-        const response = await Factory('post', 'user_management/business/create/', values);
-        console.log(response);
-
+        const response = await Factory('post', '/user_management/business/create/', values, {});
         if (response.res.status_cd === 0) {
           resetForm();
+          dispatch(
+            openSnackbar({
+              open: true,
+              message: 'Business Added Successfully',
+              variant: 'alert',
+              anchorOrigin: { vertical: 'top', horizontal: 'right' },
+              alert: { color: 'success' },
+              close: false,
+              severity: 'success'
+            })
+          );
+          getContext();
           onClose();
-          consol.elog(response);
           // You might want to add a success notification here
         }
       } catch (error) {
         console.error('Error registering business:', error);
         // You might want to add an error notification here
       } finally {
-        console.log('values');
         setSubmitting(false);
       }
     }
@@ -107,7 +121,7 @@ const AddBusiness = ({ open, onClose, activeContext, setActiveContext, userData 
     <Dialog
       open={open}
       onClose={handleClose}
-      maxWidth="md"
+      maxWidth="sm"
       fullWidth
       PaperProps={{
         sx: {
@@ -116,25 +130,24 @@ const AddBusiness = ({ open, onClose, activeContext, setActiveContext, userData 
       }}
     >
       <DialogTitle>
-        <Typography variant="h4">Add New Business</Typography>
-        <IconButton
-          aria-label="close"
-          onClick={handleClose}
-          sx={{
-            position: 'absolute',
-            right: 8,
-            top: 8,
-            color: (theme) => theme.palette.grey[500]
-          }}
-        >
-          <CloseIcon />
-        </IconButton>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Typography variant="h3">Add New Business</Typography>
+          <IconButton
+            aria-label="close"
+            onClick={handleClose}
+            sx={{
+              color: (theme) => theme.palette.grey[500]
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </Box>
       </DialogTitle>
 
       <form onSubmit={formik.handleSubmit}>
         <DialogContent dividers>
           <Grid container spacing={3}>
-            <Grid size={6}>
+            <Grid size={12}>
               <TextField
                 fullWidth
                 size="small"
@@ -244,7 +257,7 @@ const AddBusiness = ({ open, onClose, activeContext, setActiveContext, userData 
                 helperText={formik.touched.email && formik.errors.email}
               />
             </Grid>
-            <Grid size={12}>
+            <Grid size={6}>
               <TextField
                 fullWidth
                 size="small"
@@ -261,11 +274,7 @@ const AddBusiness = ({ open, onClose, activeContext, setActiveContext, userData 
                 }}
               />
             </Grid>
-            <Grid size={12}>
-              <Typography variant="subtitle1" gutterBottom>
-                Head Office Address
-              </Typography>
-            </Grid>
+
             <Grid size={12}>
               <TextField
                 fullWidth
@@ -273,8 +282,6 @@ const AddBusiness = ({ open, onClose, activeContext, setActiveContext, userData 
                 id="head_office.address"
                 name="head_office.address"
                 label="Address"
-                multiline
-                rows={2}
                 value={formik.values.head_office.address}
                 onChange={formik.handleChange}
                 error={formik.touched.head_office?.address && Boolean(formik.errors.head_office?.address)}
@@ -295,17 +302,25 @@ const AddBusiness = ({ open, onClose, activeContext, setActiveContext, userData 
               />
             </Grid>
             <Grid size={6}>
-              <TextField
-                fullWidth
-                size="small"
-                id="head_office.state"
-                name="head_office.state"
-                label="State"
-                value={formik.values.head_office.state}
-                onChange={formik.handleChange}
-                error={formik.touched.head_office?.state && Boolean(formik.errors.head_office?.state)}
-                helperText={formik.touched.head_office?.state && formik.errors.head_office?.state}
-              />
+              <FormControl fullWidth size="small" error={formik.touched.head_office?.state && Boolean(formik.errors.head_office?.state)}>
+                <InputLabel>State</InputLabel>
+                <Select
+                  id="head_office.state"
+                  name="head_office.state"
+                  value={formik.values.head_office.state}
+                  label="State"
+                  onChange={formik.handleChange}
+                >
+                  {__IndianStates.map((state) => (
+                    <MenuItem key={state} value={state}>
+                      {state}
+                    </MenuItem>
+                  ))}
+                </Select>
+                {formik.touched.head_office?.state && formik.errors.head_office?.state && (
+                  <FormHelperText>{formik.errors.head_office.state}</FormHelperText>
+                )}
+              </FormControl>
             </Grid>
             <Grid size={6}>
               <TextField
@@ -314,6 +329,7 @@ const AddBusiness = ({ open, onClose, activeContext, setActiveContext, userData 
                 id="head_office.country"
                 name="head_office.country"
                 label="Country"
+                disabled
                 value={formik.values.head_office.country}
                 onChange={formik.handleChange}
                 error={formik.touched.head_office?.country && Boolean(formik.errors.head_office?.country)}

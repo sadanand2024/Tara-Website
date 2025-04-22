@@ -1,9 +1,9 @@
 import axios from 'axios';
 
-// import { logout } from '@/utils/api';
-
+import { logout } from './api';
 const Factory = (api, URL, payload, headers = {}) => {
-  const TOKEN = localStorage.getItem('serviceToken');
+  URL = import.meta.env.VITE_APP_BASE_URL + URL;
+  const token = localStorage.getItem('serviceToken');
   const getErrorMessage = (api) => {
     switch (api) {
       case 'put':
@@ -23,9 +23,9 @@ const Factory = (api, URL, payload, headers = {}) => {
 
   return axios({
     method: api,
-    url: import.meta.env.VITE_APP_BASE_URL + URL,
+    url: URL,
     headers: {
-      Authorization: `Bearer ${TOKEN}`,
+      Authorization: `Bearer ${token}`,
       ...headers
     },
     data: payload
@@ -59,7 +59,7 @@ const Factory = (api, URL, payload, headers = {}) => {
     .catch((e) => {
       if (e?.response?.status == 401) {
         if (e?.response?.data.code === 'token_not_valid') {
-          // logout();
+          logout();
         }
       } else if (e?.response?.status == 404) {
         if (e?.response?.data.status_cd === 2) {
