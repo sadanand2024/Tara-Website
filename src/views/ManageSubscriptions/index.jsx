@@ -1,4 +1,11 @@
-import React, { useEffect } from 'react';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useTheme } from '@mui/material/styles';
+import Badge from '@mui/material/Badge';
+import StarIcon from '@mui/icons-material/Star';
+
+// material-ui
 import {
   Box,
   Button,
@@ -7,315 +14,648 @@ import {
   Chip,
   Divider,
   Grid,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
   Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   Typography,
-  useTheme,
-  CircularProgress
+  IconButton,
+  Paper
 } from '@mui/material';
 
 // icons
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import CancelIcon from '@mui/icons-material/Cancel';
+import AddIcon from '@mui/icons-material/Add';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import UpgradeIcon from '@mui/icons-material/Upgrade';
 import ReceiptIcon from '@mui/icons-material/Receipt';
-import GroupsIcon from '@mui/icons-material/Groups';
-import BusinessIcon from '@mui/icons-material/Business';
-import DescriptionIcon from '@mui/icons-material/Description';
-import SupportAgentIcon from '@mui/icons-material/SupportAgent';
-import StorageIcon from '@mui/icons-material/Storage';
-import { get } from 'lodash-es';
-import Factory from 'utils/Factory';
-
-const getModuleIcon = (moduleId) => {
-  switch (moduleId) {
-    case 1:
-      return <GroupsIcon fontSize="large" />;
-    case 2:
-      return <ReceiptIcon fontSize="large" />;
-    default:
-      return <BusinessIcon fontSize="large" />;
-  }
-};
-
-const formatFeatureValue = (value) => {
-  if (Array.isArray(value)) {
-    return value.join(', ');
-  }
-  if (typeof value === 'boolean') {
-    return value ? 'Yes' : 'No';
-  }
-  return value.toString().replace(/_/g, ' ');
-};
-
-export default function ManageSubscriptions() {
+import ProductsAndServices from './ProductsAndServices';
+import { useSelector } from 'react-redux';
+const SubscriptionCard = ({ module, planName, price, expiry, trial }) => {
   const theme = useTheme();
-  const [currentPlan] = React.useState(1);
-  const [subscriptionPlans, setSubscriptionPlans] = React.useState([]);
-  const [isLoading, setIsLoading] = React.useState(true);
-
-  useEffect(() => {
-    const getSubscriptionPlans = async () => {
-      try {
-        setIsLoading(true);
-        const response = await Factory('get', '/user_management/subscription-plans/list', {}, {});
-        console.log(response);
-        // setSubscriptionPlans(response.data || []);
-      } catch (error) {
-        console.error('Error fetching subscription plans:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    getSubscriptionPlans();
-  }, []);
-
-  const renderFeaturesList = (features_enabled) => {
-    if (!features_enabled) return [];
-
-    const mainFeatures = Object.entries(features_enabled)
-      .filter(([key]) => !['features', 'add_ons'].includes(key))
-      .map(([key, value]) => ({
-        name: key.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase()),
-        value: formatFeatureValue(value)
-      }));
-
-    const additionalFeatures = Object.entries(features_enabled.features || {}).map(([key, value]) => ({
-      name: key.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase()),
-      value: formatFeatureValue(value)
-    }));
-
-    return [...mainFeatures, ...additionalFeatures];
-  };
-
-  const getCurrentPlan = () => {
-    return subscriptionPlans.find((plan) => plan.id === currentPlan) || null;
-  };
-
-  if (isLoading) {
-    return (
-      <Box sx={{ p: 3, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 400 }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
-
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   return (
-    <Box sx={{ p: 3 }}>
-      {/* Current Plan Section */}
-      {getCurrentPlan() && (
-        <Card
-          sx={{
-            mb: 4,
-            background: `linear-gradient(135deg, ${theme.palette.primary.lighter} 0%, ${theme.palette.background.paper} 100%)`,
-            borderLeft: `4px solid ${theme.palette.primary.main}`,
-            boxShadow: theme.customShadows.z1
-          }}
-        >
-          <CardContent sx={{ p: 3 }}>
-            <Grid container spacing={3} alignItems="center">
-              <Grid item xs={12} md={8}>
-                <Stack spacing={2}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    {getModuleIcon(getCurrentPlan().module)}
-                    <Typography
-                      variant="h3"
-                      sx={{
-                        color: theme.palette.primary.main,
-                        fontWeight: 600
-                      }}
-                    >
-                      {getCurrentPlan().name}
-                    </Typography>
-                    <Chip
-                      label={getCurrentPlan().plan_type.toUpperCase()}
-                      size="small"
-                      sx={{
-                        bgcolor: theme.palette.primary.lighter,
-                        color: theme.palette.primary.main,
-                        fontWeight: 500,
-                        borderRadius: '16px'
-                      }}
-                    />
-                  </Box>
-                  <Typography variant="body1" color="text.secondary">
-                    {getCurrentPlan().description}
-                  </Typography>
-                  <Box sx={{ display: 'flex', gap: 1 }}>
-                    <Chip
-                      label="Active"
-                      color="success"
-                      size="small"
-                      sx={{
-                        borderRadius: '16px',
-                        '& .MuiChip-label': { px: 2 }
-                      }}
-                    />
-                    <Chip
-                      label={`${getCurrentPlan().billing_cycle_days} Days Billing Cycle`}
-                      size="small"
-                      sx={{
-                        bgcolor: theme.palette.info.lighter,
-                        color: theme.palette.info.main,
-                        borderRadius: '16px',
-                        '& .MuiChip-label': { px: 2 }
-                      }}
-                    />
-                  </Box>
-                </Stack>
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <Stack spacing={2} alignItems={{ xs: 'flex-start', md: 'flex-end' }}>
-                  <Box sx={{ textAlign: { xs: 'left', md: 'right' } }}>
-                    <Typography
-                      variant="h3"
-                      sx={{
-                        color: theme.palette.primary.main,
-                        fontWeight: 600,
-                        mb: 0.5
-                      }}
-                    >
-                      ₹{getCurrentPlan().base_price}
-                      <Typography
-                        variant="subtitle1"
-                        component="span"
-                        sx={{
-                          ml: 0.5,
-                          color: 'text.secondary',
-                          fontWeight: 400
-                        }}
-                      >
-                        /{getCurrentPlan().billing_cycle_days} days
-                      </Typography>
-                    </Typography>
-                  </Box>
-                  <Button
-                    variant="outlined"
-                    color="error"
-                    sx={{
-                      borderRadius: '8px',
-                      '&:hover': {
-                        bgcolor: theme.palette.error.lighter
-                      }
-                    }}
-                  >
-                    Cancel Subscription
-                  </Button>
-                </Stack>
-              </Grid>
-            </Grid>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Available Plans Section */}
-      <Box sx={{ width: '100%' }}>
-        <Typography variant="h3" sx={{ mb: 3 }}>
-          Available Plans
-        </Typography>
-
-        <Grid container spacing={3} sx={{ mb: 4 }}>
-          {subscriptionPlans.length > 0 ? (
-            subscriptionPlans.map((plan) => (
-              <Grid item xs={12} md={6} key={plan.id}>
-                <Card
-                  sx={{
-                    height: '100%',
-                    minHeight: 600,
-                    position: 'relative',
-                    borderTop: `4px solid ${theme.palette[plan.module === 1 ? 'primary' : 'secondary'].main}`,
-                    display: 'flex',
-                    flexDirection: 'column'
-                  }}
-                >
-                  <CardContent sx={{ p: 3, display: 'flex', flexDirection: 'column', height: '100%' }}>
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        mb: 2
-                      }}
-                    >
-                      {getModuleIcon(plan.module)}
-                      <Box sx={{ ml: 1 }}>
-                        <Typography variant="h4">{plan.name}</Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {plan.description}
-                        </Typography>
-                      </Box>
-                    </Box>
-
-                    <Typography variant="h3" sx={{ mb: 2, color: 'primary.main' }}>
-                      ₹{plan.base_price}
-                      <Typography variant="body1" component="span" color="text.secondary">
-                        /{plan.billing_cycle_days} days
-                      </Typography>
-                    </Typography>
-
-                    <Divider sx={{ mb: 2 }} />
-
-                    <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
-                      <Grid container spacing={2}>
-                        {renderFeaturesList(plan.features_enabled).map((feature, index) => (
-                          <Grid item xs={6} key={index}>
-                            <Box
-                              sx={{
-                                display: 'flex',
-                                alignItems: 'flex-start',
-                                gap: 1,
-                                mb: 1
-                              }}
-                            >
-                              <CheckCircleIcon color="success" fontSize="small" sx={{ mt: 0.3 }} />
-                              <Box>
-                                <Typography
-                                  variant="body2"
-                                  sx={{
-                                    fontWeight: 500,
-                                    lineHeight: 1.2
-                                  }}
-                                >
-                                  {feature.name}
-                                </Typography>
-                                {feature.value !== 'Yes' && (
-                                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-                                    {feature.value}
-                                  </Typography>
-                                )}
-                              </Box>
-                            </Box>
-                          </Grid>
-                        ))}
-                      </Grid>
-                    </Box>
-
-                    <Box sx={{ pt: 2, mt: 'auto' }}>
-                      <Button
-                        fullWidth
-                        variant={plan.id === currentPlan ? 'outlined' : 'contained'}
-                        color={plan.module === 1 ? 'primary' : 'secondary'}
-                        disabled={plan.id === currentPlan}
-                      >
-                        {plan.id === currentPlan ? 'Current Plan' : 'Select Plan'}
-                      </Button>
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))
-          ) : (
-            <Grid item xs={12}>
-              <Box sx={{ textAlign: 'center', py: 4 }}>
-                <Typography variant="h6" color="text.secondary">
-                  No subscription plans available
+    <Card
+      sx={{
+        height: '100%',
+        position: 'relative',
+        transition: 'all 0.3s ease-in-out',
+        overflow: 'visible',
+        '&:hover': {
+          transform: 'translateY(-4px)',
+          boxShadow: (theme) => theme.shadows[8]
+        },
+        background: (theme) => `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.grey[50]} 100%)`,
+        border: '1px solid',
+        borderColor: 'divider'
+      }}
+    >
+      <CardContent sx={{ p: { xs: 1.5, sm: 2, md: 2.5 } }}>
+        <Stack spacing={{ xs: 1.5, sm: 2, md: 2.5 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: { xs: 'column', sm: 'row' },
+              gap: { xs: 1, sm: 0 },
+              justifyContent: 'space-between',
+              alignItems: { xs: 'flex-start', sm: 'flex-start' }
+            }}
+          >
+            <Typography variant={isMobile ? 'h5' : 'h4'} sx={{ fontWeight: 600 }}>
+              {planName}
+            </Typography>
+            {!trial ? (
+              <Box sx={{ textAlign: { xs: 'left', sm: 'right' } }}>
+                <Typography variant={isMobile ? 'h5' : 'h4'} color="primary.main" sx={{ fontWeight: 600 }}>
+                  ₹ {price}
+                </Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
+                  per month
                 </Typography>
               </Box>
-            </Grid>
-          )}
-        </Grid>
-      </Box>
+            ) : (
+              <Box sx={{ textAlign: { xs: 'left', sm: 'right' } }}>
+                <Typography variant={isMobile ? 'h5' : 'h4'} color="primary.main" sx={{ fontWeight: 600 }}>
+                TRIAL PLAN
+                </Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
+                  &nbsp;
+                </Typography>
+              </Box>
+            )}
+          </Box>
+          <Box
+            sx={{
+              p: 1.5,
+              bgcolor: 'background.neutral',
+              borderRadius: 1,
+              border: '1px solid',
+              borderColor: 'divider'
+            }}
+          >
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1
+              }}
+            >
+              <Box
+                component="span"
+                sx={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: '50%',
+                  bgcolor: 'warning.main',
+                  display: 'inline-block'
+                }}
+              />
+              {expiry}
+            </Typography>
+          </Box>
+          <Stack direction="row" spacing={1}>
+            <Button
+              variant="contained"
+              size="small"
+              startIcon={<UpgradeIcon />}
+              sx={{
+                background: (theme) => `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+                '&:hover': {
+                  background: (theme) => `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.darker} 100%)`
+                }
+              }}
+            >
+              Upgrade/Change Plan
+            </Button>
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<VisibilityIcon />}
+              sx={{
+                borderColor: 'primary.main',
+                '&:hover': {
+                  borderColor: 'primary.dark',
+                  bgcolor: 'primary.lighter'
+                }
+              }}
+            >
+              View Usage
+            </Button>
+          </Stack>
+        </Stack>
+      </CardContent>
+    </Card>
+  );
+};
+
+const ManageSubscriptions = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isTablet = useMediaQuery(theme.breakpoints.down('md'));
+  const navigate = useNavigate();
+  const user = useSelector((state) => state).accountReducer.user;
+
+  return (
+    <Box sx={{ p: { xs: 1, sm: 2, md: 3 } }}>
+      <Stack spacing={{ xs: 2, sm: 3, md: 4 }}>
+        {/* Header Section */}
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: { xs: 'column', md: 'row' },
+            gap: { xs: 2, md: 0 },
+            justifyContent: 'space-between',
+            alignItems: { xs: 'stretch', md: 'center' },
+            pb: 2,
+            borderBottom: '2px solid',
+            borderColor: 'divider'
+          }}
+        >
+          <Box>
+            <Typography variant={isMobile ? 'h3' : 'h2'} sx={{ mb: 0.5 }}>
+              My Subscriptions
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              Manage your subscriptions and services
+            </Typography>
+          </Box>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={{ xs: 1, sm: 2 }} sx={{ width: { xs: '100%', md: 'auto' } }}>
+            <Button
+              fullWidth={isMobile}
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() => navigate('/app/products-and-services')}
+              sx={{
+                background: (theme) => `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+                '&:hover': {
+                  background: (theme) => `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.darker} 100%)`
+                }
+              }}
+            >
+              Add Module
+            </Button>
+            <Button
+              fullWidth={isMobile}
+              variant="outlined"
+              startIcon={<ShoppingCartIcon />}
+              onClick={() => navigate('/app/products-and-services?tab=1')}
+              sx={{
+                borderColor: 'primary.main',
+                '&:hover': {
+                  borderColor: 'primary.dark',
+                  bgcolor: 'primary.lighter'
+                }
+              }}
+            >
+              Buy a Service
+            </Button>
+            <Button
+              fullWidth={isMobile}
+              variant="outlined"
+              startIcon={<VisibilityIcon />}
+              onClick={() => navigate('/app/products-and-services')}
+              sx={{
+                borderColor: 'primary.main',
+                '&:hover': {
+                  borderColor: 'primary.dark',
+                  bgcolor: 'primary.lighter'
+                }
+              }}
+            >
+              View Package/Suite
+            </Button>
+          </Stack>
+        </Box>
+
+        {/* Active Subscriptions */}
+        <Box>
+          <Typography
+            variant={isMobile ? 'h4' : 'h3'}
+            sx={{
+              mb: { xs: 2, sm: 3 },
+              color: 'primary.main',
+              fontWeight: 600,
+              position: 'relative',
+              '&:after': {
+                content: '""',
+                position: 'absolute',
+                bottom: -8,
+                left: 0,
+                width: 40,
+                height: 3,
+                bgcolor: 'primary.main',
+                borderRadius: 1
+              }
+            }}
+          >
+            Active Subscriptions
+          </Typography>
+          <Grid container spacing={{ xs: 2, sm: 3 }}>
+            {user.module_subscriptions.map((subscription) => (
+              <Grid item xs={12} md={4}>
+                <SubscriptionCard
+                  module={subscription.module_name}
+                  planName={subscription.plan_name}
+                  price={subscription.price || '0'}
+                  expiry={subscription.expiry}
+                  trial={subscription.status === 'trial'}
+                />
+              </Grid>
+            ))}
+          </Grid>
+        </Box>
+
+        {/* Services Purchased */}
+        <Box sx={{ overflow: 'auto' }}>
+          <Typography
+            variant={isMobile ? 'h4' : 'h3'}
+            sx={{
+              mb: { xs: 2, sm: 3 },
+              color: 'primary.main',
+              fontWeight: 600,
+              position: 'relative',
+              '&:after': {
+                content: '""',
+                position: 'absolute',
+                bottom: -8,
+                left: 0,
+                width: 40,
+                height: 3,
+                bgcolor: 'primary.main',
+                borderRadius: 1
+              }
+            }}
+          >
+            Services Purchased
+          </Typography>
+          <TableContainer
+            component={Paper}
+            variant="outlined"
+            sx={{
+              borderRadius: 2,
+              minWidth: { xs: 'max-content', md: '100%' },
+              '& .MuiTableCell-head': {
+                bgcolor: 'grey.50',
+                color: 'text.primary',
+                fontWeight: 600,
+                fontSize: '0.875rem',
+                whiteSpace: 'nowrap',
+                p: { xs: 1.5, sm: 2 }
+              },
+              '& .MuiTableCell-body': {
+                p: { xs: 1.5, sm: 2 },
+                whiteSpace: 'nowrap'
+              },
+              '& .MuiTableRow-root:hover': {
+                bgcolor: 'primary.lighter'
+              }
+            }}
+          >
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Service</TableCell>
+                  <TableCell>Price</TableCell>
+                  <TableCell>Date</TableCell>
+                  <TableCell>Status</TableCell>
+                  <TableCell align="right">Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                <TableRow>
+                  <TableCell>
+                    <Typography variant="subtitle2">Private Limited Company Reg.</Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body2" color="primary.main" fontWeight={500}>
+                      ₹ 9,999
+                    </Typography>
+                  </TableCell>
+                  <TableCell>14/Apr</TableCell>
+                  <TableCell>
+                    <Chip
+                      label="Completed"
+                      color="success.darker"
+                      size="small"
+                      sx={{
+                        background: (theme) =>
+                          `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.dark} 100%)`,
+                        color: 'white',
+                        fontWeight: 500
+                      }}
+                    />
+                  </TableCell>
+                  <TableCell align="right">
+                    <Stack direction="row" spacing={1} justifyContent="flex-end">
+                      <IconButton
+                        size="small"
+                        sx={{
+                          color: 'primary.main',
+                          '&:hover': {
+                            bgcolor: 'primary.lighter'
+                          }
+                        }}
+                      >
+                        <VisibilityIcon fontSize="small" />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        sx={{
+                          color: 'primary.main',
+                          '&:hover': {
+                            bgcolor: 'primary.lighter'
+                          }
+                        }}
+                      >
+                        <ReceiptIcon fontSize="small" />
+                      </IconButton>
+                    </Stack>
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>
+                    <Typography variant="subtitle2">MSME Registration</Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body2" color="primary.main" fontWeight={500}>
+                      ₹ 9,999
+                    </Typography>
+                  </TableCell>
+                  <TableCell>14/Apr</TableCell>
+                  <TableCell>
+                    <Chip
+                      label="Completed"
+                      color="success.darker"
+                      size="small"
+                      sx={{
+                        background: (theme) =>
+                          `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.dark} 100%)`,
+                        color: 'white',
+                        fontWeight: 500
+                      }}
+                    />
+                  </TableCell>
+                  <TableCell align="right">
+                    <Stack direction="row" spacing={1} justifyContent="flex-end">
+                      <IconButton
+                        size="small"
+                        sx={{
+                          color: 'primary.main',
+                          '&:hover': {
+                            bgcolor: 'primary.lighter'
+                          }
+                        }}
+                      >
+                        <VisibilityIcon fontSize="small" />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        sx={{
+                          color: 'primary.main',
+                          '&:hover': {
+                            bgcolor: 'primary.lighter'
+                          }
+                        }}
+                      >
+                        <ReceiptIcon fontSize="small" />
+                      </IconButton>
+                    </Stack>
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Box>
+
+        {/* Payment History */}
+        <Box sx={{ overflow: 'auto' }}>
+          <Typography
+            variant={isMobile ? 'h4' : 'h3'}
+            sx={{
+              mb: { xs: 2, sm: 3 },
+              color: 'primary.main',
+              fontWeight: 600,
+              position: 'relative',
+              '&:after': {
+                content: '""',
+                position: 'absolute',
+                bottom: -8,
+                left: 0,
+                width: 40,
+                height: 3,
+                bgcolor: 'primary.main',
+                borderRadius: 1
+              }
+            }}
+          >
+            Payment History
+          </Typography>
+          <TableContainer
+            component={Paper}
+            variant="outlined"
+            sx={{
+              borderRadius: 2,
+              minWidth: { xs: 'max-content', md: '100%' },
+              '& .MuiTableCell-head': {
+                bgcolor: 'grey.50',
+                color: 'text.primary',
+                fontWeight: 600,
+                fontSize: '0.875rem',
+                whiteSpace: 'nowrap',
+                p: { xs: 1.5, sm: 2 }
+              },
+              '& .MuiTableCell-body': {
+                p: { xs: 1.5, sm: 2 },
+                whiteSpace: 'nowrap'
+              },
+              '& .MuiTableRow-root:hover': {
+                bgcolor: 'primary.lighter'
+              }
+            }}
+          >
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Date</TableCell>
+                  <TableCell>Description</TableCell>
+                  <TableCell>Amount</TableCell>
+                  <TableCell>Status</TableCell>
+                  <TableCell align="right">
+                    <Box sx={{ display: { xs: 'none', sm: 'block' } }}>Actions</Box>
+                    <Box sx={{ display: { xs: 'block', sm: 'none' } }}>Act.</Box>
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                <TableRow>
+                  <TableCell>05-Apr-2025</TableCell>
+                  <TableCell>
+                    <Typography
+                      variant="subtitle2"
+                      sx={{
+                        fontSize: { xs: '0.8125rem', sm: '0.875rem' }
+                      }}
+                    >
+                      PVT Ltd Reg
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography
+                      variant="body2"
+                      color="primary.main"
+                      fontWeight={500}
+                      sx={{
+                        fontSize: { xs: '0.8125rem', sm: '0.875rem' }
+                      }}
+                    >
+                      ₹ 9,999
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Chip
+                      label="Receipt"
+                      color="success.darker"
+                      size="small"
+                      sx={{
+                        background: (theme) =>
+                          `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.dark} 100%)`,
+                        color: 'white',
+                        fontWeight: 500,
+                        fontSize: { xs: '0.75rem', sm: '0.8125rem' }
+                      }}
+                    />
+                  </TableCell>
+                  <TableCell align="right">
+                    <Stack direction="row" spacing={{ xs: 0.5, sm: 1 }} justifyContent="flex-end">
+                      {isMobile ? (
+                        <>
+                          <IconButton
+                            size="small"
+                            sx={{
+                              color: 'primary.main',
+                              '&:hover': {
+                                bgcolor: 'primary.lighter'
+                              }
+                            }}
+                          >
+                            <FileDownloadIcon fontSize="small" />
+                          </IconButton>
+                          <IconButton
+                            size="small"
+                            sx={{
+                              color: 'primary.main',
+                              '&:hover': {
+                                bgcolor: 'primary.lighter'
+                              }
+                            }}
+                          >
+                            <ReceiptIcon fontSize="small" />
+                          </IconButton>
+                        </>
+                      ) : (
+                        <>
+                          <Button
+                            size="small"
+                            startIcon={<FileDownloadIcon />}
+                            variant="outlined"
+                            sx={{
+                              borderColor: 'primary.main',
+                              '&:hover': {
+                                borderColor: 'primary.dark',
+                                bgcolor: 'primary.lighter'
+                              }
+                            }}
+                          >
+                            Download
+                          </Button>
+                          <Button
+                            size="small"
+                            startIcon={<ReceiptIcon />}
+                            variant="outlined"
+                            sx={{
+                              borderColor: 'primary.main',
+                              '&:hover': {
+                                borderColor: 'primary.dark',
+                                bgcolor: 'primary.lighter'
+                              }
+                            }}
+                          >
+                            Invoice
+                          </Button>
+                        </>
+                      )}
+                    </Stack>
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>10-Apr-2025</TableCell>
+                  <TableCell>
+                    <Typography variant="subtitle2">Invoicing Module (Pay)</Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body2" color="primary.main" fontWeight={500}>
+                      ₹ 2,999
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Chip
+                      label="Receipt"
+                      color="success.darker"
+                      size="small"
+                      sx={{
+                        background: (theme) =>
+                          `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.dark} 100%)`,
+                        color: 'white',
+                        fontWeight: 500
+                      }}
+                    />
+                  </TableCell>
+                  <TableCell align="right">
+                    <Stack direction="row" spacing={1} justifyContent="flex-end">
+                      <Button
+                        size="small"
+                        startIcon={<FileDownloadIcon />}
+                        variant="outlined"
+                        sx={{
+                          borderColor: 'primary.main',
+                          '&:hover': {
+                            borderColor: 'primary.dark',
+                            bgcolor: 'primary.lighter'
+                          }
+                        }}
+                      >
+                        Download
+                      </Button>
+                      <Button
+                        size="small"
+                        startIcon={<ReceiptIcon />}
+                        variant="outlined"
+                        sx={{
+                          borderColor: 'primary.main',
+                          '&:hover': {
+                            borderColor: 'primary.dark',
+                            bgcolor: 'primary.lighter'
+                          }
+                        }}
+                      >
+                        Invoice
+                      </Button>
+                    </Stack>
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Box>
+      </Stack>
     </Box>
   );
-}
+};
+
+export default ManageSubscriptions;

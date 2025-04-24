@@ -30,8 +30,44 @@ import BlockTwoToneIcon from '@mui/icons-material/BlockTwoTone';
 import PersonIcon from '@mui/icons-material/Person';
 import CheckCircleTwoToneIcon from '@mui/icons-material/Check';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import InfoIcon from '@mui/icons-material/Info';
 
 // ==============================|| USER LIST ||============================== //
+
+const getRoleColor = (roleType) => {
+  // Map of role types to background colors using primary and secondary shades
+  const colorMap = {
+    owner: {
+      bgcolor: 'primary.dark',
+      color: '#fff'
+    },
+    admin: {
+      bgcolor: 'primary.main',
+      color: '#fff'
+    },
+    manager: {
+      bgcolor: 'secondary.dark',
+      color: '#fff'
+    },
+    supervisor: {
+      bgcolor: 'secondary.main',
+      color: '#fff'
+    },
+    staff: {
+      bgcolor: 'info.dark',
+      color: '#fff'
+    },
+    user: {
+      bgcolor: 'info.main',
+      color: '#fff'
+    }
+  };
+
+  return colorMap[roleType?.toLowerCase()] || {
+    bgcolor: 'info.dark',
+    color: '#fff'
+  };
+};
 
 const getInitials = (first_name, last_name, email) => {
   if (first_name && last_name) {
@@ -76,9 +112,19 @@ const UserList = ({ page, rowsPerPage, searchQuery, onTotalUsers, onOpenPermissi
     onTotalUsers(filteredUsers.length);
   }, [filteredUsers, onTotalUsers]);
 
-  const handleStatusChange = (userId, currentStatus) => {
-    // Handle status toggle here
-    console.log('Toggling status for user:', userId, 'from:', currentStatus);
+  const handleStatusChange = async (userId, currentStatus) => {
+    try {
+      const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+      const response = await Factory('put', `/user_management/team/member/${userId}/status/`, { status: newStatus }, {});
+      if (response.res.status_cd === 0) {
+        // The parent component should handle refreshing the user list
+        console.log('Status updated successfully');
+      } else {
+        console.error('Failed to update status:', response.res.message);
+      }
+    } catch (error) {
+      console.error('Error updating status:', error);
+    }
   };
 
   if (loading) {
@@ -111,18 +157,18 @@ const UserList = ({ page, rowsPerPage, searchQuery, onTotalUsers, onOpenPermissi
 
   return (
     <TableContainer>
-      <Table>
+      <Table size="small">
         <TableHead>
           <TableRow>
             <TableCell sx={{ pl: 3 }}>S.No</TableCell>
-            <TableCell>ID</TableCell>
-            <TableCell>User Profile</TableCell>
-            <TableCell>Role</TableCell>
-            <TableCell>Mobile</TableCell>
-            <TableCell>Added By</TableCell>
-            <TableCell>Status</TableCell>
-            <TableCell align="center" sx={{ pr: 3 }}>
-              Actions
+            <TableCell sx={{ p: 1.5 }}>ID</TableCell>
+            <TableCell sx={{ p: 1.5 }}>User Profile</TableCell>
+            <TableCell sx={{ p: 1.5 }}>Role</TableCell>
+            <TableCell sx={{ p: 1.5 }}>Mobile</TableCell>
+            <TableCell sx={{ p: 1.5 }}>Added By</TableCell>
+            <TableCell sx={{ p: 1.5 }}>Status</TableCell>
+            <TableCell align="center" sx={{ pr: 2 }}>
+              Permissions
             </TableCell>
           </TableRow>
         </TableHead>
@@ -130,14 +176,14 @@ const UserList = ({ page, rowsPerPage, searchQuery, onTotalUsers, onOpenPermissi
           {filteredUsers.map((user, index) => (
             <TableRow hover key={user.user_id}>
               <TableCell sx={{ pl: 3 }}>{(page - 1) * rowsPerPage + index + 1}</TableCell>
-              <TableCell>{user.user_id}</TableCell>
-              <TableCell>
-                <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
+              <TableCell sx={{ p: 1.8 }}>{user.user_id}</TableCell>
+              <TableCell sx={{ p: 1.8 }}>
+                <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
                   <Avatar
                     color="primary"
                     sx={{
-                      width: 40,
-                      height: 40,
+                      width: 38,
+                      height: 38,
                       bgcolor: (theme) => theme.palette.primary.light,
                       color: (theme) => theme.palette.primary.dark
                     }}
@@ -145,8 +191,8 @@ const UserList = ({ page, rowsPerPage, searchQuery, onTotalUsers, onOpenPermissi
                     {getInitials(user.first_name, user.last_name, user.email)}
                   </Avatar>
                   <Stack>
-                    <Typography variant="subtitle1">{getFullName(user.first_name, user.last_name, user.email)}</Typography>
-                    <Typography variant="subtitle2" noWrap>
+                    <Typography variant="body1">{getFullName(user.first_name, user.last_name, user.email)}</Typography>
+                    <Typography variant="caption" noWrap>
                       {user.email}
                     </Typography>
                   </Stack>
@@ -154,14 +200,26 @@ const UserList = ({ page, rowsPerPage, searchQuery, onTotalUsers, onOpenPermissi
               </TableCell>
               <TableCell>
                 {user.role && (
-                  <Chip label={user.role.role_name} size="small" color={user.role.role_type === 'owner' ? 'primary' : 'secondary'} />
+                  <Chip
+                    label={user.role.role_name}
+                    size="small"
+                    sx={{ 
+                      height: 20,
+                      bgcolor: (theme) => getRoleColor(user.role.role_type).bgcolor,
+                      color: getRoleColor(user.role.role_type).color,
+                      fontWeight: 500,
+                      '& .MuiChip-label': {
+                        px: 1
+                      }
+                    }}
+                  />
                 )}
               </TableCell>
               <TableCell>{user.mobile_number || '-'}</TableCell>
               <TableCell>
                 {user.role?.added_by ? (
                   <Stack>
-                    <Typography variant="subtitle1">
+                    <Typography variant="body1">
                       {user.role.added_by.name !== 'Unknown'
                         ? capitalizeFirstLetter(user.role.added_by.name)
                         : getFullName(null, null, user.role.added_by.email)}
@@ -175,62 +233,75 @@ const UserList = ({ page, rowsPerPage, searchQuery, onTotalUsers, onOpenPermissi
                 )}
               </TableCell>
               <TableCell>
-                <Stack spacing={0.5} alignItems="flex-start">
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      color: user.status === 'active' ? 'success.dark' : 'error.dark',
-                      fontWeight: 500
-                    }}
-                  >
-                    {user.status === 'active' ? 'Active' : 'Inactive'}
-                  </Typography>
-                  <Switch
-                    size="small"
-                    checked={user.status === 'active'}
-                    onChange={() => handleStatusChange(user.user_id, user.status)}
-                    color="success"
-                    sx={{
-                      mt: 0,
-                      '& .MuiSwitch-switchBase.Mui-checked': {
-                        color: 'success.dark',
-                        '&:hover': {
-                          bgcolor: 'success.lighter'
-                        }
-                      },
-                      '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                        bgcolor: 'success.light'
-                      },
-                      '& .MuiSwitch-switchBase': {
-                        color: 'error.light',
-                        '&:hover': {
-                          bgcolor: 'error.lighter'
-                        }
-                      },
-                      '& .MuiSwitch-track': {
-                        bgcolor: 'error.light'
-                      }
-                    }}
-                  />
-                </Stack>
-              </TableCell>
-              <TableCell align="left" sx={{ pr: 3 }}>
-                <Stack direction="row" sx={{ justifyContent: 'center', alignItems: 'center' }}>
-                  <Tooltip placement="top" title="Edit User">
-                    <IconButton
-                      color="primary"
-                      aria-label="edit user"
-                      size="small"
+                <Stack spacing={0.4} alignItems="flex-start">
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    <Typography
+                      variant="caption"
                       sx={{
-                        color: 'primary.main',
-                        '&:hover': {
-                          bgcolor: 'primary.lighter'
-                        }
+                        color: user.status === 'active' ? 'success.darker' : user.status === 'pending' ? 'warning.dark' : 'error.dark',
+                        fontWeight: 500
                       }}
                     >
-                      <EditTwoToneIcon sx={{ fontSize: '1.3rem' }} />
-                    </IconButton>
-                  </Tooltip>
+                      {user.status === 'active' ? 'Active' : user.status === 'pending' ? 'Pending Invitation' : 'Inactive'}
+                    </Typography>
+                    {user.status === 'pending' && (
+                      <Tooltip title="User needs to accept the invitation email to activate their account" placement="top">
+                        <InfoIcon
+                          sx={{
+                            fontSize: '1rem',
+                            color: 'warning.main',
+                            cursor: 'help'
+                          }}
+                        />
+                      </Tooltip>
+                    )}
+                  </Box>
+                  {user.status === 'pending' ? (
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{
+                        fontStyle: 'italic',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 0.5
+                      }}
+                    >
+                      Waiting for user to accept invitation
+                    </Typography>
+                  ) : (
+                    <Switch
+                      size="small"
+                      checked={user.status === 'active'}
+                      onChange={() => handleStatusChange(user.user_id, user.status)}
+                      color="success"
+                      sx={{
+                        mt: 0,
+                        '& .MuiSwitch-switchBase.Mui-checked': {
+                          color: 'success.dark',
+                          '&:hover': {
+                            bgcolor: 'success.lighter'
+                          }
+                        },
+                        '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                          bgcolor: 'success.light'
+                        },
+                        '& .MuiSwitch-switchBase': {
+                          color: 'error.light',
+                          '&:hover': {
+                            bgcolor: 'error.lighter'
+                          }
+                        },
+                        '& .MuiSwitch-track': {
+                          bgcolor: 'error.light'
+                        }
+                      }}
+                    />
+                  )}
+                </Stack>
+              </TableCell>
+              <TableCell align="center" sx={{ pr: 2 }}>
+                <Stack direction="row" sx={{ justifyContent: 'center', alignItems: 'center' }}>
                   <Tooltip placement="top" title="Modify Permissions">
                     <IconButton
                       onClick={() => onOpenPermissions(user)}
@@ -243,7 +314,7 @@ const UserList = ({ page, rowsPerPage, searchQuery, onTotalUsers, onOpenPermissi
                         }
                       }}
                     >
-                      <AdminPanelSettingsIcon sx={{ fontSize: '1.3rem' }} />
+                      <AdminPanelSettingsIcon sx={{ fontSize: '1.8rem' }} />
                     </IconButton>
                   </Tooltip>
                 </Stack>

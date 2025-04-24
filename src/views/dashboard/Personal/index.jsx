@@ -19,9 +19,6 @@ import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 
 // Convert makeStyles to styled components
-const Root = styled(Box)(({ theme }) => ({
-  padding: theme.spacing(0),
-}));
 
 const GreetingSection = styled(Box)(({ theme }) => ({
   marginBottom: theme.spacing(4),
@@ -43,7 +40,7 @@ const ServiceCard = styled(Card)(({ theme }) => ({
   '&:hover': {
     transform: 'translateY(-8px)',
     '& .icon-box': {
-      transform: 'scale(1.1) translateY(-2px)',
+      transform: 'scale(1.1) translateY(-2px)'
     },
     '& .count-text': {
       color: 'inherit'
@@ -176,8 +173,7 @@ export default function Personal() {
   ];
 
   return (
-    <Root>
-      {/* Greeting Section */}
+    <Box>
       <GreetingSection>
         <Heading variant="h1" color="secondary.main">
           Hello Ratan!
@@ -215,11 +211,7 @@ export default function Personal() {
                     {service.icon}
                   </IconBox>
                   <Stack spacing={0.5} direction="column" alignItems="center">
-                    <CountText
-                      className="count-text"
-                      variant="h2"
-                      sx={{ color: (theme) => alpha(theme.palette[service.color].main, 0.8) }}
-                    >
+                    <CountText className="count-text" variant="h2" sx={{ color: (theme) => alpha(theme.palette[service.color].main, 0.8) }}>
                       {service.count}
                     </CountText>
                     <Typography variant="body1" color="text.secondary" fontWeight={500}>
@@ -235,21 +227,26 @@ export default function Personal() {
 
       {/* ITR Filing Section */}
       <ItrSection>
-        <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} alignItems={{ xs: 'stretch', md: 'center' }} justifyContent="space-between">
+        <Stack
+          direction={{ xs: 'column', md: 'row' }}
+          spacing={2}
+          alignItems={{ xs: 'stretch', md: 'center' }}
+          justifyContent="space-between"
+        >
           <Typography variant="h3" color="text.primary">
             Complete your ITR filing for FY: 2024-25
           </Typography>
           <Stack direction="row" spacing={2}>
-            <Button 
-              variant="contained" 
+            <Button
+              variant="contained"
               color="secondary"
               endIcon={<ArrowForwardIcon />}
               sx={{ px: 3, py: 1.5, borderRadius: 2, textTransform: 'none', fontWeight: 600 }}
             >
               Start Filing
             </Button>
-            <Button 
-              variant="outlined" 
+            <Button
+              variant="outlined"
               color="secondary"
               sx={{ px: 3, py: 1.5, borderRadius: 2, textTransform: 'none', fontWeight: 600, borderWidth: 2 }}
             >
@@ -339,6 +336,6 @@ export default function Personal() {
           </Grid>
         </Stack>
       </TaraSection>
-    </Root>
+    </Box>
   );
 }
