@@ -15,8 +15,10 @@ import { IconX } from '@tabler/icons-react';
 import IconButton from '@mui/material/IconButton';
 import Factory from 'utils/Factory';
 // import { useSnackbar } from '@/components/CustomSnackbar';
-import Modal from 'utils/Modal';
+import Modal from 'ui-component/extended/Modal';
 // import { ModalSize } from '@/enum';
+import { useDispatch } from 'store';
+import { openSnackbar } from 'store/slices/snackbar';
 const unitsDropdown = [
   'Kilograms (Kgs)',
   'Grams (g)',
@@ -57,6 +59,8 @@ const hsnCodes = [
 ];
 
 const AddItem = ({ type, setType, open, handleOpen, handleClose, selectedItem, businessDetailsData, get_Goods_and_Services_Data }) => {
+  const dispatch = useDispatch();
+
   const [addItemData] = useState([
     { name: 'type', label: 'Type' },
     { name: 'name', label: 'Name' },
@@ -115,18 +119,33 @@ const AddItem = ({ type, setType, open, handleOpen, handleClose, selectedItem, b
       let url = type === 'edit' ? put_url : post_url;
       let method = type === 'edit' ? 'put' : 'post';
 
-      try {
-        const { res, error } = await Factory(method, url, postData);
+      const { res, error } = await Factory(method, url, postData);
 
-        if (res.status_cd === 0) {
-          get_Goods_and_Services_Data();
-          setType('');
-          resetForm();
-          handleClose();
-          // showSnackbar(type === 'edit' ? 'Data Updated Successfully' : 'Data Added Successfully', 'success');
-        }
-      } catch (error) {
-        // showSnackbar(JSON.stringify(error), 'error');
+      if (res.status_cd === 0) {
+        get_Goods_and_Services_Data();
+        setType('');
+        resetForm();
+        handleClose();
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: type === 'edit' ? 'Data Updated Successfully' : 'Data Added Successfully',
+            variant: 'alert',
+            alert: { color: 'success' },
+            close: false
+          })
+        );
+      } else {
+        console.log(res);
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: JSON.stringify(res.data.data) || 'Something went wrong',
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
       }
     }
   });
@@ -156,78 +175,6 @@ const AddItem = ({ type, setType, open, handleOpen, handleClose, selectedItem, b
       open={open}
       // maxWidth={ModalSize.MD}
       header={{ title: type === 'edit' ? 'Update Item' : ' Add New Item', subheader: '' }}
-      modalContent={
-        <Box component="form" onSubmit={handleSubmit} sx={{ padding: 2 }}>
-          <Grid2 container spacing={2}>
-            {addItemData.map((item) => (
-              <Grid2 size={{ xs: 12, sm: 6 }} key={item.name}>
-                {item.name === 'type' ? (
-                  <FormControl fullWidth>
-                    <FormLabel>{item.label}</FormLabel>
-                    <RadioGroup
-                      name={item.name}
-                      value={values.type}
-                      onChange={(e) => {
-                        setFieldValue('type', e.target.value);
-                        if (e.target.value === 'Service') {
-                          setFieldValue('units', 'NA');
-                        }
-                        if (e.target.value === 'Goods') {
-                          setFieldValue('units', '');
-                        }
-                      }}
-                      row
-                    >
-                      <FormControlLabel value="Service" control={<Radio />} label="Service" />
-                      <FormControlLabel value="Goods" control={<Radio />} label="Goods" />
-                    </RadioGroup>
-                  </FormControl>
-                ) : item.name === 'units' || item.name === 'gst_rate' || item.name === 'tax_preference' ? (
-                  <>
-                    <Typography sx={{ mb: 1 }}>
-                      {item.label} {<span style={{ color: 'red' }}>*</span>}
-                    </Typography>
-                    <CustomAutocomplete
-                      value={values[item.name]}
-                      onChange={(_, newValue) => {
-                        setFieldValue(item.name, newValue);
-                      }}
-                      options={
-                        item.name === 'gst_rate'
-                          ? gstRatesDropdown
-                          : item.name === 'tax_preference'
-                            ? taxPreferencesDropdown
-                            : item.name === 'hsn_sac'
-                              ? hsnCodes
-                              : renderOptions
-                      }
-                      getOptionLabel={(option) => option} // Use option directly if it's a string
-                      error={touched[item.name] && Boolean(errors[item.name])}
-                      helperText={touched[item.name] && errors[item.name]}
-                      name={item.name}
-                    />
-                  </>
-                ) : (
-                  <>
-                    <Typography sx={{ mb: 1 }}>
-                      {item.label} {item.name !== 'sku_value' && <span style={{ color: 'red' }}>*</span>}
-                    </Typography>
-                    <CustomInput
-                      name={item.name}
-                      placeholder={item.name === 'selling_price' ? '₹' : ''}
-                      value={values[item.name]}
-                      onChange={(e) => setFieldValue(item.name, e.target.value)}
-                      onBlur={handleBlur}
-                      error={touched[item.name] && Boolean(errors[item.name])}
-                      helperText={touched[item.name] && errors[item.name]}
-                    />
-                  </>
-                )}
-              </Grid2>
-            ))}
-          </Grid2>
-        </Box>
-      }
       footer={
         <Stack direction="row" sx={{ width: 1, justifyContent: 'space-between', gap: 2 }}>
           <Button
@@ -246,7 +193,78 @@ const AddItem = ({ type, setType, open, handleOpen, handleClose, selectedItem, b
           </Button>
         </Stack>
       }
-    />
+    >
+      <Box component="form" onSubmit={handleSubmit} sx={{ padding: 2 }}>
+        <Grid2 container spacing={2}>
+          {addItemData.map((item) => (
+            <Grid2 size={{ xs: 12, sm: 6 }} key={item.name}>
+              {item.name === 'type' ? (
+                <FormControl fullWidth>
+                  <FormLabel>{item.label}</FormLabel>
+                  <RadioGroup
+                    name={item.name}
+                    value={values.type}
+                    onChange={(e) => {
+                      setFieldValue('type', e.target.value);
+                      if (e.target.value === 'Service') {
+                        setFieldValue('units', 'NA');
+                      }
+                      if (e.target.value === 'Goods') {
+                        setFieldValue('units', '');
+                      }
+                    }}
+                    row
+                  >
+                    <FormControlLabel value="Service" control={<Radio />} label="Service" />
+                    <FormControlLabel value="Goods" control={<Radio />} label="Goods" />
+                  </RadioGroup>
+                </FormControl>
+              ) : item.name === 'units' || item.name === 'gst_rate' || item.name === 'tax_preference' ? (
+                <>
+                  <Typography sx={{ mb: 1 }}>
+                    {item.label} {<span style={{ color: 'red' }}>*</span>}
+                  </Typography>
+                  <CustomAutocomplete
+                    value={values[item.name]}
+                    onChange={(_, newValue) => {
+                      setFieldValue(item.name, newValue);
+                    }}
+                    options={
+                      item.name === 'gst_rate'
+                        ? gstRatesDropdown
+                        : item.name === 'tax_preference'
+                          ? taxPreferencesDropdown
+                          : item.name === 'hsn_sac'
+                            ? hsnCodes
+                            : renderOptions
+                    }
+                    getOptionLabel={(option) => option} // Use option directly if it's a string
+                    error={touched[item.name] && Boolean(errors[item.name])}
+                    helperText={touched[item.name] && errors[item.name]}
+                    name={item.name}
+                  />
+                </>
+              ) : (
+                <>
+                  <Typography sx={{ mb: 1 }}>
+                    {item.label} {item.name !== 'sku_value' && <span style={{ color: 'red' }}>*</span>}
+                  </Typography>
+                  <CustomInput
+                    name={item.name}
+                    placeholder={item.name === 'selling_price' ? '₹' : ''}
+                    value={values[item.name]}
+                    onChange={(e) => setFieldValue(item.name, e.target.value)}
+                    onBlur={handleBlur}
+                    error={touched[item.name] && Boolean(errors[item.name])}
+                    helperText={touched[item.name] && errors[item.name]}
+                  />
+                </>
+              )}
+            </Grid2>
+          ))}
+        </Grid2>
+      </Box>
+    </Modal>
   );
 };
 

@@ -57,7 +57,7 @@ const ItemList = ({ type, setType, handleClose, handleOpen, open, businessDetail
             {paginatedData.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7} align="center">
-                  <EmptyTable msg="No Data" />
+                  {/* <EmptyTable msg="No Data" /> */}
                 </TableCell>
               </TableRow>
             ) : (

@@ -1,29 +1,28 @@
-'use client';
 import React, { useState, useEffect } from 'react';
-import AddInvoice from '../InvoicingComponent/AddInvoice';
-import Factory from '@/utils/Factory';
-import { useSearchParams } from 'next/navigation';
-import { IconDivide } from '@tabler/icons-react';
-import { useSnackbar } from '@/components/CustomSnackbar';
-import useCurrentUser from '@/hooks/useCurrentUser';
+import AddInvoice from './AddInvoice';
+import Factory from 'utils/Factory';
+import { useSearchParams } from 'react-router-dom';
 
-function Index() {
+import { IconDivide } from '@tabler/icons-react';
+import { useDispatch } from 'store';
+import { openSnackbar } from 'store/slices/snackbar';
+import { useSelector } from 'react-redux';
+const Index = () => {
   const [invoicesList, setInvoicesList] = useState([]);
   const [businessDetails, setBusinessDetails] = useState({});
   const [customers, setCustomers] = useState([]);
   const [invoiceNumberFormat, setInvoiceNumberFormat] = useState('');
   const [itemsList, setItemsList] = useState([]);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
-  const { showSnackbar } = useSnackbar();
-  const { userData } = useCurrentUser();
+  const user = useSelector((state) => state.accountReducer.user);
 
-  const searchParams = useSearchParams();
-  const invoiceId = searchParams.get('id');
+  const [searchParams] = useSearchParams(); // ✅ destructure array
+  const invoiceId = searchParams.get('id'); // ✅ now works
 
   const fetchBusinessDetails = async () => {
-    let id = userData.user_type === 'Business' ? userData.business_affiliated[0].id : userData.businesssDetails.business[0].id;
+    let businessId = user.active_context.business_id;
 
-    let url = `/invoicing/invoicing-profiles/?business_id=${id}`;
+    let url = `/invoicing/invoicing-profiles/?business_id=${businessId}`;
     const { res } = await Factory('get', url, {});
     if (res) {
       setBusinessDetails(res.data);
@@ -56,7 +55,15 @@ function Index() {
     if (res.status_cd === 0) {
       setItemsList(res.data.goods_and_services);
     } else {
-      showSnackbar(JSON.stringify(res.data.error), 'error');
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res.data.error) || 'Something went wrong',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     }
   };
   // Fetch Invoice Number Format
@@ -65,7 +72,15 @@ function Index() {
     if (res.status_cd === 0) {
       setInvoiceNumberFormat(res.data.latest_invoice_number);
     } else {
-      showSnackbar(JSON.stringify(res.data.error), 'error');
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res.data.error) || 'Something went wrong',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     }
   };
   const get_Individual_Invoice_Data = async () => {
@@ -73,7 +88,15 @@ function Index() {
     if (res.status_cd === 0) {
       setSelectedInvoice({ ...res.data });
     } else {
-      showSnackbar(JSON.stringify(res.data.error), 'error');
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res.data.error) || 'Something went wrong',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     }
   };
   useEffect(() => {
@@ -110,6 +133,6 @@ function Index() {
       getInvoiceFormat={getInvoiceFormat}
     />
   );
-}
+};
 
 export default Index;

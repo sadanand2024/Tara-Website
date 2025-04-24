@@ -27,6 +27,7 @@ const PayrollSettings = Loadable(lazy(() => import('views/payroll/settings')));
 
 // invoicing module
 const Invoicing = Loadable(lazy(() => import('views/invoicing'))); // ✅ works because index.jsx exists
+const GenerateInvoice = Loadable(lazy(() => import('views/invoicing/InvoicingComponent')));
 
 const Settings = Loadable(lazy(() => import('views/invoicing/InvoiceSettings')));
 
@@ -164,6 +165,10 @@ const MainRoutes = {
     {
       path: '/app/invoice/settings',
       element: <Settings />
+    },
+    {
+      path: '/app/invoice/generateInvoice',
+      element: <GenerateInvoice />
     }
   ]
 };

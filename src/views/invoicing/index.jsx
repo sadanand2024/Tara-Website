@@ -8,7 +8,7 @@ import { useDispatch } from 'store';
 
 // @project
 // import { useSnackbar } from '@/components/CustomSnackbar';
-// import OverviewCard from './InvoiceCards/OverviewCard';
+import OverviewCard from './InvoiceCards/OverviewCard';
 import { Button, Stack, Typography } from '@mui/material';
 import { IconSparkles, IconSettings2 } from '@tabler/icons-react';
 // import AddInvoice from './InvoicingComponent/AddInvoice';
@@ -71,7 +71,7 @@ const AnalyticsOverview = () => {
           <Button
             variant="outlined"
             onClick={() => {
-              router.push(`${pathname}/settings`);
+              navigate('/app/invoice/settings');
             }}
             startIcon={<IconSettings2 size={18} />}
           >
@@ -82,7 +82,7 @@ const AnalyticsOverview = () => {
             onClick={() => {
               setType('add');
               // handleOpen();
-              router.push(`${pathname}/generateInvoice`);
+              navigate(`/app/invoice/generateInvoice`);
             }}
             startIcon={<IconSparkles size={16} />}
           >
@@ -97,15 +97,15 @@ const AnalyticsOverview = () => {
         ) : (
           <Grid container spacing={{ xs: 2, md: 3 }}>
             <Grid size={12}>
-              {/* <OverviewCard
+              <OverviewCard
                 businessId={user.active_context.business_id}
                 open={open}
                 onClose={handleClose}
-                clientListData={clientListData || []}
+                // clientListData={clientListData || []}
                 type={type}
                 setType={setType}
                 handleOpen={handleOpen}
-              /> */}
+              />
             </Grid>
           </Grid>
         )}

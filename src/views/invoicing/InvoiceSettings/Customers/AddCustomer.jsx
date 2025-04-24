@@ -16,6 +16,8 @@ import IconButton from '@mui/material/IconButton';
 import { indian_States_And_UTs } from 'utils/indian_States_And_UT';
 import Factory from 'utils/Factory';
 // import { useSnackbar } from 'components/CustomSnackbar';
+import { useDispatch } from 'store';
+import { openSnackbar } from 'store/slices/snackbar';
 import Modal from 'ui-component/extended/Modal';
 import { CountriesList } from 'utils/CountriesList';
 let gstTypes = [
@@ -31,6 +33,8 @@ let gstTypes = [
 ];
 
 const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, businessDetailsData, getCustomersData }) => {
+  const dispatch = useDispatch();
+
   const [addCustomerData] = useState([
     { name: 'name', label: 'Name of the Customer' },
     { name: 'pan_number', label: 'PAN' },
@@ -115,10 +119,27 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
           setType('');
           resetForm();
           handleClose();
-          // showSnackbar(type === 'edit' ? 'Data Updated Successfully' : 'Data Added Successfully', 'success');
+          dispatch(
+            openSnackbar({
+              open: true,
+              message: type === 'edit' ? 'Data Updated Successfully' : 'Data Added Successfully',
+              variant: 'alert',
+              alert: { color: 'success' },
+              close: false
+            })
+          );
         }
       } catch (error) {
         // showSnackbar(JSON.stringify(error), 'error');
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: JSON.stringify(error) || 'Something went wrong',
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
       }
     }
   });
