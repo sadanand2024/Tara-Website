@@ -207,5 +207,7 @@
   "loan": "Loan",
   "investments": "Investments",
   "subscriptions": "Subscriptions & Payments",
-  "support&chat": "Support & Chat"
+  "support&chat": "Support & Chat",
+  "payroll": "Payroll",
+  "invoice": "Invoice"
 }

@@ -14,9 +14,9 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
 // @project
-import MainCard from '@/components/MainCard';
-import CustomTooltip from '@/components/third-party/chart/CustomTooltip';
-import Legend from '@/components/third-party/chart/Legend';
+import MainCard from '../../ui-component/cards/MainCard';
+// import CustomTooltip from '@/components/third-party/chart/CustomTooltip';
+// import Legend from '@/components/third-party/chart/Legend';
 
 //@type
 
@@ -91,7 +91,7 @@ export default function AnalyticsBehaviorChart() {
             </IconButton>
           </Stack>
         </Stack>
-        <Legend items={lagendItems} onToggle={toggleVisibility} />
+        {/* <Legend items={lagendItems} onToggle={toggleVisibility} /> */}
       </Stack>
 
       <BarChart

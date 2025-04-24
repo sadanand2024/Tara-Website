@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Table, TableContainer, TableHead, TableRow, TableCell, TableBody, Paper, Stack } from '@mui/material';
-import EmptyTable from '@/components/third-party/table/EmptyTable';
-import Factory from '@/utils/Factory';
-import { useSnackbar } from '@/components/CustomSnackbar';
-import MainCard from '@/components/MainCard';
+// import EmptyTable from '@/components/third-party/table/EmptyTable';
+import Factory from 'utils/Factory';
+// import { useSnackbar } from '@/components/CustomSnackbar';
+import MainCard from '../../ui-component/cards/MainCard';
 
 const MONTHS = ['April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December', 'January', 'February', 'March'];
 const TABLE_HEADERS = ['CTC', 'Status', 'Action'];
@@ -11,7 +11,7 @@ const TABLE_HEADERS = ['CTC', 'Status', 'Action'];
 export default function PayrollStatusSummary({ payrollId, financialYear }) {
   const [financialYearSummary, setFinancial_year_summary] = useState([]);
   const [loading, setLoading] = useState(false);
-  const { showSnackbar } = useSnackbar();
+  // const { showSnackbar } = useSnackbar();
 
   const get_financialYearData = async () => {
     setLoading(true);
@@ -21,7 +21,7 @@ export default function PayrollStatusSummary({ payrollId, financialYear }) {
     if (res?.status_cd === 0) {
       setFinancial_year_summary(Array.isArray(res.data.financial_year_summary) ? res.data.financial_year_summary : []);
     } else {
-      showSnackbar(JSON.stringify(res?.data?.error), 'error');
+      // showSnackbar(JSON.stringify(res?.data?.error), 'error');
     }
   };
 

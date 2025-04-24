@@ -1,36 +1,37 @@
-'use client';
-import { usePathname, useRouter } from 'next/navigation';
+import { useNavigate } from 'react-router-dom';
+
 import { useSelector, useDispatch } from 'react-redux';
-import { setPayrollId } from '@/store/slices/payrollSlice';
-import Factory from '@/utils/Factory';
+import Factory from 'utils/Factory';
 import { useState, useEffect } from 'react';
-import CustomAutocomplete from '@/utils/CustomAutocomplete';
+import CustomAutocomplete from 'utils/CustomAutocomplete';
+// import { useSelector } from 'store';
 
 // @project
-import { useSnackbar } from '@/components/CustomSnackbar';
-import OverviewCard from './OverviewCard';
+// import OverviewCard from './OverviewCard';
 import PayrollStatusSummary from './PayrollStatusSummary';
 import PayrollComplianceSummary from './PayrollComplianceSummary';
 
 import PayrollMonthwise from './PayrollMonthwise';
 import { Button, Stack, Typography, Grid2, TextField } from '@mui/material';
 import { IconSparkles, IconSettings2 } from '@tabler/icons-react';
-import HomeCard from '@/components/cards/HomeCard';
-import Loader from '@/components/PageLoader';
-import useCurrentUser from '@/hooks/useCurrentUser';
-import { generateFinancialYears } from '@/utils/FinancialYearsList';
+// import HomeCard from '@/components/cards/HomeCard';
+// import Loader from '@/components/PageLoader';
+// import useCurrentUser from '@/hooks/useCurrentUser';
+import { generateFinancialYears } from 'utils/FinancialYearsList';
+import MainCard from '../../ui-component/cards/MainCard';
 /***************************  ANALYTICS - OVERVIEW  ***************************/
 
-export default function PayrollDashboard() {
-  const { userData } = useCurrentUser();
+const PayrollDashboard = () => {
+  // const { userData } = useCurrentUser();
+  const navigate = useNavigate();
+  const user = useSelector((state) => state).accountReducer.user;
 
-  const router = useRouter();
+  // const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [businessDetails, setBusinessDetails] = useState({});
   const [financialYear, setFinancialYear] = useState(null);
 
   const financialYearOptions = generateFinancialYears();
-  const { showSnackbar } = useSnackbar();
 
   const getData = async (id) => {
     setLoading(true);
@@ -39,7 +40,9 @@ export default function PayrollDashboard() {
 
     if (res?.status_cd === 0) {
       if (res.data.payroll_setup === false) {
-        router.push(`/payrollsetup`);
+        // router.push(`/payrollsetup`);
+        navigate('/app/payroll/settings');
+
         setLoading(false);
       } else {
         setBusinessDetails(res?.data);
@@ -65,13 +68,21 @@ export default function PayrollDashboard() {
     }
     setLoading(false);
   };
+  // useEffect(() => {
+  //   if (userData.business_exists === false) {
+  //     router.push('/payrollsetup/payroll_business_profileSetup');
+  //   } else {
+  //     get_business_details();
+  //   }
+  // }, [userData.id]);
   useEffect(() => {
-    if (userData.business_exists === false) {
-      router.push('/payrollsetup/payroll_business_profileSetup');
+    if (user?.business_exists === false) {
+      navigate('/payrollsetup/payroll_business_profileSetup');
     } else {
-      get_business_details();
+      getData(user.id);
     }
-  }, [userData.id]);
+  }, [user]);
+
   useEffect(() => {
     const getCurrentFinancialYear = () => {
       const today = new Date();
@@ -88,12 +99,13 @@ export default function PayrollDashboard() {
   }, []);
 
   return loading ? (
-    <Loader />
+    <Typography variant="h6" align="center" sx={{ mt: 4 }}>
+      Loading Payroll Dashboard...
+    </Typography>
   ) : (
-    <HomeCard
+    <MainCard
       title={`Payroll for ${businessDetails?.nameOfBusiness}`}
-      tagline="Create and manage Payroll for your employees."
-      CustomElement={() => (
+      secondary={
         <Stack direction="row" sx={{ gap: 2 }}>
           <CustomAutocomplete
             options={financialYearOptions}
@@ -108,17 +120,17 @@ export default function PayrollDashboard() {
           <Button
             variant="contained"
             onClick={() => {
-              router.push(`/payrollsetup/add-employee?payrollid=${businessDetails?.payroll_id}`);
+              navigate(`/payrollsetup/add-employee?payrollid=${businessDetails?.payroll_id}`);
             }}
             startIcon={<IconSparkles size={16} />}
           >
             Add Employee
           </Button>
-          <Button variant="outlined" onClick={() => router.push(`/payrollsetup`)} startIcon={<IconSettings2 size={18} />}>
+          <Button variant="outlined" onClick={() => navigate(`/payrollsetup`)} startIcon={<IconSettings2 size={18} />}>
             Payroll Settings
           </Button>
         </Stack>
-      )}
+      }
     >
       <Grid2 container spacing={{ xs: 2, md: 3 }}>
         <Grid2 size={{ xs: 12 }}>
@@ -137,10 +149,11 @@ export default function PayrollDashboard() {
           </Typography>
           <PayrollComplianceSummary payrollId={businessDetails?.payroll_id} financialYear={financialYear} />
         </Grid2>
-        <Grid2 size={{ xs: 12 }}>
+        {/* <Grid2 size={{ xs: 12 }}>
           <OverviewCard payrollId={businessDetails?.payroll_id} financialYear={financialYear} />
-        </Grid2>
+        </Grid2> */}
       </Grid2>
-    </HomeCard>
+    </MainCard>
   );
-}
+};
+export default PayrollDashboard;
