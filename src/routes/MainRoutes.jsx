@@ -6,10 +6,11 @@ import Loadable from 'ui-component/Loadable';
 import AuthGuard from 'utils/route-guard/AuthGuard';
 
 // payroll module
-// const PayrollDashboard = Loadable(lazy(() => import('views/payroll')));
+const PayrollDashboard = Loadable(lazy(() => import('views/payroll'))); // ✅ works because index.jsx exists
+
 // const EmployeeDashboard = Loadable(lazy(() => import('views/payroll/EmployeeDashboard')));
 // const PayrollWorkflows = Loadable(lazy(() => import('views/payroll/PayrollWorkflows')));
-// const PayrollSettings = Loadable(lazy(() => import('views/payroll/settings')));
+const PayrollSettings = Loadable(lazy(() => import('views/payroll/settings')));
 // const OrganizationDetails = Loadable(lazy(() => import('views/payroll/settings/OrganizationDetails')));
 // const WorkLocation = Loadable(lazy(() => import('views/payroll/settings/WorkLocation')));
 // const Departments = Loadable(lazy(() => import('views/payroll/settings/Departments')));
@@ -23,6 +24,11 @@ import AuthGuard from 'utils/route-guard/AuthGuard';
 // const BusinessProfileSetup = Loadable(lazy(() => import('views/payroll/settings/BusinessProfileSetup')));
 // const EmployeeMaster = Loadable(lazy(() => import('views/payroll/settings/employee-master/Index')));
 // const AddEmployee = Loadable(lazy(() => import('views/payroll/settings/employee-master/AddEmployee')));
+
+// invoicing module
+const Invoicing = Loadable(lazy(() => import('views/invoicing'))); // ✅ works because index.jsx exists
+
+const Settings = Loadable(lazy(() => import('views/invoicing/InvoiceSettings')));
 
 // dashboard routing
 const Dashboard = Loadable(lazy(() => import('views/dashboard')));
@@ -82,11 +88,11 @@ const MainRoutes = {
     {
       path: '/app/subscriptions',
       element: <ManageSubscriptions />
-    }
-    // {
-    //   path: '/payroll',
-    //   element: <PayrollDashboard />
-    // },
+    },
+    {
+      path: '/app/payroll',
+      element: <PayrollDashboard />
+    },
     // {
     //   path: '/payroll/employee-dashboard',
     //   element: <EmployeeDashboard />
@@ -95,10 +101,10 @@ const MainRoutes = {
     //   path: '/payroll/payroll-workflows',
     //   element: <PayrollWorkflows />
     // },
-    // {
-    //   path: '/payroll/settings',
-    //   element: <PayrollSettings />
-    // },
+    {
+      path: '/app/payroll/settings',
+      element: <PayrollSettings />
+    },
     // {
     //   path: '/payroll/settings/organization-details',
     //   element: <OrganizationDetails />
@@ -151,6 +157,14 @@ const MainRoutes = {
     //   path: '/payroll/settings/employee-master/add',
     //   element: <AddEmployee />
     // }
+    {
+      path: '/app/invoice',
+      element: <Invoicing />
+    },
+    {
+      path: '/app/invoice/settings',
+      element: <Settings />
+    }
   ]
 };
 

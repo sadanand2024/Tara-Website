@@ -1,28 +1,28 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import { months } from '@/utils/MonthsList';
+import { useNavigate } from 'react-router-dom';
+import { months } from 'utils/MonthsList';
 
 // @mui
 import { useTheme, alpha } from '@mui/material/styles';
 import Stack from '@mui/material/Stack';
 import Grid from '@mui/material/Grid2';
-import { useSnackbar } from '@/components/CustomSnackbar';
+// import { useSnackbar } from '@/components/CustomSnackbar';
 import { ServicesData } from './data';
-import Factory from '@/utils/Factory';
+import Factory from 'utils/Factory';
 import { Box, Button, Paper, Divider, Chip, Typography } from '@mui/material';
-import CustomAutocomplete from '@/utils/CustomAutocomplete';
-import MainCard from '@/components/MainCard';
+import CustomAutocomplete from 'utils/CustomAutocomplete';
+import MainCard from '../../ui-component/cards/MainCard';
 export default function PayrollMonthwise({ payrollId, financialYear }) {
-  const router = useRouter();
-  const { showSnackbar } = useSnackbar();
+  const navigate = useNavigate();
+  // const { showSnackbar } = useSnackbar();
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth()); // JS Date month is 0-indexed, so we add 1 to get the correct month number
   const [monthWiseData, setMonthWiseData] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const handleMonthChange = (event, newValue) => {
     if (!newValue || newValue === 'Please select') {
-      showSnackbar('Please select a month', 'error');
+      // showSnackbar('Please select a month', 'error');
       return;
     }
 
@@ -42,7 +42,7 @@ export default function PayrollMonthwise({ payrollId, financialYear }) {
     if (res?.status_cd === 0) {
       setMonthWiseData(res.data);
     } else {
-      showSnackbar(JSON.stringify(res?.data?.error), 'error');
+      // showSnackbar(JSON.stringify(res?.data?.error), 'error');
     }
   };
 
@@ -98,9 +98,7 @@ export default function PayrollMonthwise({ payrollId, financialYear }) {
                   size="small"
                   onClick={() => {
                     if (payrollId) {
-                      router.push(
-                        `/payroll/employee-dashboard?payrollid=${payrollId}&month=${selectedMonth}&financialYear=${financialYear}`
-                      );
+                      navigate(`/payroll/employee-dashboard?payrollid=${payrollId}&month=${selectedMonth}&financialYear=${financialYear}`);
                     }
                   }}
                 >
