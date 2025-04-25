@@ -73,106 +73,61 @@ export default function AppBar({ ...others }) {
   return (
     <ElevationScroll {...others}>
       <MuiAppBar>
-        <Container>
-          <Toolbar sx={{ py: 2.5, px: `0 !important` }}>
-            {/* <Logo /> */}
+        {/* <Container> */}
+        <Toolbar sx={{ py: 2.5, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          {/* Left: Logo */}
+          <Box>
             <RouterLink to="/">
-              <CardMedia component="img" src={Tarafirstlogo_png} alt="defaultLayout" sx={{ width: 200 }} />
+              <CardMedia component="img" src={Tarafirstlogo_png} alt="Tarafirst Logo" sx={{ width: 200 }} />
             </RouterLink>
-            <Stack direction="row" spacing={{ xs: 1.5, md: 3 }}>
-              <Stack direction="row" sx={{ display: { xs: 'none', sm: 'block' } }} spacing={{ xs: 1.5, md: 2.5 }}>
-                <Button color="inherit" onClick={handleToggle}>
-                  Services
-                </Button>
-                <Button color="inherit" onClick={handleProductsToggle}>
-                  Products
-                </Button>
+          </Box>
 
-                <Button color="inherit" onClick={handleToggle}>
-                  Knowledge
-                </Button>
-                <Button color="inherit" onClick={handleToggle}>
-                  Company
-                </Button>
-                <Button color="inherit" onClick={handleToggle}>
-                  Book Consultation
-                </Button>
-                {/* <Button color="inherit" component={Link} href="#">
-                  Home
-                </Button> */}
-                {/* <Button color="inherit" component={RouterLink} to="/login">
-                  Dashboard
-                </Button> */}
-                <Button color="inherit" component={Link} href="https://codedthemes.gitbook.io/berry" target="_blank">
-                  Knowledge
-                </Button>
-              </Stack>
-              <Stack direction="row" sx={{ display: { xs: 'none', sm: 'block' } }} spacing={{ xs: 0.5, md: 0.5 }}>
-                <Button component={RouterLink} to="/register" disableElevation color="secondary">
-                  Signup
-                </Button>
-                <Button component={RouterLink} to="/login" variant="contained" color="secondary">
-                  Login
-                </Button>
-              </Stack>
-            </Stack>
-            <Box sx={{ display: { xs: 'block', sm: 'none' } }}>
-              <IconButton color="inherit" onClick={drawerToggler(true)} size="large">
-                <MenuIcon />
-              </IconButton>
-              <Drawer anchor="top" open={drawerToggle} onClose={drawerToggler(false)}>
-                {drawerToggle && (
-                  <Box sx={{ width: 'auto' }} role="presentation" onClick={drawerToggler(false)} onKeyDown={drawerToggler(false)}>
-                    <List>
-                      <Link sx={{ textDecoration: 'none' }} href="#" target="_blank">
-                        <ListItemButton component="a">
-                          <ListItemIcon>
-                            <IconHome2 />
-                          </ListItemIcon>
-                          <ListItemText primary="Home" />
-                        </ListItemButton>
-                      </Link>
-                      <Link sx={{ textDecoration: 'none' }} href="/login" target="_blank">
-                        <ListItemButton component="a">
-                          <ListItemIcon>
-                            <IconDashboard />
-                          </ListItemIcon>
-                          <ListItemText primary="Dashboard" />
-                        </ListItemButton>
-                      </Link>
-                      <Link sx={{ textDecoration: 'none' }} href="https://codedthemes.gitbook.io/berry" target="_blank">
-                        <ListItemButton component="a">
-                          <ListItemIcon>
-                            <IconBook />
-                          </ListItemIcon>
-                          <ListItemText primary="Documentation" />
-                        </ListItemButton>
-                      </Link>
-                      <Link sx={{ textDecoration: 'none' }} href="https://links.codedthemes.com/hsqll" target="_blank">
-                        <ListItemButton component="a">
-                          <ListItemIcon>
-                            <IconCreditCard />
-                          </ListItemIcon>
-                          <ListItemText primary="Purchase Now" />
-                        </ListItemButton>
-                      </Link>
-                    </List>
-                  </Box>
-                )}
-              </Drawer>
-            </Box>
-          </Toolbar>
-          {openServices && (
-            <Box sx={{ position: 'absolute', top: '100%', left: 0, right: 0 }}>
-              <ServicesPanel onClose={handleClose} />
-            </Box>
-          )}
-          {openProducts && (
-            <Box sx={{ position: 'absolute', top: '100%', left: 0, right: 0 }}>
-              <ProductsPanel onClose={handleProductsClose} />
-            </Box>
-          )}
-        </Container>
+          {/* Center: Navigation Buttons */}
+          <Stack
+            direction="row"
+            spacing={{ xs: 1.5, md: 3 }}
+            sx={{
+              flexGrow: 1,
+              justifyContent: 'center',
+              display: { xs: 'none', sm: 'flex' }
+            }}
+          >
+            <Button color="inherit" onClick={handleToggle}>
+              Services
+            </Button>
+            <Button color="inherit" onClick={handleProductsToggle}>
+              Products
+            </Button>
+            <Button color="inherit">Knowledge</Button>
+            <Button color="inherit">Company</Button>
+            <Button color="inherit">Book Consultation</Button>
+            <Button color="inherit" component={Link} href="https://codedthemes.gitbook.io/berry" target="_blank">
+              Knowledge
+            </Button>
+          </Stack>
+
+          {/* Right: Auth Buttons */}
+          <Stack direction="row" spacing={1} sx={{ flexShrink: 0, display: { xs: 'none', sm: 'flex' } }}>
+            <Button component={RouterLink} to="/register" disableElevation color="secondary">
+              Signup
+            </Button>
+            <Button component={RouterLink} to="/login" variant="contained" color="secondary">
+              Login
+            </Button>
+          </Stack>
+        </Toolbar>
+
+        {openServices && (
+          <Box sx={{ position: 'absolute', top: '100%', left: 0, right: 0 }}>
+            <ServicesPanel onClose={handleClose} />
+          </Box>
+        )}
+        {openProducts && (
+          <Box sx={{ position: 'absolute', top: '100%', left: 0, right: 0 }}>
+            <ProductsPanel onClose={handleProductsClose} />
+          </Box>
+        )}
+        {/* </Container> */}
       </MuiAppBar>
     </ElevationScroll>
   );
