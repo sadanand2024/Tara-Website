@@ -1,21 +1,12 @@
 import Grid from '@mui/material/Grid2';
 import { useNavigate } from 'react-router';
-
 import Factory from 'utils/Factory';
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useDispatch } from 'store';
-
-// @project
-// import { useSnackbar } from '@/components/CustomSnackbar';
 import OverviewCard from './InvoiceCards/OverviewCard';
-import { Button, Stack, Typography } from '@mui/material';
-import { IconSparkles, IconSettings2 } from '@tabler/icons-react';
-// import AddInvoice from './InvoicingComponent/AddInvoice';
-// import useCurrentUser from '@/hooks/useCurrentUser';
-import { CoPresentOutlined } from '@mui/icons-material';
-// import Loader from '@/components/PageLoader';
-// import HomeCard from '@/components/cards/HomeCard';
+import { Button, Stack, Typography, Box, Skeleton } from '@mui/material';
+import { IconSparkles, IconSettings2, IconReceipt } from '@tabler/icons-react';
 import MainCard from '../../ui-component/cards/MainCard';
 import { openSnackbar } from 'store/slices/snackbar';
 
@@ -23,11 +14,12 @@ import { openSnackbar } from 'store/slices/snackbar';
 
 const AnalyticsOverview = () => {
   const dispatch = useDispatch();
-
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [type, setType] = useState('');
-  const [loading, setLoading] = useState(false); // State for loader
+  const [loading, setLoading] = useState(false);
+  const [invoicing_profile_data, setInvoicing_profile_data] = useState(null);
+  const user = useSelector((state) => state).accountReducer.user;
 
   const handleClose = () => {
     setOpen(false);
@@ -36,7 +28,6 @@ const AnalyticsOverview = () => {
   const handleOpen = () => {
     setOpen(true);
   };
-  const user = useSelector((state) => state).accountReducer.user;
 
   const invoice_settings_status_check = async () => {
     setLoading(true);
@@ -47,6 +38,7 @@ const AnalyticsOverview = () => {
     if (res.status_cd === 0 && res.data.exists === false) {
       navigate('/app/invoice/settings');
     } else if (res.status_cd === 0 && res.data.exists === true) {
+      setInvoicing_profile_data(res.data);
       return;
     } else {
       dispatch(
@@ -60,57 +52,91 @@ const AnalyticsOverview = () => {
       );
     }
   };
+
   useEffect(() => {
     invoice_settings_status_check();
   }, [user]);
+
   return (
-    <MainCard
-      title=" Invoicing"
-      secondary={
-        <Stack direction="row" sx={{ gap: 2 }}>
-          <Button
-            variant="outlined"
-            onClick={() => {
-              navigate('/app/invoice/settings');
-            }}
-            startIcon={<IconSettings2 size={18} />}
-          >
-            Invoice Settings
-          </Button>
-          <Button
-            variant="contained"
-            onClick={() => {
-              setType('add');
-              // handleOpen();
-              navigate(`/app/invoice/generateInvoice`);
-            }}
-            startIcon={<IconSparkles size={16} />}
-          >
-            New Invoice
-          </Button>
-        </Stack>
-      }
+    <Box
+      sx={{
+        width: '100%',
+        minHeight: '100%',
+        p: 0
+      }}
     >
-      <MainCard>
+      <MainCard
+        title={
+          <Stack direction="row" alignItems="center" spacing={1}>
+            <IconReceipt size={24} />
+            <Typography variant="h3">Invoicing Dashboard</Typography>
+          </Stack>
+        }
+        secondary={
+          <Stack direction="row" spacing={2}>
+            <Button
+              variant="outlined"
+              onClick={() => navigate('/app/invoice/settings')}
+              startIcon={<IconSettings2 size={18} />}
+              sx={{
+                borderRadius: 2,
+                px: 3,
+                py: 1
+              }}
+            >
+              Invoice Settings
+            </Button>
+            <Button
+              variant="contained"
+              onClick={() => {
+                setType('add');
+                navigate(`/app/invoice/generateInvoice`);
+              }}
+              startIcon={<IconSparkles size={16} />}
+              sx={{
+                borderRadius: 2,
+                px: 3,
+                py: 1,
+                boxShadow: (theme) => theme.customShadows.primary
+              }}
+            >
+              New Invoice
+            </Button>
+          </Stack>
+        }
+        sx={{
+          borderRadius: 0,
+          boxShadow: (theme) => theme.customShadows.z1,
+          height: '100%',
+          minHeight: 'calc(100vh - 64px)',
+          display: 'flex',
+          flexDirection: 'column'
+        }}
+      >
         {loading ? (
-          <h1>loading</h1>
-        ) : (
-          <Grid container spacing={{ xs: 2, md: 3 }}>
-            <Grid size={12}>
-              <OverviewCard
-                businessId={user.active_context.business_id}
-                open={open}
-                onClose={handleClose}
-                // clientListData={clientListData || []}
-                type={type}
-                setType={setType}
-                handleOpen={handleOpen}
-              />
+          <Box sx={{ p: 3, flex: 1 }}>
+            <Grid container spacing={3}>
+              <Grid item xs={12}>
+                <Skeleton variant="rectangular" height={200} sx={{ borderRadius: 2 }} />
+              </Grid>
             </Grid>
-          </Grid>
+          </Box>
+        ) : (
+          <Box sx={{ p: { xs: 1 }, flex: 1 }}>
+            <OverviewCard
+              businessId={user.active_context.business_id}
+              invoicing_profile_data={invoicing_profile_data}
+              open={open}
+              onClose={handleClose}
+              type={type}
+              setType={setType}
+              handleOpen={handleOpen}
+            />
+          </Box>
         )}
       </MainCard>
-    </MainCard>
+    </Box>
   );
 };
+
 export default AnalyticsOverview;

@@ -51,7 +51,18 @@ const BerryDialog = ({
             )}
           </Stack>
           {showClose && (
-            <IconButton onClick={handleClose} size="small" sx={{ ml: 2 }}>
+            <IconButton
+              onClick={handleClose}
+              size="small"
+              sx={{
+                ml: 2,
+                color: theme.palette.error.main,
+                bgcolor: theme.palette.error.lighter,
+                '&:hover': {
+                  bgcolor: theme.palette.error.light
+                }
+              }}
+            >
               <IconX stroke={1.5} size="1.2rem" />
             </IconButton>
           )}

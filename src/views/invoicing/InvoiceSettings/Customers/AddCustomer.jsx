@@ -1,26 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import Button from '@mui/material/Button';
-import Grid2 from '@mui/material/Grid2';
-import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogContent from '@mui/material/DialogContent';
-import Divider from '@mui/material/Divider';
-import Box from '@mui/material/Box';
-import { FormControl, FormLabel, RadioGroup, FormControlLabel, Radio, Typography, Stack } from '@mui/material';
-import CustomInput from 'utils/CustomInput';
-import CustomAutocomplete from 'utils/CustomAutocomplete';
-import { IconX } from '@tabler/icons-react';
-import IconButton from '@mui/material/IconButton';
-import { indian_States_And_UTs } from 'utils/indian_States_And_UT';
-import Factory from 'utils/Factory';
-// import { useSnackbar } from 'components/CustomSnackbar';
+import { Button, Grid, Stack, Typography, Box, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio } from '@mui/material';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
+import { IconPlus } from '@tabler/icons-react';
 import Modal from 'ui-component/extended/Modal';
+import CustomInput from 'utils/CustomInput';
+import CustomAutocomplete from 'utils/CustomAutocomplete';
+import Factory from 'utils/Factory';
+import { indian_States_And_UTs } from 'utils/indian_States_And_UT';
 import { CountriesList } from 'utils/CountriesList';
-let gstTypes = [
+
+const gstTypes = [
   'Registered Business - Regular',
   'Registered Business - Composition',
   'Unregistered Business',
@@ -34,24 +26,6 @@ let gstTypes = [
 
 const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, businessDetailsData, getCustomersData }) => {
   const dispatch = useDispatch();
-
-  const [addCustomerData] = useState([
-    { name: 'name', label: 'Name of the Customer' },
-    { name: 'pan_number', label: 'PAN' },
-    { name: 'gst_registered', label: 'GST Registered' },
-    { name: 'gstin', label: 'GSTIN' },
-    { name: 'gst_type', label: 'Type of GST' },
-    { name: 'address_line1', label: 'Address Lane 1' },
-    { name: 'address_line2', label: 'Address Lane 2' },
-    { name: 'country', label: 'Country' },
-    { name: 'state', label: 'State' },
-    { name: 'postal_code', label: 'Pincode' },
-    { name: 'email', label: 'Email' },
-    { name: 'mobile_number', label: 'Mobile' },
-    { name: 'opening_balance', label: 'Opening Balance' }
-    // { name: 'swift_code', label: 'SWIFT Code' }
-  ]);
-  // const { showSnackbar } = useSnackbar();
 
   const formik = useFormik({
     initialValues: {
@@ -81,39 +55,28 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
           Yup.string()
             .required('GSTIN is required')
             .matches(/^[0-9A-Z]{15}$/, 'Invalid GSTIN, Format must be: 22AAAAA0000A1Z5'),
-        otherwise: () => Yup.string().oneOf(['NA'], 'GSTIN must be "NA" when GST Registered is "No"') // Ensure "NA" for "No"
+        otherwise: () => Yup.string().oneOf(['NA'], 'GSTIN must be "NA" when GST Registered is "No"')
       }),
-
       gst_type: Yup.string().required('GST Type is required'),
       address_line1: Yup.string().required('Address Line 1 is required'),
       postal_code: Yup.number()
-        .typeError('Pincode must be an integer')
+        .typeError('Pincode must be a number')
         .required('Pincode is required')
-        .integer('Pincode must be an integer')
-        .min(100000, 'Pincode must be at least 6 digits')
-        .max(999999, 'Pincode must be at most 6 digits'),
-
-      email: Yup.string().email('Invalid email format').required('Email is required'),
-
+        .min(100000, 'Minimum 6 digits')
+        .max(999999, 'Maximum 6 digits'),
+      email: Yup.string().email('Invalid email').required('Email is required'),
       state: Yup.string().required('State is required'),
       country: Yup.string().required('Country is required'),
-      opening_balance: Yup.number()
-        .typeError('Opening Balance must be an integer')
-        .required('Opening Balance is required')
-        .integer('Opening Balance must be an integer')
+      opening_balance: Yup.number().typeError('Opening Balance must be a number').required('Opening Balance is required')
     }),
-
     onSubmit: async (values) => {
-      const postData = { ...values };
-      postData.invoicing_profile = businessDetailsData?.id;
-      let post_url = '/invoicing/customer_profiles/create/';
-      let put_url = `/invoicing/invoicing/customer_profiles/update/${selectedCustomer?.id}/`;
-
-      let url = type === 'edit' ? put_url : post_url;
-      let method = type === 'edit' ? 'put' : 'post';
+      const postData = { ...values, invoicing_profile: businessDetailsData?.id };
+      const url =
+        type === 'edit' ? `/invoicing/invoicing/customer_profiles/update/${selectedCustomer?.id}/` : '/invoicing/customer_profiles/create/';
+      const method = type === 'edit' ? 'put' : 'post';
 
       try {
-        const { res, error } = await Factory(method, url, postData);
+        const { res } = await Factory(method, url, postData);
         if (res.status_cd === 0) {
           getCustomersData(businessDetailsData?.id);
           setType('');
@@ -130,7 +93,6 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
           );
         }
       } catch (error) {
-        // showSnackbar(JSON.stringify(error), 'error');
         dispatch(
           openSnackbar({
             open: true,
@@ -143,6 +105,8 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
       }
     }
   });
+
+  const { values, setValues, errors, touched, handleSubmit, handleBlur, setFieldValue, resetForm } = formik;
 
   useEffect(() => {
     if (type === 'edit' && selectedCustomer) {
@@ -164,101 +128,116 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
     }
   }, [type, selectedCustomer]);
 
-  const { values, setValues, errors, touched, handleSubmit, handleBlur, setFieldValue, resetForm } = formik;
+  const fields = [
+    { name: 'name', label: 'Customer Name' },
+    { name: 'pan_number', label: 'PAN' },
+    { name: 'gst_registered', label: 'GST Registered' },
+    { name: 'gstin', label: 'GSTIN' },
+    { name: 'gst_type', label: 'GST Type' },
+    { name: 'address_line1', label: 'Address Line 1' },
+    { name: 'address_line2', label: 'Address Line 2' },
+    { name: 'country', label: 'Country' },
+    { name: 'state', label: 'State' },
+    { name: 'postal_code', label: 'Pincode' },
+    { name: 'email', label: 'Email' },
+    { name: 'mobile_number', label: 'Mobile' },
+    { name: 'opening_balance', label: 'Opening Balance' }
+  ];
 
   return (
     <Modal
       open={open}
-      // maxWidth={ModalSize.MD}
-      header={{ title: type === 'edit' ? 'Update Customer' : 'Add New Customer', subheader: '' }}
+      showClose={true}
+      handleClose={() => {
+        setType('');
+        resetForm(); // Optional
+        handleClose(); // <- this closes the modal
+      }}
+      header={{ title: type === 'edit' ? 'Update Customer' : 'Add New Customer' }}
       footer={
-        <Stack direction="row" sx={{ width: 1, justifyContent: 'space-between', gap: 2 }}>
+        <Stack direction="row" spacing={2} justifyContent="space-between" sx={{ width: '100%' }}>
           <Button
+            variant="outlined"
+            color="error"
             onClick={() => {
               setType('');
               resetForm();
               handleClose();
             }}
-            variant="outlined"
-            color="error"
           >
             Cancel
           </Button>
-          <Button onClick={handleSubmit} type="submit" variant="contained" color="primary">
+          <Button variant="contained" onClick={handleSubmit}>
             {type === 'edit' ? 'Update' : 'Save'}
           </Button>
         </Stack>
       }
     >
-      <Box component="form" onSubmit={handleSubmit} sx={{ padding: 2 }}>
-        <Grid2 container spacing={2}>
-          {addCustomerData.map((item) => (
-            <Grid2 size={{ xs: 12, sm: 6 }} key={item.name}>
-              {item.name === 'gst_registered' ? (
+      <Box component="form" onSubmit={handleSubmit} sx={{ p: 2 }}>
+        <Grid container spacing={2}>
+          {fields.map((field) => (
+            <Grid item xs={12} sm={6} key={field.name}>
+              {field.name === 'gst_registered' ? (
                 <FormControl fullWidth>
-                  <FormLabel>{item.label}</FormLabel>
+                  <FormLabel>{field.label}</FormLabel>
                   <RadioGroup
-                    name={item.name}
-                    value={values[item.name]}
+                    row
+                    name={field.name}
+                    value={values[field.name]}
                     onChange={(e) => {
                       const value = e.target.value;
-                      setFieldValue(item.name, value);
-
+                      setFieldValue(field.name, value);
                       if (value === 'No') {
-                        setFieldValue('gstin', 'NA'); // Set GSTIN to NA
-                        formik.setFieldTouched('gstin', false); // Clear any existing validation error
-                        formik.setFieldError('gstin', ''); // Clear error message
-                      } else if (value === 'Yes') {
-                        setFieldValue('gstin', ''); // Reset GSTIN field for "Yes"
+                        setFieldValue('gstin', 'NA');
+                        formik.setFieldTouched('gstin', false);
+                        formik.setFieldError('gstin', '');
+                      } else {
+                        setFieldValue('gstin', '');
                       }
                     }}
-                    row
                   >
                     <FormControlLabel value="Yes" control={<Radio />} label="Yes" />
                     <FormControlLabel value="No" control={<Radio />} label="No" />
                   </RadioGroup>
                 </FormControl>
-              ) : item.name === 'gst_type' || item.name === 'state' || item.name === 'country' ? (
+              ) : field.name === 'gst_type' || field.name === 'state' || field.name === 'country' ? (
                 <>
                   <Typography sx={{ mb: 1 }}>
-                    {item.label} {<span style={{ color: 'red' }}>*</span>}
+                    {field.label} <span style={{ color: 'red' }}>*</span>
                   </Typography>
                   <CustomAutocomplete
-                    value={values[item.name]}
-                    name={item.name}
-                    onChange={(e, newValue) => setFieldValue(item.name, newValue)}
-                    options={item.name === 'gst_type' ? gstTypes : item.name === 'state' ? indian_States_And_UTs : CountriesList}
-                    error={touched[item.name] && Boolean(errors[item.name])}
-                    helperText={touched[item.name] && errors[item.name]}
+                    name={field.name}
+                    value={values[field.name]}
+                    onChange={(e, val) => setFieldValue(field.name, val)}
+                    options={field.name === 'gst_type' ? gstTypes : field.name === 'state' ? indian_States_And_UTs : CountriesList}
+                    error={touched[field.name] && Boolean(errors[field.name])}
+                    helperText={touched[field.name] && errors[field.name]}
                   />
                 </>
               ) : (
                 <>
                   <Typography sx={{ mb: 1 }}>
-                    {item.label} {!['address_line2', 'mobile_number'].includes(item.name) && <span style={{ color: 'red' }}>*</span>}
+                    {field.label} {['address_line2', 'mobile_number'].includes(field.name) ? '' : <span style={{ color: 'red' }}>*</span>}
                   </Typography>
-
                   <CustomInput
-                    name={item.name}
-                    placeholder={item.name === 'opening_balance' ? '₹' : ''}
-                    value={item.name === 'pan_number' ? values[item.name].toUpperCase() : values[item.name]}
+                    name={field.name}
+                    value={field.name === 'pan_number' ? values[field.name].toUpperCase() : values[field.name]}
                     onChange={(e) => {
-                      if (item.name === 'pan_number' && e.target.value.length > 10) {
-                        return;
-                      }
-                      const value = item.name === 'pan_number' ? e.target.value.toUpperCase() : e.target.value;
-                      setFieldValue(item.name, value);
+                      const value = field.name === 'pan_number' ? e.target.value.toUpperCase() : e.target.value;
+                      if (field.name === 'pan_number' && value.length > 10) return;
+                      setFieldValue(field.name, value);
                     }}
                     onBlur={handleBlur}
-                    error={touched[item.name] && Boolean(errors[item.name])}
-                    helperText={touched[item.name] && errors[item.name]}
-                    disabled={item.name === 'gstin' && values.gst_registered === 'No'}
+                    placeholder={field.name === 'opening_balance' ? '₹' : ''}
+                    error={touched[field.name] && Boolean(errors[field.name])}
+                    helperText={touched[field.name] && errors[field.name]}
+                    disabled={field.name === 'gstin' && values.gst_registered === 'No'}
                   />
                 </>
               )}
-            </Grid2>
+            </Grid>
           ))}
-        </Grid2>
+        </Grid>
       </Box>
     </Modal>
   );

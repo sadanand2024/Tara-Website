@@ -17,8 +17,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
 
-export default function TabOne({ businessDetails, postType }) {
-  // const [businessDetails, setBusinessDetails] = useState(null);
+export default function TabOne({ businessDetails = {}, postType }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -166,13 +165,14 @@ export default function TabOne({ businessDetails, postType }) {
   const { values, setValues, errors, touched, handleSubmit, handleBlur, setFieldValue } = formik;
   useEffect(() => {
     if (businessDetails && businessDetails.id) {
-      console.log(businessDetails);
       setValues((prev) => ({
         ...prev,
         nameOfBusiness: businessDetails.business.nameOfBusiness || '',
         registrationNumber: businessDetails.business.registrationNumber || '',
         entityType: businessDetails.business.entityType || '',
-        gst_registered: businessDetails?.gst_details?.length !== 0 ? 'Yes' : 'No',
+        // gst_registered: businessDetails?.gst_details?.length !== 0 ? 'Yes' : 'No',
+        gst_registered: Array.isArray(businessDetails?.gst_details) && businessDetails.gst_details.length > 0 ? 'Yes' : 'No',
+
         gstin:
           businessDetails?.gst_details?.length !== 0 && businessDetails.gstin === 'NA'
             ? ''
@@ -193,44 +193,50 @@ export default function TabOne({ businessDetails, postType }) {
       }));
     }
   }, [businessDetails]);
+  if (!businessDetails || !businessDetails.business) return <Typography>Loading business details...</Typography>;
+
   return (
     <>
-      <Typography variant="h5" textAlign="center" sx={{ fontWeight: 'bold', fontSize: { xs: '1.25rem', sm: '1.5rem', md: '1.75rem' } }}>
+      <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 2 }}>
         Business Details
-      </Typography>
-
-      <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
-        Basic Details
       </Typography>
 
       <Grid2 container spacing={2}>
         {busineesprofileFields.basic_details.map((item, index) => (
-          <Grid2 size={{ xs: 12, sm: 6 }} key={item.name}>
+          <Grid2 size={{ xs: 12, sm: 6, md: 4 }} key={item.name}>
             <FormControl fullWidth>
               {item.name === 'gst_registered' ? (
-                <>
-                  <FormLabel>{item.label}</FormLabel>
+                <Stack spacing={1}>
+                  <FormLabel sx={{ fontWeight: 500 }}>
+                    GST Registered <span style={{ color: 'red' }}>*</span>
+                  </FormLabel>
                   <RadioGroup
-                    name={item.name}
-                    value={values.gst_registered}
                     row
+                    name="gst_registered"
+                    value={values.gst_registered}
                     onChange={(e) => {
                       const value = e.target.value;
-                      setFieldValue(item.name, value);
+                      setFieldValue('gst_registered', value);
 
+                      // Handle conditional logic for GSTIN field
                       if (value === 'No') {
-                        setFieldValue('gstin', 'NA'); // Set GSTIN to NA
-                        formik.setFieldTouched('gstin', false); // Clear any existing validation error
-                        formik.setFieldError('gstin', ''); // Clear error message
+                        setFieldValue('gstin', 'NA');
+                        formik.setFieldTouched('gstin', false);
+                        formik.setFieldError('gstin', '');
                       } else if (value === 'Yes') {
-                        setFieldValue('gstin', ''); // Reset GSTIN field for "Yes"
+                        setFieldValue('gstin', '');
                       }
                     }}
                   >
                     <FormControlLabel value="Yes" control={<Radio />} label="Yes" />
                     <FormControlLabel value="No" control={<Radio />} label="No" />
                   </RadioGroup>
-                </>
+                  {touched.gst_registered && errors.gst_registered && (
+                    <Typography variant="caption" color="error">
+                      {errors.gst_registered}
+                    </Typography>
+                  )}
+                </Stack>
               ) : item.name === 'gstin' ? (
                 <>
                   <Typography sx={{ mb: 1 }}>
@@ -243,12 +249,11 @@ export default function TabOne({ businessDetails, postType }) {
                       <CustomAutocomplete
                         value={values[item.name] || ''}
                         onChange={(e, newValue) => setFieldValue(item.name, newValue)}
-                        options={[]}
-                        // {
-                        //   Array.isArray(businessDetails.gst_details)
-                        //     ? businessDetails.gst_details.map((gstItem) => gstItem.gstin) // Get gstin from gst_details
-                        //     : [] // Return empty array if gst_details is not an array
-                        // }
+                        options={
+                          Array.isArray(businessDetails.gst_details)
+                            ? businessDetails.gst_details.map((gstItem) => gstItem.gstin) // Get gstin from gst_details
+                            : [] // Return empty array if gst_details is not an array
+                        }
                         error={touched[item.name] && Boolean(errors[item.name])}
                         helperText={touched[item.name] && errors[item.name]}
                         name={item.name}
@@ -329,7 +334,7 @@ export default function TabOne({ businessDetails, postType }) {
         ))}
       </Grid2>
 
-      <Typography variant="h6" sx={{ fontWeight: 'bold', pt: 3, mb: 2 }}>
+      <Typography variant="h4" sx={{ fontWeight: 'bold', pt: 3, mb: 2 }}>
         Bank Details
       </Typography>
 
@@ -361,25 +366,16 @@ export default function TabOne({ businessDetails, postType }) {
         ))}
       </Grid2>
 
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
-        <Button
-          variant="outlined"
-          startIcon={<ArrowBackIcon />}
-          onClick={() => {
-            navigate();
-          }}
-        >
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 4 }}>
+        <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigate(-1)}>
           Back to Dashboard
         </Button>
 
-        <Box>
-          <Button variant="contained" onClick={handleSubmit} sx={{ mr: 2 }}>
+        <Stack direction="row" spacing={2}>
+          <Button variant="contained" onClick={handleSubmit}>
             Save & Continue
           </Button>
-          {/* <Button variant="contained" onClick={handleNext}>
-            Next
-          </Button> */}
-        </Box>
+        </Stack>
       </Box>
     </>
   );

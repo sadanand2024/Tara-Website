@@ -9,10 +9,9 @@ import Tabs from '@mui/material/Tabs';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import { useSelector } from 'react-redux';
-
+import MainCard from '../../../ui-component/cards/MainCard';
 // project imports
 import { ThemeMode } from 'config';
-
 // assets
 import PersonOutlineTwoToneIcon from '@mui/icons-material/PersonOutlineTwoTone';
 import PanoramaTwoToneIcon from '@mui/icons-material/PanoramaTwoTone';
@@ -24,7 +23,8 @@ import Factory from 'utils/Factory';
 import TabOne from './BusinessProfile';
 import TabTwo from './Customers';
 import TabThree from './Goods&Services';
-import TabFour from './Invoices';
+import TabFour from './InvoiceNumberFormat';
+import { Grid2 } from '@mui/material';
 // tab content
 function TabPanel({ children, value, index, ...other }) {
   return (
@@ -84,9 +84,9 @@ export default function SimpleTabs() {
   };
   const fetch_Invoicing_profile = async () => {
     let businessId = user.active_context.business_id;
-
     let url = `/invoicing/invoicing-profiles/?business_id=${businessId}`;
     const { res } = await Factory('get', url, {});
+    console.log(res.data);
     if (res?.status_cd === 0) {
       setBusinessDetails(res.data);
       setPostType('put');
@@ -101,75 +101,79 @@ export default function SimpleTabs() {
     fetch_Invoicing_profile();
   }, []);
   return (
-    <>
-      <Tabs
-        value={value}
-        variant="scrollable"
-        onChange={handleChange}
-        sx={{
-          mb: 3,
-          '& .MuiTab-root': {
-            minHeight: 'auto',
-            minWidth: 10,
-            py: 1.5,
-            px: 1,
-            mr: 2.2,
-            color: theme.palette.mode === ThemeMode.DARK ? 'grey.600' : 'grey.900'
-          },
-          '& .Mui-selected': { color: 'primary.main' }
-        }}
-      >
-        <Tab
-          icon={<PersonOutlineTwoToneIcon sx={{ fontSize: '1.3rem' }} />}
-          iconPosition="start"
-          label="Business Profile"
-          {...a11yProps(0)}
-        />
-        <Tab icon={<RecentActorsTwoToneIcon sx={{ fontSize: '1.3rem' }} />} iconPosition="start" label="Customers" {...a11yProps(1)} />
-        <Tab
-          icon={<PeopleAltTwoToneIcon sx={{ fontSize: '1.3rem' }} />}
-          label={'Goods & Services'}
-          iconPosition="start"
-          {...a11yProps(2)}
-        />
-        <Tab
-          icon={<PanoramaTwoToneIcon sx={{ fontSize: '1.3rem' }} />}
-          iconPosition="start"
-          label="Invoice Number Format"
-          {...a11yProps(3)}
-        />
-      </Tabs>
-      <TabPanel value={value} index={0}>
-        <TabOne businessDetails={businessDetails} setBusinessDetails={setBusinessDetails} postType={postType} />
-      </TabPanel>
-      <TabPanel value={value} index={1}>
-        <TabTwo
-          getCustomersData={getCustomersData}
-          customers={customers}
-          businessDetails={businessDetails}
-          setBusinessDetails={setBusinessDetails}
-          handleNext={handleNext}
-          handleBack={handleBack}
-        />
-      </TabPanel>
-      <TabPanel value={value} index={2}>
-        <TabThree
-          businessDetails={businessDetails}
-          setBusinessDetails={setBusinessDetails}
-          handleNext={handleNext}
-          handleBack={handleBack}
-        />
-      </TabPanel>
-      <TabPanel value={value} index={3}>
-        <TabFour
-          getCustomersData={getCustomersData}
-          customers={customers}
-          businessDetails={businessDetails}
-          setBusinessDetails={setBusinessDetails}
-          handleBack={handleBack}
-        />
-      </TabPanel>
-    </>
+    <MainCard title="Invoicing Settings">
+      <Grid2 container>
+        <Grid2 size={{ xs: 12 }}>
+          <Tabs
+            value={value}
+            variant="scrollable"
+            onChange={handleChange}
+            sx={{
+              mb: 3,
+              '& .MuiTab-root': {
+                minHeight: 'auto',
+                minWidth: 10,
+                py: 1.5,
+                px: 1,
+                mr: 2.2,
+                color: theme.palette.mode === ThemeMode.DARK ? 'grey.600' : 'grey.900'
+              },
+              '& .Mui-selected': { color: 'primary.main' }
+            }}
+          >
+            <Tab
+              icon={<PersonOutlineTwoToneIcon sx={{ fontSize: '1.3rem' }} />}
+              iconPosition="start"
+              label="Business Profile"
+              {...a11yProps(0)}
+            />
+            <Tab icon={<RecentActorsTwoToneIcon sx={{ fontSize: '1.3rem' }} />} iconPosition="start" label="Customers" {...a11yProps(1)} />
+            <Tab
+              icon={<PeopleAltTwoToneIcon sx={{ fontSize: '1.3rem' }} />}
+              label={'Goods & Services'}
+              iconPosition="start"
+              {...a11yProps(2)}
+            />
+            <Tab
+              icon={<PanoramaTwoToneIcon sx={{ fontSize: '1.3rem' }} />}
+              iconPosition="start"
+              label="Invoice Number Format"
+              {...a11yProps(3)}
+            />
+          </Tabs>
+          <TabPanel value={value} index={0}>
+            <TabOne businessDetails={businessDetails} setBusinessDetails={setBusinessDetails} postType={postType} />
+          </TabPanel>
+          <TabPanel value={value} index={1}>
+            <TabTwo
+              getCustomersData={getCustomersData}
+              customers={customers}
+              businessDetails={businessDetails}
+              setBusinessDetails={setBusinessDetails}
+              handleNext={handleNext}
+              handleBack={handleBack}
+            />
+          </TabPanel>
+          <TabPanel value={value} index={2}>
+            <TabThree
+              businessDetails={businessDetails}
+              setBusinessDetails={setBusinessDetails}
+              handleNext={handleNext}
+              handleBack={handleBack}
+            />
+          </TabPanel>
+          <TabPanel value={value} index={3}>
+            <TabFour
+              getCustomersData={getCustomersData}
+              customers={customers}
+              businessDetails={businessDetails}
+              setBusinessDetails={setBusinessDetails}
+              handleBack={handleBack}
+            />
+          </TabPanel>
+        </Grid2>
+      </Grid2>
+    </MainCard>
   );
 }
 

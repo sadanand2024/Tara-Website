@@ -1,31 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Pagination, Stack } from '@mui/material';
+// 📁 File: CustomerList.jsx
+
+import React, { useEffect, useState } from 'react';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Pagination, Stack, Typography, Box } from '@mui/material';
 import Factory from 'utils/Factory';
 import AddCustomer from './AddCustomer';
-// import ActionCell from 'utils/ActionCell';
-// import { useSnackbar } from 'components/CustomSnackbar';
-// import EmptyTable from 'components/third-party/table/EmptyTable';
-
+import ActionCell from '../../../../ui-component/extended/ActionCell';
 const CustomerList = ({ type, open, handleOpen, handleClose, setType, businessDetailsData, getCustomersData, customersListData }) => {
   const [customers, setCustomers] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
-  // const [openDialog, setOpenDialog] = useState(false);
-  // const { showSnackbar } = useSnackbar();
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 8;
 
   const handlePageChange = (event, value) => {
     setCurrentPage(value);
   };
+
   const paginatedData = customers.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+
   useEffect(() => {
-    if (customersListData) {
-      // Check if customersListData is not null or undefined
-      setCustomers(customersListData);
-    } else {
-      // If customersListData is null or undefined, set customers to an empty array
-      setCustomers([]);
-    }
+    setCustomers(customersListData || []);
   }, [customersListData]);
 
   const handleEdit = (customer) => {
@@ -35,53 +28,59 @@ const CustomerList = ({ type, open, handleOpen, handleClose, setType, businessDe
   };
 
   const handleDelete = async (customer) => {
-    let url = `/invoicing/customer_profiles/delete/${customer.id}`;
+    const url = `/invoicing/customer_profiles/delete/${customer.id}`;
     const { res } = await Factory('delete', url, {});
-    if (res.status_cd === 1) {
-      // showSnackbar(res.data.message, 'error');
-    } else {
-      // showSnackbar('Data Deleted Successfully', 'success');
+    if (res.status_cd === 0) {
       getCustomersData();
     }
   };
 
   return (
     <>
-      <TableContainer component={Paper}>
-        <Table>
+      <TableContainer component={Paper} sx={{ mt: 2, borderRadius: 2, boxShadow: 1 }}>
+        <Table sx={{ minWidth: 750 }}>
           <TableHead>
-            <TableRow>
+            <TableRow sx={{ bgcolor: 'grey.100' }}>
               <TableCell>Name</TableCell>
               <TableCell>PAN</TableCell>
               <TableCell>GSTIN</TableCell>
               <TableCell>Email</TableCell>
               <TableCell>Mobile</TableCell>
               <TableCell>Receivables</TableCell>
-              <TableCell>Actions</TableCell>
+              <TableCell align="center">Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {paginatedData.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7} align="center">
-                  {/* <EmptyTable msg="No Data" /> */}
+                  <Typography variant="body2" color="text.secondary" sx={{ py: 3 }}>
+                    No customer records found.
+                  </Typography>
                 </TableCell>
               </TableRow>
             ) : (
               paginatedData.map((customer, index) => (
-                <TableRow key={index}>
+                <TableRow
+                  key={index}
+                  sx={{
+                    bgcolor: 'background.paper',
+                    '&:hover': {
+                      boxShadow: 1
+                    }
+                  }}
+                >
                   <TableCell>{customer.name}</TableCell>
                   <TableCell>{customer.pan_number}</TableCell>
-                  <TableCell>{customer.gstin ? customer.gstin : 'NA'}</TableCell>
+                  <TableCell>{customer.gstin || 'NA'}</TableCell>
                   <TableCell>{customer.email}</TableCell>
                   <TableCell>{customer.mobile_number}</TableCell>
                   <TableCell>{customer.opening_balance}</TableCell>
-                  <TableCell>
-                    {/* ActionCell to handle actions */}
-                    {/* <ActionCell
-                      row={customer} // Pass the customer row data
-                      onEdit={() => handleEdit(customer)} // Edit handler
-                      onDelete={() => handleDelete(customer)} // Delete handler
+                  <TableCell align="center">
+                    <ActionCell
+                      row={customer}
+                      onEdit={() => handleEdit(customer)}
+                      onDelete={() => handleDelete(customer)}
                       open={open}
                       onClose={handleClose}
                       deleteDialogData={{
@@ -90,7 +89,7 @@ const CustomerList = ({ type, open, handleOpen, handleClose, setType, businessDe
                         description: `This action will remove ${customer.name} from the list.`,
                         successMessage: 'Customer has been deleted.'
                       }}
-                    /> */}
+                    />
                   </TableCell>
                 </TableRow>
               ))
@@ -98,11 +97,13 @@ const CustomerList = ({ type, open, handleOpen, handleClose, setType, businessDe
           </TableBody>
         </Table>
       </TableContainer>
+
       {customers.length > 0 && (
-        <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'center', px: { xs: 0.5, sm: 2.5 }, py: 1.5 }}>
+        <Stack direction="row" justifyContent="center" sx={{ py: 2 }}>
           <Pagination count={Math.ceil(customers.length / rowsPerPage)} page={currentPage} onChange={handlePageChange} />
         </Stack>
       )}
+
       <AddCustomer
         type={type}
         setType={setType}

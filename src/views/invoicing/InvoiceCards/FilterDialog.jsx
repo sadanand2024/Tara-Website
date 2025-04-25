@@ -23,7 +23,15 @@ import {
   OutlinedInput
 } from '@mui/material';
 
-export default function FilterDialog({ financialYear, businessData, filterDialog, setFilterDialog, setInvoices, setTitle }) {
+export default function FilterDialog({
+  financialYear,
+  invoicing_profile_data,
+  businessData,
+  filterDialog,
+  setFilterDialog,
+  setInvoices,
+  setTitle
+}) {
   const {
     register,
     handleSubmit,
@@ -56,7 +64,7 @@ export default function FilterDialog({ financialYear, businessData, filterDialog
   // };
 
   const onSubmit = async (formData) => {
-    let url = `/invoicing/filter-invoices?invoicing_profile_id=${businessData.id}&financial_year=${financialYear}&payment_status=${formData.paymentstatus}&invoice_status=${formData.invoicestatus}&due_date=${formData.dueDate}&invoice_date=${formData.date}&invoice_number=${formData.invoiceNumber}&customer=${formData.customer}&total_amount=${formData.amount}`;
+    let url = `/invoicing/filter-invoices?invoicing_profile_id=${invoicing_profile_data.invoicing_profile_id}&financial_year=${financialYear}&payment_status=${formData.paymentstatus}&invoice_status=${formData.invoicestatus}&due_date=${formData.dueDate}&invoice_date=${formData.date}&invoice_number=${formData.invoiceNumber}&customer=${formData.customer}&total_amount=${formData.amount}`;
     const { res } = await Factory('get', url, {});
     if (res.status_cd === 1) {
       // showSnackbar(JSON.stringify(res.data), 'error');
@@ -80,7 +88,7 @@ export default function FilterDialog({ financialYear, businessData, filterDialog
       disableRestoreFocus
       aria-labelledby="block-dialog-title"
       aria-describedby="block-dialog-description"
-      maxWidth="sm"
+      maxWidth="md"
     >
       <DialogTitle id="block-dialog-title">{'Choose any filter'}</DialogTitle>
       <form onSubmit={handleSubmit(onSubmit)}>
