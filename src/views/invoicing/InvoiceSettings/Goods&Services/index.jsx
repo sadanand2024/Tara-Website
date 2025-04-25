@@ -1,30 +1,25 @@
-import React, { useState, useEffect } from 'react';
-import { Button, Box } from '@mui/material';
+// 📁 File: TabThree.jsx
+
+import React, { useEffect, useState } from 'react';
+import { Button, Box, Stack, Typography } from '@mui/material';
 import Grid2 from '@mui/material/Grid2';
-import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
 import { IconPlus } from '@tabler/icons-react';
-import AddItem from './AddItem'; // Import the AddCustomer component
-import ItemList from './ItemList';
-import Factory from 'utils/Factory';
-// import { useRouter } from 'next/navigation';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { useNavigate } from 'react-router';
+import Factory from 'utils/Factory';
+import AddItem from './AddItem';
+import ItemList from './ItemList';
 
 export default function TabThree({ businessDetails, handleNext, handleBack }) {
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState([]);
   const [type, setType] = useState('');
-  // const router = useRouter();
+  const navigate = useNavigate();
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
 
-  const handleOpen = () => {
-    setOpen(true);
-  };
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-  const get_Goods_and_Services_Data = async () => {
-    let url = `/invoicing/goods-services/${businessDetails.id}`;
+  const fetchItems = async () => {
+    const url = `/invoicing/goods-services/${businessDetails.id}`;
     const { res } = await Factory('get', url, {});
     if (res.status_cd === 0) {
       setItems(res.data.goods_and_services);
@@ -32,31 +27,30 @@ export default function TabThree({ businessDetails, handleNext, handleBack }) {
   };
 
   useEffect(() => {
-    get_Goods_and_Services_Data();
-  }, []);
+    if (businessDetails?.id) fetchItems();
+  }, [businessDetails]);
+
   return (
     <>
       <Grid2 container spacing={2}>
-        {' '}
+        {/* Header Section */}
         <Grid2 size={{ xs: 12 }}>
-          <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap' }}>
-            <Typography variant="h6">Items</Typography>
-
-            <Box>
-              <Button variant="contained" startIcon={<IconPlus size={16} />} onClick={handleOpen}>
-                Add
-              </Button>
-              <AddItem
-                businessDetailsData={businessDetails}
-                open={open}
-                setType={setType}
-                handleOpen={handleOpen}
-                handleClose={handleClose}
-                get_Goods_and_Services_Data={get_Goods_and_Services_Data}
-              />
-            </Box>
+          <Stack direction="row" alignItems="center" justifyContent="flex-end" spacing={2}>
+            <Button variant="contained" startIcon={<IconPlus size={16} />} onClick={handleOpen}>
+              Add Item
+            </Button>
+            <AddItem
+              businessDetailsData={businessDetails}
+              open={open}
+              setType={setType}
+              handleOpen={handleOpen}
+              handleClose={handleClose}
+              get_Goods_and_Services_Data={fetchItems}
+            />
           </Stack>
         </Grid2>
+
+        {/* Items List */}
         <Grid2 size={{ xs: 12 }}>
           <ItemList
             type={type}
@@ -66,29 +60,27 @@ export default function TabThree({ businessDetails, handleNext, handleBack }) {
             setType={setType}
             businessDetailsData={businessDetails}
             itemsData={items}
-            get_Goods_and_Services_Data={get_Goods_and_Services_Data}
+            get_Goods_and_Services_Data={fetchItems}
           />
         </Grid2>
       </Grid2>
+
+      {/* Footer Navigation */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
         <Button
           variant="outlined"
           startIcon={<ArrowBackIcon />}
           onClick={() => {
-            // router.back();
+            navigate('/app/invoice');
           }}
         >
-          Back to Dashboard
+          Back To Dashboard
         </Button>
-
-        <Box>
-          <Button variant="contained" onClick={handleBack} sx={{ mr: 2 }}>
-            Back
-          </Button>
+        {/* <Stack direction="row" spacing={2}>
           <Button variant="contained" onClick={handleNext}>
             Next
           </Button>
-        </Box>
+        </Stack> */}
       </Box>
     </>
   );

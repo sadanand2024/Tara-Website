@@ -1,21 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogActions, DialogContent, Button, Box, Typography, Grid2 } from '@mui/material';
+import { Box, Button, Grid, Typography, Stack } from '@mui/material';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import CustomInput from 'utils/CustomInput';
-import Factory from 'utils/Factory';
-// import { useSnackbar } from '@/components/CustomSnackbar';
-// import { useRouter } from 'next/navigation';
-import CustomAutocomplete from 'utils/CustomAutocomplete';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { useNavigate } from 'react-router';
+import Factory from 'utils/Factory';
+import CustomInput from 'utils/CustomInput';
+import CustomAutocomplete from 'utils/CustomAutocomplete';
 
-const InvoiceNumberFormat = ({ businessDetailsData, handleBack }) => {
-  // const { showSnackbar } = useSnackbar();
-  // const router = useRouter();
-
+const InvoiceNumberFormat = ({ businessDetails, handleBack }) => {
   const [postType, setPostType] = useState('post');
   const [selectedRecord, setSelectedRecord] = useState(null);
-
+  const navigate = useNavigate();
   const formik = useFormik({
     initialValues: {
       gstin: '',
@@ -26,16 +22,15 @@ const InvoiceNumberFormat = ({ businessDetailsData, handleBack }) => {
     },
     validationSchema: Yup.object({
       gstin: Yup.string().required('GSTIN is required'),
-      startingNumber: Yup.number().typeError('Starting Number must be a number').required('Starting Number is required'),
+      startingNumber: Yup.number().typeError('Must be a number').required('Starting Number is required'),
       prefix: Yup.string().required('Prefix is required'),
       suffix: Yup.string().required('Suffix is required')
     }),
-
     onSubmit: async (values) => {
       const url = postType === 'post' ? '/invoicing/invoice-formats/' : `/invoicing/invoice-formats/${selectedRecord.id}/`;
 
       const postData = {
-        invoicing_profile: businessDetailsData.id,
+        invoicing_profile: businessDetails.id,
         gstin: values.gstin,
         invoice_format: {
           startingNumber: values.startingNumber,
@@ -48,33 +43,33 @@ const InvoiceNumberFormat = ({ businessDetailsData, handleBack }) => {
       try {
         const { res } = await Factory(postType, url, postData);
         if (res.status_cd === 0) {
-          // showSnackbar('Data Updated Successfully', 'success');
-          // router.push('/invoicing');
+          // Handle success UI or routing if needed
         } else {
-          // showSnackbar(JSON.stringify(res.data.error), 'error');
+          // Handle error response
         }
       } catch (error) {
-        // showSnackbar('Error while updating data', 'error');
+        // Handle exception
       }
     }
   });
 
   useEffect(() => {
-    if (businessDetailsData?.invoice_format) {
-      setSelectedRecord(businessDetailsData);
+    if (businessDetails?.invoice_format) {
+      setSelectedRecord(businessDetails);
       formik.setValues({
         gstin: '',
-        startingNumber: businessDetailsData.invoice_format.startingNumber || '',
-        prefix: businessDetailsData.invoice_format.prefix || '',
-        suffix: businessDetailsData.invoice_format.suffix || '',
-        format_version: Number(businessDetailsData.invoice_format.format_version) || ''
+        startingNumber: businessDetails.invoice_format.startingNumber || '',
+        prefix: businessDetails.invoice_format.prefix || '',
+        suffix: businessDetails.invoice_format.suffix || '',
+        format_version: businessDetails.invoice_format.format_version || ''
       });
     }
-  }, [businessDetailsData]);
+  }, [businessDetails]);
+
   return (
     <Box>
-      <Grid2 container spacing={2}>
-        <Grid2 size={{ sx: 12, sm: 6 }}>
+      <Grid container spacing={2}>
+        <Grid item xs={12} sm={6}>
           <Typography sx={{ mb: 1 }}>
             <span style={{ color: 'red' }}>*</span> Select GSTIN Number:
           </Typography>
@@ -82,7 +77,7 @@ const InvoiceNumberFormat = ({ businessDetailsData, handleBack }) => {
             value={formik.values.gstin}
             onChange={(e, newValue) => {
               formik.setFieldValue('gstin', newValue);
-              const selected = businessDetailsData.invoice_format.find((item) => item.gstin === newValue);
+              const selected = businessDetails.invoice_format.find((item) => item.gstin === newValue);
               if (selected) {
                 formik.setValues({
                   gstin: newValue,
@@ -94,7 +89,6 @@ const InvoiceNumberFormat = ({ businessDetailsData, handleBack }) => {
                 setSelectedRecord(selected);
                 setPostType('put');
               } else {
-                // formik.resetForm();
                 formik.setValues((prev) => ({
                   ...prev,
                   gstin: newValue,
@@ -106,14 +100,14 @@ const InvoiceNumberFormat = ({ businessDetailsData, handleBack }) => {
                 setPostType('post');
               }
             }}
-            options={businessDetailsData?.gst_details.length > 0 ? businessDetailsData?.gst_details?.map((item) => item.gstin) : ['NA']}
+            options={businessDetails?.gst_details?.length > 0 ? businessDetails.gst_details.map((item) => item.gstin) : ['NA']}
             error={formik.touched.gstin && Boolean(formik.errors.gstin)}
             helperText={formik.touched.gstin && formik.errors.gstin}
           />
-        </Grid2>
+        </Grid>
 
         {['startingNumber', 'prefix', 'suffix'].map((field) => (
-          <Grid2 size={{ sx: 12, sm: 6 }} key={field}>
+          <Grid item xs={12} sm={6} key={field}>
             <Typography sx={{ mb: 1 }}>
               <span style={{ color: 'red' }}>*</span> {field.replace(/([A-Z])/g, ' $1').trim()}:
             </Typography>
@@ -125,30 +119,24 @@ const InvoiceNumberFormat = ({ businessDetailsData, handleBack }) => {
               error={formik.touched[field] && Boolean(formik.errors[field])}
               helperText={formik.touched[field] && formik.errors[field]}
             />
-          </Grid2>
+          </Grid>
         ))}
-      </Grid2>
+      </Grid>
 
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
+      <Stack direction="row" justifyContent="space-between" sx={{ mt: 4 }}>
         <Button
           variant="outlined"
           startIcon={<ArrowBackIcon />}
           onClick={() => {
-            // router.back();
+            navigate('/app/invoice');
           }}
         >
-          Back to Dashboard
+          Back To Dashboard
         </Button>
-
-        <Box>
-          <Button variant="contained" onClick={handleBack} sx={{ mr: 2 }}>
-            Back
-          </Button>
-          <Button onClick={formik.handleSubmit} color="primary" variant="contained">
-            Save
-          </Button>
-        </Box>
-      </Box>
+        <Button variant="contained" onClick={formik.handleSubmit}>
+          Save
+        </Button>
+      </Stack>
     </Box>
   );
 };

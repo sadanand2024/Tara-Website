@@ -1,47 +1,37 @@
-import React, { useState, useEffect } from 'react';
-import Button from '@mui/material/Button';
-import Grid2 from '@mui/material/Grid2';
-import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
-import { IconPlus } from '@tabler/icons-react';
-import AddCustomer from './AddCustomer'; // Import the AddCustomer component
-import CustomerList from './CustomerList';
-import Factory from 'utils/Factory';
-import { Box } from '@mui/material';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+// 📁 File: TabTwo.jsx
+
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router';
+import { Button, Stack, Typography, Box, Grid2 } from '@mui/material';
+import { IconPlus } from '@tabler/icons-react';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+
+import AddCustomer from './AddCustomer';
+import CustomerList from './CustomerList';
 
 export default function TabTwo({ getCustomersData, customers, businessDetails, handleNext, handleBack }) {
   const [open, setOpen] = useState(false);
-  const [type, setType] = useState('');
+  const [type, setType] = useState('add');
   const navigate = useNavigate();
 
-  const handleOpen = () => {
-    setOpen(true);
-  };
-  const handleClose = () => {
-    setOpen(false);
-  };
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
   return (
     <>
+      {/* Header Section */}
       <Grid2 container spacing={2}>
-        {' '}
         <Grid2 size={{ xs: 12 }}>
-          <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap' }}>
-            <Typography variant="h6">Customers</Typography>
-            <Button
-              variant="contained"
-              startIcon={<IconPlus size={16} />}
-              onClick={() => {
-                setType('add');
-                handleOpen();
-              }}
-            >
-              Add
+          <Stack direction="row" justifyContent="flex-end" alignItems="center" spacing={2}>
+            <Button variant="contained" startIcon={<IconPlus size={16} />} onClick={handleOpen}>
+              Add Customer
             </Button>
-            <AddCustomer businessDetailsData={businessDetails} open={open} handleClose={handleClose} getCustomersData={getCustomersData} />
           </Stack>
+
+          <AddCustomer open={open} handleClose={handleClose} getCustomersData={getCustomersData} businessDetailsData={businessDetails} />
         </Grid2>
+
+        {/* Customer List Section */}
         <Grid2 size={{ xs: 12 }}>
           <CustomerList
             type={type}
@@ -56,29 +46,25 @@ export default function TabTwo({ getCustomersData, customers, businessDetails, h
         </Grid2>
       </Grid2>
 
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
+      {/* Footer Navigation Buttons */}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
         <Button
           variant="outlined"
           startIcon={<ArrowBackIcon />}
           onClick={() => {
-            // router.back();
+            navigate('/app/invoice');
           }}
         >
           Back to Dashboard
         </Button>
-
-        <Box>
-          <Button
-            variant="contained"
-            // onClick={handleBack}
-            sx={{ mr: 2 }}
-          >
+        {/* <Stack direction="row" spacing={2}>
+          <Button variant="outlined" onClick={handleBack}>
             Back
           </Button>
           <Button variant="contained" onClick={handleNext}>
             Next
           </Button>
-        </Box>
+        </Stack> */}
       </Box>
     </>
   );

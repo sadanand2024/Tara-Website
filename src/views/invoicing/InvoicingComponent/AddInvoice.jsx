@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
@@ -14,7 +15,7 @@ import CustomInput from 'utils/CustomInput';
 import CustomAutocomplete from 'utils/CustomAutocomplete';
 import { IconPlus } from '@tabler/icons-react';
 import { IconTrash } from '@tabler/icons-react';
-
+import { BASE_URL } from '../../../../constants';
 import {
   Table,
   TableBody,
@@ -258,10 +259,37 @@ const AddItem = ({
       if (res.status_cd === 0) {
         resetForm();
         const invoice_id = selectedInvoice ? selectedInvoice?.id : res.id;
-        navigate(`/invoicing/invoice?id=${invoice_id}`);
+        // navigate(`/invoicing/invoice?id=${invoice_id}`);
+        navigate(`/app/invoice`);
+        // downloadInvoice(invoice_id);
       }
     }
   });
+  const downloadInvoice = async (id) => {
+    console.log(BASE_URL);
+    try {
+      const tokens = JSON.parse(localStorage.getItem('user'));
+      const response = await axios.get(`${BASE_URL}/invoicing/create-pdf/${id}`, {
+        responseType: 'arraybuffer',
+        headers: {
+          Authorization: `Bearer ${tokens.access_token}`
+        }
+      });
+      if (response.data.byteLength > 0) {
+        const blob = new Blob([response.data], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        window.open(url, '_blank');
+        setTimeout(() => {
+          URL.revokeObjectURL(url);
+        }, 10000);
+      } else {
+        // showSnackbar('Invalid response from server', 'error');
+      }
+    } catch (error) {
+      // console.error('Error fetching PDF:', error);
+      // showSnackbar('Invalid response from server', 'error');
+    }
+  };
   const sameAddressFunction = (e) => {
     setFieldValue('same_address', e.target.checked);
     if (e.target.checked === true) {
@@ -743,10 +771,9 @@ const AddItem = ({
   }, [selectedInvoice]);
 
   const { values, setValues, errors, touched, handleSubmit, handleBlur, setFieldValue, resetForm } = formik;
-  // useEffect(() => {
-  //   setSelectedgstin(businessDetailsData.gstin);
-  // }, [businessDetailsData]);
-  console.log(values);
+  useEffect(() => {
+    setSelectedgstin(businessDetailsData.gstin);
+  }, [businessDetailsData]);
   return (
     // <HomeCard title={selectedInvoice ? 'Edit Invoice' : 'Create Invoice'} tagline="Some text tagline regarding invoicing.">
     <MainCard>
@@ -768,21 +795,19 @@ const AddItem = ({
             <CustomAutocomplete
               // value={selectedgstin}
               value={values['gstin'] || ''}
-              options={[]}
-              // {
-              //   businessDetailsData?.gst_details?.length > 0
-              //     ? businessDetailsData.gst_details.map((item) => item.gstin || 'NA') // Show 'NA' if gstin is not available
-              //     : ['NA'] // Show only 'NA' if no data
-              // }
+              options={
+                businessDetailsData?.gst_details?.length > 0
+                  ? businessDetailsData.gst_details.map((item) => item.gstin || 'NA') // Show 'NA' if gstin is not available
+                  : ['NA'] // Show only 'NA' if no data
+              }
               onChange={async (event, newgstin) => {
                 setSelectedgstin(newgstin || 'NA');
                 setFieldValue('gstin', newgstin || 'NA');
                 const url = `/invoicing/invoicing-profiles/${businessDetailsData.id}/update/`;
-                const postData = {
-                  gstin: newgstin
-                };
+                let formdata = new FormData();
+                formdata.append('gstin', newgstin || 'NA');
 
-                const { res } = await Factory('put', url, postData);
+                const { res } = await Factory('put', url, formdata);
                 if (res.status_cd === 0) {
                   getInvoiceFormat();
                 } else {
