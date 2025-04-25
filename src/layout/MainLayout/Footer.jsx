@@ -18,24 +18,24 @@ export default function Footer() {
     >
       <Typography variant="caption">
         &copy; All rights reserved{' '}
-        <Typography component={Link} href="https://codedthemes.com" underline="hover" target="_blank" color="secondary.main">
-          CodedThemes
+        <Typography component={Link} href="https://tarafirst.com" underline="hover" target="_blank" color="secondary.main">
+        Team Tara
         </Typography>
       </Typography>
       <Stack direction="row" sx={{ gap: 1.5, alignItems: 'center', justifyContent: 'space-between' }}>
         <Link
           component={RouterLink}
-          to="https://x.com/codedthemes"
+          to="https://x.com/tarafirst"
           underline="hover"
           target="_blank"
           variant="caption"
-          color="text.primary"
+          color="text.primary" 
         >
           Twitter
         </Link>
         <Link
           component={RouterLink}
-          to="https://discord.com/invite/p2E2WhCb6s"
+          to="https://tarafirst.com/invite/p2E2WhCb6s"
           underline="hover"
           target="_blank"
           variant="caption"

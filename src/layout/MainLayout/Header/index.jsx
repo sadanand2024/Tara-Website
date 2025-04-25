@@ -80,6 +80,8 @@ export default function Header() {
         setSelectedOption(newValue);
         let data = { ...user };
         data.active_context = response.res.data.active_context;
+        data.module_subscriptions = response.res.data.module_subscriptions;
+        data.user_role = response.res.data.user_role;
         localStorage.setItem('user', JSON.stringify(data));
         reduxDispatch(storeUser(data));
         dispatch(

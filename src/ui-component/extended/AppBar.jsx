@@ -74,7 +74,7 @@ export default function AppBar({ ...others }) {
     <ElevationScroll {...others}>
       <MuiAppBar>
         {/* <Container> */}
-        <Toolbar sx={{ py: 2.5, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Toolbar sx={{ py: 0.5, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           {/* Left: Logo */}
           <Box>
             <RouterLink to="/">
