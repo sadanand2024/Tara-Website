@@ -14,6 +14,7 @@ import { storeUser } from 'store/slices/account'; // redux slice
 // project imports
 import Loader from 'ui-component/Loader';
 import axios from 'utils/axios';
+import { logout } from 'utils/api';
 
 const chance = new Chance();
 
@@ -72,6 +73,7 @@ export function JWTProvider({ children }) {
           });
         } else {
           dispatch({ type: LOGOUT });
+          logout();
         }
       } catch (err) {
         console.error(err);

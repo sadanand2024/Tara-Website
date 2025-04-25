@@ -104,19 +104,19 @@ const PermissionsDrawer = ({ open, onClose, selectedUser, selectedPermissions, o
 
   // Check if all permissions for a service are selected
   const isServiceAllSelected = (serviceKey, service) => {
-    const servicePermissions = service.actions.map(action => selectedPermissions[getPermissionKey(serviceKey, action)] || false);
+    const servicePermissions = service.actions.map((action) => selectedPermissions[getPermissionKey(serviceKey, action)] || false);
     return servicePermissions.every(Boolean);
   };
 
   // Check if some permissions for a service are selected
   const isServiceIndeterminate = (serviceKey, service) => {
-    const servicePermissions = service.actions.map(action => selectedPermissions[getPermissionKey(serviceKey, action)] || false);
+    const servicePermissions = service.actions.map((action) => selectedPermissions[getPermissionKey(serviceKey, action)] || false);
     return servicePermissions.some(Boolean) && !servicePermissions.every(Boolean);
   };
 
   // Check if all permissions for an action across all services are selected
   const isActionAllSelected = (moduleId, action) => {
-    const module = transformedPermissions.find(p => p?.module === moduleId);
+    const module = transformedPermissions.find((p) => p?.module === moduleId);
     if (!module) return false;
 
     const actionPermissions = Object.entries(module.services)
@@ -128,7 +128,7 @@ const PermissionsDrawer = ({ open, onClose, selectedUser, selectedPermissions, o
 
   // Check if some permissions for an action across all services are selected
   const isActionIndeterminate = (moduleId, action) => {
-    const module = transformedPermissions.find(p => p?.module === moduleId);
+    const module = transformedPermissions.find((p) => p?.module === moduleId);
     if (!module) return false;
 
     const actionPermissions = Object.entries(module.services)
@@ -189,7 +189,7 @@ const PermissionsDrawer = ({ open, onClose, selectedUser, selectedPermissions, o
           pb: 2
         }}
       >
-        <Typography variant="h4" sx={{ color: 'primary.main' }}>
+        <Typography variant="h4" sx={{ color: 'primary.dark' }}>
           Modify Permissions
         </Typography>
         <IconButton
@@ -412,7 +412,9 @@ const PermissionsDrawer = ({ open, onClose, selectedUser, selectedPermissions, o
                           service.actions.some((action) => !commonActions.includes(action))
                         ) && (
                           <TableCell
-                            colSpan={1}
+                            colSpan={extraActions.filter(action => 
+                              Object.values(module.services).some(service => service.actions.includes(action))
+                            ).length}
                             align="center"
                             sx={{
                               fontWeight: 600,
@@ -458,9 +460,39 @@ const PermissionsDrawer = ({ open, onClose, selectedUser, selectedPermissions, o
                             </Box>
                           </TableCell>
                         ))}
-                        {Object.values(module.services).some((service) =>
-                          service.actions.some((action) => !commonActions.includes(action))
-                        ) && <TableCell align="center">Additional</TableCell>}
+                        {extraActions
+                          .filter(action => Object.values(module.services).some(service => service.actions.includes(action)))
+                          .map((action) => (
+                            <TableCell
+                              key={action}
+                              align="center"
+                              sx={{
+                                fontWeight: 500,
+                                fontSize: '0.8rem',
+                                py: 0.5,
+                                px: 0.5,
+                                bgcolor: 'secondary.lighter'
+                              }}
+                            >
+                              <Box
+                                sx={{
+                                  display: 'flex',
+                                  flexDirection: 'column',
+                                  alignItems: 'center',
+                                  gap: 0.25
+                                }}
+                              >
+                                <Checkbox
+                                  size="small"
+                                  onChange={(e) => handleSelectAllAction(module.module, action, e.target.checked)}
+                                  checked={isActionAllSelected(module.module, action)}
+                                  indeterminate={isActionIndeterminate(module.module, action)}
+                                  color="secondary"
+                                />
+                                {actionLabels[action]}
+                              </Box>
+                            </TableCell>
+                          ))}
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -504,29 +536,30 @@ const PermissionsDrawer = ({ open, onClose, selectedUser, selectedPermissions, o
                                   color="secondary"
                                 />
                               ) : (
-                                <Typography variant="body2" color="text.secondary" sx={{ opacity: 0.7 }}>
+                                <Typography variant="body2" color="text.primary" sx={{ opacity: 0.7, fontSize: '1.75rem' }}>
                                   -
                                 </Typography>
                               )}
                             </TableCell>
                           ))}
-                          {Object.values(module.services).some((s) => s.actions.some((action) => !commonActions.includes(action))) && (
-                            <TableCell align="center">
-                              <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center', flexWrap: 'wrap' }}>
-                                {service.actions
-                                  .filter((action) => !commonActions.includes(action))
-                                  .map((action) => (
-                                    <Checkbox
-                                      key={action}
-                                      size="small"
-                                      checked={selectedPermissions[getPermissionKey(serviceKey, action)] || false}
-                                      onChange={(e) => onPermissionChange(getPermissionKey(serviceKey, action), e.target.checked)}
-                                      color="secondary"
-                                    />
-                                  ))}
-                              </Box>
-                            </TableCell>
-                          )}
+                          {extraActions
+                            .filter(action => Object.values(module.services).some(s => s.actions.includes(action)))
+                            .map((action) => (
+                              <TableCell key={action} align="center" sx={{ py: 0.25, px: 0.5 }}>
+                                {service.actions.includes(action) ? (
+                                  <Checkbox
+                                    size="small"
+                                    checked={selectedPermissions[getPermissionKey(serviceKey, action)] || false}
+                                    onChange={(e) => onPermissionChange(getPermissionKey(serviceKey, action), e.target.checked)}
+                                    color="secondary"
+                                  />
+                                ) : (
+                                  <Typography variant="h5" color="text.secondary" sx={{ opacity: 0.7, fontSize: '1.75rem' }}>
+                                    -
+                                  </Typography>
+                                )}
+                              </TableCell>
+                            ))}
                         </TableRow>
                       ))}
                     </TableBody>
