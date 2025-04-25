@@ -155,6 +155,24 @@ const dashboard = {
       icon: icons.IconHeadset,
       breadcrumbs: false,
       caption: ''
+    },
+    {
+      id: 'payroll',
+      title: 'payroll',
+      type: 'item',
+      url: '/app/payroll',
+      icon: icons.IconHeadset,
+      breadcrumbs: false,
+      caption: ''
+    },
+    {
+      id: 'invoicing',
+      title: 'invoicing',
+      type: 'item',
+      url: '/app/invoice',
+      icon: icons.IconHeadset,
+      breadcrumbs: false,
+      caption: ''
     }
   ]
 };

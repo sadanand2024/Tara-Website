@@ -1,0 +1,233 @@
+'use client';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import MainCard from '@/components/MainCard';
+import { Box, Stack, Typography, LinearProgress, Button, Grid2 } from '@mui/material';
+import Factory from '@/utils/Factory';
+import Loader from '@/components/PageLoader';
+import useCurrentUser from '@/hooks/useCurrentUser';
+import { useSnackbar } from '@/components/CustomSnackbar';
+
+// Constants for better maintainability
+const PAYROLL_STEPS = [
+  { nameKey: 'Business profile', path: '/organization_details', dataKey: 'organisation_details' },
+  { nameKey: 'Set up Work Location', path: '/set_up_work_location', dataKey: 'work_locations' },
+  { nameKey: 'Set up Departments', path: '/set_up_departments', dataKey: 'departments' },
+  { nameKey: 'Set up Designations', path: '/set_up_designations', dataKey: 'designations' },
+  { nameKey: 'Set up Statutory Components', path: '/set_up_statutory_components', dataKey: 'statutory_component' },
+  { nameKey: 'Set up Salary Components', path: '/set_up_salary_components', dataKey: 'salary_component' },
+  { nameKey: 'Set up Salary Template', path: '/set_up_salary_template', dataKey: 'salary_template' },
+  { nameKey: 'Set up Employee Master', path: '/set_up_employee_master', dataKey: 'employee_master' },
+  { nameKey: 'Set up Pay & Schedule', path: '/pay_schedule', dataKey: 'pay_schedule' },
+  { nameKey: 'Leave & Attendance', path: '/leave_and_attendance', dataKey: 'leave_and_attendance' }
+];
+
+const PayrollSetup = () => {
+  const { userData } = useCurrentUser();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { showSnackbar } = useSnackbar();
+
+  const [loading, setLoading] = useState(false);
+  const [payrollDetails, setPayrollDetails] = useState({});
+  const [steps, setSteps] = useState(PAYROLL_STEPS.map((step) => ({ ...step, completed: false })));
+
+  const businessId = useMemo(
+    () => (userData.user_type === 'Business' ? userData.business_affiliated[0]?.id : userData.businesssDetails?.business[0]?.id),
+    [userData]
+  );
+
+  const hasFetched = React.useRef(false);
+
+  const fetchPayrollDetails = useCallback(async () => {
+    if (!businessId) {
+      showSnackbar('Business ID not found', 'error');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const url = `/payroll/business-payroll/${businessId}/`;
+      const { res, error } = await Factory('get', url, {});
+
+      if (error) {
+        throw new Error(error);
+      }
+
+      if (res.status_cd === 0) {
+        setPayrollDetails((prev) => ({ ...prev, ...res.data }));
+
+        // Update steps completion status
+        setSteps((prevSteps) =>
+          prevSteps.map((step) => ({
+            ...step,
+            completed: res.data[step.dataKey] || false
+          }))
+        );
+      } else {
+        showSnackbar(res?.data?.data || 'Failed to fetch payroll details', 'error');
+      }
+    } catch (error) {
+      showSnackbar(error.message || 'An error occurred while fetching payroll details', 'error');
+    } finally {
+      setLoading(false);
+    }
+  }, [businessId, showSnackbar]);
+
+  useEffect(() => {
+    if (businessId && !hasFetched.current) {
+      hasFetched.current = true;
+      fetchPayrollDetails();
+    }
+  }, [businessId, fetchPayrollDetails]);
+
+  const handleStepClick = useCallback(
+    (step) => {
+      const routeBase = `/payrollsetup${step.path}`;
+
+      if (!payrollDetails?.payroll_id && step.nameKey === 'Business profile') {
+        router.push(`${routeBase}?business-id=${businessId}`);
+      } else if (payrollDetails?.payroll_id) {
+        router.push(`${routeBase}?payrollid=${payrollDetails.payroll_id}`);
+      } else {
+        showSnackbar('Payroll ID not available', 'error');
+      }
+    },
+    [router, payrollDetails, businessId, showSnackbar]
+  );
+
+  const completionPercentage = useMemo(() => {
+    const completedSteps = steps.filter((step) => step.completed).length;
+    return Math.round((completedSteps / steps.length) * 100);
+  }, [steps]);
+
+  if (loading) {
+    return <Loader />;
+  }
+
+  return (
+    <Box>
+      <Box sx={{ mb: 2 }}>
+        <Typography variant="h4" textAlign="center" sx={{ mb: 1 }}>
+          Welcome {userData.firstname}
+        </Typography>
+        <Typography variant="subtitle1" textAlign="center" sx={{ color: 'text.disabled' }}>
+          Set up your organization before starting payroll
+        </Typography>
+      </Box>
+
+      <Grid2 container spacing={{ xs: 2, sm: 3 }}>
+        <Grid2 size={12}>
+          <MainCard
+            sx={{
+              maxWidth: 800,
+              margin: '0 auto',
+              padding: 0,
+              borderRadius: '16px',
+              overflow: 'hidden',
+              boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.08)'
+            }}
+          >
+            <Box
+              sx={{
+                backgroundColor: '#4A90E2',
+                borderRadius: 2,
+                p: 2
+              }}
+            >
+              <Stack direction="row" sx={{ position: 'relative', zIndex: 1, justifyContent: 'space-between', alignItems: 'center' }}>
+                <Box sx={{ flex: 1 }}>
+                  <Typography variant="h5" sx={{ color: '#fff', fontWeight: 500, mb: 1 }}>
+                    Get started with Payroll
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.9)' }}>
+                    Complete the following steps to have a hassle-free payroll experience
+                  </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, minWidth: '200px' }}>
+                  <LinearProgress
+                    variant="determinate"
+                    value={completionPercentage}
+                    sx={{
+                      flexGrow: 1,
+                      height: 6,
+                      borderRadius: 3,
+                      backgroundColor: 'rgba(255,255,255,0.2)',
+                      '& .MuiLinearProgress-bar': {
+                        backgroundColor: '#fff'
+                      }
+                    }}
+                  />
+                  <Typography variant="body2" sx={{ color: '#fff', whiteSpace: 'nowrap' }}>
+                    {completionPercentage}%{' '}
+                  </Typography>
+                </Box>
+              </Stack>
+            </Box>
+
+            <Stack direction="column" spacing={2} sx={{ p: 1 }}>
+              {steps.map((step, index) => (
+                <StepItem key={step.path} step={step} index={index} onClick={() => handleStepClick(step)} />
+              ))}
+            </Stack>
+          </MainCard>
+        </Grid2>
+      </Grid2>
+    </Box>
+  );
+};
+
+const StepItem = React.memo(({ step, index, onClick }) => (
+  <Stack
+    direction="row"
+    alignItems="center"
+    justifyContent="space-between"
+    sx={{
+      p: 1,
+      borderRadius: 2,
+      backgroundColor: step.completed ? '#F9F9F9' : '#FFFFFF',
+      boxShadow: step.completed ? 'none' : '0px 1px 3px rgba(0, 0, 0, 0.1)',
+      '&:hover': {
+        backgroundColor: '#F1F1F1'
+      }
+    }}
+  >
+    <Stack direction="row" alignItems="center" spacing={2}>
+      <Box
+        sx={{
+          width: 24,
+          height: 24,
+          borderRadius: '50%',
+          backgroundColor: step.completed ? '#4A90E2' : '#E0E0E0',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}
+      >
+        {step.completed && (
+          <Typography variant="h6" sx={{ color: '#FFFFFF', fontSize: 16 }}>
+            ✓
+          </Typography>
+        )}
+      </Box>
+      <Typography variant="body1" sx={{ fontWeight: 500, color: step.completed ? '#7D7D7D' : '#4A4A4A' }}>
+        {index + 1}. {step.nameKey}
+      </Typography>
+    </Stack>
+    <Button
+      variant="outlined"
+      sx={{
+        color: step.completed ? '#4CAF50' : '#4A90E2',
+        fontWeight: step.completed ? 500 : 400,
+        border: `1px solid ${step.completed ? '#4CAF50' : '#4A90E2'}`
+      }}
+      onClick={onClick}
+    >
+      {step.completed ? 'Completed' : 'Complete Now'}
+    </Button>
+  </Stack>
+));
+
+StepItem.displayName = 'StepItem';
+
+export default PayrollSetup;
