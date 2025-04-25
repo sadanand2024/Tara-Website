@@ -209,5 +209,13 @@
   "subscriptions": "Subscriptions & Payments",
   "support&chat": "Support & Chat",
   "payroll": "Payroll",
-  "invoice": "Invoice"
+  "invoice": "Invoice",
+  "invoicing": "Invoicing",
+  "business-settings": "Business Settings",
+  "business-profile": "Business Profile",
+  "key-managerial-personnel": "Key Managerial Personnel",
+  "business-bank-details": "Business Bank Details",
+  "msme-settings": "MSME Settings",
+  "gst-settings": "GST Settings",
+  "tds-income-tax": "TDS & Income Tax"
 }

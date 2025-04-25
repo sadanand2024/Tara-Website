@@ -63,8 +63,17 @@ export default function MainLayout() {
       <MainContentStyled {...{ borderRadius, menuOrientation, open: drawerOpen }}>
         <Container
           maxWidth={false}
+          sx={{
+            padding: '10px !important',
+            ...(!container && { px: { xs: 0 } }),
+            minHeight: 'calc(100vh - 128px)',
+            display: 'flex',
+            flexDirection: 'column',
+            // bgcolor: 'white',
+            borderRadius: 1
+          }}
           // maxWidth={container ? 'lg' : false}
-          sx={{ ...(!container && { px: { xs: 0 } }), minHeight: 'calc(100vh - 128px)', display: 'flex', flexDirection: 'column' }}
+          // sx={{ ...(!container && { px: { xs: 0 } }), minHeight: 'calc(100vh - 128px)', display: 'flex', flexDirection: 'column' }}
         >
           {/* breadcrumb */}
           <Breadcrumbs />

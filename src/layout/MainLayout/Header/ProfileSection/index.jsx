@@ -160,7 +160,7 @@ export default function ProfileSection() {
                         </Stack>
                         <Typography variant="subtitle2">Project Admin</Typography>
                       </Stack>
-                      <OutlinedInput
+                      {/* <OutlinedInput
                         sx={{ width: '100%', pr: 1, pl: 2, my: 2 }}
                         id="input-search-profile"
                         value={value}
@@ -175,7 +175,7 @@ export default function ProfileSection() {
                         inputProps={{
                           'aria-label': 'weight'
                         }}
-                      />
+                      /> */}
                       <Divider />
                     </Box>
                     <Box
@@ -188,8 +188,8 @@ export default function ProfileSection() {
                         '&::-webkit-scrollbar': { width: 5 }
                       }}
                     >
-                      <UpgradePlanCard />
-                      <Divider />
+                      {/* <UpgradePlanCard /> */}
+                      {/* <Divider />
                       <Card sx={{ bgcolor: mode === ThemeMode.DARK ? 'dark.800' : 'primary.light', my: 2 }}>
                         <CardContent>
                           <Grid container spacing={3} direction="column">
@@ -226,7 +226,7 @@ export default function ProfileSection() {
                             </Grid>
                           </Grid>
                         </CardContent>
-                      </Card>
+                      </Card> */}
                       <Divider />
                       <List
                         component="nav"
@@ -254,28 +254,19 @@ export default function ProfileSection() {
                             }
                           />
                         </ListItemButton>
-                        <ListItemButton sx={{ borderRadius: `${borderRadius}px` }} selected={selectedIndex === 1}>
+                        <ListItemButton
+                          sx={{ borderRadius: `${borderRadius}px` }}
+                          selected={selectedIndex === 1}
+                          onClick={(event) => handleListItemClick(event, 1, '/apps/business-settings')}
+                        >
                           <ListItemIcon>
-                            <IconUser stroke={1.5} size="20px" />
+                            <IconSettings stroke={1.5} size="20px" />
                           </ListItemIcon>
                           <ListItemText
                             primary={
-                              <Grid container spacing={1} sx={{ justifyContent: 'space-between' }}>
-                                <Grid>
-                                  <Typography variant="body2">
-                                    <FormattedMessage id="social-profile" />
-                                  </Typography>
-                                </Grid>
-                                <Grid>
-                                  <Chip
-                                    label="02"
-                                    variant="filled"
-                                    size="small"
-                                    color="warning"
-                                    sx={{ '& .MuiChip-label': { mt: 0.25, ...theme.applyStyles('dark', { color: 'background.default' }) } }}
-                                  />
-                                </Grid>
-                              </Grid>
+                              <Typography variant="body2">
+                                <FormattedMessage id="business-settings" />
+                              </Typography>
                             }
                           />
                         </ListItemButton>

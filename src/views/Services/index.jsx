@@ -52,9 +52,7 @@ const AnimatedCard = styled(Card)(({ theme }) => ({
   }
 }));
 
-const AnimatedButton = styled((props) => (
-  <Button size="small" {...props} />
-))(({ theme }) => ({
+const AnimatedButton = styled((props) => <Button size="small" {...props} />)(({ theme }) => ({
   opacity: 0.9,
   transform: 'translateY(10px)',
   transition: 'all 0.3s ease-in-out',
@@ -63,8 +61,6 @@ const AnimatedButton = styled((props) => (
     boxShadow: theme.shadows[4]
   }
 }));
-
-
 
 const ProgressWrapper = styled(Box)(({ theme }) => ({
   position: 'relative',
@@ -252,8 +248,8 @@ export default function Services() {
               flexGrow: 1,
               display: 'flex',
               alignItems: 'center',
-              gap: 2,
-              color: 'text.primary',
+              gap: 1,
+              color: 'secondary.main',
               fontWeight: 600
             }}
           >
