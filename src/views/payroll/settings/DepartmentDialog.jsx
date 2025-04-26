@@ -1,127 +1,141 @@
-import React, { useState, useEffect } from 'react';
+'use client';
+import React, { useEffect, useState } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { Button, Box, Stack, Typography, Divider } from '@mui/material';
-import Grid2 from '@mui/material/Grid2'; // Import Grid2 from MUI system
-import CustomInput from '@/utils/CustomInput';
-import Factory from '@/utils/Factory';
-import { useSnackbar } from '@/components/CustomSnackbar';
-import { useSearchParams } from 'next/navigation';
-import Modal from '@/components/Modal';
-import { ModalSize } from '@/enum';
+import { Button, Box, Stack, Typography, Grid2 } from '@mui/material';
+import CustomInput from 'utils/CustomInput';
+import Modal from 'ui-component/extended/Modal';
+import Factory from 'utils/Factory';
+import { useDispatch } from 'store';
+import { openSnackbar } from 'store/slices/snackbar';
+import { useSearchParams } from 'react-router-dom'; // correct react-router-dom
+
 export default function DepartmentDialog({ open, handleClose, fetchDepartments, selectedRecord, type, setType }) {
-  const { showSnackbar } = useSnackbar();
-  const searchParams = useSearchParams();
-  const [payrollid, setPayrollId] = useState(null); // Payroll ID fetched from URL
+  const dispatch = useDispatch();
+  const [searchParams] = useSearchParams();
+  const [payrollid, setPayrollId] = useState(null);
 
-  // Update payroll ID from search params
-  useEffect(() => {
-    const id = searchParams.get('payrollid');
-    if (id) {
-      setPayrollId(id);
-    }
-  }, [searchParams]);
-
-  const handleOpenDialog = () => {
-    setOpenDialog(true);
-  };
   const departmentFields = [
     { name: 'dept_name', label: 'Department Name' },
     { name: 'dept_code', label: 'Department Code' },
     { name: 'description', label: 'Description' }
   ];
 
-  // Formik validation schema
-  const validationSchema = Yup.object({
-    dept_name: Yup.string().required('Department name is required'),
-    dept_code: Yup.string().required('Department code is required'),
-    description: Yup.string().required('Description is required')
-  });
+  useEffect(() => {
+    const id = searchParams.get('payrollid');
+    if (id) setPayrollId(id);
+  }, [searchParams]);
 
-  // Initialize Formik with initial values and validation schema
   const formik = useFormik({
     initialValues: {
       dept_name: '',
       dept_code: '',
       description: ''
     },
-    validationSchema,
+    validationSchema: Yup.object({
+      dept_name: Yup.string().required('Department Name is required'),
+      dept_code: Yup.string().required('Department Code is required'),
+      description: Yup.string().required('Description is required')
+    }),
     onSubmit: async (values) => {
       const postData = { ...values, payroll: payrollid };
       const url = type === 'edit' ? `/payroll/departments/${selectedRecord.id}/` : `/payroll/departments/`;
-      let postmethod = type === 'edit' ? 'put' : 'post';
-      const { res } = await Factory(postmethod, url, postData);
+      const method = type === 'edit' ? 'put' : 'post';
+
+      const { res } = await Factory(method, url, postData);
 
       if (res?.status_cd === 0) {
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: type === 'edit' ? 'Record Updated Successfully' : 'Record Saved Successfully',
+            variant: 'alert',
+            alert: { color: 'success' },
+            close: false
+          })
+        );
         setType('');
-        resetForm();
         fetchDepartments();
+        resetForm();
         handleClose();
-        showSnackbar(type === 'edit' ? 'Record Updated Successfully' : 'Record Saved Successfully', 'success');
       } else {
-        showSnackbar(JSON.stringify(res.data.error), 'error');
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: JSON.stringify(res.data.error),
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
       }
     }
   });
+
+  const { values, setValues, handleChange, handleBlur, errors, touched, handleSubmit, resetForm } = formik;
+
   useEffect(() => {
     if (type === 'edit' && selectedRecord) {
-      setValues(selectedRecord);
+      setValues({
+        dept_name: selectedRecord.dept_name || '',
+        dept_code: selectedRecord.dept_code || '',
+        description: selectedRecord.description || ''
+      });
     }
-  }, [type, selectedRecord]);
+  }, [type, selectedRecord, setValues]);
 
-  // Render each field dynamically
-  const renderFields = (fields) => {
-    return fields.map((field) => (
-      <Grid2 key={field.name} size={{ xs: 12 }}>
-        <Typography gutterBottom>
-          {field.label} {<span style={{ color: 'red' }}>*</span>}
-        </Typography>
-        <CustomInput
-          fullWidth
-          name={field.name}
-          multiline={field.name === 'description'}
-          minRows={field.name === 'description' && 6}
-          value={values[field.name]}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          error={touched[field.name] && Boolean(errors[field.name])}
-          helperText={touched[field.name] && errors[field.name]}
-        />
-      </Grid2>
-    ));
-  };
-  const { values, setValues, handleChange, errors, touched, handleSubmit, handleBlur, resetForm } = formik;
   return (
     <Modal
       open={open}
-      maxWidth={ModalSize.SM}
+      showClose={true}
+      handleClose={() => {
+        setType('');
+        resetForm(); // Optional
+        handleClose(); // <- this closes the modal
+      }}
+      maxWidth="sm"
       header={{ title: `${type === 'edit' ? 'Update' : 'Add'} Department`, subheader: '' }}
-      modalContent={
-        <Box component="form" onSubmit={handleSubmit} sx={{ padding: 2 }}>
-          <Grid2 container spacing={3}>
-            {/* Render dynamic fields for department */}
-            {renderFields(departmentFields)}
-          </Grid2>
-        </Box>
-      }
       footer={
-        <Stack direction="row" sx={{ width: 1, justifyContent: 'space-between', gap: 2 }}>
+        <Stack direction="row" justifyContent="space-between" sx={{ width: 1, gap: 2 }}>
           <Button
+            variant="outlined"
+            color="error"
             onClick={() => {
               setType('');
               resetForm();
-              handleClose(); // Reset form and close dialog
+              handleClose();
             }}
-            variant="outlined"
-            color="error"
           >
             Cancel
           </Button>
-          <Button onClick={handleSubmit} type="submit" variant="contained" color="primary">
-            Submit
+          <Button variant="contained" color="primary" onClick={handleSubmit}>
+            {type === 'edit' ? 'Update' : 'Save'}
           </Button>
         </Stack>
       }
-    />
+    >
+      <Box component="form" onSubmit={handleSubmit} sx={{ p: 2 }}>
+        <Grid2 container spacing={3}>
+          {departmentFields.map((field) => (
+            <Grid2 key={field.name} xs={12}>
+              <Typography gutterBottom>
+                {field.label} <span style={{ color: 'red' }}>*</span>
+              </Typography>
+              <CustomInput
+                fullWidth
+                name={field.name}
+                multiline={field.name === 'description'}
+                minRows={field.name === 'description' ? 6 : undefined}
+                value={values[field.name]}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                error={touched[field.name] && Boolean(errors[field.name])}
+                helperText={touched[field.name] && errors[field.name]}
+              />
+            </Grid2>
+          ))}
+        </Grid2>
+      </Box>
+    </Modal>
   );
 }

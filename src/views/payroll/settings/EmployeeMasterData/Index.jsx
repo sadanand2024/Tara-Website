@@ -1,184 +1,158 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import {
+  Box,
+  Button,
+  Stack,
   Table,
+  TableBody,
+  TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  TableCell,
-  TableBody,
   Paper,
-  Button,
-  Stack,
-  Grid2,
   Pagination,
-  Box
+  Typography,
+  Grid2,
+  CircularProgress
 } from '@mui/material';
-import EmptyTable from '@/components/third-party/table/EmptyTable';
-import HomeCard from '@/components/cards/HomeCard';
-import Factory from '@/utils/Factory';
-import { useSearchParams } from 'next/navigation';
-import ActionCell from '@/utils/ActionCell';
-import { useSnackbar } from '@/components/CustomSnackbar';
-import Loader from '@/components/PageLoader';
-import MainCard from '@/components/MainCard';
+import MainCard from 'ui-component/cards/MainCard';
+import ActionCell from 'ui-component/extended/ActionCell';
+import Factory from 'utils/Factory';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { usePathname, useRouter } from 'next/navigation';
 
 function EmployeeList() {
-  const [openDialog, setOpenDialog] = useState(false); // Controls dialog visibility
-  const [workLocations, setWorkLocations] = useState([]); // Stores the list of work locations
-  const [payrollid, setPayrollId] = useState(null); // Payroll ID fetched from URL
-  const [postType, setPostType] = useState(''); // Payroll ID fetched from URL
-  const [selectedRecord, setSelectedRecord] = useState(null);
-  const [loading, setLoading] = useState(false); // State for loader
+  const [employees, setEmployees] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [payrollId, setPayrollId] = useState(null);
+  const [openDialog, setOpenDialog] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [employeeMasterData, setEmployeeMasterData] = useState([]);
-  const pathname = usePathname();
 
   const rowsPerPage = 8;
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
-  const handlePageChange = (event, value) => {
+  const handlePageChange = (_event, value) => {
     setCurrentPage(value);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
-  const paginatedData = employeeMasterData?.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
-  const { showSnackbar } = useSnackbar();
-  const router = useRouter();
 
-  const searchParams = useSearchParams();
+  const paginatedEmployees = employees.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 
   useEffect(() => {
     const id = searchParams.get('payrollid');
-    if (id) {
-      setPayrollId(id);
-    }
+    if (id) setPayrollId(id);
   }, [searchParams]);
 
-  const handleCloseDialog = () => setOpenDialog(false);
-
-  const handleEdit = (item) => {
-    setSelectedRecord(item);
-    router.push(`/payrollsetup/add-employee?employee_id=${encodeURIComponent(item.id)}&payrollid=${encodeURIComponent(payrollid)}`);
-  };
-  const handleDelete = async (item) => {
-    // let url = `/payroll/work-locations/delete/${item.id}/`;
-    // const { res } = await Factory('delete', url, {});
-    // if (res.status_cd === 1) {
-    //   showSnackbar(JSON.stringify(res.data), 'error');
-    // } else {
-    //   showSnackbar('Record Deleted Successfully', 'success');
-    //   fetchWorkLocations();
-    // }
-  };
-  // Fetch data when payrollid changes
-
-  const fetch_employee_master_data = async () => {
+  const fetchEmployees = async () => {
     setLoading(true);
-    const url = `/payroll/employees?payroll_id=${payrollid}`;
-    const { res, error } = await Factory('get', url, {});
+    const url = `/payroll/employees?payroll_id=${payrollId}`;
+    const { res } = await Factory('get', url, {});
     setLoading(false);
     if (res?.status_cd === 0) {
-      setEmployeeMasterData(res?.data); // Successfully set work locations
+      setEmployees(res?.data || []);
     } else {
-      setEmployeeMasterData([]);
-      showSnackbar(JSON.stringify(res?.data?.data || error), 'error');
+      setEmployees([]);
     }
   };
+
   useEffect(() => {
-    if (payrollid) {
-      fetch_employee_master_data();
-    }
-  }, [payrollid]);
+    if (payrollId) fetchEmployees();
+  }, [payrollId]);
+
+  const handleEdit = (item) => {
+    navigate(`/payrollsetup/add-employee?employee_id=${encodeURIComponent(item.id)}&payrollid=${encodeURIComponent(payrollId)}`);
+  };
+
   return (
     <>
       {loading ? (
-        <Loader />
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
+          <CircularProgress />
+        </Box>
       ) : (
-        <HomeCard
-          title="Employee Mater Data"
-          tagline="Create and manage Employees of Your Organization."
-          CustomElement={() => (
-            <Stack direction="row" sx={{ gap: 2 }}>
-              <Button variant="contained" onClick={() => router.push(`/payrollsetup/add-employee?payrollid=${payrollid}`)}>
-                Add Employee
-              </Button>
-            </Stack>
-          )}
+        <MainCard
+          title="Employee Master Data"
+          secondary={
+            <Button variant="contained" onClick={() => navigate(`/payroll/settings/add-employee?payrollid=${payrollId}`)}>
+              Add Employee
+            </Button>
+          }
         >
-          <MainCard>
-            <Grid2 container spacing={{ xs: 2, sm: 3 }}>
-              <Grid2 size={12}>
-                <TableContainer component={Paper}>
-                  <Table size="large">
-                    <TableHead>
-                      <TableRow>
-                        <TableCell sx={{ whiteSpace: 'nowrap', fontWeight: 'bold' }}>Employee ID</TableCell>
-                        <TableCell sx={{ whiteSpace: 'nowrap', fontWeight: 'bold' }}>Employee Name</TableCell>
-                        <TableCell sx={{ whiteSpace: 'nowrap', fontWeight: 'bold' }}>Department</TableCell>
-                        <TableCell sx={{ whiteSpace: 'nowrap', fontWeight: 'bold' }}>Designation</TableCell>
-                        <TableCell sx={{ whiteSpace: 'nowrap', fontWeight: 'bold' }}>Email</TableCell>
-                        <TableCell sx={{ whiteSpace: 'nowrap', fontWeight: 'bold' }}>Status</TableCell>
-                        <TableCell sx={{ whiteSpace: 'nowrap', fontWeight: 'bold' }}>Action</TableCell>
+          <Grid2 container spacing={2}>
+            <TableContainer component={Paper}>
+              <Table>
+                <TableHead>
+                  <TableRow sx={{ bgcolor: 'grey.100' }}>
+                    {['Employee ID', 'Employee Name', 'Department', 'Designation', 'Email', 'Status', 'Actions'].map((header, idx) => (
+                      <TableCell key={idx} sx={{ whiteSpace: 'nowrap', fontWeight: 'bold', textAlign: 'center' }}>
+                        {header}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {paginatedEmployees.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} align="center" sx={{ height: 300 }}>
+                        <Box>
+                          <Typography variant="h6" gutterBottom>
+                            No Employees Found
+                          </Typography>
+                          <Typography variant="body2" color="textSecondary">
+                            Try adding a new employee using the button above.
+                          </Typography>
+                        </Box>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    paginatedEmployees.map((employee) => (
+                      <TableRow key={employee.id} hover sx={{ '&:nth-of-type(odd)': { backgroundColor: 'grey.50' } }}>
+                        <TableCell align="center">{employee.id}</TableCell>
+                        <TableCell align="center">{`${employee.first_name || ''} ${employee.last_name || ''}`}</TableCell>
+                        <TableCell align="center">{employee.department_name || '-'}</TableCell>
+                        <TableCell align="center">{employee.designation_name || '-'}</TableCell>
+                        <TableCell align="center">{employee.work_email || '-'}</TableCell>
+                        <TableCell align="center">{employee.is_active ? 'Active' : 'Inactive'}</TableCell>
+                        <TableCell align="center">
+                          <ActionCell
+                            row={employee}
+                            onEdit={() => handleEdit(employee)}
+                            open={openDialog}
+                            deleteDialogData={{
+                              title: 'Delete Employee',
+                              heading: 'Are you sure you want to delete this employee?',
+                              description: `This will remove ${employee.first_name} ${employee.last_name} from the list.`,
+                              successMessage: 'Employee deleted successfully'
+                            }}
+                            // Deletion not implemented yet
+                            onDelete={() => {}}
+                            onClose={() => setOpenDialog(false)}
+                          />
+                        </TableCell>
                       </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {/* Check if workLocations is valid and has data */}
-                      {paginatedData?.length === 0 ? (
-                        <TableRow>
-                          <TableCell colSpan={6} sx={{ height: 300 }}>
-                            <EmptyTable msg="No work locations available" />
-                          </TableCell>
-                        </TableRow>
-                      ) : (
-                        paginatedData?.map((item, index) => (
-                          <TableRow key={item.id}>
-                            <TableCell>{item.id}</TableCell>
-                            <TableCell>{item.first_name + ' ' + item.last_name}</TableCell>
-                            <TableCell>{item.department_name}</TableCell>
-                            <TableCell>{item.designation_name}</TableCell>
-                            <TableCell>{item.work_email}</TableCell>
-                            <TableCell>{item.work_email}</TableCell>
-                            <TableCell>
-                              <ActionCell
-                                row={item} // Pass the customer row data
-                                onEdit={() => handleEdit(item)} // Edit handler
-                                onDelete={() => handleDelete(item)} // Delete handler
-                                open={openDialog}
-                                onClose={handleCloseDialog}
-                                deleteDialogData={{
-                                  title: 'Delete Record',
-                                  heading: 'Are you sure you want to delete this Record?',
-                                  description: `This action will remove ${item.location_name} from the list.`,
-                                  successMessage: 'Record has been deleted.'
-                                }}
-                              />
-                            </TableCell>
-                          </TableRow>
-                        ))
-                      )}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-                {workLocations.length > 0 && (
-                  <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'center', px: { xs: 0.5, sm: 2.5 }, py: 1.5 }}>
-                    <Pagination count={Math.ceil(workLocations.length / rowsPerPage)} page={currentPage} onChange={handlePageChange} />
-                  </Stack>
-                )}
-              </Grid2>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+
+            {employees.length > rowsPerPage && (
+              <Stack direction="row" justifyContent="center" sx={{ py: 2 }}>
+                <Pagination count={Math.ceil(employees.length / rowsPerPage)} page={currentPage} onChange={handlePageChange} />
+              </Stack>
+            )}
+
+            <Grid2 xs={12}>
+              <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between' }}>
+                <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigate(-1)}>
+                  Back to Dashboard
+                </Button>
+              </Box>
             </Grid2>
-            <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Button
-                variant="outlined"
-                startIcon={<ArrowBackIcon />}
-                onClick={() => {
-                  router.back();
-                }}
-              >
-                Back to Dashboard
-              </Button>
-            </Box>
-          </MainCard>
-        </HomeCard>
+          </Grid2>
+        </MainCard>
       )}
     </>
   );

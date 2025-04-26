@@ -1,8 +1,5 @@
 'use client';
-import PropTypes from 'prop-types';
-import { useTheme } from '@mui/material/styles';
-import { Tab, Tabs } from '@mui/material';
-import CustomAutocomplete from '@/utils/CustomAutocomplete';
+import CustomAutocomplete from 'utils/CustomAutocomplete';
 import React, { useEffect, useState } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
@@ -27,15 +24,10 @@ import {
   Divider,
   Pagination
 } from '@mui/material';
-import EmptyTable from '@/components/third-party/table/EmptyTable';
-import Modal from '@/components/Modal';
-import { ModalSize } from '@/enum';
-import { useRouter } from 'next/navigation';
-import Factory from '@/utils/Factory';
-import { useSearchParams } from 'next/navigation';
-import Loader from '@/components/PageLoader';
-import { useSnackbar } from '@/components/CustomSnackbar';
-import ActionCell from '@/utils/ActionCell';
+import Modal from 'ui-component/extended/Modal';
+import { useNavigate, useSearchParams } from 'react-router';
+import Factory from 'utils/Factory';
+import ActionCell from 'ui-component/extended/ActionCell';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 const validationSchema = Yup.object({
@@ -45,11 +37,10 @@ const validationSchema = Yup.object({
 
 function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, setPostType }) {
   const [earningsData, setEarningsData] = useState([]);
-  const router = useRouter();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [payrollid, setPayrollId] = useState(null);
-  const searchParams = useSearchParams();
-  const { showSnackbar } = useSnackbar();
+  const [searchParams] = useSearchParams();
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 8;
 
@@ -67,13 +58,16 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
     setOpen(true);
   };
 
-  const handleClose = () => setOpen(false);
+  const handleClose = () => {
+    setOpen(false);
+    resetForm();
+  };
 
   const handleEdit = async (item) => {
     let url = `/payroll/earnings/${item.id}`;
     const { res } = await Factory('get', url, {});
     if (res.status_cd === 1) {
-      showSnackbar(JSON.stringify(res.data), 'error');
+      // showSnackbar(JSON.stringify(res.data), 'error');
     } else {
       setPostType('put');
       setValues(res.data);
@@ -84,9 +78,9 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
     let url = `/payroll/earnings/${item.id}`;
     const { res } = await Factory('delete', url, {});
     if (res.status_cd === 1) {
-      showSnackbar(JSON.stringify(res.data), 'error');
+      // showSnackbar(JSON.stringify(res.data), 'error');
     } else {
-      showSnackbar('Record Deleted Successfully', 'success');
+      // showSnackbar('Record Deleted Successfully', 'success');
       getEarnings_Details(payrollid);
     }
   };
@@ -120,12 +114,13 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
       const { res, error } = await Factory(postType, url, postData);
       setLoading(false);
       if (res.status_cd === 0) {
-        showSnackbar(postType === 'post' ? 'Data Saved Successfully' : 'Data Updated Successfully', 'success');
+        // showSnackbar(postType === 'post' ? 'Data Saved Successfully' : 'Data Updated Successfully', 'success');
         handleClose();
+
         getEarnings_Details(payrollid);
-        // router.back();
+        navigate(-1);
       } else {
-        showSnackbar(JSON.stringify(res.data.data), 'error');
+        // showSnackbar(JSON.stringify(res.data.data), 'error');
       }
     }
   });
@@ -150,35 +145,47 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
   return (
     <>
       {loading ? (
-        <Loader />
+        <></>
       ) : (
         <Box>
-          <Grid2 size={12}>
-            <Box sx={{ width: '100%', display: 'flex', justifyContent: 'flex-end', mb: 2 }}></Box>
-            <TableContainer component={Paper}>
+          <Grid2 xs={12}>
+            <Box sx={{ width: '100%', display: 'flex', justifyContent: 'flex-end', mb: 2 }} />
+
+            <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 1 }}>
               <Table>
                 <TableHead>
-                  <TableRow>
-                    <TableCell>Component Name</TableCell>
-                    <TableCell>Calculation</TableCell>
-                    <TableCell>Consider for EPF</TableCell>
-                    <TableCell>Consider for ESI</TableCell>
-                    <TableCell>Status</TableCell>
-                    <TableCell>Actions</TableCell>
+                  <TableRow sx={{ bgcolor: 'grey.100' }}>
+                    {['Component Name', 'Calculation', 'Consider for EPF', 'Consider for ESI', 'Status', 'Actions'].map((head, idx) => (
+                      <TableCell key={idx} align="center" sx={{ fontWeight: 'bold', whiteSpace: 'nowrap', fontSize: '0.9rem' }}>
+                        {head}
+                      </TableCell>
+                    ))}
                   </TableRow>
                 </TableHead>
+
                 <TableBody>
                   {paginatedData.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={6} sx={{ height: 300 }}>
-                        <EmptyTable msg="No Data available" />
+                      <TableCell colSpan={6} align="center" sx={{ height: 300 }}>
+                        <Typography variant="subtitle1" color="text.secondary">
+                          No Data Available
+                        </Typography>
                       </TableCell>
                     </TableRow>
                   ) : (
                     paginatedData.map((item, index) => (
-                      <TableRow key={item.id}>
+                      <TableRow
+                        key={item.id}
+                        hover
+                        sx={{
+                          '&:hover': {
+                            backgroundColor: 'action.hover'
+                          }
+                        }}
+                      >
                         <TableCell
-                          style={{ cursor: 'pointer', textDecoration: 'underline', color: '#007bff' }}
+                          align="center"
+                          sx={{ cursor: 'pointer', color: 'primary.main', textDecoration: 'underline' }}
                           onClick={() => {
                             setPostType('put');
                             handleEdit(item);
@@ -186,22 +193,24 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
                         >
                           {item.component_name}
                         </TableCell>
-                        <TableCell>{item.calculation}</TableCell>
-                        <TableCell>{item.consider_for_epf ? 'Yes' : 'No'}</TableCell>
-                        <TableCell>{item.consider_for_esi ? 'Yes' : 'No'}</TableCell>
-                        <TableCell>{item.is_active === true ? 'Active' : 'In active'}</TableCell>
-                        <TableCell>
+
+                        <TableCell align="center">{item.calculation}</TableCell>
+                        <TableCell align="center">{item.consider_for_epf ? 'Yes' : 'No'}</TableCell>
+                        <TableCell align="center">{item.consider_for_esi ? 'Yes' : 'No'}</TableCell>
+                        <TableCell align="center">{item.is_active ? 'Active' : 'Inactive'}</TableCell>
+
+                        <TableCell align="center">
                           {item.component_name !== 'Basic' && (
                             <ActionCell
-                              row={item} // Pass the customer row data
-                              onEdit={() => handleEdit(item)} // Edit handler
-                              onDelete={() => handleDelete(item)} // Delete handler
+                              row={item}
+                              onEdit={() => handleEdit(item)}
+                              onDelete={() => handleDelete(item)}
                               open={open}
                               onClose={handleClose}
                               deleteDialogData={{
                                 title: 'Delete Record',
-                                heading: 'Are you sure you want to delete this Record?',
-                                description: `This action will remove ${item.name} from the list.`,
+                                heading: 'Are you sure you want to delete this record?',
+                                description: `This action will remove ${item.component_name} from the list.`,
                                 successMessage: 'Record has been deleted.'
                               }}
                             />
@@ -213,34 +222,59 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
                 </TableBody>
               </Table>
             </TableContainer>
-            {earningsData.length > 0 && (
-              <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'center', px: { xs: 0.5, sm: 2.5 }, py: 1.5 }}>
-                <Pagination count={Math.ceil(earningsData.length / rowsPerPage)} page={currentPage} onChange={handlePageChange} />
+
+            {earningsData.length > rowsPerPage && (
+              <Stack direction="row" justifyContent="center" sx={{ py: 2 }}>
+                <Pagination
+                  count={Math.ceil(earningsData.length / rowsPerPage)}
+                  page={currentPage}
+                  onChange={(e, value) => setCurrentPage(value)}
+                  color="primary"
+                />
               </Stack>
             )}
           </Grid2>
+
           <Grid2 size={12}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
               <Button
                 variant="outlined"
                 startIcon={<ArrowBackIcon />}
                 onClick={() => {
-                  router.back();
+                  navigate(-1);
                 }}
               >
                 Back to Dashboard
               </Button>
-              {/* <Button size="small" variant="contained" onClick={handleNext}>
-                Next
-              </Button> */}
             </Box>
           </Grid2>
 
           <Modal
             open={open}
-            maxWidth={ModalSize.LG}
-            header={{ title: values.component_name ? values.component_name : 'New Component', subheader: '' }}
-            modalContent={
+            maxWidth={'lg'}
+            header={{ title: values.component_name || 'New Component', subheader: '' }}
+            showClose={true}
+            handleClose={handleClose}
+            footer={
+              <Stack direction="row" sx={{ width: 1, justifyContent: 'space-between', gap: 2 }}>
+                <Button
+                  variant="outlined"
+                  color="error"
+                  onClick={() => {
+                    resetForm();
+                    setPostType('');
+                    handleClose(); // Reset form and close dialog
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button component_type="submit" variant="contained" onClick={handleSubmit}>
+                  Save
+                </Button>
+              </Stack>
+            }
+          >
+            <>
               <Box component="form" onSubmit={handleSubmit}>
                 <Grid2 container spacing={3}>
                   {/* Left Column */}
@@ -590,26 +624,8 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
                   </Grid2>
                 </Grid2>
               </Box>
-            }
-            footer={
-              <Stack direction="row" sx={{ width: 1, justifyContent: 'space-between', gap: 2 }}>
-                <Button
-                  variant="outlined"
-                  color="error"
-                  onClick={() => {
-                    resetForm();
-                    setPostType('');
-                    handleClose(); // Reset form and close dialog
-                  }}
-                >
-                  Cancel
-                </Button>
-                <Button component_type="submit" variant="contained" onClick={handleSubmit}>
-                  Save
-                </Button>
-              </Stack>
-            }
-          />
+            </>
+          </Modal>
         </Box>
       )}
     </>

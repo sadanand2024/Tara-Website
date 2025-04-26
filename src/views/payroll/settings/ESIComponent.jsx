@@ -18,17 +18,14 @@ import {
   Grid2,
   FormGroup
 } from '@mui/material';
-import EmptyTable from '@/components/third-party/table/EmptyTable';
 import { IconPlus, IconEdit } from '@tabler/icons-react';
-import Modal from '@/components/Modal';
-import { ModalSize } from '@/enum';
-import MainCard from '@/components/MainCard';
-import { useRouter } from 'next/navigation';
-import { useSearchParams } from 'next/navigation';
-import Loader from '@/components/PageLoader';
-import { useSnackbar } from '@/components/CustomSnackbar';
-import Factory from '@/utils/Factory';
+import Modal from 'ui-component/extended/Modal';
+import MainCard from '../../../ui-component/cards/MainCard';
+import { useNavigate } from 'react-router';
+import { useSearchParams } from 'react-router';
+import Factory from 'utils/Factory';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import CircularProgress from '@mui/material/CircularProgress';
 
 const esiDetails = [
   { name: 'esi_number', label: 'ESI Number' },
@@ -42,9 +39,8 @@ function ESIComponent({ handleNext, handleBack }) {
   const [postType, setPostType] = useState('');
   const [loading, setLoading] = useState(false);
   const [payrollid, setPayrollId] = useState(null);
-  const searchParams = useSearchParams();
-  const { showSnackbar } = useSnackbar();
-  const router = useRouter();
+  const [searchParams] = useSearchParams();
+  const router = useNavigate();
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -75,12 +71,12 @@ function ESIComponent({ handleNext, handleBack }) {
       const { res, error } = await Factory(postType, url, postData);
       setLoading(false);
       if (res.status_cd === 0) {
-        showSnackbar(postType === 'post' ? 'Data Saved Successfully' : 'Data Updated Successfully', 'success');
+        // showSnackbar(postType === 'post' ? 'Data Saved Successfully' : 'Data Updated Successfully', 'success');
         handleClose();
         getESI_Details(payrollid);
         // router.back();
       } else {
-        showSnackbar(JSON.stringify(res.data.data), 'error');
+        // showSnackbar(JSON.stringify(res.data.data), 'error');
       }
     }
   });
@@ -136,137 +132,159 @@ function ESIComponent({ handleNext, handleBack }) {
   return (
     <>
       {loading ? (
-        <Loader />
+        <Box display="flex" justifyContent="center" alignItems="center" minHeight="50vh">
+          <CircularProgress />
+        </Box>
       ) : (
-        // <MainCard sx={{ maxWidth: 800, margin: '0 auto', padding: 2 }}>
-        <Grid2 container spacing={{ xs: 2, sm: 3 }}>
-          <Grid2 size={12}>
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', textAlign: 'center' }}>
-              <Grid2 container spacing={2} sx={{ maxWidth: '600px' }}>
-                <Grid2 container spacing={2}>
-                  {esiData && (
-                    <>
-                      {' '}
-                      <Grid2 size={6}>
-                        <Typography variant="subtitle1" sx={{ textAlign: 'left', whiteSpace: 'nowrap' }}>
-                          Employees State Insurence
-                        </Typography>
-                      </Grid2>
-                      <Grid2 size={6}>
-                        <Box sx={{ textAlign: 'left' }}>
-                          <Button
-                            size="small"
-                            variant="contained"
-                            startIcon={esiData ? <IconEdit size={16} /> : <IconPlus size={16} />}
-                            onClick={() => {
-                              setPostType('put');
-                              setValues(esiData);
-                              handleOpen();
-                            }}
-                          >
-                            Edit ESI
-                          </Button>
-                        </Box>
-                      </Grid2>
-                    </>
-                  )}
-                  {esiData ? (
-                    <>
-                      {/* EPF Data display */}
-                      <Grid2 size={6}>
-                        <Typography variant="body1" sx={{ textAlign: 'left' }}>
-                          ESI Number:
-                        </Typography>
-                      </Grid2>
-                      <Grid2 size={6}>
-                        <Typography variant="body1" sx={{ textAlign: 'left' }}>
-                          {esiData.esi_number}
-                        </Typography>
-                      </Grid2>
-                      <Grid2 size={6}>
-                        <Typography variant="body1" sx={{ textAlign: 'left' }}>
-                          Employee Contribution Rate:
-                        </Typography>
-                      </Grid2>
-                      <Grid2 size={6}>
-                        <Typography variant="body1" sx={{ textAlign: 'left' }}>
-                          {esiData.employee_contribution} % of Gross Pay
-                        </Typography>
-                      </Grid2>
+        <MainCard title="Employees State Insurence">
+          <Grid2 container spacing={{ xs: 2, sm: 3 }}>
+            <Grid2 size={12}>
+              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', textAlign: 'center' }}>
+                <Grid2 container spacing={2} sx={{ maxWidth: '600px' }}>
+                  <Grid2 container spacing={2}>
+                    {esiData && (
+                      <>
+                        {' '}
+                        <Grid2 size={6}>
+                          <Typography variant="subtitle1" sx={{ textAlign: 'left', whiteSpace: 'nowrap' }}>
+                            Employees State Insurence
+                          </Typography>
+                        </Grid2>
+                        <Grid2 size={6}>
+                          <Box sx={{ textAlign: 'left' }}>
+                            <Button
+                              size="small"
+                              variant="contained"
+                              startIcon={esiData ? <IconEdit size={16} /> : <IconPlus size={16} />}
+                              onClick={() => {
+                                setPostType('put');
+                                setValues(esiData);
+                                handleOpen();
+                              }}
+                            >
+                              Edit ESI
+                            </Button>
+                          </Box>
+                        </Grid2>
+                      </>
+                    )}
+                    {esiData ? (
+                      <>
+                        {/* EPF Data display */}
+                        <Grid2 size={6}>
+                          <Typography variant="body1" sx={{ textAlign: 'left' }}>
+                            ESI Number:
+                          </Typography>
+                        </Grid2>
+                        <Grid2 size={6}>
+                          <Typography variant="body1" sx={{ textAlign: 'left' }}>
+                            {esiData.esi_number}
+                          </Typography>
+                        </Grid2>
+                        <Grid2 size={6}>
+                          <Typography variant="body1" sx={{ textAlign: 'left' }}>
+                            Employee Contribution Rate:
+                          </Typography>
+                        </Grid2>
+                        <Grid2 size={6}>
+                          <Typography variant="body1" sx={{ textAlign: 'left' }}>
+                            {esiData.employee_contribution} % of Gross Pay
+                          </Typography>
+                        </Grid2>
 
-                      <Grid2 size={6}>
-                        <Typography variant="body1" sx={{ textAlign: 'left' }}>
-                          Employer Contribution Rate:
-                        </Typography>
-                      </Grid2>
-                      <Grid2 size={6}>
-                        <Typography variant="body1" sx={{ textAlign: 'left' }}>
-                          {esiData.employer_contribution} % of Gross Pay
-                        </Typography>
-                      </Grid2>
+                        <Grid2 size={6}>
+                          <Typography variant="body1" sx={{ textAlign: 'left' }}>
+                            Employer Contribution Rate:
+                          </Typography>
+                        </Grid2>
+                        <Grid2 size={6}>
+                          <Typography variant="body1" sx={{ textAlign: 'left' }}>
+                            {esiData.employer_contribution} % of Gross Pay
+                          </Typography>
+                        </Grid2>
 
-                      <Grid2 size={6}>
-                        <Typography variant="subtitle1" sx={{ textAlign: 'left' }}>
-                          CTC Inclusions:
-                        </Typography>
-                      </Grid2>
-                      <Grid2 size={6}>
-                        <FormControlLabel
-                          control={<Checkbox checked={esiData.include_employer_contribution_in_ctc} />}
-                          label="Include Employer's Contribution in the CTC"
-                          sx={{ whiteSpace: 'nowrap' }}
-                          disabled
-                        />
-                      </Grid2>
-                      {/* <Grid2 size={12} textAlign="center" sx={{ mt: 2 }}>
+                        <Grid2 size={6}>
+                          <Typography variant="subtitle1" sx={{ textAlign: 'left' }}>
+                            CTC Inclusions:
+                          </Typography>
+                        </Grid2>
+                        <Grid2 size={6}>
+                          <FormControlLabel
+                            control={<Checkbox checked={esiData.include_employer_contribution_in_ctc} />}
+                            label="Include Employer's Contribution in the CTC"
+                            sx={{ whiteSpace: 'nowrap' }}
+                            disabled
+                          />
+                        </Grid2>
+                        {/* <Grid2 size={12} textAlign="center" sx={{ mt: 2 }}>
                       <Box>
                       
                       </Box>
                     </Grid2> */}
-                      <Grid2 size={12}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
-                          <Button
-                            variant="outlined"
-                            startIcon={<ArrowBackIcon />}
-                            onClick={() => {
-                              router.back();
-                            }}
-                          >
-                            Back to Dashboard
+                        <Grid2 size={12}>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
+                            <Button
+                              variant="outlined"
+                              startIcon={<ArrowBackIcon />}
+                              onClick={() => {
+                                router.back();
+                              }}
+                            >
+                              Back to Dashboard
+                            </Button>
+                            <Button size="small" variant="contained" onClick={handleBack} sx={{ mr: 2 }}>
+                              Back
+                            </Button>
+                            <Button size="small" variant="contained" onClick={handleNext}>
+                              Next
+                            </Button>
+                          </Box>
+                        </Grid2>
+                      </>
+                    ) : (
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                        {/* Empty Table */}
+                        <Box>No Data</Box>
+                        {/* Add EPF Button */}
+                        <Grid2 container justifyContent="center" mt={2}>
+                          <Button variant="contained" startIcon={<IconPlus size={16} />} onClick={handleOpen}>
+                            Enable ESI
                           </Button>
-                          <Button size="small" variant="contained" onClick={handleBack} sx={{ mr: 2 }}>
-                            Back
-                          </Button>
-                          <Button size="small" variant="contained" onClick={handleNext}>
-                            Next
-                          </Button>
-                        </Box>
-                      </Grid2>
-                    </>
-                  ) : (
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-                      {/* Empty Table */}
-                      <Box>
-                        <EmptyTable msg="No ESI YET!" sx={{ height: 300, fontWeight: 'bold' }} />
+                        </Grid2>
                       </Box>
-                      {/* Add EPF Button */}
-                      <Grid2 container justifyContent="center" mt={2}>
-                        <Button variant="contained" startIcon={<IconPlus size={16} />} onClick={handleOpen}>
-                          Enable ESI
-                        </Button>
-                      </Grid2>
-                    </Box>
-                  )}
+                    )}
+                  </Grid2>
                 </Grid2>
-              </Grid2>
-            </Box>
-          </Grid2>
+              </Box>
+            </Grid2>
 
-          <Modal
-            open={open}
-            maxWidth={ModalSize.MD}
-            header={{ title: 'Employees State Insurence', subheader: '' }}
-            modalContent={
+            <Modal
+              open={open}
+              maxWidth={'sm'}
+              showClose={true}
+              handleClose={() => {
+                resetForm();
+                handleClose();
+              }}
+              header={{ title: 'Employees State Insurence', subheader: '' }}
+              footer={
+                <Stack direction="row" sx={{ width: 1, justifyContent: 'space-between', gap: 2 }}>
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    onClick={() => {
+                      resetForm();
+                      handleClose();
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit" variant="contained" onClick={handleSubmit}>
+                    Save
+                  </Button>
+                </Stack>
+              }
+            >
               <Box component="form" onSubmit={handleSubmit} sx={{ padding: 2 }}>
                 <Grid2 container spacing={3}>
                   {renderFields(esiDetails)}
@@ -284,27 +302,9 @@ function ESIComponent({ handleNext, handleBack }) {
                   />
                 </Grid2>
               </Box>
-            }
-            footer={
-              <Stack direction="row" sx={{ width: 1, justifyContent: 'space-between', gap: 2 }}>
-                <Button
-                  variant="outlined"
-                  color="error"
-                  onClick={() => {
-                    resetForm();
-                    handleClose();
-                  }}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" variant="contained" onClick={handleSubmit}>
-                  Save
-                </Button>
-              </Stack>
-            }
-          />
-        </Grid2>
-        // </MainCard>
+            </Modal>
+          </Grid2>
+        </MainCard>
       )}
     </>
   );

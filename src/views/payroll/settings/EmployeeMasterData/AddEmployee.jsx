@@ -1,65 +1,32 @@
 'use client';
-import React, { useEffect, useState } from 'react';
-import { Stepper, Step, StepLabel, Button, Typography, Box, Stack } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Box, Button, Typography, Stepper, Step, StepLabel, Stack } from '@mui/material';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+
 import BasicDetails from './BasicDetails';
 import SalaryDetails from './SalaryDetails';
 import PersonalDetails from './PersonalDetails';
-import PaymentInformation from '../../Payrollsettings/EmployeeMasterData/PaymentInformation';
-import MainCard from '@/components/MainCard';
-import HomeCard from '@/components/cards/HomeCard';
-import { useSearchParams } from 'next/navigation';
-import Factory from '@/utils/Factory';
-import { useSnackbar } from '@/components/CustomSnackbar';
-import { useRouter, usePathname } from 'next/navigation';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import PaymentInformation from '../EmployeeMasterData/PaymentInformation';
+import MainCard from 'ui-component/cards/MainCard';
+import Loader from 'ui-component/Loader';
+import Factory from 'utils/Factory';
 
-const StepperComponent = () => {
+function StepperComponent() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [activeStep, setActiveStep] = useState(0);
-  const [loading, setLoading] = useState(false); // State for loader
-  const router = useRouter();
-
-  const steps = ['Basic Details', 'Salary Details', 'Personal Details', 'Payment Information'];
-  const [payrollid, setPayrollId] = useState(null);
+  const [payrollId, setPayrollId] = useState(null);
   const [employeeId, setEmployeeId] = useState(null);
   const [employeeData, setEmployeeData] = useState(null);
-  const searchParams = useSearchParams();
-  const { showSnackbar } = useSnackbar();
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const id = searchParams.get('payrollid');
-    if (id) {
-      setPayrollId(id);
-    }
-  }, [searchParams]);
-  useEffect(() => {
-    const tabValue = searchParams.get('tabValue');
-    if (tabValue) {
-      setActiveStep(Number(tabValue));
-    }
-  }, [searchParams]);
-  useEffect(() => {
-    const id = searchParams.get('employee_id');
-    if (id) {
-      setEmployeeId(id);
-    }
-  }, [searchParams]);
-  const handleNext = () => {
-    if (activeStep < steps.length - 1) {
-      setActiveStep(activeStep + 1);
-    }
-  };
+  const steps = ['Basic Details', 'Salary Details', 'Personal Details', 'Payment Information'];
 
-  const handleBack = () => {
-    if (activeStep > 0) {
-      setActiveStep(activeStep - 1);
-    }
-  };
+  const handleNext = () => setActiveStep((prev) => Math.min(prev + 1, steps.length - 1));
+  const handleBack = () => setActiveStep((prev) => Math.max(prev - 1, 0));
+  const handleReset = () => setActiveStep(0);
 
-  const handleReset = () => {
-    setActiveStep(0);
-  };
-
-  // Conditional content rendering based on the active step
   const renderStepContent = (step) => {
     switch (step) {
       case 0:
@@ -71,75 +38,89 @@ const StepperComponent = () => {
       case 3:
         return <PaymentInformation employeeData={employeeData} />;
       default:
-        return <div>Unknown Step</div>;
+        return <Typography>Unknown Step</Typography>;
     }
   };
-  const fetch_employee_data = async (id) => {
-    let url = `/payroll/employees/${id}`;
-    const { res } = await Factory('get', url, {});
-    if (res.status_cd === 1) {
-      showSnackbar(JSON.stringify(res.data), 'error');
-    } else {
-      setEmployeeData(res.data);
-    }
-  };
-  useEffect(() => {
-    if (employeeId) {
-      fetch_employee_data(employeeId);
-    }
-  }, [employeeId, activeStep]);
-  return (
-    <Box sx={{ width: '100%' }}>
-      <HomeCard title="Employee Master Data" tagline="Create and manage Deatils.">
-        <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 1 }}>
-          {steps.map((label, index) => (
-            <Step key={index}>
-              <StepLabel>{label}</StepLabel>
-            </Step>
-          ))}
-        </Stepper>
-        <MainCard>
-          <Box>
-            {activeStep === steps.length ? (
-              <Box>
-                <Typography variant="h6">All steps completed</Typography>
-                <Button onClick={handleReset}>Reset</Button>
-              </Box>
-            ) : (
-              <Box>
-                {/* <Typography variant="h6">{`You are on ${steps[activeStep]}`}</Typography> */}
-                {renderStepContent(activeStep)}
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
-                  <Box>
-                    <Button variant="outlined" onClick={() => router.back()} sx={{ mr: 2 }} startIcon={<ArrowBackIcon />}>
-                      Back to Dashboard
-                    </Button>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={() => {
-                        if (activeStep === 0) {
-                          router.back();
-                        } else {
-                          handleBack();
-                        }
-                      }}
-                    >
-                      Back
-                    </Button>
-                  </Box>
 
-                  <Button variant="contained" color="primary" onClick={handleNext} disabled={activeStep === steps.length - 1}>
-                    Next
+  const fetchEmployeeData = async (id) => {
+    setLoading(true);
+    const url = `/payroll/employees/${id}`;
+    const { res } = await Factory('get', url, {});
+    setLoading(false);
+
+    if (res?.status_cd === 0) {
+      setEmployeeData(res.data);
+    } else {
+      setEmployeeData(null);
+    }
+  };
+
+  useEffect(() => {
+    const id = searchParams.get('payrollid');
+    if (id) setPayrollId(id);
+  }, [searchParams]);
+
+  useEffect(() => {
+    const tabValue = searchParams.get('tabValue');
+    if (tabValue) setActiveStep(Number(tabValue));
+  }, [searchParams]);
+
+  useEffect(() => {
+    const empId = searchParams.get('employee_id');
+    if (empId) setEmployeeId(empId);
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (employeeId) fetchEmployeeData(employeeId);
+  }, [employeeId]);
+
+  return (
+    <>
+      {loading ? (
+        <Loader />
+      ) : (
+        <MainCard title="Employee Master Data" tagline="Manage employee profile details before processing payroll.">
+          <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 3 }}>
+            {steps.map((label, idx) => (
+              <Step key={idx}>
+                <StepLabel>{label}</StepLabel>
+              </Step>
+            ))}
+          </Stepper>
+
+          {activeStep === steps.length ? (
+            <Box textAlign="center" mt={4}>
+              <Typography variant="h5" gutterBottom>
+                All steps completed!
+              </Typography>
+              <Button variant="contained" onClick={handleReset}>
+                Reset
+              </Button>
+            </Box>
+          ) : (
+            <>
+              {renderStepContent(activeStep)}
+
+              <Stack direction="row" justifyContent="space-between" mt={4}>
+                <Stack direction="row" spacing={2}>
+                  <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigate(-1)}>
+                    Back to Dashboard
                   </Button>
-                </Box>
-              </Box>
-            )}
-          </Box>
+                  <Button variant="contained" onClick={handleBack} disabled={activeStep === 0}>
+                    Back
+                  </Button>
+                </Stack>
+
+                <Button variant="contained" color="primary" onClick={handleNext} disabled={activeStep === steps.length - 1}>
+                  Next
+                </Button>
+              </Stack>
+            </>
+          )}
         </MainCard>
-      </HomeCard>
-    </Box>
+      )}
+    </>
   );
-};
+}
 
 export default StepperComponent;

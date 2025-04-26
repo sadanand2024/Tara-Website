@@ -3,15 +3,13 @@ import React, { useState, useEffect } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { FormControlLabel, Checkbox, Stack, Button, Box, Grid2, Typography, Divider, FormGroup, TextField } from '@mui/material';
-import { useRouter } from 'next/navigation';
-import CustomInput from '@/utils/CustomInput';
-import CustomAutocomplete from '@/utils/CustomAutocomplete';
+import { useNavigate } from 'react-router';
+import CustomInput from 'utils/CustomInput';
+import CustomAutocomplete from 'utils/CustomAutocomplete';
 import dayjs from 'dayjs';
-import CustomDatePicker from '@/utils/CustomDateInput';
-import { useSnackbar } from '@/components/CustomSnackbar';
-import { useSearchParams } from 'next/navigation';
-import Factory from '@/utils/Factory';
-import Loader from '@/components/PageLoader';
+import CustomDatePicker from 'utils/CustomDateInput';
+import { useSearchParams } from 'react-router';
+import Factory from 'utils/Factory';
 
 const employeeFields = [
   { name: 'first_name', label: 'First Name' },
@@ -27,11 +25,9 @@ const employeeFields = [
   { name: 'department', label: 'Department' }
 ];
 function BasicDetails({ employeeData }) {
-  const router = useRouter();
   const [loading, setLoading] = useState(false); // State for loader
 
-  const searchParams = useSearchParams();
-  const { showSnackbar } = useSnackbar();
+  const [searchParams] = useSearchParams();
   const [payrollid, setPayrollId] = useState(null);
   const [employeeId, setEmployeeId] = useState(null);
 
@@ -98,9 +94,9 @@ function BasicDetails({ employeeData }) {
       const { res, error } = await Factory(employeeData?.id ? 'put' : 'post', url, postData);
       setLoading(false);
       if (res.status_cd === 0) {
-        showSnackbar('Data Saved Successfully', 'success');
+        // showSnackbar('Data Saved Successfully', 'success');
       } else {
-        showSnackbar(JSON.stringify(res.data.data), 'error');
+        // showSnackbar(JSON.stringify(res.data.data), 'error');
       }
     }
   });
@@ -197,7 +193,7 @@ function BasicDetails({ employeeData }) {
       setWorkLocations(res?.data); // Successfully set work locations
     } else {
       setWorkLocations([]);
-      showSnackbar(JSON.stringify(res?.data?.data || error), 'error');
+      // showSnackbar(JSON.stringify(res?.data?.data || error), 'error');
     }
   };
 

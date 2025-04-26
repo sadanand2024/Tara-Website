@@ -3,22 +3,20 @@ import React, { useState, useEffect } from 'react';
 import { useFormik, FormikProvider } from 'formik';
 import * as Yup from 'yup';
 import { TextField, Button, Box, Grid2, Typography } from '@mui/material';
-import { useSnackbar } from '@/components/CustomSnackbar';
-import { useSearchParams } from 'next/navigation';
-import CustomDatePicker from '@/utils/CustomDateInput';
-import Factory from '@/utils/Factory'; // Ensure this function is defined
+import { useSearchParams } from 'react-router';
+import CustomDatePicker from 'utils/CustomDateInput';
+import Factory from 'utils/Factory'; // Ensure this function is defined
 import dayjs from 'dayjs';
-import CustomInput from '@/utils/CustomInput';
-import CustomAutocomplete from '@/utils/CustomAutocomplete';
-import { indian_States_And_UTs } from '@/utils/indian_States_And_UT';
+import CustomInput from 'utils/CustomInput';
+import CustomAutocomplete from 'utils/CustomAutocomplete';
+import { indian_States_And_UTs } from 'utils/indian_States_And_UT';
 
 function PersonalDetails({ employeeData }) {
   const [payrollid, setPayrollId] = useState(null);
   const [employeeId, setEmployeeId] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const searchParams = useSearchParams();
-  const { showSnackbar } = useSnackbar();
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
     const id = searchParams.get('payrollid');
@@ -103,9 +101,9 @@ function PersonalDetails({ employeeData }) {
       const { res } = await Factory(method, url, postData);
 
       if (res.status_cd === 0) {
-        showSnackbar('Data Saved Successfully', 'success');
+        // showSnackbar('Data Saved Successfully', 'success');
       } else {
-        showSnackbar(JSON.stringify(res.data.data), 'error');
+        // showSnackbar(JSON.stringify(res.data.data), 'error');
       }
 
       setLoading(false);

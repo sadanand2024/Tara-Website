@@ -1,18 +1,13 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { Box, Button, Typography, TextField, Grid2, Divider, InputAdornment, Stack } from '@mui/material';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { Box, TextField, Typography, Button, Grid2, InputAdornment, Divider } from '@mui/material';
-import HomeCard from '@/components/cards/HomeCard';
-import CustomInput from '@/utils/CustomInput';
-import CustomAutocomplete from '@/utils/CustomAutocomplete';
-import { IconTrash } from '@tabler/icons-react';
-import { usePathname, useRouter } from 'next/navigation';
-import { useSearchParams } from 'next/navigation';
-import Factory from '@/utils/Factory';
-import MainCard from '@/components/MainCard';
-import { useSnackbar } from '@/components/CustomSnackbar';
-import { CoPresentOutlined } from '@mui/icons-material';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import Factory from 'utils/Factory';
+import { useDispatch } from 'store';
+import { openSnackbar } from 'store/slices/snackbar';
+import MainCard from 'ui-component/cards/MainCard';
 import RenderSalaryTemplateTable from './RenderSalaryTemplateTable';
 
 const validationSchema = Yup.object({
@@ -20,36 +15,24 @@ const validationSchema = Yup.object({
   description: Yup.string().required('Description is required'),
   annual_ctc: Yup.number().required('Annual CTC is required').positive('Annual CTC must be a positive number')
 });
+
 const initialEarnings = [{ component_name: 'Basic', calculation_type: 'Fixed', monthly: 0, annually: 0, calculation: 0 }];
 
-function SalaryTemplate({}) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const [loading, setLoading] = useState(false);
+function SalaryTemplate() {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const [searchParams] = useSearchParams();
   const [payrollid, setPayrollId] = useState(null);
-  const [template_id, setTemplate_id] = useState(null);
-  const { showSnackbar } = useSnackbar();
+  const [templateId, setTemplateId] = useState(null);
   const [enablePreviewButton, setEnablePreviewButton] = useState(false);
 
   useEffect(() => {
-    const id = searchParams.get('payrollid');
-    if (id) {
-      setPayrollId(id);
-    }
+    const pid = searchParams.get('payrollid');
+    const tid = searchParams.get('template_id');
+    if (pid) setPayrollId(pid);
+    if (tid) setTemplateId(tid);
   }, [searchParams]);
-  useEffect(() => {
-    const id = searchParams.get('template_id');
-    if (id) {
-      setTemplate_id(id);
-    }
-  }, [searchParams]);
-  // Initial fields for template
-  const fields = [
-    { name: 'template_name', label: 'Template Name' },
-    { name: 'description', label: 'Description' }
-  ];
 
-  // Formik initialization
   const formik = useFormik({
     initialValues: {
       template_name: '',
@@ -64,110 +47,117 @@ function SalaryTemplate({}) {
     },
     validationSchema,
     onSubmit: async (values) => {
-      setLoading(true);
-      if (values.errorMessage) {
-        showSnackbar(values.errorMessage, 'error');
-        return; // Prevent form submission
-      }
-      let postData = { ...values };
-      postData.payroll = payrollid;
-      let url = template_id ? `/payroll/salary-templates/${template_id}` : `/payroll/salary-templates`;
-      let method = template_id ? 'put' : 'post';
-      const { res } = await Factory(method, url, postData);
-      setLoading(false);
+      const postData = { ...values, payroll: payrollid };
+      const url = templateId ? `/payroll/salary-templates/${templateId}` : `/payroll/salary-templates`;
+      const method = templateId ? 'put' : 'post';
 
-      if (res.status_cd === 1) {
-        showSnackbar(JSON.stringify(res.data), 'error');
+      const { res } = await Factory(method, url, postData);
+      if (res.status_cd === 0) {
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'Template saved successfully!',
+            variant: 'alert',
+            alert: { color: 'success' },
+            close: false
+          })
+        );
+        navigate(-1);
       } else {
-        router.back();
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: JSON.stringify(res?.data?.data || 'Something went wrong!'),
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
       }
     }
   });
 
-  const renderFields = (fields) => {
-    return fields.map((field) => (
-      <Grid2 key={field.name} size={{ xs: 12, sm: 6 }}>
-        <div style={{ paddingBottom: '5px' }}>
-          <label>{field.label}</label>
-        </div>
-        <TextField
-          fullWidth
-          name={field.name}
-          value={values[field.name]}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          error={touched[field.name] && Boolean(errors[field.name])}
-          helperText={touched[field.name] && errors[field.name]}
-        />
-      </Grid2>
-    ));
-  };
+  const { values, handleChange, handleSubmit, setFieldValue, errors, touched, handleBlur } = formik;
 
-  const { values, setValues, handleChange, errors, touched, handleSubmit, handleBlur, resetForm, setFieldValue } = formik;
   return (
-    <HomeCard title="New Salary Template" tagline="Set up your organization before starting payroll">
-      <MainCard>
-        <Box component="form" onSubmit={handleSubmit}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-            {/* Template Fields */}
-            <Grid2 container spacing={3}>
-              {renderFields(fields)}
-            </Grid2>
-
-            {/* Annual CTC */}
-            <Grid2 container spacing={3}>
-              <Grid2 size={{ xs: 12, sm: 6 }}>
-                <Box style={{ paddingBottom: '5px' }}>
-                  <Typography variant="subtitle1">Annual CTC</Typography>
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <CustomInput
-                    fullWidth
-                    name="annual_ctc"
-                    value={values.annual_ctc}
-                    onChange={(e) => {
-                      const annualCtc = e.target.value;
-                      setFieldValue('annual_ctc', annualCtc);
-                      setEnablePreviewButton(true);
-                    }}
-                    // onBlur={() => recalculate()}
-                    error={touched.annual_ctc && Boolean(errors.annual_ctc)}
-                    helperText={touched.annual_ctc && errors.annual_ctc}
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start" sx={{ display: 'flex', alignItems: 'center' }}>
-                          <span>₹</span>
-                          <Divider orientation="vertical" flexItem sx={{ mx: 1, height: '24px' }} />
-                        </InputAdornment>
-                      )
-                    }}
-                  />
-
-                  <Typography variant="body1" sx={{ whiteSpace: 'nowrap', ml: 1 }}>
-                    Per Year
-                  </Typography>
-                </Box>
-              </Grid2>
-            </Grid2>
-            <RenderSalaryTemplateTable
-              values={values}
-              setValues={setValues}
-              setFieldValue={setFieldValue}
-              enablePreviewButton={enablePreviewButton}
-              setEnablePreviewButton={setEnablePreviewButton}
+    <MainCard title="Create Salary Template">
+      <Box component="form" onSubmit={handleSubmit} sx={{ p: 2 }}>
+        <Grid2 container spacing={3}>
+          <Grid2 xs={12} sm={6}>
+            <Typography variant="subtitle1" sx={{ mb: 0.5 }}>
+              Template Name <span style={{ color: 'red' }}>*</span>
+            </Typography>
+            <TextField
+              fullWidth
+              name="template_name"
+              value={values.template_name}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              error={touched.template_name && Boolean(errors.template_name)}
+              helperText={touched.template_name && errors.template_name}
             />
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
-              <Button variant="outlined" onClick={() => router.back()}>
-                Back
-              </Button>
-              <Button variant="contained" color="primary" type="submit">
-                Save Template
-              </Button>
-            </Box>
-          </Box>
+          </Grid2>
+
+          <Grid2 xs={12} sm={6}>
+            <Typography variant="subtitle1" sx={{ mb: 0.5 }}>
+              Description <span style={{ color: 'red' }}>*</span>
+            </Typography>
+            <TextField
+              fullWidth
+              name="description"
+              value={values.description}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              error={touched.description && Boolean(errors.description)}
+              helperText={touched.description && errors.description}
+            />
+          </Grid2>
+
+          <Grid2 xs={12} sm={6}>
+            <Typography variant="subtitle1" sx={{ mb: 0.5 }}>
+              Annual CTC <span style={{ color: 'red' }}>*</span>
+            </Typography>
+            <TextField
+              fullWidth
+              name="annual_ctc"
+              value={values.annual_ctc}
+              onChange={(e) => {
+                setFieldValue('annual_ctc', e.target.value);
+                setEnablePreviewButton(true);
+              }}
+              onBlur={handleBlur}
+              error={touched.annual_ctc && Boolean(errors.annual_ctc)}
+              helperText={touched.annual_ctc && errors.annual_ctc}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    ₹<Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
+                  </InputAdornment>
+                )
+              }}
+            />
+          </Grid2>
+        </Grid2>
+
+        <Box mt={4}>
+          <RenderSalaryTemplateTable
+            values={values}
+            setFieldValue={setFieldValue}
+            enablePreviewButton={enablePreviewButton}
+            setEnablePreviewButton={setEnablePreviewButton}
+          />
         </Box>
-      </MainCard>
-    </HomeCard>
+
+        <Stack direction="row" spacing={2} sx={{ mt: 4, justifyContent: 'space-between' }}>
+          <Button variant="outlined" onClick={() => navigate(-1)}>
+            Back
+          </Button>
+          <Button type="submit" variant="contained" color="primary">
+            Save Template
+          </Button>
+        </Stack>
+      </Box>
+    </MainCard>
   );
 }
 

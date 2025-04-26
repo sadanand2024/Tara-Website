@@ -3,14 +3,13 @@ import React, { useState, useEffect } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { Button, Box, Stack, Grid2, Typography } from '@mui/material';
-import { indian_States_And_UTs } from '@/utils/indian_States_And_UT';
-import CustomInput from '@/utils/CustomInput';
-import CustomAutocomplete from '@/utils/CustomAutocomplete';
-import Factory from '@/utils/Factory';
-import { useSnackbar } from '@/components/CustomSnackbar';
-import { useSearchParams } from 'next/navigation';
-import Modal from '@/components/Modal';
-import { ModalSize } from '@/enum';
+import { indian_States_And_UTs } from 'utils/indian_States_And_UT';
+import CustomInput from 'utils/CustomInput';
+import CustomAutocomplete from 'utils/CustomAutocomplete';
+import Factory from 'utils/Factory';
+import { useSearchParams } from 'react-router';
+import Modal from 'ui-component/extended/Modal';
+
 const filingAddress = [
   { name: 'location_name', label: 'Location Name' },
   { name: 'address_line1', label: 'Address Line 1' },
@@ -20,8 +19,7 @@ const filingAddress = [
   { name: 'address_pincode', label: 'Pincode' }
 ];
 export default function WorkLocationDialog({ open, handleClose, fetchWorkLocations, selectedRecord, type, setType }) {
-  const { showSnackbar } = useSnackbar();
-  const searchParams = useSearchParams();
+  const [searchParams] = useSearchParams();
   const [payrollid, setPayrollId] = useState(null);
 
   useEffect(() => {
@@ -62,9 +60,25 @@ export default function WorkLocationDialog({ open, handleClose, fetchWorkLocatio
         fetchWorkLocations();
         resetForm();
         handleClose();
-        showSnackbar(type === 'edit' ? 'Record Updated Successfully' : 'Record Saved Successfully', 'success');
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: type === 'edit' ? 'Record Updated Successfully' : 'Record Saved Successfully',
+            variant: 'alert',
+            alert: { color: 'success' },
+            close: false
+          })
+        );
       } else {
-        showSnackbar(JSON.stringify(res?.data?.data?.error || 'Unknown error'), 'error');
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: JSON.stringify(res?.data?.data?.error || 'Unknown error'),
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
       }
     }
   });
@@ -118,15 +132,13 @@ export default function WorkLocationDialog({ open, handleClose, fetchWorkLocatio
   return (
     <Modal
       open={open}
-      maxWidth={ModalSize.MD}
+      showClose={true}
+      handleClose={() => {
+        setType('');
+        resetForm(); // Optional
+        handleClose(); // <- this closes the modal
+      }}
       header={{ title: `${type === 'edit' ? 'Update' : 'Add'} work Location`, subheader: '' }}
-      modalContent={
-        <Box component="form" onSubmit={handleSubmit} sx={{ padding: 2 }}>
-          <Grid2 container spacing={3}>
-            {renderFields(filingAddress)}
-          </Grid2>
-        </Box>
-      }
       footer={
         <Stack direction="row" sx={{ width: 1, justifyContent: 'space-between', gap: 2 }}>
           <Button
@@ -145,6 +157,12 @@ export default function WorkLocationDialog({ open, handleClose, fetchWorkLocatio
           </Button>
         </Stack>
       }
-    />
+    >
+      <Box component="form" onSubmit={handleSubmit} sx={{ padding: 2 }}>
+        <Grid2 container spacing={3}>
+          {renderFields(filingAddress)}
+        </Grid2>
+      </Box>
+    </Modal>
   );
 }

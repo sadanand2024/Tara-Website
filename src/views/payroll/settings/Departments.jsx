@@ -1,3 +1,5 @@
+// 📁 File: Departments.jsx
+
 'use client';
 import React, { useState, useEffect } from 'react';
 import {
@@ -10,198 +12,165 @@ import {
   Paper,
   Button,
   Stack,
-  Grid2,
+  Box,
   Pagination,
-  Box
+  Typography,
+  Grid2
 } from '@mui/material';
-import DepartmentDialog from './DepartmentDialog'; // Import the DepartmentDialog
-import EmptyTable from '@/components/third-party/table/EmptyTable';
-import HomeCard from '@/components/cards/HomeCard';
-import Factory from '@/utils/Factory';
-import { useSearchParams } from 'next/navigation';
-import ActionCell from '@/utils/ActionCell';
-import { useSnackbar } from '@/components/CustomSnackbar';
-import { useRouter } from 'next/navigation';
-import MainCard from '@/components/MainCard';
+import MainCard from 'ui-component/cards/MainCard';
+import ActionCell from 'ui-component/extended/ActionCell';
+import DepartmentDialog from './DepartmentDialog';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import Factory from 'utils/Factory';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 function Departments() {
-  const [openDialog, setOpenDialog] = useState(false); // State to manage dialog visibility
-  const [departments, setDepartments] = useState([]); // State to store departments data
-  const [payrollid, setPayrollId] = useState(null); // Payroll ID fetched from URL
-  const [postType, setPostType] = useState(''); // Payroll ID fetched from URL
+  const [departments, setDepartments] = useState([]);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [postType, setPostType] = useState('');
   const [selectedRecord, setSelectedRecord] = useState(null);
-  const { showSnackbar } = useSnackbar();
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+
   const rowsPerPage = 8;
-
-  const handlePageChange = (event, value) => {
-    setCurrentPage(value);
-  };
   const paginatedData = departments.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
-  const router = useRouter();
 
-  const searchParams = useSearchParams();
+  const payrollid = searchParams.get('payrollid');
 
-  // Update payroll ID from search params
   useEffect(() => {
-    const id = searchParams.get('payrollid');
-    if (id) {
-      setPayrollId(id);
-    }
-  }, [searchParams]);
+    if (payrollid) fetchDepartments();
+  }, [payrollid]);
 
-  // Open dialog
-  const handleOpenDialog = () => {
-    setOpenDialog(true);
-  };
+  const handlePageChange = (event, value) => setCurrentPage(value);
 
-  // Close dialog
-  const handleCloseDialog = () => {
-    setOpenDialog(false);
-  };
+  const handleOpenDialog = () => setOpenDialog(true);
+  const handleCloseDialog = () => setOpenDialog(false);
 
   const fetchDepartments = async () => {
-    if (!payrollid) return; // If there's no payroll id, exit early
-
     const url = `/payroll/departments/?payroll_id=${payrollid}`;
-    const { res, error } = await Factory('get', url, {});
+    const { res } = await Factory('get', url, {});
 
     if (res?.status_cd === 0 && Array.isArray(res?.data)) {
-      setDepartments(res?.data); // Successfully set work locations
+      setDepartments(res.data);
     } else {
       setDepartments([]);
     }
   };
+
   const handleEdit = (department) => {
     setPostType('edit');
     setSelectedRecord(department);
     handleOpenDialog();
   };
+
   const handleDelete = async (department) => {
-    console.log(department);
-    let url = `/payroll/departments/${department.id}/`;
+    const url = `/payroll/departments/${department.id}/`;
     const { res } = await Factory('delete', url, {});
-    console.log(res);
-    if (res.status_cd === 1) {
-      showSnackbar(JSON.stringify(res.data), 'error');
-    } else {
-      showSnackbar('Record Deleted Successfully', 'success');
+
+    if (res?.status_cd === 0) {
       fetchDepartments();
     }
   };
-  useEffect(() => {
-    fetchDepartments();
-  }, [payrollid]);
-  return (
-    <HomeCard
-      title="Departments Details"
-      tagline="Create and manage different departments of Your organization."
-      CustomElement={() => (
-        <Stack direction="row" sx={{ gap: 2 }}>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => {
-              setPostType('post');
-              handleOpenDialog();
-            }}
-          >
-            Add Department
-          </Button>
-          {/* <Button variant="outlined" color="primary" disabled>
-            Import
-          </Button> */}
-        </Stack>
-      )}
-    >
-      <MainCard>
-        <Grid2 container spacing={{ xs: 2, sm: 3 }}>
-          <Grid2 size={12}>
-            <DepartmentDialog
-              open={openDialog}
-              handleClose={handleCloseDialog}
-              handleOpenDialog={handleOpenDialog}
-              selectedRecord={selectedRecord}
-              type={postType}
-              setType={setPostType}
-              fetchDepartments={fetchDepartments}
-            />
-          </Grid2>
 
-          <Grid2 size={12}>
-            <TableContainer component={Paper}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell sx={{ whiteSpace: 'nowrap', fontWeight: 'bold' }}>S No</TableCell>
-                    <TableCell sx={{ whiteSpace: 'nowrap', fontWeight: 'bold' }}>Department Name</TableCell>
-                    <TableCell sx={{ whiteSpace: 'nowrap', fontWeight: 'bold' }}>Department Code</TableCell>
-                    <TableCell sx={{ whiteSpace: 'nowrap', fontWeight: 'bold' }}>Description</TableCell>
-                    <TableCell sx={{ whiteSpace: 'nowrap', fontWeight: 'bold' }}>No of Employees</TableCell>
-                    <TableCell sx={{ whiteSpace: 'nowrap', fontWeight: 'bold' }}>Actions</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {paginatedData.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={5} sx={{ height: 300 }}>
-                        <EmptyTable msg="No departments available" />
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    paginatedData.map((department, index) => (
-                      <TableRow key={department.id}>
-                        <TableCell>{(currentPage - 1) * rowsPerPage + index + 1}</TableCell>
-                        <TableCell>{department.dept_name}</TableCell>
-                        <TableCell>{department.dept_code}</TableCell>
-                        <TableCell>
-                          {`${department.description}`?.length > 30
-                            ? `${department.description?.substring(0, 20)}...`
-                            : `${department.description}` || 'N/A'}
-                        </TableCell>
-                        <TableCell>{department.numOfEmployees || 0}</TableCell>
-                        <TableCell>
-                          <ActionCell
-                            row={department} // Pass the customer row data
-                            onEdit={() => handleEdit(department)} // Edit handler
-                            onDelete={() => handleDelete(department)} // Delete handler
-                            open={openDialog}
-                            onClose={handleCloseDialog}
-                            deleteDialogData={{
-                              title: 'Delete Record',
-                              heading: 'Are you sure you want to delete this Record?',
-                              description: `This action will remove ${department.dept_name} from the list.`,
-                              successMessage: 'Record has been deleted.'
-                            }}
-                          />
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
-            {departments.length > 0 && (
-              <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'center', px: { xs: 0.5, sm: 2.5 }, py: 1.5 }}>
-                <Pagination count={Math.ceil(departments.length / rowsPerPage)} page={currentPage} onChange={handlePageChange} />
-              </Stack>
-            )}
-          </Grid2>
+  return (
+    <MainCard
+      title="Departments Details"
+      secondary={
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => {
+            setPostType('post');
+            handleOpenDialog();
+          }}
+        >
+          Add Department
+        </Button>
+      }
+    >
+      <Grid2 container spacing={{ xs: 2, sm: 3 }}>
+        <Grid2 xs={12}>
+          <DepartmentDialog
+            open={openDialog}
+            handleClose={handleCloseDialog}
+            handleOpenDialog={handleOpenDialog}
+            selectedRecord={selectedRecord}
+            type={postType}
+            setType={setPostType}
+            fetchDepartments={fetchDepartments}
+          />
         </Grid2>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
-          <Button
-            variant="outlined"
-            startIcon={<ArrowBackIcon />}
-            onClick={() => {
-              router.back();
-            }}
-          >
-            Back to Dashboard
-          </Button>
-        </Box>
-      </MainCard>
-    </HomeCard>
+
+        <TableContainer component={Paper} sx={{ width: '100%', borderRadius: 2, boxShadow: 1, overflowX: 'auto' }}>
+          <Table>
+            <TableHead>
+              <TableRow sx={{ bgcolor: 'grey.100' }}>
+                {['S No', 'Department Name', 'Department Code', 'Description', 'No of Employees', 'Actions'].map((header, idx) => (
+                  <TableCell
+                    key={idx}
+                    align={['S No', 'No of Employees', 'Actions'].includes(header) ? 'center' : 'left'}
+                    sx={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}
+                  >
+                    {header}
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {paginatedData.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} align="center" sx={{ height: 300 }}>
+                    No Data
+                  </TableCell>
+                </TableRow>
+              ) : (
+                paginatedData.map((department, idx) => (
+                  <TableRow key={department.id} hover sx={{ minHeight: 56, '&:hover': { bgcolor: 'action.hover' } }}>
+                    <TableCell align="center">{(currentPage - 1) * rowsPerPage + idx + 1}</TableCell>
+                    <TableCell>{department.dept_name || 'N/A'}</TableCell>
+                    <TableCell>{department.dept_code || 'N/A'}</TableCell>
+                    <TableCell>
+                      <Typography noWrap sx={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {department.description || 'N/A'}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center">{department.numOfEmployees || 0}</TableCell>
+                    <TableCell align="center">
+                      <ActionCell
+                        row={department}
+                        onEdit={() => handleEdit(department)}
+                        onDelete={() => handleDelete(department)}
+                        open={openDialog}
+                        onClose={handleCloseDialog}
+                        deleteDialogData={{
+                          title: 'Delete Record',
+                          heading: 'Are you sure you want to delete this Record?',
+                          description: `This action will remove ${department.dept_name} from the list.`,
+                          successMessage: 'Record has been deleted.'
+                        }}
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+
+        {departments.length > rowsPerPage && (
+          <Stack direction="row" justifyContent="center" sx={{ py: 2 }}>
+            <Pagination count={Math.ceil(departments.length / rowsPerPage)} page={currentPage} onChange={handlePageChange} />
+          </Stack>
+        )}
+      </Grid2>
+
+      <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigate(-1)}>
+          Back to Dashboard
+        </Button>
+      </Box>
+    </MainCard>
   );
 }
 

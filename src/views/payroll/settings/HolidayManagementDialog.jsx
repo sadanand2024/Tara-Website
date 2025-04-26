@@ -3,21 +3,16 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { Button, Box, Stack, Typography } from '@mui/material';
 import Grid2 from '@mui/material/Grid2';
-import CustomInput from '@/utils/CustomInput';
-import Factory from '@/utils/Factory';
-import { useSnackbar } from '@/components/CustomSnackbar';
-import { useSearchParams } from 'next/navigation';
-import Modal from '@/components/Modal';
-import { ModalSize } from '@/enum';
+import CustomInput from 'utils/CustomInput';
+import Factory from 'utils/Factory';
+import { useSearchParams } from 'react-router';
+import Modal from 'ui-component/extended/Modal';
 import dayjs from 'dayjs';
-import CustomDatePicker from '@/utils/CustomDateInput';
-import CustomAutocomplete from '@/utils/CustomAutocomplete';
-import { IconTemperature } from '@tabler/icons-react';
-import { ConstructionOutlined } from '@mui/icons-material';
+import CustomDatePicker from 'utils/CustomDateInput';
+import CustomAutocomplete from 'utils/CustomAutocomplete';
 
 export default function HolidayManagementDialog({ open, handleClose, selectedRecord, type, fetchHolidayManagementData, workLocations }) {
-  const { showSnackbar } = useSnackbar();
-  const searchParams = useSearchParams();
+  const [searchParams] = useSearchParams();
   const [payrollid, setPayrollId] = useState(null); // Payroll ID fetched from URL
   const [loading, setLoading] = useState(false); // State for loader
 
@@ -75,11 +70,11 @@ export default function HolidayManagementDialog({ open, handleClose, selectedRec
       const { res, error } = await Factory(postType, url, postData);
       setLoading(false);
       if (res.status_cd === 0) {
-        showSnackbar(postType === 'post' ? 'Data Saved Successfully' : 'Data Updated Successfully', 'success');
+        // showSnackbar(postType === 'post' ? 'Data Saved Successfully' : 'Data Updated Successfully', 'success');
         handleClose();
         fetchHolidayManagementData(); // Assuming getESI_Details is a function to fetch department details
       } else {
-        showSnackbar(JSON.stringify(res.data.data), 'error');
+        // showSnackbar(JSON.stringify(res.data.data), 'error');
       }
     }
   });
@@ -165,15 +160,8 @@ export default function HolidayManagementDialog({ open, handleClose, selectedRec
   return (
     <Modal
       open={open}
-      maxWidth={ModalSize.MD}
+      maxWidth={'md'}
       header={{ title: 'Add Holiday', subheader: '' }}
-      modalContent={
-        <Box component="form" onSubmit={handleSubmit} sx={{ padding: 2 }}>
-          <Grid2 container spacing={3}>
-            {renderFields(departmentFields)}
-          </Grid2>
-        </Box>
-      }
       footer={
         <Stack direction="row" sx={{ width: 1, justifyContent: 'space-between', gap: 2 }}>
           <Button
@@ -191,6 +179,12 @@ export default function HolidayManagementDialog({ open, handleClose, selectedRec
           </Button>
         </Stack>
       }
-    />
+    >
+      <Box component="form" onSubmit={handleSubmit} sx={{ padding: 2 }}>
+        <Grid2 container spacing={3}>
+          {renderFields(departmentFields)}
+        </Grid2>
+      </Box>
+    </Modal>
   );
 }

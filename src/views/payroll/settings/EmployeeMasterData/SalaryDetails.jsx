@@ -2,30 +2,12 @@
 import React, { useState, useEffect } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import {
-  Box,
-  TextField,
-  Typography,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Button,
-  Grid2
-} from '@mui/material';
-import HomeCard from '@/components/cards/HomeCard';
-import CustomInput from '@/utils/CustomInput';
-import { IconTrash } from '@tabler/icons-react';
-import Factory from '@/utils/Factory';
-import CustomAutocomplete from '@/utils/CustomAutocomplete';
-import { useSearchParams } from 'next/navigation';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
+import { Box, Typography, Button, Grid2 } from '@mui/material';
+import CustomInput from 'utils/CustomInput';
+import Factory from 'utils/Factory';
+import CustomAutocomplete from 'utils/CustomAutocomplete';
+import { useSearchParams } from 'react-router';
 import RenderSalaryTemplateTable from '../RenderSalaryTemplateTable';
-import { useSnackbar } from '@/components/CustomSnackbar';
 
 const validationSchema = Yup.object({
   // template_name: Yup.string().required('Template Name is required'),
@@ -37,8 +19,7 @@ function SalaryDetails({ employeeData }) {
   const [open, setOpen] = useState(false);
   const [payrollid, setPayrollId] = useState(null);
   const [salary_teamplates_data, setSalary_teamplates_data] = useState([]);
-  const searchParams = useSearchParams();
-  const { showSnackbar } = useSnackbar();
+  const [searchParams] = useSearchParams();
   const [enablePreviewButton, setEnablePreviewButton] = useState(false);
 
   const fields = [
@@ -81,9 +62,9 @@ function SalaryDetails({ employeeData }) {
       const { res } = await Factory(method, url, postData);
       console.log(res);
       if (res.status_cd === 1) {
-        showSnackbar(JSON.stringify(res.data), 'error');
+        // showSnackbar(JSON.stringify(res.data), 'error');
       } else {
-        showSnackbar('Data Saved Successfully', 'success');
+        // showSnackbar('Data Saved Successfully', 'success');
       }
     }
   });

@@ -1,13 +1,12 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { Button, Card, Stack, Box, Typography, Grid2 } from '@mui/material';
-import { useSearchParams, useRouter } from 'next/navigation';
-import HomeCard from '@/components/cards/HomeCard';
-import MainCard from '@/components/MainCard';
-import Factory from '@/utils/Factory';
-import { useSnackbar } from '@/components/CustomSnackbar';
+import { useSearchParams } from 'react-router';
+import { useNavigate } from 'react-router';
+import MainCard from '../../../ui-component/cards/MainCard';
+import Factory from 'utils/Factory';
 import dayjs from 'dayjs';
-import CustomDatePicker from '@/utils/CustomDateInput';
+import CustomDatePicker from 'utils/CustomDateInput';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 function PaySchedule() {
@@ -28,9 +27,8 @@ function PaySchedule() {
 
   const [dateValue, setDateValue] = useState(dayjs().format('DD-MM-YYYY'));
 
-  const { showSnackbar } = useSnackbar();
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [pay_schedule_data, setPay_schedule_data] = useState(null);
   const [postType, setPostType] = useState('');
 
@@ -70,11 +68,11 @@ function PaySchedule() {
     const selectedDays = Object.keys(weekOffSelection).filter((day) => weekOffSelection[day]);
 
     if (selectedDays.length === 0) {
-      showSnackbar('Please select at least one day for your week off.', 'error');
+      // showSnackbar('Please select at least one day for your week off.', 'error');
       return;
     }
     if (!dateValue) {
-      showSnackbar('Please select a start month for the payroll.', 'error');
+      // showSnackbar('Please select a start month for the payroll.', 'error');
       return;
     }
     const postData = {
@@ -101,9 +99,9 @@ function PaySchedule() {
     const { res, error } = await Factory(postType, url, postData);
 
     if (res?.status_cd === 0) {
-      showSnackbar(postType === 'put' ? 'Data Updated successfully!' : 'Data saved successfully!', 'success');
+      // showSnackbar(postType === 'put' ? 'Data Updated successfully!' : 'Data saved successfully!', 'success');
     } else {
-      showSnackbar(res?.message || 'Something went wrong. Please try again.', 'error');
+      // showSnackbar(res?.message || 'Something went wrong. Please try again.', 'error');
     }
   };
   const get_paySchedule_Details = async (id) => {
@@ -132,7 +130,7 @@ function PaySchedule() {
       setPostType('put');
     } else {
       // Handle error if response is not successful
-      showSnackbar('Failed to fetch pay schedule details.', 'error');
+      // showSnackbar('Failed to fetch pay schedule details.', 'error');
       setPostType('post');
     }
   };
@@ -144,10 +142,10 @@ function PaySchedule() {
   }, [payrollId]);
 
   return (
-    <HomeCard
+    <MainCard
       title="Pay Schedule"
       tagline="Setup your organization before starting payroll"
-      CustomElement={() => <Stack direction="row" sx={{ gap: 2 }}></Stack>}
+      secondary={<Stack direction="row" sx={{ gap: 2 }}></Stack>}
     >
       <MainCard sx={{ padding: 2 }}>
         <Typography variant="h6">Select your week off</Typography>
@@ -200,7 +198,7 @@ function PaySchedule() {
             variant="outlined"
             startIcon={<ArrowBackIcon />}
             onClick={() => {
-              router.back();
+              navigate();
             }}
           >
             Back to Dashboard
@@ -210,7 +208,7 @@ function PaySchedule() {
           </Button>
         </Box>
       </MainCard>
-    </HomeCard>
+    </MainCard>
   );
 }
 

@@ -1,47 +1,43 @@
 'use client';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import MainCard from '@/components/MainCard';
+import { useNavigate } from 'react-router';
+import { useSearchParams } from 'react-router';
+import MainCard from '../../../ui-component/cards/MainCard';
 import { Box, Stack, Typography, LinearProgress, Button, Grid2 } from '@mui/material';
-import Factory from '@/utils/Factory';
-import Loader from '@/components/PageLoader';
-import useCurrentUser from '@/hooks/useCurrentUser';
-import { useSnackbar } from '@/components/CustomSnackbar';
+import Factory from 'utils/Factory';
+import { useSelector } from 'react-redux';
+// import Loader from 'components/PageLoader';
 
 // Constants for better maintainability
 const PAYROLL_STEPS = [
-  { nameKey: 'Business profile', path: '/organization_details', dataKey: 'organisation_details' },
-  { nameKey: 'Set up Work Location', path: '/set_up_work_location', dataKey: 'work_locations' },
-  { nameKey: 'Set up Departments', path: '/set_up_departments', dataKey: 'departments' },
-  { nameKey: 'Set up Designations', path: '/set_up_designations', dataKey: 'designations' },
-  { nameKey: 'Set up Statutory Components', path: '/set_up_statutory_components', dataKey: 'statutory_component' },
-  { nameKey: 'Set up Salary Components', path: '/set_up_salary_components', dataKey: 'salary_component' },
-  { nameKey: 'Set up Salary Template', path: '/set_up_salary_template', dataKey: 'salary_template' },
-  { nameKey: 'Set up Employee Master', path: '/set_up_employee_master', dataKey: 'employee_master' },
-  { nameKey: 'Set up Pay & Schedule', path: '/pay_schedule', dataKey: 'pay_schedule' },
-  { nameKey: 'Leave & Attendance', path: '/leave_and_attendance', dataKey: 'leave_and_attendance' }
+  { nameKey: 'Business profile', path: '/payroll/settings/organization-details', dataKey: 'organisation_details' },
+  { nameKey: 'Set up Work Location', path: '/payroll/settings/work-location', dataKey: 'work_locations' },
+  { nameKey: 'Set up Departments', path: '/payroll/settings/departments', dataKey: 'departments' },
+  { nameKey: 'Set up Designations', path: '/payroll/settings/designations', dataKey: 'designations' },
+  { nameKey: 'Set up Statutory Components', path: '/payroll/settings/statutory-components', dataKey: 'statutory_component' },
+  { nameKey: 'Set up Salary Components', path: '/payroll/settings/salary-components', dataKey: 'salary_component' },
+  { nameKey: 'Set up Salary Template', path: '/payroll/settings/salary-template-list', dataKey: 'salary_template' },
+  { nameKey: 'Set up Employee Master', path: '/payroll/settings/employee-master', dataKey: 'employee_master' },
+  { nameKey: 'Set up Pay & Schedule', path: '/payroll/settings/pay-schedule', dataKey: 'pay_schedule' },
+  { nameKey: 'Leave & Attendance', path: '/payroll/settings/leave-attendance', dataKey: 'leave_and_attendance' }
 ];
 
 const PayrollSetup = () => {
-  const { userData } = useCurrentUser();
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const { showSnackbar } = useSnackbar();
+  const user = useSelector((state) => state).accountReducer.user;
+
+  const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
   const [payrollDetails, setPayrollDetails] = useState({});
   const [steps, setSteps] = useState(PAYROLL_STEPS.map((step) => ({ ...step, completed: false })));
 
-  const businessId = useMemo(
-    () => (userData.user_type === 'Business' ? userData.business_affiliated[0]?.id : userData.businesssDetails?.business[0]?.id),
-    [userData]
-  );
+  const businessId = user.active_context.business_id;
 
   const hasFetched = React.useRef(false);
 
   const fetchPayrollDetails = useCallback(async () => {
     if (!businessId) {
-      showSnackbar('Business ID not found', 'error');
+      // showSnackbar('Business ID not found', 'error');
       return;
     }
 
@@ -65,14 +61,14 @@ const PayrollSetup = () => {
           }))
         );
       } else {
-        showSnackbar(res?.data?.data || 'Failed to fetch payroll details', 'error');
+        // showSnackbar(res?.data?.data || 'Failed to fetch payroll details', 'error');
       }
     } catch (error) {
-      showSnackbar(error.message || 'An error occurred while fetching payroll details', 'error');
+      // showSnackbar(error.message || 'An error occurred while fetching payroll details', 'error');
     } finally {
       setLoading(false);
     }
-  }, [businessId, showSnackbar]);
+  }, [businessId]);
 
   useEffect(() => {
     if (businessId && !hasFetched.current) {
@@ -83,17 +79,17 @@ const PayrollSetup = () => {
 
   const handleStepClick = useCallback(
     (step) => {
-      const routeBase = `/payrollsetup${step.path}`;
+      const routeBase = `${step.path}`;
 
       if (!payrollDetails?.payroll_id && step.nameKey === 'Business profile') {
-        router.push(`${routeBase}?business-id=${businessId}`);
+        navigate(`${routeBase}?business-id=${businessId}`);
       } else if (payrollDetails?.payroll_id) {
-        router.push(`${routeBase}?payrollid=${payrollDetails.payroll_id}`);
+        navigate(`${routeBase}?payrollid=${payrollDetails.payroll_id}`);
       } else {
-        showSnackbar('Payroll ID not available', 'error');
+        // showSnackbar('Payroll ID not available', 'error');
       }
     },
-    [router, payrollDetails, businessId, showSnackbar]
+    [navigate, payrollDetails, businessId]
   );
 
   const completionPercentage = useMemo(() => {
@@ -102,14 +98,14 @@ const PayrollSetup = () => {
   }, [steps]);
 
   if (loading) {
-    return <Loader />;
+    return <h1>Loading</h1>;
   }
 
   return (
     <Box>
       <Box sx={{ mb: 2 }}>
         <Typography variant="h4" textAlign="center" sx={{ mb: 1 }}>
-          Welcome {userData.firstname}
+          Welcome {user.active_context.name}
         </Typography>
         <Typography variant="subtitle1" textAlign="center" sx={{ color: 'text.disabled' }}>
           Set up your organization before starting payroll
