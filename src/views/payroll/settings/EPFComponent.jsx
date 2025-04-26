@@ -1,21 +1,19 @@
-'use client';
 import React, { useEffect, useState } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { Button, Box, TextField, Checkbox, FormControlLabel, Card, CardContent, Typography, Stack, FormGroup, Grid2 } from '@mui/material';
+import { Button, Box, TextField, Checkbox, FormControlLabel, Typography, Stack, FormGroup, Grid2 } from '@mui/material';
 import { IconPlus, IconEdit } from '@tabler/icons-react';
-import Modal from '@/components/Modal';
-import { ModalSize } from '@/enum';
-import CustomAutocomplete from '@/utils/CustomAutocomplete';
-import EmptyTable from '@/components/third-party/table/EmptyTable';
-import MainCard from '@/components/MainCard';
-import { useRouter } from 'next/navigation';
-import Factory from '@/utils/Factory';
-import { useSearchParams } from 'next/navigation';
-import Loader from '@/components/PageLoader';
-import { useSnackbar } from '@/components/CustomSnackbar';
+import Modal from 'ui-component/extended/Modal';
+import CustomAutocomplete from 'utils/CustomAutocomplete';
+import { useNavigate } from 'react-router';
+import Factory from 'utils/Factory';
+import { useSearchParams } from 'react-router';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import MainCard from '../../../ui-component/cards/MainCard';
+import { CircularProgress } from '@mui/material';
+import { useDispatch } from 'store';
+import { openSnackbar } from 'store/slices/snackbar';
 
 const pfFields = [
   { name: 'epf_number', label: 'EPF Number' },
@@ -32,13 +30,17 @@ function EpfComponent({ handleNext }) {
   const [postType, setPostType] = useState('');
   const [loading, setLoading] = useState(false);
   const [payrollid, setPayrollId] = useState(null);
-  const searchParams = useSearchParams();
-  const { showSnackbar } = useSnackbar();
+  const [searchParams] = useSearchParams();
+  const dispatch = useDispatch();
 
-  const router = useRouter();
+  const navigate = useNavigate();
 
   const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const handleClose = () => {
+    setOpen(false); // Close the modal
+    resetForm(); // Reset form state when modal closes
+  };
+
   useEffect(() => {
     const id = searchParams.get('payrollid');
     if (id) {
@@ -75,12 +77,28 @@ function EpfComponent({ handleNext }) {
       const { res, error } = await Factory(postType, url, postData);
       setLoading(false);
       if (res.status_cd === 0) {
-        showSnackbar(postType === 'post' ? 'Data Saved Successfully' : 'Data Updated Successfully', 'success');
-        handleClose();
-        getEPF_Details(payrollid);
-        // router.back();
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: postType === 'post' ? 'Data Saved Successfully' : 'Data Updated Successfully',
+            variant: 'alert',
+            alert: { color: 'success' },
+            close: false
+          })
+        );
+        setOpen(false); // ✅ Close the modal manually
+        resetForm(); // ✅ Reset Form
+        getEPF_Details(payrollid); // ✅ Fetch latest data
       } else {
-        showSnackbar(JSON.stringify(res.data.data), 'error');
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: JSON.stringify(res.data.data),
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
       }
     }
   });
@@ -114,21 +132,39 @@ function EpfComponent({ handleNext }) {
     const { res, error } = await Factory(postType, url, postData);
     setLoading(false);
     if (res.status_cd === 0) {
-      showSnackbar(postType === 'post' ? 'Data Saved Successfully' : 'Data Updated Successfully', 'success');
+      dispatchSnackbar(
+        openSnackbar({
+          open: true,
+          message: postType === 'post' ? 'Data Saved Successfully' : 'Data Updated Successfully',
+          variant: 'alert',
+          alert: { color: 'success' },
+          close: false
+        })
+      );
       setEpfdisableDialog(false);
       getEPF_Details(payrollid);
     } else {
-      showSnackbar(JSON.stringify(res.data.data), 'error');
+      dispatchSnackbar(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res.data.data),
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     }
   };
   const { values, setValues, handleChange, errors, touched, handleSubmit, handleBlur, resetForm, setFieldValue } = formik;
-
+  console.log(open);
   return (
     <>
       {loading ? (
-        <Loader />
+        <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
+          <CircularProgress />
+        </Box>
       ) : (
-        <Grid2 container spacing={2}>
+        <MainCard title="Employees Provident Fund">
           <Grid2 size={12}>
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', textAlign: 'center' }}>
               <Grid2 container spacing={2} sx={{ maxWidth: '600px' }}>
@@ -146,6 +182,7 @@ function EpfComponent({ handleNext }) {
                           <Button
                             size="small"
                             variant="contained"
+                            type="button"
                             startIcon={epfData ? <IconEdit size={16} /> : <IconPlus size={16} />}
                             onClick={() => {
                               setPostType('put');
@@ -260,7 +297,7 @@ function EpfComponent({ handleNext }) {
                             variant="outlined"
                             startIcon={<ArrowBackIcon />}
                             onClick={() => {
-                              router.back();
+                              navigate(-1);
                             }}
                           >
                             Back to Dashboard
@@ -284,10 +321,13 @@ function EpfComponent({ handleNext }) {
                     </>
                   ) : (
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-                      {/* Empty Table */}
-                      <Box>
-                        <EmptyTable msg="No EPF YET!" sx={{ height: 300, fontWeight: 'bold' }} />
+                      <Box textAlign="center" mt={4}>
+                        <ErrorOutlineIcon color="disabled" fontSize="large" />
+                        <Typography variant="subtitle1" color="text.secondary">
+                          No EPF details found
+                        </Typography>
                       </Box>
+
                       {/* Add EPF Button */}
                       <Grid2 container justifyContent="center" mt={2}>
                         <Button variant="contained" startIcon={<IconPlus size={16} />} onClick={handleOpen}>
@@ -303,125 +343,11 @@ function EpfComponent({ handleNext }) {
 
           <Modal
             open={open}
-            maxWidth={ModalSize.MD}
             header={{ title: 'Employees Provident Fund', subheader: '' }}
-            modalContent={
-              <Box component="form" onSubmit={handleSubmit} p={2}>
-                <Grid2 container spacing={2}>
-                  {pfFields.map((field) => (
-                    <Grid2 size={{ xs: 12 }} key={field.name}>
-                      {field.name === 'employee_contribution_rate' || field.name === 'employer_contribution_rate' ? (
-                        <Box style={{ paddingBottom: '5px' }}>
-                          <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
-                            {field.label}
-                          </Typography>
-                          <CustomAutocomplete
-                            value={values[field.name]}
-                            name={field.name}
-                            onChange={(e, newValue) => setFieldValue(field.name, newValue)}
-                            options={employeeContributionRates}
-                            error={touched[field.name] && Boolean(errors[field.name])}
-                            helperText={touched[field.name] && errors[field.name]}
-                            sx={{ width: '100%' }}
-                          />
-                        </Box>
-                      ) : (
-                        <Box>
-                          <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
-                            {field.label}
-                          </Typography>
-                          <TextField
-                            fullWidth
-                            name={field.name}
-                            value={values[field.name]}
-                            onChange={(e) => setFieldValue(field.name, e.target.value)}
-                            error={touched[field.name] && Boolean(errors[field.name])}
-                            helperText={touched[field.name] && errors[field.name]}
-                          />
-                        </Box>
-                      )}
-                    </Grid2>
-                  ))}
-                </Grid2>
-
-                <br />
-                <Grid2 size={{ xs: 12, sm: 6 }}>
-                  <div>
-                    <FormControlLabel
-                      label="Include Employer's Contribution in the CTC"
-                      control={
-                        <Checkbox
-                          checked={formik.values.include_employer_contribution_in_ctc}
-                          onChange={(e) => {
-                            const checked = e.target.checked;
-                            formik.setFieldValue('include_employer_contribution_in_ctc', checked);
-                            // When the employer CTC is checked, enable EDIL and Admin CTC
-                            if (!checked) {
-                              formik.setFieldValue('employer_edil_contribution_in_ctc', false); // Reset EDIL CTC
-                              formik.setFieldValue('admin_charge_in_ctc', false); // Reset Admin CTC
-                            }
-                          }}
-                        />
-                      }
-                    />
-
-                    <Box sx={{ display: 'flex', flexDirection: 'column', ml: 3 }}>
-                      <FormControlLabel
-                        label="Include Employer's EDIL Contribution in the CTC"
-                        control={
-                          <Checkbox
-                            checked={formik.values.employer_edil_contribution_in_ctc}
-                            onChange={(e) => formik.setFieldValue('employer_edil_contribution_in_ctc', e.target.checked)}
-                            disabled={!formik.values.include_employer_contribution_in_ctc} // Disabled if Employer CTC is not checked
-                          />
-                        }
-                      />
-                      <FormControlLabel
-                        label="Include Admin Charges in the CTC"
-                        control={
-                          <Checkbox
-                            checked={formik.values.admin_charge_in_ctc}
-                            onChange={(e) => formik.setFieldValue('admin_charge_in_ctc', e.target.checked)}
-                            disabled={!formik.values.include_employer_contribution_in_ctc} // Disabled if Employer CTC is not checked
-                          />
-                        }
-                      />
-                    </Box>
-                  </div>
-                </Grid2>
-                <br />
-
-                <FormGroup>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={formik.values.allow_employee_level_override}
-                        onChange={(e) => formik.setFieldValue('allow_employee_level_override', e.target.checked)}
-                      />
-                    }
-                    label="Allow Employee Level Override"
-                  />
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={formik.values.prorate_restricted_pf_wage}
-                        onChange={(e) => formik.setFieldValue('prorate_restricted_pf_wage', e.target.checked)}
-                      />
-                    }
-                    label="Pro-rate Restricted PF Wage"
-                  />{' '}
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={formik.values.apply_components_if_wage_below_15k}
-                        onChange={(e) => formik.setFieldValue('apply_components_if_wage_below_15k', e.target.checked)}
-                      />
-                    }
-                    label="Consider all applicable salary components if the PF wage is less than ₹150,000 after deducting loss of pay."
-                  />{' '}
-                </FormGroup>
-              </Box>
-            }
+            showClose={true}
+            handleClose={() => {
+              handleClose(); // Reset form and close dialog
+            }}
             footer={
               <Stack direction="row" sx={{ width: 1, justifyContent: 'space-between', gap: 2 }}>
                 <Button
@@ -434,29 +360,145 @@ function EpfComponent({ handleNext }) {
                 >
                   Cancel
                 </Button>
-                <Button type="submit" variant="contained" onClick={handleSubmit}>
-                  Save
+
+                {/* Save Button */}
+                <Button
+                  type="submit"
+                  variant="contained"
+                  onClick={handleSubmit}
+                  disabled={loading} // Disable button while loading
+                >
+                  {loading ? 'Saving...' : 'Save'} {/* Change text based on loading state */}
                 </Button>
               </Stack>
             }
-          />
+          >
+            <Box component="form" onSubmit={handleSubmit} p={2}>
+              <Grid2 container spacing={2}>
+                {pfFields.map((field) => (
+                  <Grid2 size={{ xs: 12 }} key={field.name}>
+                    {field.name === 'employee_contribution_rate' || field.name === 'employer_contribution_rate' ? (
+                      <Box style={{ paddingBottom: '5px' }}>
+                        <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
+                          {field.label}
+                        </Typography>
+                        <CustomAutocomplete
+                          value={values[field.name]}
+                          name={field.name}
+                          onChange={(e, newValue) => setFieldValue(field.name, newValue)}
+                          options={employeeContributionRates}
+                          error={touched[field.name] && Boolean(errors[field.name])}
+                          helperText={touched[field.name] && errors[field.name]}
+                          sx={{ width: '100%' }}
+                        />
+                      </Box>
+                    ) : (
+                      <Box>
+                        <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
+                          {field.label}
+                        </Typography>
+                        <TextField
+                          fullWidth
+                          name={field.name}
+                          value={values[field.name]}
+                          onChange={(e) => setFieldValue(field.name, e.target.value)}
+                          error={touched[field.name] && Boolean(errors[field.name])}
+                          helperText={touched[field.name] && errors[field.name]}
+                        />
+                      </Box>
+                    )}
+                  </Grid2>
+                ))}
+              </Grid2>
+
+              <br />
+              <Grid2 size={{ xs: 12, sm: 6 }}>
+                <div>
+                  <FormControlLabel
+                    label="Include Employer's Contribution in the CTC"
+                    control={
+                      <Checkbox
+                        checked={formik.values.include_employer_contribution_in_ctc}
+                        onChange={(e) => {
+                          const checked = e.target.checked;
+                          formik.setFieldValue('include_employer_contribution_in_ctc', checked);
+                          // When the employer CTC is checked, enable EDIL and Admin CTC
+                          if (!checked) {
+                            formik.setFieldValue('employer_edil_contribution_in_ctc', false); // Reset EDIL CTC
+                            formik.setFieldValue('admin_charge_in_ctc', false); // Reset Admin CTC
+                          }
+                        }}
+                      />
+                    }
+                  />
+
+                  <Box sx={{ display: 'flex', flexDirection: 'column', ml: 3 }}>
+                    <FormControlLabel
+                      label="Include Employer's EDIL Contribution in the CTC"
+                      control={
+                        <Checkbox
+                          checked={formik.values.employer_edil_contribution_in_ctc}
+                          onChange={(e) => formik.setFieldValue('employer_edil_contribution_in_ctc', e.target.checked)}
+                          disabled={!formik.values.include_employer_contribution_in_ctc} // Disabled if Employer CTC is not checked
+                        />
+                      }
+                    />
+                    <FormControlLabel
+                      label="Include Admin Charges in the CTC"
+                      control={
+                        <Checkbox
+                          checked={formik.values.admin_charge_in_ctc}
+                          onChange={(e) => formik.setFieldValue('admin_charge_in_ctc', e.target.checked)}
+                          disabled={!formik.values.include_employer_contribution_in_ctc} // Disabled if Employer CTC is not checked
+                        />
+                      }
+                    />
+                  </Box>
+                </div>
+              </Grid2>
+              <br />
+
+              <FormGroup>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={formik.values.allow_employee_level_override}
+                      onChange={(e) => formik.setFieldValue('allow_employee_level_override', e.target.checked)}
+                    />
+                  }
+                  label="Allow Employee Level Override"
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={formik.values.prorate_restricted_pf_wage}
+                      onChange={(e) => formik.setFieldValue('prorate_restricted_pf_wage', e.target.checked)}
+                    />
+                  }
+                  label="Pro-rate Restricted PF Wage"
+                />{' '}
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={formik.values.apply_components_if_wage_below_15k}
+                      onChange={(e) => formik.setFieldValue('apply_components_if_wage_below_15k', e.target.checked)}
+                    />
+                  }
+                  label="Consider all applicable salary components if the PF wage is less than ₹150,000 after deducting loss of pay."
+                />{' '}
+              </FormGroup>
+            </Box>
+          </Modal>
 
           <Modal
             open={epfdisableDialog}
-            maxWidth={ModalSize.MD}
+            showClose={true}
+            maxWidth={'md'}
+            handleClose={() => {
+              resetForm();
+              setEpfdisableDialog(false);
+            }}
             header={{ title: 'Employees Provident Fund', subheader: '' }}
-            modalContent={
-              <Box onSubmit={handleSubmit} p={2}>
-                <Box display="flex" justifyContent="center" mb={1}>
-                  <ErrorOutlineIcon color="primary" fontSize="large" />
-                </Box>
-
-                <Typography>
-                  If your organisation has 20 or more employees, it is necessary to register for the EPF scheme. Are you sure you want to
-                  disable EPF for this organisation?
-                </Typography>
-              </Box>
-            }
             footer={
               <Stack direction="row" sx={{ width: 1, justifyContent: 'space-between', gap: 2 }}>
                 <Button
@@ -480,8 +522,19 @@ function EpfComponent({ handleNext }) {
                 </Button>
               </Stack>
             }
-          />
-        </Grid2>
+          >
+            <Box onSubmit={handleSubmit} p={2}>
+              <Box display="flex" justifyContent="center" mb={1}>
+                <ErrorOutlineIcon color="primary" fontSize="large" />
+              </Box>
+
+              <Typography>
+                If your organisation has 20 or more employees, it is necessary to register for the EPF scheme. Are you sure you want to
+                disable EPF for this organisation?
+              </Typography>
+            </Box>{' '}
+          </Modal>
+        </MainCard>
       )}
     </>
   );

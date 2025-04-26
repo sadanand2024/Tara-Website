@@ -15,25 +15,24 @@ import {
   Tooltip,
   Stack
 } from '@mui/material';
-import CustomInput from '@/utils/CustomInput';
-import CustomAutocomplete from '@/utils/CustomAutocomplete';
+import CustomInput from 'utils/CustomInput';
+import CustomAutocomplete from 'utils/CustomAutocomplete';
 import { IconTrash } from '@tabler/icons-react';
-import { useSearchParams } from 'next/navigation';
-import { usePathname, useRouter } from 'next/navigation';
-import { useSnackbar } from '@/components/CustomSnackbar';
-import Factory from '@/utils/Factory';
+import { useSearchParams } from 'react-router';
+import { useNavigate } from 'react-router';
+import Factory from 'utils/Factory';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 
 export default function RenderSalaryTemplateTable({ values, setFieldValue, setValues, enablePreviewButton, setEnablePreviewButton }) {
   const [earningsData, setEarningsData] = useState([]);
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [payrollid, setPayrollId] = useState(null);
   const [template_id, setTemplate_id] = useState(null);
   const [viewPreview, setViewPreview] = useState(false);
   const [onBlurrRecalculate, setOnBlurrRecalculate] = useState(false);
-  const { showSnackbar } = useSnackbar();
+  // const { showSnackbar } = useSnackbar();
 
   useEffect(() => {
     const id = searchParams.get('payrollid');
@@ -210,7 +209,7 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
     const url = `/payroll/calculate-payroll`;
     const { res, error } = await Factory('post', url, postData);
     if (values.errorMessage) {
-      showSnackbar(values.errorMessage, 'error');
+      // showSnackbar(values.errorMessage, 'error');
       return; // Prevent form submission
     }
     if (res?.status_cd === 0) {

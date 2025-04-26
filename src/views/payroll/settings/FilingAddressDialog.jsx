@@ -1,24 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Stack, Typography, Card, CardContent, Grid2 } from '@mui/material';
-import CustomAutocomplete from '@/utils/CustomAutocomplete'; // Assuming CustomAutocomplete is a valid component
-import Modal from '@/components/Modal';
-import { ModalSize } from '@/enum';
-import { useSearchParams } from 'next/navigation';
-import Factory from '@/utils/Factory';
-import Loader from '@/components/PageLoader';
-import useCurrentUser from '@/hooks/useCurrentUser';
-import { useSnackbar } from '@/components/CustomSnackbar';
-
+import CustomAutocomplete from 'utils/CustomAutocomplete'; // Assuming CustomAutocomplete is a valid component
+import Modal from 'ui-component/extended/Modal';
+import { useSearchParams } from 'react-router-dom';
+import Factory from 'utils/Factory';
+import { useDispatch } from 'store';
+import { openSnackbar } from 'store/slices/snackbar';
+import CircularProgress from '@mui/material/CircularProgress';
+import { useSelector } from 'react-redux';
 export default function FilingAddressDialog({ filingAddressDialog, setFilingAddressDialog, getOrgDetails }) {
-  const { userData } = useCurrentUser();
-  let businessId = userData.user_type === 'Business' ? userData.business_affiliated[0].id : userData.businesssDetails.business[0].id;
+  const user = useSelector((state) => state).accountReducer.user;
+
+  let businessId = user.active_context.business_id;
   const [selctedLocation, setSelctedLocation] = useState({});
   const [workLocations, setWorkLocations] = useState([]); // Stores the list of work locations
   const [loading, setLoading] = useState(false); // State for loader
 
   const [payrollid, setPayrollId] = useState(null); // Payroll ID fetched from URL
   const searchParams = useSearchParams();
-  const { showSnackbar } = useSnackbar();
 
   useEffect(() => {
     const id = searchParams.get('payrollid');
@@ -36,12 +35,28 @@ export default function FilingAddressDialog({ filingAddressDialog, setFilingAddr
       setWorkLocations(res?.data); // Successfully set work locations
     } else {
       setWorkLocations([]);
-      showSnackbar(JSON.stringify(res?.data?.data || error), 'error');
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res?.data?.data || error),
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     }
   };
   const saveFilingAddress = async () => {
     if (!selctedLocation.location_name) {
-      showSnackbar('Please select a filing address before submitting.', 'error');
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Please select a filing address before submitting.',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
       return;
     }
     let postData = new FormData();
@@ -57,11 +72,28 @@ export default function FilingAddressDialog({ filingAddressDialog, setFilingAddr
     const { res, error } = await Factory('post', url, postData);
     setLoading(false);
     if (res.status_cd === 0) {
-      showSnackbar('Data Saved Successfully', 'success');
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Data Saved Successfully',
+          variant: 'alert',
+          alert: { color: 'success' },
+          close: false
+        })
+      );
+
       setFilingAddressDialog(false);
       getOrgDetails(payrollid);
     } else {
-      showSnackbar(JSON.stringify(res.data.data), 'error');
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res.data.data),
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     }
   };
   useEffect(() => {
@@ -70,7 +102,9 @@ export default function FilingAddressDialog({ filingAddressDialog, setFilingAddr
   return (
     <>
       {loading ? (
-        <Loader />
+        <Box display="flex" justifyContent="center" alignItems="center" minHeight="50vh">
+          <CircularProgress />
+        </Box>
       ) : (
         <Modal
           open={filingAddressDialog}

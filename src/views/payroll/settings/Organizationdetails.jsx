@@ -4,37 +4,36 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { CardContent, Button, Box, Typography, Tooltip, Card } from '@mui/material';
 import Grid2 from '@mui/material/Grid2';
-import HomeCard from '@/components/cards/HomeCard';
-import CustomAutocomplete from '@/utils/CustomAutocomplete';
-import CustomInput from '@/utils/CustomInput';
-import CustomUpload from '@/utils/CustomUpload';
-import { indian_States_And_UTs } from '@/utils/indian_States_And_UT';
-import { industries } from '@/utils/industries';
-import { useSnackbar } from '@/components/CustomSnackbar';
-import Factory from '@/utils/Factory';
-import { useRouter } from 'next/navigation';
-import { useSearchParams } from 'next/navigation';
-import useCurrentUser from '@/hooks/useCurrentUser';
-import Loader from '@/components/PageLoader';
-import MainCard from '@/components/MainCard';
-import { entity_choices } from '@/utils/Entity-types';
+import CustomUpload from 'utils/CustomUpload';
+import { indian_States_And_UTs } from 'utils/indian_States_And_UT';
+import { industries } from 'utils/industries';
+import { entity_choices } from 'utils/Entity-types';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { IconChevronDown, IconHelp } from '@tabler/icons-react';
-import CustomDatePicker from '@/utils/CustomDateInput';
+import CustomDatePicker from 'utils/CustomDateInput';
 import dayjs from 'dayjs';
 import { IconEdit } from '@tabler/icons-react';
 import FilingAddressDialog from './FilingAddressDialog';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { useDispatch } from 'store';
+import { openSnackbar } from 'store/slices/snackbar';
+import CircularProgress from '@mui/material/CircularProgress';
 
+import MainCard from 'ui-component/cards/MainCard';
+import CustomAutocomplete from 'utils/CustomAutocomplete';
+import CustomInput from 'utils/CustomInput';
+import Factory from 'utils/Factory';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 function Organizationdetails({ tab }) {
-  const { userData } = useCurrentUser();
-  let businessId = userData.user_type === 'Business' ? userData.business_affiliated[0].id : userData.businesssDetails.business[0].id;
+  const user = useSelector((state) => state).accountReducer.user;
 
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  let businessId = user.active_context.business_id;
+
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [payrollid, setPayrollId] = useState(null);
   const [loading, setLoading] = useState(false);
-  const { showSnackbar } = useSnackbar();
   const [logoDetails, setLogoDetails] = useState([]);
   const [filingAddress, setFilingAddress] = useState({});
   const [filingAddressDialog, setFilingAddressDialog] = useState(false);
@@ -148,10 +147,28 @@ function Organizationdetails({ tab }) {
       const { res, error } = await Factory('post', url, postData);
       setLoading(false);
       if (res.status_cd === 0) {
-        showSnackbar('Data Saved Successfully', 'success');
-        router.back();
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'Data Saved Successfully',
+            variant: 'alert',
+            alert: { color: 'success' },
+            close: false
+          })
+        );
+
+        navigate(-1);
       } else {
         showSnackbar(JSON.stringify(res.data.data), 'error');
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: JSON.stringify(res.data.data) || 'Unknown Error',
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
       }
     }
   });
@@ -324,7 +341,7 @@ function Organizationdetails({ tab }) {
         country: 'IN',
         org_address_state: data.headOffice?.state || '',
         org_address_city: data.headOffice?.city || '',
-        org_address_pincode: data.headOffice?.pincode || '',
+        org_address_pincode: data.headOffice?.pinCode || '',
         filling_address_line1: data.headOffice?.address_line1 || '',
         filling_address_line2: data.headOffice?.address_line2 || '',
         filling_address_state: data.headOffice?.state || '',
@@ -368,120 +385,120 @@ function Organizationdetails({ tab }) {
   return (
     <>
       {loading ? (
-        <Loader />
+        <Box display="flex" justifyContent="center" alignItems="center" minHeight="50vh">
+          <CircularProgress />
+        </Box>
       ) : (
-        <HomeCard title="Business profile" tagline="Setup company name, registration details, and basic business information.">
-          <MainCard>
-            <Box component="form" onSubmit={handleSubmit} sx={{ padding: 1 }}>
-              <Grid2 container spacing={2}>
-                {renderFields(fields)}
-              </Grid2>
+        <MainCard title="Business profile" subtitle="Setup company name, registration details, and basic business information.">
+          <Box component="form" onSubmit={handleSubmit} sx={{ padding: 1 }}>
+            <Grid2 container spacing={2}>
+              {renderFields(fields)}
+            </Grid2>
 
-              <Typography variant="subtitle1" gutterBottom sx={{ flexShrink: 0, fontWeight: 'bold', color: 'primary.main', mt: 3, mb: 2 }}>
-                Organization Address
-                <span>
-                  {' '}
-                  <Tooltip title="This will be your primary work location." placement="right" arrow>
-                    <InfoOutlinedIcon sx={{ fontSize: 18, ml: 0.5, color: 'gray', cursor: 'pointer' }} />
-                  </Tooltip>
-                </span>
-              </Typography>
+            <Typography variant="subtitle1" gutterBottom sx={{ flexShrink: 0, fontWeight: 'bold', color: 'primary.main', mt: 3, mb: 2 }}>
+              Organization Address
+              <span>
+                {' '}
+                <Tooltip title="This will be your primary work location." placement="right" arrow>
+                  <InfoOutlinedIcon sx={{ fontSize: 18, ml: 0.5, color: 'gray', cursor: 'pointer' }} />
+                </Tooltip>
+              </span>
+            </Typography>
 
-              <Grid2 container spacing={2}>
-                {renderFields(organizationAddress)}
-              </Grid2>
+            <Grid2 container spacing={2}>
+              {renderFields(organizationAddress)}
+            </Grid2>
 
-              <Box
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 2,
+                mt: 3,
+                mb: 2
+              }}
+            >
+              <Box sx={{ display: 'flex', gap: 2 }}>
+                <Typography variant="subtitle1" gutterBottom sx={{ flexShrink: 0, fontWeight: 'bold', color: 'primary.main' }}>
+                  Filing Address
+                </Typography>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  startIcon={<IconEdit size={16} />}
+                  onClick={() => {
+                    setFilingAddressDialog(true);
+                  }}
+                  sx={{ mt: -1 }}
+                >
+                  Change
+                </Button>
+              </Box>
+              <Typography>This address will be used across all Forms and Payslips.</Typography>
+
+              <Card
                 sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 2,
-                  mt: 3,
-                  mb: 2
+                  flex: 1,
+                  p: 1,
+                  borderRadius: 2,
+                  boxShadow: 3,
+                  backgroundColor: 'background.paper',
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  maxWidth: 350
                 }}
               >
-                <Box sx={{ display: 'flex', gap: 2 }}>
-                  <Typography variant="subtitle1" gutterBottom sx={{ flexShrink: 0, fontWeight: 'bold', color: 'primary.main' }}>
-                    Filing Address
-                  </Typography>
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    startIcon={<IconEdit size={16} />}
-                    onClick={() => {
-                      setFilingAddressDialog(true);
-                    }}
-                    sx={{ mt: -1 }}
-                  >
-                    Change
-                  </Button>
-                </Box>
-                <Typography>This address will be used across all Forms and Payslips.</Typography>
-
-                <Card
-                  sx={{
-                    flex: 1,
-                    p: 1,
-                    borderRadius: 2,
-                    boxShadow: 3,
-                    backgroundColor: 'background.paper',
-                    border: '1px solid',
-                    borderColor: 'divider',
-                    maxWidth: 350
-                  }}
-                >
-                  <CardContent>
-                    {[
-                      { label: 'Address Line 1', value: values.filling_address_line1 },
-                      { label: 'Address Line 2', value: values.filling_address_line2 },
-                      { label: 'Country', value: values.country },
-                      { label: 'State', value: values.filling_address_state },
-                      { label: 'City', value: values.filling_address_city },
-                      { label: 'Pincode', value: values.filling_address_pincode }
-                    ].map((item, index) => (
-                      <Typography
-                        key={index}
-                        variant="body2"
-                        sx={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          p: 0.5,
-                          fontWeight: 500,
-                          borderBottom: index !== 5 ? '1px solid' : 'none',
-                          borderColor: 'divider'
-                        }}
-                      >
-                        <strong>{item.label}:</strong> {item.value}
-                      </Typography>
-                    ))}
-                  </CardContent>
-                </Card>
-              </Box>
-
-              <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Button
-                  variant="outlined"
-                  startIcon={<ArrowBackIcon />}
-                  onClick={() => {
-                    router.back();
-                  }}
-                >
-                  Back to Dashboard
-                </Button>
-                <Button type="submit" variant="contained" color="primary">
-                  Save
-                </Button>
-              </Box>
-              {filingAddressDialog === true && (
-                <FilingAddressDialog
-                  getOrgDetails={getOrgDetails}
-                  filingAddressDialog={filingAddressDialog}
-                  setFilingAddressDialog={setFilingAddressDialog}
-                />
-              )}
+                <CardContent>
+                  {[
+                    { label: 'Address Line 1', value: values.filling_address_line1 },
+                    { label: 'Address Line 2', value: values.filling_address_line2 },
+                    { label: 'Country', value: values.country },
+                    { label: 'State', value: values.filling_address_state },
+                    { label: 'City', value: values.filling_address_city },
+                    { label: 'Pincode', value: values.filling_address_pincode }
+                  ].map((item, index) => (
+                    <Typography
+                      key={index}
+                      variant="body2"
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        p: 0.5,
+                        fontWeight: 500,
+                        borderBottom: index !== 5 ? '1px solid' : 'none',
+                        borderColor: 'divider'
+                      }}
+                    >
+                      <strong>{item.label}:</strong> {item.value}
+                    </Typography>
+                  ))}
+                </CardContent>
+              </Card>
             </Box>
-          </MainCard>
-        </HomeCard>
+
+            <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Button
+                variant="outlined"
+                startIcon={<ArrowBackIcon />}
+                onClick={() => {
+                  router.back();
+                }}
+              >
+                Back to Dashboard
+              </Button>
+              <Button type="submit" variant="contained" color="primary">
+                Save
+              </Button>
+            </Box>
+            {filingAddressDialog === true && (
+              <FilingAddressDialog
+                getOrgDetails={getOrgDetails}
+                filingAddressDialog={filingAddressDialog}
+                setFilingAddressDialog={setFilingAddressDialog}
+              />
+            )}
+          </Box>
+        </MainCard>
       )}
     </>
   );

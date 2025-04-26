@@ -58,7 +58,7 @@ const PayrollDashboard = () => {
 
   const get_business_details = async () => {
     setLoading(true);
-    const userId = userData.dashboardChange ? userData.businesssDetails.id : userData.id;
+    const userId = userData.user.id;
     const url = `/user_management/businesses-by-client/?user_id=${userId}`;
     const { res, error } = await Factory('get', url, {});
     if (res?.status_cd === 0) {
@@ -70,19 +70,21 @@ const PayrollDashboard = () => {
   };
   // useEffect(() => {
   //   if (userData.business_exists === false) {
-  //     router.push('/payrollsetup/payroll_business_profileSetup');
+  //     // router.push('/payrollsetup/payroll_business_profileSetup');
+  //     router.push(router.push('/payrollsetup/payroll_business_profileSetup'));
   //   } else {
   //     get_business_details();
   //   }
   // }, [userData.id]);
+
   useEffect(() => {
-    if (user?.business_exists === false) {
-      navigate('/payrollsetup/payroll_business_profileSetup');
+    if (user?.user?.registration_completed === 'False') {
+      // navigate('/payrollsetup/payroll_business_profileSetup');
+      navigate('/app/payroll/settings');
     } else {
       getData(user.id);
     }
   }, [user]);
-
   useEffect(() => {
     const getCurrentFinancialYear = () => {
       const today = new Date();
@@ -126,7 +128,7 @@ const PayrollDashboard = () => {
           >
             Add Employee
           </Button>
-          <Button variant="outlined" onClick={() => navigate(`/payrollsetup`)} startIcon={<IconSettings2 size={18} />}>
+          <Button variant="outlined" onClick={() => navigate('/app/payroll/settings')} startIcon={<IconSettings2 size={18} />}>
             Payroll Settings
           </Button>
         </Stack>

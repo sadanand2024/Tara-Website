@@ -1,114 +1,130 @@
+// 📁 File: ViewSlabs.jsx
+
 'use client';
 import React, { useEffect, useState } from 'react';
 import {
-  Button,
   Box,
-  TextField,
+  Button,
   Stack,
+  Typography,
+  TextField,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Paper,
-  Typography
+  Paper
 } from '@mui/material';
-import Modal from '@/components/Modal';
-import { ModalSize } from '@/enum';
-import Factory from '@/utils/Factory';
-import { useSnackbar } from '@/components/CustomSnackbar';
+import Modal from 'ui-component/extended/Modal';
+import Factory from 'utils/Factory';
 
-function ViewSlabs({ viewSlabsDialog, setViewSlabsDialog, selectedRecord, setSelectedRecord, get_pt_Details, payrollid }) {
+const ViewSlabs = ({ viewSlabsDialog, setViewSlabsDialog, selectedRecord, setSelectedRecord, get_pt_Details, payrollid }) => {
   const [ptin, setPtin] = useState('');
-  const { showSnackbar } = useSnackbar();
 
-  const save_func = async () => {
-    if (!ptin) {
-      showSnackbar('Please Enter PTIN before Saving', 'error');
+  useEffect(() => {
+    if (selectedRecord) {
+      setPtin(selectedRecord.pt_number || '');
+    }
+  }, [selectedRecord]);
+
+  const savePTIN = async () => {
+    if (!ptin || ptin.length < 6 || ptin.length > 10) {
+      // showSnackbar('PTIN must be between 6-10 digits.', 'error');
       return;
     }
 
-    const url = `/payroll/pt/${selectedRecord.id}`;
-    let postData = {
+    const postData = {
       payroll: payrollid,
       pt_number: ptin,
       work_location: selectedRecord.work_location
     };
-    const { res, error } = await Factory('put', url, postData);
+
+    const { res } = await Factory('put', `/payroll/pt/${selectedRecord.id}`, postData);
 
     if (res?.status_cd === 0) {
+      showSnackbar('PTIN Updated Successfully', 'success');
       setViewSlabsDialog(false);
+      setSelectedRecord(null);
       get_pt_Details(payrollid);
     } else {
-      showSnackbar(JSON.stringify(res?.data?.data || error), 'error');
+      showSnackbar(JSON.stringify(res?.data?.data || 'Unknown Error'), 'error');
     }
   };
-  useEffect(() => {
-    if (selectedRecord) {
-      setPtin(selectedRecord.pt_number);
-    }
-  }, [selectedRecord]);
+
   return (
     <Modal
       open={viewSlabsDialog}
-      maxWidth={ModalSize.MD}
+      maxWidth={'md'}
+      showClose={true}
+      handleClose={() => {
+        setViewSlabsDialog(false);
+        setSelectedRecord(null);
+      }}
       header={{ title: 'Professional Tax Slabs', subheader: '' }}
       modalContent={
         <Box sx={{ padding: 2 }}>
-          <Box>
-            <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between' }}>
+          <Stack spacing={2}>
+            <Stack direction="row" justifyContent="space-between">
               <Typography variant="body1">
-                <strong>Work Location Name:</strong> {selectedRecord?.work_location_name}
+                <strong>Work Location:</strong> {selectedRecord?.work_location_name || '-'}
               </Typography>
               <Typography variant="body1">
-                <strong>State:</strong> {selectedRecord?.state}
+                <strong>State:</strong> {selectedRecord?.state || '-'}
               </Typography>
-            </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            </Stack>
+
+            <Stack direction="row" alignItems="center" spacing={1}>
               <Typography variant="body1">
                 <strong>PTIN:</strong>
               </Typography>
               <TextField
-                value={ptin || ''}
+                value={ptin}
                 onChange={(e) => {
-                  const input = e.target.value;
-                  if (/^\d{0,10}$/.test(input)) {
-                    setPtin(input);
-                  }
+                  const val = e.target.value;
+                  if (/^\d{0,10}$/.test(val)) setPtin(val);
                 }}
                 size="small"
-                sx={{ ml: 1 }}
-                error={ptin?.length > 0 && (ptin?.length < 6 || ptin?.length > 10)}
-                helperText={ptin?.length > 0 && (ptin?.length < 6 || ptin?.length > 10) ? 'PTIN must be 6-10 digits' : ''}
+                sx={{ maxWidth: 200 }}
+                error={ptin.length > 0 && (ptin.length < 6 || ptin.length > 10)}
+                helperText={ptin.length > 0 && (ptin.length < 6 || ptin.length > 10) ? '6-10 digits allowed' : ''}
               />
-            </Box>
+            </Stack>
 
-            <TableContainer component={Paper} sx={{ mt: 3 }}>
+            <TableContainer component={Paper} sx={{ mt: 2, borderRadius: 2 }}>
               <Table>
                 <TableHead>
-                  <TableRow>
-                    <TableCell sx={{ whiteSpace: 'nowrap', fontWeight: 'bold' }}>Monthly Gross Salary (₹)</TableCell>
-                    <TableCell sx={{ whiteSpace: 'nowrap', fontWeight: 'bold' }}>Monthly Tax Amount (₹)</TableCell>
+                  <TableRow sx={{ bgcolor: 'grey.100' }}>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Monthly Salary Range (₹)</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Monthly Tax Amount (₹)</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {selectedRecord?.slab?.map((item, index) => (
-                    <TableRow key={index}>
-                      <TableCell>{item['Monthly Salary (₹)']}</TableCell>
-                      <TableCell>{item['Professional Tax (₹ per month)']}</TableCell>
+                  {selectedRecord?.slab?.length > 0 ? (
+                    selectedRecord.slab.map((item, idx) => (
+                      <TableRow key={idx}>
+                        <TableCell>{item['Monthly Salary (₹)'] || '-'}</TableCell>
+                        <TableCell>{item['Professional Tax (₹ per month)'] || '-'}</TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={2} align="center">
+                        No Slab Data Available
+                      </TableCell>
                     </TableRow>
-                  ))}
+                  )}
                 </TableBody>
               </Table>
             </TableContainer>
-          </Box>
+          </Stack>
         </Box>
       }
       footer={
-        <Stack direction="row" sx={{ width: 1, justifyContent: 'space-between', gap: 2 }}>
+        <Stack direction="row" justifyContent="space-between" sx={{ width: 1, gap: 2 }}>
           <Button
             variant="outlined"
+            color="error"
             onClick={() => {
               setViewSlabsDialog(false);
               setSelectedRecord(null);
@@ -116,18 +132,13 @@ function ViewSlabs({ viewSlabsDialog, setViewSlabsDialog, selectedRecord, setSel
           >
             Cancel
           </Button>
-          <Button
-            variant="contained"
-            onClick={() => {
-              save_func();
-            }}
-          >
+          <Button variant="contained" color="primary" onClick={savePTIN}>
             Save
           </Button>
         </Stack>
       }
     />
   );
-}
+};
 
 export default ViewSlabs;

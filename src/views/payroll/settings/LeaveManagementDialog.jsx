@@ -15,17 +15,14 @@ import {
   InputLabel
 } from '@mui/material';
 import Grid2 from '@mui/material/Grid2'; // Import Grid2 from MUI system
-import CustomInput from '@/utils/CustomInput';
-import Factory from '@/utils/Factory';
-import { useSnackbar } from '@/components/CustomSnackbar';
-import { useSearchParams } from 'next/navigation';
-import Modal from '@/components/Modal';
-import { ModalSize } from '@/enum';
-import CustomAutocomplete from '@/utils/CustomAutocomplete';
+import CustomInput from 'utils/CustomInput';
+import CustomAutocomplete from 'utils/CustomAutocomplete';
+import Factory from 'utils/Factory';
+import { useSearchParams } from 'react-router';
+import Modal from 'ui-component/extended/Modal';
 
 export default function LeaveManagementDialog({ open, handleClose, selectedRecord, type, setType, fetchLeaveManagementData }) {
-  const { showSnackbar } = useSnackbar();
-  const searchParams = useSearchParams();
+  const [searchParams] = useSearchParams();
   const [payrollid, setPayrollId] = useState(null); // Payroll ID fetched from URL
 
   // Update payroll ID from search params
@@ -74,12 +71,12 @@ export default function LeaveManagementDialog({ open, handleClose, selectedRecor
 
       const { res, error } = await Factory(postType, url, postData);
       if (res?.status_cd === 0) {
-        showSnackbar(postType === 'post' ? 'Data Saved Successfully' : 'Data Updated Successfully', 'success');
+        // showSnackbar(postType === 'post' ? 'Data Saved Successfully' : 'Data Updated Successfully', 'success');
         handleClose();
         resetForm();
         fetchLeaveManagementData();
       } else {
-        showSnackbar(JSON.stringify(res?.data?.data || error), 'error');
+        // showSnackbar(JSON.stringify(res?.data?.data || error), 'error');
       }
     }
   });
@@ -124,7 +121,7 @@ export default function LeaveManagementDialog({ open, handleClose, selectedRecor
   return (
     <Modal
       open={open}
-      maxWidth={ModalSize.LG}
+      maxWidth={'lg'}
       header={{ title: 'Add Leave', subheader: '' }}
       modalContent={
         <Box component="form" onSubmit={handleSubmit} sx={{ padding: 2 }}>
