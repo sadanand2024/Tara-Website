@@ -13,6 +13,7 @@ import ServicePage from 'views/pages/services/ServicePage';
 import ServiceCategory from 'views/pages/services/ServiceCategory';
 import PayrollPage from '../views/pages/products/Payroll';
 import InvoicingPage from 'views/pages/products/invoicing/InvoicingPage';
+import KnowledgePage from 'views/pages/knowledge';
 // ==============================|| SIMPLE ROUTING ||============================== //
 
 const SimpleRoutes = {
@@ -34,6 +35,10 @@ const SimpleRoutes = {
     {
       path: '/pages/privacy-policy',
       element: <SaasPagePrivacyPolicy />
+    },
+    {
+      path: '/knowledge',
+      element: <KnowledgePage />
     },
     {
       path: 'services/:category',
