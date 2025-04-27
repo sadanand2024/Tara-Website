@@ -12,10 +12,6 @@ import Tabs from '@mui/material/Tabs';
 import Typography from '@mui/material/Typography';
 
 // project imports
-import UserProfile from './UserProfile';
-import Billing from './Billing';
-import Payment from './Payment';
-import ChangePassword from './ChangePassword';
 import { ThemeMode } from 'config';
 import useConfig from 'hooks/useConfig';
 import MainCard from 'ui-component/cards/MainCard';
@@ -23,10 +19,6 @@ import AnimateButton from 'ui-component/extended/AnimateButton';
 import { gridSpacing } from 'store/constant';
 
 // assets
-import PersonOutlineTwoToneIcon from '@mui/icons-material/PersonOutlineTwoTone';
-import DescriptionTwoToneIcon from '@mui/icons-material/DescriptionTwoTone';
-import CreditCardTwoToneIcon from '@mui/icons-material/CreditCardTwoTone';
-import VpnKeyTwoToneIcon from '@mui/icons-material/VpnKeyTwoTone';
 import ApartmentTwoToneIcon from '@mui/icons-material/ApartmentTwoTone'; // Business Profile
 import GroupsTwoToneIcon from '@mui/icons-material/GroupsTwoTone'; // Key Managerial Personnel
 import AccountBalanceTwoToneIcon from '@mui/icons-material/AccountBalanceTwoTone'; // Business Bank Details
@@ -35,8 +27,16 @@ import ReceiptLongTwoToneIcon from '@mui/icons-material/ReceiptLongTwoTone'; // 
 import MoneyTwoToneIcon from '@mui/icons-material/MoneyTwoTone'; // TDS & Income Tax
 import BadgeTwoToneIcon from '@mui/icons-material/BadgeTwoTone'; // Payroll Compliance
 import GavelTwoToneIcon from '@mui/icons-material/GavelTwoTone'; // Licenses
-import SupervisorAccountTwoToneIcon from '@mui/icons-material/SupervisorAccountTwoTone'; // User Management
 import UsbTwoToneIcon from '@mui/icons-material/UsbTwoTone'; // DSC Register
+import BusinessProfile from './BusinessProfile';
+import BusinessBankDetails from './BusinessBankDetails';
+import KeyManagerialPersonnel from './KeyManagerialPersonnel';
+import MSMESettings from './MSMESettings';
+import GSTSettings from './GSTSettings';
+import TDSAndIncomeTax from './TDSAndIncomeTax';
+import PayrollCompliance from './PayrollCompliance';
+import Licenses from './Licenses';
+import DSCRegister from './DSCRegister';
 
 // tabs
 function TabPanel({ children, value, index, ...other }) {
@@ -62,20 +62,20 @@ const tabsOption = [
     caption: 'General Business Info'
   },
   {
-    label: 'Key Managerial Personnel',
-    icon: <GroupsTwoToneIcon />,
-    caption: 'Directors, Partners, Key Staff'
-  },
-  {
     label: 'Business Bank Details',
     icon: <AccountBalanceTwoToneIcon />,
     caption: 'Bank Accounts, IFSC & Statements'
   },
   {
-    label: 'MSME Settings',
-    icon: <BusinessCenterTwoToneIcon />,
-    caption: 'Udyam Registration & MSME Category'
+    label: 'Key Managerial Personnel',
+    icon: <GroupsTwoToneIcon />,
+    caption: 'Directors, Partners, Key Staff'
   },
+  // {
+  //   label: 'MSME Settings',
+  //   icon: <BusinessCenterTwoToneIcon />,
+  //   caption: 'Udyam Reg. & MSME Category'
+  // },
   {
     label: 'GST Settings',
     icon: <ReceiptLongTwoToneIcon />,
@@ -95,11 +95,6 @@ const tabsOption = [
     label: 'Licenses',
     icon: <GavelTwoToneIcon />,
     caption: 'Trade, Shops, FSSAI & Other Licenses'
-  },
-  {
-    label: 'User Management',
-    icon: <SupervisorAccountTwoToneIcon />,
-    caption: 'Manage Users & Roles'
   },
   {
     label: 'DSC Register',
@@ -123,7 +118,7 @@ export default function Profile2() {
       <Grid size={12}>
         <MainCard title="Business Settings" content={false}>
           <Grid container spacing={gridSpacing}>
-            <Grid size={{ xs: 12, lg: 4 }}>
+            <Grid size={{ xs: 12, lg: 3 }}>
               <CardContent>
                 <Tabs
                   value={value}
@@ -139,7 +134,7 @@ export default function Profile2() {
                       minHeight: 'auto',
                       minWidth: '100%',
                       py: 1.5,
-                      px: 2,
+                      px: 0,
                       display: 'flex',
                       flexDirection: 'row',
                       alignItems: 'flex-start',
@@ -186,19 +181,34 @@ export default function Profile2() {
                 </Tabs>
               </CardContent>
             </Grid>
-            <Grid size={{ xs: 12, lg: 8 }}>
+            <Grid size={{ xs: 12, lg: 9 }}>
               <CardContent sx={{ borderLeft: '1px solid', borderColor: 'divider', height: '100%' }}>
                 <TabPanel value={value} index={0}>
-                  <UserProfile />
+                  <BusinessProfile />
                 </TabPanel>
                 <TabPanel value={value} index={1}>
-                  <Billing />
+                  <BusinessBankDetails />
                 </TabPanel>
                 <TabPanel value={value} index={2}>
-                  <Payment />
+                  <KeyManagerialPersonnel />
                 </TabPanel>
+                {/* <TabPanel value={value} index={3}>
+                  <MSMESettings />
+                </TabPanel> */}
                 <TabPanel value={value} index={3}>
-                  <ChangePassword />
+                  <GSTSettings />
+                </TabPanel>
+                <TabPanel value={value} index={4}>
+                  <TDSAndIncomeTax />
+                </TabPanel>
+                <TabPanel value={value} index={5}>
+                  <PayrollCompliance />
+                </TabPanel>
+                <TabPanel value={value} index={6}>
+                  <Licenses />
+                </TabPanel>
+                <TabPanel value={value} index={7}>
+                  <DSCRegister />
                 </TabPanel>
               </CardContent>
             </Grid>

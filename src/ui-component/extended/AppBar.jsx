@@ -98,12 +98,11 @@ export default function AppBar({ ...others }) {
             <Button color="inherit" onClick={handleProductsToggle}>
               Products
             </Button>
-            <Button color="inherit">Knowledge</Button>
             <Button color="inherit">Company</Button>
-            <Button color="inherit">Book Consultation</Button>
-            <Button color="inherit" component={Link} href="https://codedthemes.gitbook.io/berry" target="_blank">
+            <Button color="inherit" component={Link} href="/knowledge">
               Knowledge
             </Button>
+            <Button color="inherit">Book Consultation</Button>
           </Stack>
 
           {/* Right: Auth Buttons */}
