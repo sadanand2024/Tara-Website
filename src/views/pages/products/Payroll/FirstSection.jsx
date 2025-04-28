@@ -157,6 +157,8 @@ export default function PreBuildDashBoard() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const moduleId = searchParams.get('id');
+  const type = searchParams.get('type');
+  const context = searchParams.get('context');
 
   return (
     <>
@@ -183,7 +185,7 @@ export default function PreBuildDashBoard() {
                   variant="contained"
                   color="primary"
                   startIcon={<AddCircleOutlineIcon />}
-                  onClick={() => navigate(`/register?id=${moduleId}`)}
+                  onClick={() => navigate(`/register?id=${moduleId}&context=${context}&type=${type}`)}
                 >
                   Get Started with Payroll
                 </Button>

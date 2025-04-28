@@ -150,37 +150,19 @@ export default function ProfileSection() {
               <Paper>
                 {open && (
                   <MainCard border={false} elevation={16} content={false} boxShadow shadow={theme.shadows[16]}>
-                    <Box sx={{ p: 2, pb: 0 }}>
-                      <Stack>
-                        <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
-                          <Typography variant="h4">Good Morning,</Typography>
-                          <Typography component="span" variant="h4" sx={{ fontWeight: 400 }}>
-                            {user?.name}
-                          </Typography>
-                        </Stack>
-                        <Typography variant="subtitle2">Project Admin</Typography>
+                    {/* User avatar and name horizontally aligned */}
+                    <Box sx={{ px: 2, pt: 2, pb: 1 }}>
+                      <Stack direction="row" alignItems="center" spacing={2}>
+                        <Avatar src={User1} alt="user-images" sx={{ width: 40, height: 40 }} />
+                        <Typography variant="subtitle1" color="text.primary" fontWeight={600}>
+                          {user?.name || 'User Name'}
+                        </Typography>
                       </Stack>
-                      {/* <OutlinedInput
-                        sx={{ width: '100%', pr: 1, pl: 2, my: 2 }}
-                        id="input-search-profile"
-                        value={value}
-                        onChange={(e) => setValue(e.target.value)}
-                        placeholder="Search profile options"
-                        startAdornment={
-                          <InputAdornment position="start">
-                            <IconSearch stroke={1.5} size="16px" />
-                          </InputAdornment>
-                        }
-                        aria-describedby="search-helper-text"
-                        inputProps={{
-                          'aria-label': 'weight'
-                        }}
-                      /> */}
-                      <Divider />
                     </Box>
+                    <Divider />
                     <Box
                       sx={{
-                        p: 2,
+                        p: 0,
                         py: 0,
                         height: '100%',
                         maxHeight: 'calc(100vh - 250px)',
@@ -227,13 +209,14 @@ export default function ProfileSection() {
                           </Grid>
                         </CardContent>
                       </Card> */}
-                      <Divider />
+                      {/* <Divider /> */}
                       <List
                         component="nav"
                         sx={{
                           width: '100%',
                           maxWidth: 350,
                           minWidth: 300,
+                          p: 0,
                           borderRadius: `${borderRadius}px`,
                           '& .MuiListItemButton-root': { mt: 0.5 }
                         }}
@@ -244,7 +227,7 @@ export default function ProfileSection() {
                           onClick={(event) => handleListItemClick(event, 0, '/apps/user/profile')}
                         >
                           <ListItemIcon>
-                            <IconSettings stroke={1.5} size="20px" />
+                            <IconUser stroke={1.5} size="20px" />
                           </ListItemIcon>
                           <ListItemText
                             primary={

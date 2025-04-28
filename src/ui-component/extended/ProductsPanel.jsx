@@ -71,7 +71,7 @@ const ProductsPanel = ({ onClose }) => {
   useEffect(() => {
     getProductsList();
   }, []);
-  console.log(products);
+
   return (
     <AnimatePresence>
       <ClickAwayListener onClickAway={onClose}>
@@ -138,8 +138,8 @@ const ProductsPanel = ({ onClose }) => {
                         variant="text"
                         color="primary"
                         component={RouterLink}
-                        to={`${product.path}?id=${product.id}`}
-                        disabled={product.disabled}
+                        to={`${product.path}?id=${product.id}&context=${product.context_type}&type=product`}
+                        disabled={product.disabled} 
                         onClick={onClose}
                         sx={{
                           fontWeight: 500,

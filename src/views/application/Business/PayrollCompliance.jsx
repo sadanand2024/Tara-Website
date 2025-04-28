@@ -499,8 +499,8 @@ const PayrollCompliance = () => {
           </Box>
         )}
         {tab === 1 && (
-          <>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+          <Box sx={{ p: 1 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1, }}>
               <Typography variant="h6" color="text.primary">
                 Employee State Insurance
               </Typography>
@@ -692,10 +692,10 @@ const PayrollCompliance = () => {
                 </DialogActions>
               </form>
             </Dialog>
-          </>
+          </Box>
         )}
         {tab === 2 && (
-          <>
+          <Box sx={{ p: 1 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
               <Typography variant="h6" color="text.primary">
                 Professional Tax
@@ -903,7 +903,7 @@ const PayrollCompliance = () => {
                 </DialogActions>
               </form>
             </Dialog>
-          </>
+          </Box>
         )}
       </Card>
     </>
