@@ -1,6 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch } from 'store';
+import { openSnackbar } from 'store/slices/snackbar';
+import { useSelector } from 'react-redux';
 import Factory from 'utils/Factory';
 import { useState, useEffect } from 'react';
 import CustomAutocomplete from 'utils/CustomAutocomplete';
@@ -24,7 +26,9 @@ import MainCard from '../../ui-component/cards/MainCard';
 const PayrollDashboard = () => {
   // const { userData } = useCurrentUser();
   const navigate = useNavigate();
-  const user = useSelector((state) => state).accountReducer.user;
+  const user = useSelector((state) => state.accountReducer.user);
+  const businessId = user.active_context.business_id;
+  const dispatch = useDispatch();
 
   // const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -52,7 +56,15 @@ const PayrollDashboard = () => {
     } else {
       setBusinessDetails({});
       setLoading(false);
-      showSnackbar(JSON.stringify(res?.data?.error || 'Unknown error'), 'error');
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res?.data?.error) || 'An error occurred',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     }
   };
 
@@ -64,7 +76,15 @@ const PayrollDashboard = () => {
     if (res?.status_cd === 0) {
       getData(res.data.id);
     } else {
-      showSnackbar(JSON.stringify(res?.data?.data?.error || 'Unknown error'), 'error');
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res?.data?.data?.error) || 'An error occurred',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     }
     setLoading(false);
   };
@@ -78,12 +98,13 @@ const PayrollDashboard = () => {
   // }, [userData.id]);
 
   useEffect(() => {
-    if (user?.user?.registration_completed === 'False') {
-      // navigate('/payrollsetup/payroll_business_profileSetup');
-      navigate('/app/payroll/settings');
-    } else {
-      getData(user.id);
-    }
+    // if (user?.user?.registration_completed === 'False') {
+    //   // navigate('/payrollsetup/payroll_business_profileSetup');
+    //   navigate('/app/payroll/settings');
+    // } else {
+    //   getData(user.id);
+    // }
+    getData(businessId);
   }, [user]);
   useEffect(() => {
     const getCurrentFinancialYear = () => {

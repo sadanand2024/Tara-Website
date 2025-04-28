@@ -1,13 +1,10 @@
 'use client';
 import PropTypes from 'prop-types';
 import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useSnackbar } from '@/components/CustomSnackbar';
-import { useAuth } from '@/contexts/AuthContext';
-import useCurrentUser from '@/hooks/useCurrentUser';
-import Factory from '@/utils/Factory';
-import HomeCard from '@/components/cards/HomeCard';
-import MainCard from '@/components/MainCard';
+import { useNavigate } from 'react-router';
+import { useSearchParams } from 'react-router';
+import Factory from 'utils/Factory';
+import MainCard from '../../../ui-component/cards/MainCard';
 import MonthWiseDashboard from './MonthWiseDashboard';
 import PayrollSummary from './PayrollSummary';
 import DetailedPayroll from './DetailedPayroll';
@@ -20,8 +17,8 @@ import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import UpdateIcon from '@mui/icons-material/Update';
 import ReceiptIcon from '@mui/icons-material/Receipt';
-import { months } from '@/utils/MonthsList';
-import PayrollMonthwise from '../PayrollDashboard/PayrollMonthwise';
+import { months } from 'utils/MonthsList';
+import PayrollMonthwise from '../PayrollMonthwise';
 import ComplianceSummary from './ComplianceSummary';
 const PRODUCTS_DATA = [
   { title: 'New Joiners', href: '/payroll-workflows', icon: <PersonAddIcon />, color: '#4CAF50' },
@@ -44,9 +41,8 @@ TabPanel.propTypes = {
   index: PropTypes.number.isRequired
 };
 export default function Index() {
-  const { showSnackbar } = useSnackbar();
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const [payrollId, setPayrollId] = useState(null);
   const [month, setMonth] = useState(null);
@@ -95,7 +91,7 @@ export default function Index() {
     if (res.status_cd === 0) {
       setPayrollSummaryData(res.data || []);
     } else {
-      showSnackbar(JSON.stringify(res.data.data), 'error');
+      // showSnackbar(JSON.stringify(res.data.data), 'error');
     }
   };
 
@@ -104,10 +100,10 @@ export default function Index() {
   }, [payrollId]);
 
   const handleCardClick = (href, index) => {
-    router.push(`/payroll${href}?payrollid=${payrollId}&tabValue=${index}&month=${month}&financial_year=2024-2025`);
+    navigate(`/payroll${href}?payrollid=${payrollId}&tabValue=${index}&month=${month}&financial_year=2024-2025`);
   };
   return (
-    <HomeCard title={`Monthly Payroll Dashboard ${months[month - 1]}`} tagline="Explore your monthly payroll details">
+    <MainCard title={`Monthly Payroll Dashboard ${months[month - 1]}`} tagline="Explore your monthly payroll details">
       {' '}
       <Box sx={{ pb: 3 }}>
         <Grid2 container spacing={{ xs: 2, md: 3 }}>
@@ -119,104 +115,102 @@ export default function Index() {
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
               Payroll Workflows
             </Typography>
-            <MainCard>
-              <Grid2 container spacing={2}>
-                {PRODUCTS_DATA.map((item, index) => (
-                  <Grid2 key={index} size={{ xs: 12, sm: 6, md: 3 }}>
-                    <Paper
-                      elevation={0}
+            <Grid2 container spacing={2}>
+              {PRODUCTS_DATA.map((item, index) => (
+                <Grid2 key={index} size={{ xs: 12, sm: 6, md: 3 }}>
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      height: '100%',
+                      borderRadius: 2,
+                      overflow: 'hidden',
+                      transition: 'all 0.3s ease',
+                      border: '1px solid',
+                      borderColor: 'divider',
+                      '&:hover': {
+                        transform: 'translateY(-4px)',
+                        boxShadow: (theme) => `0 8px 24px ${alpha(theme.palette.primary.main, 0.15)}`,
+                        borderColor: 'primary.main',
+                        cursor: 'pointer'
+                      }
+                    }}
+                    onClick={() => handleCardClick(item.href, index)}
+                  >
+                    <Box
                       sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
                         height: '100%',
-                        borderRadius: 2,
-                        overflow: 'hidden',
-                        transition: 'all 0.3s ease',
-                        border: '1px solid',
-                        borderColor: 'divider',
-                        '&:hover': {
-                          transform: 'translateY(-4px)',
-                          boxShadow: (theme) => `0 8px 24px ${alpha(theme.palette.primary.main, 0.15)}`,
-                          borderColor: 'primary.main',
-                          cursor: 'pointer'
-                        }
+                        p: 2,
+                        position: 'relative',
+                        overflow: 'hidden'
                       }}
-                      onClick={() => handleCardClick(item.href, index)}
                     >
                       <Box
                         sx={{
+                          position: 'absolute',
+                          top: 0,
+                          right: 0,
+                          width: '100px',
+                          height: '100px',
+                          opacity: 0.1,
+                          transform: 'translate(30%, -30%) rotate(30deg)',
                           display: 'flex',
-                          flexDirection: 'column',
-                          height: '100%',
-                          p: 2,
-                          position: 'relative',
-                          overflow: 'hidden'
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}
+                      >
+                        {item.icon}
+                      </Box>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          mb: 1.5
                         }}
                       >
                         <Box
                           sx={{
-                            position: 'absolute',
-                            top: 0,
-                            right: 0,
-                            width: '100px',
-                            height: '100px',
-                            opacity: 0.1,
-                            transform: 'translate(30%, -30%) rotate(30deg)',
                             display: 'flex',
                             alignItems: 'center',
-                            justifyContent: 'center'
+                            justifyContent: 'center',
+                            width: 40,
+                            height: 40,
+                            borderRadius: '50%',
+                            bgcolor: alpha(item.color, 0.1),
+                            color: item.color,
+                            mr: 1.5
                           }}
                         >
                           {item.icon}
                         </Box>
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            mb: 1.5
-                          }}
-                        >
-                          <Box
-                            sx={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              width: 40,
-                              height: 40,
-                              borderRadius: '50%',
-                              bgcolor: alpha(item.color, 0.1),
-                              color: item.color,
-                              mr: 1.5
-                            }}
-                          >
-                            {item.icon}
-                          </Box>
-                          <Typography
-                            variant="subtitle1"
-                            fontWeight="600"
-                            sx={{
-                              color: 'text.primary',
-                              fontSize: '0.95rem'
-                            }}
-                          >
-                            {item.title}
-                          </Typography>
-                        </Box>
-                        <Divider sx={{ my: 1.5 }} />
                         <Typography
-                          variant="body2"
-                          color="text.secondary"
+                          variant="subtitle1"
+                          fontWeight="600"
                           sx={{
-                            fontSize: '0.8rem',
-                            lineHeight: 1.4
+                            color: 'text.primary',
+                            fontSize: '0.95rem'
                           }}
                         >
-                          Manage {item.title.toLowerCase()} related payroll processes and workflows
+                          {item.title}
                         </Typography>
                       </Box>
-                    </Paper>
-                  </Grid2>
-                ))}
-              </Grid2>
-            </MainCard>
+                      <Divider sx={{ my: 1.5 }} />
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{
+                          fontSize: '0.8rem',
+                          lineHeight: 1.4
+                        }}
+                      >
+                        Manage {item.title.toLowerCase()} related payroll processes and workflows
+                      </Typography>
+                    </Box>
+                  </Paper>
+                </Grid2>
+              ))}
+            </Grid2>
           </Grid2>
           <Grid2 size={12}>
             <Box sx={{ width: '100%', display: 'flex', justifyContent: 'space-between', mb: 0 }}>
@@ -240,6 +234,6 @@ export default function Index() {
           </Grid2>
         </Grid2>
       </Box>
-    </HomeCard>
+    </MainCard>
   );
 }

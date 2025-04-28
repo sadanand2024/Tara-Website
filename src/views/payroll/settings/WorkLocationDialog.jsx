@@ -9,7 +9,8 @@ import CustomAutocomplete from 'utils/CustomAutocomplete';
 import Factory from 'utils/Factory';
 import { useSearchParams } from 'react-router';
 import Modal from 'ui-component/extended/Modal';
-
+import { useDispatch } from 'store';
+import { openSnackbar } from 'store/slices/snackbar';
 const filingAddress = [
   { name: 'location_name', label: 'Location Name' },
   { name: 'address_line1', label: 'Address Line 1' },
@@ -21,6 +22,7 @@ const filingAddress = [
 export default function WorkLocationDialog({ open, handleClose, fetchWorkLocations, selectedRecord, type, setType }) {
   const [searchParams] = useSearchParams();
   const [payrollid, setPayrollId] = useState(null);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const id = searchParams.get('payrollid');

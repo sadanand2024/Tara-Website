@@ -1,6 +1,3 @@
-// 📁 File: StatutoryComponents.jsx (Final Corrected)
-
-'use client';
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Box, Stack, Typography, Tabs, Tab, Divider, Paper, Button, Grid2 } from '@mui/material';
@@ -84,7 +81,7 @@ const StatutoryComponents = () => {
         </Tabs>
       </Paper>
 
-      <Box sx={{ pt: 0 }}>
+      <Box>
         <TabPanel value={activeTab} index={0}>
           <EpfComponent handleNext={handleNext} />
         </TabPanel>

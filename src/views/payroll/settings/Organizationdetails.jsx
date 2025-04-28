@@ -9,7 +9,6 @@ import { indian_States_And_UTs } from 'utils/indian_States_And_UT';
 import { industries } from 'utils/industries';
 import { entity_choices } from 'utils/Entity-types';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import { IconChevronDown, IconHelp } from '@tabler/icons-react';
 import CustomDatePicker from 'utils/CustomDateInput';
 import dayjs from 'dayjs';
 import { IconEdit } from '@tabler/icons-react';
@@ -17,6 +16,7 @@ import FilingAddressDialog from './FilingAddressDialog';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
+import { useSelector } from 'react-redux';
 import CircularProgress from '@mui/material/CircularProgress';
 
 import MainCard from 'ui-component/cards/MainCard';
@@ -24,19 +24,17 @@ import CustomAutocomplete from 'utils/CustomAutocomplete';
 import CustomInput from 'utils/CustomInput';
 import Factory from 'utils/Factory';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-function Organizationdetails({ tab }) {
-  const user = useSelector((state) => state).accountReducer.user;
-
-  let businessId = user.active_context.business_id;
-
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+function Organizationdetails() {
+  const user = useSelector((state) => state.accountReducer.user);
+  const businessId = user.active_context.business_id;
   const [payrollid, setPayrollId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [logoDetails, setLogoDetails] = useState([]);
-  const [filingAddress, setFilingAddress] = useState({});
   const [filingAddressDialog, setFilingAddressDialog] = useState(false);
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   useEffect(() => {
     const id = searchParams.get('payrollid');
     if (id) {
@@ -159,7 +157,6 @@ function Organizationdetails({ tab }) {
 
         navigate(-1);
       } else {
-        showSnackbar(JSON.stringify(res.data.data), 'error');
         dispatch(
           openSnackbar({
             open: true,
@@ -296,7 +293,7 @@ function Organizationdetails({ tab }) {
           country: 'IN',
           org_address_state: data.business_details.headOffice?.state || '',
           org_address_city: data.business_details.headOffice?.city || '',
-          org_address_pincode: data.business_details.headOffice?.pincode || '',
+          org_address_pincode: data.business_details.headOffice?.pinCode || '',
 
           filling_address_line1:
             data.filling_address_line1 === '' ? data.business_details.headOffice?.address_line1 : data.filling_address_line1,
@@ -304,26 +301,43 @@ function Organizationdetails({ tab }) {
             data.filling_address_line1 === '' ? data.business_details.headOffice?.address_line2 : data.filling_address_line2,
           filling_address_state: data.filling_address_line1 === '' ? data.business_details.headOffice?.state : data.filling_address_state,
           filling_address_city: data.filling_address_line1 === '' ? data.business_details.headOffice?.city : data.filling_address_city,
-          filling_address_pincode:
+          filling_address_pinCode:
             data.filling_address_line1 === '' ? data.business_details.headOffice?.pincode : data.filling_address_pincode
         }));
       }
     } else {
-      showSnackbar(JSON.stringify(res.data.data), 'error');
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res.data.data) || 'An error occurred',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     }
   };
   const individual_Business_get = async () => {
     setLoading(true);
     const url = `/user_management/businesses/${businessId}/`;
-    const { res, error } = await Factory('get', url, {});
+    const { res } = await Factory('get', url, {});
 
     setLoading(false); // Stop loading after the request completes
-    if (error) {
-      showSnackbar('Failed to fetch business details', 'error');
+    if (res.status_cd !== 0) {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Failed to fetch business details',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
       return;
     }
     if (res?.data) {
       const data = res.data;
+      console.log(data);
       setValues((prev) => ({
         ...prev,
         business_name: data.nameOfBusiness || '',
@@ -349,39 +363,31 @@ function Organizationdetails({ tab }) {
         filling_address_pincode: data.headOffice?.pincode || ''
       }));
     } else {
-      showSnackbar('Invalid response data', 'error');
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Invalid response data',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     }
   };
 
-  // useEffect(() => {
-  //   if (payrollid) {
-  //     getOrgDetails(payrollid);
-  //   } else if (businessId && !payrollid) {
-  //     // Prevent overwriting when payrollid is set later
-  //     individual_Business_get();
-  //   }
-  // }, [payrollid, businessId]);
   useEffect(() => {
-    let timeout;
     if (payrollid) {
       getOrgDetails(payrollid);
-    } else if (businessId) {
-      // Wait 500ms to check if payrollid arrives
-      timeout = setTimeout(() => {
-        if (!payrollid) {
-          individual_Business_get();
-        }
-      }, 500);
+    } else if (businessId && !payrollid) {
+      // Prevent overwriting when payrollid is set later
+      individual_Business_get();
     }
-
-    return () => clearTimeout(timeout); // Cleanup on re-run
   }, [payrollid, businessId]);
 
   useEffect(() => {
     setFieldValue('logo', logoDetails);
   }, [logoDetails]);
   const { values, setValues, handleChange, errors, touched, handleSubmit, handleBlur, setFieldValue } = formik;
-  // console.log(values);
   return (
     <>
       {loading ? (
@@ -395,7 +401,7 @@ function Organizationdetails({ tab }) {
               {renderFields(fields)}
             </Grid2>
 
-            <Typography variant="subtitle1" gutterBottom sx={{ flexShrink: 0, fontWeight: 'bold', color: 'primary.main', mt: 3, mb: 2 }}>
+            <Typography variant="subtitle1" gutterBottom sx={{ flexShrink: 0, fontWeight: 'bold', mt: 3, mb: 2 }}>
               Organization Address
               <span>
                 {' '}
@@ -419,7 +425,7 @@ function Organizationdetails({ tab }) {
               }}
             >
               <Box sx={{ display: 'flex', gap: 2 }}>
-                <Typography variant="subtitle1" gutterBottom sx={{ flexShrink: 0, fontWeight: 'bold', color: 'primary.main' }}>
+                <Typography variant="subtitle1" gutterBottom sx={{ flexShrink: 0, fontWeight: 'bold' }}>
                   Filing Address
                 </Typography>
                 <Button

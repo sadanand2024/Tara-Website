@@ -8,15 +8,14 @@ import Stack from '@mui/material/Stack';
 import { Box, Button, Paper, Divider, Chip, Typography } from '@mui/material';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
-import { useSnackbar } from '@/components/CustomSnackbar';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useNavigate } from 'react-router';
 import { useTheme, alpha } from '@mui/material/styles';
-
+import { useSearchParams } from 'react-router';
 //react
 
 // @project
-import MainCard from '@/components/MainCard';
-import Factory from '@/utils/Factory';
+import MainCard from '../../../ui-component/cards/MainCard';
+import Factory from 'utils/Factory';
 
 const ServicesData = [
   {
@@ -85,13 +84,12 @@ const ServicesData = [
 ];
 export default function OverviewCard() {
   const theme = useTheme();
-  const router = useRouter();
-  const { showSnackbar } = useSnackbar();
+  const navigate = useNavigate();
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth()); // JS Date month is 0-indexed, so we add 1 to get the correct month number
   const [monthWiseData, setMonthWiseData] = useState(null);
   const [loading, setLoading] = useState(false);
   const handleChange = (val) => {
-    router.push(`corporate-admin/${val}`);
+    navigate(`corporate-admin/${val}`);
   };
   const searchParams = useSearchParams();
 
@@ -116,7 +114,7 @@ export default function OverviewCard() {
     if (res?.status_cd === 0) {
       setMonthWiseData(res.data);
     } else {
-      showSnackbar(JSON.stringify(res?.data?.error), 'error');
+      // showSnackbar(JSON.stringify(res?.data?.error), 'error');
     }
   };
 

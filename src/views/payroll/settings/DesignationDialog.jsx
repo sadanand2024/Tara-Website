@@ -38,7 +38,7 @@ export default function DesignationDialog({ open, handleClose, fetchDesignations
         dispatch(
           openSnackbar({
             open: true,
-            message: 'Record Updated Successfully',
+            message: type === 'edit' ? 'Record Updated Successfully' : 'Record Saved Successfully',
             variant: 'alert',
             alert: { color: 'success' },
             close: false
@@ -103,24 +103,22 @@ export default function DesignationDialog({ open, handleClose, fetchDesignations
       }
     >
       <Box component="form" onSubmit={handleSubmit} sx={{ p: 2 }}>
-        <Grid2 container spacing={3}>
-          {designationFields.map((field) => (
-            <Grid2 key={field.name} xs={12}>
-              <Typography gutterBottom>
-                {field.label} <span style={{ color: 'red' }}>*</span>
-              </Typography>
-              <CustomInput
-                fullWidth
-                name={field.name}
-                value={values[field.name]}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                error={touched[field.name] && Boolean(errors[field.name])}
-                helperText={touched[field.name] && errors[field.name]}
-              />
-            </Grid2>
-          ))}
-        </Grid2>
+        {designationFields.map((field) => (
+          <Grid2 key={field.name} xs={12}>
+            <Typography gutterBottom>
+              {field.label} <span style={{ color: 'red' }}>*</span>
+            </Typography>
+            <CustomInput
+              fullWidth
+              name={field.name}
+              value={values[field.name]}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              error={touched[field.name] && Boolean(errors[field.name])}
+              helperText={touched[field.name] && errors[field.name]}
+            />
+          </Grid2>
+        ))}
       </Box>
     </Modal>
   );

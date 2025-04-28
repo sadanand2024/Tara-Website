@@ -47,7 +47,7 @@ function StepperComponent() {
     const url = `/payroll/employees/${id}`;
     const { res } = await Factory('get', url, {});
     setLoading(false);
-
+    console.log(res);
     if (res?.status_cd === 0) {
       setEmployeeData(res.data);
     } else {
@@ -73,7 +73,7 @@ function StepperComponent() {
   useEffect(() => {
     if (employeeId) fetchEmployeeData(employeeId);
   }, [employeeId]);
-
+  console.log(employeeData);
   return (
     <>
       {loading ? (

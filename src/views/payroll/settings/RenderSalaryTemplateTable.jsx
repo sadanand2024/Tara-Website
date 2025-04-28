@@ -22,6 +22,7 @@ import { useSearchParams } from 'react-router';
 import { useNavigate } from 'react-router';
 import Factory from 'utils/Factory';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import EmptyDataPlaceholder from 'ui-component/extended/EmptyDataPlaceholder';
 
 export default function RenderSalaryTemplateTable({ values, setFieldValue, setValues, enablePreviewButton, setEnablePreviewButton }) {
   const [earningsData, setEarningsData] = useState([]);
@@ -95,8 +96,6 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
         annually: 0
       };
     }
-    // console.log(basicSalary);
-    // console.log((basicSalary * Number(earning.calculation)) / 100);
     switch (earning.component_name) {
       case 'Basic':
         const basicPercentage = earning.calculation; // Assume it's the percentage of CTC for Basic
@@ -175,7 +174,6 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
       const basicComponent = res.data.find((item) => item.component_name === 'Basic');
 
       const selectedItem = await get_individual_componnet_data(basicComponent.id);
-      console.log(values);
       setValues((prev) => {
         return {
           ...prev,
@@ -316,11 +314,12 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
       { component_name: '', calculation: 0, monthly: 0, annually: 0 } // Default values
     ]);
   };
+  console.log(earningsData);
   return (
-    <TableContainer component={Paper}>
-      <Table size="small" sx={{ fontSize: '0.875rem' }}>
+    <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 1 }}>
+      <Table sx={{ fontSize: '0.875rem' }}>
         <TableHead>
-          <TableRow>
+          <TableRow sx={{ bgcolor: 'grey.100' }}>
             <TableCell>
               <Typography>Salary Components</Typography>{' '}
             </TableCell>

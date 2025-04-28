@@ -31,18 +31,15 @@ const Factory = (api, URL, payload, headers = {}) => {
     data: payload
   })
     .then((res) => {
-      if (res?.status == 200) {
+      if (res?.status == 200 || res?.status == 204) {
         return {
-          // res: res.data,
-          variant: 'success',
           res: { status_cd: 0, ...res },
+          variant: 'success',
           message: getErrorMessage(api)
         };
       } else if (res?.status == 201) {
         return {
-          res: res.data,
           res: { status_cd: 0, ...res.data },
-
           variant: 'success',
           message: getErrorMessage(api)
         };
@@ -56,6 +53,7 @@ const Factory = (api, URL, payload, headers = {}) => {
         return { res: res, variant: 'error', message: 'Something went wrong.' };
       }
     })
+
     .catch((e) => {
       if (e?.response?.status == 401) {
         if (e?.response?.data.code === 'token_not_valid') {

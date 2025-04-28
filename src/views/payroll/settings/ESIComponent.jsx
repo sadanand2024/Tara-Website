@@ -3,21 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 // @mui
-import {
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Box,
-  TextField,
-  Checkbox,
-  FormControlLabel,
-  Typography,
-  Stack,
-  Grid2,
-  FormGroup
-} from '@mui/material';
+import { Button, Box, TextField, Checkbox, FormControlLabel, Typography, Stack, Grid2 } from '@mui/material';
 import { IconPlus, IconEdit } from '@tabler/icons-react';
 import Modal from 'ui-component/extended/Modal';
 import MainCard from '../../../ui-component/cards/MainCard';
@@ -26,7 +12,9 @@ import { useSearchParams } from 'react-router';
 import Factory from 'utils/Factory';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CircularProgress from '@mui/material/CircularProgress';
-
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import { useDispatch } from 'store';
+import { openSnackbar } from 'store/slices/snackbar';
 const esiDetails = [
   { name: 'esi_number', label: 'ESI Number' },
   { name: 'employee_contribution', label: 'Employees Contribution' },
@@ -41,6 +29,7 @@ function ESIComponent({ handleNext, handleBack }) {
   const [payrollid, setPayrollId] = useState(null);
   const [searchParams] = useSearchParams();
   const router = useNavigate();
+  const dispatch = useDispatch();
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -71,12 +60,29 @@ function ESIComponent({ handleNext, handleBack }) {
       const { res, error } = await Factory(postType, url, postData);
       setLoading(false);
       if (res.status_cd === 0) {
-        // showSnackbar(postType === 'post' ? 'Data Saved Successfully' : 'Data Updated Successfully', 'success');
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: postType === 'post' ? 'Data Saved Successfully' : 'Data Updated Successfully',
+            variant: 'alert',
+            alert: { color: 'success' },
+            close: false
+          })
+        );
         handleClose();
         getESI_Details(payrollid);
         // router.back();
       } else {
         // showSnackbar(JSON.stringify(res.data.data), 'error');
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: JSON.stringify(res.data.data),
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
       }
     }
   });
@@ -216,11 +222,7 @@ function ESIComponent({ handleNext, handleBack }) {
                             disabled
                           />
                         </Grid2>
-                        {/* <Grid2 size={12} textAlign="center" sx={{ mt: 2 }}>
-                      <Box>
-                      
-                      </Box>
-                    </Grid2> */}
+
                         <Grid2 size={12}>
                           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
                             <Button
@@ -232,20 +234,23 @@ function ESIComponent({ handleNext, handleBack }) {
                             >
                               Back to Dashboard
                             </Button>
-                            <Button size="small" variant="contained" onClick={handleBack} sx={{ mr: 2 }}>
+                            {/* <Button size="small" variant="contained" onClick={handleBack} sx={{ mr: 2 }}>
                               Back
                             </Button>
                             <Button size="small" variant="contained" onClick={handleNext}>
                               Next
-                            </Button>
+                            </Button> */}
                           </Box>
                         </Grid2>
                       </>
                     ) : (
                       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-                        {/* Empty Table */}
-                        <Box>No Data</Box>
-                        {/* Add EPF Button */}
+                        <Box textAlign="center" mt={4}>
+                          <ErrorOutlineIcon color="disabled" fontSize="large" />
+                          <Typography variant="subtitle1" color="text.secondary">
+                            No EPF details found
+                          </Typography>
+                        </Box>
                         <Grid2 container justifyContent="center" mt={2}>
                           <Button variant="contained" startIcon={<IconPlus size={16} />} onClick={handleOpen}>
                             Enable ESI

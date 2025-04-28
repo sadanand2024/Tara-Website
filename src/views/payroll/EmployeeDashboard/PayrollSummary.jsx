@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
 import { Table, TableContainer, TableHead, TableRow, TableCell, TableBody, Paper, Stack, Pagination, Button } from '@mui/material';
-import EmptyTable from '@/components/third-party/table/EmptyTable';
-import MainCard from '@/components/MainCard';
-import Factory from '@/utils/Factory';
-import { useSnackbar } from '@/components/CustomSnackbar';
-import { BASE_URL } from 'constants';
+import MainCard from '../../../ui-component/cards/MainCard';
+import Factory from 'utils/Factory';
+import { BASE_URL } from '../../../../constants';
 import axios from 'axios';
 
 const TABLE_HEADERS = [
@@ -23,7 +21,6 @@ const TABLE_HEADERS = [
 export default function PayrollSummary({ payrollSummaryData = [] }) {
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 5;
-  const { showSnackbar } = useSnackbar();
 
   const totalPages = Math.ceil(Array.isArray(payrollSummaryData) ? payrollSummaryData.length / rowsPerPage : 0);
   const paginatedData = Array.isArray(payrollSummaryData)
@@ -54,11 +51,11 @@ export default function PayrollSummary({ payrollSummaryData = [] }) {
           URL.revokeObjectURL(url);
         }, 10000);
       } else {
-        showSnackbar('Invalid response from server', 'error');
+        // showSnackbar('Invalid response from server', 'error');
       }
     } catch (error) {
       console.error('Error fetching PDF:', error);
-      showSnackbar('Invalid response from server', 'error');
+      // showSnackbar('Invalid response from server', 'error');
     }
   };
 
@@ -81,7 +78,7 @@ export default function PayrollSummary({ payrollSummaryData = [] }) {
               {paginatedData?.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={TABLE_HEADERS.length} sx={{ height: 300 }}>
-                    <EmptyTable msg="No work locations available" />
+                    No Data
                   </TableCell>
                 </TableRow>
               ) : (

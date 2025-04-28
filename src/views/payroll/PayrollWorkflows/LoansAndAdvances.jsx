@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import RenderTable from './RenderTable';
 import {} from '@mui/material';
-import Factory from '@/utils/Factory';
-import { useSearchParams } from 'next/navigation';
-import { useSnackbar } from '@/components/CustomSnackbar';
+import Factory from 'utils/Factory';
+import { useSearchParams } from 'react-router';
 import RenderDialog from './RenderDialog';
 
 export default function LoansAndAdvances({ employeeMasterData, from, openDialog, fields, setOpenDialog }) {
@@ -34,9 +33,7 @@ export default function LoansAndAdvances({ employeeMasterData, from, openDialog,
   const [data, setData] = useState([]);
   const [selectedRecord, setSelectedRecord] = useState(null);
 
-  const { showSnackbar } = useSnackbar();
-
-  const searchParams = useSearchParams();
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
     const id = searchParams.get('payrollid');
@@ -53,14 +50,14 @@ export default function LoansAndAdvances({ employeeMasterData, from, openDialog,
     if (res.status_cd === 0) {
       setData(res.data || []);
     } else {
-      showSnackbar(JSON.stringify(res.data.data), 'error');
+      // showSnackbar(JSON.stringify(res.data.data), 'error');
     }
   };
   const handleEdit = async (item) => {
     let url = `/payroll/advance-loans/${item.id}`;
     const { res } = await Factory('get', url, {});
     if (res.status_cd === 1) {
-      showSnackbar(JSON.stringify(res.data), 'error');
+      // showSnackbar(JSON.stringify(res.data), 'error');
     } else {
       setSelectedRecord(res.data);
       setOpenDialog(true);
@@ -70,9 +67,9 @@ export default function LoansAndAdvances({ employeeMasterData, from, openDialog,
     let url = `/payroll/advance-loans/${item.id}`;
     const { res } = await Factory('delete', url, {});
     if (res.status_cd === 1) {
-      showSnackbar(JSON.stringify(res.data), 'error');
+      // showSnackbar(JSON.stringify(res.data), 'error');
     } else {
-      showSnackbar('Record Deleted Successfully', 'success');
+      // showSnackbar('Record Deleted Successfully', 'success');
       getData();
     }
   };

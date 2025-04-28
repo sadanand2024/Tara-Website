@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import Factory from '@/utils/Factory';
-import { useSearchParams, useRouter } from 'next/navigation';
-import { useSnackbar } from '@/components/CustomSnackbar';
-
+import Factory from 'utils/Factory';
+import { useSearchParams } from 'react-router';
+import { useNavigate } from 'react-router';
 import RenderTable from './RenderTable';
 function NewJoiners() {
   const headerData = ['Employee', 'Department', 'Designations', 'Joining', 'Total Days', 'Paid Days', 'Actual Gross', 'Actual CTC'];
@@ -19,9 +18,8 @@ function NewJoiners() {
   const [payrollid, setPayrollId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [newJoinersData, setNewJoinersData] = useState([]);
-  const { showSnackbar } = useSnackbar();
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   useEffect(() => {
     const id = searchParams.get('payrollid');
     if (id) {
@@ -30,7 +28,7 @@ function NewJoiners() {
   }, [searchParams]);
 
   const handleEdit = async (item) => {
-    router.push(`/payrollsetup/add-employee?employee_id=${encodeURIComponent(item.id)}&payrollid=${encodeURIComponent(payrollid)}`);
+    navigate(`/payrollsetup/add-employee?employee_id=${encodeURIComponent(item.id)}&payrollid=${encodeURIComponent(payrollid)}`);
   };
 
   const fetch_newJoiners_Data = async () => {
@@ -44,7 +42,7 @@ function NewJoiners() {
     } else {
       setNewJoinersData([]);
 
-      showSnackbar(JSON.stringify(res.data.data), 'error');
+      // showSnackbar(JSON.stringify(res.data.data), 'error');
     }
   };
   useEffect(() => {

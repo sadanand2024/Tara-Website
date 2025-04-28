@@ -1,18 +1,18 @@
-'use client';
 import React, { useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useNavigate } from 'react-router';
 import MainCard from '@/components/MainCard';
 import { Box, Typography, Grid2, Button } from '@mui/material';
 import Factory from '@/utils/Factory';
 import Loader from '@/components/PageLoader';
-import { useSnackbar } from '@/components/CustomSnackbar';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import useCurrentUser from '@/hooks/useCurrentUser';
 import CustomAutocomplete from '@/utils/CustomAutocomplete';
 import CustomInput from '@/utils/CustomInput';
 import { indian_States_And_UTs } from '@/utils/indian_States_And_UT';
 import { industries } from '@/utils/industries';
+import { useDispatch } from 'store';
+import { openSnackbar } from 'store/slices/snackbar';
+import { useSelector } from 'react-redux';
 
 // Form validation schema using Yup
 const validationSchema = Yup.object({
@@ -31,15 +31,17 @@ const validationSchema = Yup.object({
 });
 
 const PayrollSetup = () => {
-  const { userData } = useCurrentUser();
-  let businessId = userData.user_type === 'Business' ? userData.business_affiliated[0].id : userData.businesssDetails.business[0].id;
-  let userId = userData.dashboardChange === false ? userData.id : '';
-  let router = useRouter();
-  const { showSnackbar } = useSnackbar();
-  const [postType, setPostType] = useState('');
+  const user = useSelector((state) => state.accountReducer.user);
+  const businessId = user.active_context.business_id;
+  const userId = user.user.id;
 
+  const [postType, setPostType] = useState('');
   const [loading, setLoading] = useState(false);
   const [businessDetails, setBusinessDetails] = useState({});
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const fields = [
     { name: 'nameOfBusiness', label: 'Business Name' },
     { name: 'business_nature', label: 'Business Nature' },
@@ -82,17 +84,26 @@ const PayrollSetup = () => {
       const { res, error } = await Factory(postType, url, postData);
 
       if (res.status_cd === 0) {
-        showSnackbar('Data Saved Successfully', 'success');
-
-        const userDetails = JSON.parse(localStorage.getItem('auth-user')) || {};
-
-        userDetails.business_exists = true;
-        userDetails.business_affiliated = [{ ...res.data }];
-
-        localStorage.setItem('auth-user', JSON.stringify(userDetails));
-        router.push('/payroll');
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'Data Saved Successfully',
+            variant: 'alert',
+            alert: { color: 'success' },
+            close: false
+          })
+        );
+        navigate('/payroll');
       } else {
-        showSnackbar(res.data?.data ? JSON.stringify(res.data.data) : 'An error occurred', 'error');
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: res.data?.data ? JSON.stringify(res.data.data) : 'An error occurred',
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
       }
 
       setLoading(false);
@@ -171,13 +182,13 @@ const PayrollSetup = () => {
     } else {
       setBusinessDetails((prev) => ({
         ...prev,
-        nameOfBusiness: userData.dashboardChange === false ? userData.user_name : '',
-        email: userData.dashboardChange === false ? userData.email : ''
+        nameOfBusiness: user.business_details.nameOfBusiness,
+        email: user.business_details.email
       }));
 
       setValues((prev) => ({
         ...prev,
-        nameOfBusiness: userData.dashboardChange === false ? userData.user_name : ''
+        nameOfBusiness: user.business_details.nameOfBusiness
       }));
       // showSnackbar(JSON.stringify(res.data.data), 'error');
     }
@@ -185,6 +196,7 @@ const PayrollSetup = () => {
   useEffect(() => {
     individual_Business_get();
   }, []);
+  console.log(user);
   return (
     <>
       {loading ? (

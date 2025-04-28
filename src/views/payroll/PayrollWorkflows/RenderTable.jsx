@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Table, TableContainer, TableHead, TableRow, TableCell, TableBody, Paper, Stack, Pagination, Button } from '@mui/material';
-import Loader from '@/components/PageLoader';
-import EmptyTable from '@/components/third-party/table/EmptyTable';
-import ActionCell from '@/utils/ActionCell';
-import { usePathname, useRouter } from 'next/navigation';
-import { useSearchParams } from 'next/navigation';
+import ActionCell from '../../../ui-component/extended/ActionCell';
+import { useNavigate } from 'react-router';
+import { useSearchParams } from 'react-router';
 
 export default function RenderTable({
   headerData,
@@ -25,8 +23,8 @@ export default function RenderTable({
     setCurrentPage(value);
   };
   const [payrollid, setPayrollId] = useState(null);
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   useEffect(() => {
     const id = searchParams.get('payrollid');
     if (id) {
@@ -40,7 +38,7 @@ export default function RenderTable({
     <Stack spacing={3}>
       {loading ? (
         <Stack direction="row" justifyContent="center" alignItems="center" sx={{ height: 400 }}>
-          <Loader />
+          <h1>Loading</h1>
         </Stack>
       ) : (
         <TableContainer component={Paper}>
@@ -59,7 +57,7 @@ export default function RenderTable({
               {paginatedData.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={headerData.length + 1} sx={{ height: 300 }}>
-                    <EmptyTable msg="No Data available" />
+                    No data
                   </TableCell>
                 </TableRow>
               ) : (
@@ -72,7 +70,7 @@ export default function RenderTable({
                       {from === 'Salary Revisions' ? (
                         <Button
                           onClick={() => {
-                            router.push(`/payrollsetup/add-employee?employee_id=${item.id}&payrollid=${payrollid}&tabValue=1`);
+                            navigate(`/payrollsetup/add-employee?employee_id=${item.id}&payrollid=${payrollid}&tabValue=1`);
                           }}
                         >
                           Edit pay Structure

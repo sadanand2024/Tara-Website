@@ -10,7 +10,8 @@ import dayjs from 'dayjs';
 import CustomDatePicker from 'utils/CustomDateInput';
 import { useSearchParams } from 'react-router';
 import Factory from 'utils/Factory';
-
+import { useDispatch } from 'store';
+import { openSnackbar } from 'store/slices/snackbar';
 const employeeFields = [
   { name: 'first_name', label: 'First Name' },
   { name: 'middle_name', label: 'Middle Name' },
@@ -26,6 +27,7 @@ const employeeFields = [
 ];
 function BasicDetails({ employeeData }) {
   const [loading, setLoading] = useState(false); // State for loader
+  const dispatch = useDispatch();
 
   const [searchParams] = useSearchParams();
   const [payrollid, setPayrollId] = useState(null);
@@ -94,9 +96,25 @@ function BasicDetails({ employeeData }) {
       const { res, error } = await Factory(employeeData?.id ? 'put' : 'post', url, postData);
       setLoading(false);
       if (res.status_cd === 0) {
-        // showSnackbar('Data Saved Successfully', 'success');
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'Data Saved Successfully',
+            variant: 'alert',
+            alert: { color: 'success' },
+            close: false
+          })
+        );
       } else {
-        // showSnackbar(JSON.stringify(res.data.data), 'error');
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: JSON.stringify(res?.data?.data || error),
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
       }
     }
   });
@@ -193,7 +211,15 @@ function BasicDetails({ employeeData }) {
       setWorkLocations(res?.data); // Successfully set work locations
     } else {
       setWorkLocations([]);
-      // showSnackbar(JSON.stringify(res?.data?.data || error), 'error');
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res?.data?.data || error),
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     }
   };
 
@@ -206,6 +232,15 @@ function BasicDetails({ employeeData }) {
     if (res?.status_cd === 0 && Array.isArray(res?.data)) {
       setDesignations(res?.data); // Successfully set work locations
     } else {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res?.data?.data || error),
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
       setDesignations([]);
     }
   };
@@ -219,6 +254,15 @@ function BasicDetails({ employeeData }) {
     if (res?.status_cd === 0 && Array.isArray(res?.data)) {
       setDepartments(res?.data); // Successfully set work locations
     } else {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res?.data?.data || error),
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
       setDepartments([]);
     }
   };

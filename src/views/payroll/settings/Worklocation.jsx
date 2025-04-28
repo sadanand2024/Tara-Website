@@ -23,6 +23,8 @@ import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
 import Factory from 'utils/Factory';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
+import EmptyDataPlaceholder from 'ui-component/extended/EmptyDataPlaceholder';
 
 function Worklocation() {
   const [openDialog, setOpenDialog] = useState(false);
@@ -36,8 +38,6 @@ function Worklocation() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
-  const rowsPerPage = 8;
 
   const paginatedData = workLocations.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 
@@ -169,7 +169,7 @@ function Worklocation() {
                   {paginatedData.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={6} align="center" sx={{ height: 300 }}>
-                        No Data
+                        <EmptyDataPlaceholder title="No Departments Found" subtitle="Start by adding a new department." />
                       </TableCell>
                     </TableRow>
                   ) : (
@@ -216,10 +216,18 @@ function Worklocation() {
                 </TableBody>
               </Table>
             </TableContainer>
-            {workLocations.length > rowsPerPage && (
-              <Stack direction="row" justifyContent="center" sx={{ py: 2 }}>
-                <Pagination count={Math.ceil(workLocations.length / rowsPerPage)} page={currentPage} onChange={handlePageChange} />
-              </Stack>
+            {workLocations.length > 0 && (
+              <Grid2 size={12}>
+                <Stack direction="row" justifyContent="center" sx={{ mt: 2 }}>
+                  <Pagination
+                    count={Math.ceil(workLocations.length / rowsPerPage)}
+                    page={currentPage}
+                    onChange={handlePageChange}
+                    shape="rounded"
+                    color="primary"
+                  />
+                </Stack>
+              </Grid2>
             )}
           </Grid2>
           <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

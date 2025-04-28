@@ -168,141 +168,139 @@ function EpfComponent({ handleNext }) {
           <Grid2 size={12}>
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', textAlign: 'center' }}>
               <Grid2 container spacing={2} sx={{ maxWidth: '600px' }}>
-                <Grid2 container spacing={2}>
-                  {epfData && (
-                    <>
-                      {' '}
-                      <Grid2 size={6}>
-                        <Typography variant="subtitle1" sx={{ textAlign: 'left', whiteSpace: 'nowrap' }}>
-                          Employees Provident Fund
-                        </Typography>
-                      </Grid2>
-                      <Grid2 size={6}>
-                        <Box sx={{ textAlign: 'left' }}>
-                          <Button
-                            size="small"
-                            variant="contained"
-                            type="button"
-                            startIcon={epfData ? <IconEdit size={16} /> : <IconPlus size={16} />}
-                            onClick={() => {
-                              setPostType('put');
-                              setValues(epfData);
-                              handleOpen();
-                            }}
-                            style={{ textAlign: 'left' }}
-                          >
-                            Edit EPF
-                          </Button>
-                        </Box>
-                      </Grid2>
-                    </>
-                  )}
-                  {epfData ? (
-                    <>
-                      {/* EPF Data display */}
-                      <Grid2 size={6}>
-                        <Typography variant="body1" sx={{ textAlign: 'left' }}>
-                          EPF Number:
-                        </Typography>
-                      </Grid2>
-                      <Grid2 size={6}>
-                        <Typography variant="body1" sx={{ textAlign: 'left' }}>
-                          {epfData.epf_number}
-                        </Typography>
-                      </Grid2>
-                      <Grid2 size={6}>
-                        <Typography variant="body1" sx={{ textAlign: 'left' }}>
-                          Employee Contribution Rate:
-                        </Typography>
-                      </Grid2>
-                      <Grid2 size={6}>
-                        <Typography variant="body1" sx={{ textAlign: 'left' }}>
-                          {epfData.employee_contribution_rate}
-                        </Typography>
-                      </Grid2>
+                {epfData && (
+                  <>
+                    <Grid2 size={6}>
+                      <Typography variant="h5" sx={{ textAlign: 'left', whiteSpace: 'nowrap' }}>
+                        Employees Provident Fund
+                      </Typography>
+                    </Grid2>
+                    <Grid2 size={6}>
+                      <Box sx={{ textAlign: 'left' }}>
+                        <Button
+                          size="small"
+                          variant="contained"
+                          type="button"
+                          startIcon={epfData ? <IconEdit size={16} /> : <IconPlus size={16} />}
+                          onClick={() => {
+                            setPostType('put');
+                            setValues(epfData);
+                            handleOpen();
+                          }}
+                          style={{ textAlign: 'left' }}
+                        >
+                          Edit EPF
+                        </Button>
+                      </Box>
+                    </Grid2>
+                  </>
+                )}
+                {epfData ? (
+                  <>
+                    {/* EPF Data display */}
+                    <Grid2 size={6}>
+                      <Typography variant="body1" sx={{ textAlign: 'left' }}>
+                        EPF Number:
+                      </Typography>
+                    </Grid2>
+                    <Grid2 size={6}>
+                      <Typography variant="body1" sx={{ textAlign: 'left' }}>
+                        {epfData.epf_number}
+                      </Typography>
+                    </Grid2>
+                    <Grid2 size={6}>
+                      <Typography variant="body1" sx={{ textAlign: 'left' }}>
+                        Employee Contribution Rate:
+                      </Typography>
+                    </Grid2>
+                    <Grid2 size={6}>
+                      <Typography variant="body1" sx={{ textAlign: 'left' }}>
+                        {epfData.employee_contribution_rate}
+                      </Typography>
+                    </Grid2>
 
-                      <Grid2 size={6}>
-                        <Typography variant="body1" sx={{ textAlign: 'left' }}>
-                          Employer Contribution Rate:
-                        </Typography>
-                      </Grid2>
-                      <Grid2 size={6}>
-                        <Typography variant="body1" sx={{ textAlign: 'left' }}>
-                          {epfData.employer_contribution_rate}
-                        </Typography>
-                      </Grid2>
+                    <Grid2 size={6}>
+                      <Typography variant="body1" sx={{ textAlign: 'left' }}>
+                        Employer Contribution Rate:
+                      </Typography>
+                    </Grid2>
+                    <Grid2 size={6}>
+                      <Typography variant="body1" sx={{ textAlign: 'left' }}>
+                        {epfData.employer_contribution_rate}
+                      </Typography>
+                    </Grid2>
 
-                      <Grid2 size={6}>
-                        <Typography variant="subtitle1" sx={{ textAlign: 'left' }}>
-                          CTC Inclusions:
-                        </Typography>
-                      </Grid2>
-                      <Grid2 size={6}>
-                        <FormGroup>
-                          <FormControlLabel
-                            control={<Checkbox checked={epfData.include_employer_contribution_in_ctc} />}
-                            label="Include Employer's Contribution in the CTC"
-                            sx={{ whiteSpace: 'nowrap' }}
-                            disabled
-                          />
-                          <FormControlLabel
-                            control={<Checkbox checked={epfData.employer_edil_contribution_in_ctc} />}
-                            label="Include Employer's EDIL Contribution in the CTC"
-                            sx={{ whiteSpace: 'nowrap' }}
-                            disabled
-                          />
-                          <FormControlLabel
-                            control={<Checkbox checked={epfData.admin_charge_in_ctc} />}
-                            label="Include Admin Charges in the CTC"
-                            disabled
-                          />
-                        </FormGroup>
-                      </Grid2>
+                    <Grid2 size={6}>
+                      <Typography variant="subtitle1" sx={{ textAlign: 'left' }}>
+                        CTC Inclusions:
+                      </Typography>
+                    </Grid2>
+                    <Grid2 size={6}>
+                      <FormGroup>
+                        <FormControlLabel
+                          control={<Checkbox checked={epfData.include_employer_contribution_in_ctc} />}
+                          label="Include Employer's Contribution in the CTC"
+                          sx={{ whiteSpace: 'nowrap' }}
+                          disabled
+                        />
+                        <FormControlLabel
+                          control={<Checkbox checked={epfData.employer_edil_contribution_in_ctc} />}
+                          label="Include Employer's EDIL Contribution in the CTC"
+                          sx={{ whiteSpace: 'nowrap' }}
+                          disabled
+                        />
+                        <FormControlLabel
+                          control={<Checkbox checked={epfData.admin_charge_in_ctc} />}
+                          label="Include Admin Charges in the CTC"
+                          disabled
+                        />
+                      </FormGroup>
+                    </Grid2>
 
-                      <Grid2 size={6}>
-                        <Typography variant="body1" sx={{ textAlign: 'left' }}>
-                          Allow employee level override PF contribution rate:
-                        </Typography>
-                      </Grid2>
-                      <Grid2 size={6}>
-                        <Typography variant="body1" sx={{ textAlign: 'left' }}>
-                          {epfData?.allow_employee_level_override === true ? 'Yes' : 'No'}
-                        </Typography>
-                      </Grid2>
+                    <Grid2 size={6}>
+                      <Typography variant="body1" sx={{ textAlign: 'left' }}>
+                        Allow employee level override PF contribution rate:
+                      </Typography>
+                    </Grid2>
+                    <Grid2 size={6}>
+                      <Typography variant="body1" sx={{ textAlign: 'left' }}>
+                        {epfData?.allow_employee_level_override === true ? 'Yes' : 'No'}
+                      </Typography>
+                    </Grid2>
 
-                      <Grid2 size={6}>
-                        <Typography variant="body1" sx={{ textAlign: 'left' }}>
-                          Pro rate restricted PF wage:
-                        </Typography>
-                      </Grid2>
-                      <Grid2 size={6}>
-                        <Typography variant="body1" sx={{ textAlign: 'left' }}>
-                          {epfData?.prorate_restricted_pf_wage === true ? 'Yes' : 'No'}
-                        </Typography>
-                      </Grid2>
+                    <Grid2 size={6}>
+                      <Typography variant="body1" sx={{ textAlign: 'left' }}>
+                        Pro rate restricted PF wage:
+                      </Typography>
+                    </Grid2>
+                    <Grid2 size={6}>
+                      <Typography variant="body1" sx={{ textAlign: 'left' }}>
+                        {epfData?.prorate_restricted_pf_wage === true ? 'Yes' : 'No'}
+                      </Typography>
+                    </Grid2>
 
-                      <Grid2 size={6}>
-                        <Typography variant="body1" sx={{ textAlign: 'left' }}>
-                          Consider applicable salary components based on LOP.
-                        </Typography>
-                      </Grid2>
-                      <Grid2 size={6}>
-                        <Typography variant="body1" sx={{ textAlign: 'left' }}>
-                          {epfData?.apply_components_if_wage_below_15k === true ? 'Yes' : 'No'}
-                        </Typography>
-                      </Grid2>
-                      <Grid2 size={12}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
-                          <Button
-                            variant="outlined"
-                            startIcon={<ArrowBackIcon />}
-                            onClick={() => {
-                              navigate(-1);
-                            }}
-                          >
-                            Back to Dashboard
-                          </Button>
-                          {/* <Button
+                    <Grid2 size={6}>
+                      <Typography variant="body1" sx={{ textAlign: 'left' }}>
+                        Consider applicable salary components based on LOP.
+                      </Typography>
+                    </Grid2>
+                    <Grid2 size={6}>
+                      <Typography variant="body1" sx={{ textAlign: 'left' }}>
+                        {epfData?.apply_components_if_wage_below_15k === true ? 'Yes' : 'No'}
+                      </Typography>
+                    </Grid2>
+                    <Grid2 size={12}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
+                        <Button
+                          variant="outlined"
+                          startIcon={<ArrowBackIcon />}
+                          onClick={() => {
+                            navigate(-1);
+                          }}
+                        >
+                          Back to Dashboard
+                        </Button>
+                        {/* <Button
                             size="small"
                             variant="contained"
                             onClick={() => {
@@ -313,30 +311,29 @@ function EpfComponent({ handleNext }) {
                           >
                             Disable EPF
                           </Button> */}
-                          <Button size="small" variant="contained" onClick={handleNext}>
+                        {/* <Button size="small" variant="contained" onClick={handleNext}>
                             Next
-                          </Button>
-                        </Box>
-                      </Grid2>
-                    </>
-                  ) : (
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-                      <Box textAlign="center" mt={4}>
-                        <ErrorOutlineIcon color="disabled" fontSize="large" />
-                        <Typography variant="subtitle1" color="text.secondary">
-                          No EPF details found
-                        </Typography>
+                          </Button> */}
                       </Box>
-
-                      {/* Add EPF Button */}
-                      <Grid2 container justifyContent="center" mt={2}>
-                        <Button variant="contained" startIcon={<IconPlus size={16} />} onClick={handleOpen}>
-                          Enable EPF
-                        </Button>
-                      </Grid2>
+                    </Grid2>
+                  </>
+                ) : (
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                    <Box textAlign="center" mt={4}>
+                      <ErrorOutlineIcon color="disabled" fontSize="large" />
+                      <Typography variant="subtitle1" color="text.secondary">
+                        No EPF details found
+                      </Typography>
                     </Box>
-                  )}
-                </Grid2>
+
+                    {/* Add EPF Button */}
+                    <Grid2 container justifyContent="center" mt={2}>
+                      <Button variant="contained" startIcon={<IconPlus size={16} />} onClick={handleOpen}>
+                        Enable EPF
+                      </Button>
+                    </Grid2>
+                  </Box>
+                )}
               </Grid2>
             </Box>
           </Grid2>

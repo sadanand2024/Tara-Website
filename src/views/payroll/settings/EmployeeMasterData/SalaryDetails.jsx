@@ -47,21 +47,27 @@ function SalaryDetails({ employeeData }) {
     validationSchema,
 
     onSubmit: async (values) => {
-      // if (values.errorMessage) {
-      //   showSnackbar(values.errorMessage, 'error');
-      //   return; // Prevent form submission
-      // }
       let postData = { ...values };
-      postData.employee = employeeData?.id;
-      let method = employeeData.employee_salary[employeeData?.employee_salary?.length - 1]?.id ? 'put' : 'post';
 
-      const url = employeeData.employee_salary[employeeData?.employee_salary?.length - 1]?.id
-        ? `/payroll/employee-salary/${employeeData.employee_salary[employeeData?.employee_salary?.length - 1]?.id}`
-        : `/payroll/employee-salary`;
+      if (employeeData?.id) {
+        postData.employee = employeeData.id;
+      }
+
+      let method = 'post';
+      let url = '/payroll/employee-salary';
+
+      if (employeeData?.employee_salary?.length > 0) {
+        const lastSalaryRecord = employeeData.employee_salary[employeeData.employee_salary.length - 1];
+        if (lastSalaryRecord?.id) {
+          method = 'put';
+          url = `/payroll/employee-salary/${lastSalaryRecord.id}`;
+        }
+      }
 
       const { res } = await Factory(method, url, postData);
       console.log(res);
-      if (res.status_cd === 1) {
+
+      if (res?.status_cd === 1) {
         // showSnackbar(JSON.stringify(res.data), 'error');
       } else {
         // showSnackbar('Data Saved Successfully', 'success');
@@ -109,9 +115,9 @@ function SalaryDetails({ employeeData }) {
               fullWidth
               inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
               onChange={(e) => {
-                // Handle input change
+                const { name, value } = e.target;
+                setFieldValue(field.name, value);
               }}
-              disabled
             />
           </>
         )}
@@ -124,9 +130,9 @@ function SalaryDetails({ employeeData }) {
 
     const url = `/payroll/salary-templates?payroll_id=${payrollid}`;
     const { res, error } = await Factory('get', url, {});
-
+    console.log(res.data);
     if (res?.status_cd === 0 && Array.isArray(res?.data)) {
-      setSalary_teamplates_data(res?.data); // Successfully set work locations
+      setSalary_teamplates_data(res?.data);
     } else {
       setSalary_teamplates_data([]);
     }
@@ -145,7 +151,7 @@ function SalaryDetails({ employeeData }) {
       }));
     }
   }, [employeeData]);
-
+  console.log(employeeData);
   return (
     <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>

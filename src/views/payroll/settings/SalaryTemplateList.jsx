@@ -21,6 +21,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
+import EmptyDataPlaceholder from 'ui-component/extended/EmptyDataPlaceholder';
+
 function SalaryTemplateList() {
   const [salaryTemplates, setSalaryTemplates] = useState([]);
   const [payrollid, setPayrollId] = useState(null);
@@ -96,7 +98,7 @@ function SalaryTemplateList() {
               {salaryTemplates.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} align="center" sx={{ height: 300 }}>
-                    No data
+                    <EmptyDataPlaceholder title="No Data Found" subtitle="Start by adding a new Data." />
                   </TableCell>
                 </TableRow>
               ) : (

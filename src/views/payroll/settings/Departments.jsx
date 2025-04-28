@@ -1,6 +1,3 @@
-// 📁 File: Departments.jsx
-
-'use client';
 import React, { useState, useEffect } from 'react';
 import {
   Table,
@@ -23,6 +20,10 @@ import DepartmentDialog from './DepartmentDialog';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Factory from 'utils/Factory';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { useDispatch } from 'store';
+import { openSnackbar } from 'store/slices/snackbar';
+import EmptyDataPlaceholder from 'ui-component/extended/EmptyDataPlaceholder';
+import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
 
 function Departments() {
   const [departments, setDepartments] = useState([]);
@@ -32,8 +33,8 @@ function Departments() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  const rowsPerPage = 8;
   const paginatedData = departments.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 
   const payrollid = searchParams.get('payrollid');
@@ -50,10 +51,18 @@ function Departments() {
   const fetchDepartments = async () => {
     const url = `/payroll/departments/?payroll_id=${payrollid}`;
     const { res } = await Factory('get', url, {});
-
     if (res?.status_cd === 0 && Array.isArray(res?.data)) {
       setDepartments(res.data);
     } else {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res?.data?.error) || 'An error occurred, Please Try again',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
       setDepartments([]);
     }
   };
@@ -67,8 +76,16 @@ function Departments() {
   const handleDelete = async (department) => {
     const url = `/payroll/departments/${department.id}/`;
     const { res } = await Factory('delete', url, {});
-
     if (res?.status_cd === 0) {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Record Deleted Successfully',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
       fetchDepartments();
     }
   };
@@ -121,7 +138,7 @@ function Departments() {
               {paginatedData.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} align="center" sx={{ height: 300 }}>
-                    No Data
+                    <EmptyDataPlaceholder title="No Departments Found" subtitle="Start by adding a new department." />
                   </TableCell>
                 </TableRow>
               ) : (
@@ -158,10 +175,18 @@ function Departments() {
           </Table>
         </TableContainer>
 
-        {departments.length > rowsPerPage && (
-          <Stack direction="row" justifyContent="center" sx={{ py: 2 }}>
-            <Pagination count={Math.ceil(departments.length / rowsPerPage)} page={currentPage} onChange={handlePageChange} />
-          </Stack>
+        {departments.length > 0 && (
+          <Grid2 size={12}>
+            <Stack direction="row" justifyContent="center" sx={{ mt: 2 }}>
+              <Pagination
+                count={Math.ceil(departments.length / rowsPerPage)}
+                page={currentPage}
+                onChange={handlePageChange}
+                shape="rounded"
+                color="primary"
+              />
+            </Stack>
+          </Grid2>
         )}
       </Grid2>
 
