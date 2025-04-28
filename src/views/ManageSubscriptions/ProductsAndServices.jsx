@@ -18,6 +18,7 @@ import {
 import Grid2 from '@mui/material/Grid2';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
+import Link from '@mui/material/Link';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ExtensionIcon from '@mui/icons-material/Extension';
 import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
@@ -161,6 +162,8 @@ const ProductCard = ({ title, description, price, activePlan, features, actions 
               size="small"
               startIcon={action.icon}
               fullWidth={isMobile}
+              component={Link}
+              href={`${window.location.pathname}/plans`}
               sx={
                 action.primary
                   ? {

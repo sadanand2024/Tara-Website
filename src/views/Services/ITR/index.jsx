@@ -77,7 +77,7 @@ const TimelineItem = styled(ListItem)(({ theme, completed }) => ({
 
 export default function ITRFilingDetails() {
   const progress = 60;
-
+  
   return (
     <Box>
       {/* Header Section */}
@@ -94,7 +94,7 @@ export default function ITRFilingDetails() {
         </Typography>
         <Typography variant="h4" color="text.secondary" sx={{ opacity: 0.8 }}>
           Financial Year: 2023-24 (Salaried)
-        </Typography>
+      </Typography>
       </Stack>
 
       <Stack direction={{ xs: 'column', lg: 'row' }} spacing={3}>
@@ -132,7 +132,7 @@ export default function ITRFilingDetails() {
                   </Typography>
                   <Typography variant="subtitle1" fontWeight={500}>
                     12 Apr 2025
-                  </Typography>
+            </Typography>
                 </Stack>
                 <Button
                   variant="outlined"
@@ -148,7 +148,7 @@ export default function ITRFilingDetails() {
                   Chat with Support
                 </Button>
               </Stack>
-            </Box>
+          </Box>
           </StyledCard>
 
           {/* Task Timeline */}
@@ -205,11 +205,11 @@ export default function ITRFilingDetails() {
                               </Typography>
                               <Typography variant="caption" color="success.darker">
                                 Verified
-                              </Typography>
+            </Typography>
                             </Stack>
                           ))}
                         </Stack>
-                      </Box>
+          </Box>
                     }
                   />
                 </TimelineItem>
@@ -302,11 +302,11 @@ export default function ITRFilingDetails() {
                             <RadioButtonUncheckedIcon color="disabled" />
                             <Typography variant="subtitle1" fontWeight={600}>
                               File the Return
-                            </Typography>
+            </Typography>
                           </Stack>
                           <Typography variant="body2" color="text.secondary">
                             Final submission of your ITR
-                          </Typography>
+            </Typography>
                         </Stack>
                         <StatusChip status="pending">Pending</StatusChip>
                       </Stack>
@@ -324,11 +324,11 @@ export default function ITRFilingDetails() {
                             <RadioButtonUncheckedIcon color="disabled" />
                             <Typography variant="subtitle1" fontWeight={600}>
                               Share Acknowledgement
-                            </Typography>
+          </Typography>
                           </Stack>
                           <Typography variant="body2" color="text.secondary">
                             Download your ITR acknowledgement
-                          </Typography>
+          </Typography>
                         </Stack>
                         <StatusChip status="pending">Pending</StatusChip>
                       </Stack>
@@ -423,9 +423,9 @@ export default function ITRFilingDetails() {
                     <Stack spacing={2}>
                       <Stack direction="row" alignItems="center" spacing={2}>
                         <Box
-                          sx={{
+          sx={{ 
                             width: 8,
-                            height: 8,
+            height: 8, 
                             borderRadius: '50%',
                             bgcolor: 'error.main'
                           }}
@@ -489,7 +489,7 @@ export default function ITRFilingDetails() {
                       </Stack>
                     </Stack>
                   </Box>
-                </Box>
+      </Box>
 
                 {/* Recent Uploads */}
                 <Box>
@@ -516,18 +516,18 @@ export default function ITRFilingDetails() {
                           </Typography>
                           <Typography variant="caption" color="text.secondary">
                             Uploaded on 04 Apr
-                          </Typography>
-                        </Box>
+            </Typography>
+          </Box>
                       </Stack>
                     ))}
                   </Stack>
-                </Box>
+      </Box>
 
                 {/* Action Buttons */}
                 <Stack spacing={2}>
-                  <Button
+          <Button 
                     variant="contained"
-                    startIcon={<CloudUploadIcon />}
+            startIcon={<CloudUploadIcon />} 
                     sx={{
                       py: 1.5,
                       borderRadius: 2,
@@ -536,10 +536,10 @@ export default function ITRFilingDetails() {
                     }}
                   >
                     Upload Documents
-                  </Button>
-                  <Button
+          </Button>
+          <Button 
                     variant="outlined"
-                    startIcon={<ChatIcon />}
+            startIcon={<ChatIcon />} 
                     sx={{
                       py: 1.5,
                       borderRadius: 2,
@@ -570,7 +570,7 @@ export default function ITRFilingDetails() {
                   <Stack spacing={1}>
                     <Button
                       fullWidth
-                      variant="outlined"
+            variant="outlined" 
                       startIcon={<QuestionAnswerIcon />}
                       sx={{
                         justifyContent: 'flex-start',
@@ -579,10 +579,10 @@ export default function ITRFilingDetails() {
                       }}
                     >
                       Ask a Question
-                    </Button>
-                    <Button
+          </Button>
+          <Button 
                       fullWidth
-                      variant="outlined"
+            variant="outlined" 
                       startIcon={<EventIcon />}
                       sx={{
                         justifyContent: 'flex-start',
@@ -591,14 +591,14 @@ export default function ITRFilingDetails() {
                       }}
                     >
                       Schedule a Call
-                    </Button>
+          </Button>
                   </Stack>
                 </Box>
               </Stack>
-            </Box>
+        </Box>
           </StyledCard>
         </Box>
       </Stack>
-    </Box>
+      </Box>
   );
 }
