@@ -3,7 +3,7 @@ import { Box, Typography, Grid2, Paper, ClickAwayListener, Container } from '@mu
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link as RouterLink } from 'react-router-dom';
 
-const servicesData = [
+const services = [
   {
     title: 'Income Tax & TDS',
     color: 'teal',
@@ -23,9 +23,9 @@ const servicesData = [
     items: [
       { label: 'Virtual CFO', path: '/services/accounting/vcfo' },
       { label: 'Bookkeeping', path: '/services/accounting/bookkeeping' },
-      { label: 'Compliance management', path: '/services/accounting/compliance' },
+      { label: 'Invoicing', path: '/services/accounting/invoicing' },
       { label: 'Fix My Books', path: '/services/accounting/fix-my-books' },
-      { label: 'Inventory management', path: '/services/accounting/inventory' },
+      { label: 'Inventory management', path: '/services/accounting/inventory-management' },
       { label: 'MIS & Analytics', path: '/services/accounting/mis-analytics' },
       { label: '+More', path: '/services/accounting' }
     ]
@@ -35,7 +35,7 @@ const servicesData = [
     color: 'salmon',
     items: [
       { label: 'Private Limited Company', path: '/services/registration/private-limited' },
-      { label: 'MSME registration', path: '/services/registration/msme' },
+      { label: 'MSME registration', path: '/services/registration/msme-registration' },
       { label: 'Startup India registration', path: '/services/registration/startup-india' },
       { label: 'Labour license', path: '/services/registration/labour-license' },
       { label: 'Trade license', path: '/services/registration/trade-license' },
@@ -51,7 +51,7 @@ const servicesData = [
       { label: 'Director change', path: '/services/legal/director-change' },
       { label: 'DIR 3 KYC', path: '/services/legal/dir3-kyc' },
       { label: 'Draft Board Resolution', path: '/services/legal/board-resolution' },
-      { label: 'Document Drafting Services', path: '/services/legal/document-drafting' },
+      { label: 'Agreement Drafting', path: '/services/legal/agreement-drafting' },
       { label: 'RERA', path: '/services/legal/rera' },
       { label: '+More', path: '/services/legal' }
     ]
@@ -75,10 +75,10 @@ const servicesData = [
     items: [
       { label: 'Payroll preparation / Processing', path: '/services/payroll/payroll-processing' },
       { label: 'Salary structuring', path: '/services/payroll/salary-structuring' },
-      { label: 'Employee ITR filing (bulk)', path: '/services/payroll/employee-itr-bulk' },
+      { label: 'Employee ITR filing (bulk)', path: '/services/payroll/employee-itr-filing' },
       { label: 'EPF/ESI Registration', path: '/services/payroll/epf-esi-registration' },
-      { label: 'EPF/ESI / PT Filings', path: '/services/payroll/epf-esi-pt-filings' },
-      { label: 'Employee / Group Insurance', path: '/services/payroll/group-insurance' },
+      { label: 'EPF/ESI / PT Filings', path: '/services/payroll/pt-registration' },
+      { label: 'Employee / Group Insurance', path: '/services/payroll/employee-insurance' },
       { label: '+More', path: '/services/payroll' }
     ]
   },
@@ -89,7 +89,7 @@ const servicesData = [
       { label: 'GST Registration', path: '/services/gst/registration' },
       { label: 'GST Return filing', path: '/services/gst/return-filing' },
       { label: 'Notice Management', path: '/services/gst/notice-management' },
-      { label: 'Cancellation / Revocation', path: '/services/gst/cancellation' },
+      { label: 'Cancellation / Revocation', path: '/services/gst/cancellation-revocation' },
       { label: 'GST Refund', path: '/services/gst/refund' },
       { label: 'LUT filing', path: '/services/gst/lut-filing' },
       { label: '+More', path: '/services/gst' }
@@ -143,7 +143,7 @@ const ServicesPanel = ({ onClose }) => {
         >
           <Container>
             <Grid2 container spacing={4}>
-              {servicesData.map((section, index) => (
+              {services.map((section, index) => (
                 <Grid2 size={{ xs: 12, sm: 6, md: 3 }} key={index}>
                   <Typography
                     variant="subtitle2"
