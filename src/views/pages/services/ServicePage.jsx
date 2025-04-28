@@ -1,10 +1,21 @@
+'use client';
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { Box, Typography, Grid, Paper, Button } from '@mui/material';
+import { Container, Box } from '@mui/material';
 import servicesData from 'data/servicesData';
 import ErrorPage from 'views/pages/maintenance/Error';
-import PrivateLimitedPage from './custom/PrivateLimitedPage';
-import ITR from './custom/ITR';
+
+import HeroSection from './HeroSection';
+import WhoShouldFile from './WhoShouldFile';
+import SmartITRSelector from './SmartITRSelector'; // Only render if exists
+import PricingPlans from './PricingPlans';
+import WhatsIncluded from './WhatsIncluded';
+import DocumentsRequired from './DocumentsRequired';
+import HowItWorksStepper from './HowItWorksStepper';
+import WhyChooseUs from './WhyChooseUs';
+import FAQsSection from './FAQsSection';
+import RelatedServices from './RelatedServices';
+import StickyFooterCTA from './StickyFooterCTA';
 
 const ServicePage = () => {
   const { category, slug } = useParams();
@@ -14,81 +25,24 @@ const ServicePage = () => {
   if (!categoryData || !pageData) {
     return <ErrorPage />;
   }
-  if (pageData?.customComponent === 'PrivateLimitedPage') {
-    return <PrivateLimitedPage />;
-  }
-  if (pageData?.customComponent === 'ITRFiling') {
-    return <ITR />;
-  }
-
   return (
-    <Box sx={{ px: { xs: 2, md: 8 }, py: { xs: 4, md: 10 } }}>
-      {/* Hero Section */}
-      <Box sx={{ textAlign: 'center', mb: 6 }}>
-        <Typography variant="h3" fontWeight="bold" gutterBottom>
-          {pageData.heroTitle}
-        </Typography>
-        <Typography variant="h6" color="text.secondary">
-          {pageData.heroSubtitle}
-        </Typography>
-        {pageData.cta && (
-          <Button variant="contained" color="primary" size="large" sx={{ mt: 4 }} href={pageData.cta.link}>
-            {pageData.cta.label}
-          </Button>
-        )}
-      </Box>
+    <Container sx={{ py: { xs: 4, md: 8 } }}>
+      {/* Always render Hero if present */}
+      {pageData.heroSection && <HeroSection data={pageData.heroSection} />}
 
-      {/* What's Included */}
-      {pageData.includes && (
-        <Box sx={{ mb: 6 }}>
-          <Typography variant="h5" gutterBottom>
-            What's Included
-          </Typography>
-          <Grid container spacing={4}>
-            {pageData.includes.map((item, index) => (
-              <Grid item xs={12} sm={6} md={4} key={index}>
-                <Paper elevation={2} sx={{ p: 3, height: '100%' }}>
-                  <Typography variant="body1">✅ {item}</Typography>
-                </Paper>
-              </Grid>
-            ))}
-          </Grid>
-        </Box>
-      )}
+      {pageData.whoIsThisFor && <WhoShouldFile items={pageData.whoIsThisFor} />}
+      {pageData.smartITRSelector && <SmartITRSelector data={pageData.smartITRSelector} />}
+      {pageData.pricing && <PricingPlans data={pageData.pricing} />}
+      {pageData.whatsIncluded && <WhatsIncluded items={pageData.whatsIncluded} />}
+      {pageData.documentsRequired && <DocumentsRequired documents={pageData.documentsRequired} />}
+      {pageData.howItWorks && <HowItWorksStepper steps={pageData.howItWorks} />}
+      {pageData.whyChooseUs && <WhyChooseUs reasons={pageData.whyChooseUs} />}
+      {pageData.pricing && <PricingPlans data={pageData.pricing} />}
 
-      {/* Documents Required */}
-      {pageData.documents && (
-        <Box sx={{ mb: 6 }}>
-          <Typography variant="h5" gutterBottom>
-            Documents Required
-          </Typography>
-          <ul>
-            {pageData.documents.map((doc, idx) => (
-              <li key={idx}>{doc}</li>
-            ))}
-          </ul>
-        </Box>
-      )}
-
-      {/* FAQs */}
-      {pageData.faqs && (
-        <Box>
-          <Typography variant="h5" gutterBottom>
-            Frequently Asked Questions
-          </Typography>
-          {pageData.faqs.map((faq, idx) => (
-            <Box sx={{ mt: 2 }} key={idx}>
-              <Typography variant="subtitle1" fontWeight="bold">
-                Q: {faq.question}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                A: {faq.answer}
-              </Typography>
-            </Box>
-          ))}
-        </Box>
-      )}
-    </Box>
+      {pageData.faqs && <FAQsSection faqs={pageData.faqs} />}
+      {pageData.relatedServices && <RelatedServices related={pageData.relatedServices} />}
+      {pageData.stickyFooterCta && <StickyFooterCTA data={pageData.stickyFooterCta} />}
+    </Container>
   );
 };
 

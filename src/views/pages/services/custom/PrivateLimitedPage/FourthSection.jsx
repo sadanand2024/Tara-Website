@@ -28,61 +28,6 @@ const ThirdSection = () => {
     }
   ];
 
-  // const SectionCard = ({ title, subtitle, items, cta }) => (
-  //   <Paper
-  //     elevation={4}
-  //     sx={{
-  //       p: 3,
-  //       borderRadius: 3,
-  //       maxWidth: 360,
-  //       height: '100%',
-  //       background: theme.palette.mode === 'light' ? '#ffffff' : theme.palette.background.paper,
-  //       display: 'flex',
-  //       flexDirection: 'column',
-  //       justifyContent: 'space-between',
-  //       transition: 'all 0.3s ease',
-  //       boxShadow: '0 4px 16px rgba(0,0,0,0.06)',
-  //       '&:hover': {
-  //         transform: 'translateY(-8px)',
-  //         boxShadow: '0 12px 30px rgba(0,0,0,0.12)'
-  //       }
-  //     }}
-  //   >
-  //     <Typography variant="h4" fontWeight={700} color="text.primary" gutterBottom>
-  //       {title}
-  //     </Typography>
-  //     <Typography variant="subtitle1" color="text.secondary" gutterBottom sx={{ maxWidth: 400 }}>
-  //       {subtitle}
-  //     </Typography>
-
-  //     <Divider sx={{ mb: 2 }} />
-  //     <Stack spacing={1}>
-  //       {items.map((item, index) => (
-  //         <Box key={index} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
-  //           <CheckCircleIcon fontSize="small" color="primary" sx={{ mt: '3px' }} />
-  //           <Typography variant="subtitle1" color="text.secondary">
-  //             {item}
-  //           </Typography>
-  //         </Box>
-  //       ))}
-  //       <Button
-  //         variant="contained"
-  //         fullWidth
-  //         size="large"
-  //         sx={{
-  //           mt: 3,
-  //           fontWeight: 600,
-  //           textTransform: 'none',
-  //           borderRadius: '10px',
-  //           py: 1.25
-  //         }}
-  //       >
-  //         {cta}
-  //       </Button>
-  //     </Stack>
-  //   </Paper>
-  // );
-
   const SectionCard = ({ section }) => (
     <Paper
       elevation={4}
