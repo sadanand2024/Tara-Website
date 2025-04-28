@@ -33,11 +33,12 @@ const validationSchema = Yup.object({
   registration_number: Yup.string().required('Registration number is required'),
   entity_type: Yup.string().required('Entity type is required'),
   head_office: Yup.object().shape({
-    address: Yup.string().required('Address is required'),
+    address_line1: Yup.string().required('Address is required'),
+    address_line2: Yup.string().required('Address is required'),
     city: Yup.string().required('City is required'),
     state: Yup.string().required('State is required'),
     country: Yup.string().required('Country is required'),
-    pincode: Yup.string().required('Pincode is required')
+    pinCode: Yup.string().required('Pincode is required')
   }),
   pan: Yup.string()
     .matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN Number')
@@ -68,11 +69,12 @@ const AddBusiness = ({ open, onClose, userData, setUserData, getContext }) => {
       registration_number: '',
       entity_type: '',
       head_office: {
-        address: '',
+        address_line1: '',
+        address_line2: '',
         city: '',
         state: '',
         country: 'India',
-        pincode: ''
+        pinCode: ''
       },
       pan: '',
       business_nature: '',
@@ -275,17 +277,30 @@ const AddBusiness = ({ open, onClose, userData, setUserData, getContext }) => {
               />
             </Grid>
 
-            <Grid size={12}>
+            <Grid size={6}>
               <TextField
                 fullWidth
                 size="small"
-                id="head_office.address"
-                name="head_office.address"
-                label="Address"
-                value={formik.values.head_office.address}
+                id="head_office.address_line1"
+                name="head_office.address_line1"
+                label="Address Line 1"
+                value={formik.values.head_office.address_line1}
                 onChange={formik.handleChange}
-                error={formik.touched.head_office?.address && Boolean(formik.errors.head_office?.address)}
-                helperText={formik.touched.head_office?.address && formik.errors.head_office?.address}
+                error={formik.touched.head_office?.address_line1 && Boolean(formik.errors.head_office?.address_line1)}
+                helperText={formik.touched.head_office?.address_line1 && formik.errors.head_office?.address_line1}
+              />
+            </Grid>
+            <Grid size={6}>
+              <TextField
+                fullWidth
+                size="small"
+                id="head_office.address_line2"
+                name="head_office.address_line2"
+                label="Address Line 2"
+                value={formik.values.head_office.address_line2}
+                onChange={formik.handleChange}
+                error={formik.touched.head_office?.address_line2 && Boolean(formik.errors.head_office?.address_line2)}
+                helperText={formik.touched.head_office?.address_line2 && formik.errors.head_office?.address_line2}
               />
             </Grid>
             <Grid size={6}>
@@ -340,13 +355,13 @@ const AddBusiness = ({ open, onClose, userData, setUserData, getContext }) => {
               <TextField
                 fullWidth
                 size="small"
-                id="head_office.pincode"
-                name="head_office.pincode"
+                id="head_office.pinCode"
+                name="head_office.pinCode"
                 label="Pincode"
-                value={formik.values.head_office.pincode}
+                value={formik.values.head_office.pinCode}
                 onChange={formik.handleChange}
-                error={formik.touched.head_office?.pincode && Boolean(formik.errors.head_office?.pincode)}
-                helperText={formik.touched.head_office?.pincode && formik.errors.head_office?.pincode}
+                error={formik.touched.head_office?.pinCode && Boolean(formik.errors.head_office?.pinCode)}
+                helperText={formik.touched.head_office?.pinCode && formik.errors.head_office?.pinCode}
               />
             </Grid>
           </Grid>

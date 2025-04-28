@@ -13,7 +13,8 @@ import ServicePage from 'views/pages/services/ServicePage';
 import ServiceCategory from 'views/pages/services/ServiceCategory';
 import PayrollPage from '../views/pages/products/Payroll';
 import InvoicingPage from 'views/pages/products/invoicing/InvoicingPage';
-import KnowledgePage from 'views/pages/knowledge';
+import KnowledgePage from 'views/pages/Knowledge';
+import BookConsultationPage from 'views/pages/BookConsultation';
 // ==============================|| SIMPLE ROUTING ||============================== //
 
 const SimpleRoutes = {
@@ -39,6 +40,10 @@ const SimpleRoutes = {
     {
       path: '/knowledge',
       element: <KnowledgePage />
+    },
+    {
+      path: '/book-consultation',
+      element: <BookConsultationPage />
     },
     {
       path: 'services/:category',
