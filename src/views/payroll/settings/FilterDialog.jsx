@@ -1,10 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
 import { Button, Box, Stack, Typography } from '@mui/material';
 import Grid2 from '@mui/material/Grid2';
-import CustomInput from 'utils/CustomInput';
-import Factory from 'utils/Factory';
 import Modal from 'ui-component/extended/Modal';
 import CustomAutocomplete from 'utils/CustomAutocomplete';
 export default function FilterDialog({
@@ -19,6 +15,10 @@ export default function FilterDialog({
   return (
     <Modal
       open={open}
+      showClose={true}
+      handleClose={() => {
+        setFilterDialog(false);
+      }}
       maxWidth={'md'}
       header={{ title: 'Choose any Filter', subheader: '' }}
       footer={

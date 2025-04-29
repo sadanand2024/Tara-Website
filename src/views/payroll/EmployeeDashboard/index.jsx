@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { useSearchParams } from 'react-router';
-import Factory from 'utils/Factory';
 import MainCard from '../../../ui-component/cards/MainCard';
 import MonthWiseDashboard from './MonthWiseDashboard';
 import PayrollSummary from './PayrollSummary';
@@ -47,7 +46,6 @@ export default function Index() {
   const [payrollId, setPayrollId] = useState(null);
   const [month, setMonth] = useState(null);
   const [financialYear, setFinancialYear] = useState(null);
-  const [payrollSummaryData, setPayrollSummaryData] = useState([]);
   const [activeTab, setActiveTab] = useState(0); // State to manage active tab
 
   // Function to handle tab changes
@@ -76,31 +74,16 @@ export default function Index() {
 
   // Sync month from search params
   useEffect(() => {
-    const monthNumber = searchParams.get('month');
-    if (monthNumber) setMonth(monthNumber);
+    const month = searchParams.get('month');
+    if (month) setMonth(month);
   }, [searchParams]);
   useEffect(() => {
-    const financialYear = searchParams.get('financialYear');
-    if (financialYear) setFinancialYear(financialYear);
+    const year = searchParams.get('financialYear');
+    if (year) setFinancialYear(year);
   }, [searchParams]);
-
-  // Fetch payroll summary data
-  const fetchPayrollSummary = async () => {
-    const url = `/payroll/calculate-employee-monthly-salary?payroll_id=${payrollId}&month=${month}&financial_year=${financialYear}`;
-    const { res } = await Factory('get', url, {});
-    if (res.status_cd === 0) {
-      setPayrollSummaryData(res.data || []);
-    } else {
-      // showSnackbar(JSON.stringify(res.data.data), 'error');
-    }
-  };
-
-  useEffect(() => {
-    if (payrollId) fetchPayrollSummary();
-  }, [payrollId]);
 
   const handleCardClick = (href, index) => {
-    navigate(`/payroll${href}?payrollid=${payrollId}&tabValue=${index}&month=${month}&financial_year=2024-2025`);
+    navigate(`/payroll${href}?payrollid=${payrollId}&tabValue=${index}&month=${month}&financial_year=${financialYear}`);
   };
   return (
     <MainCard title={`Monthly Payroll Dashboard ${months[month - 1]}`} tagline="Explore your monthly payroll details">
@@ -112,7 +95,7 @@ export default function Index() {
             <PayrollMonthwise payrollId={payrollId} financialYear={financialYear} />
           </Grid2>
           <Grid2 size={12}>
-            <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+            <Typography variant="h4" sx={{ mb: 2, fontWeight: 600 }}>
               Payroll Workflows
             </Typography>
             <Grid2 container spacing={2}>
@@ -223,13 +206,13 @@ export default function Index() {
           </Grid2>
           <Grid2 size={12}>
             <TabPanel value={activeTab} index={0}>
-              <PayrollSummary payrollSummaryData={payrollSummaryData} />
+              <PayrollSummary payrollId={payrollId} month={month} financialYear={financialYear} />
             </TabPanel>
             <TabPanel value={activeTab} index={1}>
-              <DetailedPayroll payrollId={payrollId} month={month} />
+              <DetailedPayroll payrollId={payrollId} month={month} financialYear={financialYear} />
             </TabPanel>
             <TabPanel value={activeTab} index={2}>
-              <ComplianceSummary payrollId={payrollId} month={month} />
+              <ComplianceSummary payrollId={payrollId} month={month} financialYear={financialYear} />
             </TabPanel>
           </Grid2>
         </Grid2>

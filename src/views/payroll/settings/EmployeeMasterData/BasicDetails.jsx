@@ -25,7 +25,7 @@ const employeeFields = [
   { name: 'designation', label: 'Designation' },
   { name: 'department', label: 'Department' }
 ];
-function BasicDetails({ employeeData }) {
+function BasicDetails({ employeeData, setCreatedEmployeeId }) {
   const [loading, setLoading] = useState(false); // State for loader
   const dispatch = useDispatch();
 
@@ -65,7 +65,7 @@ function BasicDetails({ employeeData }) {
       middle_name: '',
       last_name: '',
       associate_id: '',
-      doj: dayjs().format('YYYY-MM-DD'),
+      doj: '',
       work_email: '',
       mobile_number: '',
       gender: '',
@@ -95,6 +95,7 @@ function BasicDetails({ employeeData }) {
       const url = employeeData?.id ? `/payroll/employees/${employeeData?.id}` : `/payroll/employees`;
       const { res, error } = await Factory(employeeData?.id ? 'put' : 'post', url, postData);
       setLoading(false);
+
       if (res.status_cd === 0) {
         dispatch(
           openSnackbar({
@@ -105,6 +106,9 @@ function BasicDetails({ employeeData }) {
             close: false
           })
         );
+        if (!employeeData?.id && res?.id) {
+          setCreatedEmployeeId(res.id);
+        }
       } else {
         dispatch(
           openSnackbar({
@@ -175,7 +179,6 @@ function BasicDetails({ employeeData }) {
           />
         ) : field.name === 'doj' ? (
           <CustomDatePicker
-            views={['year', 'month', 'day']}
             value={dayjs(values[field.name]) || null}
             onChange={(newDate) => {
               const formattedDate = dayjs(newDate).format('YYYY-MM-DD');
@@ -188,6 +191,11 @@ function BasicDetails({ employeeData }) {
                 height: '40px'
               }
             }}
+            name={field.name}
+            onBlur={() => handleBlur({ target: { name: field.name } })}
+            inputFormat="DD-MM-YYYY"
+            error={touched[field.name] && Boolean(errors[field.name])}
+            helperText={touched[field.name] && errors[field.name]}
           />
         ) : (
           <CustomInput
@@ -273,7 +281,7 @@ function BasicDetails({ employeeData }) {
       fetchDepartments();
     }
   }, [payrollid]);
-  const { values, setValues, handleChange, errors, touched, handleSubmit, handleBlur, resetForm, setFieldValue } = formik;
+  const { values, setValues, errors, touched, handleSubmit, handleBlur, setFieldValue } = formik;
 
   useEffect(() => {
     if (employeeData) {

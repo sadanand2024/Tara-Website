@@ -10,11 +10,13 @@ import dayjs from 'dayjs';
 import CustomInput from 'utils/CustomInput';
 import CustomAutocomplete from 'utils/CustomAutocomplete';
 import { indian_States_And_UTs } from 'utils/indian_States_And_UT';
-
-function PersonalDetails({ employeeData }) {
+import { useDispatch } from 'store';
+import { openSnackbar } from 'store/slices/snackbar';
+function PersonalDetails({ employeeData, createdEmployeeId }) {
   const [payrollid, setPayrollId] = useState(null);
   const [employeeId, setEmployeeId] = useState(null);
   const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
 
   const [searchParams] = useSearchParams();
 
@@ -38,10 +40,12 @@ function PersonalDetails({ employeeData }) {
   ];
 
   const addressFields = [
-    { name: 'street', label: 'Street' },
-    { name: 'city', label: 'City' },
-    { name: 'state', label: 'State' },
-    { name: 'pincode', label: 'Pincode' }
+    { name: 'address_line1', label: 'Address Line 1' },
+    { name: 'address_line2', label: 'Address Line 2' },
+
+    { name: 'address_city', label: 'City' },
+    { name: 'address_state', label: 'State' },
+    { name: 'address_pinCode', label: 'Pincode' }
   ];
 
   const validationSchema = Yup.object({
@@ -49,39 +53,41 @@ function PersonalDetails({ employeeData }) {
     guardian_name: Yup.string().required('Guardian Name is required'),
     pan: Yup.string()
       .required('PAN is required')
-      .matches(/^[A-Z]{5}\d{4}[A-Z]{1}$/, 'Invalid  format. format: ABCDE1234F'),
+      .matches(/^[A-Z]{5}\d{4}[A-Z]{1}$/, 'Invalid PAN format (ABCDE1234F)'),
     aadhar: Yup.string()
-      .matches(/^\d{12}$/, 'Aadhar Card must be 12 digits')
-      .required('Aadhar Card number is required'),
-    age: Yup.number().positive().integer().required('Age is required'),
+      .matches(/^\d{12}$/, 'Aadhar must be 12 digits')
+      .required('Aadhar number is required'),
+    age: Yup.number().positive('Invalid age').integer('Invalid age').required('Age is required'),
     alternate_contact_number: Yup.string()
-      .matches(/^\d{10}$/, 'Invalid contact number')
-      .required('Required'),
-    marital_status: Yup.string().required('Required'),
+      .matches(/^\d{10}$/, 'Alternate contact must be 10 digits')
+      .required('Alternate contact is required'),
+    marital_status: Yup.string().required('Marital Status is required'),
     blood_group: Yup.string().required('Blood Group is required'),
+
     address: Yup.object({
-      street: Yup.string().required('Street is required'),
-      city: Yup.string().required('City is required'),
-      state: Yup.string().required('State is required'),
-      pincode: Yup.string()
-        .matches(/^\d{6}$/, 'Invalid pincode')
+      address_line1: Yup.string().required('Address Line 1 is required'),
+      address_line2: Yup.string(), // optional
+      address_city: Yup.string().required('City is required'),
+      address_state: Yup.string().required('State is required'),
+      address_pinCode: Yup.string()
+        .matches(/^\d{6}$/, 'Invalid Pincode')
         .required('Pincode is required')
     })
   });
 
   const formik = useFormik({
     initialValues: {
-      dob: dayjs().format('YYYY-MM-DD'),
+      dob: '',
       age: '',
-      aadhar: '',
       guardian_name: '',
       pan: '',
       aadhar: '',
       address: {
-        street: '',
-        city: '',
-        state: '',
-        pincode: ''
+        address_line1: '',
+        address_line2: '',
+        address_city: '',
+        address_state: '',
+        address_pinCode: ''
       },
       alternate_contact_number: '',
       marital_status: '',
@@ -91,8 +97,13 @@ function PersonalDetails({ employeeData }) {
     onSubmit: async (values) => {
       setLoading(true);
       const postData = { ...values, payroll: Number(payrollid) };
-      postData.employee = employeeData.id;
+      if (employeeData?.id) {
+        postData.employee = employeeData.id;
+      } else if (createdEmployeeId) {
+        postData.employee = createdEmployeeId;
+      }
       postData.marital_status = values.marital_status.toLowerCase();
+
       let method = employeeData?.employee_personal_details?.id ? 'put' : 'post';
       let url =
         method === 'post'
@@ -101,9 +112,25 @@ function PersonalDetails({ employeeData }) {
       const { res } = await Factory(method, url, postData);
 
       if (res.status_cd === 0) {
-        // showSnackbar('Data Saved Successfully', 'success');
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'Data Saved Successfully',
+            variant: 'alert',
+            alert: { color: 'success' },
+            close: false
+          })
+        );
       } else {
-        // showSnackbar(JSON.stringify(res.data.data), 'error');
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: JSON.stringify(res.data.data),
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
       }
 
       setLoading(false);
@@ -115,26 +142,31 @@ function PersonalDetails({ employeeData }) {
       const fieldName = prefix ? `${prefix}${field.name}` : field.name;
 
       return (
-        <Grid2 size={{ sx: 12, sm: 6, md: 4 }} key={fieldName}>
+        <Grid2 key={fieldName} size={{ xs: 12, sm: 6, md: 4 }}>
           <Typography variant="subtitle2" sx={{ color: 'grey.800', mb: 0.8 }}>
             {field.label}
           </Typography>
+
           {field.name === 'dob' ? (
             <CustomDatePicker
-              value={prefix ? dayjs(values.address?.[field.name]) || '' : dayjs(values[field.name]) || null}
+              name={fieldName}
+              value={(() => {
+                const rawValue = fieldName.split('.').reduce((obj, key) => (obj ? obj[key] : ''), values);
+                return rawValue ? dayjs(rawValue) : null;
+              })()}
               onChange={(newDate) => {
-                const formattedDate = dayjs(newDate).format('YYYY-MM-DD');
+                const formattedDate = newDate ? dayjs(newDate).format('YYYY-MM-DD') : '';
                 setFieldValue(fieldName, formattedDate);
               }}
-              sx={{
-                width: '100%',
-                '& .MuiInputBase-root': {
-                  fontSize: '0.75rem',
-                  height: '40px'
-                }
-              }}
+              onBlur={handleBlur}
+              inputFormat="DD-MM-YYYY"
+              error={
+                Boolean(fieldName.split('.').reduce((obj, key) => (obj ? obj[key] : ''), touched)) &&
+                Boolean(fieldName.split('.').reduce((obj, key) => (obj ? obj[key] : ''), errors))
+              }
+              helperText={fieldName.split('.').reduce((obj, key) => (obj ? obj[key] : ''), errors)}
             />
-          ) : field.name === 'state' || field.name === 'marital_status' || field.name === 'blood_group' ? (
+          ) : field.name === 'address_state' || field.name === 'marital_status' || field.name === 'blood_group' ? (
             <CustomAutocomplete
               value={prefix ? values.address?.[field.name] || '' : values[field.name]}
               onChange={(e, newValue) => {
@@ -152,7 +184,7 @@ function PersonalDetails({ employeeData }) {
             <CustomInput
               fullWidth
               name={fieldName}
-              value={prefix ? values.address?.[field.name] || '' : values[field.name]}
+              value={fieldName.split('.').reduce((obj, key) => (obj ? obj[key] : ''), values)}
               onChange={(e) => {
                 let value = e.target.value;
 
@@ -167,8 +199,11 @@ function PersonalDetails({ employeeData }) {
                 setFieldValue(fieldName, value);
               }}
               onBlur={handleBlur}
-              error={touched[fieldName] && Boolean(errors[fieldName])}
-              helperText={touched[fieldName] && errors[fieldName]}
+              error={
+                Boolean(fieldName.split('.').reduce((obj, key) => (obj ? obj[key] : ''), touched)) &&
+                Boolean(fieldName.split('.').reduce((obj, key) => (obj ? obj[key] : ''), errors))
+              }
+              helperText={fieldName.split('.').reduce((obj, key) => (obj ? obj[key] : ''), errors)}
             />
           )}
         </Grid2>
