@@ -160,7 +160,7 @@ function Organizationdetails() {
         dispatch(
           openSnackbar({
             open: true,
-            message: JSON.stringify(res.data.data) || 'Unknown Error',
+            message: res.data.data ? JSON.stringify(res.data.data) : 'Unknown Error please try again later',
             variant: 'alert',
             alert: { color: 'error' },
             close: false
@@ -273,7 +273,6 @@ function Organizationdetails() {
     if (res.status_cd === 0) {
       if (res?.data) {
         const data = res.data;
-        console.log(data);
         setValues((prev) => ({
           ...prev,
           business_name: data.business_details.nameOfBusiness || '',
@@ -293,7 +292,7 @@ function Organizationdetails() {
           country: 'IN',
           org_address_state: data.business_details.headOffice?.state || '',
           org_address_city: data.business_details.headOffice?.city || '',
-          org_address_pincode: data.business_details.headOffice?.pinCode || '',
+          org_address_pincode: data.business_details.headOffice?.pincode || '',
 
           filling_address_line1:
             data.filling_address_line1 === '' ? data.business_details.headOffice?.address_line1 : data.filling_address_line1,
@@ -337,7 +336,6 @@ function Organizationdetails() {
     }
     if (res?.data) {
       const data = res.data;
-      console.log(data);
       setValues((prev) => ({
         ...prev,
         business_name: data.nameOfBusiness || '',
@@ -355,7 +353,7 @@ function Organizationdetails() {
         country: 'IN',
         org_address_state: data.headOffice?.state || '',
         org_address_city: data.headOffice?.city || '',
-        org_address_pincode: data.headOffice?.pinCode || '',
+        org_address_pincode: data.headOffice?.pincode || '',
         filling_address_line1: data.headOffice?.address_line1 || '',
         filling_address_line2: data.headOffice?.address_line2 || '',
         filling_address_state: data.headOffice?.state || '',
@@ -487,7 +485,7 @@ function Organizationdetails() {
                 variant="outlined"
                 startIcon={<ArrowBackIcon />}
                 onClick={() => {
-                  router.back();
+                  navigate(-1);
                 }}
               >
                 Back to Dashboard

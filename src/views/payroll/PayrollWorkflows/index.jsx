@@ -2,7 +2,7 @@
 import PropTypes from 'prop-types';
 import { useState, useEffect, useMemo } from 'react';
 import { useTheme } from '@mui/material/styles';
-import { Box, Tab, Tabs, Typography, Stack, Avatar, Button } from '@mui/material';
+import { Box, Tab, Tabs, Typography, Stack, Avatar, Button, Paper } from '@mui/material';
 import { IconBolt } from '@tabler/icons-react';
 import MainCard from '../../../ui-component/cards/MainCard';
 import { useNavigate } from 'react-router';
@@ -73,7 +73,7 @@ const PayrollWorkflows = ({ type }) => {
   const [openDialog, setOpenDialog] = useState(false);
   const theme = useTheme();
   const [searchParams] = useSearchParams();
-  const router = useNavigate();
+  const navigate = useNavigate();
 
   const payrollId = searchParams.get('payrollid');
 
@@ -139,7 +139,18 @@ const PayrollWorkflows = ({ type }) => {
           { name: 'financial_year', label: 'Financial Year' }
         ]
       },
-      { label: 'Salary Revisions', component: SalaryRevisions, fields: [] },
+      {
+        label: 'Salary Revisions',
+        component: SalaryRevisions,
+        fields: [
+          { name: 'employee', label: 'Employee Name' },
+          { name: 'department', label: 'Department' },
+          { name: 'designation', label: 'Designation' },
+          { name: 'current_ctc', label: 'Current CTC' },
+          { name: 'created_on', label: 'last Revison' },
+          { name: 'revised_ctc', label: '	Revised CTC' }
+        ]
+      },
       { label: 'Other Deductions', component: OtherDeductions, fields: [] }
     ],
     []
@@ -151,7 +162,7 @@ const PayrollWorkflows = ({ type }) => {
     if (tabs[activeTab].label === 'Attendance') {
       fetchAttendanceData();
     } else if (tabs[activeTab].label === 'New Joiners') {
-      router.push(`/payrollsetup/add-employee?payrollid=${payrollId}`);
+      navigate(`/payroll/settings/add-employee?payrollid=${payrollId}`);
     } else {
       setOpenDialog(true);
     }
@@ -175,7 +186,16 @@ const PayrollWorkflows = ({ type }) => {
         </Stack>
       }
     >
-      <>
+      <Paper
+        elevation={3}
+        sx={{
+          width: '100%',
+          bgcolor: 'background.paper',
+          borderRadius: 2,
+          overflow: 'hidden',
+          border: '1px solid #e0e0e0'
+        }}
+      >
         <Tabs
           variant="fullWidth"
           scrollButtons={true}
@@ -214,7 +234,7 @@ const PayrollWorkflows = ({ type }) => {
             />
           </TabPanel>
         ))}
-      </>
+      </Paper>
     </MainCard>
   );
 };

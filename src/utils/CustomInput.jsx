@@ -17,6 +17,7 @@ const CustomInput = ({
   maxRows,
   rows,
   onBlur,
+  name,
   ...props
 }) => {
   const [showPassword, setShowPassword] = useState(false);
@@ -37,6 +38,8 @@ const CustomInput = ({
           color: textColor || 'inherit'
         }
       }}
+      onBlur={onBlur}
+      name={name}
       id={id}
       autoComplete={autoComplete}
       placeholder={placeholder}
@@ -60,7 +63,6 @@ const CustomInput = ({
       multiline={multiline}
       rows={rows}
       maxRows={maxRows}
-      onBlur={onBlur}
       {...props}
     />
   );

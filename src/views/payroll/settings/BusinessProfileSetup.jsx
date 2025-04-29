@@ -196,7 +196,6 @@ const PayrollSetup = () => {
   useEffect(() => {
     individual_Business_get();
   }, []);
-  console.log(user);
   return (
     <>
       {loading ? (

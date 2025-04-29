@@ -1,13 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { Table, TableContainer, TableHead, TableRow, TableCell, TableBody, Paper, Stack, Pagination, Button } from '@mui/material';
-import ActionCell from '../../../ui-component/extended/ActionCell';
-import { useNavigate } from 'react-router';
-import { useSearchParams } from 'react-router';
+import {
+  Table,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  Paper,
+  Stack,
+  Pagination,
+  Button,
+  Box,
+  CircularProgress
+} from '@mui/material';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
 
-export default function RenderTable({
+import ActionCell from '../../../ui-component/extended/ActionCell';
+import EmptyDataPlaceholder from 'ui-component/extended/EmptyDataPlaceholder';
+
+const RenderTable = ({
   headerData,
-  tableData = [], // Default to empty array
+  tableData = [],
   loading = false,
   body_keys,
   handleEdit,
@@ -15,77 +30,76 @@ export default function RenderTable({
   openDialog,
   handleCloseDialog,
   from
-}) {
+}) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const rowsPerPage = 5;
-  console.log(from);
-  const handlePageChange = (event, value) => {
-    setCurrentPage(value);
-  };
-  const [payrollid, setPayrollId] = useState(null);
+  const [payrollId, setPayrollId] = useState(null);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+
   useEffect(() => {
     const id = searchParams.get('payrollid');
-    if (id) {
-      setPayrollId(id);
-    }
+    if (id) setPayrollId(id);
   }, [searchParams]);
+
+  const handlePageChange = (_, value) => {
+    setCurrentPage(value);
+  };
+
   const safeTableData = Array.isArray(tableData) ? tableData : [];
   const paginatedData = safeTableData.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 
   return (
     <Stack spacing={3}>
       {loading ? (
-        <Stack direction="row" justifyContent="center" alignItems="center" sx={{ height: 400 }}>
-          <h1>Loading</h1>
-        </Stack>
+        <Box display="flex" justifyContent="center" alignItems="center" minHeight="50vh">
+          <CircularProgress />
+        </Box>
       ) : (
-        <TableContainer component={Paper}>
-          <Table size="large">
+        <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 1 }}>
+          <Table size="medium">
             <TableHead>
-              <TableRow>
-                {headerData.map((item, index) => (
-                  <TableCell key={index} sx={{ whiteSpace: 'nowrap', fontWeight: 'bold' }}>
-                    {item}
+              <TableRow sx={{ bgcolor: 'grey.100' }}>
+                {headerData.map((header, index) => (
+                  <TableCell key={index} sx={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>
+                    {header}
                   </TableCell>
                 ))}
-                <TableCell sx={{ whiteSpace: 'nowrap', fontWeight: 'bold' }}>Actions</TableCell>
+                <TableCell sx={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {paginatedData.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={headerData.length + 1} sx={{ height: 300 }}>
-                    No data
+                    <EmptyDataPlaceholder title="No Data Found" subtitle="Start by adding a new record." />
                   </TableCell>
                 </TableRow>
               ) : (
-                paginatedData.map((item, index) => (
-                  <TableRow key={index}>
-                    {body_keys.map((key, idx) => (
-                      <TableCell key={idx}>{item[key]}</TableCell>
+                paginatedData.map((row, rowIndex) => (
+                  <TableRow key={rowIndex}>
+                    {body_keys.map((key, cellIndex) => (
+                      <TableCell key={cellIndex}>{row[key]}</TableCell>
                     ))}
                     <TableCell>
                       {from === 'Salary Revisions' ? (
                         <Button
-                          onClick={() => {
-                            navigate(`/payrollsetup/add-employee?employee_id=${item.id}&payrollid=${payrollid}&tabValue=1`);
-                          }}
+                          variant="outlined"
+                          size="small"
+                          onClick={() => navigate(`/payrollsetup/add-employee?employee_id=${row.id}&payrollid=${payrollId}&tabValue=1`)}
                         >
-                          Edit pay Structure
+                          Edit Pay Structure
                         </Button>
                       ) : (
                         <ActionCell
-                          row={item}
-                          onEdit={() => handleEdit(item)}
-                          onDelete={() => handleDelete(item)}
+                          row={row}
+                          onEdit={() => handleEdit(row)}
+                          onDelete={() => handleDelete(row)}
                           open={openDialog}
                           onClose={handleCloseDialog}
                           deleteDialogData={{
                             title: 'Delete Record',
-                            heading: 'Are you sure you want to delete this Record?',
-                            description: `This action will remove ${item.dept_name || 'this item'} from the list.`,
+                            heading: 'Are you sure you want to delete this record?',
+                            description: `This action will remove ${row.dept_name || 'this item'} from the list.`,
                             successMessage: 'Record has been deleted.'
                           }}
                         />
@@ -99,23 +113,31 @@ export default function RenderTable({
         </TableContainer>
       )}
 
-      {safeTableData.length > 0 && (
-        <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'center', px: { xs: 0.5, sm: 2.5 }, py: 1.5 }}>
-          <Pagination count={Math.ceil(safeTableData.length / rowsPerPage)} page={currentPage} onChange={handlePageChange} />
+      {safeTableData.length > rowsPerPage && (
+        <Stack direction="row" justifyContent="center" alignItems="center" sx={{ py: 2 }}>
+          <Pagination
+            count={Math.ceil(safeTableData.length / rowsPerPage)}
+            page={currentPage}
+            onChange={handlePageChange}
+            color="primary"
+            shape="rounded"
+          />
         </Stack>
       )}
     </Stack>
   );
-}
+};
 
-// PropTypes for type checking
 RenderTable.propTypes = {
   headerData: PropTypes.arrayOf(PropTypes.string).isRequired,
-  tableData: PropTypes.array, // Enforce array type
+  tableData: PropTypes.array,
   loading: PropTypes.bool,
   body_keys: PropTypes.arrayOf(PropTypes.string).isRequired,
   handleEdit: PropTypes.func,
   handleDelete: PropTypes.func,
   openDialog: PropTypes.bool,
-  handleCloseDialog: PropTypes.func
+  handleCloseDialog: PropTypes.func,
+  from: PropTypes.string
 };
+
+export default RenderTable;

@@ -243,8 +243,8 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
             benefits.push({
               component_name: 'EPF',
               calculation_type: res.data.epf_details.employer_contribution_rate,
-              monthly: '',
-              annually: ''
+              monthly: 0,
+              annually: 0
             });
           }
           if (res.data.epf_details.employer_edil_contribution_in_ctc === true) {
@@ -314,7 +314,6 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
       { component_name: '', calculation: 0, monthly: 0, annually: 0 } // Default values
     ]);
   };
-  console.log(earningsData);
   return (
     <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 1 }}>
       <Table sx={{ fontSize: '0.875rem' }}>

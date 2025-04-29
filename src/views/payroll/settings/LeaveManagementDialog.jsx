@@ -122,127 +122,13 @@ export default function LeaveManagementDialog({ open, handleClose, selectedRecor
     <Modal
       open={open}
       maxWidth={'lg'}
+      showClose={true}
+      handleClose={() => {
+        setType('');
+        resetForm();
+        handleClose(); // Reset form and close dialog
+      }}
       header={{ title: 'Add Leave', subheader: '' }}
-      modalContent={
-        <Box component="form" onSubmit={handleSubmit} sx={{ padding: 2 }}>
-          <Grid2 container spacing={3}>
-            {renderFields(departmentFields)}
-          </Grid2>
-          <Box sx={{ mt: 2 }}>
-            <Typography sx={{ mb: 2 }}>How many leaves do employees get ?</Typography>
-
-            <FormControl sx={{ minWidth: 120 }} size="small">
-              <InputLabel id="demo-select-small-label">Select</InputLabel>
-              <Select
-                value={values.employee_leave_period || ''}
-                label="Selct"
-                onChange={(e) => setFieldValue('employee_leave_period', e.target.value)}
-              >
-                <MenuItem value={'Monthly'}>Monthly</MenuItem>
-                <MenuItem value={'Yearly'}>Yearly</MenuItem>
-              </Select>
-            </FormControl>
-            <TextField
-              sx={{ ml: 2 }}
-              value={values.number_of_leaves}
-              onChange={(e) => setFieldValue('number_of_leaves', e.target.value)}
-              error={touched.number_of_leaves && Boolean(errors.number_of_leaves)}
-              helperText={touched.number_of_leaves && errors.number_of_leaves}
-            />
-          </Box>
-          <Box sx={{ mt: 2 }}>
-            <FormControlLabel
-              label="Pro rate leave balance for new joinees based on their D.O.J"
-              control={
-                <Checkbox
-                  checked={values.pro_rate_leave_balance_of_new_joinees_based_on_doj}
-                  onChange={(e) => {
-                    const checked = e.target.checked;
-
-                    setFieldValue('pro_rate_leave_balance_of_new_joinees_based_on_doj', checked);
-                  }}
-                />
-              }
-            />
-          </Box>
-
-          <Box size={{ xs: 12 }} sx={{ mt: 2 }}>
-            <Box>
-              <FormControlLabel
-                label="Reset the leave balance of employees every"
-                control={
-                  <Checkbox
-                    checked={values.reset_leave_balance}
-                    onChange={(e) => {
-                      const checked = e.target.checked;
-                      if (!checked) {
-                        setFieldValue('reset_leave_balance_type', '');
-                        setFieldValue('max_carry_forward_days', '');
-                        setFieldValue('encashment_days', '');
-                      }
-                      // Update the value for the checkbox
-                      setFieldValue('reset_leave_balance', checked);
-                    }}
-                  />
-                }
-              />
-              <FormControl sx={{ m: 1, minWidth: 120, mt: 0 }} size="small">
-                <InputLabel id="demo-select-small-label">Select</InputLabel>
-                <Select
-                  value={values.reset_leave_balance_type || ''}
-                  label="Selct"
-                  onChange={(e) => setFieldValue('reset_leave_balance_type', e.target.value)}
-                >
-                  <MenuItem value={'Monthly'}>Monthly</MenuItem>
-                  <MenuItem value={'Yearly'}>Yearly</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
-            {values.reset_leave_balance && (
-              <Box sx={{ ml: 2 }}>
-                <FormControlLabel
-                  label="Carry forward unused leave days upon reset? max carry forward days"
-                  control={
-                    <Checkbox
-                      checked={values.carry_forward_unused_leaves}
-                      onChange={(e) => {
-                        const checked = e.target.checked;
-                        setFieldValue('carry_forward_unused_leaves', checked);
-                      }}
-                    />
-                  }
-                />
-                <TextField
-                  value={values.max_carry_forward_days}
-                  onChange={(e) => setFieldValue('max_carry_forward_days', e.target.value)}
-                  error={touched.max_carry_forward_days && Boolean(errors.max_carry_forward_days)}
-                  helperText={touched.max_carry_forward_days && errors.max_carry_forward_days}
-                />
-                <Box sx={{ mt: 2 }}>
-                  <FormControlLabel
-                    label="Encash remaing leave days ? max encashment days"
-                    control={
-                      <Checkbox
-                        checked={values.encash_remaining_leaves}
-                        onChange={(e) => {
-                          const checked = e.target.checked;
-                          setFieldValue('encash_remaining_leaves', checked);
-                        }}
-                      />
-                    }
-                  />
-                  <TextField
-                    value={values.encashment_days}
-                    onChange={(e) => setFieldValue('encashment_days', e.target.value)}
-                    error={touched.encashment_days && Boolean(errors.encashment_days)}
-                    helperText={touched.encashment_days && errors.encashment_days}
-                  />
-                </Box>
-              </Box>
-            )}
-          </Box>
-        </Box>
-      }
       footer={
         <Stack direction="row" sx={{ width: 1, justifyContent: 'space-between', gap: 2 }}>
           <Button
@@ -261,6 +147,125 @@ export default function LeaveManagementDialog({ open, handleClose, selectedRecor
           </Button>
         </Stack>
       }
-    />
+    >
+      <Box component="form" onSubmit={handleSubmit} sx={{ padding: 2 }}>
+        <Grid2 container spacing={3}>
+          {renderFields(departmentFields)}
+        </Grid2>
+        <Box sx={{ mt: 2 }}>
+          <Typography sx={{ mb: 2 }}>How many leaves do employees get ?</Typography>
+
+          <FormControl sx={{ minWidth: 120 }} size="small">
+            <InputLabel id="demo-select-small-label">Select</InputLabel>
+            <Select
+              value={values.employee_leave_period || ''}
+              label="Selct"
+              onChange={(e) => setFieldValue('employee_leave_period', e.target.value)}
+            >
+              <MenuItem value={'Monthly'}>Monthly</MenuItem>
+              <MenuItem value={'Yearly'}>Yearly</MenuItem>
+            </Select>
+          </FormControl>
+          <TextField
+            sx={{ ml: 2 }}
+            value={values.number_of_leaves}
+            onChange={(e) => setFieldValue('number_of_leaves', e.target.value)}
+            error={touched.number_of_leaves && Boolean(errors.number_of_leaves)}
+            helperText={touched.number_of_leaves && errors.number_of_leaves}
+          />
+        </Box>
+        <Box sx={{ mt: 2 }}>
+          <FormControlLabel
+            label="Pro rate leave balance for new joinees based on their D.O.J"
+            control={
+              <Checkbox
+                checked={values.pro_rate_leave_balance_of_new_joinees_based_on_doj}
+                onChange={(e) => {
+                  const checked = e.target.checked;
+
+                  setFieldValue('pro_rate_leave_balance_of_new_joinees_based_on_doj', checked);
+                }}
+              />
+            }
+          />
+        </Box>
+
+        <Box size={{ xs: 12 }} sx={{ mt: 2 }}>
+          <Box>
+            <FormControlLabel
+              label="Reset the leave balance of employees every"
+              control={
+                <Checkbox
+                  checked={values.reset_leave_balance}
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    if (!checked) {
+                      setFieldValue('reset_leave_balance_type', '');
+                      setFieldValue('max_carry_forward_days', '');
+                      setFieldValue('encashment_days', '');
+                    }
+                    // Update the value for the checkbox
+                    setFieldValue('reset_leave_balance', checked);
+                  }}
+                />
+              }
+            />
+            <FormControl sx={{ m: 1, minWidth: 120, mt: 0 }} size="small">
+              <InputLabel id="demo-select-small-label">Select</InputLabel>
+              <Select
+                value={values.reset_leave_balance_type || ''}
+                label="Selct"
+                onChange={(e) => setFieldValue('reset_leave_balance_type', e.target.value)}
+              >
+                <MenuItem value={'Monthly'}>Monthly</MenuItem>
+                <MenuItem value={'Yearly'}>Yearly</MenuItem>
+              </Select>
+            </FormControl>
+          </Box>
+          {values.reset_leave_balance && (
+            <Box sx={{ ml: 2 }}>
+              <FormControlLabel
+                label="Carry forward unused leave days upon reset? max carry forward days"
+                control={
+                  <Checkbox
+                    checked={values.carry_forward_unused_leaves}
+                    onChange={(e) => {
+                      const checked = e.target.checked;
+                      setFieldValue('carry_forward_unused_leaves', checked);
+                    }}
+                  />
+                }
+              />
+              <TextField
+                value={values.max_carry_forward_days}
+                onChange={(e) => setFieldValue('max_carry_forward_days', e.target.value)}
+                error={touched.max_carry_forward_days && Boolean(errors.max_carry_forward_days)}
+                helperText={touched.max_carry_forward_days && errors.max_carry_forward_days}
+              />
+              <Box sx={{ mt: 2 }}>
+                <FormControlLabel
+                  label="Encash remaing leave days ? max encashment days"
+                  control={
+                    <Checkbox
+                      checked={values.encash_remaining_leaves}
+                      onChange={(e) => {
+                        const checked = e.target.checked;
+                        setFieldValue('encash_remaining_leaves', checked);
+                      }}
+                    />
+                  }
+                />
+                <TextField
+                  value={values.encashment_days}
+                  onChange={(e) => setFieldValue('encashment_days', e.target.value)}
+                  error={touched.encashment_days && Boolean(errors.encashment_days)}
+                  helperText={touched.encashment_days && errors.encashment_days}
+                />
+              </Box>
+            </Box>
+          )}
+        </Box>
+      </Box>
+    </Modal>
   );
 }

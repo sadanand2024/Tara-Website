@@ -5,7 +5,8 @@ import Factory from 'utils/Factory';
 import { useSearchParams } from 'react-router';
 import RenderDialog from './RenderDialog';
 import { months } from 'utils/MonthsList';
-
+import { useDispatch } from 'store';
+import { openSnackbar } from 'store/slices/snackbar';
 export default function Attendance({ employeeMasterData, from, openDialog, fields, setOpenDialog, attendanceData, fetchAttendanceData }) {
   const headerData = [
     'Employee Name',
@@ -35,7 +36,8 @@ export default function Attendance({ employeeMasterData, from, openDialog, field
   const [data, setData] = useState([]);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [month, setMonth] = useState(null);
-
+  const dispatch = useDispatch();
+  const [financialYear, setFinancialYear] = useState(null);
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
@@ -50,22 +52,43 @@ export default function Attendance({ employeeMasterData, from, openDialog, field
       setMonth(monthNumber);
     }
   }, [searchParams]);
+  useEffect(() => {
+    const financialYear = searchParams.get('financial_year');
+    if (financialYear) setFinancialYear(financialYear);
+  }, [searchParams]);
+
   const getData = async () => {
     setLoading(true);
-    const url = `/payroll/employee_attendance_filtered?payroll_id=${payrollid}&financial_year=2024-2025&month=${month}`;
+    const url = `/payroll/employee_attendance_filtered?payroll_id=${payrollid}&financial_year=${financialYear}&month=${month}`;
     const { res, error } = await Factory('get', url, {});
     setLoading(false);
     if (res.status_cd === 0) {
       setData(res.data || []);
     } else {
-      // showSnackbar(JSON.stringify(res.data.data), 'error');
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res.data.data),
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     }
   };
   const handleEdit = async (item) => {
     let url = `/payroll/employee-attendance/${item.id}`;
     const { res } = await Factory('get', url, {});
     if (res.status_cd === 1) {
-      // showSnackbar(JSON.stringify(res.data), 'error');
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res.data),
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     } else {
       // Replace the month number with the month name
       if (res.data.month) {
@@ -83,9 +106,25 @@ export default function Attendance({ employeeMasterData, from, openDialog, field
     let url = `/payroll/employee-exit/${item.id}`;
     const { res } = await Factory('delete', url, {});
     if (res.status_cd === 1) {
-      // showSnackbar(JSON.stringify(res.data), 'error');
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res.data),
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     } else {
-      // showSnackbar('Record Deleted Successfully', 'success');
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Record Deleted Successfully',
+          variant: 'alert',
+          alert: { color: 'success' },
+          close: false
+        })
+      );
       getData();
     }
   };

@@ -114,7 +114,6 @@ const ViewSlabs = ({ viewSlabsDialog, setViewSlabsDialog, selectedRecord, setSel
               helperText={ptin.length > 0 && (ptin.length < 6 || ptin.length > 10) ? '6-10 digits allowed' : ''}
             />
           </Stack>
-          {console.log(selectedRecord)}
           <TableContainer component={Paper} sx={{ mt: 2, borderRadius: 2 }}>
             <Table>
               <TableHead>

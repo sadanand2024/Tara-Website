@@ -3,6 +3,8 @@ import Factory from 'utils/Factory';
 import { useSearchParams } from 'react-router';
 import { useNavigate } from 'react-router';
 import RenderTable from './RenderTable';
+import { useDispatch } from 'store';
+import { openSnackbar } from 'store/slices/snackbar';
 function NewJoiners() {
   const headerData = ['Employee', 'Department', 'Designations', 'Joining', 'Total Days', 'Paid Days', 'Actual Gross', 'Actual CTC'];
   const body_keys = [
@@ -26,9 +28,10 @@ function NewJoiners() {
       setPayrollId(id);
     }
   }, [searchParams]);
+  const dispatch = useDispatch();
 
   const handleEdit = async (item) => {
-    navigate(`/payrollsetup/add-employee?employee_id=${encodeURIComponent(item.id)}&payrollid=${encodeURIComponent(payrollid)}`);
+    navigate(`/payroll/settings/add-employee?employee_id=${encodeURIComponent(item.id)}&payrollid=${encodeURIComponent(payrollid)}`);
   };
 
   const fetch_newJoiners_Data = async () => {
@@ -42,7 +45,15 @@ function NewJoiners() {
     } else {
       setNewJoinersData([]);
 
-      // showSnackbar(JSON.stringify(res.data.data), 'error');
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res.data.data),
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     }
   };
   useEffect(() => {
