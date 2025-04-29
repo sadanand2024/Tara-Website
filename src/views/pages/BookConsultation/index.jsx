@@ -408,7 +408,7 @@ const BookConsultationPage = () => {
         {/* Calendar Section */}
         <Box sx={styles.calendarWrapper}>
           <Typography variant="h6" sx={{ mb: 3, color: theme.palette.text.primary, fontSize: { xs: 20, sm: 22 } }}>
-            Select a Date & Time
+            Select a Date and Time
           </Typography>
           {/* Calendar Header */}
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2 }}>
