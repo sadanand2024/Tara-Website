@@ -57,6 +57,11 @@ export default function JWTRegister({ ...others }) {
   const [searchParams] = useSearchParams();
   const authParam = searchParams.get('auth');
   const moduleId = searchParams.get('id');
+  const type = searchParams.get('type');
+  const context_type = searchParams.get('context');
+
+  // Determine if organizationName should be shown/required
+  const isBusinessContext = context_type  === 'business';
 
   const changePassword = (value) => {
     const temp = strengthIndicator(value);
@@ -81,12 +86,18 @@ export default function JWTRegister({ ...others }) {
         initialValues={{
           email: '',
           password: '',
-          organizationName: '',
+          ...(isBusinessContext ? { organizationName: '' } : {}),
           moduleId: moduleId,
+          type: type || '',
+          context_type: context_type || '',
           submit: null
         }}
         validationSchema={Yup.object().shape({
-          organizationName: Yup.string().max(255).required('Organization name is required'),
+          ...(isBusinessContext
+            ? {
+                organizationName: Yup.string().max(255).required('Organization name is required')
+              }
+            : {}),
           email: Yup.string().email('Must be a valid email').max(255).required('Email is required'),
           password: Yup.string()
             .required('Password is required')
@@ -96,7 +107,7 @@ export default function JWTRegister({ ...others }) {
         onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
           try {
             const trimmedEmail = values.email.trim();
-            const response = await register(trimmedEmail, values.password, values.organizationName, moduleId);
+            const response = await register(trimmedEmail, values.password, values.organizationName, moduleId, type, context_type);
 
             setStatus({ success: true });
             setSubmitting(false);
@@ -141,27 +152,30 @@ export default function JWTRegister({ ...others }) {
       >
         {({ errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values }) => (
           <form noValidate onSubmit={handleSubmit} {...others}>
-            <FormControl
-              fullWidth
-              error={Boolean(touched.organizationName && errors.organizationName)}
-              sx={{ ...theme.typography.customInput }}
-            >
-              <InputLabel htmlFor="organization-name">Organization Name</InputLabel>
-              <OutlinedInput
-                id="organization-name"
-                type="text"
-                value={values.organizationName}
-                name="organizationName"
-                onBlur={handleBlur}
-                onChange={handleChange}
-                label="Organization Name"
-              />
-              {touched.organizationName && errors.organizationName && (
-                <FormHelperText error id="helper-text-organization-name">
-                  {errors.organizationName}
-                </FormHelperText>
-              )}
-            </FormControl>
+            {/* Only show organization name if business context */}
+            {isBusinessContext && (
+              <FormControl
+                fullWidth
+                error={Boolean(touched.organizationName && errors.organizationName)}
+                sx={{ ...theme.typography.customInput }}
+              >
+                <InputLabel htmlFor="organization-name">Organization Name</InputLabel>
+                <OutlinedInput
+                  id="organization-name"
+                  type="text"
+                  value={values.organizationName}
+                  name="organizationName"
+                  onBlur={handleBlur}
+                  onChange={handleChange}
+                  label="Organization Name"
+                />
+                {touched.organizationName && errors.organizationName && (
+                  <FormHelperText error id="helper-text-organization-name">
+                    {errors.organizationName}
+                  </FormHelperText>
+                )}
+              </FormControl>
+            )}
 
             <FormControl fullWidth error={Boolean(touched.email && errors.email)} sx={{ ...theme.typography.customInput }}>
               <InputLabel htmlFor="outlined-adornment-email-register">Email Address / Username</InputLabel>

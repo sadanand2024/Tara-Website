@@ -210,20 +210,10 @@ export default function Header() {
             }
 
             return (
-              <Box {...otherProps} component="li" key={option.id}>
+              <Box {...otherProps} component="li" key={option.id} sx={{ p: 4 }}>
                 <BusinessIcon fontSize="small" sx={{ mr: 1 }} />
-                <Stack direction="row" alignItems="center" sx={{ justifyContent: 'space-between', width: '100%' }}>
+                <Stack direction="row" alignItems="center" sx={{ justifyContent: 'space-between', width: '100%', py:0.6}}>
                   {option.name || option.context_name || 'Unnamed Option'}
-                  <IconButton
-                    sx={{ p: 0.5 }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      e.preventDefault();
-                      handleEditBusiness(option);
-                    }}
-                  >
-                    <EditIcon fontSize="small" sx={{ ml: 1 }} />
-                  </IconButton>
                 </Stack>
               </Box>
             );

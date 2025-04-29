@@ -102,7 +102,9 @@ export default function AppBar({ ...others }) {
             <Button color="inherit" component={Link} href="/knowledge">
               Knowledge
             </Button>
-            <Button color="inherit">Book Consultation</Button>
+            <Button color="inherit" component={Link} href="/book-consultation">
+              Book Consultation
+            </Button>
           </Stack>
 
           {/* Right: Auth Buttons */}
