@@ -143,7 +143,7 @@ const PayrollDashboard = () => {
           <Button
             variant="contained"
             onClick={() => {
-              navigate(`/payrollsetup/add-employee?payrollid=${businessDetails?.payroll_id}`);
+              navigate(`/payroll/settings/add-employee?payrollid=${businessDetails?.payroll_id}`);
             }}
             startIcon={<IconSparkles size={16} />}
           >
@@ -161,16 +161,10 @@ const PayrollDashboard = () => {
         </Grid2>
 
         <Grid2 size={{ xs: 12 }}>
-          <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-            Payroll Status Summary
-          </Typography>
           <PayrollStatusSummary payrollId={businessDetails?.payroll_id} financialYear={financialYear} />
         </Grid2>
         <Grid2 size={{ xs: 12 }}>
-          <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-            Payroll Compliance Summary
-          </Typography>
-          <PayrollComplianceSummary payrollId={businessDetails?.payroll_id} financialYear={financialYear} />
+          {/* <PayrollComplianceSummary payrollId={businessDetails?.payroll_id} financialYear={financialYear} /> */}
         </Grid2>
         {/* <Grid2 size={{ xs: 12 }}>
           <OverviewCard payrollId={businessDetails?.payroll_id} financialYear={financialYear} />

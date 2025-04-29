@@ -169,7 +169,7 @@ function Worklocation() {
                   {paginatedData.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={6} align="center" sx={{ height: 300 }}>
-                        <EmptyDataPlaceholder title="No Departments Found" subtitle="Start by adding a new department." />
+                        <EmptyDataPlaceholder title="No Data Found" subtitle="Start by adding a new Data." />
                       </TableCell>
                     </TableRow>
                   ) : (

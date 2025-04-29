@@ -156,7 +156,6 @@ function EpfComponent({ handleNext }) {
     }
   };
   const { values, setValues, handleChange, errors, touched, handleSubmit, handleBlur, resetForm, setFieldValue } = formik;
-  console.log(open);
   return (
     <>
       {loading ? (

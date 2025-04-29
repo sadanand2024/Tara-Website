@@ -2,20 +2,19 @@
 import React, { useState, useEffect } from 'react';
 import { useFormik, FormikProvider } from 'formik';
 import * as Yup from 'yup';
-import { TextField, Button, Box, Grid2, Typography } from '@mui/material';
+import { Button, Box, Grid2, Typography } from '@mui/material';
 import { useSearchParams } from 'react-router';
-import CustomDatePicker from 'utils/CustomDateInput';
 import Factory from 'utils/Factory'; // Ensure this function is defined
-import dayjs from 'dayjs';
 import CustomInput from 'utils/CustomInput';
-import CustomAutocomplete from 'utils/CustomAutocomplete';
-import { indian_States_And_UTs } from 'utils/indian_States_And_UT';
-
-function PaymentInformation({ employeeData }) {
+import { useDispatch } from 'store';
+import { openSnackbar } from 'store/slices/snackbar';
+import { useNavigate } from 'react-router';
+function PaymentInformation({ employeeData, createdEmployeeId }) {
   const [payrollid, setPayrollId] = useState(null);
   const [employeeId, setEmployeeId] = useState(null);
   const [loading, setLoading] = useState(false);
-
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
@@ -67,7 +66,11 @@ function PaymentInformation({ employeeData }) {
     onSubmit: async (values) => {
       setLoading(true);
       const postData = { ...values, payroll: Number(payrollid) };
-      postData.employee = employeeData.id;
+      if (employeeData?.id) {
+        postData.employee = employeeData.id;
+      } else if (createdEmployeeId) {
+        postData.employee = createdEmployeeId;
+      }
       let method = employeeData?.employee_bank_details?.id ? 'put' : 'post';
       let url =
         method === 'post' ? `/payroll/employee-bank-details` : `/payroll/employee-bank-details/${employeeData?.employee_bank_details?.id}`;
@@ -75,9 +78,24 @@ function PaymentInformation({ employeeData }) {
       const { res } = await Factory(method, url, postData);
 
       if (res.status_cd === 0) {
-        // showSnackbar('Data Saved Successfully', 'success');
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'Data Saved Successfully',
+            variant: 'alert',
+            alert: { color: 'success' },
+            close: false
+          })
+        );
+        navigate(-1);
       } else {
-        // showSnackbar(JSON.stringify(res.data.data), 'error');
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res.data.data),
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        });
       }
 
       setLoading(false);
@@ -116,7 +134,6 @@ function PaymentInformation({ employeeData }) {
     });
   };
   const { values, setValues, setFieldValue, handleChange, errors, touched, handleSubmit, handleBlur } = formik;
-  console.log(employeeData);
   useEffect(() => {
     if (employeeData?.employee_bank_details && Object.keys(employeeData.employee_bank_details).length > 0) {
       setValues((prev) => ({

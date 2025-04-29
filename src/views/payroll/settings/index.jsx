@@ -6,9 +6,8 @@ import MainCard from '../../../ui-component/cards/MainCard';
 import { Box, Stack, Typography, LinearProgress, Button, Grid2, CircularProgress } from '@mui/material';
 import Factory from 'utils/Factory';
 import { useSelector } from 'react-redux';
-// import Loader from 'components/PageLoader';
-
-// Constants for better maintainability
+import { useDispatch } from 'store';
+import { openSnackbar } from 'store/slices/snackbar';
 const PAYROLL_STEPS = [
   { nameKey: 'Business profile', path: '/payroll/settings/organization-details', dataKey: 'organisation_details' },
   { nameKey: 'Set up Work Location', path: '/payroll/settings/work-location', dataKey: 'work_locations' },
@@ -23,7 +22,8 @@ const PAYROLL_STEPS = [
 ];
 
 const PayrollSetup = () => {
-  const user = useSelector((state) => state).accountReducer.user;
+  const user = useSelector((state) => state.accountReducer?.user);
+  const dispatch = useDispatch();
 
   const navigate = useNavigate();
 
@@ -37,7 +37,15 @@ const PayrollSetup = () => {
 
   const fetchPayrollDetails = useCallback(async () => {
     if (!businessId) {
-      // showSnackbar('Business ID not found', 'error');
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Business ID not found',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
       return;
     }
 
@@ -61,10 +69,26 @@ const PayrollSetup = () => {
           }))
         );
       } else {
-        // showSnackbar(res?.data?.data || 'Failed to fetch payroll details', 'error');
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: res?.data?.data || 'Failed to fetch payroll details',
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
       }
     } catch (error) {
-      // showSnackbar(error.message || 'An error occurred while fetching payroll details', 'error');
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: error.message || 'An error occurred while fetching payroll details',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     } finally {
       setLoading(false);
     }

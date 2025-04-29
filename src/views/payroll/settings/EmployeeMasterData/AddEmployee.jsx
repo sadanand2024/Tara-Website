@@ -20,6 +20,7 @@ function StepperComponent() {
   const [employeeId, setEmployeeId] = useState(null);
   const [employeeData, setEmployeeData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [createdEmployeeId, setCreatedEmployeeId] = useState(null);
 
   const steps = ['Basic Details', 'Salary Details', 'Personal Details', 'Payment Information'];
 
@@ -30,13 +31,13 @@ function StepperComponent() {
   const renderStepContent = (step) => {
     switch (step) {
       case 0:
-        return <BasicDetails employeeData={employeeData} />;
+        return <BasicDetails employeeData={employeeData} setCreatedEmployeeId={setCreatedEmployeeId} />;
       case 1:
-        return <SalaryDetails employeeData={employeeData} />;
+        return <SalaryDetails employeeData={employeeData} createdEmployeeId={createdEmployeeId} />;
       case 2:
-        return <PersonalDetails employeeData={employeeData} />;
+        return <PersonalDetails employeeData={employeeData} createdEmployeeId={createdEmployeeId} />;
       case 3:
-        return <PaymentInformation employeeData={employeeData} />;
+        return <PaymentInformation employeeData={employeeData} createdEmployeeId={createdEmployeeId} />;
       default:
         return <Typography>Unknown Step</Typography>;
     }
@@ -73,7 +74,6 @@ function StepperComponent() {
   useEffect(() => {
     if (employeeId) fetchEmployeeData(employeeId);
   }, [employeeId]);
-  console.log(employeeData);
   return (
     <>
       {loading ? (

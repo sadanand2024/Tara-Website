@@ -12,11 +12,13 @@ import dayjs from 'dayjs';
 import CustomDatePicker from 'utils/CustomDateInput';
 import { months } from 'utils/MonthsList';
 import { generateFinancialYears } from 'utils/FinancialYearsList';
-
+import { useDispatch } from 'store';
+import { openSnackbar } from 'store/slices/snackbar';
 export default function RenderDialog({ from, openDialog, fields, setOpenDialog, setLoading, employeeMasterData, selectedRecord, getData }) {
   const [searchParams] = useSearchParams();
   const [payrollid, setPayrollId] = useState(null); // Payroll ID fetched from URL
   const financialYearOptions = generateFinancialYears();
+  const dispatch = useDispatch();
 
   // Update payroll ID from search params
   useEffect(() => {
@@ -72,6 +74,13 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
           amount: '',
           month: '',
           financial_year: ''
+        };
+      case 'Salary Revisions':
+        return {
+          employee: '',
+          current_ctc: '',
+          created_on: '',
+          revised_ctc: ''
         };
       default:
         return {
@@ -146,6 +155,14 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
           month: Yup.string().required('Month is required')
         });
 
+      case 'Salary Revisions':
+        return Yup.object({
+          employee: Yup.string().required('Employee is required'),
+          current_ctc: Yup.string().required('Current CTC is required'),
+          created_on: Yup.string().required('Created on is required'),
+          revised_ctc: Yup.string().required('Revised CTC is required')
+        });
+
       // Add more validation cases for different scenarios (e.g., Transfers)
       default:
         return Yup.object({
@@ -177,11 +194,27 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
         const { res, error } = await Factory(method, url, postData);
         setLoading(false);
         if (res.status_cd === 0) {
-          // showSnackbar('Data Saved Successfully', 'success');
+          dispatch(
+            openSnackbar({
+              open: true,
+              message: 'Data Saved Successfully',
+              variant: 'alert',
+              alert: { color: 'success' },
+              close: false
+            })
+          );
           getData();
           setOpenDialog(false);
         } else {
-          // showSnackbar(JSON.stringify(res.data.data), 'error');
+          dispatch(
+            openSnackbar({
+              open: true,
+              message: JSON.stringify(res.data.data),
+              variant: 'alert',
+              alert: { color: 'error' },
+              close: false
+            })
+          );
         }
       }
       if (from === 'Attendance') {
@@ -196,10 +229,27 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
         setLoading(false);
         if (res.status_cd === 0) {
           // showSnackbar('Data Saved Successfully', 'success');
+          dispatch(
+            openSnackbar({
+              open: true,
+              message: 'Data Saved Successfully',
+              variant: 'alert',
+              alert: { color: 'success' },
+              close: false
+            })
+          );
           getData();
           setOpenDialog(false);
         } else {
-          // showSnackbar(JSON.stringify(res.data.data), 'error');
+          dispatch(
+            openSnackbar({
+              open: true,
+              message: JSON.stringify(res.data.data),
+              variant: 'alert',
+              alert: { color: 'error' },
+              close: false
+            })
+          );
         }
       }
       if (from === 'Loans & Advances') {
@@ -210,11 +260,27 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
         const { res, error } = await Factory(method, url, postData);
         setLoading(false);
         if (res.status_cd === 0) {
-          // showSnackbar('Data Saved Successfully', 'success');
+          dispatch(
+            openSnackbar({
+              open: true,
+              message: 'Data Saved Successfully',
+              variant: 'alert',
+              alert: { color: 'success' },
+              close: false
+            })
+          );
           getData();
           setOpenDialog(false);
         } else {
-          // showSnackbar(JSON.stringify(res.data.data), 'error');
+          dispatch(
+            openSnackbar({
+              open: true,
+              message: JSON.stringify(res.data.data),
+              variant: 'alert',
+              alert: { color: 'error' },
+              close: false
+            })
+          );
         }
       }
       if (from === 'Bonus & Incentives') {
@@ -225,11 +291,27 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
         const { res, error } = await Factory(method, url, postData);
         setLoading(false);
         if (res.status_cd === 0) {
-          // showSnackbar('Data Saved Successfully', 'success');
+          dispatch(
+            openSnackbar({
+              open: true,
+              message: 'Data Saved Successfully',
+              variant: 'alert',
+              alert: { color: 'success' },
+              close: false
+            })
+          );
           getData();
           setOpenDialog(false);
         } else {
-          // showSnackbar(JSON.stringify(res.data.data), 'error');
+          dispatch(
+            openSnackbar({
+              open: true,
+              message: JSON.stringify(res.data.data),
+              variant: 'alert',
+              alert: { color: 'error' },
+              close: false
+            })
+          );
         }
       }
     }
@@ -380,6 +462,11 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
       open={openDialog}
       maxWidth={'md'}
       header={{ title: 'Add', subheader: '' }}
+      showClose={true}
+      handleClose={() => {
+        setOpenDialog(false);
+        resetForm();
+      }}
       footer={
         <Stack direction="row" sx={{ width: 1, justifyContent: 'space-between', gap: 2 }}>
           <Button
