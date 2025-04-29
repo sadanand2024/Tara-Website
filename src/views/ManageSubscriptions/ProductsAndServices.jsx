@@ -34,6 +34,7 @@ import { useSelector } from 'react-redux';
 const ProductCard = ({ title, description, price, activePlan, features, actions }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const navigate = useNavigate();
 
   return (
     <Card
@@ -162,8 +163,7 @@ const ProductCard = ({ title, description, price, activePlan, features, actions 
               size="small"
               startIcon={action.icon}
               fullWidth={isMobile}
-              component={Link}
-              href={`${window.location.pathname}/plans`}
+              onClick={() => navigate('/app/subscriptions/products-and-services/plans')}
               sx={
                 action.primary
                   ? {

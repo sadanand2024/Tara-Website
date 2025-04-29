@@ -103,12 +103,6 @@ export function JWTProvider({ children }) {
 
   const register = async (email, password, organizationName, moduleId, type, context_type) => {
     try {
-      console.log('email', email);
-      console.log('password', password);
-      console.log('organizationName', organizationName);
-      console.log('moduleId', moduleId);
-      console.log('type', type);
-      console.log('context_type', context_type);
       let url = '';
       if (context_type === 'business') {
         url = '/user_management/register/business-with-module/';
@@ -122,26 +116,10 @@ export function JWTProvider({ children }) {
         business_name: organizationName,
         module_id: moduleId
       });
-      console.log(response);
-      // const user = response.data;
-      // hey Krishna, if u want the user to auto-login after registration pls uncomment below code ---Anand
-
-      // const serviceToken = user.access_token;
-      // if (serviceToken) {
-      //   setSession(serviceToken, user);
-      //   reduxDispatch(storeUser(user));
-      //   dispatch({
-      //     type: LOGIN,
-      //     payload: {
-      //       isLoggedIn: true,
-      //       user
-      //     }
-      //   });
-      // }
-
-      // return user;
+      if (response.status === 201 && response.statusText === 'Created') {
+        return response.data;
+      }
     } catch (error) {
-      // console.error('Registration failed:', error);
       throw error;
     }
   };

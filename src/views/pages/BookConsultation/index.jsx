@@ -167,7 +167,7 @@ const BookConsultationPage = () => {
   const [step, setStep] = useState('calendar'); // 'calendar' or 'details'
 
   // Form state for details step
-  const [form, setForm] = useState({ name: '', email: '', notes: '' });
+  const [form, setForm] = useState({ name: '', email: '', mobile_number: '', notes: '' });
   const [errors, setErrors] = useState({});
 
   const days = daysInMonth(month, year);
@@ -231,6 +231,7 @@ const BookConsultationPage = () => {
     if (!form.name.trim()) newErrors.name = 'Name is required.';
     if (!form.email.trim()) newErrors.email = 'Email is required.';
     else if (!/^\S+@\S+\.\S+$/.test(form.email)) newErrors.email = 'Enter a valid email address.';
+    if (!form.mobile_number.trim() || form.mobile_number.length !== 10) newErrors.mobile_number = 'Mobile Number is required.';
     return newErrors;
   };
 
@@ -243,9 +244,24 @@ const BookConsultationPage = () => {
     e.preventDefault();
     const newErrors = validate();
     setErrors(newErrors);
+
+    // Format the date to YYYY-MM-DD
+    const formattedDate = selectedDateObj.toISOString().split('T')[0];
+
+    let data = {
+      date: formattedDate,
+      firstName: form.name,
+      email: form.email,
+      message: form.notes,
+      time: selectedTime,
+      phone: form.mobile_number,
+      name: form.name,
+      mobile_number: form.mobile_number
+    };
+
     if (Object.keys(newErrors).length === 0) {
       // Submit form or show success
-      // ...
+      console.log('Submitting data:', data);
     }
   };
 
@@ -577,7 +593,10 @@ const BookConsultationPage = () => {
         </Typography>
         <Box component="form" noValidate autoComplete="off" onSubmit={handleSubmit}>
           <Typography variant="subtitle1" sx={{ textAlign: 'left', mb: 0.5, color: theme.palette.text.primary }}>
-            Name *
+            Name&nbsp;
+            <Typography variant="caption" sx={{ color: theme.palette.error.main }}>
+              *
+            </Typography>
           </Typography>
           <TextField
             fullWidth
@@ -589,7 +608,25 @@ const BookConsultationPage = () => {
             helperText={errors.name}
           />
           <Typography variant="subtitle1" sx={{ textAlign: 'left', mb: 0.5, color: theme.palette.text.primary }}>
-            Email *
+            Mobile Number&nbsp;
+            <Typography variant="caption" sx={{ color: theme.palette.error.main }}>
+              *
+            </Typography>
+          </Typography>
+          <TextField
+            fullWidth
+            size="small"
+            sx={styles.textField}
+            value={form.mobile_number}
+            onChange={handleFormChange('mobile_number')}
+            error={!!errors.mobile_number}
+            helperText={errors.mobile_number}
+          />
+          <Typography variant="subtitle1" sx={{ textAlign: 'left', mb: 0.5, color: theme.palette.text.primary }}>
+            Email&nbsp;
+            <Typography variant="caption" sx={{ color: theme.palette.error.main }}>
+              *
+            </Typography>
           </Typography>
           <TextField
             fullWidth

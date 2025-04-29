@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="240" height="200" viewBox="0 0 240 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Circle -->
+  <circle cx="120" cy="100" r="80" fill="#E3F2FD" />
+  
+  <!-- Clock Circle -->
+  <circle cx="120" cy="100" r="60" fill="#2196F3" />
+  
+  <!-- Clock Hands -->
+  <path d="M120 100L120 60" stroke="white" stroke-width="6" stroke-linecap="round"/>
+  <path d="M120 100L150 100" stroke="white" stroke-width="6" stroke-linecap="round"/>
+  
+  <!-- Center Dot -->
+  <circle cx="120" cy="100" r="4" fill="white"/>
+  
+  <!-- Decorative Elements -->
+  <circle cx="40" cy="40" r="8" fill="#64B5F6"/>
+  <circle cx="200" cy="160" r="8" fill="#64B5F6"/>
+  <circle cx="180" cy="30" r="6" fill="#90CAF9"/>
+  <circle cx="60" cy="170" r="6" fill="#90CAF9"/>
+  
+  <!-- Loading Dots -->
+  <circle cx="50" cy="100" r="4" fill="#2196F3">
+    <animate attributeName="opacity" values="0;1;0" dur="1.5s" repeatCount="indefinite" begin="0s"/>
+  </circle>
+  <circle cx="70" cy="100" r="4" fill="#2196F3">
+    <animate attributeName="opacity" values="0;1;0" dur="1.5s" repeatCount="indefinite" begin="0.3s"/>
+  </circle>
+  <circle cx="90" cy="100" r="4" fill="#2196F3">
+    <animate attributeName="opacity" values="0;1;0" dur="1.5s" repeatCount="indefinite" begin="0.6s"/>
+  </circle>
+</svg> 

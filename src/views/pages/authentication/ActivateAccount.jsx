@@ -5,12 +5,14 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import { alpha } from '@mui/material/styles';
+import { alpha, useTheme } from '@mui/material/styles';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useSnackbar } from 'notistack';
+import { motion } from 'framer-motion';
 
 // project imports
 import Logo from 'ui-component/Logo';
@@ -19,237 +21,316 @@ import AuthSlider from 'ui-component/cards/AuthSlider';
 
 // assets
 import imgMain from 'assets/images/auth/img-a2-signup.svg';
+import activationSuccess from '../../../assets/images/auth/activation-success.svg';
+import activationPending from '../../../assets/images/auth/activation-pending.svg';
 
 // carousel items
 const items = [
   {
-    title: 'Power of React with Material UI',
-    description: 'Powerful and easy to use multipurpose theme'
+    title: 'Simplify Your Finance, Accounting & Compliance',
+    description: 'TaraFirst empowers businesses to manage bookkeeping, payroll, tax filings, and reporting seamlessly.'
   },
   {
-    title: 'Power of React with Material UI',
-    description: 'Powerful and easy to use multipurpose theme'
+    title: 'Expert-Backed Financial Management',
+    description: 'Get CA-supervised services, real-time reports, and stress-free compliance — tailored for startups and growing businesses.'
   },
   {
-    title: 'Power of React with Material UI',
-    description: 'Powerful and easy to use multipurpose theme'
+    title: 'Complete Business Financial Solutions',
+    description: 'From bookkeeping to CFO services, TaraFirst offers powerful tools and expert support to scale your business securely.'
+  },
+  {
+    title: 'Smart Finance & Compliance Platform',
+    description:
+      'TaraFirst combines technology and expert support to automate accounting, tax, payroll, and reporting for modern businesses.'
   }
 ];
 
 // ===============================|| AUTH2 - ACTIVATE ACCOUNT ||=============================== //
 
+const MotionBox = motion(Box);
+const MotionTypography = motion(Typography);
+
 export default function ActivateAccount() {
-  const downMD = useMediaQuery((theme) => theme.breakpoints.down('md'));
+  const theme = useTheme();
+  const downMD = useMediaQuery(theme.breakpoints.down('md'));
   const location = useLocation();
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
+  const params = new URLSearchParams(location.search);
+  const pathParts = location.pathname.split('/');
+  const lastWord = pathParts[pathParts.length - 1];
+
   const [activationData, setActivationData] = useState({
-    uid: '',
-    ssid: '',
-    name: '',
-    email: '',
-    invitedBy: ''
+    uid: params.get('uid'),
+    token: params.get('token')
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [isActivated, setIsActivated] = useState(false);
+  const [url, setUrl] = useState(lastWord !== 'activation' ? '/user_management/team/invitation/accept/' : '/user_management/activate');
 
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const uid = params.get('uid');
-    const ssid = params.get('ssid');
-    const name = params.get('name');
-    const email = params.get('email');
-    const invitedBy = params.get('invitedBy');
-
-    if (uid && ssid) {
-      setActivationData({ uid, ssid, name, email, invitedBy });
+    if (activationData.uid && activationData.token) {
+      handleActivation(url);
     } else {
       enqueueSnackbar('Invalid activation link', { variant: 'error' });
-      // navigate('/login');
+      navigate('/login');
     }
-  }, [location, navigate, enqueueSnackbar]);
+  }, []);
 
-  const handleActivation = async () => {
-    // try {
-    //   setIsLoading(true);
-    //   const response = await axios.post('/api/auth/activate-account', {
-    //     uid: activationData.uid,
-    //     ssid: activationData.ssid
-    //   });
-
-    //   if (response.data.success) {
-    //     enqueueSnackbar('Account activated successfully', { variant: 'success' });
-    //     navigate('/pages/login');
-    //   } else {
-    //     throw new Error(response.data.message || 'Activation failed');
-    //   }
-    // } catch (error) {
-    //   enqueueSnackbar(error.message || 'Failed to activate account', { variant: 'error' });
-    // } finally {
-    //   setIsLoading(false);
-    // }
+  const handleActivation = (url) => {
+    setIsLoading(true);
+    axios({
+      method: 'POST',
+      url: import.meta.env.VITE_APP_BASE_URL + url,
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      data: {
+        uid: activationData.uid,
+        token: activationData.token
+      }
+    })
+      .then((res) => {
+        setIsActivated(true);
+        enqueueSnackbar('Account activated successfully', {
+          variant: 'success',
+          autoHideDuration: 3000
+        });
+        setTimeout(() => {
+          navigate('/login');
+        }, 8000);
+      })
+      .catch((e) => {
+        const errorMessage = e.response?.data?.error || 'Invalid or expired activation link';
+        enqueueSnackbar(errorMessage, {
+          variant: 'error',
+          autoHideDuration: 5000
+        });
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   };
 
-  const activationLink = `${window.location.origin}/auth/activate?uid=${activationData.uid}&ssid=${activationData.ssid}`;
+  const activationLink = `${window.location.origin}/auth/activate?uid=${activationData.uid}&token=${activationData.token}`;
 
   return (
-    <Grid container sx={{ justifyContent: { xs: 'center', md: 'space-between' }, alignItems: 'center' }}>
-      <Grid sx={{ minHeight: '100vh' }} size={{ md: 6, lg: 7, xs: 12 }}>
+    <Grid container sx={{ minHeight: '100vh', justifyContent: { xs: 'center', md: 'space-between' }, alignItems: 'center' }}>
+      <Grid
+        sx={{
+          minHeight: '100vh',
+          width: { xs: '100%', md: '50%', lg: '58.333%' },
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center'
+        }}
+      >
         <Grid
           id="activate-account"
           container
           sx={{
-            mt: 10,
             justifyContent: 'center',
-            alignItems: 'flex-start',
-            minHeight: { xs: 'calc(100vh - 68px)', md: 'calc(100vh - 152px)' }
+            alignItems: 'center',
+            minHeight: { xs: '100vh', md: 'auto' },
+            p: { xs: 2, sm: 3, md: 4 }
           }}
-          size={12}
         >
-          {/* Content Section*/}
-          <Grid
+          <MotionBox
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.3 }}
+            component={Grid}
             container
             spacing={2}
             sx={{
               justifyContent: 'center',
-              maxWidth: 480,
+              maxWidth: { xs: '100%', sm: 480 },
+              width: '100%',
               p: { xs: 2.5, md: 4 },
               bgcolor: 'background.paper',
               borderRadius: 2,
-              boxShadow: (theme) => theme.customShadows.z1
+              boxShadow: theme.customShadows.z1,
+              overflow: 'hidden',
+              mx: { xs: 2, sm: 0 }
             }}
           >
-            <Grid size={12}>
-              <Stack spacing={3} sx={{ alignItems: 'flex-start', justifyContent: 'center' }}>
-                <Typography
-                  variant="h2"
-                  sx={{
-                    mb: 1,
-                    background: (theme) => `linear-gradient(120deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-                    backgroundClip: 'text',
-                    WebkitBackgroundClip: 'text',
-                    color: 'transparent',
-                    fontWeight: 600
-                  }}
+            <Grid size={12} sx={{ textAlign: 'center', mb: 3 }}>
+              <MotionBox
+                component="img"
+                src={isActivated ? activationSuccess : activationPending}
+                alt={isActivated ? 'Account Activated' : 'Activation Pending'}
+                sx={{
+                  width: '200px',
+                  height: 'auto',
+                  mb: 3
+                }}
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.2 }}
+              />
+              <MotionTypography
+                variant="h3"
+                sx={{
+                  mb: 1,
+                  background: `linear-gradient(120deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                  backgroundClip: 'text',
+                  WebkitBackgroundClip: 'text',
+                  color: 'transparent',
+                  fontWeight: 600
+                }}
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.3 }}
+              >
+                {isActivated ? `Activated!` : `Activating Account...`}
+              </MotionTypography>
+              {isActivated && (
+                <MotionBox
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: 0.4, type: 'spring' }}
                 >
-                  Hello {activationData.name},
-                </Typography>
-                <Typography
-                  variant="body1"
-                  color="textSecondary"
-                  sx={{
-                    lineHeight: 1.6,
-                    letterSpacing: '0.02em'
-                  }}
-                >
-                  {activationData.invitedBy} (
-                  <Typography
-                    component="span"
-                    color="primary"
+                  <CheckCircleIcon
                     sx={{
-                      textDecoration: 'none',
-                      fontWeight: 500,
-                      '&:hover': {
-                        color: 'primary.dark',
-                        transition: 'color 0.3s ease'
-                      }
+                      fontSize: 64,
+                      color: theme.palette.success.main,
+                      filter: `drop-shadow(0 4px 8px ${alpha(theme.palette.success.main, 0.4)})`
                     }}
-                  >
-                    {activationData.email}
-                  </Typography>
-                  ) with{' '}
-                  <Typography component="span" sx={{ fontWeight: 500 }}>
-                    Hyper 9
-                  </Typography>{' '}
-                  has invited you to start using their password management service.
-                </Typography>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handleActivation}
-                  disabled={isLoading}
-                  sx={{
-                    mt: 2,
-                    mb: 2,
-                    textTransform: 'none',
-                    py: 1.5,
-                    px: 4,
-                    borderRadius: 2,
-                    fontSize: '1rem',
-                    fontWeight: 500,
-                    boxShadow: (theme) => `0 8px 16px ${alpha(theme.palette.primary.main, 0.24)}`,
-                    '&:hover': {
-                      transform: 'translateY(-2px)',
-                      transition: 'all 0.3s ease',
-                      boxShadow: (theme) => `0 12px 20px ${alpha(theme.palette.primary.main, 0.28)}`
-                    }
-                  }}
-                >
-                  {isLoading ? 'Activating...' : 'Activate Account'}
-                </Button>
-                <Box sx={{ width: '100%' }}>
-                  <Typography
-                    variant="body2"
+                  />
+                </MotionBox>
+              )}
+            </Grid>
+            <Grid size={12}>
+              <Stack spacing={3} sx={{ alignItems: 'center', justifyContent: 'center' }}>
+                {!isActivated && (
+                  <MotionTypography
+                    variant="body1"
                     color="textSecondary"
                     sx={{
-                      mb: 1.5,
-                      fontWeight: 500
+                      lineHeight: 1.6,
+                      letterSpacing: '0.02em',
+                      textAlign: 'center'
                     }}
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.4 }}
                   >
-                    Instead, you can copy/paste this link into your browser
-                  </Typography>
-                  <Box
+                    <Stack sx={{ direction: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                      <Typography component="span" sx={{ fontWeight: 500 }}>
+                        Please wait while we activate your account.
+                      </Typography>
+                      <Typography component="span" sx={{ fontWeight: 500 }}>
+                        This won't take long.
+                      </Typography>
+                    </Stack>
+                  </MotionTypography>
+                )}
+                {isActivated ? (
+                  <MotionBox initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.5 }}>
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        color: 'text.secondary',
+                        textAlign: 'center',
+                        mb: 2
+                      }}
+                    >
+                      You will be redirected to the login page in a few seconds...
+                    </Typography>
+                    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => navigate('/login')}
+                        sx={{
+                          textTransform: 'none',
+                          py: 1.5,
+                          px: 4,
+                          borderRadius: 2,
+                          fontSize: '1rem',
+                          fontWeight: 500,
+                          boxShadow: `0 8px 16px ${alpha(theme.palette.primary.main, 0.24)}`,
+                          '&:hover': {
+                            boxShadow: `0 12px 20px ${alpha(theme.palette.primary.main, 0.28)}`
+                          }
+                        }}
+                      >
+                        Go to Login
+                      </Button>
+                    </Box>
+                  </MotionBox>
+                ) : (
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => handleActivation(url)}
+                    disabled={isLoading}
                     sx={{
-                      bgcolor: (theme) => alpha(theme.palette.primary.main, 0.04),
-                      p: 2.5,
+                      textTransform: 'none',
+                      py: 1.5,
+                      px: 4,
                       borderRadius: 2,
-                      border: '1px solid',
-                      borderColor: (theme) => alpha(theme.palette.primary.main, 0.08),
-                      width: '100%',
-                      wordBreak: 'break-all',
-                      transition: 'all 0.3s ease',
-                      cursor: 'pointer',
+                      fontSize: '1rem',
+                      fontWeight: 500,
+                      boxShadow: `0 8px 16px ${alpha(theme.palette.primary.main, 0.24)}`,
                       '&:hover': {
-                        bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08),
-                        borderColor: (theme) => alpha(theme.palette.primary.main, 0.12)
+                        transform: 'translateY(-2px)',
+                        transition: 'all 0.3s ease',
+                        boxShadow: `0 12px 20px ${alpha(theme.palette.primary.main, 0.28)}`
                       }
                     }}
-                    onClick={() => {
-                      navigator.clipboard.writeText(activationLink);
-                      enqueueSnackbar('Link copied to clipboard', { variant: 'success' });
+                  >
+                    {isLoading ? 'Activating...' : 'Retry Activation'}
+                  </Button>
+                )}
+                {!isActivated && (
+                  <MotionBox
+                    sx={{
+                      width: '100%',
+                      mt: 3
                     }}
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.6 }}
                   >
                     <Typography
                       variant="body2"
                       sx={{
                         color: 'text.secondary',
-                        fontFamily: 'monospace',
-                        fontSize: '0.875rem'
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 0.5
                       }}
                     >
-                      {activationLink}
+                      <InfoOutlinedIcon sx={{ fontSize: 16, color: 'primary.main' }} />
+                      Having trouble? Contact support at{' '}
+                      <a
+                        href="mailto:admin@tarafirst.com"
+                        style={{
+                          color: theme.palette.primary.main,
+                          textDecoration: 'none',
+                          fontWeight: 500
+                        }}
+                      >
+                        admin@tarafirst.com
+                      </a>
                     </Typography>
-                  </Box>
-                </Box>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: 'text.secondary',
-                    mt: 2,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 0.5
-                  }}
-                >
-                  <InfoOutlinedIcon sx={{ fontSize: 16, color: 'primary.main' }} />
-                  If you have any problems accessing your account, please contact support.
-                </Typography>
-                <a href="mailto:admin@tarafirst.com">admin@tarafirst.com</a>
+                  </MotionBox>
+                )}
               </Stack>
             </Grid>
-          </Grid>
+          </MotionBox>
         </Grid>
       </Grid>
-      <Grid sx={{ position: 'relative', alignSelf: 'stretch', display: { xs: 'none', md: 'block' } }} size={{ md: 6, lg: 5 }}>
+      <Grid
+        sx={{
+          position: 'relative',
+          alignSelf: 'stretch',
+          display: { xs: 'none', md: 'block' },
+          width: { md: '50%', lg: '41.667%' }
+        }}
+      >
         <BackgroundPattern2>
           <Grid container sx={{ justifyContent: 'center' }}>
             <Grid size={12}>
@@ -260,7 +341,17 @@ export default function ActivateAccount() {
               </Grid>
             </Grid>
             <Grid size={12}>
-              <CardMedia component="img" alt="Auth method" src={imgMain} sx={{ maxWidth: 1, m: '0 auto', display: 'block', width: 300 }} />
+              <CardMedia
+                component="img"
+                alt="Auth method"
+                src={imgMain}
+                sx={{
+                  maxWidth: 1,
+                  m: '0 auto',
+                  display: 'block',
+                  width: 300
+                }}
+              />
             </Grid>
           </Grid>
         </BackgroundPattern2>
