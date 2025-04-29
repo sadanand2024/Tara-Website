@@ -58,7 +58,6 @@ export default function ActionCell({
     setOpenDeleteDialog(false);
     handleCloseMenu();
   };
-  console.log(row);
   return (
     <>
       {/* Trigger Button */}

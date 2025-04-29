@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import RenderTable from './RenderTable';
 import {} from '@mui/material';
-import Factory from '@/utils/Factory';
-import { useSearchParams } from 'next/navigation';
-import { useSnackbar } from '@/components/CustomSnackbar';
+import Factory from 'utils/Factory';
+import { useSearchParams } from 'react-router';
 import RenderDialog from './RenderDialog';
 
 export default function BonusAndIncentives({ employeeMasterData, from, openDialog, fields, setOpenDialog }) {
@@ -16,9 +15,8 @@ export default function BonusAndIncentives({ employeeMasterData, from, openDialo
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [month, setMonth] = useState(null);
   const [financialYear, setFinancialYear] = useState(null);
-  const { showSnackbar } = useSnackbar();
 
-  const searchParams = useSearchParams();
+  const [searchParams] = useSearchParams();
   useEffect(() => {
     let monthNumber = searchParams.get('month');
     if (monthNumber) {
@@ -48,14 +46,14 @@ export default function BonusAndIncentives({ employeeMasterData, from, openDialo
     if (res.status_cd === 0) {
       setData(res.data || []);
     } else {
-      showSnackbar(JSON.stringify(res.data.data), 'error');
+      // showSnackbar(JSON.stringify(res.data.data), 'error');
     }
   };
   const handleEdit = async (item) => {
     let url = `/payroll/bonus-incentives/${item.id}`;
     const { res } = await Factory('get', url, {});
     if (res.status_cd === 1) {
-      showSnackbar(JSON.stringify(res.data), 'error');
+      // showSnackbar(JSON.stringify(res.data), 'error');
     } else {
       setSelectedRecord(res.data);
       setOpenDialog(true);
@@ -65,9 +63,9 @@ export default function BonusAndIncentives({ employeeMasterData, from, openDialo
     let url = `/payroll/bonus-incentives/${item.id}`;
     const { res } = await Factory('delete', url, {});
     if (res.status_cd === 1) {
-      showSnackbar(JSON.stringify(res.data), 'error');
+      // showSnackbar(JSON.stringify(res.data), 'error');
     } else {
-      showSnackbar('Record Deleted Successfully', 'success');
+      // showSnackbar('Record Deleted Successfully', 'success');
       getData();
     }
   };

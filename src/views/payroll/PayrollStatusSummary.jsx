@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Table, TableContainer, TableHead, TableRow, TableCell, TableBody, Paper, Stack } from '@mui/material';
-// import EmptyTable from '@/components/third-party/table/EmptyTable';
 import Factory from 'utils/Factory';
-// import { useSnackbar } from '@/components/CustomSnackbar';
 import MainCard from '../../ui-component/cards/MainCard';
 
 const MONTHS = ['April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December', 'January', 'February', 'March'];

@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { Table, TableContainer, TableHead, TableRow, TableCell, TableBody, Paper, Stack, Button, Select, MenuItem } from '@mui/material';
 import dayjs from 'dayjs';
-import EmptyTable from '@/components/third-party/table/EmptyTable';
-import MainCard from '@/components/MainCard';
-import CustomInput from '@/utils/CustomInput';
-import CustomDatePicker from '@/utils/CustomDateInput';
+import MainCard from '../../../ui-component/cards/MainCard';
+import CustomInput from 'utils/CustomInput';
+import CustomDatePicker from 'utils/CustomDateInput';
 
 const TABLE_HEADERS = ['Compliance Type', 'Due Date', 'Status', 'Filing Date', 'Reference Number'];
 
@@ -69,7 +68,7 @@ export default function ComplianceSummary() {
               {data.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={TABLE_HEADERS.length + 1} sx={{ height: 300 }}>
-                    <EmptyTable msg="No compliance data available" />
+                    No Data
                   </TableCell>
                 </TableRow>
               ) : (

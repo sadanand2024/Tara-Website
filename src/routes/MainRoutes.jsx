@@ -8,8 +8,8 @@ import AuthGuard from 'utils/route-guard/AuthGuard';
 // payroll module
 const PayrollDashboard = Loadable(lazy(() => import('views/payroll'))); // ✅ works because index.jsx exists
 
-// const EmployeeDashboard = Loadable(lazy(() => import('views/payroll/EmployeeDashboard')));
-// const PayrollWorkflows = Loadable(lazy(() => import('views/payroll/PayrollWorkflows')));
+const EmployeeDashboard = Loadable(lazy(() => import('views/payroll/EmployeeDashboard')));
+const PayrollWorkflows = Loadable(lazy(() => import('views/payroll/PayrollWorkflows')));
 const PayrollSettings = Loadable(lazy(() => import('views/payroll/settings')));
 const OrganizationDetails = Loadable(lazy(() => import('views/payroll/settings/OrganizationDetails')));
 const WorkLocation = Loadable(lazy(() => import('views/payroll/settings/WorkLocation')));
@@ -109,14 +109,14 @@ const MainRoutes = {
       path: '/app/payroll',
       element: <PayrollDashboard />
     },
-    // {
-    //   path: '/payroll/employee-dashboard',
-    //   element: <EmployeeDashboard />
-    // },
-    // {
-    //   path: '/payroll/payroll-workflows',
-    //   element: <PayrollWorkflows />
-    // },
+    {
+      path: '/payroll/employee-dashboard',
+      element: <EmployeeDashboard />
+    },
+    {
+      path: '/payroll/payroll-workflows',
+      element: <PayrollWorkflows />
+    },
     {
       path: '/app/payroll/settings',
       element: <PayrollSettings />

@@ -64,13 +64,13 @@ export default function PayrollMonthwise({ payrollId, financialYear }) {
               spacing={2}
             >
               <Typography
-                variant="h6"
+                variant="h4"
                 sx={{
                   fontWeight: 600,
                   color: 'primary.main'
                 }}
               >
-                Payroll for the Month
+                Payroll for the Month of
               </Typography>
 
               <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap">

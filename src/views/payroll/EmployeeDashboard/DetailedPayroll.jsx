@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Table, TableContainer, TableHead, TableRow, TableCell, TableBody, Paper, Stack, Pagination, Button } from '@mui/material';
-import EmptyTable from '@/components/third-party/table/EmptyTable';
-import MainCard from '@/components/MainCard';
-import Factory from '@/utils/Factory';
-import { useSnackbar } from '@/components/CustomSnackbar';
-import { BASE_URL } from 'constants';
+import MainCard from '../../../ui-component/cards/MainCard';
+import Factory from 'utils/Factory';
+import { BASE_URL } from '../../../../constants';
 import axios from 'axios';
 
 const TABLE_HEADERS = [
@@ -40,7 +38,6 @@ export default function DetailedPayroll({ payrollId, month }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [detailedSummary, setDetailedSummary] = useState([]);
   const rowsPerPage = 5;
-  const { showSnackbar } = useSnackbar();
 
   const totalPages = Math.ceil(detailedSummary.length / rowsPerPage);
   const paginatedData = detailedSummary.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
@@ -54,7 +51,7 @@ export default function DetailedPayroll({ payrollId, month }) {
     if (res.status_cd === 0) {
       setDetailedSummary(res.data || []);
     } else {
-      showSnackbar(JSON.stringify(res.data.data), 'error');
+      // showSnackbar(JSON.stringify(res.data.data), 'error');
     }
   };
 
@@ -81,7 +78,7 @@ export default function DetailedPayroll({ payrollId, month }) {
               {paginatedData?.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={TABLE_HEADERS.length} sx={{ height: 300 }}>
-                    <EmptyTable msg="No work locations available" />
+                    No Data
                   </TableCell>
                 </TableRow>
               ) : (

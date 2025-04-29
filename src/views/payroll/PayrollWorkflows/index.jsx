@@ -4,10 +4,9 @@ import { useState, useEffect, useMemo } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { Box, Tab, Tabs, Typography, Stack, Avatar, Button } from '@mui/material';
 import { IconBolt } from '@tabler/icons-react';
-import HomeCard from '@/components/cards/HomeCard';
-import MainCard from '@/components/MainCard';
-import { useSearchParams, useRouter } from 'next/navigation';
-import { useSnackbar } from '@/components/CustomSnackbar';
+import MainCard from '../../../ui-component/cards/MainCard';
+import { useNavigate } from 'react-router';
+import { useSearchParams } from 'react-router';
 import NewJoiners from './NewJoiners';
 import Exits from './Exits';
 import Attendance from './Attendance';
@@ -15,7 +14,7 @@ import LoansAndAdvances from './LoansAndAdvances';
 import BonusAndIncentives from './BonusAndIncentives';
 import SalaryRevisions from './SalaryRevisions';
 import OtherDeductions from './OtherDeductions';
-import Factory from '@/utils/Factory';
+import Factory from 'utils/Factory';
 
 // TabPanel Component
 const TabPanel = ({ children, value, index }) => (
@@ -35,7 +34,6 @@ const usePayrollData = (payrollId) => {
   const [loading, setLoading] = useState(false);
   const [employeeMasterData, setEmployeeMasterData] = useState([]);
   const [attendanceData, setAttendanceData] = useState([]);
-  const { showSnackbar } = useSnackbar();
 
   const fetchEmployeeMasterData = async () => {
     setLoading(true);
@@ -46,7 +44,7 @@ const usePayrollData = (payrollId) => {
       setEmployeeMasterData(res.data);
     } else {
       setEmployeeMasterData([]);
-      showSnackbar(JSON.stringify(res?.data?.data || error), 'error');
+      // showSnackbar(JSON.stringify(res?.data?.data || error), 'error');
     }
   };
 
@@ -58,7 +56,7 @@ const usePayrollData = (payrollId) => {
     if (res?.status_cd === 0) {
       setAttendanceData(res.data || []);
     } else {
-      showSnackbar(JSON.stringify(res.data?.data || error), 'error');
+      // showSnackbar(JSON.stringify(res.data?.data || error), 'error');
     }
   };
 
@@ -74,8 +72,8 @@ const PayrollWorkflows = ({ type }) => {
   const [activeTab, setActiveTab] = useState(0);
   const [openDialog, setOpenDialog] = useState(false);
   const theme = useTheme();
-  const searchParams = useSearchParams();
-  const router = useRouter();
+  const [searchParams] = useSearchParams();
+  const router = useNavigate();
 
   const payrollId = searchParams.get('payrollid');
 
@@ -166,18 +164,18 @@ const PayrollWorkflows = ({ type }) => {
   }, [searchParams]);
 
   return (
-    <HomeCard
+    <MainCard
       title="Employee Dashboard"
       tagline="Payroll Workflow"
-      CustomElement={() => (
+      secondary={
         <Stack direction="row" sx={{ gap: 2 }}>
           <Button variant="contained" color="primary" onClick={handleButtonClick}>
             {renderButtonLabel()}
           </Button>
         </Stack>
-      )}
+      }
     >
-      <MainCard>
+      <>
         <Tabs
           variant="fullWidth"
           scrollButtons={true}
@@ -216,8 +214,8 @@ const PayrollWorkflows = ({ type }) => {
             />
           </TabPanel>
         ))}
-      </MainCard>
-    </HomeCard>
+      </>
+    </MainCard>
   );
 };
 

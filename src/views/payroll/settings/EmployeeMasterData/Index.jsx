@@ -18,16 +18,20 @@ import {
 } from '@mui/material';
 import MainCard from 'ui-component/cards/MainCard';
 import ActionCell from 'ui-component/extended/ActionCell';
+
 import Factory from 'utils/Factory';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-
+import EmptyDataPlaceholder from 'ui-component/extended/EmptyDataPlaceholder';
+import { useDispatch } from 'store';
+import { openSnackbar } from 'store/slices/snackbar';
 function EmployeeList() {
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(false);
   const [payrollId, setPayrollId] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const dispatch = useDispatch();
 
   const rowsPerPage = 8;
   const navigate = useNavigate();
@@ -53,16 +57,55 @@ function EmployeeList() {
     if (res?.status_cd === 0) {
       setEmployees(res?.data || []);
     } else {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res?.data?.data || error),
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
       setEmployees([]);
     }
   };
 
+  const deleteEmployee = async (item) => {
+    setLoading(true);
+    const url = `/payroll/employees/${item.id}`;
+    const { res } = await Factory('delete', url, {});
+    console.log(res);
+    setLoading(false);
+    if (res?.status_cd === 0) {
+      fetchEmployees();
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Record deleted Successfully',
+          variant: 'alert',
+          alert: { color: 'success' },
+          close: false
+        })
+      );
+    } else {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res?.data?.data || 'something went wrong'),
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
+      setEmployees([]);
+    }
+  };
   useEffect(() => {
     if (payrollId) fetchEmployees();
   }, [payrollId]);
 
   const handleEdit = (item) => {
-    navigate(`/payrollsetup/add-employee?employee_id=${encodeURIComponent(item.id)}&payrollid=${encodeURIComponent(payrollId)}`);
+    navigate(`/payroll/settings/add-employee?employee_id=${encodeURIComponent(item.id)}&payrollid=${encodeURIComponent(payrollId)}`);
   };
 
   return (
@@ -96,14 +139,7 @@ function EmployeeList() {
                   {paginatedEmployees.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={7} align="center" sx={{ height: 300 }}>
-                        <Box>
-                          <Typography variant="h6" gutterBottom>
-                            No Employees Found
-                          </Typography>
-                          <Typography variant="body2" color="textSecondary">
-                            Try adding a new employee using the button above.
-                          </Typography>
-                        </Box>
+                        <EmptyDataPlaceholder title="No Data Found" subtitle="Start Adding data." />
                       </TableCell>
                     </TableRow>
                   ) : (
@@ -127,7 +163,7 @@ function EmployeeList() {
                               successMessage: 'Employee deleted successfully'
                             }}
                             // Deletion not implemented yet
-                            onDelete={() => {}}
+                            onDelete={() => deleteEmployee(employee)}
                             onClose={() => setOpenDialog(false)}
                           />
                         </TableCell>

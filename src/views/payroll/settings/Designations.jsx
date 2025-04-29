@@ -23,7 +23,8 @@ import DesignationDialog from './DesignationDialog';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Factory from 'utils/Factory';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-
+import EmptyDataPlaceholder from 'ui-component/extended/EmptyDataPlaceholder';
+import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
 function Designations() {
   const [designations, setDesignations] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
@@ -35,7 +36,6 @@ function Designations() {
   const [searchParams] = useSearchParams();
   const payrollid = searchParams.get('payrollid');
 
-  const rowsPerPage = 8;
   const paginatedData = designations.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 
   useEffect(() => {
@@ -67,7 +67,6 @@ function Designations() {
   const handleDelete = async (designation) => {
     const url = `/payroll/designations/${designation.id}/`;
     const { res } = await Factory('delete', url, {});
-
     if (res?.status_cd === 0) {
       fetchDesignations();
     }
@@ -121,7 +120,7 @@ function Designations() {
               {paginatedData.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={4} align="center" sx={{ height: 300 }}>
-                    No Data
+                    <EmptyDataPlaceholder title="No Departments Found" subtitle="Start by adding a new department." />
                   </TableCell>
                 </TableRow>
               ) : (
@@ -152,10 +151,18 @@ function Designations() {
           </Table>
         </TableContainer>
 
-        {designations.length > rowsPerPage && (
-          <Stack direction="row" justifyContent="center" sx={{ py: 2 }}>
-            <Pagination count={Math.ceil(designations.length / rowsPerPage)} page={currentPage} onChange={handlePageChange} />
-          </Stack>
+        {designations.length > 0 && (
+          <Grid2 size={12}>
+            <Stack direction="row" justifyContent="center" sx={{ mt: 2 }}>
+              <Pagination
+                count={Math.ceil(designations.length / rowsPerPage)}
+                page={currentPage}
+                onChange={handlePageChange}
+                shape="rounded"
+                color="primary"
+              />
+            </Stack>
+          </Grid2>
         )}
       </Grid2>
 

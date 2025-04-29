@@ -77,7 +77,7 @@ function SalaryTemplate() {
     }
   });
 
-  const { values, handleChange, handleSubmit, setFieldValue, errors, touched, handleBlur } = formik;
+  const { values, setValues, handleChange, handleSubmit, setFieldValue, errors, touched, handleBlur } = formik;
 
   return (
     <MainCard title="Create Salary Template">
@@ -90,6 +90,7 @@ function SalaryTemplate() {
             <TextField
               fullWidth
               name="template_name"
+              size="small"
               value={values.template_name}
               onChange={handleChange}
               onBlur={handleBlur}
@@ -104,6 +105,7 @@ function SalaryTemplate() {
             </Typography>
             <TextField
               fullWidth
+              size="small"
               name="description"
               value={values.description}
               onChange={handleChange}
@@ -119,6 +121,7 @@ function SalaryTemplate() {
             </Typography>
             <TextField
               fullWidth
+              size="small"
               name="annual_ctc"
               value={values.annual_ctc}
               onChange={(e) => {
@@ -142,6 +145,7 @@ function SalaryTemplate() {
         <Box mt={4}>
           <RenderSalaryTemplateTable
             values={values}
+            setValues={setValues}
             setFieldValue={setFieldValue}
             enablePreviewButton={enablePreviewButton}
             setEnablePreviewButton={setEnablePreviewButton}

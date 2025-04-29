@@ -1,11 +1,7 @@
-// 📁 File: ProfessionalTax.jsx (final clean Berry version)
-
-'use client';
 import React, { useEffect, useState } from 'react';
 import {
   Box,
   Button,
-  Typography,
   Stack,
   Table,
   TableBody,
@@ -17,8 +13,6 @@ import {
   Pagination,
   Grid2
 } from '@mui/material';
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
 import { useNavigate } from 'react-router';
 import { useSearchParams } from 'react-router';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -26,9 +20,12 @@ import MainCard from '../../../ui-component/cards/MainCard';
 import ViewSlabsModel from './ViewSlabs';
 import Factory from 'utils/Factory';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { rowsPerPage } from '../../../ui-component/extended/RowsPerPage';
+import { useDispatch } from 'store';
+import { openSnackbar } from 'store/slices/snackbar';
+import EmptyDataPlaceholder from 'ui-component/extended/EmptyDataPlaceholder';
 
 const ProfessionalTax = ({ handleNext, handleBack }) => {
-  const [openDialog, setOpenDialog] = useState(false);
   const [ptData, setPtData] = useState([]);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [payrollid, setPayrollId] = useState(null);
@@ -36,12 +33,10 @@ const ProfessionalTax = ({ handleNext, handleBack }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [viewSlabsDialog, setViewSlabsDialog] = useState(false);
 
+  const dispatch = useDispatch();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-
-  const rowsPerPage = 8;
   const paginatedData = ptData.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
-
   const handlePageChange = (_e, newPage) => setCurrentPage(newPage);
 
   useEffect(() => {
@@ -61,7 +56,15 @@ const ProfessionalTax = ({ handleNext, handleBack }) => {
       setPtData(res.data);
     } else {
       setPtData([]);
-      // showSnackbar('Failed to fetch PT data', 'error');
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Failed to fetch data, Please try again',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     }
   };
 
@@ -89,7 +92,7 @@ const ProfessionalTax = ({ handleNext, handleBack }) => {
                   {paginatedData.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={5} align="center" sx={{ height: 300 }}>
-                        no Data
+                        <EmptyDataPlaceholder title="No Departments Found" subtitle="Start by adding a new department." />
                       </TableCell>
                     </TableRow>
                   ) : (
@@ -114,25 +117,33 @@ const ProfessionalTax = ({ handleNext, handleBack }) => {
                 </TableBody>
               </Table>
             </TableContainer>
-            {ptData.length > rowsPerPage && (
-              <Stack direction="row" justifyContent="center" sx={{ py: 2 }}>
-                <Pagination count={Math.ceil(ptData.length / rowsPerPage)} page={currentPage} onChange={handlePageChange} />
-              </Stack>
-            )}
 
+            {ptData.length > 0 && (
+              <Grid2 size={12}>
+                <Stack direction="row" justifyContent="center" sx={{ mt: 2 }}>
+                  <Pagination
+                    count={Math.ceil(ptData.length / rowsPerPage)}
+                    page={currentPage}
+                    onChange={handlePageChange}
+                    shape="rounded"
+                    color="primary"
+                  />
+                </Stack>
+              </Grid2>
+            )}
             <Grid2 xs={12}>
               <Box display="flex" justifyContent="space-between" mt={3}>
                 <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigate(-1)}>
                   Back to Dashboard
                 </Button>
-                <Stack direction="row" spacing={2}>
+                {/* <Stack direction="row" spacing={2}>
                   <Button variant="contained" onClick={handleBack}>
                     Back
                   </Button>
                   <Button variant="contained" onClick={handleNext}>
                     Next
                   </Button>
-                </Stack>
+                </Stack> */}
               </Box>
             </Grid2>
           </Grid2>

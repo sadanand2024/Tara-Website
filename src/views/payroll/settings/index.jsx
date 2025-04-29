@@ -3,7 +3,7 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router';
 import { useSearchParams } from 'react-router';
 import MainCard from '../../../ui-component/cards/MainCard';
-import { Box, Stack, Typography, LinearProgress, Button, Grid2 } from '@mui/material';
+import { Box, Stack, Typography, LinearProgress, Button, Grid2, CircularProgress } from '@mui/material';
 import Factory from 'utils/Factory';
 import { useSelector } from 'react-redux';
 // import Loader from 'components/PageLoader';
@@ -98,13 +98,17 @@ const PayrollSetup = () => {
   }, [steps]);
 
   if (loading) {
-    return <h1>Loading</h1>;
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="50vh">
+        <CircularProgress />
+      </Box>
+    );
   }
 
   return (
     <Box>
       <Box sx={{ mb: 2 }}>
-        <Typography variant="h4" textAlign="center" sx={{ mb: 1 }}>
+        <Typography variant="h3" textAlign="center" sx={{ mb: 1 }}>
           Welcome {user.active_context.name}
         </Typography>
         <Typography variant="subtitle1" textAlign="center" sx={{ color: 'text.disabled' }}>
@@ -133,10 +137,10 @@ const PayrollSetup = () => {
             >
               <Stack direction="row" sx={{ position: 'relative', zIndex: 1, justifyContent: 'space-between', alignItems: 'center' }}>
                 <Box sx={{ flex: 1 }}>
-                  <Typography variant="h5" sx={{ color: '#fff', fontWeight: 500, mb: 1 }}>
+                  <Typography variant="h4" sx={{ color: '#fff', fontWeight: 500, mb: 1 }}>
                     Get started with Payroll
                   </Typography>
-                  <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.9)' }}>
+                  <Typography variant="body1" sx={{ color: 'rgba(255, 255, 255, 0.9)' }}>
                     Complete the following steps to have a hassle-free payroll experience
                   </Typography>
                 </Box>

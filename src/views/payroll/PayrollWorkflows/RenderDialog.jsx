@@ -3,21 +3,18 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { Button, Box, Stack, Typography, FormControl, FormLabel, FormControlLabel, FormGroup, Checkbox, TextField } from '@mui/material';
 import Grid2 from '@mui/material/Grid2'; // Import Grid2 from MUI system
-import CustomInput from '@/utils/CustomInput';
-import Factory from '@/utils/Factory';
-import { useSnackbar } from '@/components/CustomSnackbar';
-import { useSearchParams } from 'next/navigation';
-import Modal from '@/components/Modal';
-import { ModalSize } from '@/enum';
-import CustomAutocomplete from '@/utils/CustomAutocomplete';
+import CustomInput from 'utils/CustomInput';
+import Factory from 'utils/Factory';
+import { useSearchParams } from 'react-router';
+import Modal from 'ui-component/extended/Modal';
+import CustomAutocomplete from 'utils/CustomAutocomplete';
 import dayjs from 'dayjs';
-import CustomDatePicker from '@/utils/CustomDateInput';
-import { months } from '@/utils/MonthsList';
-import { generateFinancialYears } from '@/utils/FinancialYearsList';
+import CustomDatePicker from 'utils/CustomDateInput';
+import { months } from 'utils/MonthsList';
+import { generateFinancialYears } from 'utils/FinancialYearsList';
 
 export default function RenderDialog({ from, openDialog, fields, setOpenDialog, setLoading, employeeMasterData, selectedRecord, getData }) {
-  const { showSnackbar } = useSnackbar();
-  const searchParams = useSearchParams();
+  const [searchParams] = useSearchParams();
   const [payrollid, setPayrollId] = useState(null); // Payroll ID fetched from URL
   const financialYearOptions = generateFinancialYears();
 
@@ -180,11 +177,11 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
         const { res, error } = await Factory(method, url, postData);
         setLoading(false);
         if (res.status_cd === 0) {
-          showSnackbar('Data Saved Successfully', 'success');
+          // showSnackbar('Data Saved Successfully', 'success');
           getData();
           setOpenDialog(false);
         } else {
-          showSnackbar(JSON.stringify(res.data.data), 'error');
+          // showSnackbar(JSON.stringify(res.data.data), 'error');
         }
       }
       if (from === 'Attendance') {
@@ -198,11 +195,11 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
         const { res, error } = await Factory(method, url, postData);
         setLoading(false);
         if (res.status_cd === 0) {
-          showSnackbar('Data Saved Successfully', 'success');
+          // showSnackbar('Data Saved Successfully', 'success');
           getData();
           setOpenDialog(false);
         } else {
-          showSnackbar(JSON.stringify(res.data.data), 'error');
+          // showSnackbar(JSON.stringify(res.data.data), 'error');
         }
       }
       if (from === 'Loans & Advances') {
@@ -213,11 +210,11 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
         const { res, error } = await Factory(method, url, postData);
         setLoading(false);
         if (res.status_cd === 0) {
-          showSnackbar('Data Saved Successfully', 'success');
+          // showSnackbar('Data Saved Successfully', 'success');
           getData();
           setOpenDialog(false);
         } else {
-          showSnackbar(JSON.stringify(res.data.data), 'error');
+          // showSnackbar(JSON.stringify(res.data.data), 'error');
         }
       }
       if (from === 'Bonus & Incentives') {
@@ -228,11 +225,11 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
         const { res, error } = await Factory(method, url, postData);
         setLoading(false);
         if (res.status_cd === 0) {
-          showSnackbar('Data Saved Successfully', 'success');
+          // showSnackbar('Data Saved Successfully', 'success');
           getData();
           setOpenDialog(false);
         } else {
-          showSnackbar(JSON.stringify(res.data.data), 'error');
+          // showSnackbar(JSON.stringify(res.data.data), 'error');
         }
       }
     }
@@ -381,96 +378,8 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
   return (
     <Modal
       open={openDialog}
-      maxWidth={ModalSize.MD}
+      maxWidth={'md'}
       header={{ title: 'Add', subheader: '' }}
-      modalContent={
-        <Box component="form" onSubmit={handleSubmit} sx={{ padding: 2 }}>
-          <Grid2 container spacing={3}>
-            {/* Render dynamic fields for department */}
-            {renderFields(fields)}
-          </Grid2>
-          {from === 'Exits' && (
-            <Grid2 container spacing={3} sx={{ mt: 2 }}>
-              <FormControl fullWidth>
-                <FormLabel>When do you want to settle the final pay?</FormLabel>
-                <FormGroup row>
-                  {/* Regular Pay Schedule Checkbox */}
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={values.regular_pay_schedule}
-                        onChange={(e) => {
-                          const isChecked = e.target.checked;
-                          setFieldValue('regular_pay_schedule', isChecked); // Send boolean
-                          if (isChecked) {
-                            setFieldValue('specify_date', null); // Reset specify_date if checked
-                          }
-                        }}
-                      />
-                    }
-                    label="Regular pay schedule"
-                  />
-
-                  {/* Specify Date Checkbox */}
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={values.specify_date !== null}
-                        onChange={(e) => {
-                          const isChecked = e.target.checked;
-                          setFieldValue('regular_pay_schedule', !isChecked); // Set regular_pay_schedule to false
-                          setFieldValue('specify_date', isChecked ? '' : null); // Reset if unchecked
-                        }}
-                      />
-                    }
-                    label="Specify date"
-                  />
-                </FormGroup>
-
-                {/* Date Picker (only shown when "Specify Date" is checked) */}
-                {values.specify_date !== null && (
-                  <CustomDatePicker
-                    name="specify_date"
-                    views={['year', 'month', 'day']}
-                    value={values.specify_date ? dayjs(values.specify_date, 'YYYY-MM-DD') : null}
-                    onChange={(newDate) => {
-                      if (newDate) {
-                        setFieldValue('specify_date', newDate.format('YYYY-MM-DD'));
-                      } else {
-                        setFieldValue('specify_date', null); // Reset if no date selected
-                      }
-                    }}
-                    sx={{ width: '100%' }}
-                    size="small"
-                    inputFormat="DD-MM-YYYY"
-                  />
-                )}
-              </FormControl>
-            </Grid2>
-          )}
-
-          {values.regular_pay_schedule === 'false' && (
-            <CustomDatePicker
-              views={['year', 'month', 'day']}
-              value={values['specify_date'] ? dayjs(values['specify_date'], 'YYYY-MM-DD') : null}
-              onChange={(newDate) => {
-                if (newDate) {
-                  // Save the date in 'YYYY-MM-DD' format to Formik
-                  setFieldValue('specify_date', newDate.format('YYYY-MM-DD'));
-                } else {
-                  setFieldValue('specify_date', ''); // Clear the date if none is selected
-                }
-              }}
-              sx={{ width: '100%' }}
-              onBlur={handleBlur}
-              // error={touched[field.name] && Boolean(errors[field.name])}
-              // helperText={touched[field.name] && errors[field.name]}
-              size="small"
-              inputFormat="YYYY-MM-DD" // Display in YYYY-MM-DD format
-            />
-          )}
-        </Box>
-      }
       footer={
         <Stack direction="row" sx={{ width: 1, justifyContent: 'space-between', gap: 2 }}>
           <Button
@@ -488,6 +397,93 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
           </Button>
         </Stack>
       }
-    />
+    >
+      <Box component="form" onSubmit={handleSubmit} sx={{ padding: 2 }}>
+        <Grid2 container spacing={3}>
+          {/* Render dynamic fields for department */}
+          {renderFields(fields)}
+        </Grid2>
+        {from === 'Exits' && (
+          <Grid2 container spacing={3} sx={{ mt: 2 }}>
+            <FormControl fullWidth>
+              <FormLabel>When do you want to settle the final pay?</FormLabel>
+              <FormGroup row>
+                {/* Regular Pay Schedule Checkbox */}
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={values.regular_pay_schedule}
+                      onChange={(e) => {
+                        const isChecked = e.target.checked;
+                        setFieldValue('regular_pay_schedule', isChecked); // Send boolean
+                        if (isChecked) {
+                          setFieldValue('specify_date', null); // Reset specify_date if checked
+                        }
+                      }}
+                    />
+                  }
+                  label="Regular pay schedule"
+                />
+
+                {/* Specify Date Checkbox */}
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={values.specify_date !== null}
+                      onChange={(e) => {
+                        const isChecked = e.target.checked;
+                        setFieldValue('regular_pay_schedule', !isChecked); // Set regular_pay_schedule to false
+                        setFieldValue('specify_date', isChecked ? '' : null); // Reset if unchecked
+                      }}
+                    />
+                  }
+                  label="Specify date"
+                />
+              </FormGroup>
+
+              {/* Date Picker (only shown when "Specify Date" is checked) */}
+              {values.specify_date !== null && (
+                <CustomDatePicker
+                  name="specify_date"
+                  views={['year', 'month', 'day']}
+                  value={values.specify_date ? dayjs(values.specify_date, 'YYYY-MM-DD') : null}
+                  onChange={(newDate) => {
+                    if (newDate) {
+                      setFieldValue('specify_date', newDate.format('YYYY-MM-DD'));
+                    } else {
+                      setFieldValue('specify_date', null); // Reset if no date selected
+                    }
+                  }}
+                  sx={{ width: '100%' }}
+                  size="small"
+                  inputFormat="DD-MM-YYYY"
+                />
+              )}
+            </FormControl>
+          </Grid2>
+        )}
+
+        {values.regular_pay_schedule === 'false' && (
+          <CustomDatePicker
+            views={['year', 'month', 'day']}
+            value={values['specify_date'] ? dayjs(values['specify_date'], 'YYYY-MM-DD') : null}
+            onChange={(newDate) => {
+              if (newDate) {
+                // Save the date in 'YYYY-MM-DD' format to Formik
+                setFieldValue('specify_date', newDate.format('YYYY-MM-DD'));
+              } else {
+                setFieldValue('specify_date', ''); // Clear the date if none is selected
+              }
+            }}
+            sx={{ width: '100%' }}
+            onBlur={handleBlur}
+            // error={touched[field.name] && Boolean(errors[field.name])}
+            // helperText={touched[field.name] && errors[field.name]}
+            size="small"
+            inputFormat="YYYY-MM-DD" // Display in YYYY-MM-DD format
+          />
+        )}
+      </Box>
+    </Modal>
   );
 }
