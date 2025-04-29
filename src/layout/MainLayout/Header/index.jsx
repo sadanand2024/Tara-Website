@@ -144,21 +144,21 @@ export default function Header() {
       </Box>
 
       {/* header search */}
-      <SearchSection />
+      {/* <SearchSection /> */}
       <Box sx={{ flexGrow: 1 }} />
 
       {/* mega-menu */}
-      <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+      {/* <Box sx={{ display: { xs: 'none', md: 'block' } }}>
         <MegaMenuSection />
-      </Box>
+      </Box> */}
 
       {/* live customization & localization */}
-      <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
+      {/* <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
         <LocalizationSection />
-      </Box>
+      </Box> */}
 
       {/* notification */}
-      <NotificationSection />
+      {/* <NotificationSection /> */}
 
       {/* full screen toggler */}
       <Box sx={{ display: { xs: 'none', lg: 'block' } }}>
@@ -166,7 +166,7 @@ export default function Header() {
       </Box>
 
       {/* business selector */}
-      <Box sx={{ display: { xs: 'none', sm: 'block' }, mx: 2, width: 300 }}>
+      <Box sx={{ display: { xs: 'block', sm: 'block' }, mx: 2, width: 300 }}>
         <Autocomplete
           value={selectedOption}
           onChange={handleOptionChange}
@@ -231,9 +231,9 @@ export default function Header() {
       <ProfileSection />
 
       {/* mobile header */}
-      <Box sx={{ display: { xs: 'block', sm: 'none' } }}>
+      {/* <Box sx={{ display: { xs: 'block', sm: 'none' } }}>
         <MobileSection />
-      </Box>
+      </Box> */}
 
       {/* Add Business Dialog */}
       <AddBusiness

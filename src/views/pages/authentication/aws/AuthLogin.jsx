@@ -64,7 +64,7 @@ export default function AwsCognitoLogin({ loginProp }, { ...others }) {
         password: Yup.string()
           .required('Password is required')
           .test('no-leading-trailing-whitespace', 'Password can not start or end with spaces', (value) => value === value.trim())
-          .max(10, 'Password must be less than 10 characters')
+          .max(20, 'Password must be less than 20 characters')
       })}
       onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
         try {
@@ -88,7 +88,7 @@ export default function AwsCognitoLogin({ loginProp }, { ...others }) {
       {({ errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values }) => (
         <form noValidate onSubmit={handleSubmit} {...others}>
           <FormControl fullWidth error={Boolean(touched.email && errors.email)} sx={{ ...theme.typography.customInput }}>
-            <InputLabel htmlFor="outlined-adornment-email-login">Email Address / Username</InputLabel>
+            <InputLabel htmlFor="outlined-adornment-email-login">Email Address</InputLabel>
             <OutlinedInput
               id="outlined-adornment-email-login"
               type="email"

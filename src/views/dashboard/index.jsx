@@ -55,8 +55,8 @@ const ChooseAccountDialog = ({ open, onClose, onContinue }) => {
       onClose={onClose}
       PaperProps={{
         sx: {
-          width: '28vw', 
-          maxWidth: '28vw'
+          width: { xs: '100%', md: '28vw' },
+          maxWidth: { xs: '100%', md: '28vw' }
         }
       }}
       fullWidth

@@ -94,7 +94,7 @@ export default function AuthForgotPassword({ link, ...others }) {
       {({ errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values }) => (
         <form noValidate onSubmit={handleSubmit} {...others}>
           <FormControl fullWidth error={Boolean(touched.email && errors.email)} sx={{ ...theme.typography.customInput }}>
-            <InputLabel htmlFor="outlined-adornment-email-forgot">Email Address / Username</InputLabel>
+            <InputLabel htmlFor="outlined-adornment-email-forgot">Email Address</InputLabel>
             <OutlinedInput
               id="outlined-adornment-email-forgot"
               type="email"
@@ -102,7 +102,7 @@ export default function AuthForgotPassword({ link, ...others }) {
               name="email"
               onBlur={handleBlur}
               onChange={handleChange}
-              label="Email Address / Username"
+              label="Email Address"
               inputProps={{}}
             />
             {touched.email && errors.email && (

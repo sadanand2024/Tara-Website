@@ -154,9 +154,14 @@ export default function ProfileSection() {
                     <Box sx={{ px: 2, pt: 2, pb: 1 }}>
                       <Stack direction="row" alignItems="center" spacing={2}>
                         <Avatar src={User1} alt="user-images" sx={{ width: 40, height: 40 }} />
-                        <Typography variant="subtitle1" color="text.primary" fontWeight={600}>
-                          {user?.name || 'User Name'}
-                        </Typography>
+                        <Stack direction="column" spacing={0}>
+                          <Typography variant="h5" color="text.primary" sx={{ lineHeight: 1 }} fontWeight={600}>
+                            {user?.name || 'User Name'}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary" sx={{ p: 0, m: 0 }} fontWeight={600}>
+                            {user?.role || 'User Role'} 
+                          </Typography>
+                        </Stack>
                       </Stack>
                     </Box>
                     <Divider />

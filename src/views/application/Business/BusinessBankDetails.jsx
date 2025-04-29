@@ -32,13 +32,14 @@ const validationSchema = Yup.object({
     .required('Account number is required')
     .matches(/^\d{9,18}$/, 'Account number must be between 9 and 18 digits'),
   branch_name: Yup.string().required('Branch name is required'),
-  ifsc: Yup.string()
+  ifsc_code: Yup.string()
     .required('IFSC code is required')
     .matches(/^[A-Z]{4}0[A-Z0-9]{6}$/, 'Invalid IFSC code'),
   swift_code: Yup.string().matches(/^[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?$/, 'Invalid SWIFT code')
 });
 
-const BusinessBankDetails = () => {
+const BusinessBankDetails = ({ user }) => {
+  console.log(user);
   const [open, setOpen] = useState(false);
   const [bankAccounts, setBankAccounts] = useState([]);
   const [editIndex, setEditIndex] = useState(null);
@@ -59,10 +60,11 @@ const BusinessBankDetails = () => {
 
   const formik = useFormik({
     initialValues: {
+      business: user?.active_context?.business_id,
       bank_name: '',
       account_number: '',
       branch_name: '',
-      ifsc: '',
+      ifsc_code: '',
       swift_code: ''
     },
     validationSchema,
@@ -128,7 +130,7 @@ const BusinessBankDetails = () => {
                   <TableCell>{account.bank_name}</TableCell>
                   <TableCell>{account.account_number}</TableCell>
                   <TableCell>{account.branch_name}</TableCell>
-                  <TableCell>{account.ifsc}</TableCell>
+                  <TableCell>{account.ifsc_code}</TableCell>
                   <TableCell>{account.swift_code}</TableCell>
                   <TableCell>
                     <IconButton size="small" onClick={() => handleEdit(index)} sx={{ color: 'primary.main' }}>
@@ -223,13 +225,13 @@ const BusinessBankDetails = () => {
                 <TextField
                   fullWidth
                   size="small"
-                  id="ifsc"
-                  name="ifsc"
+                  id="ifsc_code"
+                  name="ifsc_code"
                   label="IFSC Code"
-                  value={formik.values.ifsc}
+                  value={formik.values.ifsc_code}
                   onChange={formik.handleChange}
-                  error={formik.touched.ifsc && Boolean(formik.errors.ifsc)}
-                  helperText={formik.touched.ifsc && formik.errors.ifsc}
+                  error={formik.touched.ifsc_code && Boolean(formik.errors.ifsc_code)}
+                  helperText={formik.touched.ifsc_code && formik.errors.ifsc_code}
                   InputLabelProps={{
                     sx: { color: 'text.primary' }
                   }}

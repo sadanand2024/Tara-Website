@@ -28,7 +28,17 @@ import Tarafirstlogo_png from 'assets/images/Tarafirstlogo_png.png'; // Tarafirs
 import CardMedia from '@mui/material/CardMedia';
 
 // assets
-import { IconBook, IconCreditCard, IconDashboard, IconHome2 } from '@tabler/icons-react';
+import {
+  IconBook,
+  IconCreditCard,
+  IconDashboard,
+  IconHome2,
+  IconBuildingStore,
+  IconApps,
+  IconBuildingSkyscraper,
+  IconBrain,
+  IconCalendarTime
+} from '@tabler/icons-react';
 import MenuIcon from '@mui/icons-material/Menu';
 import ServicesPanel from './ServicesPanel';
 import ProductsPanel from './ProductsPanel';
@@ -89,7 +99,7 @@ export default function AppBar({ ...others }) {
             sx={{
               flexGrow: 1,
               justifyContent: 'center',
-              display: { xs: 'none', sm: 'flex' }
+              display: { xs: 'none', md: 'flex' }
             }}
           >
             <Button color="inherit" onClick={handleToggle}>
@@ -107,9 +117,108 @@ export default function AppBar({ ...others }) {
             </Button>
           </Stack>
 
+          <Box sx={{ display: { xs: 'block', md: 'none' } }}>
+            <IconButton color="inherit" onClick={drawerToggler(true)} size="large">
+              <MenuIcon />
+            </IconButton>
+            <Drawer anchor="top" open={drawerToggle} onClose={drawerToggler(false)}>
+              {drawerToggle && (
+                <Box
+                  sx={{
+                    width: 'auto',
+                    py: 2
+                  }}
+                  role="presentation"
+                >
+                  <List>
+                    <ListItemButton
+                      onClick={() => {
+                        setOpenServices(!openServices);
+                        setOpenProducts(false);
+                      }}
+                    >
+                      <ListItemIcon>
+                        <IconBuildingStore />
+                      </ListItemIcon>
+                      <ListItemText primary="Services" />
+                    </ListItemButton>
+                    {openServices && (
+                      <Box sx={{ pl: 2, bgcolor: 'background.default' }}>
+                        <ServicesPanel onClose={() => setOpenServices(false)} />
+                      </Box>
+                    )}
+
+                    <ListItemButton
+                      onClick={() => {
+                        setOpenProducts(!openProducts);
+                        setOpenServices(false);
+                      }}
+                    >
+                      <ListItemIcon>
+                        <IconApps />
+                      </ListItemIcon>
+                      <ListItemText primary="Products" />
+                    </ListItemButton>
+                    {openProducts && (
+                      <Box sx={{ pl: 2, bgcolor: 'background.default' }}>
+                        <ProductsPanel onClose={() => setOpenProducts(false)} />
+                      </Box>
+                    )}
+
+                    <ListItemButton>
+                      <ListItemIcon>
+                        <IconBuildingSkyscraper />
+                      </ListItemIcon>
+                      <ListItemText primary="Company" />
+                    </ListItemButton>
+
+                    <ListItemButton component={Link} href="/knowledge">
+                      <ListItemIcon>
+                        <IconBrain />
+                      </ListItemIcon>
+                      <ListItemText primary="Knowledge" />
+                    </ListItemButton>
+
+                    <ListItemButton component={Link} href="/book-consultation">
+                      <ListItemIcon>
+                        <IconCalendarTime />
+                      </ListItemIcon>
+                      <ListItemText primary="Book Consultation" />
+                    </ListItemButton>
+
+                    <Box
+                      sx={{
+                        pt: 2,
+                        borderTop: 1,
+                        borderColor: 'divider',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        gap: 2
+                      }}
+                    >
+                      <Button
+                        component={RouterLink}
+                        to="/register"
+                        disableElevation
+                        color="secondary"
+                        variant="outlined"
+                        fullWidth
+                        sx={{ maxWidth: 200 }}
+                      >
+                        Signup
+                      </Button>
+                      <Button component={RouterLink} to="/login" variant="contained" color="secondary" fullWidth sx={{ maxWidth: 200 }}>
+                        Login
+                      </Button>
+                    </Box>
+                  </List>
+                </Box>
+              )}
+            </Drawer>
+          </Box>
           {/* Right: Auth Buttons */}
-          <Stack direction="row" spacing={1} sx={{ flexShrink: 0, display: { xs: 'none', sm: 'flex' } }}>
-            <Button component={RouterLink} to="/register" disableElevation color="secondary">
+          <Stack direction="row" spacing={1} sx={{ flexShrink: 0, display: { xs: 'none', md: 'flex' } }}>
+            <Button component={RouterLink} to="/register" disableElevation color="secondary" variant="outlined">
               Signup
             </Button>
             <Button component={RouterLink} to="/login" variant="contained" color="secondary">

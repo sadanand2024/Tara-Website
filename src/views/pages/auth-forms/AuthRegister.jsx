@@ -74,7 +74,7 @@ export default function AuthRegister() {
         </Grid>
       </Grid>
       <FormControl fullWidth sx={{ ...theme.typography.customInput }}>
-        <InputLabel htmlFor="outlined-adornment-email-register">Email Address / Username</InputLabel>
+        <InputLabel htmlFor="outlined-adornment-email-register">Email Address</InputLabel>
         <OutlinedInput id="outlined-adornment-email-register" type="email" value="jones@doe.com" name="email" inputProps={{}} />
       </FormControl>
 

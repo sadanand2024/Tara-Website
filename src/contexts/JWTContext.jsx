@@ -112,18 +112,17 @@ export function JWTProvider({ children }) {
       let url = '';
       if (context_type === 'business') {
         url = '/user_management/register/business-with-module/';
-      } else{
+      } else {
         url = '/user_management/register/standard ';
       }
-      console.log(url)
-      // const response = await axios.post('/user_management/register/business-with-module/', {
-      //   email,
-      //   password,
-      //   business_name: organizationName,
-      //   module_id: moduleId,
-      //   type,
-      //   context
-      // });
+      console.log(url);
+      const response = await axios.post('/user_management/register/business-with-module/', {
+        email,
+        password,
+        business_name: organizationName,
+        module_id: moduleId
+      });
+      console.log(response);
       // const user = response.data;
       // hey Krishna, if u want the user to auto-login after registration pls uncomment below code ---Anand
 

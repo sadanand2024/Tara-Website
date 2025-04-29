@@ -64,7 +64,7 @@ export default function ActivateAccount() {
       setActivationData({ uid, ssid, name, email, invitedBy });
     } else {
       enqueueSnackbar('Invalid activation link', { variant: 'error' });
-      navigate('/login');
+      // navigate('/login');
     }
   }, [location, navigate, enqueueSnackbar]);
 

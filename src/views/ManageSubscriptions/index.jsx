@@ -190,7 +190,7 @@ const EmptySubscriptions = () => {
       <Button
         variant="contained"
         startIcon={<AddIcon />}
-        onClick={() => navigate('/app/products-and-services')}
+        onClick={() => navigate('/app/subscriptions/products-and-services')}
         sx={{
           background: (theme) => `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
           '&:hover': {
@@ -239,7 +239,7 @@ const ManageSubscriptions = () => {
             fullWidth={isMobile}
             variant="contained"
             startIcon={<AddIcon />}
-            onClick={() => navigate('/app/products-and-services')}
+            onClick={() => navigate('/app/subscriptions/products-and-services')}
             sx={{
               background: (theme) => `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
               '&:hover': {
@@ -253,7 +253,7 @@ const ManageSubscriptions = () => {
             fullWidth={isMobile}
             variant="outlined"
             startIcon={<ShoppingCartIcon />}
-            onClick={() => navigate('/app/products-and-services?tab=1')}
+            onClick={() => navigate('/app/subscriptions/products-and-services?tab=1')}
             sx={{
               borderColor: 'primary.main',
               '&:hover': {
@@ -268,7 +268,7 @@ const ManageSubscriptions = () => {
             fullWidth={isMobile}
             variant="outlined"
             startIcon={<VisibilityIcon />}
-            onClick={() => navigate('/app/products-and-services')}
+            onClick={() => navigate('/app/subscriptions/products-and-services')}
             sx={{
               borderColor: 'primary.main',
               '&:hover': {
