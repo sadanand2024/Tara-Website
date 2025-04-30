@@ -33,7 +33,7 @@ export default function TabOne({ businessDetails = {}, postType }) {
       { name: 'address_line2', label: 'Address Line 2' },
       { name: 'country', label: 'Country' },
       { name: 'state', label: 'State' },
-      { name: 'pinCode', label: 'Pincode' },
+      { name: 'pincode', label: 'Pincode' },
       { name: 'email', label: 'Email' },
       { name: 'mobile_number', label: 'Mobile' }
     ],
@@ -60,7 +60,7 @@ export default function TabOne({ businessDetails = {}, postType }) {
     country: Yup.string().required('Country is required'),
     state: Yup.string().required('State is required'),
     email: Yup.string().email('Invalid email format').required('Email is required'),
-    pinCode: Yup.number()
+    pincode: Yup.number()
       .typeError('Pincode must be an integer')
       .required('Pincode is required')
       .integer('Pincode must be an integer')
@@ -107,7 +107,7 @@ export default function TabOne({ businessDetails = {}, postType }) {
       country: 'IN',
       state: '',
       email: '',
-      pinCode: '',
+      pincode: '',
       mobile_number: '',
       address_line1: '',
       address_line2: '',
@@ -181,7 +181,7 @@ export default function TabOne({ businessDetails = {}, postType }) {
               : businessDetails.gstin,
         state: businessDetails.business?.headOffice?.state || businessDetails?.state || '',
         email: businessDetails.business.email || '',
-        pinCode: businessDetails.business?.headOffice?.pinCode || businessDetails?.pinCode || '',
+        pincode: businessDetails.business?.headOffice?.pincode || businessDetails?.pincode || '',
         mobile_number: businessDetails.business.mobile_number || '',
         address_line1: businessDetails.business?.headOffice?.address_line1 || businessDetails?.address_line1 || '',
         address_line2: businessDetails.business?.headOffice?.address_line2 || businessDetails?.address_line2 || '',
