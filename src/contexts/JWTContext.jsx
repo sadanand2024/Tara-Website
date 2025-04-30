@@ -109,13 +109,16 @@ export function JWTProvider({ children }) {
       } else {
         url = '/user_management/register/standard ';
       }
-      console.log(url);
-      const response = await axios.post('/user_management/register/business-with-module/', {
+      let __postData = {
         email,
-        password,
-        business_name: organizationName,
-        module_id: moduleId
-      });
+        password
+      };
+      if (context_type === 'business') {
+        __postData.business_name = organizationName;
+        __postData.module_id = moduleId;
+      }
+      console.log(__postData);
+      const response = await axios.post(url, __postData);
       if (response.status === 201 && response.statusText === 'Created') {
         return response.data;
       }

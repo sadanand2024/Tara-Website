@@ -108,7 +108,7 @@ export default function JWTRegister({ ...others }) {
           try {
             const trimmedEmail = values.email.trim();
             const response = await register(trimmedEmail, values.password, values.organizationName, moduleId, type, context_type);
-
+            
             setStatus({ success: true });
             setSubmitting(false);
 
