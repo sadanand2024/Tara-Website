@@ -212,13 +212,13 @@ export default function Header() {
             return (
               <Box {...otherProps} component="li" key={option.id} sx={{ p: 4 }}>
                 <BusinessIcon fontSize="small" sx={{ mr: 1 }} />
-                <Stack direction="row" alignItems="center" sx={{ justifyContent: 'space-between', width: '100%', py:0.6}}>
+                <Stack direction="row" alignItems="center" sx={{ justifyContent: 'space-between', width: '100%', py: 0.6 }}>
                   {option.name || option.context_name || 'Unnamed Option'}
                 </Stack>
               </Box>
             );
           }}
-          renderInput={(params) => <TextField {...params} size="small" placeholder="Select Business" />}
+          renderInput={(params) => <TextField {...params} size="small" placeholder="Select or Add Business" />}
           disableClearable
           ListboxProps={{
             sx: { maxHeight: 250 }
