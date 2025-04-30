@@ -38,7 +38,7 @@ const validationSchema = Yup.object({
     city: Yup.string().required('City is required'),
     state: Yup.string().required('State is required'),
     country: Yup.string().required('Country is required'),
-    pinCode: Yup.string().required('Pincode is required')
+    pincode: Yup.string().required('Pincode is required')
   }),
   pan: Yup.string()
     .matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN Number')
@@ -74,7 +74,7 @@ const AddBusiness = ({ open, onClose, userData, setUserData, getContext }) => {
         city: '',
         state: '',
         country: 'India',
-        pinCode: ''
+        pincode: ''
       },
       pan: '',
       business_nature: '',
@@ -355,13 +355,13 @@ const AddBusiness = ({ open, onClose, userData, setUserData, getContext }) => {
               <TextField
                 fullWidth
                 size="small"
-                id="head_office.pinCode"
-                name="head_office.pinCode"
+                id="head_office.pincode"
+                name="head_office.pincode"
                 label="Pincode"
-                value={formik.values.head_office.pinCode}
+                value={formik.values.head_office.pincode}
                 onChange={formik.handleChange}
-                error={formik.touched.head_office?.pinCode && Boolean(formik.errors.head_office?.pinCode)}
-                helperText={formik.touched.head_office?.pinCode && formik.errors.head_office?.pinCode}
+                error={formik.touched.head_office?.pincode && Boolean(formik.errors.head_office?.pincode)}
+                helperText={formik.touched.head_office?.pincode && formik.errors.head_office?.pincode}
               />
             </Grid>
           </Grid>

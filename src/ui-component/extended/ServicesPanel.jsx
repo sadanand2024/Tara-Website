@@ -155,7 +155,8 @@ const ServicesPanel = ({ onClose }) => {
                       borderBottom: '1px solid',
                       borderColor: 'divider',
                       pb: 1,
-                      mb: 1
+                      mb: 1,
+                      textAlign: 'left'
                     }}
                   >
                     {section.title}
@@ -174,6 +175,7 @@ const ServicesPanel = ({ onClose }) => {
                         textDecoration: 'none',
                         color: 'text.primary',
                         transition: 'color 0.2s ease',
+                        textAlign: 'left',
                         '&:hover': {
                           textDecoration: 'underline',
                           color: section.color
