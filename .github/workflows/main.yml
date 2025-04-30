@@ -34,5 +34,5 @@ jobs:
           AWS_S3_BUCKET: dev.tarafirst.com
           AWS_ACCESS_KEY_ID: ${{ secrets.DEPLOY_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.DEPLOY_SECRET_ACCESS_KEY }}
-          AWS_REGION: your-region-code-here         # e.g., us-east-1
+          AWS_REGION: ap-south-1         # e.g., us-east-1
           SOURCE_DIR: dist                          # Output folder from vite build
