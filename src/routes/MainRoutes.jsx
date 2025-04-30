@@ -12,7 +12,7 @@ const EmployeeDashboard = Loadable(lazy(() => import('views/payroll/EmployeeDash
 const PayrollWorkflows = Loadable(lazy(() => import('views/payroll/PayrollWorkflows')));
 const PayrollSettings = Loadable(lazy(() => import('views/payroll/settings')));
 const OrganizationDetails = Loadable(lazy(() => import('views/payroll/settings/Organizationdetails')));
-const WorkLocation = Loadable(lazy(() => import('views/payroll/settings/WorkLocation')));
+const WorkLocation = Loadable(lazy(() => import('views/payroll/settings/Worklocation')));
 const Departments = Loadable(lazy(() => import('views/payroll/settings/Departments')));
 const Designations = Loadable(lazy(() => import('views/payroll/settings/Designations')));
 const StatuitoryComponents = Loadable(lazy(() => import('views/payroll/settings/StatuitoryComponents')));
