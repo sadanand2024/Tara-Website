@@ -1,4 +1,3 @@
-'use client';
 import React, { useEffect, useState } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
@@ -88,6 +87,7 @@ export default function DepartmentDialog({ open, handleClose, fetchDepartments, 
     <Modal
       open={open}
       showClose={true}
+      title={type === 'edit' ? 'Edit Department' : 'Add Department'}
       handleClose={() => {
         setType('');
         resetForm(); // Optional

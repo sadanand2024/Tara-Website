@@ -1,4 +1,3 @@
-'use client';
 import React, { useState, useEffect } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
@@ -179,10 +178,13 @@ function BasicDetails({ employeeData, setCreatedEmployeeId }) {
           />
         ) : field.name === 'doj' ? (
           <CustomDatePicker
-            value={dayjs(values[field.name]) || null}
+            value={dayjs(values[field.name]).isValid() ? dayjs(values[field.name]) : null}
             onChange={(newDate) => {
-              const formattedDate = dayjs(newDate).format('YYYY-MM-DD');
-              setFieldValue(field.name, formattedDate);
+              if (newDate && dayjs(newDate).isValid()) {
+                setFieldValue(field.name, dayjs(newDate).format('YYYY-MM-DD'));
+              } else {
+                setFieldValue(field.name, '');
+              }
             }}
             sx={{
               width: '100%',

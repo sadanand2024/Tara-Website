@@ -67,7 +67,6 @@ const PayrollSummary = ({ payrollId, month, financialYear }) => {
         window.open(url, '_blank');
         setTimeout(() => URL.revokeObjectURL(url), 10000);
       } else {
-        console.error('Empty PDF received.');
         dispatch(
           openSnackbar({
             open: true,
@@ -79,7 +78,6 @@ const PayrollSummary = ({ payrollId, month, financialYear }) => {
         );
       }
     } catch (error) {
-      console.error('Error fetching payslip PDF:', error);
       dispatch(
         openSnackbar({
           open: true,
@@ -113,7 +111,6 @@ const PayrollSummary = ({ payrollId, month, financialYear }) => {
       setLoading(false);
     }
   };
-  console.log(payrollId, month, financialYear);
   useEffect(() => {
     if (payrollId && financialYear) fetchPayrollSummary();
   }, [payrollId, financialYear]);

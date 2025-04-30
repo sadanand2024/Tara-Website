@@ -9,25 +9,39 @@ import { useNavigate } from 'react-router';
 import Factory from 'utils/Factory';
 import AddItem from './AddItem';
 import ItemList from './ItemList';
+import { useDispatch } from 'store';
+import { openSnackbar } from 'store/slices/snackbar';
+import EmptyDataPlaceholder from 'ui-component/extended/EmptyDataPlaceholder';
 
 export default function TabThree({ businessDetails, handleNext, handleBack }) {
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState([]);
   const [type, setType] = useState('');
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
   const fetchItems = async () => {
-    const url = `/invoicing/goods-services/${businessDetails.id}`;
+    const url = `/invoicing/goods-services/${businessDetails.invoicing_profile_id}`;
     const { res } = await Factory('get', url, {});
     if (res.status_cd === 0) {
       setItems(res.data.goods_and_services);
+    } else {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: res.data.error || 'Failed to fetch items',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     }
   };
 
   useEffect(() => {
-    if (businessDetails?.id) fetchItems();
+    if (businessDetails?.invoicing_profile_id) fetchItems();
   }, [businessDetails]);
 
   return (
@@ -52,16 +66,20 @@ export default function TabThree({ businessDetails, handleNext, handleBack }) {
 
         {/* Items List */}
         <Grid2 size={{ xs: 12 }}>
-          <ItemList
-            type={type}
-            open={open}
-            handleOpen={handleOpen}
-            handleClose={handleClose}
-            setType={setType}
-            businessDetailsData={businessDetails}
-            itemsData={items}
-            get_Goods_and_Services_Data={fetchItems}
-          />
+          {items.length === 0 ? (
+            <EmptyDataPlaceholder title="No Items Found" subtitle="Start by adding your first item using the 'Add Item' button above." />
+          ) : (
+            <ItemList
+              type={type}
+              open={open}
+              handleOpen={handleOpen}
+              handleClose={handleClose}
+              setType={setType}
+              businessDetailsData={businessDetails}
+              itemsData={items}
+              get_Goods_and_Services_Data={fetchItems}
+            />
+          )}
         </Grid2>
       </Grid2>
 
@@ -76,11 +94,14 @@ export default function TabThree({ businessDetails, handleNext, handleBack }) {
         >
           Back To Dashboard
         </Button>
-        {/* <Stack direction="row" spacing={2}>
+        <Stack direction="row" spacing={2}>
+          <Button variant="contained" onClick={handleBack}>
+            Back
+          </Button>
           <Button variant="contained" onClick={handleNext}>
             Next
           </Button>
-        </Stack> */}
+        </Stack>
       </Box>
     </>
   );

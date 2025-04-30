@@ -1,4 +1,3 @@
-'use client';
 import PropTypes from 'prop-types';
 import { useState, useEffect, useMemo } from 'react';
 import { useTheme } from '@mui/material/styles';

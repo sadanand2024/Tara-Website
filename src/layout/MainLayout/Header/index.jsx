@@ -44,7 +44,7 @@ import { Stack } from '@mui/material';
 export default function Header() {
   const dispatch = useDispatch();
   const reduxDispatch = useReduxDispatch(); // ✅ Redux dispatcher
-  const user = useSelector((state) => state).accountReducer.user;
+  const user = useSelector((state) => state.accountReducer.user);
   const theme = useTheme();
   const downMD = useMediaQuery(theme.breakpoints.down('md'));
 

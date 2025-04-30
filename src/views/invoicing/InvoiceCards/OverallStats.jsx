@@ -59,7 +59,7 @@ const OverallStats = ({ theme, title, setTitle, dashboardData, getInvoices, getS
   return (
     <Grid2 container spacing={2} sx={{ mb: 4 }}>
       {overallStatsData.map((item, index) => (
-        <Grid2 size={{ xs: 12, sm: 6, md: 4, lg: 2.4 }}>
+        <Grid2 key={item.id} size={{ xs: 12, sm: 6, md: 4, lg: 2.4 }}>
           <SubCard
             onClick={() => {
               if (item.title === title) {

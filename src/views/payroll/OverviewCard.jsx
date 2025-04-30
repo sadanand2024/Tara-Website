@@ -1,4 +1,3 @@
-'use client';
 import Stack from '@mui/material/Stack';
 import Grid from '@mui/material/Grid2';
 import { useSnackbar } from '@/components/CustomSnackbar';
