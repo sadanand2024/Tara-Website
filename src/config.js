@@ -1,5 +1,7 @@
 export const DASHBOARD_PATH = '/dashboard';
 export const HORIZONTAL_MAX_ITEM = 7;
+export const DIALOG_TITLE_PADDING = { px: 2, py: 1 };
+export const DIALOG_CONTENT_PADDING = { px: 2, py: 3 };
 
 export let MenuOrientation;
 

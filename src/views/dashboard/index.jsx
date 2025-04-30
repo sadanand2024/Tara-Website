@@ -1,19 +1,36 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogTitle, DialogContent, Typography, Box, Grid, Button, Paper } from '@mui/material';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
 import { useTheme } from '@mui/material/styles';
+import { useSelector } from 'store';
+import Personal from '../KYC/Personal';
+import Business from '../KYC/Business';
+import Factory from 'utils/Factory';
+import { useSnackbar } from 'notistack';
+import { useDispatch as useReduxDispatch } from 'react-redux';
+import { storeUser } from 'store/slices/account'; // redux slice
 
 export default function Dashboard() {
-  const [accDialog, setAccDialog] = useState(true);
+  const reduxDispatch = useReduxDispatch(); // ✅ Redux dispatcher 
+  const snackbar = useSnackbar();
+  const user = useSelector((state) => state).accountReducer.user;
+  const [accDialog, setAccDialog] = useState(false);
+  const [personalKYCDialog, setPersonalKYCDialog] = useState(false);
+  const [businessKYCDialog, setBusinessKYCDialog] = useState(false);
+  const [selected, setSelected] = useState(null);
   const navigate = useNavigate();
 
+
   function onContinue(selected) {
+    let user_id = user.user.id;
     if (selected === 'business') {
-      navigate('/dashboard/business');
+      setBusinessKYCDialog(true);
+      setSelected('business');
     } else {
-      navigate('/dashboard/personal');
+      setPersonalKYCDialog(true);
+      setSelected('personal');
     }
     closeDiag();
   }
@@ -22,15 +39,63 @@ export default function Dashboard() {
     setAccDialog(() => false);
   }
 
+  const switchContext = async (context_id) => {
+    const response = await Factory('post', '/user_management/switch-context/', { context_id: context_id, user_id: user.user.id });
+    if (response.res.status_cd === 0) {
+      let data = { ...user };
+      data.active_context = response.res.data.active_context;
+      data.module_subscriptions = response.res.data.module_subscriptions;
+      data.user_role = response.res.data.user_role;
+      localStorage.setItem('user', JSON.stringify(data));
+      reduxDispatch(storeUser(data));
+    }
+  };
+
+  const handleKYCSubmit = async (data) => {
+    let kycData = {
+      user_id: user.user.id,
+      context_type: selected
+    };
+    if (selected === 'personal') {
+      kycData.user_kyc = { ...data, have_firm: false };
+    } else {
+      kycData.business_details = { ...data };
+    }
+
+    const response = await Factory('post', '/user_management/select-context', kycData, {});
+    if (response.res.status_cd === 0) {
+      switchContext(response.res.context_id);
+      if (selected === 'personal') {
+        navigate('/dashboard/personal');
+      } else {
+        navigate('/dashboard/business');
+      }
+    } else {
+      snackbar.error('Something went wrong');
+    }
+  };
+
+  useEffect(() => {
+    console.log(user);
+    if (user.all_contexts.length === 0) {
+      setAccDialog(true);
+    } else if (user.active_context.context_type === 'business') {
+      navigate('/dashboard/business');
+    } else {
+      navigate('/dashboard/personal');
+    }
+  }, [user]);
+
   return (
     <>
-      <h1>Dashboard</h1>
-      <ChooseAccountDialog open={accDialog} onClose={closeDiag} onContinue={onContinue} />
+      <ChooseAccountDialog open={accDialog} onContinue={onContinue} />
+      <Personal open={personalKYCDialog} onClose={() => setPersonalKYCDialog(false)} onSubmit={handleKYCSubmit} />
+      <Business open={businessKYCDialog} onClose={() => setBusinessKYCDialog(false)} onSubmit={handleKYCSubmit} />
     </>
   );
 }
 
-const ChooseAccountDialog = ({ open, onClose, onContinue }) => {
+const ChooseAccountDialog = ({ open, onContinue }) => {
   const [selected, setSelected] = React.useState('personal');
   const theme = useTheme();
 
@@ -52,7 +117,6 @@ const ChooseAccountDialog = ({ open, onClose, onContinue }) => {
   return (
     <Dialog
       open={open}
-      onClose={onClose}
       PaperProps={{
         sx: {
           width: { xs: '100%', md: '28vw' },
