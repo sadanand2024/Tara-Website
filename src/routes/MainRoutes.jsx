@@ -22,7 +22,7 @@ const SalaryTemplate = Loadable(lazy(() => import('views/payroll/settings/Salary
 const PaySchedule = Loadable(lazy(() => import('views/payroll/settings/PaySchedule')));
 const LeaveAttendance = Loadable(lazy(() => import('views/payroll/settings/LeaveAttendance')));
 // const BusinessProfileSetup = Loadable(lazy(() => import('views/payroll/settings/BusinessProfileSetup')));
-const EmployeeMaster = Loadable(lazy(() => import('views/payroll/settings/EmployeeMasterData')));
+const EmployeeMaster = Loadable(lazy(() => import('views/payroll/settings/EmployeeMasterData/Index')));
 const AddEmployee = Loadable(lazy(() => import('views/payroll/settings/EmployeeMasterData/AddEmployee')));
 
 // invoicing module
