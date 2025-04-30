@@ -4,17 +4,18 @@ import { lazy } from 'react';
 import SimpleLayout from 'layout/SimpleLayout';
 import Loadable from 'ui-component/Loadable';
 
-// login routing
+// lazy loaded pages
 const ContactUs = Loadable(lazy(() => import('views/pages/contact-us')));
 const AboutUs = Loadable(lazy(() => import('views/pages/about-us')));
 const SaasPageFaqs = Loadable(lazy(() => import('views/pages/saas-pages/Faqs')));
 const SaasPagePrivacyPolicy = Loadable(lazy(() => import('views/pages/saas-pages/PrivacyPolicy')));
-import ServicePage from 'views/pages/services/ServicePage';
-import ServiceCategory from 'views/pages/services/ServiceCategory';
-import PayrollPage from '../views/pages/products/Payroll';
-import InvoicingPage from 'views/pages/products/invoicing/InvoicingPage';
-import KnowledgePage from 'views/pages/Knowledge';
-import BookConsultationPage from 'views/pages/BookConsultation';
+const ServicePage = Loadable(lazy(() => import('views/pages/services/ServicePage')));
+const ServiceCategory = Loadable(lazy(() => import('views/pages/services/ServiceCategory')));
+const PayrollPage = Loadable(lazy(() => import('views/pages/products/Payroll')));
+const InvoicingPage = Loadable(lazy(() => import('views/pages/products/invoicing/InvoicingPage')));
+const KnowledgePage = Loadable(lazy(() => import('views/pages/knowledge')));
+const BookConsultationPage = Loadable(lazy(() => import('views/pages/BookConsultation')));
+
 // ==============================|| SIMPLE ROUTING ||============================== //
 
 const SimpleRoutes = {
