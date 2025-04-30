@@ -17,7 +17,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
 
-export default function TabOne({ businessDetails = {}, postType }) {
+export default function TabOne({ businessDetails = {}, postType, handleNext }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -120,7 +120,9 @@ export default function TabOne({ businessDetails = {}, postType }) {
     validationSchema,
     onSubmit: async (values) => {
       const url =
-        postType === 'put' ? `/invoicing/invoicing-profiles/${businessDetails.id}/update/` : '/invoicing/invoicing-profiles/create/';
+        postType === 'put'
+          ? `/invoicing/invoicing-profiles/${businessDetails.invoicing_profile_id}/update/`
+          : '/invoicing/invoicing-profiles/create/';
       const formData = new FormData();
 
       // Append all form values to the FormData object
@@ -134,7 +136,7 @@ export default function TabOne({ businessDetails = {}, postType }) {
         }
       });
       if (postType === 'post') {
-        postData.business = businessDetails.id;
+        formData.append('business', businessDetails.id);
       }
 
       const { res } = await Factory(postType, url, formData);
@@ -149,7 +151,6 @@ export default function TabOne({ businessDetails = {}, postType }) {
           })
         );
       } else {
-        // handleNext();
         dispatch(
           openSnackbar({
             open: true,
@@ -159,6 +160,7 @@ export default function TabOne({ businessDetails = {}, postType }) {
             close: false
           })
         );
+        handleNext();
       }
     }
   });
@@ -167,33 +169,32 @@ export default function TabOne({ businessDetails = {}, postType }) {
     if (businessDetails && businessDetails.id) {
       setValues((prev) => ({
         ...prev,
-        nameOfBusiness: businessDetails.business.nameOfBusiness || '',
-        registrationNumber: businessDetails.business.registrationNumber || '',
-        entityType: businessDetails.business.entityType || '',
-        // gst_registered: businessDetails?.gst_details?.length !== 0 ? 'Yes' : 'No',
+        nameOfBusiness: businessDetails.nameOfBusiness || '',
+        registrationNumber: businessDetails.registrationNumber || '',
+        entityType: businessDetails.entityType || '',
         gst_registered: Array.isArray(businessDetails?.gst_details) && businessDetails.gst_details.length > 0 ? 'Yes' : 'No',
-
         gstin:
           businessDetails?.gst_details?.length !== 0 && businessDetails.gstin === 'NA'
             ? ''
             : businessDetails?.gst_details?.length === 0
               ? 'NA'
               : businessDetails.gstin,
-        state: businessDetails.business?.headOffice?.state || businessDetails?.state || '',
-        email: businessDetails.business.email || '',
-        pincode: businessDetails.business?.headOffice?.pincode || businessDetails?.pincode || '',
-        mobile_number: businessDetails.business.mobile_number || '',
-        address_line1: businessDetails.business?.headOffice?.address_line1 || businessDetails?.address_line1 || '',
-        address_line2: businessDetails.business?.headOffice?.address_line2 || businessDetails?.address_line2 || '',
-        pan: businessDetails?.business?.pan || '',
+        state: businessDetails?.headOffice?.state || businessDetails?.state || '',
+        email: businessDetails.email || '',
+        pincode: businessDetails?.headOffice?.pincode || businessDetails?.pincode || '',
+        mobile_number: businessDetails.mobile_number || '',
+        address_line1: businessDetails?.headOffice?.address_line1 || businessDetails?.address_line1 || '',
+        address_line2: businessDetails?.headOffice?.address_line2 || businessDetails?.address_line2 || '',
+        pan: businessDetails.pan || '',
         bank_name: businessDetails?.bank_name || '',
-        account_number: businessDetails.account_number || '',
-        ifsc_code: businessDetails.ifsc_code || '',
-        swift_code: businessDetails.swift_code || ''
+        account_number: businessDetails?.account_number || '',
+        ifsc_code: businessDetails?.ifsc_code || '',
+        swift_code: businessDetails?.swift_code || ''
       }));
     }
   }, [businessDetails]);
-  if (!businessDetails || !businessDetails.business) return <Typography>Loading business details...</Typography>;
+
+  if (!businessDetails || !businessDetails.id) return <Typography>Loading business details...</Typography>;
 
   return (
     <>
@@ -239,7 +240,7 @@ export default function TabOne({ businessDetails = {}, postType }) {
                 </Stack>
               ) : item.name === 'gstin' ? (
                 <>
-                  <Typography sx={{ mb: 1 }}>
+                  <Typography component="label" sx={{ mb: 1 }}>
                     {item.label}
                     <span style={{ color: 'red' }}>*</span>
                   </Typography>
@@ -301,9 +302,11 @@ export default function TabOne({ businessDetails = {}, postType }) {
                 </>
               ) : (
                 <>
-                  <Typography sx={{ mb: 1 }}>
-                    {item.label} {item.name !== 'address_line2' && <span style={{ color: 'red' }}>*</span>}
+                  <Typography component="label" sx={{ mb: 1 }}>
+                    {item.label}
+                    {item.name !== 'address_line2' && <span style={{ color: 'red' }}>*</span>}
                   </Typography>
+
                   <CustomInput
                     name={item.name}
                     value={values[item.name]}

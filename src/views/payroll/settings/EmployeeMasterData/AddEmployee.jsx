@@ -1,4 +1,3 @@
-'use client';
 import React, { useState, useEffect } from 'react';
 import { Box, Button, Typography, Stepper, Step, StepLabel, Stack } from '@mui/material';
 import { useNavigate, useSearchParams } from 'react-router-dom';

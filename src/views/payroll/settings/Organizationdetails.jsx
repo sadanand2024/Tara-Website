@@ -1,4 +1,3 @@
-'use client';
 import React, { useEffect, useState } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
@@ -48,7 +47,7 @@ function Organizationdetails() {
     pan: '',
     entityType: '',
     registration_number: '',
-    dob_or_incorp_date: dayjs().format('YYYY-MM-DD'),
+    dob_or_incorp_date: '',
     primary_email: '',
     city: '',
     sender_email: '',
@@ -211,18 +210,13 @@ function Organizationdetails() {
               {field.label} {<span style={{ color: 'red' }}>*</span>}
             </Typography>
             <CustomDatePicker
-              views={['year', 'month', 'day']}
-              value={dayjs(values[field.name]) || null}
-              onChange={(newDate) => {
-                setFieldValue(field.name, newDate);
+              name="dob_or_incorp_date"
+              value={formik.values.dob_or_incorp_date}
+              onChange={(date) => {
+                formik.setFieldValue('dob_or_incorp_date', date?.format('YYYY-MM-DD') || '');
               }}
-              sx={{
-                width: '100%',
-                '& .MuiInputBase-root': {
-                  fontSize: '0.75rem',
-                  height: '40px'
-                }
-              }}
+              error={formik.touched.dob_or_incorp_date && Boolean(formik.errors.dob_or_incorp_date)}
+              helperText={formik.touched.dob_or_incorp_date && formik.errors.dob_or_incorp_date}
             />
           </Grid2>
         );
@@ -281,9 +275,9 @@ function Organizationdetails() {
           pan: data.business_details.pan || '',
           entityType: data.business_details.entityType || '',
           registration_number: data.business_details.registrationNumber || '',
-          dob_or_incorp_date: data.business_details.dob_or_incorp_date
+          dob_or_incorp_date: dayjs(data.business_details.dob_or_incorp_date).isValid()
             ? dayjs(data.business_details.dob_or_incorp_date).format('YYYY-MM-DD')
-            : dayjs().format('YYYY-MM-DD'),
+            : '',
           primary_email: data.business_details.email || '',
           city: data.business_details.headOffice?.city || '',
           sender_email: data.sender_email,
@@ -344,7 +338,7 @@ function Organizationdetails() {
         pan: data.pan || '',
         entityType: data.entityType || '',
         registration_number: data.registrationNumber || '',
-        dob_or_incorp_date: data.dob_or_incorp_date ? dayjs(data.dob_or_incorp_date).format('YYYY-MM-DD') : dayjs().format('YYYY-MM-DD'),
+        dob_or_incorp_date: dayjs(data.dob_or_incorp_date).isValid() ? dayjs(data.dob_or_incorp_date).format('YYYY-MM-DD') : '',
         primary_email: data.email || '',
         city: data.headOffice?.city || '',
         sender_email: '',

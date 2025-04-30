@@ -1,4 +1,3 @@
-'use client';
 import CustomAutocomplete from 'utils/CustomAutocomplete';
 import React, { useEffect, useState } from 'react';
 import { useFormik } from 'formik';

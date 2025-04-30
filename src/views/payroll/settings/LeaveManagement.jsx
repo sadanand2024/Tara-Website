@@ -1,4 +1,3 @@
-'use client';
 import React, { useState, useEffect } from 'react';
 import {
   Box,
@@ -25,7 +24,7 @@ import LeaveManagementDialog from './LeaveManagementDialog';
 import Factory from 'utils/Factory';
 
 function LeaveManagement() {
-  const [leaveType, setLeaveType] = useState('2024-25');
+  const [leaveType, setLeaveType] = useState('Paid');
   const [loading, setLoading] = useState(false);
   const [payrollId, setPayrollId] = useState(null);
   const [leaveManagementData, setLeaveManagementData] = useState([]);
@@ -81,7 +80,12 @@ function LeaveManagement() {
             <Typography variant="subtitle1" sx={{ mb: 0.5 }}>
               Leave Type
             </Typography>
-            <CustomAutocomplete value={leaveType} options={['2024-25']} onChange={(e, val) => setLeaveType(val)} sx={{ minWidth: 220 }} />
+            <CustomAutocomplete
+              value={leaveType}
+              options={['Paid', 'UnPaid']}
+              onChange={(e, val) => setLeaveType(val)}
+              sx={{ minWidth: 220 }}
+            />
           </Box>
 
           {/* Right Side - Add Leave Button */}
@@ -97,7 +101,15 @@ function LeaveManagement() {
             <CircularProgress />
           </Stack>
         ) : (
-          <TableContainer component={Paper}>
+          <TableContainer
+            component={Paper}
+            sx={{
+              width: '100%',
+              borderRadius: 2,
+              boxShadow: 1,
+              overflowX: 'auto'
+            }}
+          >
             <Table>
               <TableHead>
                 <TableRow sx={{ bgcolor: 'grey.100' }}>

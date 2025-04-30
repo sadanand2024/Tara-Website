@@ -1,5 +1,3 @@
-'use client';
-
 // @mui
 import Typography from '@mui/material/Typography';
 

@@ -185,7 +185,6 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
     initialValues: getInitialValues(),
     validationSchema: getValidationSchema(),
     onSubmit: async (values) => {
-      console.log(from);
       if (from === 'Exits') {
         setLoading(true);
         let url = selectedRecord?.id ? `/payroll/employee-exit/${selectedRecord?.id}` : `/payroll/employee-exit`;
@@ -456,7 +455,6 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
       }));
     }
   }, [selectedRecord]);
-  console.log(errors);
   return (
     <Modal
       open={openDialog}

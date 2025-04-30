@@ -1,4 +1,3 @@
-'use client';
 import React from 'react';
 import { Box, Paper, Typography, Stack, Grid, Divider, Button } from '@mui/material';
 import { Fade } from 'react-awesome-reveal';

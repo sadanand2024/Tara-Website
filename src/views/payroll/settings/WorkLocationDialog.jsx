@@ -1,4 +1,3 @@
-'use client';
 import React, { useState, useEffect } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
@@ -135,6 +134,7 @@ export default function WorkLocationDialog({ open, handleClose, fetchWorkLocatio
     <Modal
       open={open}
       showClose={true}
+      title={type === 'edit' ? 'Edit Work Location' : 'Add Work Location'}
       handleClose={() => {
         setType('');
         resetForm(); // Optional

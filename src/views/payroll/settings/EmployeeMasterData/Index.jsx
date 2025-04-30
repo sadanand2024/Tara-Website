@@ -1,4 +1,3 @@
-'use client';
 import React, { useEffect, useState } from 'react';
 import {
   Box,
@@ -74,7 +73,6 @@ function EmployeeList() {
     setLoading(true);
     const url = `/payroll/employees/${item.id}`;
     const { res } = await Factory('delete', url, {});
-    console.log(res);
     setLoading(false);
     if (res?.status_cd === 0) {
       fetchEmployees();
@@ -107,7 +105,6 @@ function EmployeeList() {
   const handleEdit = (item) => {
     navigate(`/payroll/settings/add-employee?employee_id=${encodeURIComponent(item.id)}&payrollid=${encodeURIComponent(payrollId)}`);
   };
-
   return (
     <>
       {loading ? (
@@ -145,7 +142,7 @@ function EmployeeList() {
                   ) : (
                     paginatedEmployees.map((employee) => (
                       <TableRow key={employee.id} hover sx={{ '&:nth-of-type(odd)': { backgroundColor: 'grey.50' } }}>
-                        <TableCell align="center">{employee.id}</TableCell>
+                        <TableCell align="center">{employee.associate_id}</TableCell>
                         <TableCell align="center">{`${employee.first_name || ''} ${employee.last_name || ''}`}</TableCell>
                         <TableCell align="center">{employee.department_name || '-'}</TableCell>
                         <TableCell align="center">{employee.designation_name || '-'}</TableCell>

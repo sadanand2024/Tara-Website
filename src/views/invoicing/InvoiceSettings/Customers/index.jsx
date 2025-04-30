@@ -1,8 +1,6 @@
-// 📁 File: TabTwo.jsx
-
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
-import { Button, Stack, Typography, Box, Grid2 } from '@mui/material';
+import { Button, Stack, Box, Grid2 } from '@mui/material';
 import { IconPlus } from '@tabler/icons-react';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
@@ -12,6 +10,12 @@ import CustomerList from './CustomerList';
 export default function TabTwo({ getCustomersData, customers, businessDetails, handleNext, handleBack }) {
   const [open, setOpen] = useState(false);
   const [type, setType] = useState('add');
+  useEffect(() => {
+    if (businessDetails?.invoicing_profile_id) {
+      getCustomersData(businessDetails.invoicing_profile_id);
+    }
+  }, [businessDetails?.invoicing_profile_id]);
+
   const navigate = useNavigate();
 
   const handleOpen = () => setOpen(true);
@@ -57,14 +61,14 @@ export default function TabTwo({ getCustomersData, customers, businessDetails, h
         >
           Back to Dashboard
         </Button>
-        {/* <Stack direction="row" spacing={2}>
+        <Stack direction="row" spacing={2}>
           <Button variant="outlined" onClick={handleBack}>
             Back
           </Button>
           <Button variant="contained" onClick={handleNext}>
             Next
           </Button>
-        </Stack> */}
+        </Stack>
       </Box>
     </>
   );

@@ -1,4 +1,3 @@
-'use client';
 import React from 'react';
 import axios from 'axios';
 // @mui
@@ -14,6 +13,8 @@ import ActionCell from '../../../ui-component/extended/ActionCell';
 import Factory from 'utils/Factory';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'store';
+import { openSnackbar } from 'store/slices/snackbar';
 
 // @project
 import MainCard from '../../../ui-component/cards/MainCard';
@@ -40,6 +41,8 @@ const titles = {
 export default function OverviewCard({ invoicing_profile_data, businessId, open, onClose }) {
   const theme = useTheme();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const [loading, setLoading] = useState(false);
   const chipDefaultProps = { color: 'success', variant: 'text', size: 'small' };
   const [title, setTitle] = useState('Over All Financial Year Invoices');
   const [financialYear, setFinancialYear] = useState('2025-26');
@@ -56,102 +59,256 @@ export default function OverviewCard({ invoicing_profile_data, businessId, open,
   const handlePageChange = (event, newPage) => {
     setCurrentPage(newPage);
   };
+
   const getStatsData = async (type) => {
-    if (businessId) {
+    if (!invoicing_profile_data?.invoicing_profile_id) {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Business data not found',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
+      return;
+    }
+
+    setLoading(true);
+    try {
       setTitle(titles[type]);
-      let url = `/invoicing/detail-invoice?invoicing_profile_id=${invoicing_profile_data.invoicing_profile_id}&&filter_type=${type}&&financial_year=${financialYear}`;
+      const url = `/invoicing/detail-invoice?invoicing_profile_id=${invoicing_profile_data.invoicing_profile_id}&&filter_type=${type}&&financial_year=${financialYear}`;
       const { res } = await Factory('get', url, {});
-      if (res.status_cd === 1) {
-        if (res.status === 404) {
-          // showSnackbar('Data Not found', 'error');
-        }
-      } else {
+
+      if (res.status_cd === 0) {
         setInvoicesList(res.data);
+      } else {
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'Data not found',
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
       }
-    } else {
-      // showSnackbar('Business data not found', 'error');
+    } catch (error) {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Error fetching data',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
-  const getDashboardData = async (id) => {
-    let url = `/invoicing/invoice-stats?invoicing_profile_id=${invoicing_profile_data.invoicing_profile_id}&financial_year=${financialYear}`;
-    const { res } = await Factory('get', url, {});
-    if (res.status_cd === 1) {
-      if (res.status === 404) {
-        // showSnackbar('Data Not found', 'error');
-      }
-    } else {
-      setDashboardData(res.data);
-    }
-  };
+  const getDashboardData = async () => {
+    if (!invoicing_profile_data?.invoicing_profile_id) return;
 
-  const getInvoices = async (id) => {
-    let url = `/invoicing/invoice-retrieve?invoicing_profile_id=${invoicing_profile_data.invoicing_profile_id}&financial_year=${financialYear}`;
-    const { res } = await Factory('get', url, {});
-    if (res.status_cd === 1) {
-      if (res.status === 404) {
-        // showSnackbar('Data Not found', 'error');
-      }
-    } else {
-      setInvoicesList(res.data.invoices);
-    }
-  };
-  const getInvoicesList = async (id) => {
-    if (businessId) {
-      let url = `/invoicing/invoice-retrieve?invoicing_profile_id=${invoicing_profile_data.invoicing_profile_id}`;
+    setLoading(true);
+    try {
+      const url = `/invoicing/invoice-stats?invoicing_profile_id=${invoicing_profile_data.invoicing_profile_id}&financial_year=${financialYear}`;
       const { res } = await Factory('get', url, {});
+
+      if (res.status_cd === 0) {
+        setDashboardData(res.data);
+      } else {
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'Error fetching dashboard data',
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
+      }
+    } catch (error) {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Error fetching dashboard data',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getInvoices = async () => {
+    if (!invoicing_profile_data?.invoicing_profile_id) return;
+
+    setLoading(true);
+    try {
+      const url = `/invoicing/invoice-retrieve?invoicing_profile_id=${invoicing_profile_data.invoicing_profile_id}&financial_year=${financialYear}`;
+      const { res } = await Factory('get', url, {});
+
       if (res.status_cd === 0) {
         setInvoicesList(res.data.invoices);
+      } else {
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'Error fetching invoices',
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
       }
+    } catch (error) {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Error fetching invoices',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
+    } finally {
+      setLoading(false);
     }
   };
-  useEffect(() => {
-    getInvoicesList(businessId);
-  }, []);
-  // Handle delete action
+
   const handleDelete = async (id) => {
-    let url = `/invoicing/invoice-delete/${id}/`;
-    const { res } = await Factory('delete', url, {});
-    if (res.status_cd === 1) {
-      // showSnackbar(JSON.stringify(res.data), 'error');
-    } else {
-      // showSnackbar('Invoice Deleted Successfully', 'success');
-      getInvoices(businessId);
+    setLoading(true);
+    try {
+      const url = `/invoicing/invoice-delete/${id}/`;
+      const { res } = await Factory('delete', url, {});
+
+      if (res.status_cd === 0) {
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'Invoice Deleted Successfully',
+            variant: 'alert',
+            alert: { color: 'success' },
+            close: false
+          })
+        );
+        getInvoices();
+      } else {
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: JSON.stringify(res.data),
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
+      }
+    } catch (error) {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Error deleting invoice',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
+    } finally {
+      setLoading(false);
     }
   };
+
   const handleWriteOff = async (id) => {
-    let url = `/invoicing/invoice-wave-off/${id}`;
-    const { res } = await Factory('put', url, {});
-    if (res.status_cd === 1) {
-      // showSnackbar(JSON.stringify(res.data), 'error');
-    } else {
-      // showSnackbar('Successfully wavedoff', 'success');
-      getInvoices(businessId);
+    setLoading(true);
+    try {
+      const url = `/invoicing/invoice-wave-off/${id}`;
+      const { res } = await Factory('put', url, {});
+
+      if (res.status_cd === 0) {
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'Successfully waved off',
+            variant: 'alert',
+            alert: { color: 'success' },
+            close: false
+          })
+        );
+        getInvoices();
+      } else {
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: JSON.stringify(res.data),
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
+      }
+    } catch (error) {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Error waving off invoice',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleApprove = async (id) => {
-    const postData = {
-      invoice_status: 'Approved'
-    };
-    let url = `/invoicing/invoice-update/${id}/`;
-    const { res } = await Factory('put', url, postData);
-    if (res.status_cd === 0) {
-      // showSnackbar('Approved', 'success');
-      getInvoices(businessId);
+    setLoading(true);
+    try {
+      const url = `/invoicing/invoice-update/${id}/`;
+      const { res } = await Factory('put', url, { invoice_status: 'Approved' });
+
+      if (res.status_cd === 0) {
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'Invoice Approved Successfully',
+            variant: 'alert',
+            alert: { color: 'success' },
+            close: false
+          })
+        );
+        getInvoices();
+      } else {
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: JSON.stringify(res.data),
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
+      }
+    } catch (error) {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Error approving invoice',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
-  useEffect(() => {
-    if (businessId && financialYear) {
-      getInvoices(businessId);
-      getDashboardData(businessId);
-    }
-  }, [financialYear, businessId]);
-
-  const handleChange = (val) => {
-    router.replace(`/dashboard/user/${val}`);
-  };
   const downloadInvoice = async (id) => {
     try {
       const tokens = JSON.parse(localStorage.getItem('user'));
@@ -161,6 +318,7 @@ export default function OverviewCard({ invoicing_profile_data, businessId, open,
           Authorization: `Bearer ${tokens.access_token}`
         }
       });
+
       if (response.data.byteLength > 0) {
         const blob = new Blob([response.data], { type: 'application/pdf' });
         const url = URL.createObjectURL(blob);
@@ -169,13 +327,45 @@ export default function OverviewCard({ invoicing_profile_data, businessId, open,
           URL.revokeObjectURL(url);
         }, 10000);
       } else {
-        // showSnackbar('Invalid response from server', 'error');
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'Invalid response from server',
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
       }
     } catch (error) {
-      // console.error('Error fetching PDF:', error);
-      // showSnackbar('Invalid response from server', 'error');
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Error downloading invoice',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     }
   };
+
+  // Initial data fetch
+  useEffect(() => {
+    if (invoicing_profile_data?.invoicing_profile_id) {
+      getInvoices();
+      getDashboardData();
+    }
+  }, [invoicing_profile_data?.invoicing_profile_id]);
+
+  // Fetch data when financial year changes
+  useEffect(() => {
+    if (invoicing_profile_data?.invoicing_profile_id && financialYear) {
+      getInvoices();
+      getDashboardData();
+    }
+  }, [financialYear, invoicing_profile_data?.invoicing_profile_id]);
+
   return (
     <Box>
       <YearlyStats
@@ -205,7 +395,7 @@ export default function OverviewCard({ invoicing_profile_data, businessId, open,
           <Grid2 size={{ xs: 6 }}>
             <Typography variant="h4">{title}</Typography>
             {!['Over due', 'Due today', 'Due with in 30 days', 'Total Receivable', 'Bad Debt'].includes(title) && (
-              <Typography variant="caption" color="grey.700">
+              <Typography variant="subtitle1" color="grey.700">
                 FY: {financialYear}
               </Typography>
             )}
@@ -217,7 +407,7 @@ export default function OverviewCard({ invoicing_profile_data, businessId, open,
               startIcon={<IconReload size={16} />}
               sx={{ minWidth: 78, mr: 1 }}
               onClick={() => {
-                getInvoices(businessId);
+                getInvoices();
                 setTitle('Over All Financial Year Invoices');
               }}
             >
@@ -239,16 +429,18 @@ export default function OverviewCard({ invoicing_profile_data, businessId, open,
       </Box>
       <Grid2>
         <MainCard content={false} sx={{ mt: 3 }}>
-          <TableContainer>
-            <Table
-              sx={{
-                minWidth: 750,
-                borderCollapse: 'separate',
-                borderSpacing: '0 8px'
-              }}
-            >
+          <TableContainer
+            component={Paper}
+            sx={{
+              width: '100%',
+              borderRadius: 2,
+              boxShadow: 1,
+              overflowX: 'auto'
+            }}
+          >
+            <Table>
               <TableHead>
-                <TableRow sx={{ bgcolor: theme.palette.grey[100] }}>
+                <TableRow sx={{ bgcolor: 'grey.100' }}>
                   <TableCell>Date</TableCell>
                   <TableCell>Invoice Number</TableCell>
                   <TableCell>Customer</TableCell>

@@ -1,4 +1,3 @@
-'use client';
 import React from 'react';
 import { Box, Stepper, Step, StepLabel, Typography, Paper, StepConnector, stepConnectorClasses } from '@mui/material';
 import { styled } from '@mui/material/styles';

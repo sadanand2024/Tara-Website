@@ -186,11 +186,12 @@ function Worklocation() {
                         <TableCell>{location.location_name || 'N/A'}</TableCell>
                         <TableCell>
                           <Typography noWrap sx={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                            {location.address_line1 && location.address_line2
-                              ? `${location.address_line1}, ${location.address_line2}`
+                            {location.address_line1
+                              ? `${location.address_line1}${location.address_line2 ? `, ${location.address_line2}` : ''}`
                               : 'N/A'}
                           </Typography>
                         </TableCell>
+
                         <TableCell align="center">{location.address_state || 'N/A'}</TableCell>
                         <TableCell align="center">{location.employees || 0}</TableCell>
                         <TableCell align="center">

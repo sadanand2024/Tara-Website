@@ -44,7 +44,7 @@ import { Stack } from '@mui/material';
 export default function Header() {
   const dispatch = useDispatch();
   const reduxDispatch = useReduxDispatch(); // ✅ Redux dispatcher
-  const user = useSelector((state) => state).accountReducer.user;
+  const user = useSelector((state) => state.accountReducer.user);
   const theme = useTheme();
   const downMD = useMediaQuery(theme.breakpoints.down('md'));
 
@@ -212,7 +212,7 @@ export default function Header() {
             return (
               <Box {...otherProps} component="li" key={option.id} sx={{ p: 4 }}>
                 <BusinessIcon fontSize="small" sx={{ mr: 1 }} />
-                <Stack direction="row" alignItems="center" sx={{ justifyContent: 'space-between', width: '100%', py:0.6}}>
+                <Stack direction="row" alignItems="center" sx={{ justifyContent: 'space-between', width: '100%', py: 0.6 }}>
                   {option.name || option.context_name || 'Unnamed Option'}
                 </Stack>
               </Box>

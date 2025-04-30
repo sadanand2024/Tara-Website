@@ -1,4 +1,3 @@
-'use client';
 import React, { useState, useEffect } from 'react';
 import { Button, Card, Stack, Box, Typography, Grid2 } from '@mui/material';
 import { useSearchParams } from 'react-router';

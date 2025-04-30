@@ -20,7 +20,12 @@ import { IconX } from '@tabler/icons-react';
 import { CheckCircle, Add, Remove } from '@mui/icons-material';
 import CustomInput from 'utils/CustomInput';
 
-const BulkItems = ({ bulkItemsDialogue, setBulkItemsDialogue, itemsList, bulkItemSave }) => {
+const BulkItems = ({
+  bulkItemsDialogue,
+  setBulkItemsDialogue,
+  itemsList = [], // ✅ default fallback
+  bulkItemSave
+}) => {
   const [selectedItems, setSelectedItems] = useState([]);
   const [items, setItems] = useState([]);
   const [filteredItems, setFilteredItems] = useState([]);
@@ -109,9 +114,15 @@ const BulkItems = ({ bulkItemsDialogue, setBulkItemsDialogue, itemsList, bulkIte
   // Filter items based on search term
   useEffect(() => {
     const lowercasedSearchTerm = searchTerm.toLowerCase();
-    const filtered = itemsList.filter((item) => item.name.toLowerCase().includes(lowercasedSearchTerm));
-    setFilteredItems(filtered);
+
+    if (Array.isArray(itemsList)) {
+      const filtered = itemsList.filter((item) => item.name.toLowerCase().includes(lowercasedSearchTerm));
+      setFilteredItems(filtered);
+    } else {
+      setFilteredItems([]);
+    }
   }, [searchTerm, itemsList]);
+
   // Add selected items and close dialog
   const handleAddItems = () => {
     bulkItemSave(items);

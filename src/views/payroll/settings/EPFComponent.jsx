@@ -339,6 +339,7 @@ function EpfComponent({ handleNext }) {
 
           <Modal
             open={open}
+            title={'Add Or Edit EPF Details'}
             header={{ title: 'Employees Provident Fund', subheader: '' }}
             showClose={true}
             handleClose={() => {

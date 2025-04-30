@@ -38,7 +38,27 @@ export default function PayrollMonthwise({ payrollId, financialYear }) {
 
     get_payrollMonthData(monthIndex + 1); // API expects 1-based month number
   };
-
+  const detail_employee_payroll_salary = async (monthNumber) => {
+    if (!monthNumber) return;
+    setLoading(true);
+    const url = `/payroll/detail_employee_payroll_salary?payroll_id=${payrollId}&month=${monthNumber}&financial_year=${financialYear}`;
+    const { res, error } = await Factory('get', url, {});
+    setLoading(false);
+    console.log(res);
+    // if (res?.status_cd === 0) {
+    //   setMonthWiseData(res.data);
+    // } else {
+    //   dispatch(
+    //     openSnackbar({
+    //       open: true,
+    //       message: JSON.stringify(res?.data?.error),
+    //       variant: 'alert',
+    //       alert: { color: 'error' },
+    //       close: false
+    //     })
+    //   );
+    // }
+  };
   const get_payrollMonthData = async (monthNumber) => {
     if (!monthNumber) return;
     setLoading(true);
@@ -63,6 +83,7 @@ export default function PayrollMonthwise({ payrollId, financialYear }) {
   useEffect(() => {
     if (payrollId && financialYear) {
       get_payrollMonthData(selectedMonth); // JS Date month is 0-indexed
+      // detail_employee_payroll_salary(selectedMonth); // JS Date month is 0-indexed
     }
   }, [payrollId, financialYear]);
   return (
