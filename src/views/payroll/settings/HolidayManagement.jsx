@@ -25,6 +25,8 @@ import HolidayManagementDialog from './HolidayManagementDialog';
 import FilterDialog from './FilterDialog';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
+import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
+
 function HolidayManagement() {
   const [holidayManagementData, setHolidayManagementData] = useState([]);
   const [workLocations, setWorkLocations] = useState([]);
@@ -41,7 +43,6 @@ function HolidayManagement() {
   const [loading, setLoading] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const rowsPerPage = 5;
 
   const [searchParams] = useSearchParams();
   const paginatedData = holidayManagementData.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
@@ -243,9 +244,15 @@ function HolidayManagement() {
           </TableContainer>
         )}
 
-        {holidayManagementData.length > rowsPerPage && (
+        {holidayManagementData.length > 0 && (
           <Stack direction="row" justifyContent="center" sx={{ py: 2 }}>
-            <Pagination count={Math.ceil(holidayManagementData.length / rowsPerPage)} page={currentPage} onChange={handlePageChange} />
+            <Pagination
+              count={Math.ceil(holidayManagementData.length / rowsPerPage)}
+              page={currentPage}
+              onChange={handlePageChange}
+              shape="rounded"
+              color="primary"
+            />
           </Stack>
         )}
       </Stack>

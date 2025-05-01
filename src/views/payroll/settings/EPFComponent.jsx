@@ -50,7 +50,7 @@ function EpfComponent({ handleNext }) {
   const validationSchema = Yup.object({
     epf_number: Yup.string()
       .required('EPF Number is required')
-      .matches(/^[A-Za-z]{5}\d{17}$/, 'Invalid EPF Number format, EX: ABCDE12345678901234567'),
+      .matches(/^[A-Z]{4}\d{10}$/, 'Invalid EPF Number format, EX: APHYD2405151000'),
     employee_contribution_rate: Yup.string().required('EPF Contribution Rate is required')
   });
 
