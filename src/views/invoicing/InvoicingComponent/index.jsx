@@ -7,7 +7,7 @@ const InvoicingComponent = () => {
   const { businessDetails, customers, itemsList, invoiceNumberFormat, selectedInvoice, getInvoiceFormat } = useInvoicingData();
 
   return (
-    <MainCard title="Invoicing Settings">
+    <MainCard title="Invoice Generation">
       <AddInvoice
         businessDetailsData={businessDetails}
         customers={customers}

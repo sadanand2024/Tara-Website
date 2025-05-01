@@ -51,7 +51,10 @@ function BasicDetails({ employeeData, setCreatedEmployeeId }) {
     associate_id: Yup.string().required('Employee ID is required'),
     doj: Yup.date().required('Date of Joining is required'),
     work_email: Yup.string().email('Invalid email format').required('Work Email is required'),
-    mobile_number: Yup.string().required('Mobile Number is required'),
+    mobile_number: Yup.string()
+      .required('Mobile Number is required')
+      .matches(/^[0-9]{10}$/, 'Mobile Number must be exactly 10 digits'),
+
     gender: Yup.string().required('Gender is required'),
     work_location: Yup.string().required('Work Location is required'),
     designation: Yup.string().required('Designation is required'),

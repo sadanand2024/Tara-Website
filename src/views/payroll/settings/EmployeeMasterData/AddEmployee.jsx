@@ -78,7 +78,7 @@ function StepperComponent() {
       {loading ? (
         <Loader />
       ) : (
-        <MainCard title="Employee Master Data" tagline="Manage employee profile details before processing payroll.">
+        <MainCard title="Employee Master Data">
           <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 3 }}>
             {steps.map((label, idx) => (
               <Step key={idx}>

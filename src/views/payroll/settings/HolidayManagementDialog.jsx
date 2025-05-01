@@ -107,21 +107,12 @@ export default function HolidayManagementDialog({ open, handleClose, selectedRec
             </Typography>
             <CustomDatePicker
               name={field.name}
-              value={dayjs(values[field.name]) || null}
+              value={values[field.name] ? dayjs(values[field.name]) : null}
               onChange={(newDate) => {
-                if (newDate) {
-                  // Save the date in 'YYYY-MM-DD' format to Formik
-                  setFieldValue(field.name, newDate.format('YYYY-MM-DD'));
-                } else {
-                  setFieldValue(field.name, ''); // Clear the date if none is selected
-                }
+                setFieldValue(field.name, newDate ? newDate.format('YYYY-MM-DD') : '');
               }}
-              sx={{ width: '100%' }}
               error={touched[field.name] && Boolean(errors[field.name])}
               helperText={touched[field.name] && errors[field.name]}
-              size="small"
-              inputFormat="YYYY-MM-DD" // Display in YYYY-MM-DD format
-              onBlur={() => handleBlur({ target: { name: field.name } })}
             />
           </Grid2>
         );

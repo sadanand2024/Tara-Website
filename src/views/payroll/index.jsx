@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { months } from 'utils/MonthsList';
 
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
@@ -7,18 +8,17 @@ import Factory from 'utils/Factory';
 import { useState, useEffect } from 'react';
 import CustomAutocomplete from 'utils/CustomAutocomplete';
 // import { useSelector } from 'store';
+import PayrollSummaryGrid from './PayrollSummaryGrid';
+import { ServicesData } from './data';
 
 // @project
-// import OverviewCard from './OverviewCard';
 import PayrollStatusSummary from './PayrollStatusSummary';
 import PayrollComplianceSummary from './PayrollComplianceSummary';
 
 import PayrollMonthwise from './PayrollMonthwise';
-import { Button, Stack, Typography, Grid2, TextField } from '@mui/material';
+import { Button, Stack, Typography, Grid2, TextField, Chip } from '@mui/material';
 import { IconSparkles, IconSettings2 } from '@tabler/icons-react';
-// import HomeCard from '@/components/cards/HomeCard';
-// import Loader from '@/components/PageLoader';
-// import useCurrentUser from '@/hooks/useCurrentUser';
+
 import { generateFinancialYears } from 'utils/FinancialYearsList';
 import MainCard from '../../ui-component/cards/MainCard';
 /***************************  ANALYTICS - OVERVIEW  ***************************/
@@ -29,14 +29,109 @@ const PayrollDashboard = () => {
   const user = useSelector((state) => state.accountReducer.user);
   const businessId = user.active_context.business_id;
   const dispatch = useDispatch();
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
+  const [monthWiseData, setMonthWiseData] = useState(null);
 
-  // const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [businessDetails, setBusinessDetails] = useState({});
   const [financialYear, setFinancialYear] = useState(null);
 
   const financialYearOptions = generateFinancialYears();
 
+  const detail_employee_payroll_salary = async () => {
+    if (!monthNumber) return;
+    setLoading(true);
+    const url = `/payroll/detail_employee_payroll_salary?payroll_id=${payrollId}&month=${monthNumber}&financial_year=${financialYear}`;
+    const { res, error } = await Factory('get', url, {});
+    setLoading(false);
+    console.log(res);
+    // if (res?.status_cd === 0) {
+    //   setMonthWiseData(res.data);
+    // } else {
+    //   dispatch(
+    //     openSnackbar({
+    //       open: true,
+    //       message: JSON.stringify(res?.data?.error),
+    //       variant: 'alert',
+    //       alert: { color: 'error' },
+    //       close: false
+    //     })
+    //   );
+    // }
+  };
+  const get_payrollMonthData = async (monthNumber) => {
+    if (!monthNumber) return;
+    setLoading(true);
+    const url = `/payroll/payroll-summary-view?payroll_id=${businessDetails?.payroll_id}&month=${monthNumber}&financial_year=${financialYear}`;
+    const { res, error } = await Factory('get', url, {});
+    setLoading(false);
+    if (res?.status_cd === 0) {
+      setMonthWiseData(res.data);
+    } else {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res?.data?.error),
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
+    }
+  };
+  const handleMonthChange = (event, newValue) => {
+    if (!newValue || newValue === 'Please select') {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Please select a month',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
+      return;
+    }
+
+    const monthIndex = months.indexOf(newValue); // 0-based index
+    setSelectedMonth(monthIndex + 1); // Store 1-based month number
+
+    get_payrollMonthData(monthIndex + 1); // API expects 1-based month number
+  };
+  const calculate_employee_monthly_salary_status = async (payrollId) => {
+    setLoading(true);
+    const url = `/payroll/calculate-employee-monthly-salary?payroll_id=${payrollId}&month=${selectedMonth}&financial_year=${financialYear}`;
+    const { res } = await Factory('get', url, {});
+
+    if (res?.status_cd === 0) {
+      if (res.data?.message === 'Salary processing will be initiated between the 26th and 30th of the month.') {
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: res.data.message,
+            variant: 'alert',
+            alert: { color: 'info' },
+            close: false
+          })
+        );
+        setMonthWiseData(null); // Clear the data to hide the component
+      } else {
+        // setMonthWiseData(res.data);
+        detail_employee_payroll_salary(selectedMonth);
+      }
+    } else {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res?.data?.error) || 'An error occurred',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
+    }
+    setLoading(false);
+  };
   const getData = async (id) => {
     setLoading(true);
     const url = `/payroll/payroll-setup-status?business_id=${id}`;
@@ -50,7 +145,7 @@ const PayrollDashboard = () => {
         setLoading(false);
       } else {
         setBusinessDetails(res?.data);
-        // console.log('res.data', res.data);
+        calculate_employee_monthly_salary_status(res?.data?.payroll_id);
         setLoading(false);
       }
     } else {
@@ -67,35 +162,6 @@ const PayrollDashboard = () => {
       );
     }
   };
-
-  const get_business_details = async () => {
-    setLoading(true);
-    const userId = userData.user.id;
-    const url = `/user_management/businesses-by-client/?user_id=${userId}`;
-    const { res, error } = await Factory('get', url, {});
-    if (res?.status_cd === 0) {
-      getData(res.data.id);
-    } else {
-      dispatch(
-        openSnackbar({
-          open: true,
-          message: JSON.stringify(res?.data?.data?.error) || 'An error occurred',
-          variant: 'alert',
-          alert: { color: 'error' },
-          close: false
-        })
-      );
-    }
-    setLoading(false);
-  };
-  // useEffect(() => {
-  //   if (userData.business_exists === false) {
-  //     // router.push('/payrollsetup/payroll_business_profileSetup');
-  //     router.push(router.push('/payrollsetup/payroll_business_profileSetup'));
-  //   } else {
-  //     get_business_details();
-  //   }
-  // }, [userData.id]);
 
   useEffect(() => {
     // if (user?.user?.registration_completed === 'False') {
@@ -157,7 +223,74 @@ const PayrollDashboard = () => {
     >
       <Grid2 container spacing={{ xs: 2, md: 3 }}>
         <Grid2 size={{ xs: 12 }}>
-          <PayrollMonthwise payrollId={businessDetails?.payroll_id} financialYear={financialYear} />
+          <Stack sx={{ gap: 4 }}>
+            <MainCard>
+              <Stack sx={{ gap: 3 }}>
+                <Stack direction="row" sx={{ gap: 2 }}>
+                  <Stack
+                    direction={{ xs: 'column', sm: 'row' }}
+                    alignItems={{ xs: 'flex-start', sm: 'center' }}
+                    justifyContent="space-between"
+                    spacing={2}
+                  >
+                    <Typography
+                      variant="h4"
+                      sx={{
+                        fontWeight: 600,
+                        color: 'primary.main'
+                      }}
+                    >
+                      Payroll for the Month of
+                    </Typography>
+
+                    <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap">
+                      <CustomAutocomplete
+                        value={months[selectedMonth - 1]}
+                        onChange={handleMonthChange}
+                        options={['Please select', ...months]}
+                        placeholder="Select Month"
+                        size="small"
+                        sx={{
+                          minWidth: 180,
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: 2,
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                            backgroundColor: 'background.paper'
+                          }
+                        }}
+                      />
+
+                      <Chip variant="outlined" label="In Progress" color="warning" sx={{ fontWeight: 500 }} />
+
+                      <Button
+                        variant="contained"
+                        color="success"
+                        size="small"
+                        onClick={() => {
+                          if (businessDetails?.payroll_id) {
+                            navigate(
+                              `/payroll/employee-dashboard?payrollid=${businessDetails?.payroll_id}&month=${selectedMonth}&financialYear=${financialYear}&monthwisedata=${encodeURIComponent(JSON.stringify(monthWiseData))}`
+                            );
+                          }
+                        }}
+                      >
+                        Resume Payroll
+                      </Button>
+                    </Stack>
+                  </Stack>
+                </Stack>
+                {monthWiseData ? (
+                  <PayrollSummaryGrid data={monthWiseData} config={ServicesData} />
+                ) : (
+                  <Typography variant="h4" align="center" sx={{ mt: 4 }}>
+                    Detailed salary calculations are available only between the 26th and 30th of each month. Please select a previous month
+                    to view the details.
+                  </Typography>
+                )}
+              </Stack>
+            </MainCard>
+          </Stack>
+          {/* <PayrollMonthwise payrollId={businessDetails?.payroll_id} financialYear={financialYear} /> */}
         </Grid2>
 
         <Grid2 size={{ xs: 12 }}>
@@ -166,9 +299,6 @@ const PayrollDashboard = () => {
         <Grid2 size={{ xs: 12 }}>
           {/* <PayrollComplianceSummary payrollId={businessDetails?.payroll_id} financialYear={financialYear} /> */}
         </Grid2>
-        {/* <Grid2 size={{ xs: 12 }}>
-          <OverviewCard payrollId={businessDetails?.payroll_id} financialYear={financialYear} />
-        </Grid2> */}
       </Grid2>
     </MainCard>
   );
