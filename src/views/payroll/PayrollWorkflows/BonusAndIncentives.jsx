@@ -4,6 +4,8 @@ import {} from '@mui/material';
 import Factory from 'utils/Factory';
 import { useSearchParams } from 'react-router';
 import RenderDialog from './RenderDialog';
+import { useDispatch } from 'store';
+import { openSnackbar } from 'store/slices/snackbar';
 
 export default function BonusAndIncentives({ employeeMasterData, from, openDialog, fields, setOpenDialog }) {
   const headerData = ['Employee Name', 'Department', 'Designation', 'Type', 'Amount', 'Month', 'Financial Year'];
@@ -15,7 +17,7 @@ export default function BonusAndIncentives({ employeeMasterData, from, openDialo
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [month, setMonth] = useState(null);
   const [financialYear, setFinancialYear] = useState(null);
-
+  const dispatch = useDispatch();
   const [searchParams] = useSearchParams();
   useEffect(() => {
     let monthNumber = searchParams.get('month');
@@ -39,21 +41,36 @@ export default function BonusAndIncentives({ employeeMasterData, from, openDialo
   const getData = async () => {
     setLoading(true);
     const year = financialYear.split('-')[1];
-    console.log(year);
     const url = `/payroll/bonus-incentives/by-payroll-month?payroll_id=${payrollid}&month=${month}&year=${year}`;
     const { res, error } = await Factory('get', url, {});
     setLoading(false);
     if (res.status_cd === 0) {
       setData(res.data || []);
     } else {
-      // showSnackbar(JSON.stringify(res.data.data), 'error');
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res.data.message),
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     }
   };
   const handleEdit = async (item) => {
     let url = `/payroll/bonus-incentives/${item.id}`;
     const { res } = await Factory('get', url, {});
     if (res.status_cd === 1) {
-      // showSnackbar(JSON.stringify(res.data), 'error');
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res.data.data),
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     } else {
       setSelectedRecord(res.data);
       setOpenDialog(true);
@@ -63,9 +80,26 @@ export default function BonusAndIncentives({ employeeMasterData, from, openDialo
     let url = `/payroll/bonus-incentives/${item.id}`;
     const { res } = await Factory('delete', url, {});
     if (res.status_cd === 1) {
-      // showSnackbar(JSON.stringify(res.data), 'error');
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res.data.data),
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     } else {
-      // showSnackbar('Record Deleted Successfully', 'success');
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Record Deleted Successfully',
+          variant: 'alert',
+          alert: { color: 'success' },
+          close: false
+        })
+      );
+
       getData();
     }
   };

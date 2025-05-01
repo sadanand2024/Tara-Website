@@ -68,7 +68,7 @@ export default function Attendance({ employeeMasterData, from, openDialog, field
       dispatch(
         openSnackbar({
           open: true,
-          message: JSON.stringify(res.data.data),
+          message: JSON.stringify(res.data.message),
           variant: 'alert',
           alert: { color: 'error' },
           close: false

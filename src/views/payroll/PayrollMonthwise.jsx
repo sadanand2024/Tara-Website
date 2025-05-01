@@ -12,6 +12,7 @@ import Factory from 'utils/Factory';
 import { Box, Button, Paper, Divider, Chip, Typography } from '@mui/material';
 import CustomAutocomplete from 'utils/CustomAutocomplete';
 import MainCard from '../../ui-component/cards/MainCard';
+import PayrollSummaryGrid from './PayrollSummaryGrid';
 export default function PayrollMonthwise({ payrollId, financialYear }) {
   const navigate = useNavigate();
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
@@ -141,112 +142,7 @@ export default function PayrollMonthwise({ payrollId, financialYear }) {
               </Stack>
             </Stack>
           </Stack>
-          <Grid container spacing={{ xs: 2, md: 3 }}>
-            {ServicesData.map((card, idx) => (
-              <Grid key={idx} size={{ xs: 12, sm: 6, md: 4, lg: 2.4 }}>
-                <Paper
-                  elevation={0}
-                  sx={{
-                    height: '100%',
-                    borderRadius: 2,
-                    overflow: 'hidden',
-                    transition: 'all 0.3s ease',
-                    border: '1px solid',
-                    borderColor: 'divider',
-                    '&:hover': {
-                      transform: 'translateY(-4px)',
-                      boxShadow: (theme) => `0 8px 24px ${alpha(theme.palette.primary.main, 0.15)}`,
-                      borderColor: 'primary.main'
-                    }
-                  }}
-                >
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      height: '100%',
-                      p: 2,
-                      position: 'relative',
-                      overflow: 'hidden'
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                      }}
-                    >
-                      <Typography
-                        variant="h5"
-                        sx={{
-                          fontWeight: 600,
-                          color: 'primary.main'
-                        }}
-                      >
-                        {/* {monthWiseData ? (monthWiseData[card.key] ?? 0) : 0} */}
-                        {monthWiseData ? Number(monthWiseData[card.key] ?? 0).toLocaleString() : '0'}
-                      </Typography>
-                    </Box>
-                    <Divider sx={{ my: 1.5 }} />
-                    <Typography
-                      variant="subtitle1"
-                      fontWeight="600"
-                      textAlign="center"
-                      sx={{
-                        color: 'text.primary',
-                        fontSize: '0.95rem',
-                        mr: 4
-                      }}
-                    >
-                      {card.title}
-                    </Typography>
-                  </Box>
-                </Paper>
-              </Grid>
-            ))}
-            <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2.4 }}>
-              <Paper
-                elevation={0}
-                sx={{
-                  height: '100%',
-                  borderRadius: 2,
-                  overflow: 'hidden',
-                  transition: 'all 0.3s ease',
-                  border: '1px solid',
-                  borderColor: 'divider',
-                  '&:hover': {
-                    transform: 'translateY(-4px)',
-                    boxShadow: (theme) => `0 8px 24px ${alpha(theme.palette.primary.main, 0.15)}`,
-                    borderColor: 'primary.main'
-                  }
-                }}
-              >
-                <Box
-                  sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    height: '100%',
-                    p: 2,
-                    position: 'relative',
-                    overflow: 'hidden'
-                  }}
-                >
-                  <Typography variant="h5" textAlign="center" sx={{ fontWeight: 600, color: 'primary.main' }}>
-                    {/* {monthWiseData ? (monthWiseData.total_new_joinees ?? 0) : 0} / {monthWiseData ? (monthWiseData.total_exits ?? 0) : 0} */}
-                    {monthWiseData ? Number(monthWiseData.total_new_joinees ?? 0).toLocaleString() : '0'} /{' '}
-                    {monthWiseData ? Number(monthWiseData.total_exits ?? 0).toLocaleString() : '0'}
-                  </Typography>
-
-                  <Divider sx={{ my: 1.5 }} />
-
-                  <Typography variant="subtitle1" fontWeight="600" textAlign="center" sx={{ color: 'text.primary', fontSize: '0.95rem' }}>
-                    Joinees / Exits
-                  </Typography>
-                </Box>
-              </Paper>
-            </Grid>
-          </Grid>
+          <PayrollSummaryGrid data={monthWiseData} config={ServicesData} />
         </Stack>
       </MainCard>
     </Stack>

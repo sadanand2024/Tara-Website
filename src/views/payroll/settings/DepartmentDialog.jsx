@@ -42,7 +42,7 @@ export default function DepartmentDialog({ open, handleClose, fetchDepartments, 
       const method = type === 'edit' ? 'put' : 'post';
 
       const { res } = await Factory(method, url, postData);
-
+      console.log(res);
       if (res?.status_cd === 0) {
         dispatch(
           openSnackbar({

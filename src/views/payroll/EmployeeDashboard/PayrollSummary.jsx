@@ -90,26 +90,24 @@ const PayrollSummary = ({ payrollId, month, financialYear }) => {
     }
   };
   const fetchPayrollSummary = async () => {
-    try {
-      setLoading(true);
-      const url = `/payroll/calculate-employee-monthly-salary?payroll_id=${payrollId}&month=${month}&financial_year=${financialYear}`;
-      const { res } = await Factory('get', url, {});
-      if (res.status_cd === 0) {
-        setPayrollSummaryData(res.data || []);
-      } else {
-        dispatch(
-          openSnackbar({
-            open: true,
-            message: JSON.stringify(res.data.data),
-            variant: 'alert',
-            alert: { color: 'error' },
-            close: false
-          })
-        );
-      }
-    } finally {
-      setLoading(false);
+    setLoading(true);
+    const url = `/payroll/calculate-employee-monthly-salary?payroll_id=${payrollId}&month=${month}&financial_year=${financialYear}`;
+    const { res } = await Factory('get', url, {});
+    if (res.status_cd === 0) {
+      setPayrollSummaryData(res.data || []);
+    } else {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res.data.data),
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     }
+
+    setLoading(false);
   };
   useEffect(() => {
     if (payrollId && financialYear) fetchPayrollSummary();

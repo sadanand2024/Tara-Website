@@ -26,7 +26,6 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 function Organizationdetails() {
   const user = useSelector((state) => state.accountReducer.user);
   const businessId = user.active_context.business_id;
-  const [payrollid, setPayrollId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [logoDetails, setLogoDetails] = useState([]);
   const [filingAddressDialog, setFilingAddressDialog] = useState(false);
@@ -34,12 +33,7 @@ function Organizationdetails() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  useEffect(() => {
-    const id = searchParams.get('payrollid');
-    if (id) {
-      setPayrollId(id);
-    }
-  }, [searchParams]);
+
   const initialData = {
     business_name: '',
     logo: null,
@@ -368,13 +362,14 @@ function Organizationdetails() {
   };
 
   useEffect(() => {
-    if (payrollid) {
-      getOrgDetails(payrollid);
-    } else if (businessId && !payrollid) {
-      // Prevent overwriting when payrollid is set later
+    const id = searchParams.get('payrollid');
+    if (id) {
+      getOrgDetails(id); // Call directly
+    } else if (businessId) {
+      console.log('anand');
       individual_Business_get();
     }
-  }, [payrollid, businessId]);
+  }, [searchParams, businessId]);
 
   useEffect(() => {
     setFieldValue('logo', logoDetails);

@@ -14,7 +14,8 @@ import BonusAndIncentives from './BonusAndIncentives';
 import SalaryRevisions from './SalaryRevisions';
 import OtherDeductions from './OtherDeductions';
 import Factory from 'utils/Factory';
-
+import { useDispatch } from 'store';
+import { openSnackbar } from 'store/slices/snackbar';
 // TabPanel Component
 const TabPanel = ({ children, value, index }) => (
   <div role="tabpanel" hidden={value !== index} id={`tabpanel-${index}`} aria-labelledby={`tab-${index}`}>
@@ -29,41 +30,60 @@ TabPanel.propTypes = {
 };
 
 // Custom Hook for Payroll Data
-const usePayrollData = (payrollId) => {
+// Move this outside the main component
+const usePayrollData = (payrollId, month, financialYear) => {
   const [loading, setLoading] = useState(false);
   const [employeeMasterData, setEmployeeMasterData] = useState([]);
   const [attendanceData, setAttendanceData] = useState([]);
+  const dispatch = useDispatch();
 
+  // ✅ Define this function before useEffect
   const fetchEmployeeMasterData = async () => {
     setLoading(true);
-    const url = `/payroll/employees?payroll_id=${payrollId}`;
-    const { res, error } = await Factory('get', url, {});
+    const url = `/payroll/employees?payroll_id=${payrollId}&month=${month}&financial_year=${financialYear}`;
+    const { res } = await Factory('get', url, {});
     setLoading(false);
     if (res?.status_cd === 0) {
       setEmployeeMasterData(res.data);
     } else {
       setEmployeeMasterData([]);
-      // showSnackbar(JSON.stringify(res?.data?.data || error), 'error');
     }
   };
 
   const fetchAttendanceData = async () => {
+    if (!month) return;
     setLoading(true);
-    const url = `/payroll/employee_attendance_current_month_automate?payroll_id=${payrollId}`;
-    const { res, error } = await Factory('post', url, {});
+    const url = `/payroll/employee_attendance_current_month_automate?payroll_id=${payrollId}&month=${month}&financial_year=${financialYear}`;
+    const { res } = await Factory('post', url, {});
     setLoading(false);
+    console.log(res);
     if (res?.status_cd === 0) {
       setAttendanceData(res.data || []);
     } else {
-      // showSnackbar(JSON.stringify(res.data?.data || error), 'error');
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res.message),
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     }
   };
 
   useEffect(() => {
-    if (payrollId) fetchEmployeeMasterData();
+    if (payrollId) {
+      fetchEmployeeMasterData();
+    }
   }, [payrollId]);
 
-  return { loading, employeeMasterData, attendanceData, fetchAttendanceData };
+  return {
+    loading,
+    employeeMasterData,
+    attendanceData,
+    fetchAttendanceData
+  };
 };
 
 // Main Component
@@ -75,8 +95,9 @@ const PayrollWorkflows = ({ type }) => {
   const navigate = useNavigate();
 
   const payrollId = searchParams.get('payrollid');
-
-  const { loading, employeeMasterData, attendanceData, fetchAttendanceData } = usePayrollData(payrollId);
+  const month = searchParams.get('month');
+  const financialYear = searchParams.get('financial_year');
+  const { loading, employeeMasterData, attendanceData, fetchAttendanceData } = usePayrollData(payrollId, month, financialYear);
 
   // Tab Configuration
   const tabs = useMemo(

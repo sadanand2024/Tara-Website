@@ -21,6 +21,7 @@ const CustomDatePicker = ({ label, value, name, onChange, error, helperText, wid
           }
         }}
         format="DD-MM-YYYY"
+        openTo="day"
         slotProps={{
           textField: {
             error: Boolean(error),
@@ -33,6 +34,9 @@ const CustomDatePicker = ({ label, value, name, onChange, error, helperText, wid
               placeholder: 'DD-MM-YYYY',
               maxLength: 10
             }
+          },
+          actionBar: {
+            actions: ['clear', 'accept']
           }
         }}
         {...params}

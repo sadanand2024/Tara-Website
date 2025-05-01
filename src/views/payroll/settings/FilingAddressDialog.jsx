@@ -15,7 +15,7 @@ export default function FilingAddressDialog({ filingAddressDialog, setFilingAddr
   const [selctedLocation, setSelctedLocation] = useState({});
   const [workLocations, setWorkLocations] = useState([]); // Stores the list of work locations
   const [loading, setLoading] = useState(false); // State for loader
-
+  const dispatch = useDispatch();
   const [payrollid, setPayrollId] = useState(null); // Payroll ID fetched from URL
   const [searchParams] = useSearchParams();
 
@@ -71,6 +71,7 @@ export default function FilingAddressDialog({ filingAddressDialog, setFilingAddr
     const url = `/payroll/orgs/`;
     const { res, error } = await Factory('post', url, postData);
     setLoading(false);
+    console.log(res);
     if (res.status_cd === 0) {
       dispatch(
         openSnackbar({
