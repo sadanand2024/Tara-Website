@@ -117,7 +117,7 @@ const BusinessKYCDialog = ({ open, onClose, onSubmit, isSubmitting }) => {
       </DialogTitle>
       <form onSubmit={formik.handleSubmit}>
         <DialogContent sx={{ ...DIALOG_CONTENT_PADDING }} dividers>
-          <Grid container spacing={2}>
+        <Grid container spacing={2}>
             <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 fullWidth
@@ -298,8 +298,8 @@ const BusinessKYCDialog = ({ open, onClose, onSubmit, isSubmitting }) => {
             </Grid>
 
             <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField
-                fullWidth
+            <TextField
+              fullWidth
                 label={requiredLabel('City')}
                 name="headOffice.city"
                 value={formik.values.headOffice.city}
@@ -308,8 +308,8 @@ const BusinessKYCDialog = ({ open, onClose, onSubmit, isSubmitting }) => {
                 error={formik.touched.headOffice?.city && Boolean(formik.errors.headOffice?.city)}
                 helperText={formik.touched.headOffice?.city && formik.errors.headOffice?.city}
                 size="small"
-              />
-            </Grid>
+            />
+          </Grid>
 
             <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
@@ -333,8 +333,8 @@ const BusinessKYCDialog = ({ open, onClose, onSubmit, isSubmitting }) => {
             </Grid>
 
             <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField
-                fullWidth
+            <TextField
+              fullWidth
                 label={requiredLabel('Country')}
                 name="headOffice.country"
                 value={formik.values.headOffice.country}

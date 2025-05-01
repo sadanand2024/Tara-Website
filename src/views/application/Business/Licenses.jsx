@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Card,
@@ -22,7 +22,10 @@ import {
   Select,
   MenuItem,
   InputLabel,
-  FormControl
+  FormControl,
+  CircularProgress,
+  Snackbar,
+  Alert
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
@@ -31,44 +34,66 @@ import CloseIcon from '@mui/icons-material/Close';
 import DownloadIcon from '@mui/icons-material/Download';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
+import { useSelector } from 'store';
+import Factory from 'utils/Factory';
+import DeleteConfirmationDialog from 'utils/DeleteConfirmationDialog';
 
-const initialLicenses = [
-  {
-    license_name: 'Trade License',
-    license_number: 'TL12345',
-    location: 'Mumbai',
-    issue_date: '2022-01-01',
-    expiry_date: '2025-01-01',
-    status: 'Active',
-    doc: null
-  },
-  {
-    license_name: 'Food License',
-    license_number: 'FL67890',
-    location: 'Delhi',
-    issue_date: '2021-06-15',
-    expiry_date: '2024-06-15',
-    status: 'Active',
-    doc: null
-  }
-];
-
-const validationSchema = Yup.object({
-  license_name: Yup.string().required('License Name is required'),
+const validationSchema = Yup.object().shape({
+  license_type: Yup.string().required('License Type is required'),
   license_number: Yup.string().required('License Number is required'),
   location: Yup.string().required('Location is required'),
-  issue_date: Yup.string().required('Date of Issue is required'),
-  expiry_date: Yup.string().required('Valid Till is required'),
-  doc: Yup.mixed()
+  date_of_issue: Yup.string().required('Date of Issue is required'),
+  date_of_expiry: Yup.string().required('Date of Expiry is required'),
+  license_document: Yup.mixed()
 });
 
-const licenseNameOptions = ['Trade', 'Labour', 'Food', 'Trade Mark', 'Add New'];
+const licenseTypeOptions = ['Trade License', 'Labour License', 'Food License', 'Trade Mark'];
 
 const Licenses = () => {
-  const [licenses, setLicenses] = useState(initialLicenses);
+  const [licenses, setLicenses] = useState([]);
   const [open, setOpen] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
-  const [customLicenseName, setCustomLicenseName] = useState('');
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteIndex, setDeleteIndex] = useState(null);
+  const user = useSelector((state) => state).accountReducer.user;
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success'
+  });
+
+  useEffect(() => {
+    fetchLicenses();
+  }, []);
+
+  const handleSnackbarClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setSnackbar({ ...snackbar, open: false });
+  };
+
+  const showNotification = (message, severity = 'success') => {
+    setSnackbar({
+      open: true,
+      message,
+      severity
+    });
+  };
+
+  const fetchLicenses = async () => {
+    try {
+      const response = await Factory('get', `/user_management/license-details/${user.active_context.business_id}/`, {}, {});
+      if (response.res.status_cd === 0) {
+        setLicenses(response.res.data);
+      } else {
+        showNotification('Failed to fetch licenses', 'error');
+      }
+    } catch (error) {
+      console.error('Error fetching licenses:', error);
+      showNotification('Failed to fetch licenses', 'error');
+    }
+  };
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
@@ -79,51 +104,105 @@ const Licenses = () => {
 
   const handleEdit = (index) => {
     setEditIndex(index);
-    formik.setValues({ ...licenses[index] });
+    const itemToEdit = licenses[index];
+    const newValues = { ...itemToEdit };
+    delete newValues['license_document'];
+    formik.setValues(newValues);
     setOpen(true);
   };
 
-  const handleDelete = (index) => {
-    if (window.confirm('Are you sure you want to delete this license?')) {
-      setLicenses(licenses.filter((_, i) => i !== index));
+  const handleDeleteClick = (index) => {
+    setDeleteIndex(index);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteClose = () => {
+    setDeleteDialogOpen(false);
+    setDeleteIndex(null);
+  };
+
+  const handleDelete = async () => {
+    try {
+      const response = await Factory('delete', `/user_management/license-details/${licenses[deleteIndex].id}/`, {}, {});
+      if (response.res.status_cd === 0) {
+        setLicenses(licenses.filter((_, i) => i !== deleteIndex));
+        showNotification('License deleted successfully');
+      } else {
+        showNotification('Failed to delete license', 'error');
+      }
+    } catch (error) {
+      console.error('Error deleting license:', error);
+      showNotification('Failed to delete license', 'error');
+    } finally {
+      handleDeleteClose();
     }
   };
 
   const formik = useFormik({
     initialValues: {
-      license_name: '',
+      license_type: '',
       license_number: '',
       location: '',
-      issue_date: '',
-      expiry_date: '',
-      doc: null
+      date_of_issue: '',
+      date_of_expiry: '',
+      license_document: null
     },
     validationSchema,
-    onSubmit: (values) => {
-      let finalValues = { ...values };
-      if (values.license_name === 'Add New') {
-        finalValues.license_name = customLicenseName;
+    onSubmit: async (values, { setSubmitting }) => {
+      try {
+        const formData = new FormData();
+        Object.keys(values).forEach(key => {
+          if (key === 'license_document' && values[key] instanceof File) {
+            formData.append(key, values[key]);
+          } else {
+            formData.append(key, values[key]);
+          }
+        });
+        formData.append('business', user.active_context.business_id);
+
+        let url = '/user_management/license-details/';
+        let type = 'post';
+        if (editIndex !== null) {
+          url = `/user_management/license-details/${licenses[editIndex].id}/`;
+          type = 'put';
+        }
+
+        const response = await Factory(type, url, formData, {}, true);
+
+        if (response.res.status_cd === 0) {
+          if (editIndex !== null) {
+            const updated = [...licenses];
+            updated[editIndex] = response.res.data;
+            setLicenses(updated);
+            showNotification('License updated successfully');
+          } else {
+            setLicenses([...licenses, response.res]);
+            showNotification('License added successfully');
+          }
+          handleClose();
+        } else {
+          showNotification(response.res.status_msg || 'Failed to save license', 'error');
+        }
+      } catch (error) {
+        console.error('Error submitting license:', error);
+        showNotification('Failed to save license', 'error');
+      } finally {
+        setSubmitting(false);
       }
-      if (editIndex !== null) {
-        const updated = [...licenses];
-        updated[editIndex] = finalValues;
-        setLicenses(updated);
-      } else {
-        setLicenses([...licenses, finalValues]);
-      }
-      setCustomLicenseName('');
-      handleClose();
     }
   });
 
-  const handleDocDownload = (doc) => {
-    if (doc) {
-      const url = URL.createObjectURL(doc);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = doc.name;
-      a.click();
-      URL.revokeObjectURL(url);
+  const handleDocDownload = async (documentUrl) => {
+    try {
+      if (!documentUrl) {
+        showNotification('No document available for download', 'error');
+        return;
+      }
+      window.open(documentUrl, '_blank');
+      showNotification('Document download started');
+    } catch (error) {
+      console.error('Error downloading document:', error);
+      showNotification('Failed to download document', 'error');
     }
   };
 
@@ -150,11 +229,10 @@ const Licenses = () => {
           <Table size="small">
             <TableHead>
               <TableRow>
-                <TableCell>License Name</TableCell>
+                <TableCell>License Type</TableCell>
                 <TableCell>License Number</TableCell>
                 <TableCell>Location</TableCell>
                 <TableCell>Expiry Date</TableCell>
-                <TableCell>Status</TableCell>
                 <TableCell>Doc</TableCell>
                 <TableCell align="right">Actions</TableCell>
               </TableRow>
@@ -162,20 +240,20 @@ const Licenses = () => {
             <TableBody>
               {licenses.map((row, idx) => (
                 <TableRow key={idx} hover>
-                  <TableCell>{row.license_name}</TableCell>
+                  <TableCell>{row.license_type}</TableCell>
                   <TableCell>{row.license_number}</TableCell>
                   <TableCell>{row.location}</TableCell>
-                  <TableCell>{row.expiry_date}</TableCell>
-                  <TableCell>{row.status}</TableCell>
+                  <TableCell>{row.date_of_expiry}</TableCell>
                   <TableCell>
-                    {row.doc ? (
-                      <Tooltip title="Download/View Document">
-                        <IconButton size="small" onClick={() => handleDocDownload(row.doc)}>
+                    {row.license_document && (
+                      <Tooltip title="Download Document">
+                        <IconButton 
+                          size="small" 
+                          onClick={() => handleDocDownload(row.license_document)}
+                        >
                           <DownloadIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
-                    ) : (
-                      '—'
                     )}
                   </TableCell>
                   <TableCell align="right">
@@ -185,7 +263,7 @@ const Licenses = () => {
                           <EditIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
-                      <IconButton size="small" color="error" onClick={() => handleDelete(idx)}>
+                      <IconButton size="small" color="error" onClick={() => handleDeleteClick(idx)}>
                         <DeleteIcon fontSize="small" />
                       </IconButton>
                     </Stack>
@@ -215,44 +293,26 @@ const Licenses = () => {
         <form autoComplete="off" onSubmit={formik.handleSubmit}>
           <DialogContent dividers>
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={4}>
-                <FormControl fullWidth size="small" error={formik.touched.license_name && Boolean(formik.errors.license_name)}>
-                  <InputLabel>License Name</InputLabel>
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth size="small" error={formik.touched.license_type && Boolean(formik.errors.license_type)}>
+                  <InputLabel>License Type</InputLabel>
                   <Select
-                    id="license_name"
-                    name="license_name"
-                    value={formik.values.license_name}
-                    label="License Name"
-                    onChange={(e) => {
-                      formik.handleChange(e);
-                      if (e.target.value !== 'Add New') setCustomLicenseName('');
-                    }}
+                    id="license_type"
+                    name="license_type"
+                    value={formik.values.license_type}
+                    label="License Type"
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
                   >
-                    {licenseNameOptions.map((option) => (
+                    {licenseTypeOptions.map((option) => (
                       <MenuItem key={option} value={option}>
                         {option}
                       </MenuItem>
                     ))}
                   </Select>
-                  {formik.touched.license_name && formik.errors.license_name && (
-                    <Typography variant="caption" color="error">
-                      {formik.errors.license_name}
-                    </Typography>
-                  )}
                 </FormControl>
-                {formik.values.license_name === 'Add New' && (
-                  <Box mt={1}>
-                    <TextField
-                      fullWidth
-                      size="small"
-                      label="Enter License Name"
-                      value={customLicenseName}
-                      onChange={(e) => setCustomLicenseName(e.target.value)}
-                    />
-                  </Box>
-                )}
               </Grid>
-              <Grid item xs={12} sm={4}>
+              <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
                   size="small"
@@ -261,11 +321,12 @@ const Licenses = () => {
                   label="License Number"
                   value={formik.values.license_number}
                   onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
                   error={formik.touched.license_number && Boolean(formik.errors.license_number)}
                   helperText={formik.touched.license_number && formik.errors.license_number}
                 />
               </Grid>
-              <Grid item xs={12} sm={4}>
+              <Grid item xs={12}>
                 <TextField
                   fullWidth
                   size="small"
@@ -274,50 +335,71 @@ const Licenses = () => {
                   label="Location"
                   value={formik.values.location}
                   onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
                   error={formik.touched.location && Boolean(formik.errors.location)}
                   helperText={formik.touched.location && formik.errors.location}
                 />
               </Grid>
-              <Grid item xs={12} sm={4}>
+              <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
                   size="small"
-                  id="issue_date"
-                  name="issue_date"
+                  id="date_of_issue"
+                  name="date_of_issue"
                   label="Date of Issue"
                   type="date"
-                  value={formik.values.issue_date}
+                  value={formik.values.date_of_issue}
                   onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
                   InputLabelProps={{ shrink: true }}
-                  error={formik.touched.issue_date && Boolean(formik.errors.issue_date)}
-                  helperText={formik.touched.issue_date && formik.errors.issue_date}
+                  error={formik.touched.date_of_issue && Boolean(formik.errors.date_of_issue)}
+                  helperText={formik.touched.date_of_issue && formik.errors.date_of_issue}
                 />
               </Grid>
-              <Grid item xs={12} sm={4}>
+              <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
                   size="small"
-                  id="expiry_date"
-                  name="expiry_date"
-                  label="Valid Till"
+                  id="date_of_expiry"
+                  name="date_of_expiry"
+                  label="Date of Expiry"
                   type="date"
-                  value={formik.values.expiry_date}
+                  value={formik.values.date_of_expiry}
                   onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
                   InputLabelProps={{ shrink: true }}
-                  error={formik.touched.expiry_date && Boolean(formik.errors.expiry_date)}
-                  helperText={formik.touched.expiry_date && formik.errors.expiry_date}
+                  error={formik.touched.date_of_expiry && Boolean(formik.errors.date_of_expiry)}
+                  helperText={formik.touched.date_of_expiry && formik.errors.date_of_expiry}
                 />
               </Grid>
-              <Grid item xs={12} sm={4}>
-                <Button variant="outlined" component="label" fullWidth size="small" sx={{ height: '40px' }}>
-                  Upload Doc
-                  <input type="file" hidden onChange={(e) => formik.setFieldValue('doc', e.currentTarget.files[0])} />
-                </Button>
-                {formik.values.doc && (
-                  <Typography variant="caption" sx={{ ml: 1 }}>
-                    {formik.values.doc.name}
-                  </Typography>
-                )}
+              <Grid item xs={12}>
+                <Box>
+                  <Button variant="outlined" component="label" fullWidth size="small" sx={{ height: '40px', mb: 1 }}>
+                    {editIndex !== null && licenses[editIndex]?.license_document ? 'Replace Document' : 'Upload Document'}
+                    <input 
+                      type="file" 
+                      hidden 
+                      onChange={(e) => formik.setFieldValue('license_document', e.currentTarget.files[0])} 
+                    />
+                  </Button>
+                  {editIndex !== null && licenses[editIndex]?.license_document && !formik.values.license_document && (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Typography variant="caption">Current file:</Typography>
+                      <Button
+                        variant="text"
+                        size="small"
+                        onClick={() => handleDocDownload(licenses[editIndex].license_document)}
+                      >
+                        Download Current Document
+                      </Button>
+                    </Box>
+                  )}
+                  {formik.values.license_document && (
+                    <Typography variant="caption">
+                      New file: {formik.values.license_document.name}
+                    </Typography>
+                  )}
+                </Box>
               </Grid>
             </Grid>
           </DialogContent>
@@ -325,12 +407,57 @@ const Licenses = () => {
             <Button onClick={handleClose} size="small" sx={{ color: 'text.primary' }}>
               Cancel
             </Button>
-            <Button type="submit" variant="contained" size="small" color="primary">
-              Save
+            <Button 
+              type="submit" 
+              variant="contained" 
+              size="small" 
+              color="primary"
+              disabled={formik.isSubmitting}
+              sx={{ position: 'relative', minWidth: '100px' }}
+            >
+              {formik.isSubmitting ? (
+                <>
+                  <CircularProgress
+                    size={24}
+                    sx={{
+                      position: 'absolute',
+                      top: '50%',
+                      left: '50%',
+                      marginTop: '-12px',
+                      marginLeft: '-12px'
+                    }}
+                  />
+                  {editIndex !== null ? 'Updating...' : 'Saving...'}
+                </>
+              ) : editIndex !== null ? (
+                'Update'
+              ) : (
+                'Save'
+              )}
             </Button>
           </DialogActions>
         </form>
       </Dialog>
+
+      <DeleteConfirmationDialog
+        open={deleteDialogOpen}
+        onClose={handleDeleteClose}
+        onConfirm={handleDelete}
+        title="Delete License"
+        message="Are you sure you want to delete this license? This action cannot be undone."
+        itemName={deleteIndex !== null ? `License: ${licenses[deleteIndex]?.license_number}` : ''}
+      />
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert onClose={handleSnackbarClose} severity={snackbar.severity} variant="filled">
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

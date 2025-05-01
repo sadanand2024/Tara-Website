@@ -24,10 +24,33 @@ import ErrorTwoToneIcon from '@mui/icons-material/ErrorTwoTone';
 // ==============================|| PROFILE 2 - USER PROFILE ||============================== //
 
 const states = [
-  'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 'Goa', 'Gujarat',
-  'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka', 'Kerala', 'Madhya Pradesh',
-  'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab',
-  'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand',
+  'Andhra Pradesh',
+  'Arunachal Pradesh',
+  'Assam',
+  'Bihar',
+  'Chhattisgarh',
+  'Goa',
+  'Gujarat',
+  'Haryana',
+  'Himachal Pradesh',
+  'Jharkhand',
+  'Karnataka',
+  'Kerala',
+  'Madhya Pradesh',
+  'Maharashtra',
+  'Manipur',
+  'Meghalaya',
+  'Mizoram',
+  'Nagaland',
+  'Odisha',
+  'Punjab',
+  'Rajasthan',
+  'Sikkim',
+  'Tamil Nadu',
+  'Telangana',
+  'Tripura',
+  'Uttar Pradesh',
+  'Uttarakhand',
   'West Bengal'
 ];
 
@@ -54,15 +77,9 @@ export default function UserProfile({ onSubmit }) {
       .required('ICAI Number is required')
       .matches(/^\d{6}$/, 'ICAI Number should be 6 digits'),
     address: Yup.object({
-      address_line1: Yup.string()
-        .required('Address Line 1 is required')
-        .min(5, 'Address should be at least 5 characters'),
+      address_line1: Yup.string().required('Address Line 1 is required').min(5, 'Address should be at least 5 characters'),
       address_line2: Yup.string(),
-      address_line3: Yup.string(),
-      pincode: Yup.number()
-        .required('PIN Code is required')
-        .min(100000, 'Invalid PIN Code')
-        .max(999999, 'Invalid PIN Code'),
+      pincode: Yup.number().required('PIN Code is required').min(100000, 'Invalid PIN Code').max(999999, 'Invalid PIN Code'),
       state: Yup.string().required('State is required'),
       city: Yup.string()
         .required('City is required')
@@ -81,7 +98,6 @@ export default function UserProfile({ onSubmit }) {
       address: {
         address_line1: '',
         address_line2: '',
-        address_line3: '',
         pincode: '',
         state: '',
         city: '',
@@ -105,7 +121,7 @@ export default function UserProfile({ onSubmit }) {
   return (
     <form id="profile-form" onSubmit={formik.handleSubmit}>
       <Grid container spacing={gridSpacing}>
-        <Grid size={12}>
+        {/* <Grid size={12}>
           <Grid container spacing={2} sx={{ alignItems: 'center' }}>
             <Grid>
               <Avatar alt="User 1" src={Avatar1} sx={{ height: 80, width: 80 }} />
@@ -126,12 +142,13 @@ export default function UserProfile({ onSubmit }) {
               </Grid>
             </Grid>
           </Grid>
-        </Grid>
+        </Grid> */}
 
         <Grid size={{ xs: 12 }}>
           <TextField
             fullWidth
             label="Full Name"
+            size="small"
             name="name"
             value={formik.values.name}
             onChange={formik.handleChange}
@@ -145,6 +162,7 @@ export default function UserProfile({ onSubmit }) {
           <TextField
             fullWidth
             label="PAN Number"
+            size="small"
             name="pan_number"
             value={formik.values.pan_number}
             onChange={(e) => formik.setFieldValue('pan_number', e.target.value.toUpperCase())}
@@ -158,6 +176,7 @@ export default function UserProfile({ onSubmit }) {
           <TextField
             fullWidth
             label="Aadhaar Number"
+            size="small"
             name="aadhaar_number"
             value={formik.values.aadhaar_number}
             onChange={formik.handleChange}
@@ -176,9 +195,11 @@ export default function UserProfile({ onSubmit }) {
               onBlur={() => formik.setFieldTouched('date', true)}
               slotProps={{
                 textField: {
+                  size: 'small',
                   fullWidth: true,
                   error: formik.touched.date && Boolean(formik.errors.date),
-                  helperText: formik.touched.date && formik.errors.date
+                  helperText: formik.touched.date && formik.errors.date,
+                  sx: { '& .MuiInputBase-root': { height: '40px' } }
                 }
               }}
             />
@@ -189,6 +210,7 @@ export default function UserProfile({ onSubmit }) {
           <TextField
             fullWidth
             label="ICAI Number"
+            size="small"
             name="icai_number"
             value={formik.values.icai_number}
             onChange={formik.handleChange}
@@ -202,6 +224,7 @@ export default function UserProfile({ onSubmit }) {
           <TextField
             fullWidth
             label="Address Line 1"
+            size="small"
             name="address.address_line1"
             value={formik.values.address.address_line1}
             onChange={formik.handleChange}
@@ -215,6 +238,7 @@ export default function UserProfile({ onSubmit }) {
           <TextField
             fullWidth
             label="Address Line 2"
+            size="small"
             name="address.address_line2"
             value={formik.values.address.address_line2}
             onChange={formik.handleChange}
@@ -224,22 +248,10 @@ export default function UserProfile({ onSubmit }) {
           />
         </Grid>
 
-        <Grid size={{ xs: 12 }}>
-          <TextField
-            fullWidth
-            label="Address Line 3"
-            name="address.address_line3"
-            value={formik.values.address.address_line3}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            error={formik.touched.address?.address_line3 && Boolean(formik.errors.address?.address_line3)}
-            helperText={formik.touched.address?.address_line3 && formik.errors.address?.address_line3}
-          />
-        </Grid>
-
         <Grid size={{ xs: 12, sm: 6 }}>
           <TextField
             fullWidth
+            size="small"
             label="City"
             name="address.city"
             value={formik.values.address.city}
@@ -253,6 +265,7 @@ export default function UserProfile({ onSubmit }) {
         <Grid size={{ xs: 12, sm: 6 }}>
           <TextField
             fullWidth
+            size="small"
             select
             label="State"
             name="address.state"
@@ -271,19 +284,14 @@ export default function UserProfile({ onSubmit }) {
         </Grid>
 
         <Grid size={{ xs: 12, sm: 6 }}>
-          <TextField
-            fullWidth
-            label="Country"
-            name="address.country"
-            value={formik.values.address.country}
-            disabled
-          />
+          <TextField fullWidth label="Country" size="small" name="address.country" value={formik.values.address.country} disabled />
         </Grid>
 
         <Grid size={{ xs: 12, sm: 6 }}>
           <TextField
             fullWidth
             label="PIN Code"
+            size="small"
             name="address.pincode"
             type="number"
             value={formik.values.address.pincode}

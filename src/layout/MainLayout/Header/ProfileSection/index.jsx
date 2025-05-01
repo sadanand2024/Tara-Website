@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'store';
 
 // material-ui
 import { useTheme } from '@mui/material/styles';
@@ -93,6 +94,10 @@ export default function ProfileSection() {
     prevOpen.current = open;
   }, [open]);
 
+  const userData = useSelector((state) => state.accountReducer.user);
+  const isPersonalContext = userData?.active_context?.context_type === 'personal';
+  const isBusinessContext = userData?.active_context?.context_type !== 'personal';
+
   return (
     <>
       <Chip
@@ -149,7 +154,7 @@ export default function ProfileSection() {
             <Transitions in={open} {...TransitionProps}>
               <Paper>
                 {open && (
-                  <MainCard border={false} elevation={16} content={false} boxShadow shadow={theme.shadows[16]}>
+                  <MainCard sx={{ pb: 0.6 }} border={false} elevation={16} content={false} boxShadow shadow={theme.shadows[16]}>
                     {/* User avatar and name horizontally aligned */}
                     <Box sx={{ px: 2, pt: 2, pb: 1 }}>
                       <Stack direction="row" alignItems="center" spacing={2}>
@@ -159,7 +164,7 @@ export default function ProfileSection() {
                             {user?.name || 'User Name'}
                           </Typography>
                           <Typography variant="caption" color="text.secondary" sx={{ p: 0, m: 0 }} fontWeight={600}>
-                            {user?.role || 'User Role'} 
+                            {user?.role || 'User Role'}
                           </Typography>
                         </Stack>
                       </Stack>
@@ -226,38 +231,42 @@ export default function ProfileSection() {
                           '& .MuiListItemButton-root': { mt: 0.5 }
                         }}
                       >
-                        <ListItemButton
-                          sx={{ borderRadius: `${borderRadius}px` }}
-                          selected={selectedIndex === 0}
-                          onClick={(event) => handleListItemClick(event, 0, '/apps/user/profile')}
-                        >
-                          <ListItemIcon>
-                            <IconUser stroke={1.5} size="20px" />
-                          </ListItemIcon>
-                          <ListItemText
-                            primary={
-                              <Typography variant="body2">
-                                <FormattedMessage id="account-settings" />
-                              </Typography>
-                            }
-                          />
-                        </ListItemButton>
-                        <ListItemButton
-                          sx={{ borderRadius: `${borderRadius}px` }}
-                          selected={selectedIndex === 1}
-                          onClick={(event) => handleListItemClick(event, 1, '/apps/business-settings')}
-                        >
-                          <ListItemIcon>
-                            <IconSettings stroke={1.5} size="20px" />
-                          </ListItemIcon>
-                          <ListItemText
-                            primary={
-                              <Typography variant="body2">
-                                <FormattedMessage id="business-settings" />
-                              </Typography>
-                            }
-                          />
-                        </ListItemButton>
+                        {isPersonalContext && (
+                          <ListItemButton
+                            sx={{ borderRadius: `${borderRadius}px` }}
+                            selected={selectedIndex === 0}
+                            onClick={(event) => handleListItemClick(event, 0, '/apps/user/profile')}
+                          >
+                            <ListItemIcon>
+                              <IconUser stroke={1.5} size="20px" />
+                            </ListItemIcon>
+                            <ListItemText
+                              primary={
+                                <Typography variant="body2">
+                                  <FormattedMessage id="account-settings" />
+                                </Typography>
+                              }
+                            />
+                          </ListItemButton>
+                        )}
+                        {isBusinessContext && (
+                          <ListItemButton
+                            sx={{ borderRadius: `${borderRadius}px` }}
+                            selected={selectedIndex === 1}
+                            onClick={(event) => handleListItemClick(event, 1, '/apps/business-settings')}
+                          >
+                            <ListItemIcon>
+                              <IconSettings stroke={1.5} size="20px" />
+                            </ListItemIcon>
+                            <ListItemText
+                              primary={
+                                <Typography variant="body2">
+                                  <FormattedMessage id="business-settings" />
+                                </Typography>
+                              }
+                            />
+                          </ListItemButton>
+                        )}
                         <ListItemButton sx={{ borderRadius: `${borderRadius}px` }} selected={selectedIndex === 4} onClick={handleLogout}>
                           <ListItemIcon>
                             <IconLogout stroke={1.5} size="20px" />

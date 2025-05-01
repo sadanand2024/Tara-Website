@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Card,
@@ -23,7 +23,10 @@ import {
   Select,
   MenuItem,
   InputLabel,
-  FormControl
+  FormControl,
+  CircularProgress,
+  Snackbar,
+  Alert
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
@@ -33,45 +36,57 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
+import { useSelector } from 'store';
+import Factory from 'utils/Factory';
+import DeleteConfirmationDialog from 'utils/DeleteConfirmationDialog';
 
-const dscTypes = ['Type 2', 'Type 3'];
+const dscTypes = ['Class 2', 'Class 3'];
 const issuingAuthorities = ['eMudhra', 'Sify', 'Capricorn', 'NSDL'];
 
-const initialDSC = [
-  {
-    name: 'John Doe',
-    dsc_serial: 'DSC123456',
-    type: 'Type 2',
-    issuing_authority: 'eMudhra',
-    issue_date: '2022-01-01',
-    expiry_date: '2024-01-01',
-    email: 'john@example.com',
-    mobile: '9876543210',
-    password: 'secret123',
-    status: 'Active',
-    location: 'Mumbai'
-  }
-];
-
-const validationSchema = Yup.object({
+const validationSchema = Yup.object().shape({
   name: Yup.string().required('Name is required'),
-  dsc_serial: Yup.string().required('DSC Serial Number is required'),
-  type: Yup.string().required('Type is required'),
-  issuing_authority: Yup.string().required('Issuing Authority is required'),
-  issue_date: Yup.string().required('Date of Issue is required'),
-  expiry_date: Yup.string().required('Expiry Date is required'),
+  dsc_type: Yup.string().required('DSC Type is required'),
+  dsc_number: Yup.string().required('DSC Number is required'),
+  issue_authority: Yup.string().required('Issuing Authority is required'),
+  date_of_issue: Yup.string().required('Date of Issue is required'),
+  date_of_expiry: Yup.string().required('Date of Expiry is required'),
   email: Yup.string().email('Invalid email').required('Email is required'),
-  mobile: Yup.string().required('Mobile is required'),
-  password: Yup.string().required('Password is required'),
+  mobile_number: Yup.string()
+    .required('Mobile Number is required')
+    .matches(/^[+]?[6-9]\d{9,12}$/, 'Invalid mobile number'),
   location: Yup.string().required('Location is required')
 });
 
 const DSCRegister = () => {
-  const [dscList, setDscList] = useState(initialDSC);
+  const [dscList, setDscList] = useState([]);
   const [open, setOpen] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
-  const [showPassword, setShowPassword] = useState(false);
-  const [viewPasswordIndex, setViewPasswordIndex] = useState(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteIndex, setDeleteIndex] = useState(null);
+  const user = useSelector((state) => state).accountReducer.user;
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success'
+  });
+
+  useEffect(() => {
+    fetchDSCList();
+  }, []);
+
+  const fetchDSCList = async () => {
+    try {
+      const response = await Factory('get', `/user_management/dsc-details/${user.active_context.business_id}/`, {}, {});
+      if (response.res.status_cd === 0) {
+        setDscList(response.res.data);
+      } else {
+        showNotification('Failed to fetch DSC list', 'error');
+      }
+    } catch (error) {
+      console.error('Error fetching DSC list:', error);
+      showNotification('Failed to fetch DSC list', 'error');
+    }
+  };
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
@@ -86,39 +101,97 @@ const DSCRegister = () => {
     setOpen(true);
   };
 
-  const handleDelete = (index) => {
-    if (window.confirm('Are you sure you want to delete this DSC?')) {
-      setDscList(dscList.filter((_, i) => i !== index));
+  const handleDeleteClick = (index) => {
+    setDeleteIndex(index);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteClose = () => {
+    setDeleteDialogOpen(false);
+    setDeleteIndex(null);
+  };
+
+  const handleDelete = async () => {
+    try {
+      const response = await Factory('delete', `/user_management/dsc-details/${dscList[deleteIndex].id}/`, {}, {});
+      if (response.res.status_cd === 0) {
+        setDscList(dscList.filter((_, i) => i !== deleteIndex));
+        showNotification('DSC deleted successfully');
+      } else {
+        showNotification('Failed to delete DSC', 'error');
+      }
+    } catch (error) {
+      console.error('Error deleting DSC:', error);
+      showNotification('Failed to delete DSC', 'error');
+    } finally {
+      handleDeleteClose();
     }
   };
 
-  const handleViewPassword = (index) => {
-    setViewPasswordIndex(viewPasswordIndex === index ? null : index);
+  const handleSnackbarClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setSnackbar({ ...snackbar, open: false });
+  };
+
+  const showNotification = (message, severity = 'success') => {
+    setSnackbar({
+      open: true,
+      message,
+      severity
+    });
   };
 
   const formik = useFormik({
     initialValues: {
       name: '',
-      dsc_serial: '',
-      type: '',
-      issuing_authority: '',
-      issue_date: '',
-      expiry_date: '',
+      dsc_type: '',
+      dsc_number: '',
+      issue_authority: '',
+      date_of_issue: '',
+      date_of_expiry: '',
       email: '',
-      mobile: '',
-      password: '',
+      mobile_number: '',
       location: ''
     },
     validationSchema,
-    onSubmit: (values) => {
-      if (editIndex !== null) {
-        const updated = [...dscList];
-        updated[editIndex] = values;
-        setDscList(updated);
-      } else {
-        setDscList([...dscList, values]);
+    onSubmit: async (values, { setSubmitting }) => {
+      try {
+        const payload = {
+          ...values,
+          business: user.active_context.business_id
+        };
+
+        let url = '/user_management/dsc-details/';
+        let type = 'post';
+        if (editIndex !== null) {
+          url = `/user_management/dsc-details/${dscList[editIndex].id}/`;
+          type = 'put';
+        }
+
+        const response = await Factory(type, url, payload, {});
+
+        if (response.res.status_cd === 0) {
+          if (editIndex !== null) {
+            const updated = [...dscList];
+            updated[editIndex] = response.res.data;
+            setDscList(updated);
+            showNotification('DSC updated successfully');
+          } else {
+            setDscList([...dscList, response.res]);
+            showNotification('DSC added successfully');
+          }
+          handleClose();
+        } else {
+          showNotification(response.res.status_msg || 'Failed to save DSC', 'error');
+        }
+      } catch (error) {
+        console.error('Error submitting DSC:', error);
+        showNotification('Failed to save DSC', 'error');
+      } finally {
+        setSubmitting(false);
       }
-      handleClose();
     }
   });
 
@@ -146,9 +219,9 @@ const DSCRegister = () => {
             <TableHead>
               <TableRow>
                 <TableCell>Name</TableCell>
-                <TableCell>Email</TableCell>
+                <TableCell>DSC Number</TableCell>
+                <TableCell>Type</TableCell>
                 <TableCell>Valid Till</TableCell>
-                <TableCell>Status</TableCell>
                 <TableCell>Location</TableCell>
                 <TableCell align="right">Actions</TableCell>
               </TableRow>
@@ -157,10 +230,9 @@ const DSCRegister = () => {
               {dscList.map((row, idx) => (
                 <TableRow key={idx} hover>
                   <TableCell>{row.name}</TableCell>
-                  <TableCell>{row.email}</TableCell>
-                  <TableCell>{row.expiry_date}</TableCell>
-                  <TableCell>{row.status}</TableCell>
-
+                  <TableCell>{row.dsc_number}</TableCell>
+                  <TableCell>{row.dsc_type}</TableCell>
+                  <TableCell>{row.date_of_expiry}</TableCell>
                   <TableCell>{row.location}</TableCell>
                   <TableCell align="right">
                     <Stack direction="row" spacing={1} justifyContent="flex-end">
@@ -169,7 +241,7 @@ const DSCRegister = () => {
                           <EditIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
-                      <IconButton size="small" color="error" onClick={() => handleDelete(idx)}>
+                      <IconButton size="small" color="error" onClick={() => handleDeleteClick(idx)}>
                         <DeleteIcon fontSize="small" />
                       </IconButton>
                     </Stack>
@@ -178,7 +250,7 @@ const DSCRegister = () => {
               ))}
               {dscList.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={9} align="center" sx={{ py: 3 }}>
+                  <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
                     No DSCs added yet
                   </TableCell>
                 </TableRow>
@@ -208,6 +280,7 @@ const DSCRegister = () => {
                   label="Name"
                   value={formik.values.name}
                   onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
                   error={formik.touched.name && Boolean(formik.errors.name)}
                   helperText={formik.touched.name && formik.errors.name}
                 />
@@ -216,19 +289,27 @@ const DSCRegister = () => {
                 <TextField
                   fullWidth
                   size="small"
-                  id="dsc_serial"
-                  name="dsc_serial"
-                  label="DSC Serial Number"
-                  value={formik.values.dsc_serial}
+                  id="dsc_number"
+                  name="dsc_number"
+                  label="DSC Number"
+                  value={formik.values.dsc_number}
                   onChange={formik.handleChange}
-                  error={formik.touched.dsc_serial && Boolean(formik.errors.dsc_serial)}
-                  helperText={formik.touched.dsc_serial && formik.errors.dsc_serial}
+                  onBlur={formik.handleBlur}
+                  error={formik.touched.dsc_number && Boolean(formik.errors.dsc_number)}
+                  helperText={formik.touched.dsc_number && formik.errors.dsc_number}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <FormControl fullWidth size="small" error={formik.touched.type && Boolean(formik.errors.type)}>
-                  <InputLabel>Type</InputLabel>
-                  <Select id="type" name="type" value={formik.values.type} label="Type" onChange={formik.handleChange}>
+                <FormControl fullWidth size="small" error={formik.touched.dsc_type && Boolean(formik.errors.dsc_type)}>
+                  <InputLabel>DSC Type</InputLabel>
+                  <Select
+                    id="dsc_type"
+                    name="dsc_type"
+                    value={formik.values.dsc_type}
+                    label="DSC Type"
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                  >
                     {dscTypes.map((type) => (
                       <MenuItem key={type} value={type}>
                         {type}
@@ -238,14 +319,15 @@ const DSCRegister = () => {
                 </FormControl>
               </Grid>
               <Grid item xs={12} sm={6}>
-                <FormControl fullWidth size="small" error={formik.touched.issuing_authority && Boolean(formik.errors.issuing_authority)}>
+                <FormControl fullWidth size="small" error={formik.touched.issue_authority && Boolean(formik.errors.issue_authority)}>
                   <InputLabel>Issuing Authority</InputLabel>
                   <Select
-                    id="issuing_authority"
-                    name="issuing_authority"
-                    value={formik.values.issuing_authority}
+                    id="issue_authority"
+                    name="issue_authority"
+                    value={formik.values.issue_authority}
                     label="Issuing Authority"
                     onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
                   >
                     {issuingAuthorities.map((auth) => (
                       <MenuItem key={auth} value={auth}>
@@ -259,30 +341,32 @@ const DSCRegister = () => {
                 <TextField
                   fullWidth
                   size="small"
-                  id="issue_date"
-                  name="issue_date"
+                  id="date_of_issue"
+                  name="date_of_issue"
                   label="Date of Issue"
                   type="date"
-                  value={formik.values.issue_date}
+                  value={formik.values.date_of_issue}
                   onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
                   InputLabelProps={{ shrink: true }}
-                  error={formik.touched.issue_date && Boolean(formik.errors.issue_date)}
-                  helperText={formik.touched.issue_date && formik.errors.issue_date}
+                  error={formik.touched.date_of_issue && Boolean(formik.errors.date_of_issue)}
+                  helperText={formik.touched.date_of_issue && formik.errors.date_of_issue}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
                   size="small"
-                  id="expiry_date"
-                  name="expiry_date"
-                  label="Expiry Date"
+                  id="date_of_expiry"
+                  name="date_of_expiry"
+                  label="Date of Expiry"
                   type="date"
-                  value={formik.values.expiry_date}
+                  value={formik.values.date_of_expiry}
                   onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
                   InputLabelProps={{ shrink: true }}
-                  error={formik.touched.expiry_date && Boolean(formik.errors.expiry_date)}
-                  helperText={formik.touched.expiry_date && formik.errors.expiry_date}
+                  error={formik.touched.date_of_expiry && Boolean(formik.errors.date_of_expiry)}
+                  helperText={formik.touched.date_of_expiry && formik.errors.date_of_expiry}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -294,6 +378,7 @@ const DSCRegister = () => {
                   label="Email"
                   value={formik.values.email}
                   onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
                   error={formik.touched.email && Boolean(formik.errors.email)}
                   helperText={formik.touched.email && formik.errors.email}
                 />
@@ -302,44 +387,17 @@ const DSCRegister = () => {
                 <TextField
                   fullWidth
                   size="small"
-                  id="mobile"
-                  name="mobile"
-                  label="Mobile"
-                  value={formik.values.mobile}
+                  id="mobile_number"
+                  name="mobile_number"
+                  label="Mobile Number"
+                  value={formik.values.mobile_number}
                   onChange={formik.handleChange}
-                  error={formik.touched.mobile && Boolean(formik.errors.mobile)}
-                  helperText={formik.touched.mobile && formik.errors.mobile}
+                  onBlur={formik.handleBlur}
+                  error={formik.touched.mobile_number && Boolean(formik.errors.mobile_number)}
+                  helperText={formik.touched.mobile_number && formik.errors.mobile_number}
                 />
               </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  id="password"
-                  name="password"
-                  label="Password"
-                  type={showPassword ? 'text' : 'password'}
-                  value={formik.values.password}
-                  onChange={formik.handleChange}
-                  error={formik.touched.password && Boolean(formik.errors.password)}
-                  helperText={formik.touched.password && formik.errors.password}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          aria-label="toggle password visibility"
-                          onClick={() => setShowPassword((show) => !show)}
-                          edge="end"
-                          size="small"
-                        >
-                          {showPassword ? <VisibilityOffIcon fontSize="small" /> : <VisibilityIcon fontSize="small" />}
-                        </IconButton>
-                      </InputAdornment>
-                    )
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12}>
                 <TextField
                   fullWidth
                   size="small"
@@ -348,6 +406,7 @@ const DSCRegister = () => {
                   label="Location"
                   value={formik.values.location}
                   onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
                   error={formik.touched.location && Boolean(formik.errors.location)}
                   helperText={formik.touched.location && formik.errors.location}
                 />
@@ -358,12 +417,57 @@ const DSCRegister = () => {
             <Button onClick={handleClose} size="small" sx={{ color: 'text.primary' }}>
               Cancel
             </Button>
-            <Button type="submit" variant="contained" size="small" color="primary">
-              Save
+            <Button 
+              type="submit" 
+              variant="contained" 
+              size="small" 
+              color="primary"
+              disabled={formik.isSubmitting}
+              sx={{ position: 'relative', minWidth: '100px' }}
+            >
+              {formik.isSubmitting ? (
+                <>
+                  <CircularProgress
+                    size={24}
+                    sx={{
+                      position: 'absolute',
+                      top: '50%',
+                      left: '50%',
+                      marginTop: '-12px',
+                      marginLeft: '-12px'
+                    }}
+                  />
+                  {editIndex !== null ? 'Updating...' : 'Saving...'}
+                </>
+              ) : editIndex !== null ? (
+                'Update'
+              ) : (
+                'Save'
+              )}
             </Button>
           </DialogActions>
         </form>
       </Dialog>
+
+      <DeleteConfirmationDialog
+        open={deleteDialogOpen}
+        onClose={handleDeleteClose}
+        onConfirm={handleDelete}
+        title="Delete DSC"
+        message="Are you sure you want to delete this DSC? This action cannot be undone."
+        itemName={deleteIndex !== null ? `DSC: ${dscList[deleteIndex]?.dsc_number}` : ''}
+      />
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert onClose={handleSnackbarClose} severity={snackbar.severity} variant="filled">
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

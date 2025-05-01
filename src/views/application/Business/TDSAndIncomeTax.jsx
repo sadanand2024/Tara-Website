@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Card,
@@ -22,7 +22,11 @@ import {
   InputLabel,
   FormControl,
   Stack,
-  Tooltip
+  Tooltip,
+  FormHelperText,
+  CircularProgress,
+  Snackbar,
+  Alert
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
@@ -30,6 +34,10 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import CloseIcon from '@mui/icons-material/Close';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
+import { useSelector } from 'store';
+import Factory from 'utils/Factory';
+import { INDIAN_STATES } from 'utils/constants';
+import DeleteConfirmationDialog from 'utils/DeleteConfirmationDialog';
 
 const initialTDS = [
   {
@@ -47,35 +55,63 @@ const initialTDS = [
 const deductorCategories = ['Company', 'Individual', 'Firm', 'Trust'];
 const deductorTypes = ['Government', 'Non-Government'];
 
-const validationSchema = Yup.object({
-  tan: Yup.string().required('TAN is required'),
-  pan: Yup.string().required('PAN is required'),
+const validationSchema = Yup.object().shape({
+  tan_number: Yup.string()
+    .required('TAN is required')
+    .matches(/^[A-Z]{4}[0-9]{5}[A-Z]{1}$/, 'Invalid TAN format'),
+  pan: Yup.string()
+    .required('PAN is required')
+    .matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN format'),
   legal_name: Yup.string().required('Legal Name is required'),
   trade_name: Yup.string().required('Trade Name is required'),
   location: Yup.string().required('Location/Vertical is required'),
   deductor_category: Yup.string().required('Deductor Category is required'),
   deductor_type: Yup.string().required('Type of Deductor is required'),
   address: Yup.string().required('Address is required'),
-  state: Yup.string().required('State is required'),
-  zipcode: Yup.string().required('Zipcode is required'),
-  tds_email: Yup.string().email('Invalid email').required('Email is required'),
-  tds_contact: Yup.string().required('Contact Number is required'),
+  state: Yup.string().required('State is required').oneOf(INDIAN_STATES, 'Please select a valid state'),
+  pincode: Yup.string()
+    .required('Pincode is required')
+    .matches(/^[1-9][0-9]{5}$/, 'Invalid pincode format'),
+  email: Yup.string().email('Invalid email').required('Email is required'),
+  mobile_number: Yup.string()
+    .required('Contact Number is required')
+    .matches(/^[6-9]\d{9}$/, 'Invalid mobile number'),
   tds_username: Yup.string().required('Username is required'),
   tds_password: Yup.string().required('Password is required'),
-  rp_name: Yup.string().required('Name of Responsible Person is required'),
-  rp_designation: Yup.string().required('Designation is required'),
-  rp_pan: Yup.string().required('PAN of RP is required'),
-  rp_mobile: Yup.string().required('Mobile is required'),
-  rp_email: Yup.string().email('Invalid email').required('Email is required'),
-  it_pan: Yup.string().required('PAN is required'),
-  it_password: Yup.string().required('Password is required'),
-  it_mobile: Yup.string().required('Registered Mobile Number is required')
+  authorized_personal_Details: Yup.object().shape({
+    name: Yup.string().required('Name of Responsible Person is required'),
+    designation: Yup.string().required('Designation is required'),
+    pan_of_RP: Yup.string()
+      .required('PAN of RP is required')
+      .matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN format'),
+    mobile: Yup.string()
+      .required('Mobile is required')
+      .matches(/^[6-9]\d{9}$/, 'Invalid mobile number'),
+    email: Yup.string().email('Invalid email').required('Email is required')
+  }),
+  income_tax_details: Yup.object().shape({
+    pan: Yup.string()
+      .required('PAN is required')
+      .matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN format'),
+    password: Yup.string().required('Password is required'),
+    registered_mobile_number: Yup.string()
+      .required('Registered Mobile Number is required')
+      .matches(/^[6-9]\d{9}$/, 'Invalid mobile number')
+  })
 });
 
 const TDSAndIncomeTax = () => {
-  const [tdsList, setTdsList] = useState(initialTDS);
+  const [tdsList, setTdsList] = useState([]);
   const [open, setOpen] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteIndex, setDeleteIndex] = useState(null);
+  const user = useSelector((state) => state).accountReducer.user;
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success'
+  });
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
@@ -86,19 +122,80 @@ const TDSAndIncomeTax = () => {
 
   const handleEdit = (index) => {
     setEditIndex(index);
-    formik.setValues({ ...tdsList[index] });
+    const itemToEdit = tdsList[index];
+    formik.setValues({
+      ...itemToEdit,
+      authorized_personal_Details: {
+        ...formik.values.authorized_personal_Details,
+        ...itemToEdit.authorized_personal_Details
+      },
+      income_tax_details: {
+        ...formik.values.income_tax_details,
+        ...itemToEdit.income_tax_details
+      }
+    });
     setOpen(true);
   };
 
-  const handleDelete = (index) => {
-    if (window.confirm('Are you sure you want to delete this TDS entry?')) {
-      setTdsList(tdsList.filter((_, i) => i !== index));
+  const handleDeleteClick = (index) => {
+    setDeleteIndex(index);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteClose = () => {
+    setDeleteDialogOpen(false);
+    setDeleteIndex(null);
+  };
+
+  const handleDelete = async () => {
+    try {
+      const response = await Factory('delete', `/user_management/tds-details/${tdsList[deleteIndex].id}/`, {}, {});
+      if (response.res.status_cd === 0) {
+        setTdsList(tdsList.filter((_, i) => i !== deleteIndex));
+        showNotification('TDS details deleted successfully');
+      } else {
+        showNotification('Failed to delete TDS details', 'error');
+      }
+    } catch (error) {
+      console.error('Error deleting TDS details:', error);
+      showNotification('Failed to delete TDS details', 'error');
+    } finally {
+      handleDeleteClose();
+    }
+  };
+
+  const handleSnackbarClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setSnackbar({ ...snackbar, open: false });
+  };
+
+  const showNotification = (message, severity = 'success') => {
+    setSnackbar({
+      open: true,
+      message,
+      severity
+    });
+  };
+
+  const fetchTDSDetails = async () => {
+    try {
+      const response = await Factory('get', `/user_management/tds-details/${user.active_context.business_id}/`, {}, {});
+      if (response.res.status_cd === 0) {
+        setTdsList(response.res.data);
+      } else {
+        showNotification('Failed to fetch TDS details', 'error');
+      }
+    } catch (error) {
+      console.error('Error fetching TDS details:', error);
+      showNotification('Failed to fetch TDS details', 'error');
     }
   };
 
   const formik = useFormik({
     initialValues: {
-      tan: '',
+      tan_number: '',
       pan: '',
       legal_name: '',
       trade_name: '',
@@ -107,32 +204,91 @@ const TDSAndIncomeTax = () => {
       deductor_type: '',
       address: '',
       state: '',
-      zipcode: '',
-      tds_email: '',
-      tds_contact: '',
+      pincode: '',
+      email: '',
+      mobile_number: '',
       tds_username: '',
       tds_password: '',
-      rp_name: '',
-      rp_designation: '',
-      rp_pan: '',
-      rp_mobile: '',
-      rp_email: '',
-      it_pan: '',
-      it_password: '',
-      it_mobile: ''
+      authorized_personal_Details: {
+        name: '',
+        designation: '',
+        pan_of_RP: '',
+        mobile: '',
+        email: ''
+      },
+      income_tax_details: {
+        pan: '',
+        password: '',
+        registered_mobile_number: ''
+      }
     },
     validationSchema,
-    onSubmit: (values) => {
-      if (editIndex !== null) {
-        const updated = [...tdsList];
-        updated[editIndex] = values;
-        setTdsList(updated);
-      } else {
-        setTdsList([...tdsList, values]);
+    validateOnChange: true,
+    validateOnBlur: true,
+    onSubmit: async (values, { setSubmitting }) => {
+      try {
+        const payload = {
+          ...values,
+          business: user.active_context.business_id,
+          authorized_personal_details: {
+            name: values.authorized_personal_name,
+            designation: values.authorized_personal_designation,
+            mobile_number: values.authorized_personal_mobile,
+            email: values.authorized_personal_email
+          },
+          income_tax_details: {
+            ward: values.ward,
+            ao_type: values.ao_type,
+            range: values.range,
+            ao_number: values.ao_number
+          }
+        };
+
+        // Remove individual fields that are now in nested objects
+        delete payload.authorized_personal_name;
+        delete payload.authorized_personal_designation;
+        delete payload.authorized_personal_mobile;
+        delete payload.authorized_personal_email;
+        delete payload.ward;
+        delete payload.ao_type;
+        delete payload.range;
+        delete payload.ao_number;
+
+        let url = '/user_management/tds-details/';
+        let type = 'post';
+        if (editIndex !== null) {
+          url = `/user_management/tds-details/${tdsList[editIndex].id}/`;
+          type = 'put';
+        }
+
+        const response = await Factory(type, url, payload, {});
+
+        if (response.res.status_cd === 0) {
+          if (editIndex !== null) {
+            const updated = [...tdsList];
+            updated[editIndex] = response.res.data;
+            setTdsList(updated);
+            showNotification('TDS details updated successfully');
+          } else {
+            setTdsList([...tdsList, response.res]);
+            showNotification('TDS details added successfully');
+          }
+          handleClose();
+        } else {
+          showNotification(response.res.status_msg || 'Failed to save TDS details', 'error');
+        }
+      } catch (error) {
+        console.error('Error submitting TDS details:', error);
+        showNotification('Failed to save TDS details', 'error');
+      } finally {
+        setSubmitting(false);
       }
-      handleClose();
     }
   });
+
+  useEffect(() => {
+    fetchTDSDetails();
+  }, []);
 
   return (
     <Box>
@@ -163,20 +319,18 @@ const TDSAndIncomeTax = () => {
                 <TableCell>Deductor Category</TableCell>
                 <TableCell>Deductor Type</TableCell>
                 <TableCell>State</TableCell>
-                <TableCell>Status</TableCell>
                 <TableCell align="right">Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {tdsList.map((row, idx) => (
                 <TableRow key={idx} hover>
-                  <TableCell>{row.tan}</TableCell>
+                  <TableCell>{row.tan_number}</TableCell>
                   <TableCell>{row.trade_name}</TableCell>
                   <TableCell>{row.location}</TableCell>
                   <TableCell>{row.deductor_category}</TableCell>
                   <TableCell>{row.deductor_type}</TableCell>
                   <TableCell>{row.state}</TableCell>
-                  <TableCell>{row.status}</TableCell>
                   <TableCell align="right">
                     <Stack direction="row" spacing={1} justifyContent="flex-end">
                       <Tooltip title="View/Edit">
@@ -184,7 +338,7 @@ const TDSAndIncomeTax = () => {
                           <EditIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
-                      <IconButton size="small" color="error" onClick={() => handleDelete(idx)}>
+                      <IconButton size="small" color="error" onClick={() => handleDeleteClick(idx)}>
                         <DeleteIcon fontSize="small" />
                       </IconButton>
                     </Stack>
@@ -223,13 +377,13 @@ const TDSAndIncomeTax = () => {
                   <TextField
                     fullWidth
                     size="small"
-                    id="tan"
-                    name="tan"
+                    id="tan_number"
+                    name="tan_number"
                     label="TAN"
-                    value={formik.values.tan}
+                    value={formik.values.tan_number}
                     onChange={formik.handleChange}
-                    error={formik.touched.tan && Boolean(formik.errors.tan)}
-                    helperText={formik.touched.tan && formik.errors.tan}
+                    error={formik.touched.tan_number && Boolean(formik.errors.tan_number)}
+                    helperText={formik.touched.tan_number && formik.errors.tan_number}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
@@ -334,55 +488,64 @@ const TDSAndIncomeTax = () => {
                   />
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
+                  <FormControl fullWidth size="small" error={formik.touched.state && Boolean(formik.errors.state)}>
+                    <InputLabel>State</InputLabel>
+                    <Select
+                      id="state"
+                      name="state"
+                      value={formik.values.state}
+                      label="State"
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                    >
+                      {INDIAN_STATES.map((state) => (
+                        <MenuItem key={state} value={state}>
+                          {state}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                    {formik.touched.state && formik.errors.state && <FormHelperText>{formik.errors.state}</FormHelperText>}
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={6} md={4}>
                   <TextField
                     fullWidth
                     size="small"
-                    id="state"
-                    name="state"
-                    label="State"
-                    value={formik.values.state}
+                    id="pincode"
+                    name="pincode"
+                    label="Pincode"
+                    value={formik.values.pincode}
                     onChange={formik.handleChange}
-                    error={formik.touched.state && Boolean(formik.errors.state)}
-                    helperText={formik.touched.state && formik.errors.state}
+                    onBlur={formik.handleBlur}
+                    error={formik.touched.pincode && Boolean(formik.errors.pincode)}
+                    helperText={formik.touched.pincode && formik.errors.pincode}
+                    inputProps={{ maxLength: 6 }}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
                   <TextField
                     fullWidth
                     size="small"
-                    id="zipcode"
-                    name="zipcode"
-                    label="Zipcode"
-                    value={formik.values.zipcode}
-                    onChange={formik.handleChange}
-                    error={formik.touched.zipcode && Boolean(formik.errors.zipcode)}
-                    helperText={formik.touched.zipcode && formik.errors.zipcode}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    id="tds_email"
-                    name="tds_email"
+                    id="email"
+                    name="email"
                     label="Email ID"
-                    value={formik.values.tds_email}
+                    value={formik.values.email}
                     onChange={formik.handleChange}
-                    error={formik.touched.tds_email && Boolean(formik.errors.tds_email)}
-                    helperText={formik.touched.tds_email && formik.errors.tds_email}
+                    error={formik.touched.email && Boolean(formik.errors.email)}
+                    helperText={formik.touched.email && formik.errors.email}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
                   <TextField
                     fullWidth
                     size="small"
-                    id="tds_contact"
-                    name="tds_contact"
+                    id="mobile_number"
+                    name="mobile_number"
                     label="Contact Number"
-                    value={formik.values.tds_contact}
+                    value={formik.values.mobile_number}
                     onChange={formik.handleChange}
-                    error={formik.touched.tds_contact && Boolean(formik.errors.tds_contact)}
-                    helperText={formik.touched.tds_contact && formik.errors.tds_contact}
+                    error={formik.touched.mobile_number && Boolean(formik.errors.mobile_number)}
+                    helperText={formik.touched.mobile_number && formik.errors.mobile_number}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
@@ -427,65 +590,75 @@ const TDSAndIncomeTax = () => {
                   <TextField
                     fullWidth
                     size="small"
-                    id="rp_name"
-                    name="rp_name"
+                    id="authorized_personal_Details.name"
+                    name="authorized_personal_Details.name"
                     label="Name of Responsible Person"
-                    value={formik.values.rp_name}
+                    value={formik.values.authorized_personal_Details.name}
                     onChange={formik.handleChange}
-                    error={formik.touched.rp_name && Boolean(formik.errors.rp_name)}
-                    helperText={formik.touched.rp_name && formik.errors.rp_name}
+                    onBlur={formik.handleBlur}
+                    error={formik.touched.authorized_personal_Details?.name && Boolean(formik.errors.authorized_personal_Details?.name)}
+                    helperText={formik.touched.authorized_personal_Details?.name && formik.errors.authorized_personal_Details?.name}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
                   <TextField
                     fullWidth
                     size="small"
-                    id="rp_designation"
-                    name="rp_designation"
+                    id="authorized_personal_Details.designation"
+                    name="authorized_personal_Details.designation"
                     label="Designation"
-                    value={formik.values.rp_designation}
+                    value={formik.values.authorized_personal_Details.designation}
                     onChange={formik.handleChange}
-                    error={formik.touched.rp_designation && Boolean(formik.errors.rp_designation)}
-                    helperText={formik.touched.rp_designation && formik.errors.rp_designation}
+                    error={
+                      formik.touched.authorized_personal_Details?.designation &&
+                      Boolean(formik.errors.authorized_personal_Details?.designation)
+                    }
+                    helperText={
+                      formik.touched.authorized_personal_Details?.designation && formik.errors.authorized_personal_Details?.designation
+                    }
                   />
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
                   <TextField
                     fullWidth
                     size="small"
-                    id="rp_pan"
-                    name="rp_pan"
+                    id="authorized_personal_Details.pan_of_RP"
+                    name="authorized_personal_Details.pan_of_RP"
                     label="PAN of RP"
-                    value={formik.values.rp_pan}
+                    value={formik.values.authorized_personal_Details.pan_of_RP}
                     onChange={formik.handleChange}
-                    error={formik.touched.rp_pan && Boolean(formik.errors.rp_pan)}
-                    helperText={formik.touched.rp_pan && formik.errors.rp_pan}
+                    error={
+                      formik.touched.authorized_personal_Details?.pan_of_RP && Boolean(formik.errors.authorized_personal_Details?.pan_of_RP)
+                    }
+                    helperText={
+                      formik.touched.authorized_personal_Details?.pan_of_RP && formik.errors.authorized_personal_Details?.pan_of_RP
+                    }
                   />
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
                   <TextField
                     fullWidth
                     size="small"
-                    id="rp_mobile"
-                    name="rp_mobile"
+                    id="authorized_personal_Details.mobile"
+                    name="authorized_personal_Details.mobile"
                     label="Mobile"
-                    value={formik.values.rp_mobile}
+                    value={formik.values.authorized_personal_Details.mobile}
                     onChange={formik.handleChange}
-                    error={formik.touched.rp_mobile && Boolean(formik.errors.rp_mobile)}
-                    helperText={formik.touched.rp_mobile && formik.errors.rp_mobile}
+                    error={formik.touched.authorized_personal_Details?.mobile && Boolean(formik.errors.authorized_personal_Details?.mobile)}
+                    helperText={formik.touched.authorized_personal_Details?.mobile && formik.errors.authorized_personal_Details?.mobile}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
                   <TextField
                     fullWidth
                     size="small"
-                    id="rp_email"
-                    name="rp_email"
+                    id="authorized_personal_Details.email"
+                    name="authorized_personal_Details.email"
                     label="Email"
-                    value={formik.values.rp_email}
+                    value={formik.values.authorized_personal_Details.email}
                     onChange={formik.handleChange}
-                    error={formik.touched.rp_email && Boolean(formik.errors.rp_email)}
-                    helperText={formik.touched.rp_email && formik.errors.rp_email}
+                    error={formik.touched.authorized_personal_Details?.email && Boolean(formik.errors.authorized_personal_Details?.email)}
+                    helperText={formik.touched.authorized_personal_Details?.email && formik.errors.authorized_personal_Details?.email}
                   />
                 </Grid>
               </Grid>
@@ -501,40 +674,46 @@ const TDSAndIncomeTax = () => {
                   <TextField
                     fullWidth
                     size="small"
-                    id="it_pan"
-                    name="it_pan"
+                    id="income_tax_details.pan"
+                    name="income_tax_details.pan"
                     label="PAN"
-                    value={formik.values.it_pan}
+                    value={formik.values.income_tax_details.pan}
                     onChange={formik.handleChange}
-                    error={formik.touched.it_pan && Boolean(formik.errors.it_pan)}
-                    helperText={formik.touched.it_pan && formik.errors.it_pan}
+                    error={formik.touched.income_tax_details?.pan && Boolean(formik.errors.income_tax_details?.pan)}
+                    helperText={formik.touched.income_tax_details?.pan && formik.errors.income_tax_details?.pan}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
                   <TextField
                     fullWidth
                     size="small"
-                    id="it_password"
-                    name="it_password"
+                    id="income_tax_details.password"
+                    name="income_tax_details.password"
                     label="Password"
                     type="password"
-                    value={formik.values.it_password}
+                    value={formik.values.income_tax_details.password}
                     onChange={formik.handleChange}
-                    error={formik.touched.it_password && Boolean(formik.errors.it_password)}
-                    helperText={formik.touched.it_password && formik.errors.it_password}
+                    error={formik.touched.income_tax_details?.password && Boolean(formik.errors.income_tax_details?.password)}
+                    helperText={formik.touched.income_tax_details?.password && formik.errors.income_tax_details?.password}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
                   <TextField
                     fullWidth
                     size="small"
-                    id="it_mobile"
-                    name="it_mobile"
+                    id="income_tax_details.registered_mobile_number"
+                    name="income_tax_details.registered_mobile_number"
                     label="Registered Mobile Number"
-                    value={formik.values.it_mobile}
+                    value={formik.values.income_tax_details.registered_mobile_number}
                     onChange={formik.handleChange}
-                    error={formik.touched.it_mobile && Boolean(formik.errors.it_mobile)}
-                    helperText={formik.touched.it_mobile && formik.errors.it_mobile}
+                    error={
+                      formik.touched.income_tax_details?.registered_mobile_number &&
+                      Boolean(formik.errors.income_tax_details?.registered_mobile_number)
+                    }
+                    helperText={
+                      formik.touched.income_tax_details?.registered_mobile_number &&
+                      formik.errors.income_tax_details?.registered_mobile_number
+                    }
                   />
                 </Grid>
               </Grid>
@@ -544,12 +723,58 @@ const TDSAndIncomeTax = () => {
             <Button onClick={handleClose} size="small" sx={{ color: 'text.primary' }}>
               Cancel
             </Button>
-            <Button type="submit" variant="contained" size="small" color="primary">
-              {editIndex !== null ? 'Update' : 'Save'}
+            <Button
+              type="submit"
+              variant="contained"
+              size="small"
+              color="primary"
+              disabled={formik.isSubmitting}
+              onClick={formik.handleSubmit}
+              sx={{ position: 'relative' }}
+            >
+              {formik.isSubmitting ? (
+                <>
+                  <CircularProgress
+                    size={24}
+                    sx={{
+                      position: 'absolute',
+                      top: '50%',
+                      left: '50%',
+                      marginTop: '-12px',
+                      marginLeft: '-12px'
+                    }}
+                  />
+                  {editIndex !== null ? 'Updating...' : 'Saving...'}
+                </>
+              ) : editIndex !== null ? (
+                'Update'
+              ) : (
+                'Save'
+              )}
             </Button>
           </DialogActions>
         </form>
       </Dialog>
+
+      <DeleteConfirmationDialog
+        open={deleteDialogOpen}
+        onClose={handleDeleteClose}
+        onConfirm={handleDelete}
+        title="Delete TDS Details"
+        message="Are you sure you want to delete these TDS details? This action cannot be undone."
+        itemName={deleteIndex !== null ? `TAN: ${tdsList[deleteIndex]?.tan_number}` : ''}
+      />
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert onClose={handleSnackbarClose} severity={snackbar.severity} variant="filled">
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
