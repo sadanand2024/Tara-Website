@@ -9,6 +9,7 @@ import Typography from '@mui/material/Typography';
 import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
 import IconButton from '@mui/material/IconButton';
+import Button from '@mui/material/Button';
 
 // project imports
 import LogoSection from '../LogoSection';
@@ -40,6 +41,7 @@ import { openSnackbar } from 'store/slices/snackbar';
 
 import { useSelector } from 'store';
 import { Stack } from '@mui/material';
+import Personal from 'views/KYC/Personal';
 
 export default function Header() {
   const dispatch = useDispatch();
@@ -56,6 +58,8 @@ export default function Header() {
   const [selectedOption, setSelectedOption] = React.useState(user.active_context || null);
   const [openAddDialog, setOpenAddDialog] = React.useState(false);
   const [userData, setUserData] = React.useState(user || null);
+  const [openPersonalKYC, setOpenPersonalKYC] = React.useState(false);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const getContext = async () => {
     const response = await Factory('get', '/user_management/user/contexts?user_id=' + userData.user.id, {}, {});
@@ -65,6 +69,7 @@ export default function Header() {
       __storedData.all_contexts = data.contexts;
       setUserData(__storedData);
       localStorage.setItem('user', JSON.stringify(__storedData));
+      reduxDispatch(storeUser(__storedData));
     }
   };
 
@@ -110,8 +115,100 @@ export default function Header() {
     setOpenAddDialog(false);
   };
 
-  // Create options array with all contexts
-  const options = [...userData.all_contexts, { id: 'add_business', name: 'Add Business', isAddOption: true }];
+  const hasPersonalContext = userData.all_contexts.some((context) => context.context_type === 'personal');
+
+  const options = [
+    ...userData.all_contexts
+      .filter((context) => context.context_type === 'personal')
+      .map((context) => ({
+        ...context,
+        isPersonal: true
+      })),
+    ...userData.all_contexts
+      .filter((context) => context.context_type !== 'personal')
+      .map((context) => ({
+        ...context,
+        isPersonal: false,
+        personalContext:
+          userData.all_contexts.find((pc) => pc.type === 'personal' && pc.id === context.personal_context_id)?.name || 'Personal'
+      })),
+    {
+      id: 'add_options',
+      name: hasPersonalContext ? 'Add Business' : 'Add Personal or Business',
+      isAddOption: true
+    }
+  ];
+
+  const handlePersonalKYCSubmit = async (values) => {
+    setIsSubmitting(true);
+    try {
+      const formattedData = {
+        user_id: userData.user.id,
+        context_type: 'personal',
+        user_kyc: {
+          name: values.name,
+          pan_number: values.pan_number,
+          aadhaar_number: values.aadhaar_number,
+          date: values.date,
+          icai_number: null,
+          address: {
+            address_line1: values.address.address_line1,
+            address_line2: values.address.address_line2 || '',
+            pincode: parseInt(values.address.pinCode, 10),
+            state: values.address.state,
+            city: values.address.city,
+            country: values.address.country
+          },
+          have_firm: false
+        }
+      };
+
+      const response = await Factory('post', '/user_management/select-context', formattedData, {});
+      if (response.res.status_cd === 0) {
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'Personal details added successfully',
+            variant: 'alert',
+            anchorOrigin: { vertical: 'top', horizontal: 'right' },
+            alert: { color: 'success' },
+            close: false,
+            severity: 'success'
+          })
+        );
+        setOpenPersonalKYC(false);
+        // Refresh contexts after adding personal details
+        getContext();
+      } else {
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: response.res.status_msg || 'Failed to add personal details',
+            variant: 'alert',
+            anchorOrigin: { vertical: 'top', horizontal: 'right' },
+            alert: { color: 'error' },
+            close: false,
+            severity: 'error'
+          })
+        );
+      }
+    } catch (error) {
+      console.error('Error submitting personal KYC:', error);
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Failed to add personal details',
+          variant: 'alert',
+          anchorOrigin: { vertical: 'top', horizontal: 'right' },
+          alert: { color: 'error' },
+          close: false,
+          severity: 'error'
+        })
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <>
@@ -197,24 +294,82 @@ export default function Header() {
                   component="li"
                   key={option.id}
                   sx={{
-                    color: 'primary.main',
-                    '&:hover': {
-                      bgcolor: 'primary.lighter'
-                    }
+                    p: 1,
+                    display: 'flex',
+                    gap: 1,
+                    justifyContent: 'center'
                   }}
                 >
-                  <AddCircleOutlineIcon fontSize="small" sx={{ mr: 1 }} />
-                  Add Business
+                  {!hasPersonalContext && (
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      startIcon={<AddCircleOutlineIcon />}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setOpenPersonalKYC(true);
+                      }}
+                      sx={{ flex: 1 }}
+                    >
+                      Add Personal
+                    </Button>
+                  )}
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<BusinessIcon />}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setOpenAddDialog(true);
+                    }}
+                    sx={{ flex: 1 }}
+                  >
+                    Add Business
+                  </Button>
                 </Box>
               ];
             }
 
             return (
-              <Box {...otherProps} component="li" key={option.id} sx={{ p: 4 }}>
-                <BusinessIcon fontSize="small" sx={{ mr: 1 }} />
-                <Stack direction="row" alignItems="center" sx={{ justifyContent: 'space-between', width: '100%', py: 0.6 }}>
-                  {option.name || option.context_name || 'Unnamed Option'}
-                </Stack>
+              <Box {...otherProps} component="li" key={option.id} sx={{ p: 1 }}>
+                {option.isPersonal ? (
+                  <Stack direction="row" alignItems="center" sx={{ justifyContent: 'space-between', width: '100%' }}>
+                    <Stack direction="row" alignItems="center">
+                      <Avatar
+                        sx={{
+                          width: 24,
+                          height: 24,
+                          mr: 1,
+                          py: 2,
+                          bgcolor: 'secondary.light',
+                          color: 'secondary.dark'
+                        }}
+                      >
+                        {option.name?.charAt(0) || 'P'}
+                      </Avatar>
+                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                        {option.name || option.context_name || 'Personal'}
+                      </Typography>
+                    </Stack>
+                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                      Personal
+                    </Typography>
+                  </Stack>
+                ) : (
+                  <Stack direction="column" sx={{ width: '100%', py: 0.8 }}>
+                    <Stack direction="row" alignItems="center" sx={{ justifyContent: 'space-between', width: '100%' }}>
+                      <Stack direction="row" alignItems="center">
+                        <BusinessIcon fontSize="small" sx={{ mr: 1, color: 'primary.main' }} />
+                        <Typography variant="body2">{option.name || option.context_name || 'Unnamed Business'}</Typography>
+                      </Stack>
+                      <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                        Business
+                      </Typography>
+                    </Stack>
+                  </Stack>
+                )}
               </Box>
             );
           }}
@@ -242,6 +397,15 @@ export default function Header() {
         userData={userData}
         setUserData={setUserData}
         getContext={getContext}
+      />
+
+      {/* Personal KYC Dialog */}
+      <Personal
+        open={openPersonalKYC}
+        onClose={() => setOpenPersonalKYC(false)}
+        onSubmit={handlePersonalKYCSubmit}
+        isSubmitting={isSubmitting}
+        cancel={true}
       />
     </>
   );

@@ -24,7 +24,7 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import dayjs from 'dayjs';
 import { states } from 'utils/constants';
-const Personal = ({ open, onClose, onSubmit, isSubmitting }) => {
+const Personal = ({ open, onClose, onSubmit, isSubmitting, cancel }) => {
   const theme = useTheme();
 
   const requiredLabel = (label) => (
@@ -77,7 +77,7 @@ const Personal = ({ open, onClose, onSubmit, isSubmitting }) => {
       pan_number: '',
       aadhaar_number: '',
       date: null,
-    //   icai_number: '',
+      //   icai_number: '',
       address: {
         address_line1: '',
         address_line2: '',
@@ -298,10 +298,15 @@ const Personal = ({ open, onClose, onSubmit, isSubmitting }) => {
           </Grid>
         </DialogContent>
         <DialogActions sx={{ p: 2, px: 3 }}>
-          <Button 
-            type="submit" 
-            variant="contained" 
-            color="primary" 
+          {cancel && (
+            <Button onClick={onClose} variant="outlined" color="error" size="medium">
+              Cancel
+            </Button>
+          )}
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
             size="medium"
             disabled={isSubmitting || !formik.dirty || Object.keys(formik.errors).length > 0}
             startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : null}
