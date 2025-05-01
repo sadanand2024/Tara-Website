@@ -32,10 +32,12 @@ function LeaveManagement() {
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [postType, setPostType] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [allLeaveManagementData, setAllLeaveManagementData] = useState([]);
+  const [filteredLeaveData, setFilteredLeaveData] = useState([]);
 
   const rowsPerPage = 5;
   const [searchParams] = useSearchParams();
-  const paginatedData = leaveManagementData.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+  const paginatedData = filteredLeaveData.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 
   useEffect(() => {
     const id = searchParams.get('payrollid');
@@ -52,8 +54,17 @@ function LeaveManagement() {
     setLoading(true);
     const { res } = await Factory('get', `/payroll/leave-management?payroll_id=${payrollId}`, {});
     setLoading(false);
-    setLeaveManagementData(res?.status_cd === 0 ? res.data : []);
+    if (res?.status_cd === 0) {
+      setAllLeaveManagementData(res.data);
+    } else {
+      setAllLeaveManagementData([]);
+    }
   };
+  useEffect(() => {
+    const filtered = allLeaveManagementData.filter((item) => item.leave_type.toLowerCase() === leaveType.toLowerCase());
+    setFilteredLeaveData(filtered);
+    setCurrentPage(1); // Reset to first page on filter change
+  }, [leaveType, allLeaveManagementData]);
 
   const handleOpenDialog = () => setOpenDialog(true);
   const handleCloseDialog = () => setOpenDialog(false);
@@ -158,9 +169,9 @@ function LeaveManagement() {
           </TableContainer>
         )}
 
-        {leaveManagementData.length > rowsPerPage && (
+        {filteredLeaveData.length > 0 && (
           <Stack direction="row" justifyContent="center" py={2}>
-            <Pagination count={Math.ceil(leaveManagementData.length / rowsPerPage)} page={currentPage} onChange={handlePageChange} />
+            <Pagination count={Math.ceil(filteredLeaveData.length / rowsPerPage)} page={currentPage} onChange={handlePageChange} />
           </Stack>
         )}
       </Stack>

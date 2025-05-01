@@ -28,11 +28,11 @@ const ViewSlabs = ({ viewSlabsDialog, setViewSlabsDialog, selectedRecord, setSel
   }, [selectedRecord]);
 
   const savePTIN = async () => {
-    if (!ptin || ptin.length < 6 || ptin.length > 10) {
+    if (!ptin || ptin.length !== 11) {
       dispatch(
         openSnackbar({
           open: true,
-          message: 'PTIN must be between 6-10 digits.',
+          message: 'PTIN must be exactly 11 digits.',
           variant: 'alert',
           alert: { color: 'error' },
           close: false
@@ -50,12 +50,28 @@ const ViewSlabs = ({ viewSlabsDialog, setViewSlabsDialog, selectedRecord, setSel
     const { res } = await Factory('put', `/payroll/pt/${selectedRecord.id}`, postData);
 
     if (res?.status_cd === 0) {
-      showSnackbar('PTIN Updated Successfully', 'success');
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'PTIN Updated Successfully',
+          variant: 'alert',
+          alert: { color: 'success' },
+          close: false
+        })
+      );
       setViewSlabsDialog(false);
       setSelectedRecord(null);
       get_pt_Details(payrollid);
     } else {
-      showSnackbar(JSON.stringify(res?.data?.data || 'Unknown Error'), 'error');
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res?.data?.data || 'Unknown Error'),
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     }
   };
 
@@ -106,12 +122,10 @@ const ViewSlabs = ({ viewSlabsDialog, setViewSlabsDialog, selectedRecord, setSel
               value={ptin}
               onChange={(e) => {
                 const val = e.target.value;
-                if (/^\d{0,10}$/.test(val)) setPtin(val);
+                if (/^\d{0,11}$/.test(val)) setPtin(val);
               }}
               size="small"
               sx={{ maxWidth: 200 }}
-              error={ptin.length > 0 && (ptin.length < 6 || ptin.length > 10)}
-              helperText={ptin.length > 0 && (ptin.length < 6 || ptin.length > 10) ? '6-10 digits allowed' : ''}
             />
           </Stack>
           <TableContainer component={Paper} sx={{ mt: 2, borderRadius: 2 }}>

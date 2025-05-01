@@ -15,6 +15,8 @@ import InputLabel from '@mui/material/InputLabel';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
+import { openSnackbar } from 'store/slices/snackbar';
+import { useDispatch } from 'store';
 
 // third party
 import * as Yup from 'yup';
@@ -33,8 +35,9 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
 export default function JWTLogin({ ...others }) {
   const theme = useTheme();
+  const dispatch = useDispatch();
 
-  const { login, isLoggedIn } = useAuth(); 
+  const { login, isLoggedIn } = useAuth();
   const scriptedRef = useScriptRef();
 
   const [checked, setChecked] = useState(true);
@@ -74,13 +77,31 @@ export default function JWTLogin({ ...others }) {
           if (scriptedRef.current) {
             setStatus({ success: true });
             setSubmitting(false);
+            dispatch(
+              openSnackbar({
+                open: true,
+                message: 'Login successful',
+                variant: 'alert',
+                alert: { color: 'success' },
+                close: false
+              })
+            );
           }
         } catch (err) {
-          console.error(err);
+          const message = err?.error || 'Invalid email or password';
+          dispatch(
+            openSnackbar({
+              open: true,
+              message: message,
+              variant: 'alert',
+              alert: { color: 'error' },
+              close: false
+            })
+          );
           if (scriptedRef.current) {
             setStatus({ success: false });
-            setErrors({ submit: err.message });
-            setSubmitting(false); 
+            setErrors({ submit: err.error });
+            setSubmitting(false);
           }
         }
       }}
