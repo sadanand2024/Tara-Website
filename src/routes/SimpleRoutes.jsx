@@ -4,7 +4,6 @@ import { lazy } from 'react';
 import SimpleLayout from 'layout/SimpleLayout';
 import Loadable from 'ui-component/Loadable';
 import ProductPage from 'views/pages/products/ProductPage';
-
 // lazy loaded pages
 const ContactUs = Loadable(lazy(() => import('views/pages/contact-us')));
 const AboutUs = Loadable(lazy(() => import('views/pages/about-us')));
@@ -12,8 +11,8 @@ const SaasPageFaqs = Loadable(lazy(() => import('views/pages/saas-pages/Faqs')))
 const SaasPagePrivacyPolicy = Loadable(lazy(() => import('views/pages/saas-pages/PrivacyPolicy')));
 const ServicePage = Loadable(lazy(() => import('views/pages/services/ServicePage')));
 const ServiceCategory = Loadable(lazy(() => import('views/pages/services/ServiceCategory')));
-const PayrollPage = Loadable(lazy(() => import('views/pages/products/Payroll')));
-const InvoicingPage = Loadable(lazy(() => import('views/pages/products/invoicing/InvoicingPage')));
+// const PayrollPage = Loadable(lazy(() => import('views/pages/products/Payroll')));
+// const InvoicingPage = Loadable(lazy(() => import('views/pages/products/invoicing/InvoicingPage')));
 const KnowledgePage = Loadable(lazy(() => import('views/pages/knowledge')));
 const BookConsultationPage = Loadable(lazy(() => import('views/pages/BookConsultation')));
 

@@ -22,7 +22,7 @@ const ProductPage = () => {
   return (
     <Box>
       {/* Hero Section */}
-      <Container sx={{ py: { xs: 4, md: 8 } }}>
+      <Container sx={{ py: { xs: 4, md: 8, lg: 2 } }}>
         <HeroSection data={productData} />
       </Container>
 

@@ -1,13 +1,18 @@
-// File: BillingShippingForm.jsx
-
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Box, Grid, Typography, FormControlLabel, Checkbox } from '@mui/material';
 import CustomInput from 'utils/CustomInput';
 import CustomAutocomplete from 'utils/CustomAutocomplete';
 import { indian_States_And_UTs } from 'utils/indian_States_And_UT';
 
-const BillingShippingForm = ({ formik }) => {
+const BillingShippingForm = ({ formik, onStateChange }) => {
   const { values, setFieldValue, touched, errors } = formik;
+
+  const handleStateChange = (section, newState) => {
+    setFieldValue(`${section}.state`, newState);
+    if (onStateChange) {
+      onStateChange(section, newState);
+    }
+  };
 
   const handleSameAddress = (e) => {
     const checked = e.target.checked;
@@ -15,6 +20,10 @@ const BillingShippingForm = ({ formik }) => {
     if (checked) {
       setFieldValue('not_applicablefor_shipping', false);
       setFieldValue('shipping_address', { ...values.billing_address });
+      // Notify about shipping state change if it's now same as billing
+      if (onStateChange) {
+        onStateChange('shipping_address', values.billing_address.state);
+      }
     } else {
       setFieldValue('shipping_address', {
         address_line1: '',
@@ -23,6 +32,9 @@ const BillingShippingForm = ({ formik }) => {
         state: '',
         postal_code: ''
       });
+      if (onStateChange) {
+        onStateChange('shipping_address', '');
+      }
     }
   };
 
@@ -48,6 +60,9 @@ const BillingShippingForm = ({ formik }) => {
             postal_code: ''
           }
     );
+    if (onStateChange) {
+      onStateChange('shipping_address', checked ? 'NA' : '');
+    }
   };
 
   const renderField = (item, section) => {
@@ -59,7 +74,7 @@ const BillingShippingForm = ({ formik }) => {
         <CustomAutocomplete
           options={indian_States_And_UTs}
           value={value || ''}
-          onChange={(_, val) => setFieldValue(fieldName, val)}
+          onChange={(_, val) => handleStateChange(section, val)}
           name={fieldName}
           disabled={values.same_address || values.not_applicablefor_shipping}
           error={touched[section]?.[item.name] && Boolean(errors[section]?.[item.name])}

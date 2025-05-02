@@ -18,42 +18,60 @@ const products = [
     description: 'Automated payroll with TDS, EPF/ESI, payslips & more.',
     icon: <CreditCardIcon sx={{ fontSize: 32, color: '#FF6B6B' }} />,
     path: '/products/payroll',
-    color: '#FF6B6B'
+    color: '#FF6B6B',
+    id: 1,
+    context_type: 'business',
+    is_active: true
   },
   {
     title: 'Invoice',
     description: 'Smart invoicing with GST, reminders, and online payments.',
     icon: <ReceiptIcon sx={{ fontSize: 32, color: '#4D96FF' }} />,
     path: '/products/invoice',
-    color: '#4D96FF'
+    color: '#4D96FF',
+    id: 2,
+    context_type: 'business',
+    is_active: true
   },
   {
     title: 'Accounting',
     description: 'Track income, expenses, and manage books easily.',
     icon: <AccountBalanceIcon sx={{ fontSize: 32, color: '#00C9A7' }} />,
     path: '/products/accounting',
-    color: '#00C9A7'
+    color: '#00C9A7',
+    id: 3,
+    context_type: 'business',
+    is_active: true
   },
   {
     title: 'Document Vault',
     description: 'Securely store and access all your financial documents.',
     icon: <FolderIcon sx={{ fontSize: 32, color: '#FFA94D' }} />,
     path: '/products/document-vault',
-    color: '#FFA94D'
+    color: '#FFA94D',
+    id: 4,
+    context_type: 'business',
+    is_active: true
   },
   {
     title: 'Compliance Tracker',
     description: 'Auto reminders and status for ITR, GST, and ROC filings.',
     icon: <VerifiedUserIcon sx={{ fontSize: 32, color: '#845EF7' }} />,
     path: '/products/compliance-tracker',
-    color: '#845EF7'
+    color: '#845EF7',
+    id: 5,
+    context_type: 'business',
+    is_active: true
   },
   {
     title: 'Tax Calculators',
     description: 'Calculate tax liability, HRA, capital gains & more.',
     icon: <CalculateIcon sx={{ fontSize: 32, color: '#2EB67D' }} />,
     path: '/products/tax-calculators',
-    color: '#2EB67D'
+    color: '#2EB67D',
+    id: 6,
+    context_type: 'business',
+    is_active: true
   }
 ];
 
@@ -93,7 +111,7 @@ const ProductCard = ({ product, onClose }) => (
     </Typography>
     <Button
       component={RouterLink}
-      to={product.path}
+      to={`${product.path}?id=${product.id}&context=${product.context_type}&type=product`}
       onClick={onClose}
       endIcon={<ArrowForwardIcon />}
       sx={{
