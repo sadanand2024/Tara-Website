@@ -185,31 +185,31 @@ export default function Profile2() {
             <Grid size={{ xs: 12, lg: 9 }}>
               <CardContent sx={{ borderLeft: '1px solid', borderColor: 'divider', height: '100%' }}>
                 <TabPanel value={value} index={0}>
-                  <BusinessProfile user={user} />
+                  <BusinessProfile user={user} tabChange={handleChange} tabval={value} />
                 </TabPanel>
                 <TabPanel value={value} index={1}>
-                  <BusinessBankDetails user={user} />
+                  <BusinessBankDetails user={user} tabChange={handleChange} tabval={value} />
                 </TabPanel>
                 <TabPanel value={value} index={2}>
-                  <KeyManagerialPersonnel user={user} />
+                  <KeyManagerialPersonnel user={user} tabChange={handleChange} tabval={value} />
                 </TabPanel>
                 {/* <TabPanel value={value} index={3}>
                   <MSMESettings />
                 </TabPanel> */}
                 <TabPanel value={value} index={3}>
-                  <GSTSettings user={user} />
+                  <GSTSettings user={user} tabChange={handleChange} tabval={value} />
                 </TabPanel>
                 <TabPanel value={value} index={4}>
-                  <TDSAndIncomeTax user={user} />
+                  <TDSAndIncomeTax user={user} tabChange={handleChange} tabval={value} />
                 </TabPanel>
                 <TabPanel value={value} index={5}>
-                  <PayrollCompliance user={user} />
+                  <PayrollCompliance user={user} tabChange={handleChange} tabval={value} />
                 </TabPanel>
                 <TabPanel value={value} index={6}>
-                  <Licenses user={user} />
+                  <Licenses user={user} tabChange={handleChange} tabval={value} />
                 </TabPanel>
                 <TabPanel value={value} index={7}>
-                  <DSCRegister user={user} />
+                  <DSCRegister user={user} tabChange={handleChange} tabval={value} />
                 </TabPanel>
               </CardContent>
             </Grid>
@@ -227,7 +227,7 @@ export default function Profile2() {
                 )}
               </Grid>
               <Grid>
-                {value < 3 && (
+                {value < 7 && value !== 0 && (
                   <AnimateButton>
                     <Button variant="contained" size="large" onClick={(e) => handleChange(e, 1 + value)}>
                       Continue

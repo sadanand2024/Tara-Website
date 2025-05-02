@@ -243,7 +243,7 @@ export default function ProfileSection() {
                             <ListItemText
                               primary={
                                 <Typography variant="body2">
-                                  <FormattedMessage id="account-settings" />
+                                  <FormattedMessage id="personal-settings" />
                                 </Typography>
                               }
                             />

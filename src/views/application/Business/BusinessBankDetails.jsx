@@ -46,7 +46,7 @@ const validationSchema = Yup.object().shape({
     .nullable()
 });
 
-const BusinessBankDetails = () => {
+const BusinessBankDetails = ({ user, tabChange, tabval }) => {
   const [open, setOpen] = useState(false);
   const [bankAccounts, setBankAccounts] = useState([]);
   const [editIndex, setEditIndex] = useState(null);
@@ -58,7 +58,6 @@ const BusinessBankDetails = () => {
     message: '',
     severity: 'success'
   });
-  const user = useSelector((state) => state).accountReducer.user;
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
@@ -335,15 +334,15 @@ const BusinessBankDetails = () => {
             <Button onClick={handleClose} size="small" sx={{ color: 'text.primary' }}>
               Cancel
             </Button>
-            <Button 
-              type="submit" 
-              variant="contained" 
-              size="small" 
+            <Button
+              type="submit"
+              variant="contained"
+              size="small"
               color="primary"
               disabled={formik.isSubmitting || isLoading}
               sx={{ position: 'relative', minWidth: '100px' }}
             >
-              {(formik.isSubmitting || isLoading) ? (
+              {formik.isSubmitting || isLoading ? (
                 <>
                   <CircularProgress
                     size={24}

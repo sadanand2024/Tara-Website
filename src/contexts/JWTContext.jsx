@@ -117,7 +117,6 @@ export function JWTProvider({ children }) {
         __postData.business_name = organizationName;
         __postData.module_id = moduleId;
       }
-      console.log(__postData);
       const response = await axios.post(url, __postData);
       if (response.status === 201 && response.statusText === 'Created') {
         return response.data;

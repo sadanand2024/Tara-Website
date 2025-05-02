@@ -23,7 +23,7 @@ import NotificationSection from './NotificationSection';
 import AddBusiness from './AddBusiness';
 import { useDispatch as useReduxDispatch } from 'react-redux';
 
-import { handlerDrawerOpen, useGetMenuMaster } from 'api/menu';
+import { handlerDrawerOpen, useGetMenuMaster } from 'api/menu'; 
 import { MenuOrientation, ThemeMode } from 'config';
 import useConfig from 'hooks/useConfig';
 import Factory from 'utils/Factory';
@@ -43,7 +43,7 @@ import { useSelector } from 'store';
 import { Stack } from '@mui/material';
 import Personal from 'views/KYC/Personal';
 
-export default function Header() {
+const Header = ({ hamburgerDisplay = 'block' }) => {
   const dispatch = useDispatch();
   const reduxDispatch = useReduxDispatch(); // ✅ Redux dispatcher
   const user = useSelector((state) => state.accountReducer.user);
@@ -105,12 +105,7 @@ export default function Header() {
       console.error('Error switching context:', error);
     }
   };
-
-  const handleEditBusiness = (option) => {
-    console.log(option);
-    setOpenAddDialog(true);
-  };
-
+  
   const handleAddDialogClose = () => {
     setOpenAddDialog(false);
   };
@@ -213,14 +208,30 @@ export default function Header() {
   return (
     <>
       {/* logo & toggler button */}
-      <Box sx={{ width: downMD ? 'auto' : 228, display: 'flex' }}>
-        <Box component="span" sx={{ display: { xs: 'none', md: 'block' }, flexGrow: 1 }}>
+      <Box
+        sx={{
+          width: 228,
+          display: 'flex',
+          [theme.breakpoints.down('md')]: {
+            width: 'auto'
+          }
+        }}
+      >
+        <Box
+          component="span"
+          sx={{
+            display: { xs: 'none', md: 'block' },
+            flexGrow: 1,
+            mr: 2
+          }}
+        >
           <LogoSection />
         </Box>
         {!isHorizontal && (
           <Avatar
             variant="rounded"
             sx={{
+              display: hamburgerDisplay,
               ...theme.typography.commonAvatar,
               ...theme.typography.mediumAvatar,
               overflow: 'hidden',
@@ -230,12 +241,18 @@ export default function Header() {
               '&:hover': {
                 bgcolor: mode === ThemeMode.DARK ? 'secondary.main' : 'secondary.dark',
                 color: mode === ThemeMode.DARK ? 'secondary.light' : 'secondary.light'
-              }
+              },
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '34px',
+              height: '34px',
+              padding: '6px'
             }}
             onClick={() => handlerDrawerOpen(!drawerOpen)}
             color="inherit"
           >
-            <IconMenu2 stroke={1.5} size="20px" />
+            <IconMenu2 stroke={1.5} size="1.3rem" />
           </Avatar>
         )}
       </Box>
@@ -409,4 +426,6 @@ export default function Header() {
       />
     </>
   );
-}
+};
+
+export default Header;

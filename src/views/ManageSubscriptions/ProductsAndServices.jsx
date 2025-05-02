@@ -203,7 +203,6 @@ const ProductsAndServices = () => {
   const user = useSelector((state) => state).accountReducer.user;
 
   useEffect(() => {
-    console.log(user);
     const tab = searchParams.get('tab');
     if (tab) {
       setTabValue(parseInt(tab));

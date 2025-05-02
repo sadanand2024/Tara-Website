@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 
 // material-ui
@@ -31,34 +31,69 @@ export default function MainLayout() {
   const { borderRadius, container, miniDrawer, menuOrientation } = useConfig();
   const { menuMaster, menuMasterLoading } = useGetMenuMaster();
   const drawerOpen = menuMaster?.isDashboardDrawerOpened;
+  const [isHovering, setIsHovering] = useState(false);
 
   useEffect(() => {
-    handlerDrawerOpen(!miniDrawer);
-  }, [miniDrawer]);
-
-  useEffect(() => {
-    downMD && handlerDrawerOpen(false);
+    if (!downMD) {
+      handlerDrawerOpen(true);
+    }
   }, [downMD]);
 
-  const isHorizontal = menuOrientation === MenuOrientation.HORIZONTAL && !downMD;
-
-  // horizontal menu-list bar : drawer
-  const menu = useMemo(() => (isHorizontal ? <HorizontalBar /> : <Sidebar />), [isHorizontal]);
+  useEffect(() => {
+    if (downMD) {
+      return;
+    }
+    handlerDrawerOpen(isHovering);
+  }, [isHovering, downMD]);
 
   if (menuMasterLoading) return <Loader />;
 
   return (
     <Box sx={{ display: 'flex' }}>
-      {/* header */}
       <AppBar enableColorOnDark position="fixed" color="inherit" elevation={0} sx={{ bgcolor: 'background.default' }}>
-        <Toolbar sx={{ p: isHorizontal ? 1.25 : 2 }}>
-          <Header />
+        <Toolbar>
+          <Header hamburgerDisplay={downMD ? 'block' : 'none'} />
         </Toolbar>
       </AppBar>
 
-      {/* menu / drawer */}
-      {menu}
-
+      <Box
+        onMouseEnter={() => !downMD && setIsHovering(true)}
+        onMouseLeave={() => !downMD && setIsHovering(false)}
+        sx={{
+          transition: theme.transitions.create(['width', 'margin'], {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.shorter
+          }),
+          '& > *': {
+            transition: theme.transitions.create(['width', 'margin'], {
+              easing: theme.transitions.easing.sharp,
+              duration: theme.transitions.duration.shorter
+            })
+          },
+          '& .simplebar-scrollbar': {
+            '&.simplebar-visible:before': {
+              opacity: 0
+            }
+          },
+          '& .simplebar-track.simplebar-vertical': {
+            width: '0 !important'
+          },
+          '& .simplebar-track.simplebar-horizontal .simplebar-scrollbar': {
+            height: '0 !important'
+          },
+          '& .simplebar-mask': {
+            overflow: 'auto !important'
+          },
+          '& .simplebar-content-wrapper': {
+            scrollbarWidth: 'none',
+            '&::-webkit-scrollbar': {
+              display: 'none'
+            }
+          }
+        }}
+      >
+        <Sidebar />
+      </Box>
       {/* main content */}
       <MainContentStyled {...{ borderRadius, menuOrientation, open: drawerOpen }}>
         <Container
