@@ -96,19 +96,21 @@ const InvoiceDetailsForm = ({ formik, invoiceData, businessDetailsData, customer
     if (fieldName === 'invoice_date' || fieldName === 'due_date') {
       return (
         <CustomDatePicker
-          views={['year', 'month', 'day']}
+          name={fieldName}
           value={value ? dayjs(value) : null}
           onChange={(date) => {
-            const formatted = dayjs(date).format('YYYY-MM-DD');
-            formik.setFieldValue(fieldName, formatted);
-            if (fieldName === 'due_date' && formik.values.terms !== 'Custom') {
-              formik.setFieldValue('terms', 'Custom');
+            if (date) {
+              const formatted = dayjs(date).format('YYYY-MM-DD');
+              formik.setFieldValue(fieldName, formatted);
+              if (fieldName === 'due_date' && formik.values.terms !== 'Custom') {
+                formik.setFieldValue('terms', 'Custom');
+              }
+            } else {
+              formik.setFieldValue(fieldName, null);
             }
           }}
           error={formik.touched[fieldName] && Boolean(formik.errors[fieldName])}
           helperText={formik.touched[fieldName] && formik.errors[fieldName]}
-          inputFormat="YYYY-MM-DD" // Display in YYYY-MM-DD format
-          onBlur={() => formik.setFieldTouched(item.name, true)}
         />
       );
     } else if (['place_of_supply', 'state'].includes(fieldName)) {
@@ -150,7 +152,6 @@ const InvoiceDetailsForm = ({ formik, invoiceData, businessDetailsData, customer
           name={fieldName}
           value={value || ''}
           onChange={(e) => formik.setFieldValue(fieldName, e.target.value)}
-          onBlur={formik.handleBlur}
           error={formik.touched[fieldName] && Boolean(formik.errors[fieldName])}
           helperText={formik.touched[fieldName] && formik.errors[fieldName]}
           disabled={fieldName === 'invoice_number'}

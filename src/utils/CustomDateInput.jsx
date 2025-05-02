@@ -8,20 +8,20 @@ import dayjs from 'dayjs';
 const CustomDatePicker = ({ label, value, name, onChange, error, helperText, width = '100%', size = 'small', onBlur, ...params }) => {
   const parsedValue = value ? dayjs(value) : null;
 
+  const handleDateChange = (newValue) => {
+    // Handle both direct date picker selection and manual input
+    if (newValue && dayjs(newValue).isValid()) {
+      onChange(newValue);
+    } else {
+      onChange(null);
+    }
+  };
+
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <DatePicker
-        label={label}
         value={parsedValue}
-        onChange={(newValue) => {
-          if (newValue && dayjs(newValue).isValid()) {
-            onChange(dayjs(newValue));
-          } else {
-            onChange(null);
-          }
-        }}
-        format="DD-MM-YYYY"
-        openTo="day"
+        onChange={handleDateChange}
         slotProps={{
           textField: {
             error: Boolean(error),
@@ -31,15 +31,18 @@ const CustomDatePicker = ({ label, value, name, onChange, error, helperText, wid
             onBlur,
             sx: { width },
             inputProps: {
-              placeholder: 'DD-MM-YYYY',
-              maxLength: 10
+              placeholder: 'DD-MM-YYYY'
             }
           },
-          actionBar: {
-            actions: ['clear', 'accept']
+          field: {
+            clearable: true,
+            onClear: () => onChange(null)
           }
         }}
         {...params}
+        format="DD-MM-YYYY"
+        views={['year', 'month', 'day']}
+        closeOnSelect={true}
       />
     </LocalizationProvider>
   );

@@ -103,7 +103,7 @@ const AddItem = ({
     customer: Yup.string().required('Customer name is required'),
     terms: Yup.string().required('Terms are required'),
     invoice_number: Yup.string().required('Invoice number is required'),
-    invoice_date: Yup.date().required('Invoice date is required'),
+    invoice_date: Yup.string().required('Invoice date is required'),
     place_of_supply: Yup.string().required('Place of supply is required'),
     due_date: Yup.date().required('Due date is required'),
     order_number: Yup.string().required('Order number is required'),
