@@ -216,7 +216,7 @@ const BusinessProfile = ({ user, tabChange, tabval }) => {
         </Grid>
 
         {/* First Row: Business Name, Business PAN, and Logo */}
-        <Grid item xs={12} sm={4}>
+        <Grid item xs={12} sm={6}>
           <TextField
             fullWidth
             size="small"
@@ -230,7 +230,7 @@ const BusinessProfile = ({ user, tabChange, tabval }) => {
           />
         </Grid>
 
-        <Grid item xs={12} sm={4}>
+        <Grid item xs={12} sm={6}>
           <TextField
             fullWidth
             size="small"
@@ -244,8 +244,8 @@ const BusinessProfile = ({ user, tabChange, tabval }) => {
           />
         </Grid>
 
-        <Grid item xs={12} sm={4}>
-          <Box sx={{ mb: 2 }}>
+        {/* <Grid item xs={12} sm={4}> */}
+          {/* <Box sx={{ mb: 2 }}>
             <input accept="image/*" style={{ display: 'none' }} id="logo-upload" type="file" onChange={handleLogoChange} />
             <label htmlFor="logo-upload">
               <Button variant="outlined" component="span" size="small">
@@ -257,8 +257,8 @@ const BusinessProfile = ({ user, tabChange, tabval }) => {
                 {logoFile.name}
               </Typography>
             )}
-          </Box>
-        </Grid>
+          </Box> */}
+        {/* </Grid> */}
 
         <Grid item xs={12} sm={6}>
           <FormControl fullWidth size="small" error={formik.touched.business_nature && Boolean(formik.errors.business_nature)}>
@@ -335,7 +335,7 @@ const BusinessProfile = ({ user, tabChange, tabval }) => {
           </Typography>
         </Grid>
 
-        <Grid item xs={12} sm={6} md={4}>
+        <Grid item xs={12} sm={6} md={6}>
           <TextField
             fullWidth
             size="small"
@@ -349,7 +349,7 @@ const BusinessProfile = ({ user, tabChange, tabval }) => {
           />
         </Grid>
 
-        <Grid item xs={12} sm={6} md={4}>
+        <Grid item xs={12} sm={6} md={6}>
           <TextField
             fullWidth
             size="small"
