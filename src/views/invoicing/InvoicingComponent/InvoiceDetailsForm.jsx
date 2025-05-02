@@ -7,8 +7,10 @@ import CustomInput from 'utils/CustomInput';
 import CustomDatePicker from 'utils/CustomDateInput';
 import { indian_States_And_UTs } from 'utils/indian_States_And_UT';
 import dayjs from 'dayjs';
-
+import { useDispatch } from 'store';
+import { openSnackbar } from 'store/slices/snackbar';
 const InvoiceDetailsForm = ({ formik, invoiceData, businessDetailsData, customers }) => {
+  const dispatch = useDispatch();
   const termsDropdown = [
     'NET 15',
     'NET 30',
@@ -78,7 +80,8 @@ const InvoiceDetailsForm = ({ formik, invoiceData, businessDetailsData, customer
     formik.setFieldValue('billing_address.state', selectedCustomer.state);
     formik.setFieldValue('billing_address.country', selectedCustomer.country);
     formik.setFieldValue('billing_address.postal_code', selectedCustomer.postal_code);
-
+    formik.setFieldValue('customer_gstin', selectedCustomer.gstin);
+    formik.setFieldValue('customer_pan', selectedCustomer.pan_number);
     // Conditionally update shipping address if "same_address" is true
     if (formik.values.same_address) {
       formik.setFieldValue('shipping_address.address_line1', selectedCustomer.address_line1);

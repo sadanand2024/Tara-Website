@@ -62,11 +62,11 @@ const ItemDetailsAndNotes = ({
         <Table>
           <TableHead>
             <TableRow sx={{ bgcolor: 'grey.100' }}>
-              <TableCell>Item</TableCell>
-              <TableCell>Quantity</TableCell>
+              <TableCell sx={{ minWidth: '250px' }}>Item</TableCell>
+              <TableCell sx={{ minWidth: '100px' }}>Quantity</TableCell>
               <TableCell>Rate</TableCell>
-              <TableCell>Discount type</TableCell>
-              <TableCell>Discount</TableCell>
+              <TableCell sx={{ minWidth: '100px' }}>Discount type</TableCell>
+              <TableCell sx={{ minWidth: '80px' }}>Discount</TableCell>
               <TableCell>Amount</TableCell>
               <TableCell>Tax %</TableCell>
               <TableCell>Tax Amount</TableCell>
@@ -83,16 +83,16 @@ const ItemDetailsAndNotes = ({
                     options={itemsList.map((item) => item.name)}
                     value={item.item || ''}
                     onChange={(e, val) => handleItemChange(index, val)}
-                    renderInput={(params) => <TextField {...params} />}
+                    renderInput={(params) => <TextField {...params} sx={{ width: 250 }} />}
                   />
                 </TableCell>
 
                 <TableCell>
-                  <CustomInput value={item.quantity} onChange={(e) => handleQuantityChange(index, e.target.value)} />
+                  <CustomInput value={item.quantity} onChange={(e) => handleQuantityChange(index, e.target.value)} sx={{ width: 100 }} />
                 </TableCell>
 
                 <TableCell>
-                  <CustomInput value={item.rate} onChange={(e) => handleRateChange(index, e.target.value)} />
+                  <CustomInput value={item.rate} onChange={(e) => handleRateChange(index, e.target.value)} sx={{ width: '80%' }} />
                 </TableCell>
 
                 <TableCell>
@@ -100,12 +100,12 @@ const ItemDetailsAndNotes = ({
                     options={['%', '₹']}
                     value={item.discount_type || ''}
                     onChange={(e, val) => handleDiscountTypeChange(index, val)}
-                    renderInput={(params) => <TextField {...params} />}
+                    renderInput={(params) => <TextField {...params} sx={{ width: 80 }} />}
                   />
                 </TableCell>
 
                 <TableCell>
-                  <CustomInput value={item.discount} onChange={(e) => handleDiscountChange(index, e.target.value)} />
+                  <CustomInput value={item.discount} onChange={(e) => handleDiscountChange(index, e.target.value)} sx={{ width: '60%' }} />
                 </TableCell>
 
                 <TableCell>{item.amount.toFixed(2)}</TableCell>
@@ -171,15 +171,17 @@ const ItemDetailsAndNotes = ({
                 <Typography variant="body1">{formik.values.subtotal_amount.toFixed(2)}</Typography>
               </Box>
 
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Typography variant="body1" sx={{ minWidth: 110 }}>
+              <Box
+                sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', bgcolor: 'grey.100', p: 1, borderRadius: 1 }}
+              >
+                <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
                   Shipping Charges:
                 </Typography>
                 <CustomInput
                   name="shipping_amount"
                   value={formik.values.shipping_amount}
                   onChange={handleShippingAmountChange}
-                  sx={{ maxWidth: 100 }}
+                  sx={{ maxWidth: 100, bgcolor: 'white' }}
                 />
               </Box>
 

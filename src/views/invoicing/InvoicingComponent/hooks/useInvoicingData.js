@@ -16,24 +16,22 @@ export const useInvoicingData = () => {
   const [searchParams] = useSearchParams();
   const invoiceId = searchParams.get('id');
 
-  const showErrorSnackbar = (error) => {
-    dispatch(
-      openSnackbar({
-        open: true,
-        message: JSON.stringify(error) || 'Something went wrong',
-        variant: 'alert',
-        alert: { color: 'error' },
-        close: false
-      })
-    );
-  };
-
   const fetchBusinessDetails = async () => {
     const businessId = user.active_context.business_id;
     const url = `/invoicing/invoicing-profiles/?business_id=${businessId}`;
     const { res } = await Factory('get', url, {});
-    if (res) {
+    if (res.status_cd === 0) {
       setBusinessDetails(res.data);
+    } else {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res.data.data.error),
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     }
   };
 
@@ -42,7 +40,15 @@ export const useInvoicingData = () => {
     if (res.status_cd === 0) {
       setCustomers(res.data.customer_profiles);
     } else {
-      showErrorSnackbar(res.data.error);
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res.data.data.error),
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     }
   };
 
@@ -53,16 +59,33 @@ export const useInvoicingData = () => {
     if (res.status_cd === 0) {
       setItemsList(res.data.goods_and_services);
     } else {
-      showErrorSnackbar(res.data.error);
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res.data.data.error),
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     }
   };
 
   const getInvoiceFormat = async () => {
     const { res } = await Factory('get', `/invoicing/latest/${businessDetails?.id}/`, {});
+    console.log(res);
     if (res.status_cd === 0) {
       setInvoiceNumberFormat(res.data.latest_invoice_number);
     } else {
-      showErrorSnackbar(res.data.error);
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res.data.data.error),
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     }
   };
 
@@ -71,7 +94,15 @@ export const useInvoicingData = () => {
     if (res.status_cd === 0) {
       setSelectedInvoice({ ...res.data });
     } else {
-      showErrorSnackbar(res.data.error);
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res.data.error),
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     }
   };
 

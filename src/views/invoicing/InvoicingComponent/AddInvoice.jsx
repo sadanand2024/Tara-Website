@@ -16,8 +16,9 @@ import { BASE_URL } from '../../../../constants';
 import InvoiceDetailsForm from './InvoiceDetailsForm';
 import BillingShippingForm from './BillingShippingForm';
 import ItemDetailsAndNotes from './ItemDetailsAndNotes';
-
-import { Checkbox, FormControlLabel, Typography, Select, MenuItem, InputLabel, Stack } from '@mui/material';
+import { useDispatch } from 'store';
+import { openSnackbar } from 'store/slices/snackbar';
+import { Typography, Stack } from '@mui/material';
 import dayjs from 'dayjs';
 import Factory from 'utils/Factory';
 import BulkItems from './BulkItems';
@@ -38,6 +39,8 @@ const AddItem = ({
   const [addInvoiceData] = useState({
     invoice_data: [
       { name: 'customer', label: 'Customer Name' },
+      { name: 'customer_gstin', label: 'Customer GSTIN' },
+      { name: 'customer_pan', label: 'Customer PAN' },
       { name: 'place_of_supply', label: 'Place of Supply' },
       { name: 'invoice_number', label: 'Invoice Number' },
       { name: 'invoice_date', label: 'Invoice Date' },
@@ -55,7 +58,7 @@ const AddItem = ({
   const [selectedgstin, setSelectedgstin] = useState('');
   const [bulkItemsDialogue, setBulkItemsDialogue] = useState(false); // State for Apply Tax checkbox
   // const [invoice_number_format, set_Invoice_number_format] = useState('');
-
+  const dispatch = useDispatch();
   const gstRates = [0, 5, 12, 18, 28]; // Example GST rates
 
   const handleShippingAmountChange = (e) => {
@@ -73,10 +76,10 @@ const AddItem = ({
     formik.setFieldValue('shipping_amount_with_tax', shippingCharges + taxOnShipping);
   };
   const handleApplyTaxChange = (e) => {
-    setFieldValue('applied_tax', e.target.checked);
+    formik.setFieldValue('applied_tax', e.target.checked);
     if (!e.target.checked) {
-      formik.setFieldValue('shipping_tax', 0); // If tax is not applied, reset shipping tax
-      setFieldValue('selected_gst_rate', 0);
+      formik.setFieldValue('shipping_tax', 0);
+      formik.setFieldValue('selected_gst_rate', 0);
     }
   };
 
@@ -101,36 +104,15 @@ const AddItem = ({
   const validationSchema = Yup.object({
     gstin: Yup.string().required('GSTIN is required'),
     customer: Yup.string().required('Customer name is required'),
+    customer_gstin: Yup.string().required('Customer GSTIN is required'),
+    customer_pan: Yup.string().required('Customer PAN is required'),
     terms: Yup.string().required('Terms are required'),
     invoice_number: Yup.string().required('Invoice number is required'),
     invoice_date: Yup.string().required('Invoice date is required'),
     place_of_supply: Yup.string().required('Place of supply is required'),
-    due_date: Yup.date().required('Due date is required'),
-    order_number: Yup.string().required('Order number is required'),
-    sales_person: Yup.string().required('Sales Person is required')
-
-    // not_applicablefor_shipping: Yup.boolean(),
-
-    // billing_address: Yup.object({
-    //   address_line1: Yup.string().required('Address Line 1 is required'),
-    //   address_line2: Yup.string().required('Address Line 2 is required'),
-    //   country: Yup.string().required('Country is required'),
-    //   state: Yup.string().required('State is required'),
-    //   postal_code: Yup.string().required('Postal Code is required')
-    // }),
-    // shipping_address: Yup.object({
-    //   address_line1: Yup.string().required('Address Line 1 is required'),
-    //   address_line2: Yup.string().required('Address Line 2 is required'),
-    //   country: Yup.string().required('Country is required'),
-    //   state: Yup.string().required('State is required'),
-
-    //   postal_code: Yup.string().when('not_applicablefor_shipping', {
-    //     is: false,
-    //     then: () => Yup.string().required('Postal code is required'),
-
-    //     otherwise: Yup.string().oneOf(['NA'], 'Postal code must be "NA" when shipping is not applicable') // Ensure "NA" for "No"
-    //   })
-    // })
+    due_date: Yup.date().required('Due date is required')
+    // order_number: Yup.string().required('Order number is required'),
+    // sales_person: Yup.string().required('Sales Person is required')
   });
   const formik = useFormik({
     initialValues: {
@@ -157,22 +139,7 @@ const AddItem = ({
         state: '',
         postal_code: ''
       },
-      item_details: [
-        // {
-        //   item: '',
-        //   quantity: 1,
-        //   rate: 0,
-        //   discount_type: '%',
-        //   discount: 0,
-        //   amount: 0,
-        //   tax: 0,
-        //   taxamount: 0,
-        //   total_amount: 0,
-        //   cgst_amount: 0,
-        //   sgst_amount: 0,
-        //   igst_amount: 0
-        // }
-      ],
+      item_details: [],
       amount_invoiced: 0,
       total_cgst_amount: 0,
       total_sgst_amount: 0,
@@ -335,15 +302,41 @@ const AddItem = ({
       item.total_amount = amountAfterDiscount + taxAmount;
 
       // Update CGST, SGST, IGST amounts based on place of supply logic
-      if (values.place_of_supply === businessDetailsData.state) {
-        // If place of supply is same, CGST and SGST
+      console.log('States comparison:', {
+        place_of_supply: values.place_of_supply,
+        billing_state: values.billing_address.state,
+        shipping_state: values.shipping_address.state
+      });
+
+      // Normalize state values for comparison
+      const normalizeState = (state) => (state ? state.toString().trim().toLowerCase() : '');
+
+      const placeOfSupply = normalizeState(values.place_of_supply);
+      const billingState = normalizeState(values.billing_address.state);
+      const shippingState = values.shipping_address.state; // Don't normalize shipping state to check for exact "NA"
+
+      // If shipping state is "NA" or empty string, consider it as same as billing state for GST calculation
+      const effectiveShippingState = shippingState === 'NA' || shippingState === '' ? billingState : normalizeState(shippingState);
+
+      const isIntraState = placeOfSupply === billingState && placeOfSupply === effectiveShippingState;
+
+      console.log('Normalized States:', {
+        placeOfSupply,
+        billingState,
+        shippingState,
+        effectiveShippingState,
+        isIntraState
+      });
+
+      if (isIntraState) {
+        // If place of supply and both addresses are in same state, CGST and SGST
         item.cgst_amount = taxAmount / 2;
         item.sgst_amount = taxAmount / 2;
         item.igst_amount = 0;
         totalCGSTAmount += item.cgst_amount;
         totalSGSTAmount += item.sgst_amount;
       } else {
-        // If place of supply is different, IGST
+        // If any of the states are different, IGST
         item.cgst_amount = 0;
         item.sgst_amount = 0;
         item.igst_amount = taxAmount;
@@ -389,9 +382,10 @@ const AddItem = ({
     const newItemDetails = [...formik.values.item_details];
     newItemDetails[index].rate = newRate;
 
-    // formik.setFieldValue('item_details', newItemDetails);
+    formik.setFieldValue('item_details', newItemDetails); // ✅ missing line
     recalculateTotals();
   };
+
   const handleDiscountChange = (index, value) => {
     setSaveButton(false);
 
@@ -448,7 +442,9 @@ const AddItem = ({
     formik.values.shipping_amount_with_tax,
     formik.values.applied_tax,
     formik.values.selected_gst_rate,
-    formik.values.place_of_supply
+    formik.values.place_of_supply,
+    formik.values.billing_address.state,
+    formik.values.shipping_address.state
   ]);
   useEffect(() => {
     recalculateTotals();
@@ -494,7 +490,8 @@ const AddItem = ({
           selectedInvoice.shipping_address.postal_code === selectedInvoice.billing_address.postal_code
             ? true
             : false,
-
+        customer_gstin: selectedInvoice.customer_gstin,
+        customer_pan: selectedInvoice.customer_pan,
         // not_applicablefor_shipping:
         //   selectedInvoice.billing_address &&
         //   selectedInvoice.shipping_address.address_line1 === 'NA' &&
@@ -516,7 +513,6 @@ const AddItem = ({
     setSelectedgstin(businessDetailsData.gstin);
   }, [businessDetailsData]);
   return (
-    // <HomeCard title={selectedInvoice ? 'Edit Invoice' : 'Create Invoice'} tagline="Some text tagline regarding invoicing.">
     <MainCard>
       <Stack direction="row" sx={{ alignItems: 'end', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap' }}></Stack>
       <form
@@ -532,7 +528,7 @@ const AddItem = ({
 
         <Grid2 container spacing={2}>
           <Grid2 size={{ xs: 6 }}>
-            <Typography gutterBottom>Select GSTIN</Typography>
+            <Typography gutterBottom>Select Company GSTIN</Typography>
             <CustomAutocomplete
               name="gstin"
               value={values.gstin || ''}
@@ -542,12 +538,12 @@ const AddItem = ({
                 const url = `/invoicing/invoicing-profiles/${businessDetailsData.id}/update/`;
                 let formdata = new FormData();
                 formdata.append('gstin', newgstin || 'NA');
-
                 const { res } = await Factory('put', url, formdata);
+
                 if (res.status_cd === 0) {
                   getInvoiceFormat();
                 } else {
-                  showSnackbar(JSON.stringify(res.data.data), 'error');
+                  dispatch(openSnackbar({ message: JSON.stringify(res.data.data), variant: 'error' }));
                 }
               }}
               options={
@@ -568,7 +564,15 @@ const AddItem = ({
         </Grid2>
         <Divider sx={{ mb: 4, mt: 4 }} />
 
-        <BillingShippingForm formik={formik} />
+        <BillingShippingForm
+          formik={formik}
+          onStateChange={(section, newState) => {
+            // Update the state in formik
+            formik.setFieldValue(`${section}.state`, newState);
+            // Trigger GST recalculation
+            recalculateTotals();
+          }}
+        />
 
         <Divider sx={{ mt: 4, mb: 4 }} />
         <Grid2 size={{ xs: 12, sm: 6 }}>
@@ -596,22 +600,11 @@ const AddItem = ({
             color="error"
             type="button"
             onClick={() => {
-              navigate(`/invoicing`);
+              navigate(`/app/invoice`);
             }}
           >
             Cancel
           </Button>
-          {/* <Button
-              variant="contained"
-              type="button"
-              onClick={() => {
-                formik.setFieldValue('invoice_status', 'Draft'); // 'Draft' should be a string
-                formik.handleSubmit();
-              }}
-              // disabled={formik.values.invoice_status === 'Draft'}
-            >
-              Save as Draft
-            </Button> */}
 
           <Button variant="contained" type="submit">
             Save
@@ -629,7 +622,6 @@ const AddItem = ({
         bulkItemSave={bulkItemSave}
       />
     </MainCard>
-    // </HomeCard>
   );
 };
 

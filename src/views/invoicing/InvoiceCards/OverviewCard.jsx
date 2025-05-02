@@ -318,7 +318,6 @@ export default function OverviewCard({ invoicing_profile_data, businessId, open,
           Authorization: `Bearer ${tokens.access_token}`
         }
       });
-
       if (response.data.byteLength > 0) {
         const blob = new Blob([response.data], { type: 'application/pdf' });
         const url = URL.createObjectURL(blob);
@@ -338,10 +337,34 @@ export default function OverviewCard({ invoicing_profile_data, businessId, open,
         );
       }
     } catch (error) {
+      let errorMessage = 'Error downloading invoice';
+
+      // Try to parse the error response if it's an arraybuffer
+      if (error.response?.data instanceof ArrayBuffer) {
+        try {
+          const errorText = new TextDecoder().decode(error.response.data);
+          const errorJson = JSON.parse(errorText);
+          errorMessage = errorJson.error || errorJson.message || errorMessage;
+        } catch (e) {
+          console.error('Error parsing error response:', e);
+        }
+      } else if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+
+      console.error('Download error:', {
+        message: error.message,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        errorMessage: errorMessage
+      });
+
       dispatch(
         openSnackbar({
           open: true,
-          message: 'Error downloading invoice',
+          message: errorMessage,
           variant: 'alert',
           alert: { color: 'error' },
           close: false
