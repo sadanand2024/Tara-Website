@@ -3,6 +3,7 @@ import { lazy } from 'react';
 // project imports
 import SimpleLayout from 'layout/SimpleLayout';
 import Loadable from 'ui-component/Loadable';
+import ProductPage from 'views/pages/products/ProductPage';
 
 // lazy loaded pages
 const ContactUs = Loadable(lazy(() => import('views/pages/contact-us')));
@@ -55,12 +56,8 @@ const SimpleRoutes = {
       element: <ServicePage />
     },
     {
-      path: 'products/payroll',
-      element: <PayrollPage />
-    },
-    {
-      path: 'products/invoicing',
-      element: <InvoicingPage />
+      path: 'products/:category',
+      element: <ProductPage />
     }
   ]
 };
