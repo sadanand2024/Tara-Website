@@ -16,42 +16,42 @@ const products = [
   {
     title: 'Payroll',
     description: 'Automated payroll with TDS, EPF/ESI, payslips & more.',
-    icon: <CreditCardIcon sx={{ fontSize: 40, color: '#FF6B6B' }} />,
+    icon: <CreditCardIcon sx={{ fontSize: 32, color: '#FF6B6B' }} />,
     path: '/products/payroll',
     color: '#FF6B6B'
   },
   {
     title: 'Invoice',
     description: 'Smart invoicing with GST, reminders, and online payments.',
-    icon: <ReceiptIcon sx={{ fontSize: 40, color: '#4D96FF' }} />,
+    icon: <ReceiptIcon sx={{ fontSize: 32, color: '#4D96FF' }} />,
     path: '/products/invoice',
     color: '#4D96FF'
   },
   {
     title: 'Accounting',
     description: 'Track income, expenses, and manage books easily.',
-    icon: <AccountBalanceIcon sx={{ fontSize: 40, color: '#00C9A7' }} />,
+    icon: <AccountBalanceIcon sx={{ fontSize: 32, color: '#00C9A7' }} />,
     path: '/products/accounting',
     color: '#00C9A7'
   },
   {
     title: 'Document Vault',
     description: 'Securely store and access all your financial documents.',
-    icon: <FolderIcon sx={{ fontSize: 40, color: '#FFA94D' }} />,
+    icon: <FolderIcon sx={{ fontSize: 32, color: '#FFA94D' }} />,
     path: '/products/document-vault',
     color: '#FFA94D'
   },
   {
     title: 'Compliance Tracker',
     description: 'Auto reminders and status for ITR, GST, and ROC filings.',
-    icon: <VerifiedUserIcon sx={{ fontSize: 40, color: '#845EF7' }} />,
+    icon: <VerifiedUserIcon sx={{ fontSize: 32, color: '#845EF7' }} />,
     path: '/products/compliance-tracker',
     color: '#845EF7'
   },
   {
     title: 'Tax Calculators',
     description: 'Calculate tax liability, HRA, capital gains & more.',
-    icon: <CalculateIcon sx={{ fontSize: 40, color: '#2EB67D' }} />,
+    icon: <CalculateIcon sx={{ fontSize: 32, color: '#2EB67D' }} />,
     path: '/products/tax-calculators',
     color: '#2EB67D'
   }
@@ -69,7 +69,7 @@ const ProductCard = ({ product, onClose }) => (
   <Paper
     elevation={0}
     sx={{
-      p: 3,
+      p: 1.5,
       height: '100%',
       display: 'flex',
       flexDirection: 'column',
@@ -84,11 +84,11 @@ const ProductCard = ({ product, onClose }) => (
       }
     }}
   >
-    <Box sx={{ mb: 2 }}>{product.icon}</Box>
-    <Typography variant="h4" sx={{ mb: 1, fontWeight: 600 }}>
+    <Box sx={{ mb: 0.5 }}>{product.icon}</Box>
+    <Typography variant="h5" sx={{ mb: 0.5, fontWeight: 600 }}>
       {product.title}
     </Typography>
-    <Typography variant="body2" color="text.secondary" sx={{ mb: 2, flex: 1 }}>
+    <Typography variant="body2" color="text.secondary" sx={{ mb: 1, flex: 1 }}>
       {product.description}
     </Typography>
     <Button
