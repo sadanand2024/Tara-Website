@@ -268,11 +268,9 @@ export default function TabOne({ businessDetails = {}, postType, handleNext }) {
                         size="small"
                         startIcon={<IconPlus size={16} />}
                         onClick={() => {
-                          let id =
-                            userData.user_type === 'Business'
-                              ? userData.business_affiliated[0].id
-                              : userData.businesssDetails.business[0].id;
-                          navigate(`/business-profile?BID=${id}`);
+                          if (businessDetails.id) {
+                            navigate(`/apps/business-settings?BID=${businessDetails.id}`);
+                          }
                         }}
                         sx={{ ml: 2 }}
                       >
