@@ -493,7 +493,7 @@ const KnowledgePage = () => {
   );
 
   return (
-    <Box sx={{ background: '#f6f8fd', minHeight: '100vh', pb: 6 }}>
+    <Box sx={{ background: '#f6f8fd', minHeight: '100vh', pb: 6, pt:2 }}>
       {/* Hero Section */}
       <Box
         sx={{

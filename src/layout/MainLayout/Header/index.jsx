@@ -23,7 +23,7 @@ import NotificationSection from './NotificationSection';
 import AddBusiness from './AddBusiness';
 import { useDispatch as useReduxDispatch } from 'react-redux';
 
-import { handlerDrawerOpen, useGetMenuMaster } from 'api/menu'; 
+import { handlerDrawerOpen, useGetMenuMaster } from 'api/menu';
 import { MenuOrientation, ThemeMode } from 'config';
 import useConfig from 'hooks/useConfig';
 import Factory from 'utils/Factory';
@@ -105,7 +105,7 @@ const Header = ({ hamburgerDisplay = 'block' }) => {
       console.error('Error switching context:', error);
     }
   };
-  
+
   const handleAddDialogClose = () => {
     setOpenAddDialog(false);
   };
@@ -242,7 +242,6 @@ const Header = ({ hamburgerDisplay = 'block' }) => {
                 bgcolor: mode === ThemeMode.DARK ? 'secondary.main' : 'secondary.dark',
                 color: mode === ThemeMode.DARK ? 'secondary.light' : 'secondary.light'
               },
-              display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               width: '34px',

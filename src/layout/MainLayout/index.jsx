@@ -52,7 +52,7 @@ export default function MainLayout() {
     <Box sx={{ display: 'flex' }}>
       <AppBar enableColorOnDark position="fixed" color="inherit" elevation={0} sx={{ bgcolor: 'background.default' }}>
         <Toolbar>
-          <Header hamburgerDisplay={downMD ? 'block' : 'none'} />
+          <Header hamburgerDisplay={downMD ? 'flex' : 'none'} />
         </Toolbar>
       </AppBar>
 

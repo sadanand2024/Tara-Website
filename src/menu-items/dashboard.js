@@ -58,6 +58,15 @@ const dashboard = {
       caption: ''
     },
     {
+      id: 'subscriptions',
+      title: 'subscriptions',
+      type: 'item',
+      url: '/app/subscriptions',
+      icon: icons.IconCreditCard,
+      breadcrumbs: false,
+      caption: ''
+    },
+    {
       id: 'task-manager',
       title: 'task-manager',
       type: 'item',
@@ -81,6 +90,24 @@ const dashboard = {
       type: 'item',
       url: '/app/documents',
       icon: icons.IconFolder,
+      breadcrumbs: false,
+      caption: ''
+    },
+    {
+      id: 'payroll',
+      title: 'payroll',
+      type: 'item',
+      url: '/app/payroll',
+      icon: icons.IconHeadset,
+      breadcrumbs: false,
+      caption: ''
+    },
+    {
+      id: 'invoicing',
+      title: 'invoicing',
+      type: 'item',
+      url: '/app/invoice',
+      icon: icons.IconHeadset,
       breadcrumbs: false,
       caption: ''
     },
@@ -139,15 +166,6 @@ const dashboard = {
       caption: ''
     },
     {
-      id: 'subscriptions',
-      title: 'subscriptions',
-      type: 'item',
-      url: '/app/subscriptions',
-      icon: icons.IconCreditCard,
-      breadcrumbs: false,
-      caption: ''
-    },
-    {
       id: 'support&chat',
       title: 'support&chat',
       type: 'item',
@@ -156,24 +174,6 @@ const dashboard = {
       breadcrumbs: false,
       caption: ''
     },
-    {
-      id: 'payroll',
-      title: 'payroll',
-      type: 'item',
-      url: '/app/payroll',
-      icon: icons.IconHeadset,
-      breadcrumbs: false,
-      caption: ''
-    },
-    {
-      id: 'invoicing',
-      title: 'invoicing',
-      type: 'item',
-      url: '/app/invoice',
-      icon: icons.IconHeadset,
-      breadcrumbs: false,
-      caption: ''
-    }
   ]
 };
 
