@@ -75,6 +75,7 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
       const method = type === 'edit' ? 'put' : 'post';
       postData.opening_balance = Number(postData.opening_balance);
       const { res } = await Factory(method, url, postData);
+      console.log(res);
       if (res.status_cd === 0) {
         getCustomersData(businessDetailsData?.invoicing_profile_id);
         setType('');
@@ -93,7 +94,7 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
       dispatch(
         openSnackbar({
           open: true,
-          message: JSON.stringify(res.data.error) || 'Something went wrong',
+          message: JSON.stringify(res.data.data) || 'Something went wrong',
           variant: 'alert',
           alert: { color: 'error' },
           close: false
