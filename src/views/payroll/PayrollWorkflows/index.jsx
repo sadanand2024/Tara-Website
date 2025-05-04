@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { Box, Tab, Tabs, Typography, Stack, Avatar, Button, Paper } from '@mui/material';
 import { IconBolt } from '@tabler/icons-react';
@@ -50,13 +50,12 @@ const usePayrollData = (payrollId, month, financialYear) => {
     }
   };
 
-  const fetchAttendanceData = async () => {
+  const generateAttandance = async () => {
     if (!month) return;
     setLoading(true);
     const url = `/payroll/employee_attendance_current_month_automate?payroll_id=${payrollId}&month=${month}&financial_year=${financialYear}`;
     const { res } = await Factory('post', url, {});
     setLoading(false);
-    console.log(res);
     if (res?.status_cd === 0) {
       setAttendanceData(res.data || []);
     } else {
@@ -70,6 +69,7 @@ const usePayrollData = (payrollId, month, financialYear) => {
         })
       );
     }
+    return res;
   };
 
   useEffect(() => {
@@ -82,7 +82,7 @@ const usePayrollData = (payrollId, month, financialYear) => {
     loading,
     employeeMasterData,
     attendanceData,
-    fetchAttendanceData
+    generateAttandance
   };
 };
 
@@ -97,7 +97,20 @@ const PayrollWorkflows = ({ type }) => {
   const payrollId = searchParams.get('payrollid');
   const month = searchParams.get('month');
   const financialYear = searchParams.get('financial_year');
-  const { loading, employeeMasterData, attendanceData, fetchAttendanceData } = usePayrollData(payrollId, month, financialYear);
+  const {
+    loading,
+    employeeMasterData,
+    attendanceData,
+    generateAttandance: originalGenerateAttandance
+  } = usePayrollData(payrollId, month, financialYear);
+  const getAttandanceDataRef = useRef(null);
+
+  const generateAttandance = async () => {
+    const res = await originalGenerateAttandance();
+    if (res?.status_cd === 0 && getAttandanceDataRef.current) {
+      getAttandanceDataRef.current();
+    }
+  };
 
   // Tab Configuration
   const tabs = useMemo(
@@ -180,7 +193,7 @@ const PayrollWorkflows = ({ type }) => {
 
   const handleButtonClick = () => {
     if (tabs[activeTab].label === 'Attendance') {
-      fetchAttendanceData();
+      generateAttandance();
     } else if (tabs[activeTab].label === 'New Joiners') {
       navigate(`/payroll/settings/add-employee?payrollid=${payrollId}`);
     } else {
@@ -250,7 +263,8 @@ const PayrollWorkflows = ({ type }) => {
               loading={loading}
               employeeMasterData={employeeMasterData}
               attendanceData={tab.label === 'Attendance' ? attendanceData : undefined}
-              fetchAttendanceData={tab.label === 'Attendance' ? fetchAttendanceData : undefined}
+              generateAttandance={tab.label === 'Attendance' ? generateAttandance : undefined}
+              getAttandanceDataRef={tab.label === 'Attendance' ? getAttandanceDataRef : undefined}
             />
           </TabPanel>
         ))}

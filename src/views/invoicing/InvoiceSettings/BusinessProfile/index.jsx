@@ -262,21 +262,23 @@ export default function TabOne({ businessDetails = {}, postType, handleNext }) {
                       />
                     </Grid2>
 
-                    <Grid2 size={{ xs: 4 }}>
-                      <Button
-                        variant="contained"
-                        size="small"
-                        startIcon={<IconPlus size={16} />}
-                        onClick={() => {
-                          if (businessDetails.id) {
-                            navigate(`/apps/business-settings?BID=${businessDetails.id}`);
-                          }
-                        }}
-                        sx={{ ml: 2 }}
-                      >
-                        Add GST
-                      </Button>
-                    </Grid2>
+                    {values.gst_registered !== 'No' && (
+                      <Grid2 size={{ xs: 4 }}>
+                        <Button
+                          variant="contained"
+                          size="small"
+                          startIcon={<IconPlus size={16} />}
+                          onClick={() => {
+                            if (businessDetails.id) {
+                              navigate(`/apps/business-settings?BID=${businessDetails.id}`);
+                            }
+                          }}
+                          sx={{ ml: 2 }}
+                        >
+                          Add GST
+                        </Button>
+                      </Grid2>
+                    )}
                   </Grid2>
                 </>
               ) : item.name === 'state' || item.name === 'entityType' ? (

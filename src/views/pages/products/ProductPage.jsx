@@ -4,7 +4,7 @@ import { Container, Box, Typography, Grid, Button } from '@mui/material';
 import productsData from 'data/productsData';
 import ErrorPage from 'views/pages/maintenance/Error';
 import { IconArrowRight } from '@tabler/icons-react';
-
+import PricingComponent from './components/ProductsPricingComponent';
 // Import common components
 import HeroSection from './components/HeroSection';
 import KeyFeaturesSection from './components/KeyFeaturesSection';
@@ -28,21 +28,22 @@ const ProductPage = () => {
 
       {/* First Section */}
       <Box sx={{ bgcolor: 'background.default' }}>
-        <Container sx={{ py: { xs: 4, md: 8 } }}>
-          <FirstSection data={productData} />
-        </Container>
+        <FirstSection data={productData} />
       </Box>
 
       {/* Key Features Section */}
-      <Container sx={{ py: { xs: 4, md: 8 } }}>
+      <Box sx={{ py: { xs: 4, md: 8 } }}>
         <KeyFeaturesSection data={productData} />
-      </Container>
+      </Box>
 
       {/* Target Audience Section */}
       <Box sx={{ bgcolor: 'background.default' }}>
-        <Container sx={{ py: { xs: 4, md: 8 } }}>
-          <TargetAudienceSection data={productData} />
-        </Container>
+        <TargetAudienceSection data={productData} />
+      </Box>
+
+      {/* Pricing Section */}
+      <Box id="pricing" sx={{ py: { xs: 4, md: 8 } }}>
+        <PricingComponent plans={productData.plans} planList={productData.planList} />
       </Box>
     </Box>
   );

@@ -38,12 +38,21 @@ const ItemDetailsAndNotes = ({
   handleDiscountChange,
   handleDeleteItem,
   handleAddItemRow,
+  handleNoteChange,
   openBulkItemsModal,
   handleShippingAmountChange,
   handleApplyTaxChange,
   handleGSTRateChange,
-  gstRates
+  gstRates,
+  totalDiscount
 }) => {
+  // Prevent Enter key from submitting the form in item input fields
+  const handleItemInputKeyDown = (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+    }
+  };
+
   return (
     <Box sx={{ mb: 4 }}>
       <Typography variant="h6" sx={{ mb: 2 }}>
@@ -63,6 +72,7 @@ const ItemDetailsAndNotes = ({
           <TableHead>
             <TableRow sx={{ bgcolor: 'grey.100' }}>
               <TableCell sx={{ minWidth: '250px' }}>Item</TableCell>
+              <TableCell sx={{ minWidth: '100px' }}>Note</TableCell>
               <TableCell sx={{ minWidth: '100px' }}>Quantity</TableCell>
               <TableCell>Rate</TableCell>
               <TableCell sx={{ minWidth: '100px' }}>Discount type</TableCell>
@@ -83,16 +93,34 @@ const ItemDetailsAndNotes = ({
                     options={itemsList.map((item) => item.name)}
                     value={item.item || ''}
                     onChange={(e, val) => handleItemChange(index, val)}
+                    onKeyDown={handleItemInputKeyDown}
                     renderInput={(params) => <TextField {...params} sx={{ width: 250 }} />}
+                  />
+                </TableCell>
+                <TableCell>
+                  <CustomInput
+                    value={item.note}
+                    onChange={(e) => handleNoteChange(index, e.target.value)}
+                    sx={{ width: 150 }}
+                    onKeyDown={handleItemInputKeyDown}
+                  />
+                </TableCell>
+                <TableCell>
+                  <CustomInput
+                    value={item.quantity}
+                    onChange={(e) => handleQuantityChange(index, e.target.value)}
+                    sx={{ width: 100 }}
+                    onKeyDown={handleItemInputKeyDown}
                   />
                 </TableCell>
 
                 <TableCell>
-                  <CustomInput value={item.quantity} onChange={(e) => handleQuantityChange(index, e.target.value)} sx={{ width: 100 }} />
-                </TableCell>
-
-                <TableCell>
-                  <CustomInput value={item.rate} onChange={(e) => handleRateChange(index, e.target.value)} sx={{ width: '80%' }} />
+                  <CustomInput
+                    value={item.rate}
+                    onChange={(e) => handleRateChange(index, e.target.value)}
+                    sx={{ width: '80%' }}
+                    onKeyDown={handleItemInputKeyDown}
+                  />
                 </TableCell>
 
                 <TableCell>
@@ -100,12 +128,18 @@ const ItemDetailsAndNotes = ({
                     options={['%', '₹']}
                     value={item.discount_type || ''}
                     onChange={(e, val) => handleDiscountTypeChange(index, val)}
+                    onKeyDown={handleItemInputKeyDown}
                     renderInput={(params) => <TextField {...params} sx={{ width: 80 }} />}
                   />
                 </TableCell>
 
                 <TableCell>
-                  <CustomInput value={item.discount} onChange={(e) => handleDiscountChange(index, e.target.value)} sx={{ width: '60%' }} />
+                  <CustomInput
+                    value={item.discount}
+                    onChange={(e) => handleDiscountChange(index, e.target.value)}
+                    sx={{ width: '60%' }}
+                    onKeyDown={handleItemInputKeyDown}
+                  />
                 </TableCell>
 
                 <TableCell>{item.amount.toFixed(2)}</TableCell>
@@ -183,6 +217,14 @@ const ItemDetailsAndNotes = ({
                   onChange={handleShippingAmountChange}
                   sx={{ maxWidth: 100, bgcolor: 'white' }}
                 />
+              </Box>
+
+              {/* Discount Total Row */}
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
+                  Discount Total:
+                </Typography>
+                <Typography variant="body1">{typeof totalDiscount === 'number' ? totalDiscount.toFixed(2) : '0.00'}</Typography>
               </Box>
 
               <FormControlLabel

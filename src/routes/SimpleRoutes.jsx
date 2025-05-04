@@ -4,6 +4,7 @@ import { lazy } from 'react';
 import SimpleLayout from 'layout/SimpleLayout';
 import Loadable from 'ui-component/Loadable';
 import ProductPage from 'views/pages/products/ProductPage';
+
 // lazy loaded pages
 const ContactUs = Loadable(lazy(() => import('views/pages/contact-us')));
 const AboutUs = Loadable(lazy(() => import('views/pages/about-us')));
@@ -15,7 +16,7 @@ const ServiceCategory = Loadable(lazy(() => import('views/pages/services/Service
 // const InvoicingPage = Loadable(lazy(() => import('views/pages/products/invoicing/InvoicingPage')));
 const KnowledgePage = Loadable(lazy(() => import('views/pages/knowledge')));
 const BookConsultationPage = Loadable(lazy(() => import('views/pages/BookConsultation')));
-
+const ProductDetails = Loadable(lazy(() => import('views/pages/products/ProductDetails')));
 // ==============================|| SIMPLE ROUTING ||============================== //
 
 const SimpleRoutes = {
@@ -57,6 +58,10 @@ const SimpleRoutes = {
     {
       path: 'products/:category',
       element: <ProductPage />
+    },
+    {
+      path: 'products/plans',
+      element: <ProductDetails />
     }
   ]
 };
