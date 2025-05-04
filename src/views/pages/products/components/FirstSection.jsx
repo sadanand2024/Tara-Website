@@ -1,167 +1,209 @@
-import React from 'react';
 import PropTypes from 'prop-types';
-import { Box, Container, Grid, Typography, Button, Stack } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
-import { IconArrowRight } from '@tabler/icons-react';
-import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 
-const FirstSection = ({ data }) => {
+// material-ui
+import { styled, useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import IconButton from '@mui/material/IconButton';
+import Grid from '@mui/material/Grid2';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
+
+// third party
+import { Carousel } from 'react-responsive-carousel';
+
+// project imports
+import { ThemeMode } from 'config';
+
+// assets
+import { IconChevronRight, IconChevronLeft, IconLink } from '@tabler/icons-react';
+
+import SliderLight1 from 'assets/images/landing/pre-apps/slider-light-1.png';
+import SliderDark1 from 'assets/images/landing/pre-apps/slider-dark-1.png';
+import SliderLight2 from 'assets/images/landing/pre-apps/slider-light-2.png';
+import SliderDark2 from 'assets/images/landing/pre-apps/slider-dark-2.png';
+import SliderLight3 from 'assets/images/landing/pre-apps/slider-light-3.png';
+import SliderDark3 from 'assets/images/landing/pre-apps/slider-dark-3.png';
+import SliderLight4 from 'assets/images/landing/pre-apps/slider-light-4.png';
+import SliderDark4 from 'assets/images/landing/pre-apps/slider-dark-4.png';
+import SliderLight5 from 'assets/images/landing/pre-apps/slider-light-5.png';
+import SliderDark5 from 'assets/images/landing/pre-apps/slider-dark-5.png';
+import SliderLight6 from 'assets/images/landing/pre-apps/slider-light-6.png';
+import SliderDark6 from 'assets/images/landing/pre-apps/slider-dark-6.png';
+import SliderLight7 from 'assets/images/landing/pre-apps/slider-light-7.png';
+import SliderDark7 from 'assets/images/landing/pre-apps/slider-dark-7.png';
+import SliderLight8 from 'assets/images/landing/pre-apps/slider-light-8.png';
+import SliderDark8 from 'assets/images/landing/pre-apps/slider-dark-8.png';
+import SliderLight9 from 'assets/images/landing/pre-apps/slider-light-9.png';
+import SliderDark9 from 'assets/images/landing/pre-apps/slider-dark-9.png';
+import SliderLight10 from 'assets/images/landing/pre-apps/slider-light-10.png';
+import SliderDark10 from 'assets/images/landing/pre-apps/slider-dark-10.png';
+import SliderLight11 from 'assets/images/landing/pre-apps/slider-light-11.png';
+import SliderDark11 from 'assets/images/landing/pre-apps/slider-dark-11.png';
+
+// styles
+const Images = styled('img')({
+  width: '100%',
+  height: 'auto',
+  marginBottom: 32,
+  backgroundSize: 'cover',
+  objectFit: 'cover'
+});
+
+function SampleNextArrow(props) {
   const theme = useTheme();
-  const navigate = useNavigate();
+  const { onClickHandler } = props;
 
   return (
-    <Box
+    <IconButton
+      onClick={onClickHandler}
       sx={{
-        py: { xs: 6, md: 10 },
-        background: `linear-gradient(135deg, ${theme.palette.background.default} 0%, ${theme.palette.background.paper} 100%)`,
-        position: 'relative',
-        overflow: 'hidden',
-        '&::before': {
+        position: 'absolute',
+        zIndex: 2,
+        top: 'calc(50% - 70px)',
+        cursor: 'pointer',
+        bgcolor: `${theme.palette.background.paper} !important`,
+        width: { xs: '40px !important', xl: '65px !important' },
+        height: { xs: '40px !important', xl: '65px !important' },
+        boxShadow: '0px 24px 38px rgba(9, 15, 37, 0.07)',
+        '&:after': {
           content: '""',
           position: 'absolute',
           top: 0,
           left: 0,
-          right: 0,
           bottom: 0,
-          background: `radial-gradient(circle at 50% 50%, ${theme.palette.primary.light}20 0%, transparent 50%)`,
-          zIndex: 0
-        }
+          right: 0,
+          transform: 'scale(9)'
+        },
+        svg: {
+          height: { md: 20, lg: 40, xl: '40px' },
+          width: { md: 20, lg: 40, xl: '40px' }
+        },
+        right: { xs: '50px', md: '80px', lg: '120px', xl: '220px' }
       }}
+      aria-label="button"
     >
-      <Container sx={{ position: 'relative', zIndex: 1 }}>
-        <Grid container spacing={6} direction="column" alignItems="center">
-          <Grid item xs={12} sx={{ textAlign: 'center', maxWidth: '800px', mx: 'auto' }}>
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-              <Typography
-                variant="h1"
-                color="primary"
-                sx={{
-                  fontSize: { xs: '2.5rem', sm: '3rem', md: '4rem' },
-                  fontWeight: 800,
-                  lineHeight: 1.1,
-                  letterSpacing: '-0.02em',
-                  background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  mb: 2
-                }}
-              >
-                {data.name}
-              </Typography>
-            </motion.div>
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }}>
-              <Typography
-                variant="h4"
-                sx={{
-                  color: 'text.secondary',
-                  lineHeight: 1.6,
-                  mb: 3,
-                  fontWeight: 500
-                }}
-              >
-                {data.description}
-              </Typography>
-            </motion.div>
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.4 }}>
-              <Typography
-                variant="body1"
-                color="textSecondary"
-                sx={{
-                  mb: 4,
-                  maxWidth: '600px',
-                  mx: 'auto',
-                  fontSize: '1.1rem',
-                  lineHeight: 1.8
-                }}
-              >
-                {data.longDescription || data.description}
-              </Typography>
-            </motion.div>
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.6 }}>
-              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="center">
-                <Button
-                  variant="contained"
-                  color="primary"
-                  size="large"
-                  endIcon={<IconArrowRight />}
-                  sx={{
-                    px: 4,
-                    py: 1.5,
-                    borderRadius: 2,
-                    boxShadow: `0 4px 14px 0 ${theme.palette.primary.main}40`,
-                    '&:hover': {
-                      transform: 'translateY(-2px)',
-                      boxShadow: `0 6px 20px 0 ${theme.palette.primary.main}60`
-                    },
-                    transition: 'all 0.3s ease'
-                  }}
-                >
-                  Get Started
-                </Button>
-                <Button
-                  variant="outlined"
-                  color="primary"
-                  size="large"
-                  onClick={() => navigate(`/products/${data.id}#pricing`)}
-                  sx={{
-                    px: 4,
-                    py: 1.5,
-                    borderRadius: 2,
-                    borderWidth: 2,
-                    '&:hover': {
-                      borderWidth: 2,
-                      transform: 'translateY(-2px)',
-                      backgroundColor: `${theme.palette.primary.main}10`
-                    },
-                    transition: 'all 0.3s ease'
-                  }}
-                >
-                  View Plans
-                </Button>
-              </Stack>
-            </motion.div>
-          </Grid>
-          <Grid item xs={12} sx={{ width: '100%', mt: 6 }}>
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.8, delay: 0.8 }}>
-              <Box
-                component="img"
-                src={data.mainImage || data.images?.light[0]}
-                alt={data.name}
-                sx={{
-                  width: '100%',
-                  maxWidth: '800px',
-                  height: 'auto',
-                  borderRadius: 4,
-                  boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1)',
-                  border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'}`,
-                  transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-                  '&:hover': {
-                    transform: 'translateY(-5px) scale(1.02)',
-                    boxShadow: '0 25px 50px rgba(0, 0, 0, 0.15)'
-                  }
-                }}
-              />
-            </motion.div>
-          </Grid>
-        </Grid>
-      </Container>
-    </Box>
+      <IconChevronRight fontSize={25} color={theme.palette.grey[900]} />
+    </IconButton>
   );
-};
+}
 
-FirstSection.propTypes = {
-  data: PropTypes.shape({
-    name: PropTypes.string.isRequired,
-    description: PropTypes.string.isRequired,
-    longDescription: PropTypes.string,
-    mainImage: PropTypes.string,
-    images: PropTypes.shape({
-      light: PropTypes.arrayOf(PropTypes.string),
-      dark: PropTypes.arrayOf(PropTypes.string)
-    }),
-    id: PropTypes.string.isRequired
-  }).isRequired
-};
+function SamplePrevArrow(props) {
+  const theme = useTheme();
+  const { onClickHandler } = props;
 
-export default FirstSection;
+  return (
+    <IconButton
+      onClick={onClickHandler}
+      sx={{
+        position: 'absolute',
+        zIndex: 2,
+        top: 'calc(50% - 70px)',
+        cursor: 'pointer',
+        bgcolor: `${theme.palette.background.paper} !important`,
+        width: { xs: '40px !important', xl: '65px !important' },
+        height: { xs: '40px !important', xl: '65px !important' },
+        boxShadow: '0px 24px 38px rgba(9, 15, 37, 0.07)',
+        '&:after': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          bottom: 0,
+          right: 0,
+          transform: 'scale(9)'
+        },
+        svg: {
+          height: { md: 20, lg: 40, xl: '40px' },
+          width: { md: 20, lg: 40, xl: '40px' }
+        },
+        left: { xs: '50px', md: '80px', lg: '120px', xl: '220px' }
+      }}
+      aria-label="button"
+    >
+      <IconChevronLeft fontSize={25} color={theme.palette.grey[900]} />
+    </IconButton>
+  );
+}
+
+function Items({ title, caption, image, link }) {
+  return (
+    <>
+      <Images
+        src={image}
+        alt="dashboard"
+        sx={{
+          width: { xs: '100%', xl: 743 },
+          objectFit: 'contain',
+          direction: 'initial'
+        }}
+      />
+      <Stack spacing={1} sx={{ pt: 1 }}>
+        <Stack
+          direction="row"
+          spacing={1}
+          component={Link}
+          to={link}
+          target="_blank"
+          sx={{ alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}
+        >
+          <Typography variant="h3" sx={{ fontWeight: 500 }}>
+            {title}
+          </Typography>
+          <IconButton size="small" sx={{ color: 'text.primary' }}>
+            <IconLink aria-label="link button" size={18} />
+          </IconButton>
+        </Stack>
+        <Typography variant="subtitle2" sx={{ color: 'text.primary', fontSize: { xs: '1rem', xl: '1.125rem' } }}>
+          {caption}
+        </Typography>
+      </Stack>
+    </>
+  );
+}
+
+export default function FirstSection({ data }) {
+  const theme = useTheme();
+  const downMD = useMediaQuery(theme.breakpoints.down('md'));
+  console.log(data);
+  return (
+    <Grid container sx={{ justifyContent: 'center', px: 1.25, gap: 7.5 }}>
+      <Grid size={12}>
+        <Box
+          className="preBuildDashBoard-slider"
+          sx={{
+            direction: 'initial',
+            '.slider': { height: { xs: 'auto' }, '& .slide:not(.selected)': { transformOrigin: 'center !important' } }
+          }}
+        >
+          <Carousel
+            showArrows={true}
+            showThumbs={false}
+            showIndicators={false}
+            centerMode={downMD ? false : true}
+            centerSlidePercentage={50}
+            infiniteLoop={true}
+            autoFocus={true}
+            emulateTouch={true}
+            swipeable={true}
+            autoPlay={true}
+            interval={2000}
+            renderArrowPrev={(onClickHandler, hasPrev, label) =>
+              hasPrev && <SamplePrevArrow onClickHandler={onClickHandler} hasPrev={hasPrev} label={label} />
+            }
+            renderArrowNext={(onClickHandler, hasNext, label) =>
+              hasNext && <SampleNextArrow onClickHandler={onClickHandler} hasNext={hasNext} label={label} />
+            }
+          >
+            {data.images?.light.map((img, idx) => (
+              <img key={idx} src={img} alt={data.name} style={{ width: '100%', height: 'auto' }} />
+            ))}
+          </Carousel>
+        </Box>
+      </Grid>
+    </Grid>
+  );
+}
+
+Items.propTypes = { title: PropTypes.string, caption: PropTypes.string, image: PropTypes.string, link: PropTypes.string };

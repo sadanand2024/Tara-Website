@@ -16,7 +16,7 @@ const products = [
   {
     title: 'Payroll',
     description: 'Automated payroll with TDS, EPF/ESI, payslips & more.',
-    icon: <CreditCardIcon sx={{ fontSize: 32, color: '#FF6B6B' }} />,
+    icon: <CreditCardIcon sx={{ fontSize: 30, color: '#FF6B6B' }} />,
     path: '/products/payroll',
     color: '#FF6B6B',
     id: 1,
@@ -26,7 +26,7 @@ const products = [
   {
     title: 'Invoice',
     description: 'Smart invoicing with GST, reminders, and online payments.',
-    icon: <ReceiptIcon sx={{ fontSize: 32, color: '#4D96FF' }} />,
+    icon: <ReceiptIcon sx={{ fontSize: 30, color: '#4D96FF' }} />,
     path: '/products/invoice',
     color: '#4D96FF',
     id: 2,
@@ -36,7 +36,7 @@ const products = [
   {
     title: 'Accounting',
     description: 'Track income, expenses, and manage books easily.',
-    icon: <AccountBalanceIcon sx={{ fontSize: 32, color: '#00C9A7' }} />,
+    icon: <AccountBalanceIcon sx={{ fontSize: 30, color: '#00C9A7' }} />,
     path: '/products/accounting',
     color: '#00C9A7',
     id: 3,
@@ -46,7 +46,7 @@ const products = [
   {
     title: 'Document Vault',
     description: 'Securely store and access all your financial documents.',
-    icon: <FolderIcon sx={{ fontSize: 32, color: '#FFA94D' }} />,
+    icon: <FolderIcon sx={{ fontSize: 30, color: '#FFA94D' }} />,
     path: '/products/document-vault',
     color: '#FFA94D',
     id: 4,
@@ -56,7 +56,7 @@ const products = [
   {
     title: 'Compliance Tracker',
     description: 'Auto reminders and status for ITR, GST, and ROC filings.',
-    icon: <VerifiedUserIcon sx={{ fontSize: 32, color: '#845EF7' }} />,
+    icon: <VerifiedUserIcon sx={{ fontSize: 30, color: '#845EF7' }} />,
     path: '/products/compliance-tracker',
     color: '#845EF7',
     id: 5,
@@ -66,7 +66,7 @@ const products = [
   {
     title: 'Tax Calculators',
     description: 'Calculate tax liability, HRA, capital gains & more.',
-    icon: <CalculateIcon sx={{ fontSize: 32, color: '#2EB67D' }} />,
+    icon: <CalculateIcon sx={{ fontSize: 30, color: '#2EB67D' }} />,
     path: '/products/tax-calculators',
     color: '#2EB67D',
     id: 6,
@@ -87,37 +87,50 @@ const ProductCard = ({ product, onClose }) => (
   <Paper
     elevation={0}
     sx={{
-      p: 1.5,
+      p: 1,
       height: '100%',
+      maxWidth: 320,
+      minWidth: 320,
+      mx: 'auto',
       display: 'flex',
       flexDirection: 'column',
-      borderRadius: 2,
-      transition: 'all 0.3s ease',
+      alignItems: 'center',
+      borderRadius: 2.5,
+      transition: 'all 0.25s cubic-bezier(.4,2,.6,1)',
       border: '1px solid',
       borderColor: 'divider',
+      minHeight: 180,
+      boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
       '&:hover': {
-        transform: 'translateY(-4px)',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-        borderColor: product.color
+        transform: 'scale(1.035)',
+        boxShadow: '0 6px 24px 0 rgba(0,0,0,0.10)',
+        borderColor: product.color,
+        zIndex: 1
       }
     }}
   >
-    <Box sx={{ mb: 0.5 }}>{product.icon}</Box>
-    <Typography variant="h5" sx={{ mb: 0.5, fontWeight: 600 }}>
+    <Box sx={{ mb: 0.5, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>{product.icon}</Box>
+    <Typography variant="subtitle1" sx={{ mb: 0.25, fontWeight: 700, fontSize: 16, textAlign: 'center', width: '100%' }}>
       {product.title}
     </Typography>
-    <Typography variant="body2" color="text.secondary" sx={{ mb: 1, flex: 1 }}>
+    <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 1, flex: 1, fontSize: 13, textAlign: 'center', width: '100%' }}>
       {product.description}
     </Typography>
     <Button
       component={RouterLink}
       to={`${product.path}?id=${product.id}&context=${product.context_type}&type=product`}
       onClick={onClose}
-      endIcon={<ArrowForwardIcon />}
+      endIcon={<ArrowForwardIcon sx={{ fontSize: 18 }} />}
+      size="small"
       sx={{
         color: product.color,
-        justifyContent: 'flex-start',
+        justifyContent: 'center',
         pl: 0,
+        fontWeight: 500,
+        fontSize: 13,
+        minWidth: 0,
+        textTransform: 'none',
+        width: '100%',
         '&:hover': {
           bgcolor: 'transparent',
           '& .MuiSvgIcon-root': {
@@ -146,23 +159,24 @@ const ProductsPanel = ({ onClose }) => {
           transition={{ duration: 0.2, ease: 'easeOut' }}
           sx={{
             position: 'absolute',
-            maxHeight: '80vh',
+            maxHeight: '75vh',
             overflowY: 'auto',
             top: '100%',
             left: 0,
             width: '100vw',
             zIndex: 1100,
-            backgroundColor: 'background.paper',
-            px: { xs: 2, sm: 4, md: 10 },
-            py: { xs: 3, sm: 5 },
+            background: 'linear-gradient(135deg, #f8fafc 0%, #f1f3f6 100%)',
+            px: { xs: 1, sm: 2, md: 6 },
+            py: { xs: 2, sm: 3 },
             borderTop: (theme) => `1px solid ${theme.palette.divider}`,
-            boxShadow: '0 8px 12px -4px rgba(0, 0, 0, 0.45)'
+            boxShadow: '0 8px 16px -4px rgba(0, 0, 0, 0.10)',
+            borderRadius: 3
           }}
         >
-          <Container>
-            <Grid2 container spacing={3}>
+          <Container maxWidth="lg">
+            <Grid2 container spacing={2} sx={{ px: { xs: 1, sm: 0 } }}>
               {products.map((product, index) => (
-                <Grid2 size={{ xs: 12, sm: 6, md: 4 }} key={index}>
+                <Grid2 xs={12} sm={6} md={4} lg={3} key={index} sx={{ display: 'flex', justifyContent: 'center' }}>
                   <ProductCard product={product} onClose={onClose} />
                 </Grid2>
               ))}

@@ -77,24 +77,30 @@ export default function PricingComponent({ plans, planList }) {
       </Typography>
       <Divider sx={{ my: 2 }} />
       <Stack spacing={1}>
-        {visibleItems.map((item, idx) => (
-          <Box
-            key={idx}
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.6rem',
-              color: plan.permission.includes(idx) ? 'text.primary' : 'error.main'
-            }}
-          >
-            {plan.permission.includes(idx) ? (
-              <CheckTwoToneIcon sx={{ fontSize: 22, color: '#673AB7' }} />
-            ) : (
-              <CancelIcon sx={{ fontSize: 22, color: 'error.main' }} />
-            )}
-            <Typography variant="subtitle1">{item}</Typography>
-          </Box>
-        ))}
+        {visibleItems.map((item, idx) => {
+          const isAvailable = plan.permission.includes(idx);
+          const value = plan.details && plan.details[item] !== undefined ? plan.details[item] : isAvailable ? 'Yes' : 'No';
+          return (
+            <Box
+              key={idx}
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.6rem',
+                color: isAvailable ? 'text.primary' : 'error.main'
+              }}
+            >
+              {isAvailable ? (
+                <CheckTwoToneIcon sx={{ fontSize: 22, color: '#673AB7' }} />
+              ) : (
+                <CancelIcon sx={{ fontSize: 22, color: 'error.main' }} />
+              )}
+              <Typography variant="subtitle1">
+                {item}: <b>{value}</b>
+              </Typography>
+            </Box>
+          );
+        })}
       </Stack>
 
       {/* {planList.length > 5 && (

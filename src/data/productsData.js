@@ -1,3 +1,9 @@
+import image1 from 'assets/images/payrollimages/image1.png';
+import image2 from 'assets/images/payrollimages/image2.png';
+import image3 from 'assets/images/payrollimages/image3.png';
+import image4 from 'assets/images/payrollimages/image4.png';
+import { IconUsers, IconBuildingStore, IconBriefcase } from '@tabler/icons-react';
+
 const productsData = {
   payroll: {
     id: 'payroll',
@@ -9,16 +15,8 @@ const productsData = {
     color: '#FF6B6B',
     path: '/products/payroll',
     images: {
-      light: [
-        'https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
-        'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
-        'https://images.unsplash.com/photo-1554224154-26032ffc0d07?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80'
-      ],
-      dark: [
-        'https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
-        'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
-        'https://images.unsplash.com/photo-1554224154-26032ffc0d07?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80'
-      ]
+      light: [image1, image2, image3, image4],
+      dark: [image1, image2, image3, image4]
     },
     sections: [
       {
@@ -59,24 +57,34 @@ const productsData = {
     ],
     features: [
       {
-        title: 'Salary Processing',
-        description: 'Automated salary calculations and processing',
+        title: 'Salary Structuring',
+        description: 'Define flexible salary components with automated tax and deduction calculations.',
         icon: 'IconCalculator'
       },
       {
-        title: 'Employee Management',
-        description: 'Complete employee data and profile management',
-        icon: 'IconUsers'
-      },
-      {
-        title: 'Compliance',
-        description: 'EPF, ESI, PT, and TDS compliance handling',
+        title: 'Statutory Setup',
+        description: 'Set up statutory parameters like EPF, ESI, PT, and TDS for full compliance.',
         icon: 'IconShieldCheck'
       },
       {
-        title: 'Reports',
-        description: 'Comprehensive payroll and tax reports',
-        icon: 'IconChartBar'
+        title: 'Pay Schedule Management',
+        description: 'Configure and manage pay cycles, frequency, and processing timelines.',
+        icon: 'IconCalendarTime'
+      },
+      {
+        title: 'Employee Master',
+        description: 'Centralized database to manage employee profiles, bank details, and documents.',
+        icon: 'IconIdBadge2'
+      },
+      {
+        title: 'Payslip Generation',
+        description: 'Auto-generate and distribute detailed monthly payslips with compliance summary.',
+        icon: 'IconFileText'
+      },
+      {
+        title: 'Leave Management',
+        description: 'Track leave balances, define leave policies, and manage employee leave requests.',
+        icon: 'IconUsers'
       }
     ],
     howItWorks: [
@@ -120,6 +128,139 @@ const productsData = {
         question: 'What compliance features are included?',
         answer: 'We handle EPF, ESI, Professional Tax, and TDS calculations and filings.'
       }
+    ],
+    targetAudience: [
+      {
+        title: 'Startups',
+        description: 'Perfect for startups and small businesses looking to streamline their operations',
+        icon: IconBuildingStore
+      },
+      {
+        title: 'MSME',
+        description: 'Scalable solutions for large organizations with complex requirements',
+        icon: IconBriefcase
+      },
+      {
+        title: 'Internal HR Teams',
+        description: 'Ideal for freelancers and independent professionals managing their business',
+        icon: IconUsers
+      },
+      {
+        title: 'Coorporates',
+        description: 'Ideal for freelancers and independent professionals managing their business',
+        icon: IconUsers
+      }
+    ],
+    plans: [
+      {
+        title: 'Essentials',
+        icon: '🟢',
+        description: 'For small teams',
+        price: '399',
+        permission: [0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 14, 15, 16, 17, 18, 19],
+        details: {
+          'Payroll Setup Wizard': 'Full Access',
+          'Employees Limit': '10',
+          Locations: '1',
+          'Salary Templates': '1',
+          'Salary Components': 'Unlimited',
+          'Pay Schedule': 'Monthly Only',
+          'Departments & Designations': 'Yes',
+          'Leave Management': '1 Leave Head (Basic)',
+          'Payslip Download': 'Yes',
+          Attendance: 'No',
+          'Compliance Config': 'PF / ESI / PT / TDS',
+          'No of Users': '1',
+          'Email Payslips': 'Yes',
+          'Custom Payslip Format': 'No',
+          'Extra Employee (per 10)': 'INR 150/month',
+          'Payslip via WhatsApp': '₹0.75/message',
+          'Additional Admin Users': '₹99/month/user',
+          'Salary Structuring Assistance': '₹499 one-time',
+          'Form 16 Auto Generator (Beta)': '₹499/month',
+          'PF/ESI/PT Filings (Service)': '₹499/month'
+        }
+      },
+      {
+        title: 'Pro Edge',
+        icon: '🔵',
+        description: 'For growing businesses',
+        price: '999',
+        permission: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+        details: {
+          'Payroll Setup Wizard': 'Full Access',
+          'Employees Limit': '50',
+          Locations: '3',
+          'Salary Templates': 'Multiple',
+          'Salary Components': 'Unlimited',
+          'Pay Schedule': 'Monthly / Fortnightly',
+          'Departments & Designations': 'Yes',
+          'Leave Management': 'Multiple Heads + Accruals',
+          'Payslip Download': 'Yes',
+          Attendance: 'Excel Upload',
+          'Compliance Config': 'PF / ESI / PT / TDS',
+          'No of Users': '2',
+          'Email Payslips': 'Yes',
+          'Custom Payslip Format': 'No',
+          'Extra Employee (per 10)': 'INR 150/month',
+          'Payslip via WhatsApp': '₹0.75/message',
+          'Additional Admin Users': '₹99/month/user',
+          'Salary Structuring Assistance': '₹499 one-time',
+          'Form 16 Auto Generator (Beta)': '₹499/month',
+          'PF/ESI/PT Filings (Service)': '₹499/month'
+        }
+      },
+      {
+        title: 'Ultimate Control',
+        icon: '🟣',
+        description: 'For large enterprises',
+        price: '1999',
+        permission: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+        details: {
+          'Payroll Setup Wizard': 'Full Access',
+          'Employees Limit': '100',
+          Locations: 'Unlimited',
+          'Salary Templates': 'Multiple',
+          'Salary Components': 'Unlimited',
+          'Pay Schedule': 'Custom',
+          'Departments & Designations': 'Yes',
+          'Leave Management': 'Rule-Based (Custom Policies)',
+          'Payslip Download': 'Yes',
+          Attendance: 'Excel + Manual',
+          'Compliance Config': 'PF / ESI / PT / TDS + Summary View',
+          'No of Users': 'Unlimited',
+          'Email Payslips': 'Yes',
+          'Custom Payslip Format': 'Yes',
+          'Extra Employee (per 10)': 'INR 150/month',
+          'Payslip via WhatsApp': '₹0.75/message',
+          'Additional Admin Users': '₹99/month/user',
+          'Salary Structuring Assistance': '₹499 one-time',
+          'Form 16 Auto Generator (Beta)': '₹499/month',
+          'PF/ESI/PT Filings (Service)': '₹499/month'
+        }
+      }
+    ],
+    planList: [
+      'Payroll Setup Wizard',
+      'Employees Limit',
+      'Locations',
+      'Salary Templates',
+      'Salary Components',
+      'Pay Schedule',
+      'Departments & Designations',
+      'Leave Management',
+      'Payslip Download',
+      'Attendance',
+      'Compliance Config',
+      'No of Users',
+      'Email Payslips',
+      'Custom Payslip Format',
+      'Extra Employee (per 10)',
+      'Payslip via WhatsApp',
+      'Additional Admin Users',
+      'Salary Structuring Assistance',
+      'Form 16 Auto Generator (Beta)',
+      'PF/ESI/PT Filings (Service)'
     ]
   },
   invoice: {
@@ -242,6 +383,116 @@ const productsData = {
         question: 'Can I customize invoice templates?',
         answer: 'Yes, you can customize invoice templates with your logo and branding.'
       }
+    ],
+    plans: [
+      {
+        title: 'Essentials',
+        icon: '🟢',
+        description: 'For individuals and small businesses',
+        price: '199',
+        permission: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
+        details: {
+          Pricing: '199',
+          'Invoices Limit': '100',
+          'No of Users': '1',
+          GSTINs: '1',
+          Branches: '1',
+          'Invoice Format': 'Basic (Pre-defined)',
+          'Payment Status Tracker': 'No',
+          'Inventory & Items Master': 'No',
+          'Customer Master': 'No',
+          'Import from Excel': 'No',
+          'Download in PDF': 'Yes',
+          'Email/Whatsapp Invoices': 'No',
+          'Reports & Filters': 'No',
+          'Branding (Custom color/theme)': 'No',
+          Support: 'Email',
+          'Extra User': 'INR 50/Month',
+          'Extra GSTIN': 'INR 100/Month',
+          'Custom Template Setup': 'INR 499 one time'
+        }
+      },
+      {
+        title: 'Pro Edge',
+        icon: '🔵',
+        description: 'For growing businesses',
+        price: '499',
+        permission: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+        details: {
+          'Payroll Setup Wizard': 'Full Access',
+          'Employees Limit': '50',
+          Locations: '3',
+          'Salary Templates': 'Multiple',
+          'Salary Components': 'Unlimited',
+          'Pay Schedule': 'Monthly / Fortnightly',
+          'Departments & Designations': 'Yes',
+          'Leave Management': 'Multiple Heads + Accruals',
+          'Payslip Download': 'Yes',
+          Attendance: 'Excel Upload',
+          'Compliance Config': 'PF / ESI / PT / TDS',
+          'No of Users': '2',
+          'Email Payslips': 'Yes',
+          'Custom Payslip Format': 'No',
+          'Extra Employee (per 10)': 'INR 150/month',
+          'Payslip via WhatsApp': '₹0.75/message',
+          'Additional Admin Users': '₹99/month/user',
+          'Salary Structuring Assistance': '₹499 one-time',
+          'Form 16 Auto Generator (Beta)': '₹499/month',
+          'PF/ESI/PT Filings (Service)': '₹499/month'
+        }
+      },
+      {
+        title: 'Ultimate Control',
+        icon: '🟣',
+        description: 'For large enterprises',
+        price: '899',
+        permission: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+        details: {
+          'Payroll Setup Wizard': 'Full Access',
+          'Employees Limit': '100',
+          Locations: 'Unlimited',
+          'Salary Templates': 'Multiple',
+          'Salary Components': 'Unlimited',
+          'Pay Schedule': 'Custom',
+          'Departments & Designations': 'Yes',
+          'Leave Management': 'Rule-Based (Custom Policies)',
+          'Payslip Download': 'Yes',
+          Attendance: 'Excel + Manual',
+          'Compliance Config': 'PF / ESI / PT / TDS + Summary View',
+          'No of Users': 'Unlimited',
+          'Email Payslips': 'Yes',
+          'Custom Payslip Format': 'Yes',
+          'Extra Employee (per 10)': 'INR 150/month',
+          'Payslip via WhatsApp': '₹0.75/message',
+          'Additional Admin Users': '₹99/month/user',
+          'Salary Structuring Assistance': '₹499 one-time',
+          'Form 16 Auto Generator (Beta)': '₹499/month',
+          'PF/ESI/PT Filings (Service)': '₹499/month'
+        }
+      }
+    ],
+    planList: [
+      'Invoices Limit',
+      'No of Users',
+      'GSTINs',
+      'Branches',
+      'Invoice Format',
+      'Payment Status Tracker',
+      'Inventory & Items Master',
+      'Customer Master',
+      'Import from Excel',
+      'Download in PDF',
+      'Email/Whatsapp Invoices',
+      'Reports & Filters',
+      'Branding (Custom color/theme)',
+      'Support',
+      'Extra User',
+      'Extra GSTIN',
+      'Custom Template Setup',
+      'Add ons',
+      'Custom Layout Control',
+      'Advanced Reports',
+      'Priority/Call Support'
     ]
   },
   accounting: {

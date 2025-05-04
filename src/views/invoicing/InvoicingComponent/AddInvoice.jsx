@@ -227,6 +227,7 @@ const AddItem = ({
       ...formik.values.item_details,
       {
         item: '',
+        note: '',
         quantity: 1,
         rate: 0,
         discount_type: '%',
@@ -261,6 +262,7 @@ const AddItem = ({
       formik.setFieldValue('amount_invoiced', 0);
       formik.setFieldValue('total_amount', 0);
       formik.setFieldValue('applied_tax', false);
+      formik.setFieldValue('total_discount', 0);
 
       return;
     }
@@ -270,6 +272,7 @@ const AddItem = ({
     let totalSGSTAmount = 0;
     let totalIGSTAmount = 0;
     let totalAmount = 0;
+    let totalDiscount = 0;
 
     formik.values.item_details.forEach((item) => {
       // Ensure all values are numbers before performing calculations
@@ -289,6 +292,7 @@ const AddItem = ({
       } else if (discountType === '₹') {
         discountAmount = discount;
       }
+      totalDiscount += discountAmount;
 
       // Calculate amount after discount
       const amountAfterDiscount = taxableAmount - discountAmount;
@@ -354,6 +358,7 @@ const AddItem = ({
     formik.setFieldValue('total_igst_amount', totalIGSTAmount);
     formik.setFieldValue('subtotal_amount', subtotalAmount);
     formik.setFieldValue('total_amount', totalAmount + (formik.values.shipping_amount_with_tax || 0)); // Include shipping if applicable
+    formik.setFieldValue('total_discount', totalDiscount);
   };
 
   const handleDiscountTypeChange = (index, newDiscountType) => {
@@ -467,7 +472,11 @@ const AddItem = ({
     formik.setFieldValue('item_details', newItemDetails);
     recalculateTotals();
   };
-
+  const handleNoteChange = (index, value) => {
+    let newItemDetails = [...formik.values.item_details];
+    newItemDetails[index].note = value;
+    formik.setFieldValue('item_details', newItemDetails);
+  };
   useEffect(() => {
     if (selectedInvoice) {
       formik.setValues({
@@ -591,6 +600,8 @@ const AddItem = ({
             handleApplyTaxChange={handleApplyTaxChange}
             handleGSTRateChange={handleGSTRateChange}
             gstRates={gstRates}
+            handleNoteChange={handleNoteChange}
+            totalDiscount={formik.values.total_discount || 0}
           />
         </Grid2>
 

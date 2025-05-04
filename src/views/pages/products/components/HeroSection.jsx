@@ -3,10 +3,9 @@ import PropTypes from 'prop-types';
 import { Box, Container, Grid, Typography, useTheme, Button, Stack, Fade } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import Carousel from 'react-material-ui-carousel';
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ThemeMode } from 'config';
-
+import FirstSection from './FirstSection';
 const StyledImage = styled('img')(({ theme }) => ({
   width: '100%',
   height: '100%',
@@ -65,7 +64,7 @@ const HeroSection = ({ data }) => {
                 {data.title}
               </Typography>
               <Typography
-                variant="h5"
+                variant="h4"
                 sx={{
                   color: 'text.secondary',
                   lineHeight: 1.6
@@ -75,16 +74,15 @@ const HeroSection = ({ data }) => {
               </Typography>
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="center">
                 <Button
-                  size="large"
+                  size="small"
                   variant="contained"
                   color="primary"
-                  startIcon={<AddCircleOutlineIcon />}
                   onClick={() => navigate(`/register?id=${moduleId}&context=${context}&type=${type}`)}
                   sx={{
                     px: 4,
                     py: 1.5,
                     borderRadius: 2,
-                    fontSize: '1.1rem',
+                    fontSize: '1rem',
                     boxShadow: `0 4px 20px ${theme.palette.primary.main}40`,
                     '&:hover': {
                       transform: 'translateY(-2px)',
@@ -96,10 +94,10 @@ const HeroSection = ({ data }) => {
                   {data.primaryCTA || `Get Started with ${data.name} for Free`}
                 </Button>
                 <Button
-                  size="large"
+                  size="small"
                   variant="outlined"
                   color="primary"
-                  onClick={() => navigate(`/products/${data.id}#pricing`)}
+                  onClick={() => navigate(`/products/plans?id=${data.id}`)}
                   sx={{
                     px: 4,
                     py: 1.5,
@@ -139,107 +137,6 @@ const HeroSection = ({ data }) => {
               </Stack>
             </Stack>
           </Fade>
-        </Grid>
-
-        <Grid item xs={12} sx={{ width: '100%' }}>
-          <Box
-            sx={{
-              position: 'relative',
-              width: '100%',
-              minHeight: { xs: 300, md: 500 },
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            <Carousel
-              animation="slide"
-              autoPlay
-              interval={3000}
-              cycleNavigation
-              navButtonsAlwaysVisible
-              sx={{
-                width: '100%',
-                '& .MuiIconButton-root': {
-                  backgroundColor: theme.palette.background.paper,
-                  boxShadow: '0 8px 16px rgba(0, 0, 0, 0.1)',
-                  '&:hover': {
-                    backgroundColor: theme.palette.primary.main,
-                    color: theme.palette.primary.contrastText
-                  }
-                }
-              }}
-            >
-              {images.map((src, index) => (
-                <Box
-                  key={index}
-                  sx={{
-                    width: '100%',
-                    height: { xs: 300, md: 500 },
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    p: 2
-                  }}
-                >
-                  <StyledImage src={src} alt={`${data.name} Screenshot ${index + 1}`} />
-                </Box>
-              ))}
-            </Carousel>
-          </Box>
-
-          {/* Preview Images */}
-          <Box
-            sx={{
-              display: 'flex',
-              gap: 2,
-              justifyContent: 'center',
-              mt: 2,
-              px: 2,
-              overflowX: 'auto',
-              '&::-webkit-scrollbar': {
-                height: 8
-              },
-              '&::-webkit-scrollbar-track': {
-                background: theme.palette.mode === ThemeMode.DARK ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
-                borderRadius: 4
-              },
-              '&::-webkit-scrollbar-thumb': {
-                background: theme.palette.primary.main,
-                borderRadius: 4
-              }
-            }}
-          >
-            {images.map((src, index) => (
-              <Box
-                key={index}
-                sx={{
-                  width: 120,
-                  height: 80,
-                  flexShrink: 0,
-                  cursor: 'pointer',
-                  position: 'relative',
-                  '&::after': {
-                    content: '""',
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    borderRadius: 12,
-                    border: `2px solid ${theme.palette.primary.main}`,
-                    opacity: 0,
-                    transition: 'opacity 0.3s ease'
-                  },
-                  '&:hover::after': {
-                    opacity: 1
-                  }
-                }}
-              >
-                <PreviewImage src={src} alt={`${data.name} Preview ${index + 1}`} />
-              </Box>
-            ))}
-          </Box>
         </Grid>
       </Grid>
     </Container>
