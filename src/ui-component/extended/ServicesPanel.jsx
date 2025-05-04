@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useContext, useMemo } from 'react';
 import { Box, Typography, Grid2, Paper, ClickAwayListener, Container } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link as RouterLink } from 'react-router-dom';
+import ServicesContext from 'contexts/ServicesContext';
 
 const services = [
   {
@@ -116,7 +117,34 @@ const panelVariants = {
   visible: { opacity: 1, y: 0 },
   exit: { opacity: 0, y: -20 }
 };
+
 const ServicesPanel = ({ onClose }) => {
+  const { services: apiServices } = useContext(ServicesContext);
+
+  // Create a lookup for fast matching
+  const apiLookup = useMemo(() => {
+    const lookup = {};
+    apiServices.forEach((service) => {
+      lookup[`${service.group_key}/${service.name}`] = service;
+    });
+    return lookup;
+  }, [apiServices]);
+
+  // Merge API data into hardcoded items
+  const mergedServices = useMemo(() => {
+    return services.map((section) => ({
+      ...section,
+      items: section.items.map((item) => {
+        // Only try to match if not a '+More' or catch-all
+        if (item.label.startsWith('+')) return item;
+        const match = item.path.match(/\/services\/(.*?)\/(.*)/);
+        if (!match) return item;
+        const key = `${match[1]}/${match[2]}`;
+        const apiData = apiLookup[key];
+        return apiData ? { ...item, ...apiData } : item;
+      })
+    }));
+  }, [apiLookup]);
   return (
     <AnimatePresence>
       <ClickAwayListener onClickAway={onClose}>
@@ -143,7 +171,7 @@ const ServicesPanel = ({ onClose }) => {
         >
           <Container>
             <Grid2 container spacing={4}>
-              {services.map((section, index) => (
+              {mergedServices.map((section, index) => (
                 <Grid2 size={{ xs: 12, sm: 6, md: 3 }} key={index}>
                   <Typography
                     variant="subtitle2"
@@ -161,30 +189,37 @@ const ServicesPanel = ({ onClose }) => {
                   >
                     {section.title}
                   </Typography>
-                  {section.items.map((item, i) => (
-                    <Typography
-                      key={i}
-                      component={RouterLink}
-                      to={item.path}
-                      onClick={onClose}
-                      variant="body2"
-                      sx={{
-                        display: 'block',
-                        mb: 1,
-                        cursor: 'pointer',
-                        textDecoration: 'none',
-                        color: 'text.primary',
-                        transition: 'color 0.2s ease',
-                        textAlign: 'left',
-                        '&:hover': {
-                          textDecoration: 'underline',
-                          color: section.color
-                        }
-                      }}
-                    >
-                      {item.label}
-                    </Typography>
-                  ))}
+                  {section.items.map((item, i) => {
+                    // Build the route with query params if API data is present
+                    let to = item.path;
+                    if (item.id && item.name && item.group_key) {
+                      to = `${item.path}?id=${item.id}&name=${encodeURIComponent(item.name)}&group_key=${encodeURIComponent(item.group_key)}`;
+                    }
+                    return (
+                      <Typography
+                        key={i}
+                        component={RouterLink}
+                        to={to}
+                        onClick={onClose}
+                        variant="body2"
+                        sx={{
+                          display: 'block',
+                          mb: 1,
+                          cursor: 'pointer',
+                          textDecoration: 'none',
+                          color: 'text.primary',
+                          transition: 'color 0.2s ease',
+                          textAlign: 'left',
+                          '&:hover': {
+                            textDecoration: 'underline',
+                            color: section.color
+                          }
+                        }}
+                      >
+                        {item.label}
+                      </Typography>
+                    );
+                  })}
                 </Grid2>
               ))}
             </Grid2>

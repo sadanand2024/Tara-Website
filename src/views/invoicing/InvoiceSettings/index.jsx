@@ -132,17 +132,25 @@ export default function SimpleTabs() {
               label="Business Profile"
               {...a11yProps(0)}
             />
-            <Tab icon={<RecentActorsTwoToneIcon sx={{ fontSize: '1.3rem' }} />} iconPosition="start" label="Customers" {...a11yProps(1)} />
+            <Tab
+              icon={<RecentActorsTwoToneIcon sx={{ fontSize: '1.3rem' }} />}
+              iconPosition="start"
+              label="Customers"
+              disabled={!businessDetails?.invoicing_profile_id}
+              {...a11yProps(1)}
+            />
             <Tab
               icon={<PeopleAltTwoToneIcon sx={{ fontSize: '1.3rem' }} />}
               label={'Goods & Services'}
               iconPosition="start"
+              disabled={!businessDetails?.invoicing_profile_id}
               {...a11yProps(2)}
             />
             <Tab
               icon={<PanoramaTwoToneIcon sx={{ fontSize: '1.3rem' }} />}
               iconPosition="start"
               label="Invoice Number Format"
+              disabled={!businessDetails?.invoicing_profile_id}
               {...a11yProps(3)}
             />
           </Tabs>
