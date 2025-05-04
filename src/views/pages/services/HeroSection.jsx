@@ -1,6 +1,6 @@
 'use client';
+import { Box, Button, Container, Stack, Typography, useTheme } from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import { Box, Typography, Stack, Button, Container, useTheme } from '@mui/material';
 import { Fade } from 'react-awesome-reveal';
 
 const Typewriter = ({ text, speed = 80 }) => {
@@ -33,7 +33,7 @@ const Typewriter = ({ text, speed = 80 }) => {
       variant="h1"
       fontWeight={700}
       sx={{
-        fontSize: { xs: '1.8rem', sm: '2.5rem', md: '3.5rem' }, // 👈 adaptive font size
+        fontSize: { xs: '1.6rem', sm: '2.2rem', md: '3.2rem' },
         color: 'text.primary',
         textAlign: 'center',
         wordBreak: 'break-word'
@@ -51,39 +51,42 @@ const HeroWithFinalTouch = ({ data }) => {
     <Box
       sx={{
         position: 'relative',
-        py: { xs: 6, md: 12 },
-        px: { xs: 2, md: 8 },
-        mt: { xs: 2, md: 4 },
+        py: { xs: 5, md: 12 },
+        px: { xs: 1, md: 8 },
+        mt: { xs: 1, md: 4 },
         borderRadius: 4,
-        background: 'linear-gradient(to right, #f5f7fa 0%, #c3cfe2 100%)',
-        boxShadow: '0px 6px 20px rgba(0,0,0,0.08)'
+        background: 'url("/assets/hero-bg.svg") center/cover no-repeat, linear-gradient(to right,rgb(225, 229, 233) 0%,rgb(218, 221, 225) 100%)',
+        boxShadow: '0px 6px 20px rgba(0,0,0,0.08)',
+        overflow: 'hidden'
       }}
     >
       {/* Floating Bubbles */}
       <Box
         sx={{
           position: 'absolute',
-          width: 250,
-          height: 250,
-          top: -80,
-          left: -80,
+          width: { xs: 120, sm: 180, md: 250 },
+          height: { xs: 120, sm: 180, md: 250 },
+          top: { xs: -40, md: -80 },
+          left: { xs: -40, md: -80 },
           borderRadius: '50%',
           background: 'linear-gradient(135deg, #ff7e5f, #feb47b)',
           opacity: 0.1,
-          animation: 'float 6s ease-in-out infinite alternate'
+          animation: 'float 6s ease-in-out infinite alternate',
+          zIndex: 1
         }}
       />
       <Box
         sx={{
           position: 'absolute',
-          width: 180,
-          height: 180,
-          bottom: -60,
-          right: -60,
+          width: { xs: 90, sm: 140, md: 180 },
+          height: { xs: 90, sm: 140, md: 180 },
+          bottom: { xs: -30, md: -60 },
+          right: { xs: -30, md: -60 },
           borderRadius: '50%',
           background: 'linear-gradient(135deg, #76b2fe, #b69efe)',
           opacity: 0.1,
-          animation: 'float 8s ease-in-out infinite alternate-reverse'
+          animation: 'float 8s ease-in-out infinite alternate-reverse',
+          zIndex: 1
         }}
       />
 
@@ -91,7 +94,14 @@ const HeroWithFinalTouch = ({ data }) => {
         <Fade cascade damping={0.1} triggerOnce>
           <Typewriter text={data.title} />
 
-          <Typography variant="h5" color="text.secondary" fontWeight={400} mt={2} mb={4} sx={{ fontSize: { xs: '1.1rem', md: '1.5rem' } }}>
+          <Typography
+            variant="h5"
+            color="text.secondary"
+            fontWeight={400}
+            mt={2}
+            mb={4}
+            sx={{ fontSize: { xs: '1rem', md: '1.5rem' } }}
+          >
             {data.subtitle}
           </Typography>
 
@@ -111,16 +121,17 @@ const HeroWithFinalTouch = ({ data }) => {
                 variant={idx === 0 ? 'contained' : 'outlined'}
                 size="large"
                 color="primary"
-                fullWidth={{ xs: true, sm: false }} // ✅ Full width only on mobile, normal on desktop
+                fullWidth={true}
                 sx={{
                   borderRadius: 3,
                   fontWeight: 600,
-                  px: 4,
-                  py: 1.5,
-                  minWidth: 180,
-                  width: { xs: '100%', sm: 'auto' }, // ✅ Force 100% width mobile, normal on desktop
+                  px: 3,
+                  py: 1.2,
+                  minWidth: { xs: '100%', sm: 160 },
+                  width: { xs: '100%', sm: 'auto' },
                   textAlign: 'center',
                   transition: '0.3s ease',
+                  mb: { xs: 1, sm: 0 },
                   '&:hover': {
                     transform: 'scale(1.05)',
                     boxShadow: idx === 0 ? '0px 0px 20px 4px rgba(0,123,255,0.3)' : undefined
