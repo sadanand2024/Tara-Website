@@ -1,17 +1,15 @@
 // material-ui
-import { useTheme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
+import { useTheme } from '@mui/material/styles';
 
 // project imports
 import Customization from 'layout/Customization';
 import AppBar from 'ui-component/extended/AppBar';
-import HeaderSection from './HeaderSection';
 import CardSection from './CardSection';
-import FeatureSection from './FeatureSection';
-import PeopleSection from './PeopleSection';
-import FrameworkSection from './FrameworkSection';
-import FooterSection from './FooterSection';
 import CustomizeSection from './CustomizeSection';
+import FeatureSection from './FeatureSection';
+import FooterSection from './FooterSection';
+import HeaderSection from './HeaderSection';
 import PreBuildDashBoard from './PreBuildDashBoard';
 import StartupProjectSection from './StartupProjectSection';
 //import IncludeSection from './IncludeSection';

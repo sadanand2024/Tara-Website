@@ -272,12 +272,8 @@
   resolved "https://registry.npmjs.org/@emotion/memoize/-/memoize-0.9.0.tgz"
   integrity sha512-30FAj7/EoJ5mwVPOWhAyCX+FPfMDrVecJAM+Iw9NRoSl4BBAQeqj4cApHHUXOVvIPgLVDsCFoz/hGD+5QQD1GQ==
 
-"@emotion/memoize@0.7.4":
-  version "0.7.4"
-  resolved "https://registry.npmjs.org/@emotion/memoize/-/memoize-0.7.4.tgz"
-  integrity sha512-Ja/Vfqe3HpuzRsG1oBtWTHk2PGZ7GR+2Vz5iYGelAw8dx32K0y7PjVuxK6z1nMpZOqAFsRUPCkK1YjJ56qJlgw==
+"@emotion/react@^11.0.0", "@emotion/react@^11.0.0-rc.0", "@emotion/react@^11.4.1", "@emotion/react@^11.5.0", "@emotion/react@^11.9.0", "@emotion/react@11.13.5":
 
-"@emotion/react@^11.7.1", "@emotion/react@11.13.5":
   version "11.13.5"
   resolved "https://registry.npmjs.org/@emotion/react/-/react-11.13.5.tgz"
   integrity sha512-6zeCUxUH+EPF1s+YF/2hPVODeV/7V07YU5x+2tfuRL8MdW6rv5vb2+CBEGTGwBdux0OIERcOS+RzxeK80k2DsQ==

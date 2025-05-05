@@ -1,61 +1,67 @@
+
+import { Box, Container, Stack, Typography } from '@mui/material';
+import CardMedia from '@mui/material/CardMedia';
+import { IconCircleCheck } from '@tabler/icons-react';
+
 import React from 'react';
-import { Box, Typography, Stack, Chip, Paper, Fade } from '@mui/material';
+import { Slide } from 'react-awesome-reveal'; // ✅ Animation
+
+import LayerLeft from 'assets/images/landing/customization-left.png'; // Your actual image path
 
 const RelatedServices = ({ related }) => {
   if (!related || related.length === 0) return null;
 
-  return (
-    <Fade in timeout={700}>
-      <Box sx={{ my: 8 }}>
-        {/* Title */}
-        <Typography variant="h2" fontWeight={700} textAlign="center" gutterBottom>
-          Related Services
-        </Typography>
+  const listSX = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '1rem',
+    padding: '12px 0',
+    fontSize: '1rem',
+    color: 'grey.900',
+    svg: { color: 'secondary.main', minWidth: 30 }
+  };
 
-        {/* Beautiful Background Box */}
-        <Paper
-          elevation={3}
-          sx={{
-            p: 4,
-            mt: 4,
-            borderRadius: 3,
-            background: 'linear-gradient(145deg, rgba(255,255,255,0.8) 0%, rgba(245,245,245,0.95) 100%)',
-            backdropFilter: 'blur(6px)',
-            border: '1px solid',
-            borderColor: 'divider',
-            boxShadow: '0 8px 16px rgba(0,0,0,0.1)'
-          }}
-        >
-          <Stack direction="row" spacing={2} useFlexGap flexWrap="wrap" justifyContent="center">
-            {related.map((service, idx) => (
-              <Chip
-                key={idx}
-                label={service}
-                clickable
-                variant="filled"
-                color="primary"
-                sx={{
-                  fontSize: '1rem',
-                  px: 2,
-                  py: 1,
-                  borderRadius: 2,
-                  backgroundColor: 'primary.light',
-                  color: 'primary.dark',
-                  fontWeight: 600,
-                  transition: 'all 0.3s ease-in-out',
-                  '&:hover': {
-                    backgroundColor: 'primary.main',
-                    color: 'white',
-                    boxShadow: '0px 8px 20px rgba(0,0,0,0.15)',
-                    transform: 'translateY(-3px)'
-                  }
-                }}
-              />
-            ))}
+  return (
+    <Container sx={{ mt: 10 }}>
+      <Stack
+        direction={{ xs: 'column', md: 'row' }}
+        spacing={{ xs: 4, md: 8 }}
+        alignItems="center"
+        justifyContent="space-between"
+      >
+        {/* Left: Image */}
+        <Box sx={{ width: { xs: '100%', md: '40%' }, maxWidth: 500 }}>
+          <Stack sx={{ width: '80%', mx: 'auto' }}>
+            <CardMedia component="img" image={LayerLeft} alt="Related Services" />
           </Stack>
-        </Paper>
-      </Box>
-    </Fade>
+        </Box>
+
+        {/* Right: Text with Slide-Up Animation */}
+        <Box sx={{ width: { xs: '100%', md: '60%' } }}>
+          <Slide direction="up" triggerOnce>
+            <Stack spacing={3}>
+              <Box>
+                <Typography variant="h1" fontWeight={800} color="text.primary">
+                  Related <span style={{ color: '#1976d2' }}>Services</span>
+                </Typography>
+                <Typography variant="h3" color="text.secondary" mt={2} mb={3}>
+                  Explore other services that may benefit you:
+                </Typography>
+              </Box>
+
+              <Stack spacing={1}>
+                {related.map((item, idx) => (
+                  <Typography key={idx} sx={listSX}>
+                    <IconCircleCheck size={30} />
+                    {item}
+                  </Typography>
+                ))}
+              </Stack>
+            </Stack>
+          </Slide>
+        </Box>
+      </Stack>
+    </Container>
   );
 };
 

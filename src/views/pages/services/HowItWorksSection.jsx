@@ -1,56 +1,6 @@
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import { Box, Grid, Paper, Typography } from '@mui/material';
 import React from 'react';
-import { Box, Typography, Stepper, Step, StepLabel, Paper, StepConnector, stepConnectorClasses } from '@mui/material';
-import { styled } from '@mui/material/styles';
-import AssignmentIcon from '@mui/icons-material/Assignment';
-import UploadFileIcon from '@mui/icons-material/UploadFile';
-import DoneOutlineIcon from '@mui/icons-material/DoneOutline';
-import PaymentIcon from '@mui/icons-material/Payment';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-
-// --- Custom Styled Connector
-const CustomConnector = styled(StepConnector)(({ theme }) => ({
-  [`&.${stepConnectorClasses.alternativeLabel}`]: {
-    top: 22
-  },
-  [`& .${stepConnectorClasses.line}`]: {
-    height: 3,
-    border: 0,
-    borderRadius: 1,
-    backgroundImage: 'linear-gradient(95deg, #2196F3 0%, #21CBF3 50%, #1DE9B6 100%)'
-  }
-}));
-
-// --- Custom Step Icon
-const CustomStepIconRoot = styled('div')(() => ({
-  backgroundImage: 'linear-gradient(136deg, #2196F3 0%, #21CBF3 50%, #1DE9B6 100%)',
-  zIndex: 1,
-  color: '#fff',
-  width: 50,
-  height: 50,
-  display: 'flex',
-  borderRadius: '50%',
-  justifyContent: 'center',
-  alignItems: 'center',
-  boxShadow: '0 4px 10px 0 rgba(0,0,0,.25)',
-  transition: 'all 0.3s ease-in-out'
-}));
-
-function CustomStepIcon(props) {
-  const { active, completed, icon, className } = props;
-  const icons = {
-    1: <AssignmentIcon />,
-    2: <UploadFileIcon />,
-    3: <DoneOutlineIcon />,
-    4: <PaymentIcon />,
-    5: <CheckCircleIcon />
-  };
-
-  return (
-    <CustomStepIconRoot ownerState={{ completed, active }} className={className}>
-      {icons[String(icon)]}
-    </CustomStepIconRoot>
-  );
-}
 
 const HowItWorksSection = ({ steps = [] }) => {
   return (
@@ -68,22 +18,50 @@ const HowItWorksSection = ({ steps = [] }) => {
         How It Works 🚀
       </Typography>
 
-      <Stepper alternativeLabel connector={<CustomConnector />} activeStep={1} sx={{ mt: 4 }}>
+      <Grid container spacing={2} sx={{ mt: 4, alignItems: 'center' }}>
         {steps.map((step, index) => (
-          <Step key={index}>
-            <StepLabel StepIconComponent={CustomStepIcon}>
-              <Box sx={{ textAlign: 'center', maxWidth: 200, mx: 'auto' }}>
-                <Typography variant="h5" fontWeight={600} mb={1}>
+          <React.Fragment key={index}>
+            <Grid item xs={12} sm={2.4}>
+              <Box
+                sx={{
+                  p: 2,
+                  borderRadius: 2,
+                  backgroundColor: 'primary.main',
+                  color: 'white',
+                  textAlign: 'center',
+                  position: 'relative',
+                  '&::after': {
+                    content: '""',
+                    position: 'absolute',
+                    right: 0,
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    width: 0,
+                    height: 0,
+                    borderTop: '15px solid transparent',
+                    borderBottom: '15px solid transparent',
+                    borderLeft: '15px solid',
+                    borderLeftColor: 'primary.main',
+                    zIndex: 1
+                  }
+                }}
+              >
+                <Typography variant="h6" fontWeight={600}>
                   Step {index + 1}
                 </Typography>
-                <Typography variant="subtitle2" color="text.secondary">
+                <Typography variant="body2">
                   {step}
                 </Typography>
               </Box>
-            </StepLabel>
-          </Step>
+            </Grid>
+            {index < steps.length - 1 && (
+              <Grid item xs={12} sm="auto" sx={{ display: { xs: 'none', sm: 'block' } }}>
+                <ArrowForwardIosIcon sx={{ color: 'primary.main' }} />
+              </Grid>
+            )}
+          </React.Fragment>
         ))}
-      </Stepper>
+      </Grid>
     </Paper>
   );
 };
