@@ -500,7 +500,7 @@ const PayrollCompliance = () => {
         )}
         {tab === 1 && (
           <Box sx={{ p: 1 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1, }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
               <Typography variant="h6" color="text.primary">
                 Employee State Insurance
               </Typography>
@@ -717,7 +717,7 @@ const PayrollCompliance = () => {
                 <Table size="small">
                   <TableHead>
                     <TableRow>
-                      <TableCell>PTIN</TableCell>
+                      <TableCell>PT Number</TableCell>
                       <TableCell>State</TableCell>
                       <TableCell>Location</TableCell>
                       <TableCell>PT Slabs</TableCell>
