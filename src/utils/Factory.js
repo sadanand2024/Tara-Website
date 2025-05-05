@@ -60,13 +60,6 @@ const Factory = (api, URL, payload, headers = {}) => {
           logout();
         }
       } else if (e?.response?.status == 404) {
-        if (e?.response?.data.status_cd === 2) {
-          return {
-            res: { status_cd: 2, ...e.response },
-            variant: 'warning',
-            message: 'Data not found.'
-          };
-        }
         return {
           res: { status_cd: 1, ...e.response },
           variant: 'warning',

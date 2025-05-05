@@ -215,11 +215,11 @@ export default function ManageUsers() {
           <Grid container spacing={gridSpacing} sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
             <Grid>
               <Typography variant="h3" sx={{ p: 0 }}>
-                Users List
+                Tasks List
               </Typography>
             </Grid>
             <Grid>
-              <Stack direction="row" spacing={2}>
+              {/* <Stack direction="row" spacing={2}>
                 <Button variant="contained" startIcon={<AddIcon />} onClick={handleAddDialogOpen} size="small">
                   Add User
                 </Button>
@@ -235,7 +235,7 @@ export default function ManageUsers() {
                   }
                   size="small"
                 />
-              </Stack>
+              </Stack> */}
             </Grid>
           </Grid>
         }

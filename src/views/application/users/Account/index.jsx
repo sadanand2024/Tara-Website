@@ -48,25 +48,25 @@ function a11yProps(index) {
 // tabs option
 const tabsOption = [
   {
-    label: 'Personal KYC',
+    label: 'Account Details',
     icon: <PersonOutlineTwoToneIcon />,
     caption: 'Profile Settings'
+  },
+  {
+    label: 'Billing',
+    icon: <DescriptionTwoToneIcon />,
+    caption: 'Billing Information'
+  },
+  {
+    label: 'Payment',
+    icon: <CreditCardTwoToneIcon />,
+    caption: 'Add & Update Card'
+  },
+  {
+    label: 'Change Password',
+    icon: <VpnKeyTwoToneIcon />,
+    caption: 'Update Profile Security'
   }
-  // {
-  //   label: 'Billing',
-  //   icon: <DescriptionTwoToneIcon />,
-  //   caption: 'Billing Information'
-  // },
-  // {
-  //   label: 'Payment',
-  //   icon: <CreditCardTwoToneIcon />,
-  //   caption: 'Add & Update Card'
-  // },
-  // {
-  //   label: 'Change Password',
-  //   icon: <VpnKeyTwoToneIcon />,
-  //   caption: 'Update Profile Security'
-  // }
 ];
 
 // ==============================|| PROFILE 2 ||============================== //
@@ -83,7 +83,7 @@ export default function Profile2() {
   return (
     <Grid container spacing={gridSpacing}>
       <Grid size={12}>
-        <MainCard title="Personal Settings" content={false}>
+        <MainCard title="Account Settings" content={false}>
           <Grid container spacing={gridSpacing}>
             <Grid size={{ xs: 12, lg: 4 }}>
               <CardContent>
@@ -153,7 +153,7 @@ export default function Profile2() {
                 <TabPanel value={value} index={0}>
                   <UserProfile user={user} pageChange={handleChange} value={value} />
                 </TabPanel>
-                {/* <TabPanel value={value} index={1}>
+                <TabPanel value={value} index={1}>
                   <Billing user={user} />
                 </TabPanel>
                 <TabPanel value={value} index={2}>
@@ -161,7 +161,7 @@ export default function Profile2() {
                 </TabPanel>
                 <TabPanel value={value} index={3}>
                   <ChangePassword user={user} />
-                </TabPanel> */}
+                </TabPanel>
               </CardContent>
             </Grid>
           </Grid>
