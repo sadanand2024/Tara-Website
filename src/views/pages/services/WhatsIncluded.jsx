@@ -1,6 +1,5 @@
 import AutoGraphIcon from '@mui/icons-material/AutoGraph';
 import React from 'react';
-import { Box, Grid2, Paper, Typography } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CloudDoneIcon from '@mui/icons-material/CloudDone';
 import IntegrationInstructionsIcon from '@mui/icons-material/IntegrationInstructions';
@@ -9,7 +8,6 @@ import SmartToyIcon from '@mui/icons-material/SmartToy';
 import SupportAgentIcon from '@mui/icons-material/SupportAgent';
 import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import { Box, Container, Paper, Stack, Typography } from '@mui/material';
-import React from 'react';
 import { Fade } from 'react-awesome-reveal';
 
 const WhatsIncluded = ({ title = "What's Included", items }) => {
@@ -22,8 +20,7 @@ const WhatsIncluded = ({ title = "What's Included", items }) => {
     { icon: <AutoGraphIcon />, color: '#fbc02d', gradient: 'linear-gradient(135deg, #fbc02d 0%, #f9a825 100%)' },
     { icon: <TaskAltIcon />, color: '#512da8', gradient: 'linear-gradient(135deg, #512da8 0%, #4527a0 100%)' },
     { icon: <CheckCircleIcon />, color: '#ff5722', gradient: 'linear-gradient(135deg, #ff5722 0%, #f4511e 100%)' },
-    { icon: <SupportAgentIcon />, color: '#388e3c', gradient: 'linear-gradient(135deg, #388e3c 0%, #2e7d32 100%)' },
-
+    { icon: <SupportAgentIcon />, color: '#388e3c', gradient: 'linear-gradient(135deg, #388e3c 0%, #2e7d32 100%)' }
   ];
 
   return (
@@ -45,14 +42,7 @@ const WhatsIncluded = ({ title = "What's Included", items }) => {
           {title}
         </Typography>
 
-        <Stack
-          direction="row"
-          spacing={{ xs: 2, md: 3 }}
-          justifyContent="center"
-          alignItems="center"
-          flexWrap="wrap"
-          useFlexGap
-        >
+        <Stack direction="row" spacing={{ xs: 2, md: 3 }} justifyContent="center" alignItems="center" flexWrap="wrap" useFlexGap>
           {items.map((label, idx) => (
             <Box
               key={idx}
@@ -83,10 +73,10 @@ const WhatsIncluded = ({ title = "What's Included", items }) => {
                       transform: 'translateY(-8px)',
                       boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1)',
                       '& .icon-container': {
-                        transform: 'scale(1.1)',
+                        transform: 'scale(1.1)'
                       },
                       '& .gradient-overlay': {
-                        opacity: 0.1,
+                        opacity: 0.1
                       }
                     }
                   }}
@@ -101,7 +91,7 @@ const WhatsIncluded = ({ title = "What's Included", items }) => {
                       bottom: 0,
                       background: iconList[idx].gradient,
                       opacity: 0.05,
-                      transition: 'opacity 0.3s ease',
+                      transition: 'opacity 0.3s ease'
                     }}
                   />
                   <Box
@@ -116,8 +106,7 @@ const WhatsIncluded = ({ title = "What's Included", items }) => {
                       background: iconList[idx].gradient,
                       mb: 2,
                       transition: 'transform 0.3s ease',
-                      boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-                      
+                      boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
                     }}
                   >
                     {React.cloneElement(iconList[idx].icon, {
