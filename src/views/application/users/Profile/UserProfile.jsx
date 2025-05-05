@@ -1,6 +1,8 @@
+import { useEffect, useState } from 'react';
 // material-ui
 import Grid from '@mui/material/Grid2';
 import Stack from '@mui/material/Stack';
+import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import MenuItem from '@mui/material/MenuItem';
@@ -11,6 +13,8 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 // project imports
 import Avatar from 'ui-component/extended/Avatar';
 import { gridSpacing } from 'store/constant';
+import { INDIAN_STATES as states } from 'utils/constants';
+import Factory from 'utils/Factory';
 
 // validation
 import { useFormik } from 'formik';
@@ -23,38 +27,8 @@ import ErrorTwoToneIcon from '@mui/icons-material/ErrorTwoTone';
 
 // ==============================|| PROFILE 2 - USER PROFILE ||============================== //
 
-const states = [
-  'Andhra Pradesh',
-  'Arunachal Pradesh',
-  'Assam',
-  'Bihar',
-  'Chhattisgarh',
-  'Goa',
-  'Gujarat',
-  'Haryana',
-  'Himachal Pradesh',
-  'Jharkhand',
-  'Karnataka',
-  'Kerala',
-  'Madhya Pradesh',
-  'Maharashtra',
-  'Manipur',
-  'Meghalaya',
-  'Mizoram',
-  'Nagaland',
-  'Odisha',
-  'Punjab',
-  'Rajasthan',
-  'Sikkim',
-  'Tamil Nadu',
-  'Telangana',
-  'Tripura',
-  'Uttar Pradesh',
-  'Uttarakhand',
-  'West Bengal'
-];
-
-export default function UserProfile({ onSubmit }) {
+export default function UserProfile({ user, pageChange, value }) {
+  const [type, setType] = useState('put');
   const validationSchema = Yup.object({
     name: Yup.string()
       .required('Name is required')
@@ -73,9 +47,6 @@ export default function UserProfile({ onSubmit }) {
         if (!value) return false;
         return dayjs().diff(dayjs(value), 'year') >= 18;
       }),
-    icai_number: Yup.string()
-      .required('ICAI Number is required')
-      .matches(/^\d{6}$/, 'ICAI Number should be 6 digits'),
     address: Yup.object({
       address_line1: Yup.string().required('Address Line 1 is required').min(5, 'Address should be at least 5 characters'),
       address_line2: Yup.string(),
@@ -105,18 +76,72 @@ export default function UserProfile({ onSubmit }) {
       }
     },
     validationSchema,
-    onSubmit: (values) => {
+    onSubmit: async (values) => {
       const submissionData = {
         ...values,
         date: values.date ? dayjs(values.date).format('YYYY-MM-DD') : null,
         address: {
           ...values.address,
           pincode: values.address.pincode ? parseInt(values.address.pincode, 10) : ''
-        }
+        },
+        have_firm: false // Default value
       };
-      onSubmit(submissionData);
+
+      // Only include icai_number if have_firm is true
+      if (!submissionData.have_firm) {
+        delete submissionData.icai_number;
+      }
+
+      const url = type === 'put' ? `/user_management/users-kyc/${values.id}` : '/user_management/users-kyc/';
+
+      const response = await Factory(type, url, submissionData, {}, true);
+
+      if (response.res.status_cd === 0) {
+        // Handle successful operation
+        console.log(`Profile ${type === 'put' ? 'updated' : 'created'} successfully`);
+        if (type === 'post') {
+          setType('put'); // Update type to put for future updates
+        }
+      } else {
+        // Handle error
+        console.error(`Failed to ${type === 'put' ? 'update' : 'create'} profile:`, response.res.data);
+      }
     }
   });
+
+  const getUserData = async () => {
+    try {
+      const response = await Factory('get', `/user_management/users-kyc/${user.user.id}`, {}, {});
+      if (response.res.status_cd === 0) {
+        setType('put');
+        formik.setValues({
+          id: response.res.data.id || '',
+          name: response.res.data.name || '',
+          pan_number: response.res.data.pan_number || '',
+          aadhaar_number: response.res.data.aadhaar_number || '',
+          date: response.res.data.date ? dayjs(response.res.data.date) : null,
+          icai_number: response.res.data.icai_number || '',
+          address: {
+            address_line1: response.res.data.address?.address_line1 || '',
+            address_line2: response.res.data.address?.address_line2 || '',
+            pincode: response.res.data.address?.pincode || '',
+            state: response.res.data.address?.state || '',
+            city: response.res.data.address?.city || '',
+            country: response.res.data.address?.country || 'India'
+          }
+        });
+      } else if (response.res.data.detail === 'User details not found.') {
+        setType('post');
+      }
+    } catch (error) {
+      console.error('Error fetching licenses:', error);
+      // showNotification('Failed to fetch licenses', 'error');
+    }
+  };
+
+  useEffect(() => {
+    getUserData();
+  }, []);
 
   return (
     <form id="profile-form" onSubmit={formik.handleSubmit}>
@@ -207,7 +232,7 @@ export default function UserProfile({ onSubmit }) {
         </Grid>
 
         <Grid size={{ xs: 12, sm: 6 }}>
-          <TextField
+          {/* <TextField
             fullWidth
             label="ICAI Number"
             size="small"
@@ -217,7 +242,7 @@ export default function UserProfile({ onSubmit }) {
             onBlur={formik.handleBlur}
             error={formik.touched.icai_number && Boolean(formik.errors.icai_number)}
             helperText={formik.touched.icai_number && formik.errors.icai_number}
-          />
+          /> */}
         </Grid>
 
         <Grid size={{ xs: 12 }}>
@@ -300,6 +325,24 @@ export default function UserProfile({ onSubmit }) {
             error={formik.touched.address?.pincode && Boolean(formik.errors.address?.pincode)}
             helperText={formik.touched.address?.pincode && formik.errors.address?.pincode}
           />
+        </Grid>
+      </Grid>
+      <Grid container spacing={gridSpacing} sx={{ mt: 2 }}>
+        <Grid size={12}>
+          <Stack direction="row" justifyContent="flex-end">
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              size="medium"
+              onClick={() => {
+                formik.handleSubmit();
+                pageChange(value + 1);
+              }}
+            >
+              Save & Continue
+            </Button>
+          </Stack>
         </Grid>
       </Grid>
     </form>

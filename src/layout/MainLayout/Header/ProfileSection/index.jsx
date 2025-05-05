@@ -161,10 +161,10 @@ export default function ProfileSection() {
                         <Avatar src={User1} alt="user-images" sx={{ width: 40, height: 40 }} />
                         <Stack direction="column" spacing={0}>
                           <Typography variant="h5" color="text.primary" sx={{ lineHeight: 1 }} fontWeight={600}>
-                            {user?.name || 'User Name'}
+                            {userData?.user?.email || 'User Name'}
                           </Typography>
                           <Typography variant="caption" color="text.secondary" sx={{ p: 0, m: 0 }} fontWeight={600}>
-                            {user?.role || 'User Role'}
+                            {userData?.user_role?.name || 'User Role'}
                           </Typography>
                         </Stack>
                       </Stack>
@@ -267,6 +267,22 @@ export default function ProfileSection() {
                             />
                           </ListItemButton>
                         )}
+                        <ListItemButton
+                          sx={{ borderRadius: `${borderRadius}px` }}
+                          selected={selectedIndex === 1}
+                          onClick={(event) => handleListItemClick(event, 1, '/apps/account-settings')}
+                        >
+                          <ListItemIcon>
+                            <IconSettings stroke={1.5} size="20px" />
+                          </ListItemIcon>
+                          <ListItemText
+                            primary={
+                              <Typography variant="body2">
+                                <FormattedMessage id="account-settings" />
+                              </Typography>
+                            }
+                          />
+                        </ListItemButton>
                         <ListItemButton sx={{ borderRadius: `${borderRadius}px` }} selected={selectedIndex === 4} onClick={handleLogout}>
                           <ListItemIcon>
                             <IconLogout stroke={1.5} size="20px" />

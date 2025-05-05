@@ -70,7 +70,7 @@ const dashboard = {
       id: 'task-manager',
       title: 'task-manager',
       type: 'item',
-      url: '/app/tasks',
+      url: '/app/manage-tasks',
       icon: icons.IconClipboardList,
       breadcrumbs: false,
       caption: ''
@@ -173,7 +173,7 @@ const dashboard = {
       icon: icons.IconHeadset,
       breadcrumbs: false,
       caption: ''
-    },
+    }
   ]
 };
 

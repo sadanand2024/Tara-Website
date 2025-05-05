@@ -12,20 +12,10 @@ import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
-
-// project imports
-import UserList from './UserList';
-import AddUser from './AddUser';
-import PermissionsDrawer from './PermissionsDrawer';
 import MainCard from 'ui-component/cards/MainCard';
 import { gridSpacing } from 'store/constant';
 import Factory from 'utils/Factory';
 import { useSelector } from 'store';
-
-// assets
-import { IconSearch } from '@tabler/icons-react';
-import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded';
-import AddIcon from '@mui/icons-material/Add';
 
 // ==============================|| MANAGE USERS ||============================== //
 
@@ -208,118 +198,5 @@ export default function ManageUsers() {
 
   // Add effect to refresh users when page or rowsPerPage changes
 
-  return (
-    <>
-      <MainCard
-        title={
-          <Grid container spacing={gridSpacing} sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
-            <Grid>
-              <Typography variant="h3" sx={{ p: 0 }}>
-                Users List
-              </Typography>
-            </Grid>
-            <Grid>
-              <Stack direction="row" spacing={2}>
-                <Button variant="contained" startIcon={<AddIcon />} onClick={handleAddDialogOpen} size="small">
-                  Add User
-                </Button>
-                <OutlinedInput
-                  id="input-search-list-style1"
-                  placeholder="Search"
-                  value={searchQuery}
-                  onChange={handleSearch}
-                  startAdornment={
-                    <InputAdornment position="start">
-                      <IconSearch stroke={1.5} size="16px" />
-                    </InputAdornment>
-                  }
-                  size="small"
-                />
-              </Stack>
-            </Grid>
-          </Grid>
-        }
-        content={false}
-      >
-        <UserList
-          page={page}
-          rowsPerPage={rowsPerPage}
-          searchQuery={searchQuery}
-          onTotalUsers={handleTotalUsers}
-          onOpenPermissions={handleOpenPermissionDrawer}
-          loading={loading}
-          users={users}
-        />
-        <Grid sx={{ p: 1.5 }} size={12}>
-          <Grid container spacing={gridSpacing} sx={{ justifyContent: 'space-between' }}>
-            <Grid>
-              <Pagination
-                count={Math.ceil(totalUsers / rowsPerPage)}
-                page={page}
-                onChange={handleChangePage}
-                color="primary"
-                shape="rounded"
-              />
-            </Grid>
-            <Grid>
-              <Button size="large" sx={{ color: 'grey.900' }} color="secondary" endIcon={<ExpandMoreRoundedIcon />} onClick={handleClick}>
-                {rowsPerPage} Rows
-              </Button>
-              <Menu
-                id="menu-user-list-style1"
-                anchorEl={anchorEl}
-                keepMounted
-                open={Boolean(anchorEl)}
-                onClose={handleClose}
-                variant="selectedMenu"
-                anchorOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right'
-                }}
-                transformOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'right'
-                }}
-              >
-                <MenuItem onClick={() => handleChangeRowsPerPage(10)}>10 Rows</MenuItem>
-                <MenuItem onClick={() => handleChangeRowsPerPage(20)}>20 Rows</MenuItem>
-                <MenuItem onClick={() => handleChangeRowsPerPage(30)}>30 Rows</MenuItem>
-              </Menu>
-            </Grid>
-          </Grid>
-        </Grid>
-        <AddUser open={openAddDialog} onClose={handleAddDialogClose} user={user} getUsers={getUsers} />
-        <PermissionsDrawer
-          open={openPermissionDrawer}
-          onClose={handleClosePermissionDrawer}
-          selectedUser={selectedUser}
-          selectedPermissions={selectedPermissions}
-          onPermissionChange={handlePermissionChange}
-          onSave={handleSavePermissions}
-          masterPermissions={masterPermissions}
-        />
-      </MainCard>
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={4000}
-        onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-      >
-        <Alert
-          onClose={handleCloseSnackbar}
-          severity={snackbar.severity}
-          variant="filled"
-          elevation={6}
-          sx={{
-            width: '100%',
-            '& .MuiAlert-message': {
-              fontSize: '0.875rem'
-            }
-          }}
-        >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
-    </>
-  );
+  return <h1>My Services</h1>;
 }
