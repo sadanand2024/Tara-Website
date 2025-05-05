@@ -171,7 +171,7 @@ const PayrollDashboard = () => {
     //   getData(user.id);
     // }
     getData(businessId);
-  }, [user]);
+  }, [user.active_context]);
   useEffect(() => {
     const getCurrentFinancialYear = () => {
       const today = new Date();
@@ -264,7 +264,6 @@ const PayrollDashboard = () => {
 
                       <Button
                         variant="contained"
-                        color="success"
                         size="small"
                         onClick={() => {
                           if (businessDetails?.payroll_id) {

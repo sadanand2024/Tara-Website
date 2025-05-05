@@ -340,6 +340,7 @@ function EpfComponent({ handleNext }) {
 
           <Modal
             open={open}
+            maxWidth={'sm'}
             title={'Add Or Edit EPF Details'}
             header={{ title: 'Employees Provident Fund', subheader: '' }}
             showClose={true}
@@ -371,7 +372,7 @@ function EpfComponent({ handleNext }) {
               </Stack>
             }
           >
-            <Box component="form" onSubmit={handleSubmit} p={2}>
+            <Box component="form" onSubmit={handleSubmit}>
               <Grid2 container spacing={2}>
                 {pfFields.map((field) => (
                   <Grid2 size={{ xs: 12 }} key={field.name}>

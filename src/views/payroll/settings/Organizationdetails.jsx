@@ -81,6 +81,17 @@ function Organizationdetails() {
 
   const validationSchema = Yup.object({
     business_name: Yup.string().required('Organization name is required'),
+    logo: Yup.mixed()
+      .required('Logo is required')
+      .test('fileSize', 'File size is too large', (value) => {
+        // If value is a string (URL), it's valid
+        if (typeof value === 'string') return true;
+        // If value is a file object, check its size
+        if (value && value.size) {
+          return value.size <= 5242880; // 5MB in bytes
+        }
+        return false;
+      }),
     business_nature: Yup.string().required('Business Nature is required'),
     pan: Yup.string()
       .required('PAN Number is required')
@@ -126,7 +137,12 @@ function Organizationdetails() {
       };
 
       postData.append('business_details', JSON.stringify(postBusinessDetails.business_details));
-      postData.append('logo', values.logo);
+      if (formik.touched.logo && values.logo !== formik.initialValues.logo) {
+        // Only append logo if it's a File object, not a URL string
+        if (values.logo instanceof File) {
+          postData.append('logo', values.logo);
+        }
+      }
       postData.append('sender_email', values.sender_email);
       postData.append('filling_address_line1', values.filling_address_line1);
       postData.append('filling_address_line2', values.filling_address_line2);
@@ -168,7 +184,25 @@ function Organizationdetails() {
       if (field.name === 'logo') {
         return (
           <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4 }}>
-            <CustomUpload title="Upload Logo" setData={setLogoDetails} logoDetails={values.logo} existingImageUrl={values.logo} />
+            <Typography gutterBottom>
+              {field.label} {<span style={{ color: 'red' }}>*</span>}
+            </Typography>
+            <CustomUpload
+              title="Upload Logo"
+              setData={(data) => {
+                setLogoDetails(data);
+                formik.setFieldTouched('logo', true, false);
+              }}
+              logoDetails={values.logo}
+              existingImageUrl={values.logo}
+              error={touched.logo && Boolean(errors.logo)}
+              helperText={touched.logo && errors.logo}
+            />
+            {touched.logo && errors.logo && (
+              <Typography color="error" variant="caption" sx={{ mt: 1, display: 'block' }}>
+                {errors.logo}
+              </Typography>
+            )}
           </Grid2>
         );
       }
