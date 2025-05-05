@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useSelector } from 'react-redux';
 
 // material-ui
 import Button from '@mui/material/Button';
@@ -47,25 +48,25 @@ function a11yProps(index) {
 // tabs option
 const tabsOption = [
   {
-    label: 'User Profile',
+    label: 'Personal KYC',
     icon: <PersonOutlineTwoToneIcon />,
     caption: 'Profile Settings'
-  },
-  {
-    label: 'Billing',
-    icon: <DescriptionTwoToneIcon />,
-    caption: 'Billing Information'
-  },
-  {
-    label: 'Payment',
-    icon: <CreditCardTwoToneIcon />,
-    caption: 'Add & Update Card'
-  },
-  {
-    label: 'Change Password',
-    icon: <VpnKeyTwoToneIcon />,
-    caption: 'Update Profile Security'
   }
+  // {
+  //   label: 'Billing',
+  //   icon: <DescriptionTwoToneIcon />,
+  //   caption: 'Billing Information'
+  // },
+  // {
+  //   label: 'Payment',
+  //   icon: <CreditCardTwoToneIcon />,
+  //   caption: 'Add & Update Card'
+  // },
+  // {
+  //   label: 'Change Password',
+  //   icon: <VpnKeyTwoToneIcon />,
+  //   caption: 'Update Profile Security'
+  // }
 ];
 
 // ==============================|| PROFILE 2 ||============================== //
@@ -73,6 +74,7 @@ const tabsOption = [
 export default function Profile2() {
   const { mode, borderRadius } = useConfig();
   const [value, setValue] = React.useState(0);
+  const user = useSelector((state) => state).accountReducer.user;
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -81,7 +83,7 @@ export default function Profile2() {
   return (
     <Grid container spacing={gridSpacing}>
       <Grid size={12}>
-        <MainCard title="Account Settings" content={false}>
+        <MainCard title="Personal Settings" content={false}>
           <Grid container spacing={gridSpacing}>
             <Grid size={{ xs: 12, lg: 4 }}>
               <CardContent>
@@ -149,17 +151,17 @@ export default function Profile2() {
             <Grid size={{ xs: 12, lg: 8 }}>
               <CardContent sx={{ borderLeft: '1px solid', borderColor: 'divider', height: '100%' }}>
                 <TabPanel value={value} index={0}>
-                  <UserProfile />
+                  <UserProfile user={user} pageChange={handleChange} value={value} />
                 </TabPanel>
-                <TabPanel value={value} index={1}>
-                  <Billing />
+                {/* <TabPanel value={value} index={1}>
+                  <Billing user={user} />
                 </TabPanel>
                 <TabPanel value={value} index={2}>
-                  <Payment />
+                  <Payment user={user} />
                 </TabPanel>
                 <TabPanel value={value} index={3}>
-                  <ChangePassword />
-                </TabPanel>
+                  <ChangePassword user={user} />
+                </TabPanel> */}
               </CardContent>
             </Grid>
           </Grid>
@@ -176,7 +178,7 @@ export default function Profile2() {
                 )}
               </Grid>
               <Grid>
-                {value < 3 && (
+                {value < 3 && value != 0 && (
                   <AnimateButton>
                     <Button variant="contained" size="large" onClick={(e) => handleChange(e, 1 + value)}>
                       Continue

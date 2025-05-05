@@ -1,39 +1,29 @@
 import PropTypes from 'prop-types';
 import React, { useState, useEffect } from 'react';
-
 // material-ui
 import { useTheme } from '@mui/material/styles';
 import Chip from '@mui/material/Chip';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
-import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import { useSelector } from 'react-redux';
 import MainCard from '../../../ui-component/cards/MainCard';
-// project imports
 import { ThemeMode } from 'config';
-// assets
 import PersonOutlineTwoToneIcon from '@mui/icons-material/PersonOutlineTwoTone';
 import PanoramaTwoToneIcon from '@mui/icons-material/PanoramaTwoTone';
 import PeopleAltTwoToneIcon from '@mui/icons-material/PeopleAltTwoTone';
 import RecentActorsTwoToneIcon from '@mui/icons-material/RecentActorsTwoTone';
-
-//
 import Factory from 'utils/Factory';
 import TabOne from './BusinessProfile';
 import TabTwo from './Customers';
 import TabThree from './Goods&Services';
 import TabFour from './InvoiceNumberFormat';
 import { Grid2 } from '@mui/material';
-// tab content
+
 function TabPanel({ children, value, index, ...other }) {
   return (
     <div role="tabpanel" hidden={value !== index} id={`simple-tabpanel-${index}`} aria-labelledby={`simple-tab-${index}`} {...other}>
-      {value === index && (
-        <Box sx={{ p: 3 }}>
-          <Typography>{children}</Typography>
-        </Box>
-      )}
+      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
     </div>
   );
 }
@@ -45,26 +35,25 @@ function a11yProps(index) {
   };
 }
 
-// ================================|| UI TABS - SAMPLE ||================================ //
-
 export default function SimpleTabs() {
   const theme = useTheme();
-  const [value, setValue] = React.useState(0);
+  const [value, setValue] = useState(0);
   const [businessDetails, setBusinessDetails] = useState(null);
   const [postType, setPostType] = useState('');
   const [loading, setLoading] = useState(true);
-  const user = useSelector((state) => state).accountReducer.user;
   const [customers, setCustomers] = useState([]);
+  const user = useSelector((state) => state.accountReducer?.user);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
+
   const handleNext = () => {
-    if (activeTab < tabLabels.length - 1) setActiveTab((prev) => prev + 1);
+    if (value < 3) setValue((prev) => prev + 1);
   };
 
   const handleBack = () => {
-    if (activeTab > 0) setActiveTab((prev) => prev - 1);
+    if (value > 0) setValue((prev) => prev - 1);
   };
 
   const getCustomersData = async (id) => {
@@ -75,31 +64,47 @@ export default function SimpleTabs() {
   };
 
   const fetch_business_Details_by_businessId = async () => {
-    let businessId = user.active_context.business_id;
-    let url = `/user_management/businesses/${businessId}/`;
+    const businessId = user.active_context.business_id;
+    const url = `/user_management/businesses/${businessId}/`;
     const { res } = await Factory('get', url, {});
-    if (res?.status_cd === 0) {
-      setBusinessDetails(res?.data);
-    }
-  };
-  const fetch_Invoicing_profile = async () => {
-    let businessId = user.active_context.business_id;
-    let url = `/invoicing/invoicing-profiles/?business_id=${businessId}`;
-    const { res } = await Factory('get', url, {});
-    console.log(res.data);
     if (res?.status_cd === 0) {
       setBusinessDetails(res.data);
+    }
+  };
+
+  const fetch_Invoicing_profile = async () => {
+    const businessId = user.active_context.business_id;
+    const url = `/invoicing/invoicing-profiles/?business_id=${businessId}`;
+    const { res } = await Factory('get', url, {});
+    if (res?.status_cd === 0) {
+      const invoicingProfile = res.data;
+      const normalized = {
+        ...invoicingProfile.business,
+        gstin: invoicingProfile.gstin,
+        gst_registered: invoicingProfile.gst_registered,
+        bank_name: invoicingProfile.bank_name,
+        account_number: invoicingProfile.account_number,
+        ifsc_code: invoicingProfile.ifsc_code,
+        swift_code: invoicingProfile.swift_code,
+        gst_details: invoicingProfile.gst_details || [],
+        invoicing_profile_id: invoicingProfile.id,
+        invoice_format: invoicingProfile.invoice_format || []
+      };
+
+      setBusinessDetails(normalized);
       setPostType('put');
-      getCustomersData(res.data.id);
+      getCustomersData(invoicingProfile.id);
     } else if (res.status === 404 && res.data.message === 'Invoicing profile not found.') {
-      await fetch_business_Details_by_businessId();
+      await fetch_business_Details_by_businessId(); // this returns already flattened structure
       setPostType('post');
     }
     setLoading(false);
   };
+
   useEffect(() => {
     fetch_Invoicing_profile();
   }, []);
+
   return (
     <MainCard title="Invoicing Settings">
       <Grid2 container>
@@ -127,22 +132,31 @@ export default function SimpleTabs() {
               label="Business Profile"
               {...a11yProps(0)}
             />
-            <Tab icon={<RecentActorsTwoToneIcon sx={{ fontSize: '1.3rem' }} />} iconPosition="start" label="Customers" {...a11yProps(1)} />
+            <Tab
+              icon={<RecentActorsTwoToneIcon sx={{ fontSize: '1.3rem' }} />}
+              iconPosition="start"
+              label="Customers"
+              disabled={!businessDetails?.invoicing_profile_id}
+              {...a11yProps(1)}
+            />
             <Tab
               icon={<PeopleAltTwoToneIcon sx={{ fontSize: '1.3rem' }} />}
               label={'Goods & Services'}
               iconPosition="start"
+              disabled={!businessDetails?.invoicing_profile_id}
               {...a11yProps(2)}
             />
             <Tab
               icon={<PanoramaTwoToneIcon sx={{ fontSize: '1.3rem' }} />}
               iconPosition="start"
               label="Invoice Number Format"
+              disabled={!businessDetails?.invoicing_profile_id}
               {...a11yProps(3)}
             />
           </Tabs>
+
           <TabPanel value={value} index={0}>
-            <TabOne businessDetails={businessDetails} setBusinessDetails={setBusinessDetails} postType={postType} />
+            <TabOne businessDetails={businessDetails} setBusinessDetails={setBusinessDetails} postType={postType} handleNext={handleNext} />
           </TabPanel>
           <TabPanel value={value} index={1}>
             <TabTwo

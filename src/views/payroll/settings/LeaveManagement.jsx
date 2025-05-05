@@ -1,4 +1,3 @@
-'use client';
 import React, { useState, useEffect } from 'react';
 import {
   Box,
@@ -23,20 +22,22 @@ import CustomAutocomplete from 'utils/CustomAutocomplete';
 import ActionCell from 'ui-component/extended/ActionCell';
 import LeaveManagementDialog from './LeaveManagementDialog';
 import Factory from 'utils/Factory';
+import { openSnackbar } from 'store/slices/snackbar';
+import { useDispatch } from 'store';
+const ROWS_PER_PAGE = 5;
 
 function LeaveManagement() {
-  const [leaveType, setLeaveType] = useState('2024-25');
+  const [leaveType, setLeaveType] = useState('Paid');
   const [loading, setLoading] = useState(false);
   const [payrollId, setPayrollId] = useState(null);
-  const [leaveManagementData, setLeaveManagementData] = useState([]);
-  const [openDialog, setOpenDialog] = useState(false);
+  const [data, setData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
+  const [page, setPage] = useState(1);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [postType, setPostType] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-
-  const rowsPerPage = 5;
   const [searchParams] = useSearchParams();
-  const paginatedData = leaveManagementData.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const id = searchParams.get('payrollid');
@@ -44,48 +45,62 @@ function LeaveManagement() {
   }, [searchParams]);
 
   useEffect(() => {
-    if (payrollId) fetchLeaveManagementData();
+    if (payrollId) fetchData();
   }, [payrollId]);
 
-  const handlePageChange = (_, value) => setCurrentPage(value);
+  useEffect(() => {
+    const filtered = data.filter((d) => d.leave_type.toLowerCase() === leaveType.toLowerCase());
+    setFilteredData(filtered);
+    setPage(1);
+  }, [leaveType, data]);
 
-  const fetchLeaveManagementData = async () => {
+  const fetchData = async () => {
     setLoading(true);
     const { res } = await Factory('get', `/payroll/leave-management?payroll_id=${payrollId}`, {});
     setLoading(false);
-    setLeaveManagementData(res?.status_cd === 0 ? res.data : []);
-  };
-
-  const handleOpenDialog = () => setOpenDialog(true);
-  const handleCloseDialog = () => setOpenDialog(false);
-
-  const handleEdit = (item) => {
-    setPostType('edit');
-    setSelectedRecord(item);
-    handleOpenDialog();
+    if (res?.status_cd === 0) {
+      setData(res.data);
+    } else {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: res.error || 'Unkown Error',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
+      setData([]);
+    }
   };
 
   const handleDelete = async (item) => {
     const { res } = await Factory('delete', `/payroll/leave-management/${item.id}`, {});
-    if (res?.status_cd === 0) {
-      fetchLeaveManagementData();
-    }
+    if (res?.status_cd === 0) fetchData();
   };
+
+  const openDialog = (type = '', record = null) => {
+    setPostType(type);
+    setSelectedRecord(record);
+    setDialogOpen(true);
+  };
+
+  const paginatedData = filteredData.slice((page - 1) * ROWS_PER_PAGE, page * ROWS_PER_PAGE);
 
   return (
     <MainCard
       title={
-        <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2} sx={{ mb: 2 }}>
-          {/* Left Side - Leave Type Dropdown */}
+        <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2}>
           <Box>
-            <Typography variant="subtitle1" sx={{ mb: 0.5 }}>
-              Leave Type
-            </Typography>
-            <CustomAutocomplete value={leaveType} options={['2024-25']} onChange={(e, val) => setLeaveType(val)} sx={{ minWidth: 220 }} />
+            <Typography variant="subtitle1">Leave Type</Typography>
+            <CustomAutocomplete
+              value={leaveType}
+              options={['Paid', 'UnPaid']}
+              onChange={(_, val) => setLeaveType(val)}
+              sx={{ minWidth: 220 }}
+            />
           </Box>
-
-          {/* Right Side - Add Leave Button */}
-          <Button variant="contained" startIcon={<IconPlus size={16} />} onClick={handleOpenDialog}>
+          <Button variant="contained" startIcon={<IconPlus size={16} />} onClick={() => openDialog('add')}>
             Add Leave
           </Button>
         </Stack>
@@ -97,12 +112,12 @@ function LeaveManagement() {
             <CircularProgress />
           </Stack>
         ) : (
-          <TableContainer component={Paper}>
+          <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 1 }}>
             <Table>
               <TableHead>
                 <TableRow sx={{ bgcolor: 'grey.100' }}>
                   {['Leave Name', 'Code', 'Type', 'Period', 'No of Leaves', 'Actions'].map((head, idx) => (
-                    <TableCell key={idx} sx={{ whiteSpace: 'nowrap', fontWeight: 'bold', textAlign: 'center' }}>
+                    <TableCell key={idx} align="center" sx={{ fontWeight: 'bold' }}>
                       {head}
                     </TableCell>
                   ))}
@@ -126,10 +141,10 @@ function LeaveManagement() {
                       <TableCell align="center">
                         <ActionCell
                           row={item}
-                          onEdit={() => handleEdit(item)}
+                          onEdit={() => openDialog('edit', item)}
                           onDelete={() => handleDelete(item)}
-                          open={openDialog}
-                          onClose={handleCloseDialog}
+                          open={dialogOpen}
+                          onClose={() => setDialogOpen(false)}
                           deleteDialogData={{
                             title: 'Delete Leave',
                             heading: 'Are you sure you want to delete this Leave?',
@@ -145,21 +160,26 @@ function LeaveManagement() {
             </Table>
           </TableContainer>
         )}
-
-        {leaveManagementData.length > rowsPerPage && (
+        {filteredData.length > 0 && (
           <Stack direction="row" justifyContent="center" py={2}>
-            <Pagination count={Math.ceil(leaveManagementData.length / rowsPerPage)} page={currentPage} onChange={handlePageChange} />
+            <Pagination
+              count={Math.ceil(filteredData.length / ROWS_PER_PAGE)}
+              page={page}
+              onChange={(_, val) => setPage(val)}
+              shape="rounded"
+              color="primary"
+            />
           </Stack>
         )}
       </Stack>
 
       <LeaveManagementDialog
-        open={openDialog}
-        handleClose={handleCloseDialog}
+        open={dialogOpen}
+        handleClose={() => setDialogOpen(false)}
         selectedRecord={selectedRecord}
         type={postType}
         setType={setPostType}
-        fetchLeaveManagementData={fetchLeaveManagementData}
+        fetchLeaveManagementData={fetchData}
       />
     </MainCard>
   );

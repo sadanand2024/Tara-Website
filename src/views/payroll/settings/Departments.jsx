@@ -152,7 +152,7 @@ function Departments() {
                         {department.description || 'N/A'}
                       </Typography>
                     </TableCell>
-                    <TableCell align="center">{department.numOfEmployees || 0}</TableCell>
+                    <TableCell align="center">{department.employee_count || 0}</TableCell>
                     <TableCell align="center">
                       <ActionCell
                         row={department}

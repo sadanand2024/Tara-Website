@@ -1,8 +1,8 @@
-'use client';
 
 import { Box, Container, Stack, Typography } from '@mui/material';
 import CardMedia from '@mui/material/CardMedia';
 import { IconCircleCheck } from '@tabler/icons-react';
+
 import React from 'react';
 import { Slide } from 'react-awesome-reveal'; // ✅ Animation
 

@@ -1,4 +1,3 @@
-'use client';
 import React, { useEffect, useState } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
@@ -75,6 +74,7 @@ export default function DesignationDialog({ open, handleClose, fetchDesignations
   return (
     <Modal
       open={open}
+      title={type === 'edit' ? 'Edit Designation' : 'Add Designation'}
       maxWidth="sm"
       showClose={true}
       handleClose={() => {

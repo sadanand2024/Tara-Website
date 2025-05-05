@@ -1,4 +1,3 @@
-'use client';
 import React, { useState, useEffect } from 'react';
 import {
   Box,
@@ -12,18 +11,21 @@ import {
   TableHead,
   TableRow,
   Paper,
-  Typography,
   Pagination,
   CircularProgress
 } from '@mui/material';
 import { IconPlus, IconReload, IconFilter } from '@tabler/icons-react';
 import { useSearchParams } from 'react-router-dom';
+import EmptyDataPlaceholder from 'ui-component/extended/EmptyDataPlaceholder';
 
 import MainCard from 'ui-component/cards/MainCard';
 import ActionCell from 'ui-component/extended/ActionCell';
 import Factory from 'utils/Factory';
 import HolidayManagementDialog from './HolidayManagementDialog';
 import FilterDialog from './FilterDialog';
+import { useDispatch } from 'store';
+import { openSnackbar } from 'store/slices/snackbar';
+import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
 
 function HolidayManagement() {
   const [holidayManagementData, setHolidayManagementData] = useState([]);
@@ -41,10 +43,10 @@ function HolidayManagement() {
   const [loading, setLoading] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const rowsPerPage = 5;
 
   const [searchParams] = useSearchParams();
   const paginatedData = holidayManagementData.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const id = searchParams.get('payrollid');
@@ -66,26 +68,65 @@ function HolidayManagement() {
   const fetchHolidayManagementData = async () => {
     setLoading(true);
     const { res } = await Factory('get', `/payroll/holiday-management?payroll_id=${payrollId}`, {});
+    if (res?.status_cd === 0 && Array.isArray(res?.data)) {
+      setHolidayManagementData(res.data);
+    } else {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Failed to fetch data, Please Try again',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
+      setHolidayManagementData([]);
+    }
     setLoading(false);
-    setHolidayManagementData(res?.status_cd === 0 && Array.isArray(res?.data) ? res.data : []);
   };
 
   const fetchWorkLocations = async () => {
     setLoading(true);
     const { res } = await Factory('get', `/payroll/work-locations/?payroll_id=${payrollId}`, {});
+    if (res?.status_cd === 0 && Array.isArray(res?.data)) {
+      setWorkLocations(res.data);
+    } else {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Failed to fetch work locations, Please Try again',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
+      setWorkLocations([]);
+    }
     setLoading(false);
-    setWorkLocations(res?.status_cd === 0 && Array.isArray(res?.data) ? res.data : []);
   };
 
   const fetchByFilter = async () => {
     setLoading(true);
     const { res } = await Factory(
       'get',
-      `/payroll/holiday-management-filter?payroll_id=${payrollId}&financial_year=${financialYear}&applicable_for=${selectedWorkLocation}`,
+      `/payroll/holiday-management-filter?payroll_id=${payrollId}&financial_year=${financialYear}&applicable_for=${selectedWorkLocation || ''}`,
       {}
     );
+    if (res?.status_cd === 0 && Array.isArray(res?.data)) {
+      setHolidayManagementData(res.data);
+    } else {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Failed to fetch filtered data, Please Try again',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
+      setHolidayManagementData([]);
+    }
     setLoading(false);
-    setHolidayManagementData(res?.status_cd === 0 && Array.isArray(res?.data) ? res.data : []);
     setFilterDialog(false);
   };
 
@@ -99,6 +140,25 @@ function HolidayManagement() {
     const { res } = await Factory('delete', `/payroll/holiday-management/${item.id}`, {});
     if (res?.status_cd === 0) {
       fetchHolidayManagementData();
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Holiday deleted successfully',
+          variant: 'alert',
+          alert: { color: 'success' },
+          close: false
+        })
+      );
+    } else {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Failed to delete holiday',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     }
   };
 
@@ -126,7 +186,15 @@ function HolidayManagement() {
             <CircularProgress />
           </Stack>
         ) : (
-          <TableContainer component={Paper} sx={{ borderRadius: 2 }}>
+          <TableContainer
+            component={Paper}
+            sx={{
+              width: '100%',
+              borderRadius: 2,
+              boxShadow: 1,
+              overflowX: 'auto'
+            }}
+          >
             <Table>
               <TableHead>
                 <TableRow sx={{ bgcolor: 'grey.100' }}>
@@ -141,7 +209,7 @@ function HolidayManagement() {
                 {paginatedData.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={5} align="center" sx={{ height: 250 }}>
-                      No Data
+                      <EmptyDataPlaceholder title="No Data Found" subtitle="Start by adding a new Data." />
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -176,9 +244,15 @@ function HolidayManagement() {
           </TableContainer>
         )}
 
-        {holidayManagementData.length > rowsPerPage && (
+        {holidayManagementData.length > 0 && (
           <Stack direction="row" justifyContent="center" sx={{ py: 2 }}>
-            <Pagination count={Math.ceil(holidayManagementData.length / rowsPerPage)} page={currentPage} onChange={handlePageChange} />
+            <Pagination
+              count={Math.ceil(holidayManagementData.length / rowsPerPage)}
+              page={currentPage}
+              onChange={handlePageChange}
+              shape="rounded"
+              color="primary"
+            />
           </Stack>
         )}
       </Stack>

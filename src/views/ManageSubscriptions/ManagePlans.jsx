@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 // material-ui
 import { alpha, useTheme } from '@mui/material/styles';
 import Alert from '@mui/material/Alert';
@@ -22,7 +23,8 @@ import { ThemeMode, ThemeDirection } from 'config';
 import MainCard from 'ui-component/cards/MainCard';
 import useConfig from 'hooks/useConfig';
 import { gridSpacing } from 'store/constant';
-
+import Factory from 'utils/Factory';
+import RazorparPayment from './RazorparPayment';
 // assets
 import CheckTwoToneIcon from '@mui/icons-material/CheckTwoTone';
 import TwoWheelerTwoToneIcon from '@mui/icons-material/TwoWheelerTwoTone';
@@ -30,89 +32,25 @@ import AirportShuttleTwoToneIcon from '@mui/icons-material/AirportShuttleTwoTone
 import DirectionsBoatTwoToneIcon from '@mui/icons-material/DirectionsBoatTwoTone';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import CloseIcon from '@mui/icons-material/Close';
 
-const plans = [
-  {
-    active: false,
-    icon: <TwoWheelerTwoToneIcon fontSize="medium" color="inherit" />,
-    title: 'Standard',
-    description:
-      'Create one end product for a client, transfer that end product to your client, charge them for your services. Not as Saas but the license can be transferred to the client.',
-    price: 69,
-    permission: [0, 1]
-  },
-  {
-    active: true,
-    icon: <AirportShuttleTwoToneIcon fontSize="medium" />,
-    title: 'Standard Plus',
-    description:
-      'Create one end product for a client, transfer that end product to your client, transfer that end product to your client, charge them for your services. The license is then transferred to the client.',
-    price: 129,
-    permission: [0, 1, 2, 3]
-  },
-  {
-    active: false,
-    icon: <DirectionsBoatTwoToneIcon fontSize="medium" />,
-    title: 'Enterprise',
-    description:
-      'You are licensed to use the CONTENT to create one end product for yourself or for one client (a "single application"), and the end product may be sold or distributed for free.',
-    price: 599,
-    permission: [0, 1, 2, 3, 5]
-  },
-  {
-    active: false,
-    icon: <DirectionsBoatTwoToneIcon fontSize="medium" />,
-    title: 'Business Pro',
-    description:
-      'You are licensed to use the CONTENT to create one end product for yourself or for one client (a "single application"), and the end product may be sold or distributed for free.',
-    price: 599,
-    permission: [0, 1, 2, 3, 5]
-  },
-  {
-    active: false,
-    icon: <DirectionsBoatTwoToneIcon fontSize="medium" />,
-    title: 'Startup',
-    description:
-      'You are licensed to use the CONTENT to create one end product for yourself or for one client (a "single application"), and the end product may be sold or distributed for free.',
-    price: 599,
-    permission: [0, 1, 2, 3, 5]
-  },
-  {
-    active: false,
-    icon: <DirectionsBoatTwoToneIcon fontSize="medium" />,
-    title: 'Growth',
-    description:
-      'You are licensed to use the CONTENT to create one end product for yourself or for one client (a "single application"), and the end product may be sold or distributed for free.',
-    price: 599,
-    permission: [0, 1, 2, 3, 5]
-  },
-  {
-    active: false,
-    icon: <DirectionsBoatTwoToneIcon fontSize="medium" />,
-    title: 'Ultimate',
-    description:
-      'You are licensed to use the CONTENT to create one end product for yourself or for one client (a "single application"), and the end product may be sold or distributed for free.',
-    price: 599,
-    permission: [0, 1, 2, 3, 5]
-  }
-];
-
-const planList = [
-  'One End Product', // 0
-  'No attribution required', // 1
-  'TypeScript', // 2
-  'Figma Design Resources', // 3
-  'Create Multiple Products', // 4
-  'Create a SaaS Project', // 5
-  'Resale Product', // 6
-  'Separate sale of our UI Elements?' // 7
+const planIcons = [
+  <TwoWheelerTwoToneIcon fontSize="medium" color="inherit" />,
+  <AirportShuttleTwoToneIcon fontSize="medium" />,
+  <DirectionsBoatTwoToneIcon fontSize="medium" />
+  // ...add more icons if you want
 ];
 
 // ===============================|| PRICING - PRICE 1 ||=============================== //
 
 export default function Price1() {
   const theme = useTheme();
+  const [searchParams] = useSearchParams();
+  const moduleId = searchParams.get('id');
   const { themeDirection } = useConfig();
+  const [plans, setPlans] = useState([]);
+  const [centerIndex, setCenterIndex] = useState(1);
+  const user = useSelector((state) => state).accountReducer.user;
   const priceListDisable = {
     opacity: '0.4',
     '& >div> svg': {
@@ -124,14 +62,19 @@ export default function Price1() {
   const [billingType, setBillingType] = useState('annual'); // 'monthly' or 'annual'
 
   // Carousel state
-  const [centerIndex, setCenterIndex] = useState(1); // Start with the second card centered
   const visibleCount = 3;
   const cardWidth = 420;
   const cardGap = 24;
 
-  // Clamp centerIndex
+  const filteredPlans = plans.filter(
+    (plan) =>
+      plan.plan_type === 'trial' ||
+      (billingType === 'monthly' && plan.plan_type === 'monthly') ||
+      (billingType === 'annual' && plan.plan_type === 'annually')
+  );
+
   const minIndex = 1;
-  const maxIndex = plans.length - 2;
+  const maxIndex = filteredPlans.length - 2;
 
   const handlePrev = () => {
     setCenterIndex((prev) => Math.max(minIndex, prev - 1));
@@ -148,18 +91,37 @@ export default function Price1() {
 
   // Only show three cards: center, left, right
   const getVisibleCards = () => {
-    if (plans.length < 3) return plans;
-    return plans.slice(centerIndex - 1, centerIndex + 2);
+    if (filteredPlans.length < 3) return filteredPlans;
+    return filteredPlans.slice(centerIndex - 1, centerIndex + 2);
   };
   const visibleCards = getVisibleCards();
 
   // Example price calculation (replace with your real logic)
   const getPrice = (plan) => {
     if (billingType === 'monthly') {
-      return Math.round(plan.price / 12);
+      return Math.round(plan.base_price / 12);
     }
-    return plan.price;
+    return plan.base_price;
   };
+
+  // Helper to get a random icon for each plan
+  const getPlanIcon = (idx) => planIcons[idx % planIcons.length];
+
+  function capitalizeWords(str) {
+    return str.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+  }
+
+  useEffect(() => {
+    if (moduleId) {
+      const getModulePricing = async () => {
+        const res = await Factory('get', `/user_management/subscription-plans/list/?is_active=yes&module_id=${moduleId}`);
+        if (res.res.status_cd === 0) {
+          setPlans(res.res.data.data);
+        }
+      };
+      getModulePricing();
+    }
+  }, [moduleId]);
 
   return (
     <Card sx={{ pt: 3, pb: 5 }}>
@@ -252,8 +214,8 @@ export default function Price1() {
         </Box>
       </Box>
       {/* Dots Indicator */}
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 2}}>
-        {plans.map((_, idx) => (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 2 }}>
+        {filteredPlans.map((_, idx) => (
           <Box
             key={idx}
             onClick={() => {
@@ -272,7 +234,7 @@ export default function Price1() {
               cursor: idx >= minIndex && idx <= maxIndex ? 'pointer' : 'default',
               opacity: idx >= minIndex && idx <= maxIndex ? 1 : 0.4,
               '&:hover': {
-                boxShadow: idx >= minIndex && idx <= maxIndex ? 2 : 'none',
+                boxShadow: idx >= minIndex && idx <= maxIndex ? 2 : 'none'
               }
             }}
           />
@@ -291,7 +253,7 @@ export default function Price1() {
             transition: 'opacity 0.2s',
             '&:hover': {
               opacity: 1,
-              bgcolor: 'transparent',
+              bgcolor: 'transparent'
             }
           }}
         >
@@ -307,22 +269,20 @@ export default function Price1() {
             justifyContent: 'center',
             alignItems: 'center',
             position: 'relative',
-            py: 2,
+            py: 2
           }}
         >
           {visibleCards.map((plan, idx) => {
-            // idx: 0 (left), 1 (center), 2 (right)
             const planIndex = centerIndex - 1 + idx;
-            const randomColor = getRandomColor(planIndex);
             let scale = 0.9;
             let zIndex = 1;
             if (idx === 1) {
               scale = 1;
               zIndex = 2;
-            } // Center card zoomed
+            }
             return (
               <Box
-                key={planIndex}
+                key={plan.id}
                 sx={{
                   width: cardWidth,
                   flex: `0 0 ${cardWidth}px`,
@@ -330,10 +290,10 @@ export default function Price1() {
                   transition: 'transform 0.3s cubic-bezier(.4,2,.6,1), box-shadow 0.3s',
                   zIndex,
                   boxShadow: idx === 1 ? theme.shadows[8] : theme.shadows[2],
-                  border: idx === 1 ? `1px solid ${randomColor}` : 'none',
+                  border: idx === 1 ? `1px solid ${getRandomColor(planIndex)}` : 'none',
                   borderRadius: 2,
                   background: 'transparent',
-                  position: 'relative',
+                  position: 'relative'
                 }}
               >
                 {/* Current Plan Badge as Diagonal Strip */}
@@ -365,7 +325,7 @@ export default function Price1() {
                   boxShadow
                   sx={{
                     pt: 1,
-                    borderTop: `6px solid ${randomColor}`,
+                    borderTop: `6px solid ${getRandomColor(planIndex)}`,
                     transition: 'box-shadow 0.3s, border 0.3s',
                     height: '100%',
                     '&:hover': {
@@ -391,7 +351,7 @@ export default function Price1() {
                           }
                         }}
                       >
-                        {plan.icon}
+                        {getPlanIcon(planIndex)}
                       </Box>
                     </Grid>
                     <Grid size={12}>
@@ -414,7 +374,7 @@ export default function Price1() {
                           }
                         }}
                       >
-                        {plan.title}
+                        {plan.name}
                       </Typography>
                     </Grid>
                     <Grid size={12}>
@@ -432,9 +392,22 @@ export default function Price1() {
                           }
                         }}
                       >
-                        <sup>$</sup>
-                        {getPrice(plan)}
-                        <span>/ {billingType === 'monthly' ? 'Month ' : 'Year'} per user</span>
+                        <sup>₹</sup>
+                        {plan.plan_type === 'annually' ? (
+                          <>
+                            {plan.base_price}
+                            <span>/ Year</span>
+                            <br />
+                            <Typography variant="caption" color="text.secondary">
+                              (₹{(parseFloat(plan.base_price) / 12).toFixed(2)} / Month)
+                            </Typography>
+                          </>
+                        ) : (
+                          <>
+                            {plan.base_price}
+                            <span>/ {plan.plan_type === 'monthly' ? 'Month' : 'Trial'}</span>
+                          </>
+                        )}
                       </Typography>
                     </Grid>
                     <Grid size={12}>
@@ -452,23 +425,98 @@ export default function Price1() {
                         }}
                         component="ul"
                       >
-                        {planList.map((list, i) => (
-                          <React.Fragment key={i}>
-                            <ListItem sx={!plan.permission.includes(i) ? priceListDisable : {}}>
-                              <ListItemIcon>
-                                <CheckTwoToneIcon sx={{ fontSize: '1.3rem' }} />
-                              </ListItemIcon>
-                              <ListItemText primary={list} />
-                            </ListItem>
-                            <Divider />
-                          </React.Fragment>
-                        ))}
+                        {Object.entries(plan.features_enabled || {}).map(([key, value]) => {
+                          if (key === 'features' && typeof value === 'object') {
+                            // Nested features
+                            return Object.entries(value).map(([subKey, subValue], idx) => (
+                              <React.Fragment key={subKey}>
+                                <ListItem>
+                                  <ListItemIcon>
+                                    {typeof subValue === 'boolean' ? (
+                                      subValue ? (
+                                        <CheckTwoToneIcon color="success" sx={{ fontSize: '1.3rem' }} />
+                                      ) : (
+                                        <CloseIcon
+                                          color="inherit"
+                                          sx={{ fontSize: '1.3rem', color: `${theme.palette.error.main} !important` }}
+                                        />
+                                      )
+                                    ) : (
+                                      <CheckTwoToneIcon sx={{ fontSize: '1.3rem' }} />
+                                    )}
+                                  </ListItemIcon>
+                                  <ListItemText
+                                    primary={
+                                      typeof subValue === 'boolean' ? (
+                                        <span style={{ fontWeight: 600 }}>{capitalizeWords(subKey)}</span>
+                                      ) : (
+                                        <>
+                                          <span style={{ fontWeight: 600 }}>{capitalizeWords(subKey)}</span>
+                                          {`: ${Array.isArray(subValue) ? subValue.join(', ') : subValue.toString()}`}
+                                        </>
+                                      )
+                                    }
+                                    primaryTypographyProps={{ color: theme.palette.text.primary }}
+                                  />
+                                </ListItem>
+                                <Divider />
+                              </React.Fragment>
+                            ));
+                          } else if (typeof value === 'object') {
+                            // Add-ons or other nested objects, skip or handle as needed
+                            return null;
+                          } else {
+                            return (
+                              <React.Fragment key={key}>
+                                <ListItem>
+                                  <ListItemIcon>
+                                    {typeof value === 'boolean' ? (
+                                      value ? (
+                                        <CheckTwoToneIcon color="success" sx={{ fontSize: '1.3rem' }} />
+                                      ) : (
+                                        <CloseIcon
+                                          color="inherit"
+                                          sx={{ fontSize: '1.3rem', color: `${theme.palette.error.main} !important` }}
+                                        />
+                                      )
+                                    ) : (
+                                      <CheckTwoToneIcon sx={{ fontSize: '1.3rem' }} />
+                                    )}
+                                  </ListItemIcon>
+                                  <ListItemText
+                                    primary={
+                                      typeof value === 'boolean' ? (
+                                        <span style={{ fontWeight: 600 }}>{capitalizeWords(key)}</span>
+                                      ) : (
+                                        <>
+                                          <span style={{ fontWeight: 600 }}>{capitalizeWords(key)}</span>
+                                          {`: ${value}`}
+                                        </>
+                                      )
+                                    }
+                                  />
+                                </ListItem>
+                                <Divider />
+                              </React.Fragment>
+                            );
+                          }
+                        })}
                       </List>
                     </Grid>
                     <Grid size={12}>
-                      <Button variant="outlined" disabled={plan.active}>
-                        {!plan.active ? 'Order Now' : 'Current Plan'}
-                      </Button>
+                      <RazorparPayment
+                        contextId={user.active_context.id}
+                        userId={user.user.id}
+                        plan={plan}
+                        onSuccess={(response) => {
+                          // Handle success (show snackbar, update UI, etc.)
+                          console.log('Payment Success:', response);
+                        }}
+                        onFailure={() => {
+                          // Handle failure/cancel
+                          console.log('Payment Cancelled');
+                        }}
+                      />
                     </Grid>
                   </Grid>
                 </MainCard>
@@ -488,7 +536,7 @@ export default function Price1() {
             transition: 'opacity 0.2s',
             '&:hover': {
               opacity: 1,
-              bgcolor: 'transparent',
+              bgcolor: 'transparent'
             }
           }}
         >

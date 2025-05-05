@@ -58,10 +58,19 @@ const dashboard = {
       caption: ''
     },
     {
+      id: 'subscriptions',
+      title: 'subscriptions',
+      type: 'item',
+      url: '/app/subscriptions',
+      icon: icons.IconCreditCard,
+      breadcrumbs: false,
+      caption: ''
+    },
+    {
       id: 'task-manager',
       title: 'task-manager',
       type: 'item',
-      url: '/app/tasks',
+      url: '/app/manage-tasks',
       icon: icons.IconClipboardList,
       breadcrumbs: false,
       caption: ''
@@ -81,6 +90,24 @@ const dashboard = {
       type: 'item',
       url: '/app/documents',
       icon: icons.IconFolder,
+      breadcrumbs: false,
+      caption: ''
+    },
+    {
+      id: 'payroll',
+      title: 'payroll',
+      type: 'item',
+      url: '/app/payroll',
+      icon: icons.IconHeadset,
+      breadcrumbs: false,
+      caption: ''
+    },
+    {
+      id: 'invoicing',
+      title: 'invoicing',
+      type: 'item',
+      url: '/app/invoice',
+      icon: icons.IconHeadset,
       breadcrumbs: false,
       caption: ''
     },
@@ -139,37 +166,10 @@ const dashboard = {
       caption: ''
     },
     {
-      id: 'subscriptions',
-      title: 'subscriptions',
-      type: 'item',
-      url: '/app/subscriptions',
-      icon: icons.IconCreditCard,
-      breadcrumbs: false,
-      caption: ''
-    },
-    {
       id: 'support&chat',
       title: 'support&chat',
       type: 'item',
       url: '/app/support-chat',
-      icon: icons.IconHeadset,
-      breadcrumbs: false,
-      caption: ''
-    },
-    {
-      id: 'payroll',
-      title: 'payroll',
-      type: 'item',
-      url: '/app/payroll',
-      icon: icons.IconHeadset,
-      breadcrumbs: false,
-      caption: ''
-    },
-    {
-      id: 'invoicing',
-      title: 'invoicing',
-      type: 'item',
-      url: '/app/invoice',
       icon: icons.IconHeadset,
       breadcrumbs: false,
       caption: ''

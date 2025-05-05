@@ -1,6 +1,6 @@
-'use client';
-
 import AutoGraphIcon from '@mui/icons-material/AutoGraph';
+import React from 'react';
+import { Box, Grid2, Paper, Typography } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CloudDoneIcon from '@mui/icons-material/CloudDone';
 import IntegrationInstructionsIcon from '@mui/icons-material/IntegrationInstructions';

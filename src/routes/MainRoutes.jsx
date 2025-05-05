@@ -11,8 +11,8 @@ const PayrollDashboard = Loadable(lazy(() => import('views/payroll'))); // ✅ w
 const EmployeeDashboard = Loadable(lazy(() => import('views/payroll/EmployeeDashboard')));
 const PayrollWorkflows = Loadable(lazy(() => import('views/payroll/PayrollWorkflows')));
 const PayrollSettings = Loadable(lazy(() => import('views/payroll/settings')));
-const OrganizationDetails = Loadable(lazy(() => import('views/payroll/settings/OrganizationDetails')));
-const WorkLocation = Loadable(lazy(() => import('views/payroll/settings/WorkLocation')));
+const OrganizationDetails = Loadable(lazy(() => import('views/payroll/settings/Organizationdetails')));
+const WorkLocation = Loadable(lazy(() => import('views/payroll/settings/Worklocation')));
 const Departments = Loadable(lazy(() => import('views/payroll/settings/Departments')));
 const Designations = Loadable(lazy(() => import('views/payroll/settings/Designations')));
 const StatuitoryComponents = Loadable(lazy(() => import('views/payroll/settings/StatuitoryComponents')));
@@ -22,7 +22,7 @@ const SalaryTemplate = Loadable(lazy(() => import('views/payroll/settings/Salary
 const PaySchedule = Loadable(lazy(() => import('views/payroll/settings/PaySchedule')));
 const LeaveAttendance = Loadable(lazy(() => import('views/payroll/settings/LeaveAttendance')));
 // const BusinessProfileSetup = Loadable(lazy(() => import('views/payroll/settings/BusinessProfileSetup')));
-const EmployeeMaster = Loadable(lazy(() => import('views/payroll/settings/EmployeeMasterData')));
+const EmployeeMaster = Loadable(lazy(() => import('views/payroll/settings/EmployeeMasterData/Index')));
 const AddEmployee = Loadable(lazy(() => import('views/payroll/settings/EmployeeMasterData/AddEmployee')));
 
 // invoicing module
@@ -42,11 +42,13 @@ const MyServices = Loadable(lazy(() => import('views/Services')));
 const ITRSummary = Loadable(lazy(() => import('views/Services/ITR')));
 const ManageUsers = Loadable(lazy(() => import('views/ManageUsers')));
 const ManageSubscriptions = Loadable(lazy(() => import('views/ManageSubscriptions')));
-const ManageProductsAndServices = Loadable(lazy(() => import('views/ManageSubscriptions/ProductsAndServices')));
+const ManageModulesAndServices = Loadable(lazy(() => import('views/ManageSubscriptions/ModulesAndServices')));
 // application - user social & account profile routing
 const AppUserAccountProfile2 = Loadable(lazy(() => import('views/application/users/Profile')));
-const AppBusinessSettings = Loadable(lazy(() => import('views/application/business/settings')));
+const AppBusinessSettings = Loadable(lazy(() => import('views/application/Business/settings')));
+const AppAccountSettings = Loadable(lazy(() => import('views/application/users/Account')));
 const ManagePlans = Loadable(lazy(() => import('views/ManageSubscriptions/ManagePlans')));
+const ManageTasks = Loadable(lazy(() => import('views/application/ManageTasks')));
 // ==============================|| MAIN ROUTING ||============================== //
 
 const MainRoutes = {
@@ -82,6 +84,10 @@ const MainRoutes = {
       element: <AppBusinessSettings />
     },
     {
+      path: '/apps/account-settings',
+      element: <AppAccountSettings />
+    },
+    {
       path: '/app/my-services',
       element: <MyServices />
     },
@@ -94,15 +100,19 @@ const MainRoutes = {
       element: <ManageUsers />
     },
     {
+      path: '/app/manage-tasks',
+      element: <ManageTasks />
+    },
+    {
       path: '/app/subscriptions',
       element: <ManageSubscriptions />
     },
     {
-      path: '/app/subscriptions/products-and-services',
-      element: <ManageProductsAndServices />
+      path: '/app/subscriptions/modules-and-services',
+      element: <ManageModulesAndServices />
     },
     {
-      path: '/app/subscriptions/products-and-services/plans',
+      path: '/app/subscriptions/modules-and-services/plans',
       element: <ManagePlans />
     },
     {

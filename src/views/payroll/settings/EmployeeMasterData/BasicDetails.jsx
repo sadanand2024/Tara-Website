@@ -1,4 +1,3 @@
-'use client';
 import React, { useState, useEffect } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
@@ -25,7 +24,7 @@ const employeeFields = [
   { name: 'designation', label: 'Designation' },
   { name: 'department', label: 'Department' }
 ];
-function BasicDetails({ employeeData }) {
+function BasicDetails({ employeeData, setCreatedEmployeeId }) {
   const [loading, setLoading] = useState(false); // State for loader
   const dispatch = useDispatch();
 
@@ -52,7 +51,10 @@ function BasicDetails({ employeeData }) {
     associate_id: Yup.string().required('Employee ID is required'),
     doj: Yup.date().required('Date of Joining is required'),
     work_email: Yup.string().email('Invalid email format').required('Work Email is required'),
-    mobile_number: Yup.string().required('Mobile Number is required'),
+    mobile_number: Yup.string()
+      .required('Mobile Number is required')
+      .matches(/^[0-9]{10}$/, 'Mobile Number must be exactly 10 digits'),
+
     gender: Yup.string().required('Gender is required'),
     work_location: Yup.string().required('Work Location is required'),
     designation: Yup.string().required('Designation is required'),
@@ -65,7 +67,7 @@ function BasicDetails({ employeeData }) {
       middle_name: '',
       last_name: '',
       associate_id: '',
-      doj: dayjs().format('YYYY-MM-DD'),
+      doj: '',
       work_email: '',
       mobile_number: '',
       gender: '',
@@ -95,6 +97,7 @@ function BasicDetails({ employeeData }) {
       const url = employeeData?.id ? `/payroll/employees/${employeeData?.id}` : `/payroll/employees`;
       const { res, error } = await Factory(employeeData?.id ? 'put' : 'post', url, postData);
       setLoading(false);
+
       if (res.status_cd === 0) {
         dispatch(
           openSnackbar({
@@ -105,6 +108,9 @@ function BasicDetails({ employeeData }) {
             close: false
           })
         );
+        if (!employeeData?.id && res?.id) {
+          setCreatedEmployeeId(res.id);
+        }
       } else {
         dispatch(
           openSnackbar({
@@ -175,11 +181,13 @@ function BasicDetails({ employeeData }) {
           />
         ) : field.name === 'doj' ? (
           <CustomDatePicker
-            views={['year', 'month', 'day']}
-            value={dayjs(values[field.name]) || null}
+            value={dayjs(values[field.name]).isValid() ? dayjs(values[field.name]) : null}
             onChange={(newDate) => {
-              const formattedDate = dayjs(newDate).format('YYYY-MM-DD');
-              setFieldValue(field.name, formattedDate);
+              if (newDate && dayjs(newDate).isValid()) {
+                setFieldValue(field.name, dayjs(newDate).format('YYYY-MM-DD'));
+              } else {
+                setFieldValue(field.name, '');
+              }
             }}
             sx={{
               width: '100%',
@@ -188,6 +196,11 @@ function BasicDetails({ employeeData }) {
                 height: '40px'
               }
             }}
+            name={field.name}
+            onBlur={() => handleBlur({ target: { name: field.name } })}
+            inputFormat="DD-MM-YYYY"
+            error={touched[field.name] && Boolean(errors[field.name])}
+            helperText={touched[field.name] && errors[field.name]}
           />
         ) : (
           <CustomInput
@@ -273,7 +286,7 @@ function BasicDetails({ employeeData }) {
       fetchDepartments();
     }
   }, [payrollid]);
-  const { values, setValues, handleChange, errors, touched, handleSubmit, handleBlur, resetForm, setFieldValue } = formik;
+  const { values, setValues, errors, touched, handleSubmit, handleBlur, setFieldValue } = formik;
 
   useEffect(() => {
     if (employeeData) {

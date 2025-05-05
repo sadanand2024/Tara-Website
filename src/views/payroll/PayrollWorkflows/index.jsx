@@ -1,8 +1,7 @@
-'use client';
 import PropTypes from 'prop-types';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useTheme } from '@mui/material/styles';
-import { Box, Tab, Tabs, Typography, Stack, Avatar, Button } from '@mui/material';
+import { Box, Tab, Tabs, Typography, Stack, Avatar, Button, Paper } from '@mui/material';
 import { IconBolt } from '@tabler/icons-react';
 import MainCard from '../../../ui-component/cards/MainCard';
 import { useNavigate } from 'react-router';
@@ -15,7 +14,8 @@ import BonusAndIncentives from './BonusAndIncentives';
 import SalaryRevisions from './SalaryRevisions';
 import OtherDeductions from './OtherDeductions';
 import Factory from 'utils/Factory';
-
+import { useDispatch } from 'store';
+import { openSnackbar } from 'store/slices/snackbar';
 // TabPanel Component
 const TabPanel = ({ children, value, index }) => (
   <div role="tabpanel" hidden={value !== index} id={`tabpanel-${index}`} aria-labelledby={`tab-${index}`}>
@@ -30,41 +30,60 @@ TabPanel.propTypes = {
 };
 
 // Custom Hook for Payroll Data
-const usePayrollData = (payrollId) => {
+// Move this outside the main component
+const usePayrollData = (payrollId, month, financialYear) => {
   const [loading, setLoading] = useState(false);
   const [employeeMasterData, setEmployeeMasterData] = useState([]);
   const [attendanceData, setAttendanceData] = useState([]);
+  const dispatch = useDispatch();
 
+  // ✅ Define this function before useEffect
   const fetchEmployeeMasterData = async () => {
     setLoading(true);
-    const url = `/payroll/employees?payroll_id=${payrollId}`;
-    const { res, error } = await Factory('get', url, {});
+    const url = `/payroll/employees?payroll_id=${payrollId}&month=${month}&financial_year=${financialYear}`;
+    const { res } = await Factory('get', url, {});
     setLoading(false);
     if (res?.status_cd === 0) {
       setEmployeeMasterData(res.data);
     } else {
       setEmployeeMasterData([]);
-      // showSnackbar(JSON.stringify(res?.data?.data || error), 'error');
     }
   };
 
-  const fetchAttendanceData = async () => {
+  const generateAttandance = async () => {
+    if (!month) return;
     setLoading(true);
-    const url = `/payroll/employee_attendance_current_month_automate?payroll_id=${payrollId}`;
-    const { res, error } = await Factory('post', url, {});
+    const url = `/payroll/employee_attendance_current_month_automate?payroll_id=${payrollId}&month=${month}&financial_year=${financialYear}`;
+    const { res } = await Factory('post', url, {});
     setLoading(false);
     if (res?.status_cd === 0) {
       setAttendanceData(res.data || []);
     } else {
-      // showSnackbar(JSON.stringify(res.data?.data || error), 'error');
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res.message),
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     }
+    return res;
   };
 
   useEffect(() => {
-    if (payrollId) fetchEmployeeMasterData();
+    if (payrollId) {
+      fetchEmployeeMasterData();
+    }
   }, [payrollId]);
 
-  return { loading, employeeMasterData, attendanceData, fetchAttendanceData };
+  return {
+    loading,
+    employeeMasterData,
+    attendanceData,
+    generateAttandance
+  };
 };
 
 // Main Component
@@ -73,11 +92,25 @@ const PayrollWorkflows = ({ type }) => {
   const [openDialog, setOpenDialog] = useState(false);
   const theme = useTheme();
   const [searchParams] = useSearchParams();
-  const router = useNavigate();
+  const navigate = useNavigate();
 
   const payrollId = searchParams.get('payrollid');
+  const month = searchParams.get('month');
+  const financialYear = searchParams.get('financial_year');
+  const {
+    loading,
+    employeeMasterData,
+    attendanceData,
+    generateAttandance: originalGenerateAttandance
+  } = usePayrollData(payrollId, month, financialYear);
+  const getAttandanceDataRef = useRef(null);
 
-  const { loading, employeeMasterData, attendanceData, fetchAttendanceData } = usePayrollData(payrollId);
+  const generateAttandance = async () => {
+    const res = await originalGenerateAttandance();
+    if (res?.status_cd === 0 && getAttandanceDataRef.current) {
+      getAttandanceDataRef.current();
+    }
+  };
 
   // Tab Configuration
   const tabs = useMemo(
@@ -139,7 +172,18 @@ const PayrollWorkflows = ({ type }) => {
           { name: 'financial_year', label: 'Financial Year' }
         ]
       },
-      { label: 'Salary Revisions', component: SalaryRevisions, fields: [] },
+      {
+        label: 'Salary Revisions',
+        component: SalaryRevisions,
+        fields: [
+          { name: 'employee', label: 'Employee Name' },
+          { name: 'department', label: 'Department' },
+          { name: 'designation', label: 'Designation' },
+          { name: 'current_ctc', label: 'Current CTC' },
+          { name: 'created_on', label: 'last Revison' },
+          { name: 'revised_ctc', label: '	Revised CTC' }
+        ]
+      },
       { label: 'Other Deductions', component: OtherDeductions, fields: [] }
     ],
     []
@@ -149,9 +193,9 @@ const PayrollWorkflows = ({ type }) => {
 
   const handleButtonClick = () => {
     if (tabs[activeTab].label === 'Attendance') {
-      fetchAttendanceData();
+      generateAttandance();
     } else if (tabs[activeTab].label === 'New Joiners') {
-      router.push(`/payrollsetup/add-employee?payrollid=${payrollId}`);
+      navigate(`/payroll/settings/add-employee?payrollid=${payrollId}`);
     } else {
       setOpenDialog(true);
     }
@@ -175,7 +219,16 @@ const PayrollWorkflows = ({ type }) => {
         </Stack>
       }
     >
-      <>
+      <Paper
+        elevation={3}
+        sx={{
+          width: '100%',
+          bgcolor: 'background.paper',
+          borderRadius: 2,
+          overflow: 'hidden',
+          border: '1px solid #e0e0e0'
+        }}
+      >
         <Tabs
           variant="fullWidth"
           scrollButtons={true}
@@ -210,11 +263,12 @@ const PayrollWorkflows = ({ type }) => {
               loading={loading}
               employeeMasterData={employeeMasterData}
               attendanceData={tab.label === 'Attendance' ? attendanceData : undefined}
-              fetchAttendanceData={tab.label === 'Attendance' ? fetchAttendanceData : undefined}
+              generateAttandance={tab.label === 'Attendance' ? generateAttandance : undefined}
+              getAttandanceDataRef={tab.label === 'Attendance' ? getAttandanceDataRef : undefined}
             />
           </TabPanel>
         ))}
-      </>
+      </Paper>
     </MainCard>
   );
 };

@@ -1,13 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Stack, Pagination, Typography } from '@mui/material';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Stack,
+  Pagination,
+  Typography,
+  CircularProgress
+} from '@mui/material';
 import Factory from 'utils/Factory';
 import AddItem from './AddItem';
 import ActionCell from '../../../../ui-component/extended/ActionCell';
+import { useDispatch } from 'react-redux';
+import { openSnackbar } from '../../../../store/slices/snackbar';
 
 const ItemList = ({ type, setType, handleClose, handleOpen, open, businessDetailsData, itemsData, get_Goods_and_Services_Data }) => {
+  const dispatch = useDispatch();
   const [itemsList, setItemsList] = useState([]);
   const [selectedItem, setSelectedItem] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(false);
   const rowsPerPage = 8;
 
   const handlePageChange = (event, value) => {
@@ -27,11 +43,37 @@ const ItemList = ({ type, setType, handleClose, handleOpen, open, businessDetail
   };
 
   const handleDelete = async (item) => {
+    setLoading(true);
     const url = `/invoicing/goods-services/${item.id}/delete/`;
     const { res } = await Factory('delete', url, {});
     if (res.status_cd === 0) {
-      get_Goods_and_Services_Data();
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Item deleted successfully',
+          variant: 'alert',
+          alert: { color: 'success' },
+          close: false
+        })
+      );
+      await get_Goods_and_Services_Data();
+    } else {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res?.data?.data || 'Failed to delete item'),
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     }
+    setLoading(false);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedItem(null);
+    handleClose();
   };
 
   return (
@@ -50,7 +92,13 @@ const ItemList = ({ type, setType, handleClose, handleOpen, open, businessDetail
             </TableRow>
           </TableHead>
           <TableBody>
-            {paginatedData.length === 0 ? (
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={7} align="center">
+                  <CircularProgress size={24} />
+                </TableCell>
+              </TableRow>
+            ) : paginatedData.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7} align="center">
                   <Typography variant="body2" color="text.secondary" sx={{ py: 3 }}>
@@ -81,7 +129,7 @@ const ItemList = ({ type, setType, handleClose, handleOpen, open, businessDetail
                       onEdit={() => handleEdit(item)}
                       onDelete={() => handleDelete(item)}
                       open={open}
-                      onClose={handleClose}
+                      onClose={handleCloseModal}
                       deleteDialogData={{
                         title: 'Delete Item',
                         heading: 'Are you sure you want to delete this item?',
@@ -99,7 +147,7 @@ const ItemList = ({ type, setType, handleClose, handleOpen, open, businessDetail
 
       {itemsList.length > 0 && (
         <Stack direction="row" justifyContent="center" sx={{ py: 2 }}>
-          <Pagination count={Math.ceil(itemsList.length / rowsPerPage)} page={currentPage} onChange={handlePageChange} />
+          <Pagination count={Math.ceil(itemsList.length / rowsPerPage)} page={currentPage} onChange={handlePageChange} color="primary" />
         </Stack>
       )}
 
@@ -107,7 +155,7 @@ const ItemList = ({ type, setType, handleClose, handleOpen, open, businessDetail
         businessDetailsData={businessDetailsData}
         open={open}
         handleOpen={handleOpen}
-        handleClose={handleClose}
+        handleClose={handleCloseModal}
         get_Goods_and_Services_Data={get_Goods_and_Services_Data}
         selectedItem={selectedItem}
         type={type}

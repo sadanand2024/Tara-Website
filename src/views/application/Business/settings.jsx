@@ -1,6 +1,5 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-
 // material-ui
 import Button from '@mui/material/Button';
 import CardActions from '@mui/material/CardActions';
@@ -17,6 +16,7 @@ import useConfig from 'hooks/useConfig';
 import MainCard from 'ui-component/cards/MainCard';
 import AnimateButton from 'ui-component/extended/AnimateButton';
 import { gridSpacing } from 'store/constant';
+import { useSelector } from 'store';
 
 // assets
 import ApartmentTwoToneIcon from '@mui/icons-material/ApartmentTwoTone'; // Business Profile
@@ -108,6 +108,7 @@ const tabsOption = [
 export default function Profile2() {
   const { mode, borderRadius } = useConfig();
   const [value, setValue] = React.useState(0);
+  const user = useSelector((state) => state).accountReducer.user;
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -184,31 +185,31 @@ export default function Profile2() {
             <Grid size={{ xs: 12, lg: 9 }}>
               <CardContent sx={{ borderLeft: '1px solid', borderColor: 'divider', height: '100%' }}>
                 <TabPanel value={value} index={0}>
-                  <BusinessProfile />
+                  <BusinessProfile user={user} tabChange={handleChange} tabval={value} />
                 </TabPanel>
                 <TabPanel value={value} index={1}>
-                  <BusinessBankDetails />
+                  <BusinessBankDetails user={user} tabChange={handleChange} tabval={value} />
                 </TabPanel>
                 <TabPanel value={value} index={2}>
-                  <KeyManagerialPersonnel />
+                  <KeyManagerialPersonnel user={user} tabChange={handleChange} tabval={value} />
                 </TabPanel>
                 {/* <TabPanel value={value} index={3}>
                   <MSMESettings />
                 </TabPanel> */}
                 <TabPanel value={value} index={3}>
-                  <GSTSettings />
+                  <GSTSettings user={user} tabChange={handleChange} tabval={value} />
                 </TabPanel>
                 <TabPanel value={value} index={4}>
-                  <TDSAndIncomeTax />
+                  <TDSAndIncomeTax user={user} tabChange={handleChange} tabval={value} />
                 </TabPanel>
                 <TabPanel value={value} index={5}>
-                  <PayrollCompliance />
+                  <PayrollCompliance user={user} tabChange={handleChange} tabval={value} />
                 </TabPanel>
                 <TabPanel value={value} index={6}>
-                  <Licenses />
+                  <Licenses user={user} tabChange={handleChange} tabval={value} />
                 </TabPanel>
                 <TabPanel value={value} index={7}>
-                  <DSCRegister />
+                  <DSCRegister user={user} tabChange={handleChange} tabval={value} />
                 </TabPanel>
               </CardContent>
             </Grid>
@@ -226,7 +227,7 @@ export default function Profile2() {
                 )}
               </Grid>
               <Grid>
-                {value < 3 && (
+                {value < 7 && value !== 0 && (
                   <AnimateButton>
                     <Button variant="contained" size="large" onClick={(e) => handleChange(e, 1 + value)}>
                       Continue

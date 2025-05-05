@@ -1,4 +1,3 @@
-'use client';
 import React, { useEffect, useState } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
@@ -265,6 +264,7 @@ function ESIComponent({ handleNext, handleBack }) {
 
             <Modal
               open={open}
+              title={'Add Or Edit ESI Details'}
               maxWidth={'sm'}
               showClose={true}
               handleClose={() => {

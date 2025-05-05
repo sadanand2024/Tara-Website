@@ -8,6 +8,7 @@ import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import { Box, Paper, Stack, Typography } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { IconCircleCheck } from '@tabler/icons-react';
+
 import React from 'react';
 
 const iconMap = [

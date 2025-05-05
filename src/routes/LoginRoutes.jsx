@@ -58,6 +58,10 @@ const LoginRoutes = {
     {
       path: '/accept-invitation',
       element: <AuthActivateAccount />
+    },
+    {
+      path: '/activation',
+      element: <AuthActivateAccount />
     }
   ]
 };

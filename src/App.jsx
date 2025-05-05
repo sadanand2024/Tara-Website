@@ -11,7 +11,7 @@ import Snackbar from 'ui-component/extended/Snackbar';
 import Notistack from 'ui-component/third-party/Notistack';
 
 import ThemeCustomization from 'themes';
-
+import { ServicesProvider } from 'contexts/ServicesContext';
 // auth provider
 import { JWTProvider as AuthProvider } from 'contexts/JWTContext';
 // import { FirebaseProvider as AuthProvider } from 'contexts/FirebaseContext';
@@ -30,8 +30,10 @@ export default function App() {
           <AuthProvider>
             <>
               <Notistack>
-                <RouterProvider router={router} />
-                <Snackbar />
+                <ServicesProvider>
+                  <RouterProvider router={router} />
+                  <Snackbar />
+                </ServicesProvider>
               </Notistack>
             </>
           </AuthProvider>

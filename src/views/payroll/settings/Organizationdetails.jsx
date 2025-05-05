@@ -1,4 +1,3 @@
-'use client';
 import React, { useEffect, useState } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
@@ -27,7 +26,6 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 function Organizationdetails() {
   const user = useSelector((state) => state.accountReducer.user);
   const businessId = user.active_context.business_id;
-  const [payrollid, setPayrollId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [logoDetails, setLogoDetails] = useState([]);
   const [filingAddressDialog, setFilingAddressDialog] = useState(false);
@@ -35,12 +33,7 @@ function Organizationdetails() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  useEffect(() => {
-    const id = searchParams.get('payrollid');
-    if (id) {
-      setPayrollId(id);
-    }
-  }, [searchParams]);
+
   const initialData = {
     business_name: '',
     logo: null,
@@ -48,7 +41,7 @@ function Organizationdetails() {
     pan: '',
     entityType: '',
     registration_number: '',
-    dob_or_incorp_date: dayjs().format('YYYY-MM-DD'),
+    dob_or_incorp_date: '',
     primary_email: '',
     city: '',
     sender_email: '',
@@ -160,7 +153,7 @@ function Organizationdetails() {
         dispatch(
           openSnackbar({
             open: true,
-            message: JSON.stringify(res.data.data) || 'Unknown Error',
+            message: res.data.data ? JSON.stringify(res.data.data) : 'Unknown Error please try again later',
             variant: 'alert',
             alert: { color: 'error' },
             close: false
@@ -211,18 +204,13 @@ function Organizationdetails() {
               {field.label} {<span style={{ color: 'red' }}>*</span>}
             </Typography>
             <CustomDatePicker
-              views={['year', 'month', 'day']}
-              value={dayjs(values[field.name]) || null}
-              onChange={(newDate) => {
-                setFieldValue(field.name, newDate);
+              name="dob_or_incorp_date"
+              value={formik.values.dob_or_incorp_date}
+              onChange={(date) => {
+                formik.setFieldValue('dob_or_incorp_date', date?.format('YYYY-MM-DD') || '');
               }}
-              sx={{
-                width: '100%',
-                '& .MuiInputBase-root': {
-                  fontSize: '0.75rem',
-                  height: '40px'
-                }
-              }}
+              error={formik.touched.dob_or_incorp_date && Boolean(formik.errors.dob_or_incorp_date)}
+              helperText={formik.touched.dob_or_incorp_date && formik.errors.dob_or_incorp_date}
             />
           </Grid2>
         );
@@ -273,7 +261,6 @@ function Organizationdetails() {
     if (res.status_cd === 0) {
       if (res?.data) {
         const data = res.data;
-        console.log(data);
         setValues((prev) => ({
           ...prev,
           business_name: data.business_details.nameOfBusiness || '',
@@ -282,9 +269,9 @@ function Organizationdetails() {
           pan: data.business_details.pan || '',
           entityType: data.business_details.entityType || '',
           registration_number: data.business_details.registrationNumber || '',
-          dob_or_incorp_date: data.business_details.dob_or_incorp_date
+          dob_or_incorp_date: dayjs(data.business_details.dob_or_incorp_date).isValid()
             ? dayjs(data.business_details.dob_or_incorp_date).format('YYYY-MM-DD')
-            : dayjs().format('YYYY-MM-DD'),
+            : '',
           primary_email: data.business_details.email || '',
           city: data.business_details.headOffice?.city || '',
           sender_email: data.sender_email,
@@ -293,7 +280,7 @@ function Organizationdetails() {
           country: 'IN',
           org_address_state: data.business_details.headOffice?.state || '',
           org_address_city: data.business_details.headOffice?.city || '',
-          org_address_pincode: data.business_details.headOffice?.pinCode || '',
+          org_address_pincode: data.business_details.headOffice?.pincode || '',
 
           filling_address_line1:
             data.filling_address_line1 === '' ? data.business_details.headOffice?.address_line1 : data.filling_address_line1,
@@ -337,7 +324,6 @@ function Organizationdetails() {
     }
     if (res?.data) {
       const data = res.data;
-      console.log(data);
       setValues((prev) => ({
         ...prev,
         business_name: data.nameOfBusiness || '',
@@ -346,7 +332,7 @@ function Organizationdetails() {
         pan: data.pan || '',
         entityType: data.entityType || '',
         registration_number: data.registrationNumber || '',
-        dob_or_incorp_date: data.dob_or_incorp_date ? dayjs(data.dob_or_incorp_date).format('YYYY-MM-DD') : dayjs().format('YYYY-MM-DD'),
+        dob_or_incorp_date: dayjs(data.dob_or_incorp_date).isValid() ? dayjs(data.dob_or_incorp_date).format('YYYY-MM-DD') : '',
         primary_email: data.email || '',
         city: data.headOffice?.city || '',
         sender_email: '',
@@ -355,7 +341,7 @@ function Organizationdetails() {
         country: 'IN',
         org_address_state: data.headOffice?.state || '',
         org_address_city: data.headOffice?.city || '',
-        org_address_pincode: data.headOffice?.pinCode || '',
+        org_address_pincode: data.headOffice?.pincode || '',
         filling_address_line1: data.headOffice?.address_line1 || '',
         filling_address_line2: data.headOffice?.address_line2 || '',
         filling_address_state: data.headOffice?.state || '',
@@ -376,13 +362,14 @@ function Organizationdetails() {
   };
 
   useEffect(() => {
-    if (payrollid) {
-      getOrgDetails(payrollid);
-    } else if (businessId && !payrollid) {
-      // Prevent overwriting when payrollid is set later
+    const id = searchParams.get('payrollid');
+    if (id) {
+      getOrgDetails(id); // Call directly
+    } else if (businessId) {
+      console.log('anand');
       individual_Business_get();
     }
-  }, [payrollid, businessId]);
+  }, [searchParams, businessId]);
 
   useEffect(() => {
     setFieldValue('logo', logoDetails);
@@ -487,7 +474,7 @@ function Organizationdetails() {
                 variant="outlined"
                 startIcon={<ArrowBackIcon />}
                 onClick={() => {
-                  router.back();
+                  navigate(-1);
                 }}
               >
                 Back to Dashboard

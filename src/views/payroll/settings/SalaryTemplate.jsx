@@ -1,4 +1,3 @@
-'use client';
 import React, { useEffect, useState } from 'react';
 import { Box, Button, Typography, TextField, Grid2, Divider, InputAdornment, Stack } from '@mui/material';
 import { useFormik } from 'formik';
@@ -39,11 +38,11 @@ function SalaryTemplate() {
       description: '',
       annual_ctc: '',
       earnings: [...initialEarnings],
-      gross_salary: { monthly: '', annually: '' },
+      gross_salary: { monthly: 0, annually: 0 },
       benefits: [],
-      total_ctc: { monthly: '', annually: '' },
+      total_ctc: { monthly: 0, annually: 0 },
       deductions: [],
-      net_salary: { monthly: '', annually: '' }
+      net_salary: { monthly: 0, annually: 0 }
     },
     validationSchema,
     onSubmit: async (values) => {

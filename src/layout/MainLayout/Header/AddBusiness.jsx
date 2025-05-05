@@ -21,13 +21,14 @@ import {
   FormControl,
   Select,
   MenuItem,
-  Box
+  Box,
+  Stack
 } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import CloseIcon from '@mui/icons-material/Close';
 import Factory from 'utils/Factory';
 import { __IndianStates } from '../../../utils/indianStates';
-
+import { DIALOG_TITLE_PADDING, DIALOG_CONTENT_PADDING } from 'config';
 const validationSchema = Yup.object({
   business_name: Yup.string().required('Business name is required'),
   registration_number: Yup.string().required('Registration number is required'),
@@ -38,7 +39,7 @@ const validationSchema = Yup.object({
     city: Yup.string().required('City is required'),
     state: Yup.string().required('State is required'),
     country: Yup.string().required('Country is required'),
-    pinCode: Yup.string().required('Pincode is required')
+    pincode: Yup.string().required('Pincode is required')
   }),
   pan: Yup.string()
     .matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN Number')
@@ -74,7 +75,7 @@ const AddBusiness = ({ open, onClose, userData, setUserData, getContext }) => {
         city: '',
         state: '',
         country: 'India',
-        pinCode: ''
+        pincode: ''
       },
       pan: '',
       business_nature: '',
@@ -131,9 +132,12 @@ const AddBusiness = ({ open, onClose, userData, setUserData, getContext }) => {
         }
       }}
     >
-      <DialogTitle>
+      <DialogTitle sx={DIALOG_TITLE_PADDING}>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Typography variant="h3">Add New Business</Typography>
+          <Stack direction="column" spacing={0}>
+            <Typography variant="h3">Add New Business</Typography>
+            <Typography variant="caption">Your business details will be used to create your business profile</Typography>
+          </Stack>
           <IconButton
             aria-label="close"
             onClick={handleClose}
@@ -147,9 +151,9 @@ const AddBusiness = ({ open, onClose, userData, setUserData, getContext }) => {
       </DialogTitle>
 
       <form onSubmit={formik.handleSubmit}>
-        <DialogContent dividers>
-          <Grid container spacing={3}>
-            <Grid size={12}>
+        <DialogContent sx={DIALOG_CONTENT_PADDING} dividers>
+          <Grid container spacing={2}>
+            <Grid size={{ xs: 12 }}>
               <TextField
                 fullWidth
                 size="small"
@@ -162,7 +166,7 @@ const AddBusiness = ({ open, onClose, userData, setUserData, getContext }) => {
                 helperText={formik.touched.business_name && formik.errors.business_name}
               />
             </Grid>
-            <Grid size={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 fullWidth
                 size="small"
@@ -175,7 +179,7 @@ const AddBusiness = ({ open, onClose, userData, setUserData, getContext }) => {
                 helperText={formik.touched.registration_number && formik.errors.registration_number}
               />
             </Grid>
-            <Grid size={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <FormControl fullWidth size="small" error={formik.touched.entity_type && Boolean(formik.errors.entity_type)}>
                 <InputLabel>Entity Type</InputLabel>
                 <Select
@@ -194,7 +198,7 @@ const AddBusiness = ({ open, onClose, userData, setUserData, getContext }) => {
                 {formik.touched.entity_type && formik.errors.entity_type && <FormHelperText>{formik.errors.entity_type}</FormHelperText>}
               </FormControl>
             </Grid>
-            <Grid size={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 fullWidth
                 size="small"
@@ -207,7 +211,7 @@ const AddBusiness = ({ open, onClose, userData, setUserData, getContext }) => {
                 helperText={formik.touched.pan && formik.errors.pan}
               />
             </Grid>
-            <Grid size={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 fullWidth
                 size="small"
@@ -220,7 +224,7 @@ const AddBusiness = ({ open, onClose, userData, setUserData, getContext }) => {
                 helperText={formik.touched.business_nature && formik.errors.business_nature}
               />
             </Grid>
-            <Grid size={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 fullWidth
                 size="small"
@@ -233,7 +237,7 @@ const AddBusiness = ({ open, onClose, userData, setUserData, getContext }) => {
                 helperText={formik.touched.trade_name && formik.errors.trade_name}
               />
             </Grid>
-            <Grid size={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 fullWidth
                 size="small"
@@ -246,7 +250,7 @@ const AddBusiness = ({ open, onClose, userData, setUserData, getContext }) => {
                 helperText={formik.touched.mobile_number && formik.errors.mobile_number}
               />
             </Grid>
-            <Grid size={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 fullWidth
                 size="small"
@@ -259,7 +263,7 @@ const AddBusiness = ({ open, onClose, userData, setUserData, getContext }) => {
                 helperText={formik.touched.email && formik.errors.email}
               />
             </Grid>
-            <Grid size={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 fullWidth
                 size="small"
@@ -277,7 +281,7 @@ const AddBusiness = ({ open, onClose, userData, setUserData, getContext }) => {
               />
             </Grid>
 
-            <Grid size={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 fullWidth
                 size="small"
@@ -290,7 +294,7 @@ const AddBusiness = ({ open, onClose, userData, setUserData, getContext }) => {
                 helperText={formik.touched.head_office?.address_line1 && formik.errors.head_office?.address_line1}
               />
             </Grid>
-            <Grid size={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 fullWidth
                 size="small"
@@ -303,7 +307,7 @@ const AddBusiness = ({ open, onClose, userData, setUserData, getContext }) => {
                 helperText={formik.touched.head_office?.address_line2 && formik.errors.head_office?.address_line2}
               />
             </Grid>
-            <Grid size={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 fullWidth
                 size="small"
@@ -316,7 +320,7 @@ const AddBusiness = ({ open, onClose, userData, setUserData, getContext }) => {
                 helperText={formik.touched.head_office?.city && formik.errors.head_office?.city}
               />
             </Grid>
-            <Grid size={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <FormControl fullWidth size="small" error={formik.touched.head_office?.state && Boolean(formik.errors.head_office?.state)}>
                 <InputLabel>State</InputLabel>
                 <Select
@@ -337,7 +341,7 @@ const AddBusiness = ({ open, onClose, userData, setUserData, getContext }) => {
                 )}
               </FormControl>
             </Grid>
-            <Grid size={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 fullWidth
                 size="small"
@@ -351,17 +355,17 @@ const AddBusiness = ({ open, onClose, userData, setUserData, getContext }) => {
                 helperText={formik.touched.head_office?.country && formik.errors.head_office?.country}
               />
             </Grid>
-            <Grid size={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 fullWidth
                 size="small"
-                id="head_office.pinCode"
-                name="head_office.pinCode"
+                id="head_office.pincode"
+                name="head_office.pincode"
                 label="Pincode"
-                value={formik.values.head_office.pinCode}
+                value={formik.values.head_office.pincode}
                 onChange={formik.handleChange}
-                error={formik.touched.head_office?.pinCode && Boolean(formik.errors.head_office?.pinCode)}
-                helperText={formik.touched.head_office?.pinCode && formik.errors.head_office?.pinCode}
+                error={formik.touched.head_office?.pincode && Boolean(formik.errors.head_office?.pincode)}
+                helperText={formik.touched.head_office?.pincode && formik.errors.head_office?.pincode}
               />
             </Grid>
           </Grid>

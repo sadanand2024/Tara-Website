@@ -1,6 +1,5 @@
 // 📁 File: Designations.jsx
 
-'use client';
 import React, { useState, useEffect } from 'react';
 import {
   Box,
@@ -120,7 +119,7 @@ function Designations() {
               {paginatedData.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={4} align="center" sx={{ height: 300 }}>
-                    <EmptyDataPlaceholder title="No Departments Found" subtitle="Start by adding a new department." />
+                    <EmptyDataPlaceholder title="No Data Found" subtitle="Start by adding a new Data." />
                   </TableCell>
                 </TableRow>
               ) : (
@@ -128,7 +127,7 @@ function Designations() {
                   <TableRow key={designation.id} hover sx={{ minHeight: 56, '&:hover': { bgcolor: 'action.hover' } }}>
                     <TableCell align="center">{(currentPage - 1) * rowsPerPage + idx + 1}</TableCell>
                     <TableCell>{designation.designation_name || 'N/A'}</TableCell>
-                    <TableCell align="center">{designation.numOfEmployees || 0}</TableCell>
+                    <TableCell align="center">{designation.employee_count || 0}</TableCell>
                     <TableCell align="center">
                       <ActionCell
                         row={designation}

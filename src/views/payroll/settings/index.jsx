@@ -1,4 +1,3 @@
-'use client';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router';
 import { useSearchParams } from 'react-router';
@@ -6,9 +5,8 @@ import MainCard from '../../../ui-component/cards/MainCard';
 import { Box, Stack, Typography, LinearProgress, Button, Grid2, CircularProgress } from '@mui/material';
 import Factory from 'utils/Factory';
 import { useSelector } from 'react-redux';
-// import Loader from 'components/PageLoader';
-
-// Constants for better maintainability
+import { useDispatch } from 'store';
+import { openSnackbar } from 'store/slices/snackbar';
 const PAYROLL_STEPS = [
   { nameKey: 'Business profile', path: '/payroll/settings/organization-details', dataKey: 'organisation_details' },
   { nameKey: 'Set up Work Location', path: '/payroll/settings/work-location', dataKey: 'work_locations' },
@@ -23,13 +21,15 @@ const PAYROLL_STEPS = [
 ];
 
 const PayrollSetup = () => {
-  const user = useSelector((state) => state).accountReducer.user;
+  const user = useSelector((state) => state.accountReducer?.user);
+  const dispatch = useDispatch();
 
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
   const [payrollDetails, setPayrollDetails] = useState({});
   const [steps, setSteps] = useState(PAYROLL_STEPS.map((step) => ({ ...step, completed: false })));
+  const [markingComplete, setMarkingComplete] = useState(false);
 
   const businessId = user.active_context.business_id;
 
@@ -37,7 +37,15 @@ const PayrollSetup = () => {
 
   const fetchPayrollDetails = useCallback(async () => {
     if (!businessId) {
-      // showSnackbar('Business ID not found', 'error');
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Business ID not found',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
       return;
     }
 
@@ -61,10 +69,26 @@ const PayrollSetup = () => {
           }))
         );
       } else {
-        // showSnackbar(res?.data?.data || 'Failed to fetch payroll details', 'error');
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: res?.data?.data || 'Failed to fetch payroll details',
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
       }
     } catch (error) {
-      // showSnackbar(error.message || 'An error occurred while fetching payroll details', 'error');
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: error.message || 'An error occurred while fetching payroll details',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     } finally {
       setLoading(false);
     }
@@ -96,6 +120,55 @@ const PayrollSetup = () => {
     const completedSteps = steps.filter((step) => step.completed).length;
     return Math.round((completedSteps / steps.length) * 100);
   }, [steps]);
+
+  // Handler for marking Statutory Components as complete
+  const handleMarkStatutoryComplete = async () => {
+    if (!payrollDetails?.payroll_id) return;
+    setMarkingComplete(true);
+    try {
+      // Example API endpoint, adjust as needed
+      const url = `/payroll/orgs/${payrollDetails.payroll_id}/`;
+      let payload = {
+        statutory_component: true
+      };
+      const { res, error } = await Factory('put', url, payload);
+      if (error || res.status_cd !== 0) {
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: res?.data?.data || error || 'Failed to mark as complete',
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
+      } else {
+        // Update the step as completed
+        setSteps((prevSteps) => prevSteps.map((step) => (step.dataKey === 'statutory_component' ? { ...step, completed: false } : step)));
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'Marked as complete!',
+            variant: 'alert',
+            alert: { color: 'success' },
+            close: false
+          })
+        );
+      }
+    } catch (err) {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: err.message || 'An error occurred',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
+    } finally {
+      setMarkingComplete(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -167,7 +240,14 @@ const PayrollSetup = () => {
 
             <Stack direction="column" spacing={2} sx={{ p: 1 }}>
               {steps.map((step, index) => (
-                <StepItem key={step.path} step={step} index={index} onClick={() => handleStepClick(step)} />
+                <StepItem
+                  key={step.path}
+                  step={step}
+                  index={index}
+                  onClick={() => handleStepClick(step)}
+                  onMarkStatutoryComplete={step.dataKey === 'statutory_component' ? handleMarkStatutoryComplete : undefined}
+                  markingComplete={markingComplete && step.dataKey === 'statutory_component'}
+                />
               ))}
             </Stack>
           </MainCard>
@@ -177,7 +257,7 @@ const PayrollSetup = () => {
   );
 };
 
-const StepItem = React.memo(({ step, index, onClick }) => (
+const StepItem = React.memo(({ step, index, onClick, onMarkStatutoryComplete, markingComplete }) => (
   <Stack
     direction="row"
     alignItems="center"
@@ -214,17 +294,25 @@ const StepItem = React.memo(({ step, index, onClick }) => (
         {index + 1}. {step.nameKey}
       </Typography>
     </Stack>
-    <Button
-      variant="outlined"
-      sx={{
-        color: step.completed ? '#4CAF50' : '#4A90E2',
-        fontWeight: step.completed ? 500 : 400,
-        border: `1px solid ${step.completed ? '#4CAF50' : '#4A90E2'}`
-      }}
-      onClick={onClick}
-    >
-      {step.completed ? 'Completed' : 'Complete Now'}
-    </Button>
+    <Stack direction="row" spacing={1}>
+      <Button
+        variant="outlined"
+        sx={{
+          color: step.completed ? '#4CAF50' : '#4A90E2',
+          fontWeight: step.completed ? 500 : 400,
+          border: `1px solid ${step.completed ? '#4CAF50' : '#4A90E2'}`
+        }}
+        onClick={onClick}
+      >
+        {step.completed ? 'Completed' : 'Complete Now'}
+      </Button>
+      {/* Show Mark as Complete only for Statutory Components step when not completed */}
+      {onMarkStatutoryComplete && !step.completed && (
+        <Button variant="contained" color="success" onClick={onMarkStatutoryComplete} disabled={markingComplete}>
+          {markingComplete ? <CircularProgress size={20} color="inherit" /> : 'Mark as Complete'}
+        </Button>
+      )}
+    </Stack>
   </Stack>
 ));
 

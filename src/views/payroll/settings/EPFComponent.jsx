@@ -50,7 +50,8 @@ function EpfComponent({ handleNext }) {
   const validationSchema = Yup.object({
     epf_number: Yup.string()
       .required('EPF Number is required')
-      .matches(/^[A-Za-z]{5}\d{17}$/, 'Invalid EPF Number format, EX: ABCDE12345678901234567'),
+      .matches(/^[A-Z]{5}\d{10}$/, 'Invalid EPF Number format, EX: ABCDE2405151000'),
+
     employee_contribution_rate: Yup.string().required('EPF Contribution Rate is required')
   });
 
@@ -156,7 +157,6 @@ function EpfComponent({ handleNext }) {
     }
   };
   const { values, setValues, handleChange, errors, touched, handleSubmit, handleBlur, resetForm, setFieldValue } = formik;
-  console.log(open);
   return (
     <>
       {loading ? (
@@ -340,6 +340,7 @@ function EpfComponent({ handleNext }) {
 
           <Modal
             open={open}
+            title={'Add Or Edit EPF Details'}
             header={{ title: 'Employees Provident Fund', subheader: '' }}
             showClose={true}
             handleClose={() => {

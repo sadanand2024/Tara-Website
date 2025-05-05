@@ -108,7 +108,7 @@ export default function JWTRegister({ ...others }) {
           try {
             const trimmedEmail = values.email.trim();
             const response = await register(trimmedEmail, values.password, values.organizationName, moduleId, type, context_type);
-
+            
             setStatus({ success: true });
             setSubmitting(false);
 
@@ -178,7 +178,7 @@ export default function JWTRegister({ ...others }) {
             )}
 
             <FormControl fullWidth error={Boolean(touched.email && errors.email)} sx={{ ...theme.typography.customInput }}>
-              <InputLabel htmlFor="outlined-adornment-email-register">Email Address / Username</InputLabel>
+              <InputLabel htmlFor="outlined-adornment-email-register">Email Address</InputLabel>
               <OutlinedInput
                 id="outlined-adornment-email-register"
                 type="email"

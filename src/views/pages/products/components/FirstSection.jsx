@@ -1,7 +1,7 @@
-import ReceiptIcon from '@mui/icons-material/Receipt';
-import BadgeIcon from '@mui/icons-material/Badge';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
+
+// material-ui
 import { styled, useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import IconButton from '@mui/material/IconButton';
@@ -9,8 +9,7 @@ import Grid from '@mui/material/Grid2';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
-import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+
 // third party
 import { Carousel } from 'react-responsive-carousel';
 
@@ -19,7 +18,6 @@ import { ThemeMode } from 'config';
 
 // assets
 import { IconChevronRight, IconChevronLeft, IconLink } from '@tabler/icons-react';
-import { useSearchParams } from 'react-router-dom';
 
 import SliderLight1 from 'assets/images/landing/pre-apps/slider-light-1.png';
 import SliderDark1 from 'assets/images/landing/pre-apps/slider-dark-1.png';
@@ -27,8 +25,22 @@ import SliderLight2 from 'assets/images/landing/pre-apps/slider-light-2.png';
 import SliderDark2 from 'assets/images/landing/pre-apps/slider-dark-2.png';
 import SliderLight3 from 'assets/images/landing/pre-apps/slider-light-3.png';
 import SliderDark3 from 'assets/images/landing/pre-apps/slider-dark-3.png';
-import { Button } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import SliderLight4 from 'assets/images/landing/pre-apps/slider-light-4.png';
+import SliderDark4 from 'assets/images/landing/pre-apps/slider-dark-4.png';
+import SliderLight5 from 'assets/images/landing/pre-apps/slider-light-5.png';
+import SliderDark5 from 'assets/images/landing/pre-apps/slider-dark-5.png';
+import SliderLight6 from 'assets/images/landing/pre-apps/slider-light-6.png';
+import SliderDark6 from 'assets/images/landing/pre-apps/slider-dark-6.png';
+import SliderLight7 from 'assets/images/landing/pre-apps/slider-light-7.png';
+import SliderDark7 from 'assets/images/landing/pre-apps/slider-dark-7.png';
+import SliderLight8 from 'assets/images/landing/pre-apps/slider-light-8.png';
+import SliderDark8 from 'assets/images/landing/pre-apps/slider-dark-8.png';
+import SliderLight9 from 'assets/images/landing/pre-apps/slider-light-9.png';
+import SliderDark9 from 'assets/images/landing/pre-apps/slider-dark-9.png';
+import SliderLight10 from 'assets/images/landing/pre-apps/slider-light-10.png';
+import SliderDark10 from 'assets/images/landing/pre-apps/slider-dark-10.png';
+import SliderLight11 from 'assets/images/landing/pre-apps/slider-light-11.png';
+import SliderDark11 from 'assets/images/landing/pre-apps/slider-dark-11.png';
 
 // styles
 const Images = styled('img')({
@@ -151,90 +163,46 @@ function Items({ title, caption, image, link }) {
   );
 }
 
-export default function PreBuildDashBoard() {
+export default function FirstSection({ data }) {
   const theme = useTheme();
   const downMD = useMediaQuery(theme.breakpoints.down('md'));
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const moduleId = searchParams.get('id');
-  const type = searchParams.get('type');
-  const context = searchParams.get('context');
-
+  console.log(data);
   return (
-    <>
-      <Grid container sx={{ justifyContent: 'center', px: 1.25, gap: 7.5, py: 12.5 }}>
-        <Grid sx={{ textAlign: 'center' }} size={{ xs: 12, md: 6 }}>
-          <Grid container spacing={1.5}>
-            <Grid size={12}>
-              <Typography variant="h2" sx={{ fontSize: { xs: '1.5rem', sm: '2.125rem' } }}>
-                <Typography variant="h1" fontWeight={700} gutterBottom>
-                  Smart Payroll That Pays Off
-                </Typography>
-              </Typography>
-            </Grid>
-            <Grid size={12}>
-              <Typography variant="h4" maxWidth={700} mx="auto">
-                Automate salary processing, compliance filings, payslip generation, and employee management — all in one unified payroll
-                system.
-              </Typography>
-            </Grid>
-            <Grid size={12}>
-              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="center" sx={{ mt: 3 }}>
-                <Button
-                  size="large"
-                  variant="contained"
-                  color="primary"
-                  startIcon={<AddCircleOutlineIcon />}
-                  onClick={() => navigate(`/register?id=${moduleId}&context=${context}&type=${type}`)}
-                >
-                  Get Started with Payroll
-                </Button>
-                <Button size="large" variant="contained" color="secondary">
-                  Request Demo
-                </Button>
-              </Stack>
-            </Grid>
-          </Grid>
-        </Grid>
-        <Grid size={12}>
-          <Box
-            className="preBuildDashBoard-slider"
-            sx={{
-              direction: 'initial',
-              '.slider': { height: { xs: 'auto' }, '& .slide:not(.selected)': { transformOrigin: 'center !important' } }
-            }}
+    <Grid container sx={{ justifyContent: 'center', px: 1.25, gap: 7.5 }}>
+      <Grid size={12}>
+        <Box
+          className="preBuildDashBoard-slider"
+          sx={{
+            direction: 'initial',
+            '.slider': { height: { xs: 'auto' }, '& .slide:not(.selected)': { transformOrigin: 'center !important' } }
+          }}
+        >
+          <Carousel
+            showArrows={true}
+            showThumbs={false}
+            showIndicators={false}
+            centerMode={downMD ? false : true}
+            centerSlidePercentage={50}
+            infiniteLoop={true}
+            autoFocus={true}
+            emulateTouch={true}
+            swipeable={true}
+            autoPlay={true}
+            interval={2000}
+            renderArrowPrev={(onClickHandler, hasPrev, label) =>
+              hasPrev && <SamplePrevArrow onClickHandler={onClickHandler} hasPrev={hasPrev} label={label} />
+            }
+            renderArrowNext={(onClickHandler, hasNext, label) =>
+              hasNext && <SampleNextArrow onClickHandler={onClickHandler} hasNext={hasNext} label={label} />
+            }
           >
-            <Carousel
-              showArrows={true}
-              showThumbs={false}
-              showIndicators={false}
-              centerMode={downMD ? false : true}
-              centerSlidePercentage={50}
-              infiniteLoop={true}
-              autoFocus={true}
-              emulateTouch={true}
-              swipeable={true}
-              autoPlay={true}
-              interval={2000}
-              renderArrowPrev={(onClickHandler, hasPrev, label) =>
-                hasPrev && <SamplePrevArrow onClickHandler={onClickHandler} hasPrev={hasPrev} label={label} />
-              }
-              renderArrowNext={(onClickHandler, hasNext, label) =>
-                hasNext && <SampleNextArrow onClickHandler={onClickHandler} hasNext={hasNext} label={label} />
-              }
-            >
-              <Items
-                title="Blog Dashboard"
-                image={theme.palette.mode === ThemeMode.DARK ? SliderDark1 : SliderLight1}
-                link="/dashboard/blog"
-              />
-              <Items title="Calender" image={theme.palette.mode === ThemeMode.DARK ? SliderDark2 : SliderLight2} link="/apps/calendar" />
-              <Items title="Chat App" image={theme.palette.mode === ThemeMode.DARK ? SliderDark3 : SliderLight3} link="/apps/chat" />
-            </Carousel>
-          </Box>
-        </Grid>
+            {data.images?.light.map((img, idx) => (
+              <img key={idx} src={img} alt={data.name} style={{ width: '100%', height: 'auto' }} />
+            ))}
+          </Carousel>
+        </Box>
       </Grid>
-    </>
+    </Grid>
   );
 }
 

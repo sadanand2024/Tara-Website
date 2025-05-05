@@ -1,4 +1,3 @@
-'use client';
 import React, { useState, useEffect } from 'react';
 import { Button, Card, Stack, Box, Typography, Grid2 } from '@mui/material';
 import { useSearchParams } from 'react-router';
@@ -8,7 +7,8 @@ import Factory from 'utils/Factory';
 import dayjs from 'dayjs';
 import CustomDatePicker from 'utils/CustomDateInput';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-
+import { useDispatch } from 'store';
+import { openSnackbar } from 'store/slices/snackbar';
 function PaySchedule() {
   const [payrollId, setPayrollId] = useState(null);
   const [weekOffSelection, setWeekOffSelection] = useState({
@@ -26,6 +26,7 @@ function PaySchedule() {
   });
 
   const [dateValue, setDateValue] = useState(dayjs().format('DD-MM-YYYY'));
+  const dispatch = useDispatch();
 
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -68,11 +69,27 @@ function PaySchedule() {
     const selectedDays = Object.keys(weekOffSelection).filter((day) => weekOffSelection[day]);
 
     if (selectedDays.length === 0) {
-      // showSnackbar('Please select at least one day for your week off.', 'error');
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Please select at least one day for your week off.',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
       return;
     }
     if (!dateValue) {
-      // showSnackbar('Please select a start month for the payroll.', 'error');
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Please select a start month for the payroll.',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
       return;
     }
     const postData = {
@@ -99,9 +116,25 @@ function PaySchedule() {
     const { res, error } = await Factory(postType, url, postData);
 
     if (res?.status_cd === 0) {
-      // showSnackbar(postType === 'put' ? 'Data Updated successfully!' : 'Data saved successfully!', 'success');
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: postType === 'put' ? 'Data Updated successfully!' : 'Data saved successfully!',
+          variant: 'alert',
+          alert: { color: 'success' },
+          close: false
+        })
+      );
     } else {
-      // showSnackbar(res?.message || 'Something went wrong. Please try again.', 'error');
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: res?.message || 'Something went wrong. Please try again.',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     }
   };
   const get_paySchedule_Details = async (id) => {
@@ -148,8 +181,8 @@ function PaySchedule() {
       secondary={<Stack direction="row" sx={{ gap: 2 }}></Stack>}
     >
       <MainCard sx={{ padding: 2 }}>
-        <Typography variant="h6">Select your week off</Typography>
-        <Typography variant="body2" sx={{ mt: 1 }}>
+        <Typography variant="h4">Select your week off</Typography>
+        <Typography variant="body1" sx={{ mt: 1 }}>
           Choose your week off days from the calendar
         </Typography>
 
@@ -198,7 +231,7 @@ function PaySchedule() {
             variant="outlined"
             startIcon={<ArrowBackIcon />}
             onClick={() => {
-              navigate();
+              navigate(-1);
             }}
           >
             Back to Dashboard

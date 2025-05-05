@@ -215,7 +215,7 @@ export default function ManageUsers() {
           <Grid container spacing={gridSpacing} sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
             <Grid>
               <Typography variant="h3" sx={{ p: 0 }}>
-                List
+                Users List
               </Typography>
             </Grid>
             <Grid>

@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Button, Grid, Typography, Stack } from '@mui/material';
+import { Box, Button, Typography, Stack, Grid2 } from '@mui/material';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useNavigate } from 'react-router';
+import { useDispatch } from 'react-redux';
 import Factory from 'utils/Factory';
 import CustomInput from 'utils/CustomInput';
 import CustomAutocomplete from 'utils/CustomAutocomplete';
+import { openSnackbar } from 'store/slices/snackbar';
 
 const InvoiceNumberFormat = ({ businessDetails, handleBack }) => {
+  const dispatch = useDispatch();
   const [postType, setPostType] = useState('post');
   const [selectedRecord, setSelectedRecord] = useState(null);
   const navigate = useNavigate();
@@ -30,7 +33,7 @@ const InvoiceNumberFormat = ({ businessDetails, handleBack }) => {
       const url = postType === 'post' ? '/invoicing/invoice-formats/' : `/invoicing/invoice-formats/${selectedRecord.id}/`;
 
       const postData = {
-        invoicing_profile: businessDetails.id,
+        invoicing_profile: businessDetails.invoicing_profile_id,
         gstin: values.gstin,
         invoice_format: {
           startingNumber: values.startingNumber,
@@ -43,12 +46,37 @@ const InvoiceNumberFormat = ({ businessDetails, handleBack }) => {
       try {
         const { res } = await Factory(postType, url, postData);
         if (res.status_cd === 0) {
-          // Handle success UI or routing if needed
+          dispatch(
+            openSnackbar({
+              open: true,
+              message: 'Invoice format saved successfully',
+              variant: 'alert',
+              alert: { color: 'success' },
+              close: false
+            })
+          );
+          navigate('/app/invoice');
         } else {
-          // Handle error response
+          dispatch(
+            openSnackbar({
+              open: true,
+              message: res.message || 'Failed to save invoice format',
+              variant: 'alert',
+              alert: { color: 'error' },
+              close: false
+            })
+          );
         }
       } catch (error) {
-        // Handle exception
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: error.message || 'An error occurred while saving invoice format',
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
       }
     }
   });
@@ -68,8 +96,8 @@ const InvoiceNumberFormat = ({ businessDetails, handleBack }) => {
 
   return (
     <Box>
-      <Grid container spacing={2}>
-        <Grid item xs={12} sm={6}>
+      <Grid2 container spacing={2}>
+        <Grid2 size={{ xs: 12, sm: 6 }} xs={12} sm={6}>
           <Typography sx={{ mb: 1 }}>
             <span style={{ color: 'red' }}>*</span> Select GSTIN Number:
           </Typography>
@@ -104,10 +132,10 @@ const InvoiceNumberFormat = ({ businessDetails, handleBack }) => {
             error={formik.touched.gstin && Boolean(formik.errors.gstin)}
             helperText={formik.touched.gstin && formik.errors.gstin}
           />
-        </Grid>
+        </Grid2>
 
         {['startingNumber', 'prefix', 'suffix'].map((field) => (
-          <Grid item xs={12} sm={6} key={field}>
+          <Grid2 size={{ xs: 12, sm: 6 }} key={field}>
             <Typography sx={{ mb: 1 }}>
               <span style={{ color: 'red' }}>*</span> {field.replace(/([A-Z])/g, ' $1').trim()}:
             </Typography>
@@ -119,9 +147,9 @@ const InvoiceNumberFormat = ({ businessDetails, handleBack }) => {
               error={formik.touched[field] && Boolean(formik.errors[field])}
               helperText={formik.touched[field] && formik.errors[field]}
             />
-          </Grid>
+          </Grid2>
         ))}
-      </Grid>
+      </Grid2>
 
       <Stack direction="row" justifyContent="space-between" sx={{ mt: 4 }}>
         <Button

@@ -1,4 +1,3 @@
-'use client';
 import PropTypes from 'prop-types';
 import React, { useState } from 'react';
 import { Box, Button, Stack, Tabs, Tab, Typography } from '@mui/material';

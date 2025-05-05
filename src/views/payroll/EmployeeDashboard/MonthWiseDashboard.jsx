@@ -1,5 +1,3 @@
-'use client';
-
 // @mui
 import { useState, useEffect, useCallback } from 'react';
 

@@ -4,7 +4,6 @@ import * as Yup from 'yup';
 import { Button, Grid, Stack, Typography, Box, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio } from '@mui/material';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
-import { IconPlus } from '@tabler/icons-react';
 import Modal from 'ui-component/extended/Modal';
 import CustomInput from 'utils/CustomInput';
 import CustomAutocomplete from 'utils/CustomAutocomplete';
@@ -70,39 +69,37 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
       opening_balance: Yup.number().typeError('Opening Balance must be a number').required('Opening Balance is required')
     }),
     onSubmit: async (values) => {
-      const postData = { ...values, invoicing_profile: businessDetailsData?.id };
+      const postData = { ...values, invoicing_profile: businessDetailsData?.invoicing_profile_id };
       const url =
         type === 'edit' ? `/invoicing/invoicing/customer_profiles/update/${selectedCustomer?.id}/` : '/invoicing/customer_profiles/create/';
       const method = type === 'edit' ? 'put' : 'post';
-
-      try {
-        const { res } = await Factory(method, url, postData);
-        if (res.status_cd === 0) {
-          getCustomersData(businessDetailsData?.id);
-          setType('');
-          resetForm();
-          handleClose();
-          dispatch(
-            openSnackbar({
-              open: true,
-              message: type === 'edit' ? 'Data Updated Successfully' : 'Data Added Successfully',
-              variant: 'alert',
-              alert: { color: 'success' },
-              close: false
-            })
-          );
-        }
-      } catch (error) {
+      postData.opening_balance = Number(postData.opening_balance);
+      const { res } = await Factory(method, url, postData);
+      console.log(res);
+      if (res.status_cd === 0) {
+        getCustomersData(businessDetailsData?.invoicing_profile_id);
+        setType('');
+        resetForm();
+        handleClose();
         dispatch(
           openSnackbar({
             open: true,
-            message: JSON.stringify(error) || 'Something went wrong',
+            message: type === 'edit' ? 'Data Updated Successfully' : 'Data Added Successfully',
             variant: 'alert',
-            alert: { color: 'error' },
+            alert: { color: 'success' },
             close: false
           })
         );
       }
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res.data.data) || 'Something went wrong',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     }
   });
 

@@ -1,7 +1,7 @@
 // 📁 File: AddItem.jsx
 
 import React, { useState, useEffect } from 'react';
-import { Button, Box, Grid, Typography, Stack, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio } from '@mui/material';
+import { Button, Box, Grid2, Typography, Stack, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio } from '@mui/material';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { useDispatch } from 'store';
@@ -45,7 +45,6 @@ const unitsDropdown = [
 
 const taxPreferencesDropdown = ['Taxable', 'Non-Taxable', 'Out of Scope', 'Non-GST Supply'];
 const gstRatesDropdown = ['0', '5', '12', '18', '28'];
-const hsnCodes = ['1006', '6203', '8528', '9401', '8703'];
 
 const AddItem = ({ type, setType, open, handleOpen, handleClose, selectedItem, businessDetailsData, get_Goods_and_Services_Data }) => {
   const dispatch = useDispatch();
@@ -78,7 +77,7 @@ const AddItem = ({ type, setType, open, handleOpen, handleClose, selectedItem, b
     onSubmit: async (values) => {
       const postData = {
         ...values,
-        invoicing_profile: businessDetailsData?.id,
+        invoicing_profile: businessDetailsData?.invoicing_profile_id,
         sku_value: Number(values.sku_value),
         gst_rate: Number(values.gst_rate),
         selling_price: Number(values.selling_price)
@@ -178,9 +177,9 @@ const AddItem = ({ type, setType, open, handleOpen, handleClose, selectedItem, b
       }
     >
       <Box component="form" onSubmit={handleSubmit} sx={{ p: 2 }}>
-        <Grid container spacing={2}>
+        <Grid2 container spacing={2}>
           {fields.map((field) => (
-            <Grid item xs={12} sm={6} key={field.name}>
+            <Grid2 size={{ xs: 12, sm: 6 }} key={field.name}>
               {field.name === 'type' ? (
                 <FormControl fullWidth>
                   <FormLabel>{field.label}</FormLabel>
@@ -234,9 +233,9 @@ const AddItem = ({ type, setType, open, handleOpen, handleClose, selectedItem, b
                   />
                 </>
               )}
-            </Grid>
+            </Grid2>
           ))}
-        </Grid>
+        </Grid2>
       </Box>
     </Modal>
   );

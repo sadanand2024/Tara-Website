@@ -1,4 +1,4 @@
-'use client';
+
 import { Container } from '@mui/material';
 import servicesData from 'data/servicesData';
 import React from 'react';

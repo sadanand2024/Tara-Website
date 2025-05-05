@@ -1,15 +1,14 @@
-// 📁 File: CustomerList.jsx
-
 import React, { useEffect, useState } from 'react';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Pagination, Stack, Typography, Box } from '@mui/material';
 import Factory from 'utils/Factory';
 import AddCustomer from './AddCustomer';
 import ActionCell from '../../../../ui-component/extended/ActionCell';
+import EmptyDataPlaceholder from 'ui-component/extended/EmptyDataPlaceholder';
+import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
 const CustomerList = ({ type, open, handleOpen, handleClose, setType, businessDetailsData, getCustomersData, customersListData }) => {
   const [customers, setCustomers] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const rowsPerPage = 8;
 
   const handlePageChange = (event, value) => {
     setCurrentPage(value);
@@ -31,7 +30,7 @@ const CustomerList = ({ type, open, handleOpen, handleClose, setType, businessDe
     const url = `/invoicing/customer_profiles/delete/${customer.id}`;
     const { res } = await Factory('delete', url, {});
     if (res.status_cd === 0) {
-      getCustomersData();
+      getCustomersData(businessDetailsData?.invoicing_profile_id);
     }
   };
 
@@ -54,9 +53,7 @@ const CustomerList = ({ type, open, handleOpen, handleClose, setType, businessDe
             {paginatedData.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7} align="center">
-                  <Typography variant="body2" color="text.secondary" sx={{ py: 3 }}>
-                    No customer records found.
-                  </Typography>
+                  <EmptyDataPlaceholder title="No Data Found" subtitle="Start by adding a new Data." />
                 </TableCell>
               </TableRow>
             ) : (

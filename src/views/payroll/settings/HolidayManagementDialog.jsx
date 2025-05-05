@@ -10,7 +10,8 @@ import Modal from 'ui-component/extended/Modal';
 import dayjs from 'dayjs';
 import CustomDatePicker from 'utils/CustomDateInput';
 import CustomAutocomplete from 'utils/CustomAutocomplete';
-
+import { useDispatch } from 'store';
+import { openSnackbar } from 'store/slices/snackbar';
 export default function HolidayManagementDialog({ open, handleClose, selectedRecord, type, fetchHolidayManagementData, workLocations }) {
   const [searchParams] = useSearchParams();
   const [payrollid, setPayrollId] = useState(null); // Payroll ID fetched from URL
@@ -23,6 +24,7 @@ export default function HolidayManagementDialog({ open, handleClose, selectedRec
       setPayrollId(id);
     }
   }, [searchParams]);
+  const dispatch = useDispatch();
 
   const departmentFields = [
     { name: 'holiday_name', label: 'Holiday Name' },
@@ -44,8 +46,8 @@ export default function HolidayManagementDialog({ open, handleClose, selectedRec
   const formik = useFormik({
     initialValues: {
       holiday_name: '',
-      start_date: dayjs().format('DD-MM-YYYY'),
-      end_date: dayjs().format('DD-MM-YYYY'),
+      start_date: '',
+      end_date: '',
       description: '',
       applicable_for: ''
     },
@@ -70,11 +72,27 @@ export default function HolidayManagementDialog({ open, handleClose, selectedRec
       const { res, error } = await Factory(postType, url, postData);
       setLoading(false);
       if (res.status_cd === 0) {
-        // showSnackbar(postType === 'post' ? 'Data Saved Successfully' : 'Data Updated Successfully', 'success');
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: postType === 'post' ? 'Data Saved Successfully' : 'Data Updated Successfully',
+            variant: 'alert',
+            alert: { color: 'success' },
+            close: false
+          })
+        );
         handleClose();
         fetchHolidayManagementData(); // Assuming getESI_Details is a function to fetch department details
       } else {
-        // showSnackbar(JSON.stringify(res.data.data), 'error');
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: JSON.stringify(res.data.data),
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
       }
     }
   });
@@ -88,22 +106,13 @@ export default function HolidayManagementDialog({ open, handleClose, selectedRec
               {field.label}
             </Typography>
             <CustomDatePicker
-              views={['year', 'month', 'day']}
-              value={values[field.name] ? dayjs(values[field.name], 'YYYY-MM-DD') : null} // Parse correctly for displaying
+              name={field.name}
+              value={values[field.name] ? dayjs(values[field.name]) : null}
               onChange={(newDate) => {
-                if (newDate) {
-                  // Save the date in 'YYYY-MM-DD' format to Formik
-                  setFieldValue(field.name, newDate.format('YYYY-MM-DD'));
-                } else {
-                  setFieldValue(field.name, ''); // Clear the date if none is selected
-                }
+                setFieldValue(field.name, newDate ? newDate.format('YYYY-MM-DD') : '');
               }}
-              sx={{ width: '100%' }}
-              onBlur={handleBlur}
               error={touched[field.name] && Boolean(errors[field.name])}
               helperText={touched[field.name] && errors[field.name]}
-              size="small"
-              inputFormat="YYYY-MM-DD" // Display in YYYY-MM-DD format
             />
           </Grid2>
         );
@@ -139,7 +148,7 @@ export default function HolidayManagementDialog({ open, handleClose, selectedRec
               fullWidth
               name={field.name}
               multiline={field.name === 'description'}
-              minRows={field.name === 'description' && 4}
+              minRows={field.name === 'description' ? 4 : undefined}
               value={values[field.name]}
               onChange={(e) => setFieldValue(field.name, e.target.value)}
               onBlur={handleBlur}
@@ -161,6 +170,11 @@ export default function HolidayManagementDialog({ open, handleClose, selectedRec
     <Modal
       open={open}
       maxWidth={'md'}
+      showClose={true}
+      handleClose={() => {
+        resetForm();
+        handleClose(); // Reset form and close dialog
+      }}
       header={{ title: 'Add Holiday', subheader: '' }}
       footer={
         <Stack direction="row" sx={{ width: 1, justifyContent: 'space-between', gap: 2 }}>

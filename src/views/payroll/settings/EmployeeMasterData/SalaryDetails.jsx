@@ -1,4 +1,3 @@
-'use client';
 import React, { useState, useEffect } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
@@ -8,19 +7,21 @@ import Factory from 'utils/Factory';
 import CustomAutocomplete from 'utils/CustomAutocomplete';
 import { useSearchParams } from 'react-router';
 import RenderSalaryTemplateTable from '../RenderSalaryTemplateTable';
-
+import { useDispatch } from 'store';
+import { openSnackbar } from 'store/slices/snackbar';
 const validationSchema = Yup.object({
   // template_name: Yup.string().required('Template Name is required'),
   annual_ctc: Yup.number().required('Annual CTC is required').positive('Annual CTC must be a positive number')
 });
 const initialEarnings = [{ component_name: 'Basic', calculation_type: 'Fixed', monthly: 0, annually: 0, calculation: 0 }];
 
-function SalaryDetails({ employeeData }) {
+function SalaryDetails({ employeeData, createdEmployeeId }) {
   const [open, setOpen] = useState(false);
   const [payrollid, setPayrollId] = useState(null);
   const [salary_teamplates_data, setSalary_teamplates_data] = useState([]);
   const [searchParams] = useSearchParams();
   const [enablePreviewButton, setEnablePreviewButton] = useState(false);
+  const dispatch = useDispatch();
 
   const fields = [
     { name: 'salary_template', label: 'Salary Template' },
@@ -51,6 +52,8 @@ function SalaryDetails({ employeeData }) {
 
       if (employeeData?.id) {
         postData.employee = employeeData.id;
+      } else if (createdEmployeeId) {
+        postData.employee = createdEmployeeId;
       }
 
       let method = 'post';
@@ -65,16 +68,30 @@ function SalaryDetails({ employeeData }) {
       }
 
       const { res } = await Factory(method, url, postData);
-      console.log(res);
 
       if (res?.status_cd === 1) {
-        // showSnackbar(JSON.stringify(res.data), 'error');
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: JSON.stringify(res.data),
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
       } else {
-        // showSnackbar('Data Saved Successfully', 'success');
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'Data Saved Successfully',
+            variant: 'alert',
+            alert: { color: 'success' },
+            close: false
+          })
+        );
       }
     }
   });
-  // console.log(salary_teamplates_data);
   const renderFields = (fields) => {
     return fields.map((field) => (
       <Grid2 key={field.name} size={{ xs: 12, sm: 6 }}>
@@ -90,7 +107,6 @@ function SalaryDetails({ employeeData }) {
                   options={salary_teamplates_data.map((item) => item.template_name)}
                   onChange={(e, newValue) => {
                     const selectedOption = salary_teamplates_data.find((item) => item.template_name === newValue);
-                    console.log(selectedOption);
                     setFieldValue('template_name', newValue);
                     setFieldValue('annual_ctc', selectedOption?.annual_ctc || 0);
                     setFieldValue('description', selectedOption?.description || '');
@@ -130,7 +146,6 @@ function SalaryDetails({ employeeData }) {
 
     const url = `/payroll/salary-templates?payroll_id=${payrollid}`;
     const { res, error } = await Factory('get', url, {});
-    console.log(res.data);
     if (res?.status_cd === 0 && Array.isArray(res?.data)) {
       setSalary_teamplates_data(res?.data);
     } else {
@@ -151,7 +166,6 @@ function SalaryDetails({ employeeData }) {
       }));
     }
   }, [employeeData]);
-  console.log(employeeData);
   return (
     <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>

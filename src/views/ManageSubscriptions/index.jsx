@@ -33,7 +33,6 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import UpgradeIcon from '@mui/icons-material/Upgrade';
 import ReceiptIcon from '@mui/icons-material/Receipt';
-import ProductsAndServices from './ProductsAndServices';
 import { useSelector } from 'react-redux';
 import NoSubscriptionsIcon from '@mui/icons-material/WorkspacePremium';
 
@@ -190,7 +189,7 @@ const EmptySubscriptions = () => {
       <Button
         variant="contained"
         startIcon={<AddIcon />}
-        onClick={() => navigate('/app/products-and-services')}
+        onClick={() => navigate('/app/subscriptions/modules-and-services')}
         sx={{
           background: (theme) => `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
           '&:hover': {
@@ -210,6 +209,14 @@ const ManageSubscriptions = () => {
   const isTablet = useMediaQuery(theme.breakpoints.down('md'));
   const navigate = useNavigate();
   const user = useSelector((state) => state).accountReducer.user;
+
+  // useEffect(() => {
+  //   const getPaymentHistory = async () => {
+  //     const response = await axios.get(`${process.env.REACT_APP_API_URL}/payment-history`);
+  //     console.log(response);
+  //   };
+  //   getPaymentHistory();
+  // }, []);
 
   return (
     <Stack spacing={{ xs: 2, sm: 3, md: 4 }}>
@@ -239,7 +246,7 @@ const ManageSubscriptions = () => {
             fullWidth={isMobile}
             variant="contained"
             startIcon={<AddIcon />}
-            onClick={() => navigate('/app/products-and-services')}
+            onClick={() => navigate('/app/subscriptions/modules-and-services')}
             sx={{
               background: (theme) => `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
               '&:hover': {
@@ -253,7 +260,7 @@ const ManageSubscriptions = () => {
             fullWidth={isMobile}
             variant="outlined"
             startIcon={<ShoppingCartIcon />}
-            onClick={() => navigate('/app/products-and-services?tab=1')}
+            onClick={() => navigate('/app/subscriptions/modules-and-services?tab=1')}
             sx={{
               borderColor: 'primary.main',
               '&:hover': {
@@ -268,7 +275,7 @@ const ManageSubscriptions = () => {
             fullWidth={isMobile}
             variant="outlined"
             startIcon={<VisibilityIcon />}
-            onClick={() => navigate('/app/products-and-services')}
+            onClick={() => navigate('/app/subscriptions/modules-and-services')}
             sx={{
               borderColor: 'primary.main',
               '&:hover': {

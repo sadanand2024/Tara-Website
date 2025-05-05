@@ -4,7 +4,7 @@ import Dashboard from './dashboard';
 // ==============================|| MENU ITEMS ||============================== //
 
 const menuItems = {
-  items: [Dashboard,pages]
+  items: [Dashboard]
 };
 
 export default menuItems; 

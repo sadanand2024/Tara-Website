@@ -19,7 +19,7 @@ const AnalyticsOverview = () => {
   const [type, setType] = useState('');
   const [loading, setLoading] = useState(false);
   const [invoicing_profile_data, setInvoicing_profile_data] = useState(null);
-  const user = useSelector((state) => state).accountReducer.user;
+  const user = useSelector((state) => state.accountReducer.user);
 
   const handleClose = () => {
     setOpen(false);
@@ -116,7 +116,7 @@ const AnalyticsOverview = () => {
         {loading ? (
           <Box sx={{ p: 3, flex: 1 }}>
             <Grid container spacing={3}>
-              <Grid item xs={12}>
+              <Grid size={{ xs: 12 }}>
                 <Skeleton variant="rectangular" height={200} sx={{ borderRadius: 2 }} />
               </Grid>
             </Grid>

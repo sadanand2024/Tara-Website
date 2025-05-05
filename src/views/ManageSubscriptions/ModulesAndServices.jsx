@@ -30,10 +30,12 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import SearchIcon from '@mui/icons-material/Search';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import { useSelector } from 'react-redux';
+import Factory from '../../utils/Factory';
 
-const ProductCard = ({ title, description, price, activePlan, features, actions }) => {
+const ProductCard = ({ title, description, price, activePlan, features, actions, module_id }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const navigate = useNavigate();
 
   return (
     <Card
@@ -60,7 +62,7 @@ const ProductCard = ({ title, description, price, activePlan, features, actions 
       >
         <Box sx={{ mb: 2.5 }}>
           <Typography
-            variant="h5"
+            variant="h4"
             sx={{
               fontWeight: 600,
               mb: 1,
@@ -71,48 +73,51 @@ const ProductCard = ({ title, description, price, activePlan, features, actions 
             }}
           >
             <span>{title}</span>
-            {activePlan ? (
-              <Chip
-                size="small"
-                label={activePlan}
-                color="success"
-                icon={<CheckCircleIcon />}
-                sx={{
-                  height: 24,
-                  '& .MuiChip-icon': { fontSize: 16 }
-                }}
-              />
-            ) : (
-              <Chip
-                size="small"
-                label={
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <CurrencyRupeeIcon sx={{ fontSize: '1rem' }} />
-                    <span>{price}</span>
-                    <Typography
-                      component="span"
-                      variant="caption"
-                      sx={{
-                        opacity: 0.8,
-                        ml: 0.5
-                      }}
-                    >
-                      /month
-                    </Typography>
-                  </Box>
-                }
-                color="primary"
-                variant="outlined"
-                sx={{
-                  height: 24,
-                  '& .MuiChip-label': {
-                    px: 1,
-                    display: 'flex',
-                    alignItems: 'center'
-                  }
-                }}
-              />
-            )}
+            {
+              activePlan && (
+                <Chip
+                  size="small"
+                  label={activePlan}
+                  color="success"
+                  icon={<CheckCircleIcon />}
+                  sx={{
+                    height: 24,
+                    '& .MuiChip-icon': { fontSize: 16 }
+                  }}
+                />
+              )
+              //  : (
+              //   <Chip
+              //     size="small"
+              //     label={
+              //       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              //         <CurrencyRupeeIcon sx={{ fontSize: '1rem' }} />
+              //         <span>{price}</span>
+              //         <Typography
+              //           component="span"
+              //           variant="caption"
+              //           sx={{
+              //             opacity: 0.8,
+              //             ml: 0.5
+              //           }}
+              //         >
+              //           /month
+              //         </Typography>
+              //       </Box>
+              //     }
+              //     color="primary"
+              //     variant="outlined"
+              //     sx={{
+              //       height: 24,
+              //       '& .MuiChip-label': {
+              //         px: 1,
+              //         display: 'flex',
+              //         alignItems: 'center'
+              //       }
+              //     }}
+              //   />
+              // )
+            }
           </Typography>
           <Box
             sx={{
@@ -162,8 +167,7 @@ const ProductCard = ({ title, description, price, activePlan, features, actions 
               size="small"
               startIcon={action.icon}
               fullWidth={isMobile}
-              component={Link}
-              href={`${window.location.pathname}/plans`}
+              onClick={() => navigate(`/app/subscriptions/modules-and-services/plans?id=${module_id}`)}
               sx={
                 action.primary
                   ? {
@@ -192,7 +196,7 @@ const ProductCard = ({ title, description, price, activePlan, features, actions 
   );
 };
 
-const ProductsAndServices = () => {
+const ModulesAndServices = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const theme = useTheme();
@@ -201,14 +205,57 @@ const ProductsAndServices = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const user = useSelector((state) => state).accountReducer.user;
+  const [modules, setModules] = useState([]);
+  const [services, setServices] = useState([]);
 
   useEffect(() => {
-    console.log(user);
     const tab = searchParams.get('tab');
     if (tab) {
       setTabValue(parseInt(tab));
     }
   }, [searchParams]);
+
+  useEffect(() => {
+    //MODULES ALREADY SUBSCRIBED
+    // user.module_subscriptions.map
+    const getModules = async () => {
+      const response = await Factory('get', `/user_management/modules/list?context_type=${user.active_context.context_type}`);
+      if (response.res.status_cd === 0) {
+        const subscribedModuleIds = user.module_subscriptions.map((sub) => sub.module_id);
+        const mappedModules = response.res.data.modules.map((mod) => {
+          const isSubscribed = subscribedModuleIds.includes(mod.id);
+          return {
+            module_id: mod.id,
+            title: mod.name,
+            description: mod.description,
+            features: [],
+            price: '0',
+            activePlan: isSubscribed ? 'Active' : '',
+            category: 'accounting',
+            actions: [
+              { label: 'View Plans', icon: <VisibilityIcon />, primary: true },
+              { label: isSubscribed ? 'Modify Subscription' : 'Subscribe Now', icon: <ShoppingCartIcon /> }
+            ]
+          };
+        });
+        setModules(mappedModules);
+      } else {
+        console.log(response.res.message);
+      }
+    };
+    getModules();
+
+    // const getServices = async () => {
+    //   const response = await Factory('get', `/user_management/services/list?context_type=${user.active_context.context_type}`);
+    //   console.log(response);
+    //   if (response.res.status === 0) {
+    //     setServices(response.res.data);
+    //   } else {
+    //     console.log(response.res.message);
+    //   }
+    // };
+    // getServices();
+  }, []);
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
@@ -241,94 +288,95 @@ const ProductsAndServices = () => {
     });
   };
 
-  const modules = [
-    {
-      title: 'Invoicing Module',
-      description: 'Streamline your billing process with our comprehensive invoicing solution.',
-      features: [
-        'GST-compliant invoice generation',
-        'Multiple currency support',
-        'Customizable invoice templates',
-        'Automated recurring billing'
-      ],
-      price: '0',
-      activePlan: 'Trial Active',
-      category: 'accounting',
-      actions: [
-        { label: 'View Plans', icon: <VisibilityIcon />, primary: true },
-        { label: 'Start Trial', icon: <ShoppingCartIcon /> },
-        { label: 'Subscribe Now', icon: <UpgradeIcon /> }
-      ]
-    },
-    {
-      title: 'Payroll Module',
-      description: 'Complete payroll management system for businesses of all sizes.',
-      features: [
-        'Automated salary calculations',
-        'Tax deductions & compliance',
-        'Employee self-service portal',
-        'Leave management integration'
-      ],
-      price: '6,999',
-      activePlan: 'Pro Plan',
-      category: 'accounting',
-      actions: [
-        { label: 'View Plans', icon: <VisibilityIcon />, primary: true },
-        { label: 'Upgrade Now', icon: <UpgradeIcon /> }
-      ]
-    },
-    {
-      title: 'PractOS',
-      description: 'All-in-one practice management solution for professionals.',
-      features: ['Client management', 'Task tracking & deadlines', 'Document management', 'Team collaboration tools'],
-      price: '3,499',
-      category: 'accounting',
-      actions: [
-        { label: 'View Plans', icon: <VisibilityIcon />, primary: true },
-        { label: 'Start Trial', icon: <ShoppingCartIcon /> },
-        { label: 'Subscribe Now', icon: <UpgradeIcon /> }
-      ]
-    },
-    {
-      title: 'DOC Wallet',
-      description: 'Secure document storage and management system.',
-      features: ['Digital document storage', 'Quick document retrieval', 'Access control & sharing', 'Document version control'],
-      price: '0',
-      activePlan: 'Trial Active',
-      category: 'document',
-      actions: [
-        { label: 'View Plans', icon: <VisibilityIcon />, primary: true },
-        { label: 'Upgrade Now', icon: <UpgradeIcon /> }
-      ]
-    }
-  ];
+  // const modules = [
+  //   {
+  //     title: 'Invoicing Module',
+  //     description: 'Streamline your billing process with our comprehensive invoicing solution.',
+  //     features: [
+  //       'GST-compliant invoice generation',
+  //       'Multiple currency support',
+  //       'Customizable invoice templates',
+  //       'Automated recurring billing'
+  //     ],
+  //     price: '0',
+  //     activePlan: 'Trial Active',
+  //     category: 'accounting',
+  //     actions: [
+  //       { label: 'View Plans', icon: <VisibilityIcon />, primary: true },
+  //       { label: 'Start Trial', icon: <ShoppingCartIcon /> },
+  //       { label: 'Subscribe Now', icon: <UpgradeIcon /> }
+  //     ]
+  //   },
+  //   {
+  //     title: 'Payroll Module',
+  //     description: 'Complete payroll management system for businesses of all sizes.',
+  //     features: [
+  //       'Automated salary calculations',
+  //       'Tax deductions & compliance',
+  //       'Employee self-service portal',
+  //       'Leave management integration'
+  //     ],
+  //     price: '6,999',
+  //     activePlan: 'Pro Plan',
+  //     category: 'accounting',
+  //     actions: [
+  //       { label: 'View Plans', icon: <VisibilityIcon />, primary: true },
+  //       { label: 'Upgrade Now', icon: <UpgradeIcon /> }
+  //     ]
+  //   },
+  //   {
+  //     title: 'PractOS',
+  //     description: 'All-in-one practice management solution for professionals.',
+  //     features: ['Client management', 'Task tracking & deadlines', 'Document management', 'Team collaboration tools'],
+  //     price: '3,499',
+  //     category: 'accounting',
+  //     actions: [
+  //       { label: 'View Plans', icon: <VisibilityIcon />, primary: true },
+  //       { label: 'Start Trial', icon: <ShoppingCartIcon /> },
+  //       { label: 'Subscribe Now', icon: <UpgradeIcon /> }
+  //     ]
+  //   },
+  //   {
+  //     title: 'DOC Wallet',
+  //     description: 'Secure document storage and management system.',
+  //     features: ['Digital document storage', 'Quick document retrieval', 'Access control & sharing', 'Document version control'],
+  //     price: '0',
+  //     activePlan: 'Trial Active',
+  //     category: 'document',
+  //     actions: [
+  //       { label: 'View Plans', icon: <VisibilityIcon />, primary: true },
+  //       { label: 'Upgrade Now', icon: <UpgradeIcon /> }
+  //     ]
+  //   }
+  // ];
 
-  const services = [
-    {
-      title: 'Private Limited Company Registration',
-      description: 'End-to-end company registration service with expert guidance.',
-      features: ['Name availability check', 'ROC registration process', 'Digital signature certificates', 'Post-registration compliances'],
-      price: '9,999',
-      category: 'registration',
-      actions: [
-        { label: 'View Plans', icon: <VisibilityIcon />, primary: true },
-        { label: 'Buy Now', icon: <ShoppingCartIcon /> }
-      ]
-    },
-    {
-      title: 'GST Registration',
-      description: 'Hassle-free GST registration service with complete support.',
-      features: ['Eligibility assessment', 'Document preparation', 'Application filing', 'Follow-up support'],
-      price: '1,999',
-      category: 'compliance',
-      actions: [
-        { label: 'View Plans', icon: <VisibilityIcon />, primary: true },
-        { label: 'Buy Now', icon: <ShoppingCartIcon /> }
-      ]
-    }
-  ];
+  // const services = [
+  //   {
+  //     title: 'Private Limited Company Registration',
+  //     description: 'End-to-end company registration service with expert guidance.',
+  //     features: ['Name availability check', 'ROC registration process', 'Digital signature certificates', 'Post-registration compliances'],
+  //     price: '9,999',
+  //     category: 'registration',
+  //     actions: [
+  //       { label: 'View Plans', icon: <VisibilityIcon />, primary: true },
+  //       { label: 'Buy Now', icon: <ShoppingCartIcon /> }
+  //     ]
+  //   },
+  //   {
+  //     title: 'GST Registration',
+  //     description: 'Hassle-free GST registration service with complete support.',
+  //     features: ['Eligibility assessment', 'Document preparation', 'Application filing', 'Follow-up support'],
+  //     price: '1,999',
+  //     category: 'compliance',
+  //     actions: [
+  //       { label: 'View Plans', icon: <VisibilityIcon />, primary: true },
+  //       { label: 'Buy Now', icon: <ShoppingCartIcon /> }
+  //     ]
+  //   }
+  // ];
 
   const filteredModules = filterItems(modules);
+  console.log(filteredModules);
   const filteredServices = filterItems(services);
 
   return (
@@ -397,6 +445,7 @@ const ProductsAndServices = () => {
         sx={{
           p: 3,
           display: 'flex',
+          justifyContent: 'space-between',
           flexDirection: { xs: 'column', sm: 'row' },
           gap: 2
         }}
@@ -472,10 +521,10 @@ const ProductsAndServices = () => {
       <Box sx={{ mt: 2, px: 2 }}>
         {tabValue === 0 ? (
           <>
-            <Grid2 container spacing={{ xs: 2, sm: 1 }} disableEqualOverflow>
+            <Grid2 container spacing={{ xs: 2, sm: 1 }}>
               {filteredModules.map((module, index) => (
                 <Grid2
-                  size={{ xs: 12, sm: 6, md: 4, lg: 4 }}
+                  size={{ xs: 6, sm: 4, md: 3, lg: 3 }}
                   key={index}
                   sx={{
                     display: 'flex',
@@ -490,7 +539,7 @@ const ProductsAndServices = () => {
           </>
         ) : (
           <>
-            <Grid2 container spacing={{ xs: 2, sm: 1 }} disableEqualOverflow>
+            <Grid2 container spacing={{ xs: 2, sm: 1 }}>
               {filteredServices.map((service, index) => (
                 <Grid2
                   size={{ xs: 12, sm: 6, md: 4, lg: 4 }}
@@ -512,4 +561,4 @@ const ProductsAndServices = () => {
   );
 };
 
-export default ProductsAndServices;
+export default ModulesAndServices;
