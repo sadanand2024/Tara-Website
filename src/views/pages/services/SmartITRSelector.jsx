@@ -29,7 +29,6 @@ const SmartITRSelector = ({ data }) => {
           <Typography variant="h5" color="text.secondary" gutterBottom>
             {data.description}
           </Typography>
-
           <Stack spacing={1} sx={{ my: 3 }}>
             {data.questions?.map((q, idx) => (
               <Box key={idx} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -38,19 +37,16 @@ const SmartITRSelector = ({ data }) => {
               </Box>
             ))}
           </Stack>
-
-          {data.cta && (
+           {data.cta && (
             <Button variant="contained" size="large" startIcon={<CheckCircleIcon />} sx={{ mt: 2 }}>
               {data.cta.label}
             </Button>
           )}
-
           {data.alternativeOption && (
             <Box sx={{ mt: 4 }}>
               <Typography variant="h6" gutterBottom>
                 {data.alternativeOption.label}
               </Typography>
-
               <Grid container spacing={1} justifyContent="center">
                 {data.alternativeOption.dropdown.map((item, idx) => (
                   <Grid item key={idx}>

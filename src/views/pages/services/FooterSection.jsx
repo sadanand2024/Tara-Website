@@ -46,8 +46,17 @@ export default function FooterSection() {
   const textColor = theme.palette.mode === ThemeMode.DARK ? 'text.secondary' : 'text.hint';
 
   return (
-    <>
-      <Container sx={{ mb: 15 }}>
+    <Box sx={{ 
+      bgcolor:'rgb(53, 53, 69)', 
+      pt: 3,
+      pb: 2,
+      mt:-10,
+      width: '100%',
+      position: 'relative',
+      left: 0,
+      right:0
+    }}>
+      <Container maxWidth={true} sx={{ mb: 15, px: 0 }}>
         <Grid container spacing={6}>
           <Grid size={12}>
             <Grid container spacing={8}>
@@ -202,8 +211,15 @@ export default function FooterSection() {
           </Grid>
         </Grid>
       </Container>
-      <Box sx={{ bgcolor: 'dark.dark', py: { xs: 3, sm: 1.5 } }}>
-        <Container>
+      <Box sx={{ 
+        bgcolor: '#23272a', 
+        py: { xs: 3, sm: 1.5 }, 
+        width: '100%',
+        position: 'relative',
+        left: 0,
+        right: 0
+      }}>
+        <Container maxWidth={false} sx={{ px: 0 }}>
           <Stack
             direction={{ xs: 'column', sm: 'row' }}
             alignItems="center"
@@ -306,6 +322,6 @@ export default function FooterSection() {
           </Stack>
         </Container>
       </Box>
-    </>
+    </Box>
   );
 }

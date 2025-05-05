@@ -83,10 +83,10 @@ const servicesData = {
         whyChooseUs: [
           'Handled by Qualified Chartered Accountants',
           'All ITR Types Covered (ITR 1 to 7)',
-          'Free re-filing if return is rejected',
-          'Audit assistance for businesses',
-          'Personalised advisory for tax saving',
-          'Support for visa/tender/employment ITRs'
+          'Free Re-filing if Return is Rejected',
+          'Audit Assistance for Businesses',
+          'Personalised Advisory for Tax Saving',
+          'Support for Visa, Tender & Employment ITRs'
         ],
         faqs: [
           {
@@ -185,11 +185,11 @@ const servicesData = {
         ],
         timeline: '2–4 working days (Urgent option available)',
         whyChooseUs: [
-          'Experienced CA team familiar with all notice types',
-          'Timely and compliant replies',
-          'Guidance on preventing future notices',
-          'Help with rectification, appeal, or revised filing if needed',
-          'Support until case is closed'
+          'Modern Design',
+          'Creative Design',
+          '24X7 User Support',
+          'Affordable Cost',
+          'Business Growth'
         ],
         faqs: [
           {
@@ -259,6 +259,13 @@ const servicesData = {
             dropdown: ['24Q', '26Q', '27Q', '26QB']
           }
         },
+        whoIsThisFor: [
+          'Estimated tax liability exceeds ₹10,000',
+          'Income from business, profession, capital gains, rent, or interest',
+          'Freelancers, consultants, or salaried with additional income',
+          'Income without TDS (e.g., crypto, dividend, foreign income)',
+          'Exemptions: Senior citizens (60+) without business income'
+        ],
         pricing: {
           title: 'Transparent Quarterly & Annual Pricing',
           plans: [
@@ -436,7 +443,7 @@ const servicesData = {
           ]
         },
         whoIsThisFor: [
-          "You're a salaried employee optimizing deductions (80C, 80D, HRA, etc.)",
+          "You're a salaried employee optimizing deductions ",
           'You’re a freelancer/consultant with multiple income sources',
           'You run a business/startup and want to reduce tax liability',
           'You’re planning for big financial events (property, investments, loans)',
@@ -538,7 +545,7 @@ const servicesData = {
           ]
         },
         whoIsThisFor: [
-          'Making foreign payments (supplier, freelancer, consultant, investor, etc.)',
+          'Making foreign payments (supplier, freelancer,  investor, etc.)',
           'Amount exceeds ₹5 lakh in a financial year (usually)',
           'Bank requests Form 15CA/CB before allowing remittance',
           'For Form 15CA: Declaration by remitter',
@@ -1055,7 +1062,7 @@ const servicesData = {
           ]
         },
         whoIsThisFor: [
-          'Businesses dealing in physical goods: manufacturing, trading, e-commerce',
+          'Businesses dealing in physical goods: manufacturing, trading',
           'Real-time stock monitoring or valuation needed',
           'GST-compatible inventory for returns & invoicing',
           'Require automation for reorder alerts and stockouts',
@@ -1780,8 +1787,8 @@ const servicesData = {
         whoIsThisFor: [
           'Employers or principal contractors engaging 20+ contract workers',
           'Subcontractors deploying labour at client sites',
-          'Projects involving construction, factories, infrastructure, or manpower outsourcing',
-          'Applicable under Contract Labour (Regulation and Abolition) Act, 1970'
+          'Projects involving construction, factories, or manpower outsourcing',
+          'Applicable under Contract Labour Act, 1970'
         ],
         pricing: {
           title: 'State-Wise Pricing with Expert Filing',
@@ -2914,7 +2921,7 @@ const servicesData = {
         },
         whoIsThisFor: [
           'You’re scaling fast and want to avoid financial blindspots',
-          'You need strong financial/process controls for funding, loans, or board reporting',
+          'You need strong financial controls for funding, loans, or board reporting',
           'You have multiple branches, verticals, or vendors',
           'You want independent review of your books, workflows, and internal controls',
           'You’re preparing for external/statutory audits or due diligence'
