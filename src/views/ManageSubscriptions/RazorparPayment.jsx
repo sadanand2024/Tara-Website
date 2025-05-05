@@ -1,23 +1,24 @@
 import React from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import Button from '@mui/material/Button';
 import Factory from 'utils/Factory';
 
 export default function RazorparPayment({ plan, contextId, onSuccess, onFailure, userId }) {
+  const navigate = useNavigate();
   const handlePayment = async () => {
-    console.log(contextId, plan.id);
     try {
       const orderRes = await Factory('post', '/user_management/create-order/', {
         context_id: contextId,
         plan_id: plan.id,
         added_by_id: userId
       });
-      console.log(orderRes.res);
       if (orderRes.res.status_cd === 0 && orderRes.res.data && orderRes.res.data.order_id) {
         openRazorpay(orderRes.res.data.order_id, orderRes.res.data.amount);
       } else {
         alert('Failed to create order. Please try again.');
         if (onFailure) onFailure();
       }
+      navigate('/app/subscriptions');
     } catch (err) {
       alert('Failed to create order. Please try again.');
       if (onFailure) onFailure();

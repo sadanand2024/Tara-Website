@@ -12,7 +12,9 @@ import {
   IconPigMoney,
   IconCreditCard,
   IconHeadset,
-  IconUsers
+  IconUsers,
+  IconLayoutRows,
+  IconFileInvoice
 } from '@tabler/icons-react';
 
 // constant
@@ -29,7 +31,10 @@ const icons = {
   IconPigMoney,
   IconCreditCard,
   IconHeadset,
-  IconUsers
+  IconUsers,
+  IconLayoutRows,
+  IconFileInvoice,
+  
 };
 
 // ==============================|| DASHBOARD MENU ITEMS ||============================== //
@@ -108,6 +113,7 @@ const dashboard = {
       type: 'item',
       url: '/app/invoice',
       icon: icons.IconReceipt2,
+
       breadcrumbs: false,
       caption: ''
     },
