@@ -1,4 +1,3 @@
-
 import { Container } from '@mui/material';
 import servicesData from 'data/servicesData';
 import React from 'react';
@@ -24,45 +23,31 @@ const ServicePage = () => {
     return <ErrorPage />;
   }
   return (
-    <Container maxWidth={true} sx={{mb:3}}>
+    <Container maxWidth={true} sx={{ mb: 3 }}>
       <Container sx={{ py: { xs: 4, md: 8 } }}>
         {/* Always render Hero if present */}
         {pageData.heroSection && <HeroSection data={pageData.heroSection} />}
 
         {(pageData.whoIsThisFor || pageData.relatedServices) && (
-          <WhoShouldFile
-            items={pageData.whoIsThisFor}
-            related={pageData.relatedServices}
-          />
+          <WhoShouldFile items={pageData.whoIsThisFor} related={pageData.relatedServices} />
         )}
         {/* {pageData.smartITRSelector && <SmartITRSelector data={pageData.smartITRSelector} />} */}
         {pageData.pricing && <PricingPlans data={pageData.pricing} />}
-        {pageData.whatsIncluded && (
-          <WhatsIncluded
-            items={pageData.whatsIncluded} />
-        )} 
+        {pageData.whatsIncluded && <WhatsIncluded items={pageData.whatsIncluded} />}
         {pageData.documentsRequired && <DocumentsRequired documents={pageData.documentsRequired} />}
 
-          {pageData.whyChooseUs && <WhyChooseUs reasons={pageData.whyChooseUs} />}
-        
+        {pageData.whyChooseUs && <WhyChooseUs reasons={pageData.whyChooseUs} />}
+
         {pageData.howItWorks && <HowItWorksStepper steps={pageData.howItWorks} />}
 
         {pageData.faqs && <FAQsSection faqs={pageData.faqs} />}
-      
-      
+
         {pageData.stickyFooterCta && <StickyFooterCTA data={pageData.stickyFooterCta} />}
-        
-        
-        
       </Container>
-      
+
       <FooterSection />
-      
     </Container>
   );
-
 };
 
-
 export default ServicePage;
- 

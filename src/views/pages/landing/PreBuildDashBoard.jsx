@@ -15,32 +15,16 @@ import { Carousel } from 'react-responsive-carousel';
 
 // project imports
 import { ThemeMode } from 'config';
+import image1 from 'assets/images/payrollimages/image1.png';
+import image2 from 'assets/images/payrollimages/image2.png';
+import image3 from 'assets/images/payrollimages/image3.png';
+import image4 from 'assets/images/payrollimages/image4.png';
 
+import invoiceimage1 from 'assets/images/invoiceImages/image1.png';
+import invoiceimage2 from 'assets/images/invoiceImages/image2.png';
+import invoiceimage3 from 'assets/images/invoiceImages/image3.png';
 // assets
 import { IconChevronRight, IconChevronLeft, IconLink } from '@tabler/icons-react';
-
-import SliderLight1 from 'assets/images/landing/pre-apps/slider-light-1.png';
-import SliderDark1 from 'assets/images/landing/pre-apps/slider-dark-1.png';
-import SliderLight2 from 'assets/images/landing/pre-apps/slider-light-2.png';
-import SliderDark2 from 'assets/images/landing/pre-apps/slider-dark-2.png';
-import SliderLight3 from 'assets/images/landing/pre-apps/slider-light-3.png';
-import SliderDark3 from 'assets/images/landing/pre-apps/slider-dark-3.png';
-import SliderLight4 from 'assets/images/landing/pre-apps/slider-light-4.png';
-import SliderDark4 from 'assets/images/landing/pre-apps/slider-dark-4.png';
-import SliderLight5 from 'assets/images/landing/pre-apps/slider-light-5.png';
-import SliderDark5 from 'assets/images/landing/pre-apps/slider-dark-5.png';
-import SliderLight6 from 'assets/images/landing/pre-apps/slider-light-6.png';
-import SliderDark6 from 'assets/images/landing/pre-apps/slider-dark-6.png';
-import SliderLight7 from 'assets/images/landing/pre-apps/slider-light-7.png';
-import SliderDark7 from 'assets/images/landing/pre-apps/slider-dark-7.png';
-import SliderLight8 from 'assets/images/landing/pre-apps/slider-light-8.png';
-import SliderDark8 from 'assets/images/landing/pre-apps/slider-dark-8.png';
-import SliderLight9 from 'assets/images/landing/pre-apps/slider-light-9.png';
-import SliderDark9 from 'assets/images/landing/pre-apps/slider-dark-9.png';
-import SliderLight10 from 'assets/images/landing/pre-apps/slider-light-10.png';
-import SliderDark10 from 'assets/images/landing/pre-apps/slider-dark-10.png';
-import SliderLight11 from 'assets/images/landing/pre-apps/slider-light-11.png';
-import SliderDark11 from 'assets/images/landing/pre-apps/slider-dark-11.png';
 
 // styles
 const Images = styled('img')({
@@ -174,12 +158,12 @@ export default function PreBuildDashBoard() {
           <Grid container spacing={1.5}>
             <Grid size={12}>
               <Typography variant="h2" sx={{ fontSize: { xs: '1.5rem', sm: '2.125rem' } }}>
-                Explore Conceptual Apps
+                Explore Our Products
               </Typography>
             </Grid>
             <Grid size={12}>
               <Typography variant="h4" sx={{ fontWeight: 400 }} align="center">
-                Berry has conceptual working apps like Chat, Inbox, E-commerce, Invoice, Kanban, and Calendar.
+                We have conceptual working apps like Payroll, Invoice, Accounting, and more.
               </Typography>
             </Grid>
           </Grid>
@@ -211,49 +195,12 @@ export default function PreBuildDashBoard() {
                 hasNext && <SampleNextArrow onClickHandler={onClickHandler} hasNext={hasNext} label={label} />
               }
             >
-              <Items
-                title="Blog Dashboard"
-                image={theme.palette.mode === ThemeMode.DARK ? SliderDark1 : SliderLight1}
-                link="/dashboard/blog"
-              />
-              <Items title="Calender" image={theme.palette.mode === ThemeMode.DARK ? SliderDark2 : SliderLight2} link="/apps/calendar" />
-              <Items title="Chat App" image={theme.palette.mode === ThemeMode.DARK ? SliderDark3 : SliderLight3} link="/apps/chat" />
-              <Items
-                title="User Contacts"
-                image={theme.palette.mode === ThemeMode.DARK ? SliderDark4 : SliderLight4}
-                link="/apps/contact/c-card"
-              />
-              <Items
-                title="CRM Dashboard"
-                image={theme.palette.mode === ThemeMode.DARK ? SliderDark5 : SliderLight5}
-                link="/dashboard/crm"
-              />
-              <Items
-                title="Customers"
-                image={theme.palette.mode === ThemeMode.DARK ? SliderDark6 : SliderLight6}
-                link="/apps/customer/customer-list"
-              />
-              <Items
-                title="E-commerce"
-                image={theme.palette.mode === ThemeMode.DARK ? SliderDark7 : SliderLight7}
-                link="/apps/e-commerce/products"
-              />
-              <Items
-                title="Invoice Management"
-                image={theme.palette.mode === ThemeMode.DARK ? SliderDark8 : SliderLight8}
-                link="/dashboard/invoice"
-              />
-              <Items
-                title="Kanban"
-                image={theme.palette.mode === ThemeMode.DARK ? SliderDark9 : SliderLight9}
-                link="/apps/crm/lead-management/lm-overview"
-              />
-              <Items title="Mailbox" image={theme.palette.mode === ThemeMode.DARK ? SliderDark10 : SliderLight10} link="/apps/mail" />
-              <Items
-                title="Social Profile"
-                image={theme.palette.mode === ThemeMode.DARK ? SliderDark11 : SliderLight11}
-                link="/apps/user/social-profile/posts"
-              />
+              <Items image={theme.palette.mode === ThemeMode.DARK ? image1 : image2} />
+              <Items image={theme.palette.mode === ThemeMode.DARK ? image3 : image4} />
+              <Items image={theme.palette.mode === ThemeMode.DARK ? image3 : image4} />
+              <Items image={theme.palette.mode === ThemeMode.DARK ? invoiceimage1 : invoiceimage2} />
+              <Items image={theme.palette.mode === ThemeMode.DARK ? invoiceimage3 : invoiceimage2} />
+              <Items image={theme.palette.mode === ThemeMode.DARK ? invoiceimage3 : invoiceimage2} />
             </Carousel>
           </Box>
         </Grid>

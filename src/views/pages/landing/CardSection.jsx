@@ -81,7 +81,7 @@ export default function CardSection() {
       color: 'warning.dark'
     },
     {
-      title: 'Invoicing Engine',
+      title: 'Invoicing Generation',
       count: 189,
       icon: <ReceiptLongIcon sx={{ fontSize: '2.5rem' }} />,
       bgcolor: 'primary.200',
