@@ -280,7 +280,7 @@ export default function Price1() {
               scale = 1;
               zIndex = 2;
             }
-            return (
+        return (
               <Box
                 key={plan.id}
                 sx={{
@@ -321,9 +321,9 @@ export default function Price1() {
                     Current Plan
                   </Box>
                 )}
-                <MainCard
-                  boxShadow
-                  sx={{
+            <MainCard
+              boxShadow
+              sx={{
                     pt: 1,
                     borderTop: `6px solid ${getRandomColor(planIndex)}`,
                     transition: 'box-shadow 0.3s, border 0.3s',
@@ -331,67 +331,67 @@ export default function Price1() {
                     '&:hover': {
                       boxShadow: theme.shadows[8]
                     }
-                  }}
-                >
-                  <Grid container spacing={gridSpacing} sx={{ textAlign: 'center' }}>
-                    <Grid size={12}>
-                      <Box
-                        sx={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          borderRadius: '50%',
+              }}
+            >
+              <Grid container spacing={gridSpacing} sx={{ textAlign: 'center' }}>
+                <Grid size={12}>
+                  <Box
+                    sx={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      borderRadius: '50%',
                           width: 60,
                           height: 60,
-                          bgcolor: theme.palette.mode === ThemeMode.DARK ? 'dark.800' : 'primary.light',
-                          color: 'primary.main',
-                          '& > svg': {
-                            width: 35,
-                            height: 35
-                          }
-                        }}
-                      >
+                      bgcolor: theme.palette.mode === ThemeMode.DARK ? 'dark.800' : 'primary.light',
+                      color: 'primary.main',
+                      '& > svg': {
+                        width: 35,
+                        height: 35
+                      }
+                    }}
+                  >
                         {getPlanIcon(planIndex)}
-                      </Box>
-                    </Grid>
-                    <Grid size={12}>
-                      <Typography
-                        variant="h6"
-                        sx={{
-                          fontSize: '1.5625rem',
-                          fontWeight: 500,
-                          position: 'relative',
+                  </Box>
+                </Grid>
+                <Grid size={12}>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontSize: '1.5625rem',
+                      fontWeight: 500,
+                      position: 'relative',
                           mb: 0.5,
-                          '&:after': {
-                            content: '""',
-                            position: 'absolute',
+                      '&:after': {
+                        content: '""',
+                        position: 'absolute',
                             bottom: -10,
-                            left: 'calc(50% - 25px)',
-                            width: 50,
-                            height: 4,
-                            bgcolor: 'primary.main',
-                            borderRadius: '3px'
-                          }
-                        }}
-                      >
+                        left: 'calc(50% - 25px)',
+                        width: 50,
+                        height: 4,
+                        bgcolor: 'primary.main',
+                        borderRadius: '3px'
+                      }
+                    }}
+                  >
                         {plan.name}
-                      </Typography>
-                    </Grid>
-                    <Grid size={12}>
-                      <Typography variant="body2">{plan.description}</Typography>
-                    </Grid>
-                    <Grid size={12}>
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          fontSize: '2.1875rem',
-                          fontWeight: 700,
-                          '& > span': {
-                            fontSize: '1.25rem',
-                            fontWeight: 500
-                          }
-                        }}
-                      >
+                  </Typography>
+                </Grid>
+                <Grid size={12}>
+                  <Typography variant="body2">{plan.description}</Typography>
+                </Grid>
+                <Grid size={12}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontSize: '2.1875rem',
+                      fontWeight: 700,
+                      '& > span': {
+                        fontSize: '1.25rem',
+                        fontWeight: 500
+                      }
+                    }}
+                  >
                         <sup>₹</sup>
                         {plan.plan_type === 'annually' ? (
                           <>
@@ -408,23 +408,23 @@ export default function Price1() {
                             <span>/ {plan.plan_type === 'monthly' ? 'Month' : 'Trial'}</span>
                           </>
                         )}
-                      </Typography>
-                    </Grid>
-                    <Grid size={12}>
-                      <List
-                        sx={{
-                          m: 0,
-                          p: 0,
-                          '&> li': {
-                            px: 0,
-                            py: 0.625,
-                            '& svg': {
-                              fill: theme.palette.success.dark
-                            }
-                          }
-                        }}
-                        component="ul"
-                      >
+                  </Typography>
+                </Grid>
+                <Grid size={12}>
+                  <List
+                    sx={{
+                      m: 0,
+                      p: 0,
+                      '&> li': {
+                        px: 0,
+                        py: 0.625,
+                        '& svg': {
+                          fill: theme.palette.success.dark
+                        }
+                      }
+                    }}
+                    component="ul"
+                  >
                         {Object.entries(plan.features_enabled || {}).map(([key, value]) => {
                           if (key === 'features' && typeof value === 'object') {
                             // Nested features
@@ -469,7 +469,7 @@ export default function Price1() {
                             return (
                               <React.Fragment key={key}>
                                 <ListItem>
-                                  <ListItemIcon>
+                          <ListItemIcon>
                                     {typeof value === 'boolean' ? (
                                       value ? (
                                         <CheckTwoToneIcon color="success" sx={{ fontSize: '1.3rem' }} />
@@ -480,9 +480,9 @@ export default function Price1() {
                                         />
                                       )
                                     ) : (
-                                      <CheckTwoToneIcon sx={{ fontSize: '1.3rem' }} />
+                            <CheckTwoToneIcon sx={{ fontSize: '1.3rem' }} />
                                     )}
-                                  </ListItemIcon>
+                          </ListItemIcon>
                                   <ListItemText
                                     primary={
                                       typeof value === 'boolean' ? (
@@ -495,15 +495,15 @@ export default function Price1() {
                                       )
                                     }
                                   />
-                                </ListItem>
-                                <Divider />
-                              </React.Fragment>
+                        </ListItem>
+                        <Divider />
+                      </React.Fragment>
                             );
                           }
                         })}
-                      </List>
-                    </Grid>
-                    <Grid size={12}>
+                  </List>
+                </Grid>
+                <Grid size={12}>
                       <RazorparPayment
                         contextId={user.active_context.id}
                         userId={user.user.id}
@@ -517,12 +517,12 @@ export default function Price1() {
                           console.log('Payment Cancelled');
                         }}
                       />
-                    </Grid>
-                  </Grid>
-                </MainCard>
+                </Grid>
+              </Grid>
+            </MainCard>
               </Box>
-            );
-          })}
+        );
+      })}
         </Box>
         {/* Right Arrow */}
         <IconButton

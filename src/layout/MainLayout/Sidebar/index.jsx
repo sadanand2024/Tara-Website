@@ -21,6 +21,14 @@ import { drawerWidth } from 'store/constant';
 
 import { handlerDrawerOpen, useGetMenuMaster } from 'api/menu';
 
+const hideScrollbarSx = {
+  scrollbarWidth: 'none', // Firefox
+  '&::-webkit-scrollbar': { display: 'none' }, // Chrome, Safari, Opera
+  msOverflowStyle: 'none', // IE and Edge
+  overflowY: 'auto',
+  overflowX: 'hidden'
+};
+
 // ==============================|| SIDEBAR DRAWER ||============================== //
 
 function Sidebar() {
@@ -58,14 +66,18 @@ function Sidebar() {
     return (
       <>
         {downMD ? (
-          <Box sx={drawerSX}>
+          <Box sx={{ ...drawerSX, ...hideScrollbarSx }}>
             <MenuList />
             {isVerticalOpen && drawerContent}
           </Box>
         ) : (
-          <PerfectScrollbar style={{ height: 'calc(100vh - 88px)', ...drawerSX }}>
-            <MenuList />
-            {isVerticalOpen && drawerContent}
+          <PerfectScrollbar style={{ height: 'calc(100vh - 88px)', ...drawerSX }}
+            options={{ suppressScrollX: true }}
+          >
+            <Box sx={hideScrollbarSx}>
+              <MenuList />
+              {isVerticalOpen && drawerContent}
+            </Box>
           </PerfectScrollbar>
         )}
       </>
