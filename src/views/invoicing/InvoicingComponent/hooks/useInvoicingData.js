@@ -80,7 +80,7 @@ export const useInvoicingData = () => {
       dispatch(
         openSnackbar({
           open: true,
-          message: JSON.stringify(res.data.data.error),
+          message: JSON.stringify(res.data.error),
           variant: 'alert',
           alert: { color: 'error' },
           close: false

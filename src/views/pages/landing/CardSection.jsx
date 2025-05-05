@@ -11,10 +11,16 @@ import { ThemeMode } from 'config';
 import SubCard from 'ui-component/cards/SubCard';
 import Avatar from 'ui-component/extended/Avatar';
 
+// third party
+import CountUp from 'react-countup';
+
 // assets
-import GridViewIcon from '@mui/icons-material/GridView';
-import WidgetsOutlinedIcon from '@mui/icons-material/WidgetsOutlined';
-import WebOutlinedIcon from '@mui/icons-material/WebOutlined';
+import PaymentsIcon from '@mui/icons-material/Payments';
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
+import BusinessIcon from '@mui/icons-material/Business';
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
+import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
+import CalculateIcon from '@mui/icons-material/Calculate';
 
 // =============================|| LANDING - CARD SECTION ||============================= //
 
@@ -57,23 +63,44 @@ export default function CardSection() {
 
   const landingCards = [
     {
-      title: 'Components',
-      count: '150+',
-      icon: <GridViewIcon sx={{ fontSize: '2.25rem', transform: 'rotate(45deg)' }} />,
+      title: 'Payroll Automation',
+      count: 150,
+      icon: <PaymentsIcon sx={{ fontSize: '2.25rem', transform: 'rotate(45deg)' }} />,
       bgcolor: 'warning.main',
       color: 'warning.dark'
     },
     {
-      title: 'Application',
-      count: '11+',
-      icon: <WidgetsOutlinedIcon sx={{ fontSize: '2.25rem' }} />,
+      title: 'Invoicing Engine',
+      count: 11,
+      icon: <ReceiptLongIcon sx={{ fontSize: '2.25rem' }} />,
       bgcolor: 'primary.200',
       color: 'primary.main'
     },
     {
-      title: 'Pages',
-      count: '170+',
-      icon: <WebOutlinedIcon sx={{ fontSize: '2.25rem' }} />,
+      title: 'Business Services',
+      count: 170,
+      icon: <BusinessIcon sx={{ fontSize: '2.25rem' }} />,
+      bgcolor: 'secondary.200',
+      color: 'secondary.main'
+    },
+    {
+      title: 'Gst Filings',
+      count: 150,
+      icon: <AccountBalanceIcon sx={{ fontSize: '2.25rem', transform: 'rotate(45deg)' }} />,
+      bgcolor: 'warning.main',
+      color: 'warning.dark'
+    },
+    {
+      title: 'Fix My books',
+      count: 11,
+      icon: <AutoFixHighIcon sx={{ fontSize: '2.25rem' }} />,
+      bgcolor: 'primary.200',
+      color: 'primary.main'
+    },
+    {
+      title: 'Advance Tax',
+      count: 170,
+      icon: <CalculateIcon sx={{ fontSize: '2.25rem' }} />,
       bgcolor: 'secondary.200',
       color: 'secondary.main'
     }
@@ -110,7 +137,7 @@ export default function CardSection() {
                         color: theme.palette.mode === ThemeMode.DARK ? 'dark.900' : 'grey.900'
                       }}
                     >
-                      {card.count}
+                      <CountUp end={card.count} duration={2.5} suffix="+" enableScrollSpy scrollSpyOnce />
                     </Typography>
                     <Typography
                       variant="h5"

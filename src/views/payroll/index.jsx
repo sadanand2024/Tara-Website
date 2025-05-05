@@ -117,7 +117,7 @@ const PayrollDashboard = () => {
         setMonthWiseData(null); // Clear the data to hide the component
       } else {
         // setMonthWiseData(res.data);
-        detail_employee_payroll_salary(selectedMonth);
+        // detail_employee_payroll_salary(selectedMonth);
       }
     } else {
       dispatch(

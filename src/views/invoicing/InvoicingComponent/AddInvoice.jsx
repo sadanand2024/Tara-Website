@@ -548,7 +548,6 @@ const AddItem = ({
                 let formdata = new FormData();
                 formdata.append('gstin', newgstin || 'NA');
                 const { res } = await Factory('put', url, formdata);
-
                 if (res.status_cd === 0) {
                   getInvoiceFormat();
                 } else {

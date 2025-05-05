@@ -89,7 +89,7 @@ const WhatsIncluded = ({ title = "What's Included", items }) => {
                       left: 0,
                       right: 0,
                       bottom: 0,
-                      background: iconList[idx].gradient,
+                      background: iconList[idx % iconList.length].gradient,
                       opacity: 0.05,
                       transition: 'opacity 0.3s ease'
                     }}
@@ -103,13 +103,13 @@ const WhatsIncluded = ({ title = "What's Included", items }) => {
                       width: 50,
                       height: 50,
                       borderRadius: '50%',
-                      background: iconList[idx].gradient,
+                      background: iconList[idx % iconList.length].gradient,
                       mb: 2,
                       transition: 'transform 0.3s ease',
                       boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
                     }}
                   >
-                    {React.cloneElement(iconList[idx].icon, {
+                    {React.cloneElement(iconList[idx % iconList.length].icon, {
                       sx: {
                         fontSize: 28,
                         color: 'white'

@@ -270,7 +270,7 @@ export default function TabOne({ businessDetails = {}, postType, handleNext }) {
                           startIcon={<IconPlus size={16} />}
                           onClick={() => {
                             if (businessDetails.id) {
-                              navigate(`/apps/business-settings?BID=${businessDetails.id}`);
+                              navigate(`/apps/business-settings?BID=${businessDetails.id}&tabvalue=3`);
                             }
                           }}
                           sx={{ ml: 2 }}

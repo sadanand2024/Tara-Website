@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import React from 'react';
 // material-ui
@@ -17,7 +18,7 @@ import MainCard from 'ui-component/cards/MainCard';
 import AnimateButton from 'ui-component/extended/AnimateButton';
 import { gridSpacing } from 'store/constant';
 import { useSelector } from 'store';
-
+import { useSearchParams } from 'react-router-dom';
 // assets
 import ApartmentTwoToneIcon from '@mui/icons-material/ApartmentTwoTone'; // Business Profile
 import GroupsTwoToneIcon from '@mui/icons-material/GroupsTwoTone'; // Key Managerial Personnel
@@ -109,6 +110,14 @@ export default function Profile2() {
   const { mode, borderRadius } = useConfig();
   const [value, setValue] = React.useState(0);
   const user = useSelector((state) => state).accountReducer.user;
+  const [searchParams] = useSearchParams();
+  const tabvalue = searchParams.get('tabvalue');
+
+  useEffect(() => {
+    if (tabvalue) {
+      setValue(Number(tabvalue));
+    }
+  }, [tabvalue]);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);

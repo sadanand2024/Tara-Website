@@ -16,6 +16,7 @@ import {
   IconShoppingCart,
   IconTools
 } from '@tabler/icons-react';
+import { IconCreditCard, IconChartLine, IconShieldCheck } from '@tabler/icons-react';
 
 const productsData = {
   payroll: {
@@ -167,7 +168,7 @@ const productsData = {
     plans: [
       {
         title: 'Essentials',
-        icon: '🟢',
+        icon: IconCreditCard,
         description: 'For small teams',
         price: '399',
         permission: [0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 14, 15, 16, 17, 18, 19],
@@ -196,7 +197,7 @@ const productsData = {
       },
       {
         title: 'Pro Edge',
-        icon: '🔵',
+        icon: IconChartLine,
         description: 'For growing businesses',
         price: '999',
         permission: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
@@ -225,7 +226,7 @@ const productsData = {
       },
       {
         title: 'Ultimate Control',
-        icon: '🟣',
+        icon: IconShieldCheck,
         description: 'For large enterprises',
         price: '1999',
         permission: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
@@ -424,7 +425,7 @@ const productsData = {
     plans: [
       {
         title: 'Essentials',
-        icon: '🟢',
+        icon: IconCreditCard,
         description: 'For individuals and small businesses',
         price: '199',
         permission: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
@@ -451,7 +452,7 @@ const productsData = {
       },
       {
         title: 'Pro Edge',
-        icon: '🔵',
+        icon: IconChartLine,
         description: 'For growing businesses',
         price: '499',
         permission: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
@@ -480,7 +481,7 @@ const productsData = {
       },
       {
         title: 'Ultimate Control',
-        icon: '🟣',
+        icon: IconShieldCheck,
         description: 'For large enterprises',
         price: '899',
         permission: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],

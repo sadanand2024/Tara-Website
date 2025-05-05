@@ -110,7 +110,15 @@ const PayrollSetup = () => {
       } else if (payrollDetails?.payroll_id) {
         navigate(`${routeBase}?payrollid=${payrollDetails.payroll_id}`);
       } else {
-        // showSnackbar('Payroll ID not available', 'error');
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'Payroll ID not available. Please complete the previous steps first.',
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
       }
     },
     [navigate, payrollDetails, businessId]
@@ -123,7 +131,18 @@ const PayrollSetup = () => {
 
   // Handler for marking Statutory Components as complete
   const handleMarkStatutoryComplete = async () => {
-    if (!payrollDetails?.payroll_id) return;
+    if (!payrollDetails?.payroll_id) {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Payroll ID not available. Please complete the previous steps first.',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
+      return;
+    }
     setMarkingComplete(true);
     try {
       // Example API endpoint, adjust as needed
@@ -184,7 +203,7 @@ const PayrollSetup = () => {
         <Typography variant="h3" textAlign="center" sx={{ mb: 1 }}>
           Welcome {user.active_context.name}
         </Typography>
-        <Typography variant="subtitle1" textAlign="center" sx={{ color: 'text.disabled' }}>
+        <Typography variant="h4" textAlign="center" sx={{ color: 'text.disabled' }}>
           Set up your organization before starting payroll
         </Typography>
       </Box>

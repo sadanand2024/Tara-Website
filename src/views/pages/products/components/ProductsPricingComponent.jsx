@@ -65,7 +65,20 @@ export default function PricingComponent({ plans, planList }) {
       }}
       onClick={() => setSelectedPlanIndex(index)}
     >
-      <Box sx={{ textAlign: 'center', mb: 2 }}>{plan.icon}</Box>
+      <Box sx={{ textAlign: 'center', mb: 2 }}>
+        {plan.icon && (
+          <plan.icon
+            size={60}
+            style={{
+              color: plan.color || theme.palette.primary.main,
+              backgroundColor: plan.bgColor || 'transparent',
+              padding: '8px',
+              borderRadius: '50%'
+            }}
+          />
+        )}
+      </Box>
+
       <Typography variant="h3" fontWeight={700} gutterBottom textAlign="center">
         {plan.title}
       </Typography>
