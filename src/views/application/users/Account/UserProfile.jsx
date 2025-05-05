@@ -146,7 +146,6 @@ export default function UserProfile({ user, pageChange, value }) {
           <TextField
             fullWidth
             label="First Name"
-            size="small"
             name="first_name"
             value={formik.values.first_name}
             onChange={formik.handleChange}
@@ -160,7 +159,6 @@ export default function UserProfile({ user, pageChange, value }) {
           <TextField
             fullWidth
             label="Last Name"
-            size="small"
             name="last_name"
             value={formik.values.last_name}
             onChange={formik.handleChange}
@@ -174,7 +172,6 @@ export default function UserProfile({ user, pageChange, value }) {
           <TextField
             fullWidth
             label="Email"
-            size="small"
             name="email"
             disabled={true}
             value={formik.values.email}
@@ -189,7 +186,6 @@ export default function UserProfile({ user, pageChange, value }) {
           <TextField
             fullWidth
             label="Mobile"
-            size="small"
             name="mobile_number"
             value={formik.values.mobile_number}
             onChange={formik.handleChange}
@@ -205,10 +201,9 @@ export default function UserProfile({ user, pageChange, value }) {
           type="submit"
           variant="contained"
           color="primary"
-          size="medium"
           onClick={() => {
             formik.handleSubmit();
-            pageChange(1 + value);
+            pageChange('', 1 + value);
           }}
         >
           Save & Continue

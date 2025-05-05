@@ -89,7 +89,15 @@ function MenuCard() {
       }}
     >
       <Box sx={{ p: 2 }}>
-        <List disablePadding sx={{ pb: 1 }}>
+        <List disablePadding sx={{ pb: 1,
+          maxHeight: 120,
+          minHeight: 120,
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          scrollbarWidth: 'none', // Firefox
+          '&::-webkit-scrollbar': { display: 'none' }, // Chrome, Safari, Opera
+          msOverflowStyle: 'none' // IE and Edge
+        }}>
           <ListItem alignItems="flex-start" disableGutters disablePadding>
             <ListItemAvatar sx={{ mt: 0 }}>
               <Avatar

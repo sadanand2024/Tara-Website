@@ -13,7 +13,7 @@ import { useDispatch as useReduxDispatch } from 'react-redux';
 import { storeUser } from 'store/slices/account'; // redux slice
 
 export default function Dashboard() {
-  const reduxDispatch = useReduxDispatch(); // ✅ Redux dispatcher 
+  const reduxDispatch = useReduxDispatch(); // ✅ Redux dispatcher
   const snackbar = useSnackbar();
   const user = useSelector((state) => state).accountReducer.user;
   const [accDialog, setAccDialog] = useState(false);
@@ -21,7 +21,6 @@ export default function Dashboard() {
   const [businessKYCDialog, setBusinessKYCDialog] = useState(false);
   const [selected, setSelected] = useState(null);
   const navigate = useNavigate();
-
 
   function onContinue(selected) {
     let user_id = user.user.id;
@@ -119,8 +118,8 @@ const ChooseAccountDialog = ({ open, onContinue }) => {
       open={open}
       PaperProps={{
         sx: {
-          width: { xs: '100%', md: '28vw' },
-          maxWidth: { xs: '100%', md: '28vw' }
+          width: { xs: '100%', md: '32vw', lg: '28vw' },
+          maxWidth: { xs: '100%', md: '32vw', lg: '28vw' }
         }
       }}
       fullWidth

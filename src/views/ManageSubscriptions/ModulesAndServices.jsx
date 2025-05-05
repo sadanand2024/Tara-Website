@@ -216,8 +216,6 @@ const ModulesAndServices = () => {
   }, [searchParams]);
 
   useEffect(() => {
-    //MODULES ALREADY SUBSCRIBED
-    // user.module_subscriptions.map
     const getModules = async () => {
       const response = await Factory('get', `/user_management/modules/list?context_type=${user.active_context.context_type}`);
       if (response.res.status_cd === 0) {
@@ -255,7 +253,7 @@ const ModulesAndServices = () => {
     //   }
     // };
     // getServices();
-  }, []);
+  }, [user.active_context]);
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);

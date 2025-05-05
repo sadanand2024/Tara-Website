@@ -1,9 +1,12 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
 import Badge from '@mui/material/Badge';
 import StarIcon from '@mui/icons-material/Star';
+import { Avatar, Chip } from '@mui/material';
+import PaymentIcon from '@mui/icons-material/Payment';
+import AutorenewIcon from '@mui/icons-material/Autorenew';
 
 // material-ui
 import {
@@ -11,7 +14,6 @@ import {
   Button,
   Card,
   CardContent,
-  Chip,
   Divider,
   Grid,
   Stack,
@@ -35,8 +37,15 @@ import UpgradeIcon from '@mui/icons-material/Upgrade';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import { useSelector } from 'react-redux';
 import NoSubscriptionsIcon from '@mui/icons-material/WorkspacePremium';
+import Factory from '../../utils/Factory';
 
-const SubscriptionCard = ({ module, planName, price, expiry, trial }) => {
+const getStatusColor = (status) => {
+  if (status === 'active') return 'success';
+  if (status === 'trial') return 'warning';
+  return 'error';
+};
+
+const SubscriptionCard = ({ module, planName, price, expiry, trial, status, autoRenew, description }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   return (
@@ -44,92 +53,114 @@ const SubscriptionCard = ({ module, planName, price, expiry, trial }) => {
       sx={{
         height: '100%',
         position: 'relative',
-        transition: 'all 0.3s ease-in-out',
+        transition: 'all 0.3s',
         overflow: 'visible',
-        '&:hover': {
-          transform: 'translateY(-4px)',
-          boxShadow: (theme) => theme.shadows[8]
-        },
-        background: (theme) => `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.grey[50]} 100%)`,
+        boxShadow: 3,
+        borderRadius: 3,
         border: '1px solid',
-        borderColor: 'divider'
+        borderColor: 'divider',
+        '&:hover': {
+          boxShadow: 8,
+          transform: 'translateY(-4px) scale(1.02)'
+        }
       }}
     >
-      <CardContent sx={{ p: { xs: 1.5, sm: 2, md: 2.5 } }}>
-        <Stack spacing={{ xs: 1.5, sm: 2, md: 2.5 }}>
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: { xs: 'column', sm: 'row' },
-              gap: { xs: 1, sm: 0 },
-              justifyContent: 'space-between',
-              alignItems: { xs: 'flex-start', sm: 'flex-start' }
-            }}
-          >
-            <Typography variant={isMobile ? 'h5' : 'h4'} sx={{ fontWeight: 600 }}>
-              {planName}
-            </Typography>
-            {!trial ? (
-              <Box sx={{ textAlign: { xs: 'left', sm: 'right' } }}>
-                <Typography variant={isMobile ? 'h5' : 'h4'} color="primary.main" sx={{ fontWeight: 600 }}>
-                  ₹ {price}
+      {/* Status Chip at top right */}
+      <Chip
+        label={status === 'trial' ? 'Trial' : status.charAt(0).toUpperCase() + status.slice(1)}
+        color={getStatusColor(status)}
+        size="small"
+        sx={{
+          position: 'absolute',
+          top: 16,
+          right: 16,
+          fontWeight: 600,
+          zIndex: 2
+        }}
+      />
+      <CardContent>
+        <Stack spacing={2}>
+          <Stack direction="row" alignItems="center" spacing={2}>
+            <Avatar sx={{ bgcolor: 'primary.main', color: 'white' }}>
+              <PaymentIcon />
+            </Avatar>
+            <Box>
+              <Typography variant="h6" fontWeight={700}>
+                {planName}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {module}
+              </Typography>
+              {/* Description below module name */}
+              {description && (
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                  {description}
                 </Typography>
-                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
-                  per month
-                </Typography>
-              </Box>
-            ) : (
-              <Box sx={{ textAlign: { xs: 'left', sm: 'right' } }}>
-                <Typography variant={isMobile ? 'h5' : 'h4'} color="primary.main" sx={{ fontWeight: 600 }}>
-                  TRIAL PLAN
-                </Typography>
-                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
-                  &nbsp;
-                </Typography>
-              </Box>
-            )}
-          </Box>
-          <Box
-            sx={{
-              p: 1.5,
-              bgcolor: 'background.neutral',
-              borderRadius: 1,
-              border: '1px solid',
-              borderColor: 'divider'
-            }}
-          >
-            <Typography
-              variant="body2"
-              color="text.secondary"
+              )}
+            </Box>
+          </Stack>
+          {/* Valid till and pricing on the same line */}
+          <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1}>
+            <Chip
+              label={`Valid till: ${expiry}`}
+              color={status === 'active' ? 'success' : status === 'trial' ? 'warning' : 'error'}
+              size="small"
+              sx={{ fontWeight: 500 }}
+            />
+            {/* <Box
               sx={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: 1
+                bgcolor: 'grey.100',
+                borderRadius: 1,
+                px: 1.5,
+                py: 0.5,
+                minWidth: 90,
+                justifyContent: 'center',
+                fontWeight: 600
+              }}
+            > */}
+            <Stack
+              direction="row"
+              alignItems="center"
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                bgcolor: 'secondary.light',
+                color: 'secondary.main',
+                borderRadius: 8,
+                minWidth: 90,
+                justifyContent: 'center',
+                fontWeight: 500
               }}
             >
-              <Box
-                component="span"
-                sx={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: '50%',
-                  bgcolor: 'warning.main',
-                  display: 'inline-block'
-                }}
-              />
-              {expiry}
-            </Typography>
-          </Box>
-          <Stack direction="row" spacing={1}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 600, fontSize: '0.9rem', color: 'secondary.main', mr: 0.5 }}>
+                ₹{price}
+              </Typography>
+              <Typography variant="caption" sx={{ fontWeight: 400, color: 'secondary.main' }}>
+                / Month
+              </Typography>
+              {autoRenew === 'yes' && (
+                <Chip
+                  icon={<AutorenewIcon fontSize="small" />}
+                  label="Auto-renew"
+                  color="info"
+                  size="small"
+                  sx={{ ml: 1, height: 22, fontSize: '0.75rem', fontWeight: 500 }}
+                />
+              )}
+              {/* </Box> */}
+            </Stack>
+          </Stack>
+          <Stack direction={{ xs: 'column', sm: 'row', justifyContent: 'space-between' }} spacing={1}>
             <Button
               variant="contained"
               size="small"
+              fullWidth={isMobile}
               startIcon={<UpgradeIcon />}
               sx={{
-                background: (theme) => `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-                '&:hover': {
-                  background: (theme) => `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.darker} 100%)`
-                }
+                fontWeight: 600,
+                background: (theme) => `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`
               }}
             >
               Upgrade/Change Plan
@@ -137,13 +168,11 @@ const SubscriptionCard = ({ module, planName, price, expiry, trial }) => {
             <Button
               variant="outlined"
               size="small"
+              fullWidth={isMobile}
               startIcon={<VisibilityIcon />}
               sx={{
-                borderColor: 'primary.main',
-                '&:hover': {
-                  borderColor: 'primary.dark',
-                  bgcolor: 'primary.lighter'
-                }
+                fontWeight: 600,
+                borderColor: 'primary.main'
               }}
             >
               View Usage
@@ -197,7 +226,7 @@ const EmptySubscriptions = () => {
           }
         }}
       >
-        Browse Modules
+        Browse Modules & Services
       </Button>
     </Box>
   );
@@ -207,16 +236,38 @@ const ManageSubscriptions = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(theme.breakpoints.down('md'));
+  const [paymentHistory, setPaymentHistory] = useState([]);
+  const [moduleSubscriptions, setModuleSubscriptions] = useState([]);
+  const [servicesPurchased, setServicesPurchased] = useState([]);
   const navigate = useNavigate();
   const user = useSelector((state) => state).accountReducer.user;
 
-  // useEffect(() => {
-  //   const getPaymentHistory = async () => {
-  //     const response = await axios.get(`${process.env.REACT_APP_API_URL}/payment-history`);
-  //     console.log(response);
-  //   };
-  //   getPaymentHistory();
-  // }, []);
+  useEffect(() => {
+    const getPaymentHistory = async () => {
+      const response = await Factory('get', `/user_management/payment-history?context_id=${user.active_context.id}`);
+      console.log(response.res.data);
+      if (response.res.status_cd === 0) {
+        setPaymentHistory([...response.res.data.module_payments, ...response.res.data.service_payments]);
+      }
+    };
+    getPaymentHistory();
+
+    const getModuleSubscriptions = async () => {
+      const response = await Factory('get', `/user_management/context-subscriptions/${user.active_context.id}/`);
+      if (response.res.status_cd === 0) {
+        setModuleSubscriptions(response.res.data.subscriptions);
+      }
+    };
+    getModuleSubscriptions();
+
+    const getServicesPurchased = async () => {
+      const response = await Factory('get', `/user_management/context-service-requests/${user.active_context.id}/`);
+      if (response.res.status_cd === 0) {
+        setServicesPurchased(response.res.data);
+      }
+    };
+    getServicesPurchased();
+  }, [user.active_context]);
 
   return (
     <Stack spacing={{ xs: 2, sm: 3, md: 4 }}>
@@ -271,7 +322,7 @@ const ManageSubscriptions = () => {
           >
             Buy a Service
           </Button>
-          <Button
+          {/* <Button
             fullWidth={isMobile}
             variant="outlined"
             startIcon={<VisibilityIcon />}
@@ -285,7 +336,7 @@ const ManageSubscriptions = () => {
             }}
           >
             View Package/Suite
-          </Button>
+          </Button> */}
         </Stack>
       </Box>
 
@@ -311,16 +362,19 @@ const ManageSubscriptions = () => {
         >
           Active Subscriptions
         </Typography>
-        {user.module_subscriptions && user.module_subscriptions.length > 0 ? (
+        {moduleSubscriptions && moduleSubscriptions.length > 0 ? (
           <Grid container spacing={{ xs: 2, sm: 3 }}>
-            {user.module_subscriptions.map((subscription, index) => (
-              <Grid item xs={12} md={4} key={index}>
+            {moduleSubscriptions.map((subscription) => (
+              <Grid item xs={12} md={4} lg={3} key={subscription.id}>
                 <SubscriptionCard
-                  module={subscription.module_name}
-                  planName={subscription.plan_name}
-                  price={subscription.price || '0'}
-                  expiry={subscription.expiry}
+                  module={subscription.module.name}
+                  planName={subscription.plan.name}
+                  price={subscription.plan.price}
+                  expiry={subscription.end_date ? new Date(subscription.end_date).toLocaleDateString() : ''}
                   trial={subscription.status === 'trial'}
+                  status={subscription.status}
+                  autoRenew={subscription.auto_renew}
+                  description={subscription.plan.description || subscription.module.description}
                 />
               </Grid>
             ))}
@@ -542,172 +596,52 @@ const ManageSubscriptions = () => {
             <TableHead>
               <TableRow>
                 <TableCell>Date</TableCell>
-                <TableCell>Description</TableCell>
+                <TableCell>Plan</TableCell>
                 <TableCell>Amount</TableCell>
                 <TableCell>Status</TableCell>
-                <TableCell align="right">
-                  <Box sx={{ display: { xs: 'none', sm: 'block' } }}>Actions</Box>
-                  <Box sx={{ display: { xs: 'block', sm: 'none' } }}>Act.</Box>
-                </TableCell>
+                <TableCell>Method</TableCell>
+                <TableCell>Order ID</TableCell>
+                <TableCell>Payment ID</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              <TableRow>
-                <TableCell>05-Apr-2025</TableCell>
-                <TableCell>
-                  <Typography
-                    variant="subtitle2"
-                    sx={{
-                      fontSize: { xs: '0.8125rem', sm: '0.875rem' }
-                    }}
-                  >
-                    PVT Ltd Reg
-                  </Typography>
-                </TableCell>
-                <TableCell>
-                  <Typography
-                    variant="body2"
-                    color="primary.main"
-                    fontWeight={500}
-                    sx={{
-                      fontSize: { xs: '0.8125rem', sm: '0.875rem' }
-                    }}
-                  >
-                    ₹ 9,999
-                  </Typography>
-                </TableCell>
-                <TableCell>
-                  <Chip
-                    label="Receipt"
-                    color="success.darker"
-                    size="small"
-                    sx={{
-                      background: (theme) =>
-                        `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.dark} 100%)`,
-                      color: 'white',
-                      fontWeight: 500,
-                      fontSize: { xs: '0.75rem', sm: '0.8125rem' }
-                    }}
-                  />
-                </TableCell>
-                <TableCell align="right">
-                  <Stack direction="row" spacing={{ xs: 0.5, sm: 1 }} justifyContent="flex-end">
-                    {isMobile ? (
-                      <>
-                        <IconButton
-                          size="small"
-                          sx={{
-                            color: 'primary.main',
-                            '&:hover': {
-                              bgcolor: 'primary.lighter'
-                            }
-                          }}
-                        >
-                          <FileDownloadIcon fontSize="small" />
-                        </IconButton>
-                        <IconButton
-                          size="small"
-                          sx={{
-                            color: 'primary.main',
-                            '&:hover': {
-                              bgcolor: 'primary.lighter'
-                            }
-                          }}
-                        >
-                          <ReceiptIcon fontSize="small" />
-                        </IconButton>
-                      </>
-                    ) : (
-                      <>
-                        <Button
-                          size="small"
-                          startIcon={<FileDownloadIcon />}
-                          variant="outlined"
-                          sx={{
-                            borderColor: 'primary.main',
-                            '&:hover': {
-                              borderColor: 'primary.dark',
-                              bgcolor: 'primary.lighter'
-                            }
-                          }}
-                        >
-                          Download
-                        </Button>
-                        <Button
-                          size="small"
-                          startIcon={<ReceiptIcon />}
-                          variant="outlined"
-                          sx={{
-                            borderColor: 'primary.main',
-                            '&:hover': {
-                              borderColor: 'primary.dark',
-                              bgcolor: 'primary.lighter'
-                            }
-                          }}
-                        >
-                          Invoice
-                        </Button>
-                      </>
-                    )}
-                  </Stack>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>10-Apr-2025</TableCell>
-                <TableCell>
-                  <Typography variant="subtitle2">Invoicing Module (Pay)</Typography>
-                </TableCell>
-                <TableCell>
-                  <Typography variant="body2" color="primary.main" fontWeight={500}>
-                    ₹ 2,999
-                  </Typography>
-                </TableCell>
-                <TableCell>
-                  <Chip
-                    label="Receipt"
-                    color="success.darker"
-                    size="small"
-                    sx={{
-                      background: (theme) =>
-                        `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.dark} 100%)`,
-                      color: 'white',
-                      fontWeight: 500
-                    }}
-                  />
-                </TableCell>
-                <TableCell align="right">
-                  <Stack direction="row" spacing={1} justifyContent="flex-end">
-                    <Button
+              {paymentHistory.map((payment) => (
+                <TableRow key={payment.id}>
+                  <TableCell>{new Date(payment.created_at).toLocaleDateString()}</TableCell>
+                  <TableCell>
+                    <Typography variant="subtitle2">{payment.plan_name || payment.suite_name}</Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body2" color="primary.main" fontWeight={500}>
+                      ₹ {payment.amount}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Chip
+                      label={payment.status === 'paid' && payment.payment_captured ? 'Paid' : 'Failed'}
+                      color={payment.status === 'paid' && payment.payment_captured ? 'success' : 'error'}
                       size="small"
-                      startIcon={<FileDownloadIcon />}
-                      variant="outlined"
-                      sx={{
-                        borderColor: 'primary.main',
-                        '&:hover': {
-                          borderColor: 'primary.dark',
-                          bgcolor: 'primary.lighter'
-                        }
-                      }}
-                    >
-                      Download
-                    </Button>
-                    <Button
-                      size="small"
-                      startIcon={<ReceiptIcon />}
-                      variant="outlined"
-                      sx={{
-                        borderColor: 'primary.main',
-                        '&:hover': {
-                          borderColor: 'primary.dark',
-                          bgcolor: 'primary.lighter'
-                        }
-                      }}
-                    >
-                      Invoice
-                    </Button>
-                  </Stack>
-                </TableCell>
-              </TableRow>
+                      sx={{ fontWeight: 500 }}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body2">
+                      {payment.payment_method ? payment.payment_method.charAt(0).toUpperCase() + payment.payment_method.slice(1) : ''}
+                      {payment.card_last4 ? ` ••••${payment.card_last4}` : ''}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="caption" color="text.secondary">
+                      {payment.razorpay_order_id}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="caption" color="text.secondary">
+                      {payment.razorpay_payment_id}
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
         </TableContainer>

@@ -269,8 +269,8 @@ export default function ProfileSection() {
                         )}
                         <ListItemButton
                           sx={{ borderRadius: `${borderRadius}px` }}
-                          selected={selectedIndex === 1}
-                          onClick={(event) => handleListItemClick(event, 1, '/apps/account-settings')}
+                          selected={selectedIndex === 2}
+                          onClick={(event) => handleListItemClick(event, 2, '/apps/account-settings')}
                         >
                           <ListItemIcon>
                             <IconSettings stroke={1.5} size="20px" />
@@ -283,7 +283,7 @@ export default function ProfileSection() {
                             }
                           />
                         </ListItemButton>
-                        <ListItemButton sx={{ borderRadius: `${borderRadius}px` }} selected={selectedIndex === 4} onClick={handleLogout}>
+                        <ListItemButton sx={{ borderRadius: `${borderRadius}px` }} selected={selectedIndex === 3} onClick={handleLogout}>
                           <ListItemIcon>
                             <IconLogout stroke={1.5} size="20px" />
                           </ListItemIcon>

@@ -91,6 +91,7 @@ export default function NavItem({ item, level, isParents = false, setSelectedID 
             ...(drawerOpen &&
               level === 1 &&
               mode !== ThemeMode.DARK && {
+                px: 1,
                 '&:hover': {
                   bgcolor: 'secondary.light'
                 },
@@ -159,7 +160,7 @@ export default function NavItem({ item, level, isParents = false, setSelectedID 
                     sx={{
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
-                      width: 102,
+                      // width: 102,
                       ...(themeDirection === ThemeDirection.RTL && { textAlign: 'end', direction: 'rtl' })
                     }}
                   >
