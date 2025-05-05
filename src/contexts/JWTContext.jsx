@@ -104,8 +104,10 @@ export function JWTProvider({ children }) {
   const register = async (email, password, organizationName, moduleId, type, context_type) => {
     try {
       let url = '';
-      if (context_type === 'business') {
+      if (type === 'product') {
         url = '/user_management/register/business-with-module/';
+      } else if (type === 'service') {
+        url = '/user_management/register/register_user_with_service/';
       } else {
         url = '/user_management/register/standard ';
       }
@@ -113,9 +115,12 @@ export function JWTProvider({ children }) {
         email,
         password
       };
-      if (context_type === 'business') {
+      if (context_type === 'business' && type === 'product') {
         __postData.business_name = organizationName;
         __postData.module_id = moduleId;
+      } else if (type === 'service') {
+        __postData.name = context_type === 'business' ? organizationName : email;
+        __postData.service_id = moduleId;
       }
       const response = await axios.post(url, __postData);
       if (response.status === 201 && response.statusText === 'Created') {

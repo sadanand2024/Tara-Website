@@ -32,10 +32,16 @@ import FilterListIcon from '@mui/icons-material/FilterList';
 import { useSelector } from 'react-redux';
 import Factory from '../../utils/Factory';
 
-const ProductCard = ({ title, description, price, activePlan, features, actions, module_id }) => {
+const ProductCard = ({ title, description, price, activePlan, features, actions, module_id, type }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const navigate = useNavigate();
+
+  // Ensure features is always an array
+  const safeFeatures = Array.isArray(features) ? features : [];
+
+  // Choose icon based on type
+  const CardIcon = type === 'service' ? BusinessCenterIcon : ExtensionIcon;
 
   return (
     <Card
@@ -72,6 +78,7 @@ const ProductCard = ({ title, description, price, activePlan, features, actions,
               gap: 1
             }}
           >
+            <CardIcon sx={{ mr: 1, color: 'primary.main', fontSize: 28 }} />
             <span>{title}</span>
             {
               activePlan && (
@@ -139,9 +146,9 @@ const ProductCard = ({ title, description, price, activePlan, features, actions,
             >
               {description}
             </Typography>
-            {features && features.length > 0 && (
+            {safeFeatures && safeFeatures.length > 0 && (
               <Box component="ul" sx={{ m: 0, pl: 2 }}>
-                {features.map((feature, index) => (
+                {safeFeatures.map((feature, index) => (
                   <Typography key={index} component="li" variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
                     {feature}
                   </Typography>
@@ -167,7 +174,7 @@ const ProductCard = ({ title, description, price, activePlan, features, actions,
               size="small"
               startIcon={action.icon}
               fullWidth={isMobile}
-              onClick={() => navigate(`/app/subscriptions/modules-and-services/plans?id=${module_id}`)}
+              onClick={() => navigate(`/app/subscriptions/modules-and-services/plans?id=${module_id}&type=${type}`)}
               sx={
                 action.primary
                   ? {
@@ -195,6 +202,12 @@ const ProductCard = ({ title, description, price, activePlan, features, actions,
     </Card>
   );
 };
+
+// Helper function to capitalize the first letter of each word
+function capitalizeWords(str) {
+  if (!str) return '';
+  return str.replace(/\b\w/g, (char) => char.toUpperCase());
+}
 
 const ModulesAndServices = () => {
   const [searchParams] = useSearchParams();
@@ -224,7 +237,7 @@ const ModulesAndServices = () => {
           const isSubscribed = subscribedModuleIds.includes(mod.id);
           return {
             module_id: mod.id,
-            title: mod.name,
+            title: capitalizeWords(mod.name),
             description: mod.description,
             features: [],
             price: '0',
@@ -243,16 +256,30 @@ const ModulesAndServices = () => {
     };
     getModules();
 
-    // const getServices = async () => {
-    //   const response = await Factory('get', `/user_management/services/list?context_type=${user.active_context.context_type}`);
-    //   console.log(response);
-    //   if (response.res.status === 0) {
-    //     setServices(response.res.data);
-    //   } else {
-    //     console.log(response.res.message);
-    //   }
-    // };
-    // getServices();
+    const getServices = async () => {
+      const response = await Factory('get', `/user_management/feature-services/?context_type=${user.active_context.context_type}`);
+      if (response.res.status_cd === 0) {
+        const mappedServices = response.res.data.map((mod) => {
+          return {
+            module_id: mod.id,
+            title: capitalizeWords(mod.name),
+            description: mod.description,
+            features: [],
+            price: '0',
+            activePlan: '',
+            category: 'accounting',
+            actions: [
+              { label: 'View Plans', icon: <VisibilityIcon />, primary: true },
+              { label: 'Get Started', icon: <ShoppingCartIcon /> }
+            ]
+          };
+        });
+        setServices(mappedServices);
+      } else {
+        console.log(response.res.message);
+      }
+    };
+    getServices();
   }, [user.active_context]);
 
   const handleTabChange = (event, newValue) => {
@@ -275,10 +302,13 @@ const ModulesAndServices = () => {
 
   const filterItems = (items) => {
     return items.filter((item) => {
+      const title = item.title || '';
+      const description = item.description || '';
+      const features = Array.isArray(item.features) ? item.features : [];
       const matchesSearch =
-        item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.features.some((feature) => feature.toLowerCase().includes(searchQuery.toLowerCase()));
+        title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        features.some((feature) => (feature || '').toLowerCase().includes(searchQuery.toLowerCase()));
 
       const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
 
@@ -372,9 +402,8 @@ const ModulesAndServices = () => {
   //     ]
   //   }
   // ];
-
+  console.log(services);
   const filteredModules = filterItems(modules);
-  console.log(filteredModules);
   const filteredServices = filterItems(services);
 
   return (
@@ -530,7 +559,7 @@ const ModulesAndServices = () => {
                     p: { xs: 1, sm: 1.5 }
                   }}
                 >
-                  <ProductCard {...module} />
+                  <ProductCard {...module} type="module" />
                 </Grid2>
               ))}
             </Grid2>
@@ -540,7 +569,7 @@ const ModulesAndServices = () => {
             <Grid2 container spacing={{ xs: 2, sm: 1 }}>
               {filteredServices.map((service, index) => (
                 <Grid2
-                  size={{ xs: 12, sm: 6, md: 4, lg: 4 }}
+                  size={{ xs: 12, sm: 6, md: 4, lg: 3 }}
                   key={index}
                   sx={{
                     display: 'flex',
@@ -548,7 +577,7 @@ const ModulesAndServices = () => {
                     p: { xs: 1, sm: 1.5 }
                   }}
                 >
-                  <ProductCard {...service} />
+                  <ProductCard {...service} type="service" />
                 </Grid2>
               ))}
             </Grid2>

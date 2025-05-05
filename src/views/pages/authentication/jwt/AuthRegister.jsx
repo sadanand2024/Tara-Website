@@ -61,7 +61,7 @@ export default function JWTRegister({ ...others }) {
   const context_type = searchParams.get('context');
 
   // Determine if organizationName should be shown/required
-  const isBusinessContext = context_type  === 'business';
+  const isBusinessContext = context_type === 'business' || context_type === 'Business';
 
   const changePassword = (value) => {
     const temp = strengthIndicator(value);
@@ -108,7 +108,7 @@ export default function JWTRegister({ ...others }) {
           try {
             const trimmedEmail = values.email.trim();
             const response = await register(trimmedEmail, values.password, values.organizationName, moduleId, type, context_type);
-            
+
             setStatus({ success: true });
             setSubmitting(false);
 
