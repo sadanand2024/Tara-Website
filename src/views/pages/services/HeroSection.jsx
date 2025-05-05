@@ -1,5 +1,6 @@
-
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Box, Button, Container, Stack, Typography, useTheme } from '@mui/material';
+
 import React, { useEffect, useState } from 'react';
 import { Fade } from 'react-awesome-reveal';
 
@@ -45,6 +46,10 @@ const Typewriter = ({ text, speed = 80 }) => {
 };
 
 const HeroWithFinalTouch = ({ data }) => {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const service_id = searchParams.get('id');
+  const service_type = searchParams.get('type');
   const theme = useTheme();
 
   return (
@@ -55,7 +60,8 @@ const HeroWithFinalTouch = ({ data }) => {
         px: { xs: 1, md: 8 },
         mt: { xs: 1, md: 4 },
         borderRadius: 4,
-        background: 'url("/assets/hero-bg.svg") center/cover no-repeat, linear-gradient(to right,rgb(225, 229, 233) 0%,rgb(218, 221, 225) 100%)',
+        background:
+          'url("/assets/hero-bg.svg") center/cover no-repeat, linear-gradient(to right,rgb(225, 229, 233) 0%,rgb(218, 221, 225) 100%)',
         boxShadow: '0px 6px 20px rgba(0,0,0,0.08)',
         overflow: 'hidden'
       }}
@@ -94,14 +100,7 @@ const HeroWithFinalTouch = ({ data }) => {
         <Fade cascade damping={0.1} triggerOnce>
           <Typewriter text={data.title} />
 
-          <Typography
-            variant="h5"
-            color="text.secondary"
-            fontWeight={400}
-            mt={2}
-            mb={4}
-            sx={{ fontSize: { xs: '1rem', md: '1.5rem' } }}
-          >
+          <Typography variant="h5" color="text.secondary" fontWeight={400} mt={2} mb={4} sx={{ fontSize: { xs: '1rem', md: '1.5rem' } }}>
             {data.subtitle}
           </Typography>
 
@@ -122,6 +121,7 @@ const HeroWithFinalTouch = ({ data }) => {
                 size="large"
                 color="primary"
                 fullWidth={true}
+                onClick={() => navigate(`/register?id=${service_id}&context=${service_type}&type=service`)}
                 sx={{
                   borderRadius: 3,
                   fontWeight: 600,
