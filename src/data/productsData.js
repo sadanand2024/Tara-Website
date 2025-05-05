@@ -3,9 +3,9 @@ import image2 from 'assets/images/payrollimages/image2.png';
 import image3 from 'assets/images/payrollimages/image3.png';
 import image4 from 'assets/images/payrollimages/image4.png';
 
-import invoiceimage1 from 'assets/images/invoiceimages/image1.png';
-import invoiceimage2 from 'assets/images/invoiceimages/image2.png';
-import invoiceimage3 from 'assets/images/invoiceimages/image3.png';
+import invoiceimage1 from 'assets/images/invoiceImages/image1.png';
+import invoiceimage2 from 'assets/images/invoiceImages/image2.png';
+import invoiceimage3 from 'assets/images/invoiceImages/image3.png';
 import {
   IconUsers,
   IconBuildingStore,
