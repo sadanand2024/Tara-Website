@@ -41,7 +41,7 @@ const products = [
     color: '#00C9A7',
     id: 3,
     context_type: 'business',
-    is_active: true
+    is_active: false
   },
   {
     title: 'Document Vault',
@@ -51,7 +51,7 @@ const products = [
     color: '#FFA94D',
     id: 4,
     context_type: 'business',
-    is_active: true
+    is_active: false
   },
   {
     title: 'Compliance Tracker',
@@ -61,7 +61,7 @@ const products = [
     color: '#845EF7',
     id: 5,
     context_type: 'business',
-    is_active: true
+    is_active: false
   },
   {
     title: 'Tax Calculators',
@@ -71,7 +71,7 @@ const products = [
     color: '#2EB67D',
     id: 6,
     context_type: 'business',
-    is_active: true
+    is_active: false
   }
 ];
 
@@ -101,12 +101,17 @@ const ProductCard = ({ product, onClose }) => (
       borderColor: 'divider',
       minHeight: 180,
       boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
-      '&:hover': {
-        transform: 'scale(1.035)',
-        boxShadow: '0 6px 24px 0 rgba(0,0,0,0.10)',
-        borderColor: product.color,
-        zIndex: 1
-      }
+      opacity: product.is_active ? 1 : 0.5,
+      pointerEvents: product.is_active ? 'auto' : 'none',
+      cursor: product.is_active ? 'pointer' : 'not-allowed',
+      '&:hover': product.is_active
+        ? {
+            transform: 'scale(1.035)',
+            boxShadow: '0 6px 24px 0 rgba(0,0,0,0.10)',
+            borderColor: product.color,
+            zIndex: 1
+          }
+        : {}
     }}
   >
     <Box sx={{ mb: 0.5, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>{product.icon}</Box>
@@ -122,6 +127,7 @@ const ProductCard = ({ product, onClose }) => (
       onClick={onClose}
       endIcon={<ArrowForwardIcon sx={{ fontSize: 18 }} />}
       size="small"
+      disabled={!product.is_active}
       sx={{
         color: product.color,
         justifyContent: 'center',

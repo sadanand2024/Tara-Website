@@ -216,7 +216,7 @@ const GSTSettings = () => {
     onSubmit: async (values, { setSubmitting }) => {
       try {
         const formData = new FormData();
-        Object.keys(values).forEach(key => {
+        Object.keys(values).forEach((key) => {
           if (key === 'gst_document' && values[key] instanceof File) {
             formData.append(key, values[key]);
           } else {

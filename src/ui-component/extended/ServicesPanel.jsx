@@ -193,7 +193,7 @@ const ServicesPanel = ({ onClose }) => {
                     // Build the route with query params if API data is present
                     let to = item.path;
                     if (item.id && item.name && item.group_key) {
-                      to = `${item.path}?id=${item.id}&name=${encodeURIComponent(item.name)}&group_key=${encodeURIComponent(item.group_key)}`;
+                      to = `${item.path}?id=${item.id}&name=${encodeURIComponent(item.name)}&group_key=${encodeURIComponent(item.group_key)}&type=${encodeURIComponent(item.type)}`;
                     }
                     return (
                       <Typography

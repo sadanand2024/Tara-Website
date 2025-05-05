@@ -2,7 +2,21 @@ import image1 from 'assets/images/payrollimages/image1.png';
 import image2 from 'assets/images/payrollimages/image2.png';
 import image3 from 'assets/images/payrollimages/image3.png';
 import image4 from 'assets/images/payrollimages/image4.png';
-import { IconUsers, IconBuildingStore, IconBriefcase } from '@tabler/icons-react';
+
+import invoiceimage1 from 'assets/images/invoiceImages/image1.png';
+import invoiceimage2 from 'assets/images/invoiceImages/image2.png';
+import invoiceimage3 from 'assets/images/invoiceImages/image3.png';
+import {
+  IconUsers,
+  IconBuildingStore,
+  IconBriefcase,
+  IconBuildingFactory,
+  IconUser,
+  IconRocket,
+  IconShoppingCart,
+  IconTools
+} from '@tabler/icons-react';
+import { IconCreditCard, IconChartLine, IconShieldCheck } from '@tabler/icons-react';
 
 const productsData = {
   payroll: {
@@ -154,7 +168,7 @@ const productsData = {
     plans: [
       {
         title: 'Essentials',
-        icon: '🟢',
+        icon: IconCreditCard,
         description: 'For small teams',
         price: '399',
         permission: [0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 14, 15, 16, 17, 18, 19],
@@ -183,7 +197,7 @@ const productsData = {
       },
       {
         title: 'Pro Edge',
-        icon: '🔵',
+        icon: IconChartLine,
         description: 'For growing businesses',
         price: '999',
         permission: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
@@ -212,7 +226,7 @@ const productsData = {
       },
       {
         title: 'Ultimate Control',
-        icon: '🟣',
+        icon: IconShieldCheck,
         description: 'For large enterprises',
         price: '1999',
         permission: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
@@ -272,16 +286,8 @@ const productsData = {
     color: '#4D96FF',
     path: '/products/invoice',
     images: {
-      light: [
-        'https://images.unsplash.com/photo-1554224155-6726b3ff858f',
-        'https://images.unsplash.com/photo-1460925895917-afdab827c52f',
-        'https://images.unsplash.com/photo-1450101499163-c8848c66ca85'
-      ],
-      dark: [
-        'https://images.unsplash.com/photo-1554224155-6726b3ff858f',
-        'https://images.unsplash.com/photo-1460925895917-afdab827c52f',
-        'https://images.unsplash.com/photo-1450101499163-c8848c66ca85'
-      ]
+      light: [invoiceimage1, invoiceimage2, invoiceimage3],
+      dark: [invoiceimage1, invoiceimage2, invoiceimage3]
     },
     sections: [
       {
@@ -322,24 +328,29 @@ const productsData = {
     ],
     features: [
       {
-        title: 'Invoice Generation',
-        description: 'Create professional GST compliant invoices',
-        icon: 'IconFileInvoice'
+        title: 'GST Compliant Invoices',
+        description: 'Generate legally compliant GST invoices with ease',
+        icon: 'IconFileCertificate' // Represents compliance
       },
       {
-        title: 'Payment Tracking',
-        description: 'Track payments and send reminders',
-        icon: 'IconCreditCard'
+        title: 'Real-Time Payment Status',
+        description: 'Monitor live payment updates and statuses',
+        icon: 'IconTimelineEvent' // Reflects tracking over time
       },
       {
-        title: 'Online Payments',
-        description: 'Accept payments online with multiple options',
-        icon: 'IconCash'
+        title: 'Custom Invoice Formats',
+        description: 'Personalize invoice layouts and branding',
+        icon: 'IconLayoutDashboard' // Symbolizes customizable layouts
       },
       {
-        title: 'Reports & Analytics',
-        description: 'Generate detailed reports and insights',
-        icon: 'IconChartBar'
+        title: 'Recurring Invoices',
+        description: 'Automate recurring billing cycles effortlessly',
+        icon: 'IconRepeat' // Represents repetition and automation
+      },
+      {
+        title: 'Auto Email & Tax Calculation',
+        description: 'Automate email dispatch and tax computation',
+        icon: 'IconCalculator' // Indicates calculation logic
       }
     ],
     howItWorks: [
@@ -384,10 +395,37 @@ const productsData = {
         answer: 'Yes, you can customize invoice templates with your logo and branding.'
       }
     ],
+    targetAudience: [
+      {
+        title: 'Freelancers',
+        description: 'Simple and efficient invoicing and payment tools for independent professionals',
+        icon: IconUser
+      },
+      {
+        title: 'Startups',
+        description: 'Perfect for early-stage businesses to manage billing and finances smoothly',
+        icon: IconRocket
+      },
+      {
+        title: 'Retailers',
+        description: 'Easy billing and GST support for physical and online retail businesses',
+        icon: IconShoppingCart
+      },
+      {
+        title: 'Service Providers',
+        description: 'Seamless tools for consultants, agencies, and other service-based businesses',
+        icon: IconTools
+      },
+      {
+        title: 'MSMEs',
+        description: 'Scalable solutions for micro, small, and medium enterprises with growing needs',
+        icon: IconBuildingFactory
+      }
+    ],
     plans: [
       {
         title: 'Essentials',
-        icon: '🟢',
+        icon: IconCreditCard,
         description: 'For individuals and small businesses',
         price: '199',
         permission: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
@@ -414,7 +452,7 @@ const productsData = {
       },
       {
         title: 'Pro Edge',
-        icon: '🔵',
+        icon: IconChartLine,
         description: 'For growing businesses',
         price: '499',
         permission: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
@@ -443,7 +481,7 @@ const productsData = {
       },
       {
         title: 'Ultimate Control',
-        icon: '🟣',
+        icon: IconShieldCheck,
         description: 'For large enterprises',
         price: '899',
         permission: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],

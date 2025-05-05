@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Box, Container, Grid, Typography, Card, CardContent } from '@mui/material';
+import { Box, Container, Grid2, Typography, Card, CardContent } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import * as TablerIcons from '@tabler/icons-react';
 
@@ -71,7 +71,7 @@ const FeatureCard = ({ title, description, icon, accentIndex }) => {
         >
           <Icon size={34} stroke={2} color={theme.palette.common.white} />
         </Box>
-        <Typography variant="h5" fontWeight={700} align="center" gutterBottom sx={{ color: theme.palette.text.primary }}>
+        <Typography variant="h4" fontWeight={700} align="center" gutterBottom sx={{ color: theme.palette.text.primary }}>
           {title}
         </Typography>
         <Typography variant="body1" align="center" color="text.secondary" sx={{ mb: 1, px: 1 }}>
@@ -144,13 +144,13 @@ const KeyFeaturesSection = ({ data }) => {
         <Typography variant="h2" align="center" color="text.secondary" sx={{ mb: 7 }}>
           {data.featuresSubtitle || `Everything you need in ${data.name}`}
         </Typography>
-        <Grid container spacing={{ xs: 3, md: 5 }}>
+        <Grid2 container spacing={{ xs: 3, md: 5 }}>
           {data.features.map((feature, index) => (
-            <Grid item xs={12} sm={6} md={3} key={index}>
+            <Grid2 size={{ xs: 12, sm: 6, md: 4 }} key={index}>
               <FeatureCard title={feature.title} description={feature.description} icon={feature.icon} accentIndex={index} />
-            </Grid>
+            </Grid2>
           ))}
-        </Grid>
+        </Grid2>
       </Container>
     </Box>
   );

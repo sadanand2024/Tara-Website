@@ -27,7 +27,7 @@ import PublicIcon from '@mui/icons-material/Public';
 import SportsBasketballIcon from '@mui/icons-material/SportsBasketball';
 import XIcon from '@mui/icons-material/X';
 import YouTubeIcon from '@mui/icons-material/YouTube';
-
+import FacebookIcon from '@mui/icons-material/Facebook';
 // Link - custom style
 const FooterLink = styled(Link)(({ theme }) => ({
   color: theme.palette.mode === ThemeMode.DARK ? theme.palette.text.secondary : theme.palette.text.hint,
@@ -48,9 +48,9 @@ export default function FooterSection() {
   return (
     <>
       <Container sx={{ mb: 15 }}>
-        <Grid container spacing={6}>
+        <Grid container spacing={{ xs: 4, md: 6 }}>
           <Grid size={12}>
-            <Grid container spacing={8}>
+            <Grid container spacing={{ xs: 4, md: 8 }}>
               <Grid size={{ xs: 12, md: 4 }}>
                 <Stack spacing={{ xs: 2, md: 5 }}>
                   <Typography component={RouterLink} to="/" aria-label="theme-logo">
@@ -68,8 +68,8 @@ export default function FooterSection() {
               </Grid>
 
               <Grid size={{ xs: 12, md: 8 }}>
-                <Grid container spacing={{ xs: 5, md: 2 }}>
-                  <Grid size={{ xs: 6, sm: 3 }}>
+                <Grid container spacing={{ xs: 4, md: 4 }}>
+                  <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                     <Stack spacing={{ xs: 3, md: 3 }}>
                       <Typography variant="h4" color={textColor} sx={{ fontWeight: 500 }}>
                         Our Address
@@ -82,9 +82,7 @@ export default function FooterSection() {
                           </Typography>
                         </Stack>
                         <Typography variant="body2" color={textColor} sx={{ pl: 4 }}>
-                          White Waters @ Y, Kukatpally,
-                          <br />
-                          Hyderabad, Telangana - 500072
+                          White Waters, Timber Lake Colony, Chitrapuri Colony, Rai Durg, Hyderabad, Telangana 500032
                         </Typography>
                         <Stack direction="row" spacing={1} alignItems="center">
                           <PhoneIcon color="primary" />
@@ -102,8 +100,8 @@ export default function FooterSection() {
                     </Stack>
                   </Grid>
 
-                  <Grid size={{ xs: 6, sm: 3 }}>
-                    <Stack spacing={{ xs: 3, md: 5 }}>
+                  <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                    <Stack spacing={{ xs: 2, md: 4 }}>
                       <Typography variant="h4" color={textColor} sx={{ fontWeight: 500 }}>
                         Help
                       </Typography>
@@ -117,82 +115,109 @@ export default function FooterSection() {
                         <FooterLink href="https://links.codedthemes.com/HTIBc" target="_blank" underline="none">
                           Blog
                         </FooterLink>
-                        <FooterLink href="https://codedthemes.gitbook.io/berry/" target="_blank" underline="none">
+                        <FooterLink target="_blank" underline="none">
                           Documentation
                         </FooterLink>
                         <FooterLink href="https://codedthemes.gitbook.io/berry/support/changelog" target="_blank" underline="none">
                           Change Log
                         </FooterLink>
-                        <FooterLink href="https://codedthemes.support-hub.io/" target="_blank" underline="none">
+                        <FooterLink to={'/book-consultation'} component={RouterLink} underline="none">
                           Support
                         </FooterLink>
                       </Stack>
                     </Stack>
                   </Grid>
-                  {/* <Grid size={{ xs: 6, sm: 3 }}>
+                  <Grid size={{ xs: 6, sm: 3 }}>
                     <Stack spacing={{ xs: 3, md: 5 }}>
                       <Typography variant="h4" color={textColor} sx={{ fontWeight: 500 }}>
-                        Store Help
+                        Follow Us On
                       </Typography>
-                      <Stack spacing={{ xs: 1.5, md: 2.5 }}>
-                        <FooterLink href="https://mui.com/store/license/" target="_blank" underline="none">
-                          License
-                        </FooterLink>
-                        <FooterLink href="https://mui.com/store/customer-refund-policy/" target="_blank" underline="none">
-                          Refund Policy
-                        </FooterLink>
-                        <FooterLink
-                          href="https://support.mui.com/hc/en-us/sections/360002564979-For-customers"
+                      <Stack direction="row" alignItems="center" spacing={{ xs: 2, sm: 1.5, md: 2 }}>
+                        <IconButton
+                          size="small"
+                          aria-label="codedTheme Github"
+                          component={Link}
+                          href="https://github.com/codedthemes"
                           target="_blank"
-                          underline="none"
                         >
-                          Submit a Request
-                        </FooterLink>
-                      </Stack>
-                    </Stack>
-                  </Grid> */}
-                  <Grid size={{ xs: 6, sm: 3 }}>
-                    <Stack spacing={{ xs: 3, md: 5 }}>
-                      <Typography variant="h4" color={textColor} sx={{ fontWeight: 500 }}>
-                        Berry Eco-System
-                      </Typography>
-                      <Stack spacing={{ xs: 1.5, md: 2.5 }}>
-                        {frameworks.map((item, index) => (
-                          <FooterLink href={item.link} target="_blank" underline="none" key={index}>
-                            {item.title}
-                            {item.isUpcoming && <Chip variant="outlined" size="small" label="Upcoming" sx={{ ml: 0.5, lineHeight: 1.5 }} />}
-                          </FooterLink>
-                        ))}
-                        <FooterLink href="https://links.codedthemes.com/rjvya" target="_blank" underline="none">
-                          Pro Figma UI Kit
-                        </FooterLink>
-                      </Stack>
-                    </Stack>
-                  </Grid>
-                  <Grid size={{ xs: 6, sm: 3 }}>
-                    <Stack spacing={{ xs: 3, md: 5 }}>
-                      <Typography variant="h4" color={textColor} sx={{ fontWeight: 500 }}>
-                        Free Versions
-                      </Typography>
-                      <Stack spacing={{ xs: 1.5, md: 2.5 }}>
-                        <FooterLink href="https://links.codedthemes.com/rhhGb" target="_blank" underline="none">
-                          Free Figma UI Kit
-                        </FooterLink>
-                        <FooterLink href="https://links.codedthemes.com/Yfkxg" target="_blank" underline="none">
-                          Free React MUI
-                        </FooterLink>
-                        <FooterLink href="https://links.codedthemes.com/epTmN" target="_blank" underline="none">
-                          Free Bootstrap 5
-                        </FooterLink>
-                        <FooterLink href="https://links.codedthemes.com/seQKN" target="_blank" underline="none">
-                          Free Angular
-                        </FooterLink>
-                        <FooterLink href="https://links.codedthemes.com/zQLHX" target="_blank" underline="none">
-                          Free Vue
-                        </FooterLink>
-                        <FooterLink href="https://links.codedthemes.com/Wfbiy" target="_blank" underline="none">
-                          Free Django
-                        </FooterLink>
+                          <GitHubIcon
+                            sx={{
+                              color: 'text.secondary',
+                              '&:hover': { color: 'success.main' }
+                            }}
+                          />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          aria-label="codedTheme Instagram"
+                          component={Link}
+                          href="https://www.instagram.com/codedthemes"
+                          target="_blank"
+                        >
+                          <InstagramIcon
+                            sx={{
+                              color: 'text.secondary',
+                              '&:hover': { color: 'error.main' }
+                            }}
+                          />
+                        </IconButton>
+
+                        <IconButton
+                          size="small"
+                          aria-label="codedTheme Youtube"
+                          component={Link}
+                          href="https://www.youtube.com/channel/UCiZG__BaRkT1OuZl5ifzO6A"
+                          target="_blank"
+                        >
+                          <YouTubeIcon
+                            sx={{
+                              color: 'text.secondary',
+                              '&:hover': { color: 'error.main' }
+                            }}
+                          />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          aria-label="Berry Blog"
+                          component={Link}
+                          href="https://links.codedthemes.com/HTIBc"
+                          target="_blank"
+                        >
+                          <PublicIcon
+                            sx={{
+                              color: 'text.secondary',
+                              '&:hover': { color: 'error.main' }
+                            }}
+                          />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          aria-label="codedTheme Twitter"
+                          component={Link}
+                          href="https://x.com/codedthemes"
+                          target="_blank"
+                        >
+                          <XIcon
+                            sx={{
+                              color: 'text.secondary',
+                              '&:hover': { color: 'primary.main' }
+                            }}
+                          />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          aria-label="codedTheme Facebook"
+                          component={Link}
+                          href="https://www.facebook.com/codedthemes"
+                          target="_blank"
+                        >
+                          <FacebookIcon
+                            sx={{
+                              color: 'text.secondary',
+                              '&:hover': { color: 'primary.main' }
+                            }}
+                          />
+                        </IconButton>
                       </Stack>
                     </Stack>
                   </Grid>
@@ -203,7 +228,7 @@ export default function FooterSection() {
         </Grid>
       </Container>
       <Box sx={{ bgcolor: 'dark.dark', py: { xs: 3, sm: 1.5 } }}>
-        <Container>
+        {/* <Container>
           <Stack
             direction={{ xs: 'column', sm: 'row' }}
             alignItems="center"
@@ -304,7 +329,7 @@ export default function FooterSection() {
               </IconButton>
             </Stack>
           </Stack>
-        </Container>
+        </Container> */}
       </Box>
     </>
   );

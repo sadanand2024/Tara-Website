@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Box, Container, Grid, Typography, Card, CardContent, Divider } from '@mui/material';
+import { Box, Container, Grid2, Typography, Card, CardContent, Divider } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { IconUsers, IconBuildingStore, IconBriefcase, IconStar } from '@tabler/icons-react';
 
@@ -64,15 +64,10 @@ const AudienceCard = ({ title, description, icon: Icon, accentColor }) => {
         </Box>
       </Box>
       <CardContent sx={{ mt: 3 }}>
-        <Typography variant="h6" align="center" fontWeight={800} gutterBottom sx={{ letterSpacing: 0.5 }}>
+        <Typography variant="h4" align="center" fontWeight={800} gutterBottom sx={{ letterSpacing: 0.5 }}>
           {title}
         </Typography>
-        <Typography
-          variant="body1"
-          align="center"
-          color="text.secondary"
-          sx={{ minHeight: 60, fontWeight: 500, fontSize: { xs: 15, md: 16 } }}
-        >
+        <Typography variant="body1" align="center" color="text.secondary" sx={{ minHeight: 60, fontSize: { xs: 15, md: 16 } }}>
           {description}
         </Typography>
       </CardContent>
@@ -156,18 +151,18 @@ const TargetAudienceSection = ({ data }) => {
         <Typography variant="h5" align="center" color="text.secondary" sx={{ mb: 8, fontWeight: 600, fontSize: { xs: 18, md: 22 } }}>
           {`Discover if ${data.name} is right for you`}
         </Typography>
-        <Grid container spacing={{ xs: 4, md: 6 }}>
+        <Grid2 container spacing={{ xs: 4, md: 6 }}>
           {audiences.map((audience, index) => (
-            <Grid item xs={12} sm={6} md={4} key={index}>
+            <Grid2 size={{ xs: 12, sm: 6, md: 4 }} key={index}>
               <AudienceCard
                 title={audience.title}
                 description={audience.description}
                 icon={audience.icon || audiences[index % audiences.length].icon}
                 accentColor={accentColors[index % accentColors.length]}
               />
-            </Grid>
+            </Grid2>
           ))}
-        </Grid>
+        </Grid2>
       </Container>
     </Box>
   );

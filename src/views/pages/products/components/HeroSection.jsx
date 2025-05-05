@@ -93,7 +93,7 @@ const HeroSection = ({ data }) => {
                 >
                   {data.primaryCTA || `Get Started with ${data.name} for Free`}
                 </Button>
-                <Button
+                {/* <Button
                   size="small"
                   variant="outlined"
                   color="primary"
@@ -112,7 +112,7 @@ const HeroSection = ({ data }) => {
                   }}
                 >
                   View Plans
-                </Button>
+                </Button> */}
                 {data.secondaryCTA && (
                   <Button
                     size="large"

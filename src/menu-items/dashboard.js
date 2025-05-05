@@ -103,7 +103,7 @@ const dashboard = {
       title: 'payroll',
       type: 'item',
       url: '/app/payroll',
-      icon: icons.IconLayoutRows,
+      icon: icons.IconCreditCard,
       breadcrumbs: false,
       caption: ''
     },
@@ -112,7 +112,8 @@ const dashboard = {
       title: 'invoicing',
       type: 'item',
       url: '/app/invoice',
-      icon: icons.IconFileInvoice,
+      icon: icons.IconReceipt2,
+
       breadcrumbs: false,
       caption: ''
     },
