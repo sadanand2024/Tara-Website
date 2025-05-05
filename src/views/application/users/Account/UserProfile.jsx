@@ -35,7 +35,7 @@ export default function UserProfile({ user, pageChange, value }) {
       .min(2, 'Last Name should be at least 2 characters')
       .matches(/^[a-zA-Z\s]+$/, 'Last Name should only contain letters'),
     email: Yup.string().required('Email is required').email('Invalid email format'),
-    mobile: Yup.string()
+    mobile_number: Yup.string()
       .required('Mobile number is required')
       .matches(/^[0-9]{10}$/, 'Mobile number should be 10 digits')
   });
@@ -46,7 +46,7 @@ export default function UserProfile({ user, pageChange, value }) {
       first_name: '',
       last_name: '',
       email: '',
-      mobile: '',
+      mobile_number: '',
       status: 'active'
     },
     validationSchema,
@@ -56,22 +56,19 @@ export default function UserProfile({ user, pageChange, value }) {
         first_name: values.first_name,
         last_name: values.last_name,
         email: values.email,
-        mobile: values.mobile,
-        status: values.status
+        mobile_number: values.mobile_number
       };
 
-      const url = type === 'put' ? `/user_management/users/${values.id}` : '/user_management/users/';
+      const url = type === 'put' ? `/user_management/users/${values.id}/` : '/user_management/users/';
 
       const response = await Factory(type, url, submissionData, {}, true);
 
       if (response.res.status_cd === 0) {
-        // Handle successful operation
         console.log(`Profile ${type === 'put' ? 'updated' : 'created'} successfully`);
         if (type === 'post') {
-          setType('put'); // Update type to put for future updates
+          setType('put');
         }
       } else {
-        // Handle error
         console.error(`Failed to ${type === 'put' ? 'update' : 'create'} profile:`, response.res.data);
       }
     }
@@ -79,7 +76,7 @@ export default function UserProfile({ user, pageChange, value }) {
 
   const getUserData = async () => {
     try {
-      const response = await Factory('get', `/user_management/users/${user.user.id}`, {}, {});
+      const response = await Factory('get', `/user_management/users/${user.user.id}/`, {}, {});
       if (response.res.status_cd === 0) {
         setType('put');
         formik.setValues({
@@ -87,7 +84,7 @@ export default function UserProfile({ user, pageChange, value }) {
           first_name: response.res.data.first_name || '',
           last_name: response.res.data.last_name || '',
           email: response.res.data.email || '',
-          mobile: response.res.data.mobile || '',
+          mobile_number: response.res.data.mobile_number || '',
           status: response.res.data.status || 'active'
         });
       } else if (response.res.data.detail === 'User details not found.') {
@@ -179,6 +176,7 @@ export default function UserProfile({ user, pageChange, value }) {
             label="Email"
             size="small"
             name="email"
+            disabled={true}
             value={formik.values.email}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
@@ -192,16 +190,16 @@ export default function UserProfile({ user, pageChange, value }) {
             fullWidth
             label="Mobile"
             size="small"
-            name="mobile"
-            value={formik.values.mobile}
+            name="mobile_number"
+            value={formik.values.mobile_number}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
-            error={formik.touched.mobile && Boolean(formik.errors.mobile)}
-            helperText={formik.touched.mobile && formik.errors.mobile}
+            error={formik.touched.mobile_number && Boolean(formik.errors.mobile_number)}
+            helperText={formik.touched.mobile_number && formik.errors.mobile_number}
           />
         </Grid>
       </Grid>
-
+      {console.log(value)}
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 4 }}>
         <Button
           type="submit"
@@ -210,7 +208,7 @@ export default function UserProfile({ user, pageChange, value }) {
           size="medium"
           onClick={() => {
             formik.handleSubmit();
-            pageChange(value + 1);
+            pageChange(1 + value);
           }}
         >
           Save & Continue
