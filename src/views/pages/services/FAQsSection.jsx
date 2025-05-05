@@ -1,19 +1,9 @@
-
 import React from 'react';
-import { Accordion, AccordionSummary, AccordionDetails, Typography, Box } from '@mui/material';
+import { Accordion, AccordionSummary, AccordionDetails, Typography, Box, Container, useTheme } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
-import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  Box,
-  Container,
-  Typography,
-  useTheme
-} from '@mui/material';
-import React from 'react';
-import { Fade } from 'react-awesome-reveal'; 
+
+import { Fade } from 'react-awesome-reveal';
 
 const FAQsSection = ({ faqs }) => {
   const theme = useTheme();
@@ -24,24 +14,10 @@ const FAQsSection = ({ faqs }) => {
         {/* FAQ Header */}
         <Box display="flex" flexDirection="column" alignItems="center" mb={4}>
           <HelpOutlineIcon sx={{ fontSize: { xs: 40, md: 48 }, color: '#FF5A5F', mb: 1 }} />
-          <Typography
-            variant="h3"
-            fontWeight={700}
-            fontFamily="'Georgia', serif"
-            textAlign="center"
-            mb={1}
-            sx={{ color: '#1c1c1e' }}
-          >
+          <Typography variant="h3" fontWeight={700} fontFamily="'Georgia', serif" textAlign="center" mb={1} sx={{ color: '#1c1c1e' }}>
             FAQ
           </Typography>
-          <Typography
-            variant="body1"
-            fontSize="1.1rem"
-            textAlign="center"
-            mb={4}
-            color="text.secondary"
-            maxWidth="600px"
-          >
+          <Typography variant="body1" fontSize="1.1rem" textAlign="center" mb={4} color="text.secondary" maxWidth="600px">
             Great answers are kind of our thing! Here are some answers to frequently asked questions to help you get started.
           </Typography>
         </Box>
@@ -60,10 +36,7 @@ const FAQsSection = ({ faqs }) => {
                   '&:before': { display: 'none' }
                 }}
               >
-                <AccordionSummary
-                  expandIcon={<ExpandMoreIcon sx={{ color: '#6b7280' }} />}
-                  sx={{ px: 3, py: 2 }}
-                >
+                <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ color: '#6b7280' }} />} sx={{ px: 3, py: 2 }}>
                   <Typography fontWeight={600} fontSize="1.05rem">
                     {faq.question}
                   </Typography>
