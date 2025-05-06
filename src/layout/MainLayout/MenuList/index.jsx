@@ -4,6 +4,7 @@ import Divider from '@mui/material/Divider';
 import List from '@mui/material/List';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
+import { useSelector } from 'store';
 
 // project imports
 import NavItem from './NavItem';
@@ -26,6 +27,10 @@ function MenuList() {
   const { menuMaster } = useGetMenuMaster();
   const drawerOpen = menuMaster.isDashboardDrawerOpened;
   const isHorizontal = menuOrientation === MenuOrientation.HORIZONTAL && !downMD;
+
+  const user = useSelector((state) => state.accountReducer.user);
+  const subscriptions = user?.module_subscriptions || [];
+  const menu = menuItems(user, subscriptions);
 
   const [selectedID, setSelectedID] = useState('');
   // const [menuItems, setMenuItems] = useState<{ items: NavItemType[] }>({ items: [] });
@@ -54,14 +59,14 @@ function MenuList() {
   // last menu-item to show in horizontal menu bar
   const lastItem = isHorizontal ? HORIZONTAL_MAX_ITEM : null;
 
-  let lastItemIndex = menuItems.items.length - 1;
+  let lastItemIndex = menu.items.length - 1;
   let remItems = [];
   let lastItemId;
 
-  if (lastItem && lastItem < menuItems.items.length) {
-    lastItemId = menuItems.items[lastItem - 1].id;
+  if (lastItem && lastItem < menu.items.length) {
+    lastItemId = menu.items[lastItem - 1].id;
     lastItemIndex = lastItem - 1;
-    remItems = menuItems.items.slice(lastItem - 1, menuItems.items.length).map((item) => ({
+    remItems = menu.items.slice(lastItem - 1, menu.items.length).map((item) => ({
       title: item.title,
       elements: item.children,
       icon: item.icon,
@@ -71,7 +76,7 @@ function MenuList() {
     }));
   }
 
-  const navItems = menuItems.items.slice(0, lastItemIndex + 1).map((item, index) => {
+  const navItems = menu.items.slice(0, lastItemIndex + 1).map((item, index) => {
     switch (item.type) {
       case 'group':
         if (item.url && item.id !== lastItemId) {

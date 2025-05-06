@@ -35,7 +35,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import { storeUser } from 'store/slices/account'; // redux slice
 import { useDispatch } from 'store';
-import { openSnackbar } from 'store/slices/snackbar';
+import { useSnackbar } from 'notistack';
 
 // ==============================|| MAIN NAVBAR / HEADER ||============================== //
 
@@ -45,6 +45,7 @@ import Personal from 'views/KYC/Personal';
 
 const Header = ({ hamburgerDisplay = 'block' }) => {
   const dispatch = useDispatch();
+  const { enqueueSnackbar } = useSnackbar();
   const reduxDispatch = useReduxDispatch(); // ✅ Redux dispatcher
   const user = useSelector((state) => state.accountReducer.user);
   const theme = useTheme();
@@ -89,17 +90,10 @@ const Header = ({ hamburgerDisplay = 'block' }) => {
         data.user_role = response.res.data.user_role;
         localStorage.setItem('user', JSON.stringify(data));
         reduxDispatch(storeUser(data));
-        dispatch(
-          openSnackbar({
-            open: true,
-            message: 'Switched to ' + response.res.data.active_context.name,
-            variant: 'alert',
-            anchorOrigin: { vertical: 'top', horizontal: 'right' },
-            alert: { color: 'success' },
-            close: false,
-            severity: 'success'
-          })
-        );
+        enqueueSnackbar(`Switched to ${response.res.data.active_context.name}`, {
+          variant: 'success',
+          anchorOrigin: { vertical: 'top', horizontal: 'right' }
+        });
       }
     } catch (error) {
       console.error('Error switching context:', error);
@@ -160,46 +154,25 @@ const Header = ({ hamburgerDisplay = 'block' }) => {
 
       const response = await Factory('post', '/user_management/select-context', formattedData, {});
       if (response.res.status_cd === 0) {
-        dispatch(
-          openSnackbar({
-            open: true,
-            message: 'Personal details added successfully',
-            variant: 'alert',
-            anchorOrigin: { vertical: 'top', horizontal: 'right' },
-            alert: { color: 'success' },
-            close: false,
-            severity: 'success'
-          })
-        );
+        enqueueSnackbar('Personal details added successfully', {
+          variant: 'success',
+          anchorOrigin: { vertical: 'top', horizontal: 'right' }
+        });
         setOpenPersonalKYC(false);
         // Refresh contexts after adding personal details
         getContext();
       } else {
-        dispatch(
-          openSnackbar({
-            open: true,
-            message: response.res.status_msg || 'Failed to add personal details',
-            variant: 'alert',
-            anchorOrigin: { vertical: 'top', horizontal: 'right' },
-            alert: { color: 'error' },
-            close: false,
-            severity: 'error'
-          })
-        );
+        enqueueSnackbar(response.res.status_msg || 'Failed to add personal details', {
+          variant: 'error',
+          anchorOrigin: { vertical: 'top', horizontal: 'right' }
+        });
       }
     } catch (error) {
       console.error('Error submitting personal KYC:', error);
-      dispatch(
-        openSnackbar({
-          open: true,
-          message: 'Failed to add personal details',
-          variant: 'alert',
-          anchorOrigin: { vertical: 'top', horizontal: 'right' },
-          alert: { color: 'error' },
-          close: false,
-          severity: 'error'
-        })
-      );
+      enqueueSnackbar('Failed to add personal details', {
+        variant: 'error',
+        anchorOrigin: { vertical: 'top', horizontal: 'right' }
+      });
     } finally {
       setIsSubmitting(false);
     }

@@ -20,13 +20,15 @@ import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
 import CardContent from '@mui/material/CardContent';
 import Stack from '@mui/material/Stack';
+import Avatar from '@mui/material/Avatar';
+import Tooltip from '@mui/material/Tooltip';
 // project imports
 import { ThemeMode, ThemeDirection } from 'config';
 import MainCard from 'ui-component/cards/MainCard';
 import useConfig from 'hooks/useConfig';
 import { gridSpacing } from 'store/constant';
 import Factory from 'utils/Factory';
-import RazorparPayment from './RazorparPayment';
+import RazorpayPayment from './RazorpayPayment';
 // assets
 import CheckTwoToneIcon from '@mui/icons-material/CheckTwoTone';
 import TwoWheelerTwoToneIcon from '@mui/icons-material/TwoWheelerTwoTone';
@@ -149,48 +151,86 @@ export default function Price1() {
         boxShadow: 2,
         border: '1px solid',
         borderColor: 'divider',
-        mb: 2,
         transition: 'box-shadow 0.2s',
-        '&:hover': { boxShadow: 6 }
+        '&:hover': { boxShadow: 6 },
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column'
       }}
     >
-      <CardContent>
-        <Stack direction="row" alignItems="center" spacing={2} mb={1}>
-          <BusinessCenterIcon color="primary" sx={{ fontSize: 32 }} />
-          <Typography variant="h5" fontWeight={700}>
-            {plan.name}
-          </Typography>
-          <Chip
-            label={capitalizeWords(plan.plan_type)}
-            color="info"
-            size="small"
-            sx={{ ml: 'auto', fontWeight: 600, textTransform: 'capitalize' }}
+      <CardContent sx={{ p: '0px !important', flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <Stack spacing={2} sx={{ px: 2, py: 1 }}>
+          {/* Header */}
+          <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={2}>
+            <Box display="flex" alignItems="center" gap={1}>
+              <Avatar variant="rounded" sx={{ bgcolor: 'primary.light', color: 'secondary.main' }}>
+                <BusinessCenterIcon fontSize="small" />
+              </Avatar>
+              <Typography variant="h5" fontWeight={700}>
+                {plan.name}
+              </Typography>
+            </Box>
+            <Chip
+              label={capitalizeWords(plan.plan_type)}
+              color="info"
+              variant="outlined"
+              size="small"
+              sx={{ textTransform: 'capitalize', fontWeight: 600 }}
+            />
+          </Stack>
+        </Stack>
+
+        <Divider sx={{ borderColor: 'divider' }} />
+
+        <Stack direction="column" justifyContent="space-between" spacing={2} sx={{ p: 2, flexGrow: 1 }}>
+          {/* Description with Tooltip */}
+          <Tooltip title={plan.description} placement="top" arrow>
+            <Typography
+              variant="body1"
+              color="text.primary"
+              textAlign="center"
+              sx={{
+                display: '-webkit-box',
+                WebkitLineClamp: 3,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                mt: 1,
+                mb: 2,
+                lineHeight: 1.6,
+                minHeight: '3.2em' // Keeps all cards visually even (3 lines × 1.6 lineHeight)
+              }}
+            >
+              {plan.description}
+            </Typography>
+          </Tooltip>
+
+          {/* Price */}
+          <Stack direction="row" alignItems="flex-end" justifyContent="center" spacing={1} sx={{ mb: 0 }}>
+            <Typography variant="h3" color="secondary.main" fontWeight={700}>
+              ₹{plan.amount}&nbsp;
+              <Typography variant="caption" color="text.primary">
+                One Time
+              </Typography>
+            </Typography>
+          </Stack>
+
+          {/* Purchase Button */}
+          <RazorpayPayment
+            type="service"
+            label="Purchase Now"
+            service_id={moduleId}
+            contextId={user.active_context.id}
+            userId={user.user.id}
+            plan={plan}
+            onSuccess={(response) => {
+              console.log('Payment Success:', response);
+            }}
+            onFailure={() => {
+              console.log('Payment Cancelled');
+            }}
           />
         </Stack>
-        <Typography variant="body2" color="text.secondary" mb={2}>
-          {plan.description}
-        </Typography>
-        <Stack direction="row" alignItems="center" spacing={2} mb={2}>
-          <Typography variant="h4" color="primary.main" fontWeight={700}>
-            ₹{plan.amount}
-          </Typography>
-          <Typography variant="caption" color="text.secondary">
-            (One Time)
-          </Typography>
-        </Stack>
-        <Button
-          variant="contained"
-          startIcon={<ShoppingCartIcon />}
-          size="large"
-          fullWidth
-          onClick={() => onPurchase(plan)}
-          sx={{
-            fontWeight: 600,
-            background: (theme) => `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`
-          }}
-        >
-          Purchase
-        </Button>
       </CardContent>
     </Card>
   );
@@ -200,7 +240,7 @@ export default function Price1() {
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 3, pb: 0 }}>
         <Box>
           <Typography variant="h3" color="text.primary">
-            Choose Your Subscription Plan
+            Choose Your {type !== 'service' ? 'Subscription' : 'Service'} Plan
           </Typography>
           <Typography variant="caption" sx={{ color: 'text.secondary', mt: 0.5 }}>
             Select the plan that best fits your business needs.
@@ -296,9 +336,9 @@ export default function Price1() {
             </Typography>
           </Box>
         ) : (
-          <Grid container spacing={3} sx={{ mt: 2 }}>
+          <Grid container spacing={4} sx={{ p: 3 }}>
             {filteredPlans.map((plan) => (
-              <Grid item xs={12} md={6} lg={4} key={plan.id}>
+              <Grid size={{ xs: 6, md: 4, lg: 3 }} key={plan.id}>
                 <ServicePlanCard
                   plan={plan}
                   onPurchase={(selectedPlan) => {
@@ -310,347 +350,349 @@ export default function Price1() {
             ))}
           </Grid>
         )
+      ) : // ...existing carousel UI for modules...
+      filteredPlans.length === 0 ? (
+        <Box sx={{ py: 8, textAlign: 'center' }}>
+          <Typography variant="h5" color="text.secondary">
+            No plans to display.
+          </Typography>
+        </Box>
       ) : (
-        // ...existing carousel UI for modules...
-        filteredPlans.length === 0 ? (
-          <Box sx={{ py: 8, textAlign: 'center' }}>
-            <Typography variant="h5" color="text.secondary">
-              No plans to display.
-            </Typography>
-          </Box>
-        ) : (
-          <>
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 2 }}>
-              {filteredPlans.map((_, idx) => (
-                <Box
-                  key={idx}
-                  onClick={() => {
-                    // Clamp to minIndex and maxIndex
-                    if (idx >= minIndex && idx <= maxIndex) setCenterIndex(idx);
-                  }}
-                  sx={{
-                    width: 12,
-                    height: 12,
-                    borderRadius: '50%',
-                    mx: 0.75,
-                    backgroundColor: idx === centerIndex ? 'primary.main' : 'grey.400',
-                    transition: 'background 0.2s',
-                    border: idx === centerIndex ? '2px solid' : 'none',
-                    borderColor: idx === centerIndex ? 'primary.dark' : 'none',
-                    cursor: idx >= minIndex && idx <= maxIndex ? 'pointer' : 'default',
-                    opacity: idx >= minIndex && idx <= maxIndex ? 1 : 0.4,
-                    '&:hover': {
-                      boxShadow: idx >= minIndex && idx <= maxIndex ? 2 : 'none'
-                    }
-                  }}
-                />
-              ))}
-            </Box>
-            <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-              {/* Left Arrow */}
-              <IconButton
-                onClick={handlePrev}
-                disabled={centerIndex === minIndex}
-                sx={{
-                  p: 0,
-                  bgcolor: 'transparent',
-                  boxShadow: 'none',
-                  opacity: centerIndex === minIndex ? 0.4 : 0.9,
-                  transition: 'opacity 0.2s',
-                  '&:hover': {
-                    opacity: 1,
-                    bgcolor: 'transparent'
-                  }
-                }}
-              >
-                <ArrowBackIosNewIcon sx={{ fontSize: 28, color: 'primary.dark', transition: 'font-size 0.2s', '&:hover': { fontSize: 36 } }} />
-              </IconButton>
-              {/* Cards Row */}
+        <>
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 2 }}>
+            {filteredPlans.map((_, idx) => (
               <Box
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  gap: `${cardGap}px`,
-                  overflow: 'hidden',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  position: 'relative',
-                  py: 2
+                key={idx}
+                onClick={() => {
+                  // Clamp to minIndex and maxIndex
+                  if (idx >= minIndex && idx <= maxIndex) setCenterIndex(idx);
                 }}
-              >
-                {visibleCards.map((plan, idx) => {
-                  const planIndex = centerIndex - 1 + idx;
-                  let scale = 0.9;
-                  let zIndex = 1;
-                  if (idx === 1) {
-                    scale = 1;
-                    zIndex = 2;
+                sx={{
+                  width: 12,
+                  height: 12,
+                  borderRadius: '50%',
+                  mx: 0.75,
+                  backgroundColor: idx === centerIndex ? 'primary.main' : 'grey.400',
+                  transition: 'background 0.2s',
+                  border: idx === centerIndex ? '2px solid' : 'none',
+                  borderColor: idx === centerIndex ? 'primary.dark' : 'none',
+                  cursor: idx >= minIndex && idx <= maxIndex ? 'pointer' : 'default',
+                  opacity: idx >= minIndex && idx <= maxIndex ? 1 : 0.4,
+                  '&:hover': {
+                    boxShadow: idx >= minIndex && idx <= maxIndex ? 2 : 'none'
                   }
-                  return (
-                    <Box
-                      key={plan.id}
-                      sx={{
-                        width: cardWidth,
-                        flex: `0 0 ${cardWidth}px`,
-                        transform: `scale(${scale})`,
-                        transition: 'transform 0.3s cubic-bezier(.4,2,.6,1), box-shadow 0.3s',
-                        zIndex,
-                        boxShadow: idx === 1 ? theme.shadows[8] : theme.shadows[2],
-                        border: idx === 1 ? `1px solid ${getRandomColor(planIndex)}` : 'none',
-                        borderRadius: 2,
-                        background: 'transparent',
-                        position: 'relative'
-                      }}
-                    >
-                      {/* Current Plan Badge as Diagonal Strip */}
-                      {idx === 1 && plan.active && (
-                        <Box
-                          sx={{
-                            position: 'absolute',
-                            top: 18,
-                            right: -32,
-                            zIndex: 10,
-                            transform: 'rotate(45deg)',
-                            bgcolor: 'success.dark',
-                            color: '#fff',
-                            px: 2.5,
-                            py: 0.5,
-                            fontWeight: 700,
-                            fontSize: 13,
-                            boxShadow: 3,
-                            letterSpacing: 1,
-                            textTransform: 'uppercase',
-                            textAlign: 'center',
-                            minWidth: 80
-                          }}
-                        >
-                          Current Plan
-                        </Box>
-                      )}
-                      <MainCard
-                        boxShadow
+                }}
+              />
+            ))}
+          </Box>
+          <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+            {/* Left Arrow */}
+            <IconButton
+              onClick={handlePrev}
+              disabled={centerIndex === minIndex}
+              sx={{
+                p: 0,
+                bgcolor: 'transparent',
+                boxShadow: 'none',
+                opacity: centerIndex === minIndex ? 0.4 : 0.9,
+                transition: 'opacity 0.2s',
+                '&:hover': {
+                  opacity: 1,
+                  bgcolor: 'transparent'
+                }
+              }}
+            >
+              <ArrowBackIosNewIcon
+                sx={{ fontSize: 28, color: 'primary.dark', transition: 'font-size 0.2s', '&:hover': { fontSize: 36 } }}
+              />
+            </IconButton>
+            {/* Cards Row */}
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'row',
+                gap: `${cardGap}px`,
+                overflow: 'hidden',
+                justifyContent: 'center',
+                alignItems: 'center',
+                position: 'relative',
+                py: 2
+              }}
+            >
+              {visibleCards.map((plan, idx) => {
+                const planIndex = centerIndex - 1 + idx;
+                let scale = 0.9;
+                let zIndex = 1;
+                if (idx === 1) {
+                  scale = 1;
+                  zIndex = 2;
+                }
+                return (
+                  <Box
+                    key={plan.id}
+                    sx={{
+                      width: cardWidth,
+                      flex: `0 0 ${cardWidth}px`,
+                      transform: `scale(${scale})`,
+                      transition: 'transform 0.3s cubic-bezier(.4,2,.6,1), box-shadow 0.3s',
+                      zIndex,
+                      boxShadow: idx === 1 ? theme.shadows[8] : theme.shadows[2],
+                      border: idx === 1 ? `1px solid ${getRandomColor(planIndex)}` : 'none',
+                      borderRadius: 2,
+                      background: 'transparent',
+                      position: 'relative'
+                    }}
+                  >
+                    {/* Current Plan Badge as Diagonal Strip */}
+                    {idx === 1 && plan.active && (
+                      <Box
                         sx={{
-                          pt: 1,
-                          borderTop: `6px solid ${getRandomColor(planIndex)}`,
-                          transition: 'box-shadow 0.3s, border 0.3s',
-                          height: '100%',
-                          '&:hover': {
-                            boxShadow: theme.shadows[8]
-                          }
+                          position: 'absolute',
+                          top: 18,
+                          right: -32,
+                          zIndex: 10,
+                          transform: 'rotate(45deg)',
+                          bgcolor: 'success.dark',
+                          color: '#fff',
+                          px: 2.5,
+                          py: 0.5,
+                          fontWeight: 700,
+                          fontSize: 13,
+                          boxShadow: 3,
+                          letterSpacing: 1,
+                          textTransform: 'uppercase',
+                          textAlign: 'center',
+                          minWidth: 80
                         }}
                       >
-                        <Grid container spacing={gridSpacing} sx={{ textAlign: 'center' }}>
-                          <Grid size={12}>
-                            <Box
-                              sx={{
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                borderRadius: '50%',
-                                width: 60,
-                                height: 60,
-                                bgcolor: theme.palette.mode === ThemeMode.DARK ? 'dark.800' : 'primary.light',
-                                color: 'primary.main',
-                                '& > svg': {
-                                  width: 35,
-                                  height: 35
-                                }
-                              }}
-                            >
-                              {getPlanIcon(planIndex)}
-                            </Box>
-                          </Grid>
-                          <Grid size={12}>
-                            <Typography
-                              variant="h6"
-                              sx={{
-                                fontSize: '1.5625rem',
-                                fontWeight: 500,
-                                position: 'relative',
-                                mb: 0.5,
-                                '&:after': {
-                                  content: '""',
-                                  position: 'absolute',
-                                  bottom: -10,
-                                  left: 'calc(50% - 25px)',
-                                  width: 50,
-                                  height: 4,
-                                  bgcolor: 'primary.main',
-                                  borderRadius: '3px'
-                                }
-                              }}
-                            >
-                              {plan.name}
-                            </Typography>
-                          </Grid>
-                          <Grid size={12}>
-                            <Typography variant="body2">{plan.description}</Typography>
-                          </Grid>
-                          <Grid size={12}>
-                            <Typography
-                              variant="body2"
-                              sx={{
-                                fontSize: '2.1875rem',
-                                fontWeight: 700,
-                                '& > span': {
-                                  fontSize: '1.25rem',
-                                  fontWeight: 500
-                                }
-                              }}
-                            >
-                              <sup>₹</sup>
-                              {plan.plan_type === 'annually' ? (
-                                <>
-                                  {plan.base_price}
-                                  <span>/ Year</span>
-                                  <br />
-                                  <Typography variant="caption" color="text.secondary">
-                                    (₹{(parseFloat(plan.base_price) / 12).toFixed(2)} / Month)
-                                  </Typography>
-                                </>
-                              ) : (
-                                <>
-                                  {plan.base_price}
-                                  <span>/ {plan.plan_type === 'monthly' ? 'Month' : 'Trial'}</span>
-                                </>
-                              )}
-                            </Typography>
-                          </Grid>
-                          <Grid size={12}>
-                            <List
-                              sx={{
-                                m: 0,
-                                p: 0,
-                                '&> li': {
-                                  px: 0,
-                                  py: 0.625,
-                                  '& svg': {
-                                    fill: theme.palette.success.dark
-                                  }
-                                }
-                              }}
-                              component="ul"
-                            >
-                              {Object.entries(plan.features_enabled || {}).map(([key, value]) => {
-                                if (key === 'features' && typeof value === 'object') {
-                                  // Nested features
-                                  return Object.entries(value).map(([subKey, subValue], idx) => (
-                                    <React.Fragment key={subKey}>
-                                      <ListItem>
-                                        <ListItemIcon>
-                                          {typeof subValue === 'boolean' ? (
-                                            subValue ? (
-                                              <CheckTwoToneIcon color="success" sx={{ fontSize: '1.3rem' }} />
-                                            ) : (
-                                              <CloseIcon
-                                                color="inherit"
-                                                sx={{ fontSize: '1.3rem', color: `${theme.palette.error.main} !important` }}
-                                              />
-                                            )
-                                          ) : (
-                                            <CheckTwoToneIcon sx={{ fontSize: '1.3rem' }} />
-                                          )}
-                                        </ListItemIcon>
-                                        <ListItemText
-                                          primary={
-                                            typeof subValue === 'boolean' ? (
-                                              <span style={{ fontWeight: 600 }}>{capitalizeWords(subKey)}</span>
-                                            ) : (
-                                              <>
-                                                <span style={{ fontWeight: 600 }}>{capitalizeWords(subKey)}</span>
-                                                {`: ${Array.isArray(subValue) ? subValue.join(', ') : subValue.toString()}`}
-                                              </>
-                                            )
-                                          }
-                                          primaryTypographyProps={{ color: theme.palette.text.primary }}
-                                        />
-                                      </ListItem>
-                                      <Divider />
-                                    </React.Fragment>
-                                  ));
-                                } else if (typeof value === 'object') {
-                                  // Add-ons or other nested objects, skip or handle as needed
-                                  return null;
-                                } else {
-                                  return (
-                                    <React.Fragment key={key}>
-                                      <ListItem>
-                                        <ListItemIcon>
-                                          {typeof value === 'boolean' ? (
-                                            value ? (
-                                              <CheckTwoToneIcon color="success" sx={{ fontSize: '1.3rem' }} />
-                                            ) : (
-                                              <CloseIcon
-                                                color="inherit"
-                                                sx={{ fontSize: '1.3rem', color: `${theme.palette.error.main} !important` }}
-                                              />
-                                            )
-                                          ) : (
-                                            <CheckTwoToneIcon sx={{ fontSize: '1.3rem' }} />
-                                          )}
-                                        </ListItemIcon>
-                                        <ListItemText
-                                          primary={
-                                            typeof value === 'boolean' ? (
-                                              <span style={{ fontWeight: 600 }}>{capitalizeWords(key)}</span>
-                                            ) : (
-                                              <>
-                                                <span style={{ fontWeight: 600 }}>{capitalizeWords(key)}</span>
-                                                {`: ${value}`}
-                                              </>
-                                            )
-                                          }
-                                        />
-                                      </ListItem>
-                                      <Divider />
-                                    </React.Fragment>
-                                  );
-                                }
-                              })}
-                            </List>
-                          </Grid>
-                          <Grid size={12}>
-                            <RazorparPayment
-                              contextId={user.active_context.id}
-                              userId={user.user.id}
-                              plan={plan}
-                              onSuccess={(response) => {
-                                // Handle success (show snackbar, update UI, etc.)
-                                console.log('Payment Success:', response);
-                              }}
-                              onFailure={() => {
-                                // Handle failure/cancel
-                                console.log('Payment Cancelled');
-                              }}
-                            />
-                          </Grid>
+                        Current Plan
+                      </Box>
+                    )}
+                    <MainCard
+                      boxShadow
+                      sx={{
+                        pt: 1,
+                        borderTop: `6px solid ${getRandomColor(planIndex)}`,
+                        transition: 'box-shadow 0.3s, border 0.3s',
+                        height: '100%',
+                        '&:hover': {
+                          boxShadow: theme.shadows[8]
+                        }
+                      }}
+                    >
+                      <Grid container spacing={gridSpacing} sx={{ textAlign: 'center' }}>
+                        <Grid size={12}>
+                          <Box
+                            sx={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              borderRadius: '50%',
+                              width: 60,
+                              height: 60,
+                              bgcolor: theme.palette.mode === ThemeMode.DARK ? 'dark.800' : 'primary.light',
+                              color: 'primary.main',
+                              '& > svg': {
+                                width: 35,
+                                height: 35
+                              }
+                            }}
+                          >
+                            {getPlanIcon(planIndex)}
+                          </Box>
                         </Grid>
-                      </MainCard>
-                    </Box>
-                  );
-                })}
-              </Box>
-              {/* Right Arrow */}
-              <IconButton
-                onClick={handleNext}
-                disabled={centerIndex === maxIndex}
-                sx={{
-                  p: 0,
-                  bgcolor: 'transparent',
-                  boxShadow: 'none',
-                  opacity: centerIndex === maxIndex ? 0.4 : 0.9,
-                  transition: 'opacity 0.2s',
-                  '&:hover': {
-                    opacity: 1,
-                    bgcolor: 'transparent'
-                  }
-                }}
-              >
-                <ArrowForwardIosIcon sx={{ fontSize: 28, color: 'primary.dark', transition: 'font-size 0.2s', '&:hover': { fontSize: 36 } }} />
-              </IconButton>
+                        <Grid size={12}>
+                          <Typography
+                            variant="h6"
+                            sx={{
+                              fontSize: '1.5625rem',
+                              fontWeight: 500,
+                              position: 'relative',
+                              mb: 0.5,
+                              '&:after': {
+                                content: '""',
+                                position: 'absolute',
+                                bottom: -10,
+                                left: 'calc(50% - 25px)',
+                                width: 50,
+                                height: 4,
+                                bgcolor: 'primary.main',
+                                borderRadius: '3px'
+                              }
+                            }}
+                          >
+                            {plan.name}
+                          </Typography>
+                        </Grid>
+                        <Grid size={12}>
+                          <Typography variant="body2">{plan.description}</Typography>
+                        </Grid>
+                        <Grid size={12}>
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              fontSize: '2.1875rem',
+                              fontWeight: 700,
+                              '& > span': {
+                                fontSize: '1.25rem',
+                                fontWeight: 500
+                              }
+                            }}
+                          >
+                            <sup>₹</sup>
+                            {plan.plan_type === 'annually' ? (
+                              <>
+                                {plan.base_price}
+                                <span>/ Year</span>
+                                <br />
+                                <Typography variant="caption" color="text.secondary">
+                                  (₹{(parseFloat(plan.base_price) / 12).toFixed(2)} / Month)
+                                </Typography>
+                              </>
+                            ) : (
+                              <>
+                                {plan.base_price}
+                                <span>/ {plan.plan_type === 'monthly' ? 'Month' : 'Trial'}</span>
+                              </>
+                            )}
+                          </Typography>
+                        </Grid>
+                        <Grid size={12}>
+                          <List
+                            sx={{
+                              m: 0,
+                              p: 0,
+                              '&> li': {
+                                px: 0,
+                                py: 0.625,
+                                '& svg': {
+                                  fill: theme.palette.success.dark
+                                }
+                              }
+                            }}
+                            component="ul"
+                          >
+                            {Object.entries(plan.features_enabled || {}).map(([key, value]) => {
+                              if (key === 'features' && typeof value === 'object') {
+                                // Nested features
+                                return Object.entries(value).map(([subKey, subValue], idx) => (
+                                  <React.Fragment key={subKey}>
+                                    <ListItem>
+                                      <ListItemIcon>
+                                        {typeof subValue === 'boolean' ? (
+                                          subValue ? (
+                                            <CheckTwoToneIcon color="success" sx={{ fontSize: '1.3rem' }} />
+                                          ) : (
+                                            <CloseIcon
+                                              color="inherit"
+                                              sx={{ fontSize: '1.3rem', color: `${theme.palette.error.main} !important` }}
+                                            />
+                                          )
+                                        ) : (
+                                          <CheckTwoToneIcon sx={{ fontSize: '1.3rem' }} />
+                                        )}
+                                      </ListItemIcon>
+                                      <ListItemText
+                                        primary={
+                                          typeof subValue === 'boolean' ? (
+                                            <span style={{ fontWeight: 600 }}>{capitalizeWords(subKey)}</span>
+                                          ) : (
+                                            <>
+                                              <span style={{ fontWeight: 600 }}>{capitalizeWords(subKey)}</span>
+                                              {`: ${Array.isArray(subValue) ? subValue.join(', ') : subValue.toString()}`}
+                                            </>
+                                          )
+                                        }
+                                        primaryTypographyProps={{ color: theme.palette.text.primary }}
+                                      />
+                                    </ListItem>
+                                    <Divider />
+                                  </React.Fragment>
+                                ));
+                              } else if (typeof value === 'object') {
+                                // Add-ons or other nested objects, skip or handle as needed
+                                return null;
+                              } else {
+                                return (
+                                  <React.Fragment key={key}>
+                                    <ListItem>
+                                      <ListItemIcon>
+                                        {typeof value === 'boolean' ? (
+                                          value ? (
+                                            <CheckTwoToneIcon color="success" sx={{ fontSize: '1.3rem' }} />
+                                          ) : (
+                                            <CloseIcon
+                                              color="inherit"
+                                              sx={{ fontSize: '1.3rem', color: `${theme.palette.error.main} !important` }}
+                                            />
+                                          )
+                                        ) : (
+                                          <CheckTwoToneIcon sx={{ fontSize: '1.3rem' }} />
+                                        )}
+                                      </ListItemIcon>
+                                      <ListItemText
+                                        primary={
+                                          typeof value === 'boolean' ? (
+                                            <span style={{ fontWeight: 600 }}>{capitalizeWords(key)}</span>
+                                          ) : (
+                                            <>
+                                              <span style={{ fontWeight: 600 }}>{capitalizeWords(key)}</span>
+                                              {`: ${value}`}
+                                            </>
+                                          )
+                                        }
+                                      />
+                                    </ListItem>
+                                    <Divider />
+                                  </React.Fragment>
+                                );
+                              }
+                            })}
+                          </List>
+                        </Grid>
+                        <Grid size={12}>
+                          <RazorpayPayment
+                            contextId={user.active_context.id}
+                            userId={user.user.id}
+                            plan={plan}
+                            onSuccess={(response) => {
+                              // Handle success (show snackbar, update UI, etc.)
+                              console.log('Payment Success:', response);
+                            }}
+                            onFailure={() => {
+                              // Handle failure/cancel
+                              console.log('Payment Cancelled');
+                            }}
+                          />
+                        </Grid>
+                      </Grid>
+                    </MainCard>
+                  </Box>
+                );
+              })}
             </Box>
-          </>
-        )
+            {/* Right Arrow */}
+            <IconButton
+              onClick={handleNext}
+              disabled={centerIndex === maxIndex}
+              sx={{
+                p: 0,
+                bgcolor: 'transparent',
+                boxShadow: 'none',
+                opacity: centerIndex === maxIndex ? 0.4 : 0.9,
+                transition: 'opacity 0.2s',
+                '&:hover': {
+                  opacity: 1,
+                  bgcolor: 'transparent'
+                }
+              }}
+            >
+              <ArrowForwardIosIcon
+                sx={{ fontSize: 28, color: 'primary.dark', transition: 'font-size 0.2s', '&:hover': { fontSize: 36 } }}
+              />
+            </IconButton>
+          </Box>
+        </>
       )}
     </Card>
   );

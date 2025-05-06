@@ -13,7 +13,6 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
-  useTheme,
   useMediaQuery,
   Table,
   TableBody,
@@ -36,6 +35,45 @@ import BusinessIcon from '@mui/icons-material/Business';
 import WorkIcon from '@mui/icons-material/Work';
 import InfoIcon from '@mui/icons-material/Info';
 
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+// material-ui
+import { alpha, useTheme } from '@mui/material/styles';
+import Alert from '@mui/material/Alert';
+import AlertTitle from '@mui/material/AlertTitle';
+import Grid from '@mui/material/Grid2';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import Tooltip from '@mui/material/Tooltip';
+// project imports
+import { ThemeMode, ThemeDirection } from 'config';
+import MainCard from 'ui-component/cards/MainCard';
+import useConfig from 'hooks/useConfig';
+import { gridSpacing } from 'store/constant';
+import Factory from 'utils/Factory';
+import RazorpayPayment from '../../ManageSubscriptions/RazorpayPayment';
+// assets
+import CheckTwoToneIcon from '@mui/icons-material/CheckTwoTone';
+import TwoWheelerTwoToneIcon from '@mui/icons-material/TwoWheelerTwoTone';
+import AirportShuttleTwoToneIcon from '@mui/icons-material/AirportShuttleTwoTone';
+import DirectionsBoatTwoToneIcon from '@mui/icons-material/DirectionsBoatTwoTone';
+import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+
+const planIcons = [
+  <TwoWheelerTwoToneIcon fontSize="medium" color="inherit" />,
+  <AirportShuttleTwoToneIcon fontSize="medium" />,
+  <DirectionsBoatTwoToneIcon fontSize="medium" />
+  // ...add more icons if you want
+];
+
 const actionLabels = {
   create: 'Create',
   read: 'View',
@@ -54,114 +92,192 @@ const actionLabels = {
 const commonActions = ['create', 'read', 'update', 'delete'];
 const extraActions = ['approve', 'send', 'print', 'export', 'cancel', 'void', 'reconcile', 'generate_report'];
 
-const PermissionsDrawer = ({ open, onClose, selectedUser, selectedPermissions, onPermissionChange, onSave, masterPermissions = [] }) => {
+const PlanDrawer = ({ open, onClose, moduleId, type, selectedService }) => {
   const theme = useTheme();
+  const [searchParams] = useSearchParams();
   const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
-  const [expandedModule, setExpandedModule] = React.useState(null);
-
-  // Function to format permission key
-  const getPermissionKey = (serviceKey, action) => `${serviceKey}.${action}`;
-
-  const handleModuleChange = (moduleId) => {
-    setExpandedModule(expandedModule === moduleId ? null : moduleId);
+  const { themeDirection } = useConfig();
+  const [plans, setPlans] = useState([]);
+  const [centerIndex, setCenterIndex] = useState(1);
+  const user = useSelector((state) => state).accountReducer.user;
+  const priceListDisable = {
+    opacity: '0.4',
+    '& >div> svg': {
+      fill: theme.palette.secondary.light
+    }
   };
 
-  // Transform masterPermissions into the required format with null checks
-  const transformedPermissions = React.useMemo(() => {
-    if (!Array.isArray(masterPermissions)) return [];
+  // Billing type state
+  const [billingType, setBillingType] = useState('annual'); // 'monthly' or 'annual'
 
-    return masterPermissions
-      .map((module) => {
-        if (!module || !Array.isArray(module.features)) return null;
+  // Carousel state
+  const visibleCount = 3;
+  const cardWidth = 420;
+  const cardGap = 24;
 
-        // Group features by service
-        const serviceGroups = module.features.reduce((acc, feature) => {
-          if (!feature.service || !feature.action) return acc;
+  // Filtering logic
+  let filteredPlans = plans;
+  if (type !== 'service') {
+    filteredPlans = plans.filter(
+      (plan) =>
+        plan.plan_type === 'trial' ||
+        (billingType === 'monthly' && plan.plan_type === 'monthly') ||
+        (billingType === 'annual' && plan.plan_type === 'annually')
+    );
+  }
 
-          const serviceKey = feature.service.replace(/\s+/g, ''); // Remove spaces from service name
-          if (!acc[serviceKey]) {
-            acc[serviceKey] = {
-              name: feature.service.replace(/([A-Z])/g, ' $1').trim(), // Add spaces before capital letters
-              actions: [],
-              labels: {}
-            };
-          }
-          acc[serviceKey].actions.push(feature.action.toLowerCase());
-          acc[serviceKey].labels[feature.action.toLowerCase()] = feature.label;
-          return acc;
-        }, {});
+  const minIndex = 1;
+  const maxIndex = filteredPlans.length - 2;
 
-        return {
-          module: module.module_id,
-          module_name: module.module_name || 'Unnamed Module',
-          module_description: module.module_description,
-          subscription_status: module.subscription_status,
-          services: serviceGroups
-        };
-      })
-      .filter(Boolean);
-  }, [masterPermissions]);
-
-  // Check if all permissions for a service are selected
-  const isServiceAllSelected = (serviceKey, service) => {
-    const servicePermissions = service.actions.map((action) => selectedPermissions[getPermissionKey(serviceKey, action)] || false);
-    return servicePermissions.every(Boolean);
+  const handlePrev = () => {
+    setCenterIndex((prev) => Math.max(minIndex, prev - 1));
+  };
+  const handleNext = () => {
+    setCenterIndex((prev) => Math.min(maxIndex, prev + 1));
   };
 
-  // Check if some permissions for a service are selected
-  const isServiceIndeterminate = (serviceKey, service) => {
-    const servicePermissions = service.actions.map((action) => selectedPermissions[getPermissionKey(serviceKey, action)] || false);
-    return servicePermissions.some(Boolean) && !servicePermissions.every(Boolean);
+  // Helper to generate a random color for each card (consistent per render)
+  function getRandomColor(index) {
+    const colors = ['#cb1818', '#6B5B95', '#88B04B', '#9f1d95', '#1da390', '#955251', '#B565A7', '#009B77', '#DD4124', '#45B8AC'];
+    return colors[index % colors.length];
+  }
+
+  // Only show three cards: center, left, right
+  const getVisibleCards = () => {
+    if (filteredPlans.length < 3) return filteredPlans;
+    return filteredPlans.slice(centerIndex - 1, centerIndex + 2);
+  };
+  const visibleCards = getVisibleCards();
+
+  // Example price calculation (replace with your real logic)
+  const getPrice = (plan) => {
+    if (billingType === 'monthly') {
+      return Math.round(plan.base_price / 12);
+    }
+    return plan.base_price;
   };
 
-  // Check if all permissions for an action across all services are selected
-  const isActionAllSelected = (moduleId, action) => {
-    const module = transformedPermissions.find((p) => p?.module === moduleId);
-    if (!module) return false;
+  // Helper to get a random icon for each plan
+  const getPlanIcon = (idx) => planIcons[idx % planIcons.length];
 
-    const actionPermissions = Object.entries(module.services)
-      .filter(([_, service]) => service.actions.includes(action))
-      .map(([serviceKey]) => selectedPermissions[getPermissionKey(serviceKey, action)] || false);
-
-    return actionPermissions.length > 0 && actionPermissions.every(Boolean);
+  function capitalizeWords(str) {
+    if (!str) return '';
+    return str.replace(/\b\w/g, (c) => c.toUpperCase());
+  }
+  const getModulePricing = async () => {
+    const res = await Factory('get', `/user_management/subscription-plans/list/?is_active=yes&module_id=${moduleId}`);
+    if (res.res.status_cd === 0) {
+      setPlans(res.res.data.data);
+    }
   };
-
-  // Check if some permissions for an action across all services are selected
-  const isActionIndeterminate = (moduleId, action) => {
-    const module = transformedPermissions.find((p) => p?.module === moduleId);
-    if (!module) return false;
-
-    const actionPermissions = Object.entries(module.services)
-      .filter(([_, service]) => service.actions.includes(action))
-      .map(([serviceKey]) => selectedPermissions[getPermissionKey(serviceKey, action)] || false);
-
-    return actionPermissions.some(Boolean) && !actionPermissions.every(Boolean);
+  const getServicePricing = async () => {
+    const res = await Factory('get', `/user_management/feature-services/${moduleId}/plans/`);
+    if (res.res.status_cd === 0) {
+      setPlans(res.res.data);
+    }
   };
-
-  // Select/Deselect all permissions for a service
-  const handleSelectAllService = (moduleId, serviceKey, checked) => {
-    const module = transformedPermissions.find((p) => p?.module === moduleId);
-    if (!module || !module.services[serviceKey]) return;
-
-    module.services[serviceKey].actions.forEach((action) => {
-      onPermissionChange(getPermissionKey(serviceKey, action), checked);
-    });
-  };
-
-  // Select/Deselect all permissions for an action
-  const handleSelectAllAction = (moduleId, action, checked) => {
-    const module = transformedPermissions.find((p) => p?.module === moduleId);
-    if (!module) return;
-
-    Object.entries(module.services).forEach(([serviceKey, service]) => {
-      if (service.actions.includes(action)) {
-        onPermissionChange(getPermissionKey(serviceKey, action), checked);
+  useEffect(() => {
+    if (moduleId) {
+      if (type === 'service') {
+        getServicePricing();
+      } else {
+        getModulePricing();
       }
-    });
-  };
+    }
+  }, [moduleId]);
 
-  // Check if there are any permissions to display
-  const hasPermissions = transformedPermissions.length > 0;
+  const ServicePlanCard = ({ plan, onPurchase }) => (
+    <Card
+      sx={{
+        borderRadius: 3,
+        boxShadow: 2,
+        border: '1px solid',
+        borderColor: 'divider',
+        transition: 'box-shadow 0.2s',
+        '&:hover': { boxShadow: 6 },
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column'
+      }}
+    >
+      <CardContent sx={{ p: '0px !important', flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <Stack spacing={2} sx={{ px: 2, py: 1 }}>
+          {/* Header */}
+          <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={2}>
+            <Box display="flex" alignItems="center" gap={1}>
+              <Avatar variant="rounded" sx={{ bgcolor: 'primary.light', color: 'secondary.main' }}>
+                <BusinessCenterIcon fontSize="small" />
+              </Avatar>
+              <Typography variant="h5" fontWeight={700}>
+                {plan.name}
+              </Typography>
+            </Box>
+            <Chip
+              label={capitalizeWords(plan.plan_type)}
+              color="info"
+              variant="outlined"
+              size="small"
+              sx={{ textTransform: 'capitalize', fontWeight: 600 }}
+            />
+          </Stack>
+        </Stack>
+
+        <Divider sx={{ borderColor: 'divider' }} />
+
+        <Stack direction="column" justifyContent="space-between" spacing={2} sx={{ p: 2, flexGrow: 1 }}>
+          {/* Description with Tooltip */}
+          <Tooltip title={plan.description} placement="top" arrow>
+            <Typography
+              variant="body1"
+              color="text.primary"
+              textAlign="center"
+              sx={{
+                display: '-webkit-box',
+                WebkitLineClamp: 3,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                mt: 1,
+                mb: 2,
+                lineHeight: 1.6,
+                minHeight: '3.2em' // Keeps all cards visually even (3 lines × 1.6 lineHeight)
+              }}
+            >
+              {plan.description}
+            </Typography>
+          </Tooltip>
+
+          {/* Price */}
+          <Stack direction="row" alignItems="flex-end" justifyContent="center" spacing={1} sx={{ mb: 0 }}>
+            <Typography variant="h3" color="secondary.main" fontWeight={700}>
+              ₹{plan.amount}&nbsp;
+              <Typography variant="caption" color="text.primary">
+                One Time
+              </Typography>
+            </Typography>
+          </Stack>
+
+          {/* Purchase Button */}
+          <RazorpayPayment
+            type="service"
+            label="Purchase Now"
+            status={'pending'}
+            service_id={moduleId}
+            contextId={user.active_context.id}
+            userId={user.user.id}
+            service_request_id={selectedService.service}
+            plan={plan}
+            onSuccess={(response) => {
+              console.log('Payment Success:', response);
+            }}
+            onFailure={() => {
+              console.log('Payment Cancelled');
+            }}
+          />
+        </Stack>
+      </CardContent>
+    </Card>
+  );
 
   return (
     <Drawer
@@ -175,446 +291,470 @@ const PermissionsDrawer = ({ open, onClose, selectedUser, selectedPermissions, o
         }
       }}
     >
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          mb: 2,
-          pl: 3,
-          pr: 2,
-          pt: 2,
-          borderBottom: 1,
-          borderColor: 'divider',
-          pb: 2
-        }}
-      >
-        <Typography variant="h4" sx={{ color: 'primary.dark' }}>
-          Modify Permissions
-        </Typography>
-        <IconButton
-          onClick={onClose}
-          size="small"
-          sx={{
-            '&:hover': {
-              bgcolor: 'error.lighter'
-            }
-          }}
-        >
-          <CloseIcon fontSize="small" />
-        </IconButton>
-      </Box>
-      <Box
-        sx={{
-          mx: 2,
-          mb: 1,
-          p: 1,
-          bgcolor: 'background.paper',
-          borderRadius: 1,
-          boxShadow: 1,
-          display: 'flex',
-          gap: 2,
-          alignItems: 'center'
-        }}
-      >
-        <Box sx={{ borderRight: '1px solid #d7d7d791', bgcolor: 'primary.lighter', p: 1, pr: 10, display: 'flex', alignItems: 'center' }}>
-          <Avatar
-            sx={{
-              width: 42,
-              height: 42,
-              bgcolor: 'primary.main',
-              fontSize: '1.2rem',
-              color: 'white',
-              mr: 1
-            }}
-          >
-            {selectedUser?.first_name?.[0] + selectedUser?.last_name?.[0] || 'TU'}
-          </Avatar>
-          <Box sx={{ flex: 1 }}>
-            <Box sx={{ display: 'flex', alignItems: 'left', gap: 1, mb: 1 }}>
-              <PersonIcon sx={{ fontSize: '1.2rem', color: 'primary.main' }} />
-              <Typography variant="h5" sx={{ fontWeight: 500 }}>
-                {selectedUser?.first_name + selectedUser?.last_name || 'TaraFirst User'}
-              </Typography>
-            </Box>
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-              {selectedUser?.email && (
-                <Box sx={{ display: 'flex', alignItems: 'left', gap: 0.5 }}>
-                  <EmailIcon sx={{ fontSize: '1.2rem', color: 'text.secondary' }} />
-                  <Typography variant="body1" color="text.secondary">
-                    {selectedUser.email}
-                  </Typography>
-                </Box>
-              )}
-            </Box>
-          </Box>
-        </Box>
-
-        <Box>
-          <Stack direction="row" spacing={1} alignItems="center">
-            <InfoIcon sx={{ color: 'info.main', mt: 0.5 }} />
-            <Typography variant="subtitle1" sx={{ color: 'info.dark', fontStyle: 'italic', fontWeight: 500, mb: 0.5 }}>
-              Module Subscription Required
+      <Card sx={{ pt: 3, pb: 5 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 3, pb: 0 }}>
+          <Box>
+            <Typography variant="h3" color="text.primary">
+              Choose Your {type !== 'service' ? 'Subscription' : 'Service'} Plan
             </Typography>
-          </Stack>
-          <Typography
-            variant="body2"
-            color="info.dark"
-            sx={{
-              fontStyle: 'italic',
-              display: 'flex',
-              alignItems: 'flex-start',
-              gap: 0.5
-            }}
-          >
-            Permission management is tied to your module subscriptions. You can only assign permissions for modules that your organization
-            has subscribed to. Contact your account manager to add more modules to your subscription.
-          </Typography>
-        </Box>
-      </Box>
-      {!hasPermissions ? (
-        <Box sx={{ p: 3, textAlign: 'center' }}>
-          <Typography variant="h6" color="text.secondary">
-            No permissions available
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            There are no subscribed modules with permissions to display.
-          </Typography>
-        </Box>
-      ) : (
-        <Box sx={{ overflow: 'auto', flex: 1, px: 2 }}>
-          {transformedPermissions.map((module) => (
-            <Accordion
-              key={module.module}
-              expanded={expandedModule === module.module}
-              onChange={() => handleModuleChange(module.module)}
+            <Typography variant="caption" sx={{ color: 'text.secondary', mt: 0.5 }}>
+              Select the plan that best fits your business needs.
+            </Typography>
+          </Box>
+          {/* Billing Switcher (only for modules) */}
+          {type !== 'service' && (
+            <Box
               sx={{
-                '&:before': { display: 'none' },
-                boxShadow: 'none',
-                borderRadius: 1,
-                mb: 1,
-                border: 1,
-                borderColor: 'divider'
+                position: 'relative',
+                display: 'flex',
+                bgcolor: '#eef2f6',
+                borderRadius: 3,
+                boxShadow: 0,
+                alignItems: 'center',
+                minWidth: 260,
+                width: 320,
+                height: 48,
+                p: 0.5,
+                overflow: 'hidden'
               }}
             >
-              <AccordionSummary
-                expandIcon={
-                  <ExpandMoreIcon
-                    sx={{
-                      color: 'primary.main',
-                      transform: expandedModule === module.module ? 'rotate(180deg)' : 'rotate(0deg)',
-                      transition: 'transform 0.3s ease-in-out'
+              {/* Sliding Indicator */}
+              <Box
+                sx={{
+                  position: 'absolute',
+                  top: 6,
+                  left: billingType === 'monthly' ? 6 : '50%',
+                  width: 'calc(50% - 6px)',
+                  height: 'calc(100% - 12px)',
+                  bgcolor: '#fff',
+                  borderRadius: 2,
+                  boxShadow: '0 2px 8px 0 rgba(0,0,0,0.03)',
+                  transition: 'left 0.3s cubic-bezier(.4,2,.6,1)',
+                  zIndex: 1
+                }}
+              />
+              {/* Monthly Option */}
+              <Box
+                onClick={() => setBillingType('monthly')}
+                sx={{
+                  flex: 1,
+                  zIndex: 2,
+                  position: 'relative',
+                  textAlign: 'center',
+                  py: 1.2,
+                  fontWeight: 500,
+                  color: billingType === 'monthly' ? 'primary.main' : 'text.primary',
+                  cursor: 'pointer',
+                  fontSize: 16,
+                  borderRadius: 2,
+                  transition: 'color 0.2s',
+                  userSelect: 'none'
+                }}
+              >
+                Monthly
+              </Box>
+              {/* Annual Option */}
+              <Box
+                onClick={() => setBillingType('annual')}
+                sx={{
+                  flex: 1,
+                  zIndex: 2,
+                  position: 'relative',
+                  textAlign: 'center',
+                  py: 1.2,
+                  fontWeight: 500,
+                  color: billingType === 'annual' ? 'primary.main' : 'text.primary',
+                  cursor: 'pointer',
+                  fontSize: 16,
+                  borderRadius: 2,
+                  transition: 'color 0.2s',
+                  userSelect: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                Annual
+                <Box component="span" sx={{ color: 'success.dark', fontWeight: 400, fontSize: 14, ml: 1 }}>
+                  (Save 40%)
+                </Box>
+              </Box>
+            </Box>
+          )}
+        </Box>
+        {/* Service Plans UI */}
+        {type === 'service' ? (
+          filteredPlans.length === 0 ? (
+            <Box sx={{ py: 8, textAlign: 'center' }}>
+              <Typography variant="h5" color="text.secondary">
+                No plans to display.
+              </Typography>
+            </Box>
+          ) : (
+            <Grid container spacing={4} sx={{ p: 3 }}>
+              {filteredPlans.map((plan) => (
+                <Grid size={{ xs: 6, md: 4, lg: 3 }} key={plan.id}>
+                  <ServicePlanCard
+                    plan={plan}
+                    onPurchase={(selectedPlan) => {
+                      // Handle purchase logic here (open Razorpay, etc.)
+                      console.log('Purchase:', selectedPlan);
                     }}
                   />
-                }
+                </Grid>
+              ))}
+            </Grid>
+          )
+        ) : // ...existing carousel UI for modules...
+        filteredPlans.length === 0 ? (
+          <Box sx={{ py: 8, textAlign: 'center' }}>
+            <Typography variant="h5" color="text.secondary">
+              No plans to display.
+            </Typography>
+          </Box>
+        ) : (
+          <>
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 2 }}>
+              {filteredPlans.map((_, idx) => (
+                <Box
+                  key={idx}
+                  onClick={() => {
+                    // Clamp to minIndex and maxIndex
+                    if (idx >= minIndex && idx <= maxIndex) setCenterIndex(idx);
+                  }}
+                  sx={{
+                    width: 12,
+                    height: 12,
+                    borderRadius: '50%',
+                    mx: 0.75,
+                    backgroundColor: idx === centerIndex ? 'primary.main' : 'grey.400',
+                    transition: 'background 0.2s',
+                    border: idx === centerIndex ? '2px solid' : 'none',
+                    borderColor: idx === centerIndex ? 'primary.dark' : 'none',
+                    cursor: idx >= minIndex && idx <= maxIndex ? 'pointer' : 'default',
+                    opacity: idx >= minIndex && idx <= maxIndex ? 1 : 0.4,
+                    '&:hover': {
+                      boxShadow: idx >= minIndex && idx <= maxIndex ? 2 : 'none'
+                    }
+                  }}
+                />
+              ))}
+            </Box>
+            <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+              {/* Left Arrow */}
+              <IconButton
+                onClick={handlePrev}
+                disabled={centerIndex === minIndex}
                 sx={{
-                  bgcolor: expandedModule === module.module ? 'primary.lighter' : 'background.neutral',
-                  transition: 'background-color 0.3s ease-in-out',
+                  p: 0,
+                  bgcolor: 'transparent',
+                  boxShadow: 'none',
+                  opacity: centerIndex === minIndex ? 0.4 : 0.9,
+                  transition: 'opacity 0.2s',
                   '&:hover': {
-                    bgcolor: 'primary.lighter'
-                  },
-                  '& .MuiAccordionSummary-content': {
-                    m: 0
+                    opacity: 1,
+                    bgcolor: 'transparent'
                   }
                 }}
               >
-                <Box
-                  sx={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    width: '100%',
-                    gap: 2
-                  }}
-                >
-                  <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, py: 2 }}>
-                    <Typography
-                      variant="h4"
+                <ArrowBackIosNewIcon
+                  sx={{ fontSize: 28, color: 'primary.dark', transition: 'font-size 0.2s', '&:hover': { fontSize: 36 } }}
+                />
+              </IconButton>
+              {/* Cards Row */}
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  gap: `${cardGap}px`,
+                  overflow: 'hidden',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  position: 'relative',
+                  py: 2
+                }}
+              >
+                {visibleCards.map((plan, idx) => {
+                  const planIndex = centerIndex - 1 + idx;
+                  let scale = 0.9;
+                  let zIndex = 1;
+                  if (idx === 1) {
+                    scale = 1;
+                    zIndex = 2;
+                  }
+                  return (
+                    <Box
+                      key={plan.id}
                       sx={{
-                        fontWeight: 600,
-                        color: 'primary.dark',
-                        mb: 0.5
+                        width: cardWidth,
+                        flex: `0 0 ${cardWidth}px`,
+                        transform: `scale(${scale})`,
+                        transition: 'transform 0.3s cubic-bezier(.4,2,.6,1), box-shadow 0.3s',
+                        zIndex,
+                        boxShadow: idx === 1 ? theme.shadows[8] : theme.shadows[2],
+                        border: idx === 1 ? `1px solid ${getRandomColor(planIndex)}` : 'none',
+                        borderRadius: 2,
+                        background: 'transparent',
+                        position: 'relative'
                       }}
                     >
-                      {module.module_name}
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical',
-                        overflow: 'hidden',
-                        lineHeight: '1.4'
-                      }}
-                    >
-                      {module.module_description}
-                    </Typography>
-                  </Box>
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'flex-end',
-                      minWidth: 100
-                    }}
-                  >
-                    <Chip
-                      label={module.subscription_status.toUpperCase()}
-                      size="small"
-                      color={module.subscription_status === 'trial' ? 'warning' : 'success'}
-                      sx={{
-                        fontWeight: 500,
-                        '& .MuiChip-label': {
-                          px: 1
-                        }
-                      }}
-                    />
-                    <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
-                      {Object.keys(module.services).length} Services
-                    </Typography>
-                  </Box>
-                </Box>
-              </AccordionSummary>
-              <AccordionDetails sx={{ p: 0.5 }}>
-                <TableContainer
-                  component={Paper}
-                  variant="outlined"
-                  sx={{
-                    '& .MuiTableCell-root': {
-                      p: 0.5,
-                      '&:first-of-type': {
-                        pl: 1
-                      }
-                    }
-                  }}
-                >
-                  <Table size="small">
-                    <TableHead>
-                      <TableRow>
-                        <TableCell sx={{ fontWeight: 600, minWidth: 160 }}>Services</TableCell>
-                        <TableCell
-                          colSpan={4}
-                          align="center"
+                      {/* Current Plan Badge as Diagonal Strip */}
+                      {idx === 1 && plan.active && (
+                        <Box
                           sx={{
-                            fontWeight: 600,
-                            bgcolor: 'primary.lighter',
-                            borderBottom: '2px solid',
-                            borderColor: 'primary.main',
-                            py: 0.5
+                            position: 'absolute',
+                            top: 18,
+                            right: -32,
+                            zIndex: 10,
+                            transform: 'rotate(45deg)',
+                            bgcolor: 'success.dark',
+                            color: '#fff',
+                            px: 2.5,
+                            py: 0.5,
+                            fontWeight: 700,
+                            fontSize: 13,
+                            boxShadow: 3,
+                            letterSpacing: 1,
+                            textTransform: 'uppercase',
+                            textAlign: 'center',
+                            minWidth: 80
                           }}
                         >
-                          Common Actions
-                        </TableCell>
-                        {Object.values(module.services).some((service) =>
-                          service.actions.some((action) => !commonActions.includes(action))
-                        ) && (
-                          <TableCell
-                            colSpan={extraActions.filter(action => 
-                              Object.values(module.services).some(service => service.actions.includes(action))
-                            ).length}
-                            align="center"
-                            sx={{
-                              fontWeight: 600,
-                              bgcolor: 'secondary.lighter',
-                              borderBottom: '2px solid',
-                              borderColor: 'secondary.main',
-                              py: 0.5
-                            }}
-                          >
-                            Additional Actions
-                          </TableCell>
-                        )}
-                      </TableRow>
-                      <TableRow>
-                        <TableCell />
-                        {commonActions.map((action) => (
-                          <TableCell
-                            key={action}
-                            align="center"
-                            sx={{
-                              fontWeight: 500,
-                              fontSize: '0.8rem',
-                              py: 0.5,
-                              px: 0.5
-                            }}
-                          >
+                          Current Plan
+                        </Box>
+                      )}
+                      <MainCard
+                        boxShadow
+                        sx={{
+                          pt: 1,
+                          borderTop: `6px solid ${getRandomColor(planIndex)}`,
+                          transition: 'box-shadow 0.3s, border 0.3s',
+                          height: '100%',
+                          '&:hover': {
+                            boxShadow: theme.shadows[8]
+                          }
+                        }}
+                      >
+                        <Grid container spacing={gridSpacing} sx={{ textAlign: 'center' }}>
+                          <Grid size={12}>
                             <Box
                               sx={{
-                                display: 'flex',
-                                flexDirection: 'column',
+                                display: 'inline-flex',
                                 alignItems: 'center',
-                                gap: 0.25
+                                justifyContent: 'center',
+                                borderRadius: '50%',
+                                width: 60,
+                                height: 60,
+                                bgcolor: theme.palette.mode === ThemeMode.DARK ? 'dark.800' : 'primary.light',
+                                color: 'primary.main',
+                                '& > svg': {
+                                  width: 35,
+                                  height: 35
+                                }
                               }}
                             >
-                              <Checkbox
-                                size="small"
-                                onChange={(e) => handleSelectAllAction(module.module, action, e.target.checked)}
-                                checked={isActionAllSelected(module.module, action)}
-                                indeterminate={isActionIndeterminate(module.module, action)}
-                                color="secondary"
-                              />
-                              {actionLabels[action]}
+                              {getPlanIcon(planIndex)}
                             </Box>
-                          </TableCell>
-                        ))}
-                        {extraActions
-                          .filter(action => Object.values(module.services).some(service => service.actions.includes(action)))
-                          .map((action) => (
-                            <TableCell
-                              key={action}
-                              align="center"
+                          </Grid>
+                          <Grid size={12}>
+                            <Typography
+                              variant="h6"
                               sx={{
+                                fontSize: '1.5625rem',
                                 fontWeight: 500,
-                                fontSize: '0.8rem',
-                                py: 0.5,
-                                px: 0.5,
-                                bgcolor: 'secondary.lighter'
+                                position: 'relative',
+                                mb: 0.5,
+                                '&:after': {
+                                  content: '""',
+                                  position: 'absolute',
+                                  bottom: -10,
+                                  left: 'calc(50% - 25px)',
+                                  width: 50,
+                                  height: 4,
+                                  bgcolor: 'primary.main',
+                                  borderRadius: '3px'
+                                }
                               }}
                             >
-                              <Box
-                                sx={{
-                                  display: 'flex',
-                                  flexDirection: 'column',
-                                  alignItems: 'center',
-                                  gap: 0.25
-                                }}
-                              >
-                                <Checkbox
-                                  size="small"
-                                  onChange={(e) => handleSelectAllAction(module.module, action, e.target.checked)}
-                                  checked={isActionAllSelected(module.module, action)}
-                                  indeterminate={isActionIndeterminate(module.module, action)}
-                                  color="secondary"
-                                />
-                                {actionLabels[action]}
-                              </Box>
-                            </TableCell>
-                          ))}
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {Object.entries(module.services).map(([serviceKey, service]) => (
-                        <TableRow
-                          key={serviceKey}
-                          sx={{
-                            '&:last-child td, &:last-child th': { border: 0 },
-                            '&:hover': {
-                              bgcolor: 'action.hover'
-                            }
-                          }}
-                        >
-                          <TableCell
-                            component="th"
-                            scope="row"
-                            sx={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: 0.5,
-                              bgcolor: 'background.paper',
-                              fontSize: '0.9rem'
-                            }}
-                          >
-                            <Checkbox
-                              size="small"
-                              onChange={(e) => handleSelectAllService(module.module, serviceKey, e.target.checked)}
-                              checked={isServiceAllSelected(serviceKey, service)}
-                              indeterminate={isServiceIndeterminate(serviceKey, service)}
-                              color="secondary"
-                            />
-                            {service.name}
-                          </TableCell>
-                          {commonActions.map((action) => (
-                            <TableCell key={action} align="center" sx={{ py: 0.25, px: 0.5 }}>
-                              {service.actions.includes(action) ? (
-                                <Checkbox
-                                  size="small"
-                                  checked={selectedPermissions[getPermissionKey(serviceKey, action)] || false}
-                                  onChange={(e) => onPermissionChange(getPermissionKey(serviceKey, action), e.target.checked)}
-                                  color="secondary"
-                                />
-                              ) : (
-                                <Typography variant="body2" color="text.primary" sx={{ opacity: 0.7, fontSize: '1.75rem' }}>
-                                  -
-                                </Typography>
-                              )}
-                            </TableCell>
-                          ))}
-                          {extraActions
-                            .filter(action => Object.values(module.services).some(s => s.actions.includes(action)))
-                            .map((action) => (
-                              <TableCell key={action} align="center" sx={{ py: 0.25, px: 0.5 }}>
-                                {service.actions.includes(action) ? (
-                                  <Checkbox
-                                    size="small"
-                                    checked={selectedPermissions[getPermissionKey(serviceKey, action)] || false}
-                                    onChange={(e) => onPermissionChange(getPermissionKey(serviceKey, action), e.target.checked)}
-                                    color="secondary"
-                                  />
-                                ) : (
-                                  <Typography variant="h5" color="text.secondary" sx={{ opacity: 0.7, fontSize: '1.75rem' }}>
-                                    -
+                              {plan.name}
+                            </Typography>
+                          </Grid>
+                          <Grid size={12}>
+                            <Typography variant="body2">{plan.description}</Typography>
+                          </Grid>
+                          <Grid size={12}>
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                fontSize: '2.1875rem',
+                                fontWeight: 700,
+                                '& > span': {
+                                  fontSize: '1.25rem',
+                                  fontWeight: 500
+                                }
+                              }}
+                            >
+                              <sup>₹</sup>
+                              {plan.plan_type === 'annually' ? (
+                                <>
+                                  {plan.base_price}
+                                  <span>/ Year</span>
+                                  <br />
+                                  <Typography variant="caption" color="text.secondary">
+                                    (₹{(parseFloat(plan.base_price) / 12).toFixed(2)} / Month)
                                   </Typography>
-                                )}
-                              </TableCell>
-                            ))}
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </AccordionDetails>
-            </Accordion>
-          ))}
-        </Box>
-      )}
-      <Box
-        sx={{
-          mt: 2,
-          display: 'flex',
-          gap: 2,
-          justifyContent: 'flex-end',
-          p: 2,
-          borderTop: 1,
-          borderColor: 'divider',
-          bgcolor: 'background.paper'
-        }}
-      >
-        <Button
-          onClick={onClose}
-          color="error"
-          variant="outlined"
-          size="small"
-          sx={{
-            minWidth: 100,
-            '&:hover': {
-              bgcolor: 'error.lighter'
-            }
-          }}
-        >
-          Cancel
-        </Button>
-        <Button
-          onClick={onSave}
-          variant="contained"
-          size="small"
-          sx={{
-            minWidth: 100,
-            '&:hover': {
-              bgcolor: 'primary.dark'
-            }
-          }}
-        >
-          Save Changes
-        </Button>
-      </Box>
+                                </>
+                              ) : (
+                                <>
+                                  {plan.base_price}
+                                  <span>/ {plan.plan_type === 'monthly' ? 'Month' : 'Trial'}</span>
+                                </>
+                              )}
+                            </Typography>
+                          </Grid>
+                          <Grid size={12}>
+                            <List
+                              sx={{
+                                m: 0,
+                                p: 0,
+                                '&> li': {
+                                  px: 0,
+                                  py: 0.625,
+                                  '& svg': {
+                                    fill: theme.palette.success.dark
+                                  }
+                                }
+                              }}
+                              component="ul"
+                            >
+                              {Object.entries(plan.features_enabled || {}).map(([key, value]) => {
+                                if (key === 'features' && typeof value === 'object') {
+                                  // Nested features
+                                  return Object.entries(value).map(([subKey, subValue], idx) => (
+                                    <React.Fragment key={subKey}>
+                                      <ListItem>
+                                        <ListItemIcon>
+                                          {typeof subValue === 'boolean' ? (
+                                            subValue ? (
+                                              <CheckTwoToneIcon color="success" sx={{ fontSize: '1.3rem' }} />
+                                            ) : (
+                                              <CloseIcon
+                                                color="inherit"
+                                                sx={{ fontSize: '1.3rem', color: `${theme.palette.error.main} !important` }}
+                                              />
+                                            )
+                                          ) : (
+                                            <CheckTwoToneIcon sx={{ fontSize: '1.3rem' }} />
+                                          )}
+                                        </ListItemIcon>
+                                        <ListItemText
+                                          primary={
+                                            typeof subValue === 'boolean' ? (
+                                              <span style={{ fontWeight: 600 }}>{capitalizeWords(subKey)}</span>
+                                            ) : (
+                                              <>
+                                                <span style={{ fontWeight: 600 }}>{capitalizeWords(subKey)}</span>
+                                                {`: ${Array.isArray(subValue) ? subValue.join(', ') : subValue.toString()}`}
+                                              </>
+                                            )
+                                          }
+                                          primaryTypographyProps={{ color: theme.palette.text.primary }}
+                                        />
+                                      </ListItem>
+                                      <Divider />
+                                    </React.Fragment>
+                                  ));
+                                } else if (typeof value === 'object') {
+                                  // Add-ons or other nested objects, skip or handle as needed
+                                  return null;
+                                } else {
+                                  return (
+                                    <React.Fragment key={key}>
+                                      <ListItem>
+                                        <ListItemIcon>
+                                          {typeof value === 'boolean' ? (
+                                            value ? (
+                                              <CheckTwoToneIcon color="success" sx={{ fontSize: '1.3rem' }} />
+                                            ) : (
+                                              <CloseIcon
+                                                color="inherit"
+                                                sx={{ fontSize: '1.3rem', color: `${theme.palette.error.main} !important` }}
+                                              />
+                                            )
+                                          ) : (
+                                            <CheckTwoToneIcon sx={{ fontSize: '1.3rem' }} />
+                                          )}
+                                        </ListItemIcon>
+                                        <ListItemText
+                                          primary={
+                                            typeof value === 'boolean' ? (
+                                              <span style={{ fontWeight: 600 }}>{capitalizeWords(key)}</span>
+                                            ) : (
+                                              <>
+                                                <span style={{ fontWeight: 600 }}>{capitalizeWords(key)}</span>
+                                                {`: ${value}`}
+                                              </>
+                                            )
+                                          }
+                                        />
+                                      </ListItem>
+                                      <Divider />
+                                    </React.Fragment>
+                                  );
+                                }
+                              })}
+                            </List>
+                          </Grid>
+                          <Grid size={12}>
+                            <RazorpayPayment
+                              contextId={user.active_context.id}
+                              userId={user.user.id}
+                              plan={plan}
+                              onSuccess={(response) => {
+                                // Handle success (show snackbar, update UI, etc.)
+                                console.log('Payment Success:', response);
+                              }}
+                              onFailure={() => {
+                                // Handle failure/cancel
+                                console.log('Payment Cancelled');
+                              }}
+                            />
+                          </Grid>
+                        </Grid>
+                      </MainCard>
+                    </Box>
+                  );
+                })}
+              </Box>
+              {/* Right Arrow */}
+              <IconButton
+                onClick={handleNext}
+                disabled={centerIndex === maxIndex}
+                sx={{
+                  p: 0,
+                  bgcolor: 'transparent',
+                  boxShadow: 'none',
+                  opacity: centerIndex === maxIndex ? 0.4 : 0.9,
+                  transition: 'opacity 0.2s',
+                  '&:hover': {
+                    opacity: 1,
+                    bgcolor: 'transparent'
+                  }
+                }}
+              >
+                <ArrowForwardIosIcon
+                  sx={{ fontSize: 28, color: 'primary.dark', transition: 'font-size 0.2s', '&:hover': { fontSize: 36 } }}
+                />
+              </IconButton>
+            </Box>
+          </>
+        )}
+      </Card>
     </Drawer>
   );
 };
 
-PermissionsDrawer.propTypes = {
+PlanDrawer.propTypes = {
   open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   selectedUser: PropTypes.object,
@@ -624,4 +764,4 @@ PermissionsDrawer.propTypes = {
   masterPermissions: PropTypes.array
 };
 
-export default PermissionsDrawer;
+export default PlanDrawer;

@@ -17,6 +17,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
 import Switch from '@mui/material/Switch';
 import FormControlLabel from '@mui/material/FormControlLabel';
+import Button from '@mui/material/Button';
 
 // project imports
 import Avatar from 'ui-component/extended/Avatar';
@@ -63,10 +64,12 @@ const getRoleColor = (roleType) => {
     }
   };
 
-  return colorMap[roleType?.toLowerCase()] || {
-    bgcolor: 'info.dark',
-    color: '#fff'
-  };
+  return (
+    colorMap[roleType?.toLowerCase()] || {
+      bgcolor: 'info.dark',
+      color: '#fff'
+    }
+  );
 };
 
 const getInitials = (first_name, last_name, email) => {
@@ -96,15 +99,14 @@ const getFullName = (first_name, last_name, email) => {
 };
 
 const UserList = ({ page, rowsPerPage, searchQuery, onTotalUsers, onOpenPermissions, loading, users }) => {
+  console.log(users);
   const filteredUsers = React.useMemo(() => {
     if (!searchQuery) return users;
-
     return users.filter(
-      (user) =>
-        user.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.first_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.last_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.mobile_number?.includes(searchQuery)
+      (task) =>
+        task.service_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        task.plan_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        task.status?.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [users, searchQuery]);
 
@@ -149,7 +151,7 @@ const UserList = ({ page, rowsPerPage, searchQuery, onTotalUsers, onOpenPermissi
       >
         <PersonIcon sx={{ fontSize: 48, color: 'text.secondary', opacity: 0.5 }} />
         <Typography variant="h6" color="text.secondary">
-          {searchQuery ? 'No users found matching your search' : 'No users found'}
+          {searchQuery ? 'No tasks found matching your search' : 'No tasks found'}
         </Typography>
       </Box>
     );
@@ -161,164 +163,42 @@ const UserList = ({ page, rowsPerPage, searchQuery, onTotalUsers, onOpenPermissi
         <TableHead>
           <TableRow>
             <TableCell sx={{ pl: 3 }}>S.No</TableCell>
-            <TableCell sx={{ p: 1.5 }}>ID</TableCell>
-            <TableCell sx={{ p: 1.5 }}>User Profile</TableCell>
-            <TableCell sx={{ p: 1.5 }}>Role</TableCell>
-            <TableCell sx={{ p: 1.5 }}>Mobile</TableCell>
-            <TableCell sx={{ p: 1.5 }}>Added By</TableCell>
-            <TableCell sx={{ p: 1.5 }}>Status</TableCell>
-            <TableCell align="center" sx={{ pr: 2 }}>
-              Permissions
-            </TableCell>
+            <TableCell>Task ID</TableCell>
+            <TableCell>Service Name</TableCell>
+            <TableCell>Plan Name</TableCell>
+            <TableCell>Status</TableCell>
+            <TableCell>Created At</TableCell>
+            <TableCell>Updated At</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
-          {filteredUsers.map((user, index) => (
-            <TableRow hover key={user.user_id}>
+          {filteredUsers.map((task, index) => (
+            <TableRow hover key={task.id}>
               <TableCell sx={{ pl: 3 }}>{(page - 1) * rowsPerPage + index + 1}</TableCell>
-              <TableCell sx={{ p: 1.8 }}>{user.user_id}</TableCell>
-              <TableCell sx={{ p: 1.8 }}>
-                <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-                  <Avatar
-                    color="primary"
-                    sx={{
-                      width: 38,
-                      height: 38,
-                      bgcolor: (theme) => theme.palette.primary.light,
-                      color: (theme) => theme.palette.primary.dark
-                    }}
-                  >
-                    {getInitials(user.first_name, user.last_name, user.email)}
-                  </Avatar>
-                  <Stack>
-                    <Typography variant="body1">{getFullName(user.first_name, user.last_name, user.email)}</Typography>
-                    <Typography variant="caption" noWrap>
-                      {user.email}
-                    </Typography>
-                  </Stack>
-                </Stack>
-              </TableCell>
+              <TableCell>{task.id}</TableCell>
+              <TableCell>{task.service_name}</TableCell>
+              <TableCell>{task.plan_name}</TableCell>
               <TableCell>
-                {user.role && (
+                {task.status === 'paid' ? (
                   <Chip
-                    label={user.role.role_name}
+                    label={task.status.charAt(0).toUpperCase() + task.status.slice(1)}
+                    color="success"
                     size="small"
-                    sx={{ 
-                      height: 20,
-                      bgcolor: (theme) => getRoleColor(user.role.role_type).bgcolor,
-                      color: getRoleColor(user.role.role_type).color,
-                      fontWeight: 500,
-                      '& .MuiChip-label': {
-                        px: 1
-                      }
-                    }}
+                    sx={{ fontWeight: 500 }}
                   />
-                )}
-              </TableCell>
-              <TableCell>{user.mobile_number || '-'}</TableCell>
-              <TableCell>
-                {user.role?.added_by ? (
-                  <Stack>
-                    <Typography variant="body1">
-                      {user.role.added_by.name !== 'Unknown'
-                        ? capitalizeFirstLetter(user.role.added_by.name)
-                        : getFullName(null, null, user.role.added_by.email)}
-                    </Typography>
-                    <Typography variant="caption" color="textSecondary">
-                      {user.role.added_by.email}
-                    </Typography>
-                  </Stack>
                 ) : (
-                  '-'
+                  <Button
+                    variant="text"
+                    color="primary"
+                    size="small"
+                    onClick={() => onOpenPermissions(task)}
+                  >
+                    Complete Payment
+                  </Button>
                 )}
               </TableCell>
-              <TableCell>
-                <Stack spacing={0.4} alignItems="flex-start">
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        color: user.status === 'active' ? 'success.darker' : user.status === 'pending' ? 'warning.dark' : 'error.dark',
-                        fontWeight: 500
-                      }}
-                    >
-                      {user.status === 'active' ? 'Active' : user.status === 'pending' ? 'Pending Invitation' : 'Inactive'}
-                    </Typography>
-                    {user.status === 'pending' && (
-                      <Tooltip title="User needs to accept the invitation email to activate their account" placement="top">
-                        <InfoIcon
-                          sx={{
-                            fontSize: '1rem',
-                            color: 'warning.main',
-                            cursor: 'help'
-                          }}
-                        />
-                      </Tooltip>
-                    )}
-                  </Box>
-                  {user.status === 'pending' ? (
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
-                      sx={{
-                        fontStyle: 'italic',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 0.5
-                      }}
-                    >
-                      Waiting for user to accept invitation
-                    </Typography>
-                  ) : (
-                    <Switch
-                      size="small"
-                      checked={user.status === 'active'}
-                      onChange={() => handleStatusChange(user.user_id, user.status)}
-                      color="success"
-                      sx={{
-                        mt: 0,
-                        '& .MuiSwitch-switchBase.Mui-checked': {
-                          color: 'success.dark',
-                          '&:hover': {
-                            bgcolor: 'success.lighter'
-                          }
-                        },
-                        '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                          bgcolor: 'success.light'
-                        },
-                        '& .MuiSwitch-switchBase': {
-                          color: 'error.light',
-                          '&:hover': {
-                            bgcolor: 'error.lighter'
-                          }
-                        },
-                        '& .MuiSwitch-track': {
-                          bgcolor: 'error.light'
-                        }
-                      }}
-                    />
-                  )}
-                </Stack>
-              </TableCell>
-              <TableCell align="center" sx={{ pr: 2 }}>
-                <Stack direction="row" sx={{ justifyContent: 'center', alignItems: 'center' }}>
-                  <Tooltip placement="top" title="Modify Permissions">
-                    <IconButton
-                      onClick={() => onOpenPermissions(user)}
-                      color="secondary"
-                      size="small"
-                      sx={{
-                        color: 'secondary.dark',
-                        '&:hover': {
-                          bgcolor: 'secondary.lighter'
-                        }
-                      }}
-                    >
-                      <AdminPanelSettingsIcon sx={{ fontSize: '1.8rem' }} />
-                    </IconButton>
-                  </Tooltip>
-                </Stack>
-              </TableCell>
+              <TableCell>{task.created_at ? new Date(task.created_at).toLocaleString() : '-'}</TableCell>
+              <TableCell>{task.updated_at ? new Date(task.updated_at).toLocaleString() : '-'}</TableCell>
             </TableRow>
           ))}
         </TableBody>

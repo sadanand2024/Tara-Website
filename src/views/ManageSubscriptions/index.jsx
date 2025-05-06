@@ -65,7 +65,6 @@ const SubscriptionCard = ({ module, planName, price, expiry, trial, status, auto
         }
       }}
     >
-      {/* Status Chip at top right */}
       <Chip
         label={status === 'trial' ? 'Trial' : status.charAt(0).toUpperCase() + status.slice(1)}
         color={getStatusColor(status)}
@@ -78,20 +77,19 @@ const SubscriptionCard = ({ module, planName, price, expiry, trial, status, auto
           zIndex: 2
         }}
       />
-      <CardContent>
-        <Stack spacing={2}>
+      <CardContent sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+        <Stack spacing={2} sx={{ flexGrow: 1 }}>
           <Stack direction="row" alignItems="center" spacing={2}>
             <Avatar sx={{ bgcolor: 'primary.main', color: 'white' }}>
               <PaymentIcon />
             </Avatar>
             <Box>
-              <Typography variant="h6" fontWeight={700}>
+              <Typography variant="h5" fontWeight={700}>
                 {planName}
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 {module}
               </Typography>
-              {/* Description below module name */}
               {description && (
                 <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
                   {description}
@@ -99,7 +97,7 @@ const SubscriptionCard = ({ module, planName, price, expiry, trial, status, auto
               )}
             </Box>
           </Stack>
-          {/* Valid till and pricing on the same line */}
+
           <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1}>
             <Chip
               label={`Valid till: ${expiry}`}
@@ -107,25 +105,11 @@ const SubscriptionCard = ({ module, planName, price, expiry, trial, status, auto
               size="small"
               sx={{ fontWeight: 500 }}
             />
-            {/* <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                bgcolor: 'grey.100',
-                borderRadius: 1,
-                px: 1.5,
-                py: 0.5,
-                minWidth: 90,
-                justifyContent: 'center',
-                fontWeight: 600
-              }}
-            > */}
             <Stack
               direction="row"
               alignItems="center"
               sx={{
                 display: 'flex',
-                alignItems: 'center',
                 bgcolor: 'secondary.light',
                 color: 'secondary.main',
                 borderRadius: 8,
@@ -149,35 +133,36 @@ const SubscriptionCard = ({ module, planName, price, expiry, trial, status, auto
                   sx={{ ml: 1, height: 22, fontSize: '0.75rem', fontWeight: 500 }}
                 />
               )}
-              {/* </Box> */}
             </Stack>
           </Stack>
-          <Stack direction={{ xs: 'column', sm: 'row', justifyContent: 'space-between' }} spacing={1}>
-            <Button
-              variant="contained"
-              size="small"
-              fullWidth={isMobile}
-              startIcon={<UpgradeIcon />}
-              sx={{
-                fontWeight: 600,
-                background: (theme) => `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`
-              }}
-            >
-              Upgrade/Change Plan
-            </Button>
-            <Button
-              variant="outlined"
-              size="small"
-              fullWidth={isMobile}
-              startIcon={<VisibilityIcon />}
-              sx={{
-                fontWeight: 600,
-                borderColor: 'primary.main'
-              }}
-            >
-              View Usage
-            </Button>
-          </Stack>
+        </Stack>
+
+        {/* ⬇️ Buttons are now outside the growing content stack */}
+        <Stack direction="row" justifyContent="space-between" spacing={1} sx={{ mt: 2 }}>
+          <Button
+            variant="contained"
+            size="small"
+            fullWidth={isMobile}
+            startIcon={<UpgradeIcon />}
+            sx={{
+              fontWeight: 600,
+              background: (theme) => `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`
+            }}
+          >
+            Upgrade/Change Plan
+          </Button>
+          <Button
+            variant="outlined"
+            size="small"
+            fullWidth={isMobile}
+            startIcon={<VisibilityIcon />}
+            sx={{
+              fontWeight: 600,
+              borderColor: 'primary.main'
+            }}
+          >
+            View Usage
+          </Button>
         </Stack>
       </CardContent>
     </Card>

@@ -1,10 +1,11 @@
 import pages from './pages';
-import Dashboard from './dashboard';
+import getDashboardMenu from './dashboard';
 
 // ==============================|| MENU ITEMS ||============================== //
 
-const menuItems = {
-  items: [Dashboard]
-};
+// Usage: menuItems(user, subscriptions)
+const menuItems = (user, subscriptions) => ({
+  items: [getDashboardMenu(user, subscriptions), pages]
+});
 
-export default menuItems; 
+export default menuItems;
