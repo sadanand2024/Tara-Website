@@ -21,7 +21,7 @@ const pfFields = [
   { name: 'employer_contribution_rate', label: 'Employer Contribution Rate' }
 ];
 
-const employeeContributionRates = ['12% of Actual PF Wage', '12% of Restricted Wage of 15,000'];
+const employeeContributionRates = ['12% of Actual PF Wage', '12% of Restricted Wage of ₹ 15,000 [1800]'];
 
 function EpfComponent({ handleNext }) {
   const [open, setOpen] = useState(false);
@@ -166,19 +166,18 @@ function EpfComponent({ handleNext }) {
       ) : (
         <MainCard title="Employees Provident Fund">
           <Grid2 size={12}>
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', textAlign: 'center' }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', textAlign: 'center' }}>
               <Grid2 container spacing={2} sx={{ maxWidth: '600px' }}>
                 {epfData && (
                   <>
                     <Grid2 size={6}>
-                      <Typography variant="h5" sx={{ textAlign: 'left', whiteSpace: 'nowrap' }}>
+                      <Typography variant="h4" sx={{ textAlign: 'left', whiteSpace: 'nowrap' }}>
                         Employees Provident Fund
                       </Typography>
                     </Grid2>
                     <Grid2 size={6}>
                       <Box sx={{ textAlign: 'left' }}>
                         <Button
-                          size="small"
                           variant="contained"
                           type="button"
                           startIcon={epfData ? <IconEdit size={16} /> : <IconPlus size={16} />}
@@ -199,33 +198,33 @@ function EpfComponent({ handleNext }) {
                   <>
                     {/* EPF Data display */}
                     <Grid2 size={6}>
-                      <Typography variant="body1" sx={{ textAlign: 'left' }}>
+                      <Typography variant="subtitle1" sx={{ textAlign: 'left' }}>
                         EPF Number:
                       </Typography>
                     </Grid2>
                     <Grid2 size={6}>
-                      <Typography variant="body1" sx={{ textAlign: 'left' }}>
+                      <Typography variant="subtitle1" sx={{ textAlign: 'left' }}>
                         {epfData.epf_number}
                       </Typography>
                     </Grid2>
                     <Grid2 size={6}>
-                      <Typography variant="body1" sx={{ textAlign: 'left' }}>
+                      <Typography variant="subtitle1" sx={{ textAlign: 'left' }}>
                         Employee Contribution Rate:
                       </Typography>
                     </Grid2>
                     <Grid2 size={6}>
-                      <Typography variant="body1" sx={{ textAlign: 'left' }}>
+                      <Typography variant="subtitle1" sx={{ textAlign: 'left' }}>
                         {epfData.employee_contribution_rate}
                       </Typography>
                     </Grid2>
 
                     <Grid2 size={6}>
-                      <Typography variant="body1" sx={{ textAlign: 'left' }}>
+                      <Typography variant="subtitle1" sx={{ textAlign: 'left' }}>
                         Employer Contribution Rate:
                       </Typography>
                     </Grid2>
                     <Grid2 size={6}>
-                      <Typography variant="body1" sx={{ textAlign: 'left' }}>
+                      <Typography variant="subtitle1" sx={{ textAlign: 'left' }}>
                         {epfData.employer_contribution_rate}
                       </Typography>
                     </Grid2>
@@ -258,34 +257,34 @@ function EpfComponent({ handleNext }) {
                     </Grid2>
 
                     <Grid2 size={6}>
-                      <Typography variant="body1" sx={{ textAlign: 'left' }}>
+                      <Typography variant="subtitle1" sx={{ textAlign: 'left' }}>
                         Allow employee level override PF contribution rate:
                       </Typography>
                     </Grid2>
                     <Grid2 size={6}>
-                      <Typography variant="body1" sx={{ textAlign: 'left' }}>
+                      <Typography variant="subtitle1" sx={{ textAlign: 'left' }}>
                         {epfData?.allow_employee_level_override === true ? 'Yes' : 'No'}
                       </Typography>
                     </Grid2>
 
                     <Grid2 size={6}>
-                      <Typography variant="body1" sx={{ textAlign: 'left' }}>
+                      <Typography variant="subtitle1" sx={{ textAlign: 'left' }}>
                         Pro rate restricted PF wage:
                       </Typography>
                     </Grid2>
                     <Grid2 size={6}>
-                      <Typography variant="body1" sx={{ textAlign: 'left' }}>
+                      <Typography variant="subtitle1" sx={{ textAlign: 'left' }}>
                         {epfData?.prorate_restricted_pf_wage === true ? 'Yes' : 'No'}
                       </Typography>
                     </Grid2>
 
                     <Grid2 size={6}>
-                      <Typography variant="body1" sx={{ textAlign: 'left' }}>
+                      <Typography variant="subtitle1" sx={{ textAlign: 'left' }}>
                         Consider applicable salary components based on LOP.
                       </Typography>
                     </Grid2>
                     <Grid2 size={6}>
-                      <Typography variant="body1" sx={{ textAlign: 'left' }}>
+                      <Typography variant="subtitle1" sx={{ textAlign: 'left' }}>
                         {epfData?.apply_components_if_wage_below_15k === true ? 'Yes' : 'No'}
                       </Typography>
                     </Grid2>
@@ -414,7 +413,7 @@ function EpfComponent({ handleNext }) {
               <Grid2 size={{ xs: 12, sm: 6 }}>
                 <div>
                   <FormControlLabel
-                    label="Include Employer's Contribution in the CTC"
+                    label="Include Employer's Contribution in employees CTC"
                     control={
                       <Checkbox
                         checked={formik.values.include_employer_contribution_in_ctc}
@@ -433,7 +432,7 @@ function EpfComponent({ handleNext }) {
 
                   <Box sx={{ display: 'flex', flexDirection: 'column', ml: 3 }}>
                     <FormControlLabel
-                      label="Include Employer's EDIL Contribution in the CTC"
+                      label="Include Employer's EDIL Contribution in employees CTC"
                       control={
                         <Checkbox
                           checked={formik.values.employer_edil_contribution_in_ctc}
@@ -443,7 +442,7 @@ function EpfComponent({ handleNext }) {
                       }
                     />
                     <FormControlLabel
-                      label="Include Admin Charges in the CTC"
+                      label="Include Admin Charges in employees CTC"
                       control={
                         <Checkbox
                           checked={formik.values.admin_charge_in_ctc}
@@ -465,7 +464,7 @@ function EpfComponent({ handleNext }) {
                       onChange={(e) => formik.setFieldValue('allow_employee_level_override', e.target.checked)}
                     />
                   }
-                  label="Allow Employee Level Override"
+                  label="Allow Employee to override PF contribution rate"
                 />
                 <FormControlLabel
                   control={
@@ -474,7 +473,7 @@ function EpfComponent({ handleNext }) {
                       onChange={(e) => formik.setFieldValue('prorate_restricted_pf_wage', e.target.checked)}
                     />
                   }
-                  label="Pro-rate Restricted PF Wage"
+                  label="Pro-Rate Restricted PF Wage"
                 />{' '}
                 <FormControlLabel
                   control={
@@ -483,7 +482,7 @@ function EpfComponent({ handleNext }) {
                       onChange={(e) => formik.setFieldValue('apply_components_if_wage_below_15k', e.target.checked)}
                     />
                   }
-                  label="Consider all applicable salary components if the PF wage is less than ₹150,000 after deducting loss of pay."
+                  label="Consider all applicable salary components if the PF wage is less than ₹150,000 after loss of pay."
                 />{' '}
               </FormGroup>
             </Box>

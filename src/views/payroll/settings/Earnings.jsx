@@ -28,10 +28,15 @@ import { useNavigate, useSearchParams } from 'react-router';
 import Factory from 'utils/Factory';
 import ActionCell from 'ui-component/extended/ActionCell';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-
+import { useDispatch } from 'store';
+import { openSnackbar } from 'store/slices/snackbar';
 const validationSchema = Yup.object({
   component_name: Yup.string().required('Name is required'),
-  component_type: Yup.string().required('Type is required')
+  component_type: Yup.string().required('Type is required'),
+  calculation_type: Yup.object().shape({
+    type: Yup.string().required('Calculation type is required'),
+    value: Yup.number().required('Value is required').min(0.01, 'Value must be greater than 0').typeError('Please enter a valid number')
+  })
 });
 
 function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, setPostType }) {
@@ -42,7 +47,7 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
   const [searchParams] = useSearchParams();
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 8;
-
+  const dispatch = useDispatch();
   const handlePageChange = (event, value) => {
     setCurrentPage(value);
   };
@@ -66,7 +71,15 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
     let url = `/payroll/earnings/${item.id}`;
     const { res } = await Factory('get', url, {});
     if (res.status_cd === 1) {
-      // showSnackbar(JSON.stringify(res.data), 'error');
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res.data),
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     } else {
       setPostType('put');
       setValues(res.data);
@@ -77,9 +90,25 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
     let url = `/payroll/earnings/${item.id}`;
     const { res } = await Factory('delete', url, {});
     if (res.status_cd === 1) {
-      // showSnackbar(JSON.stringify(res.data), 'error');
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res.data),
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     } else {
-      // showSnackbar('Record Deleted Successfully', 'success');
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Record Deleted Successfully',
+          variant: 'alert',
+          alert: { color: 'success' },
+          close: false
+        })
+      );
       getEarnings_Details(payrollid);
     }
   };
@@ -113,13 +142,27 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
       const { res, error } = await Factory(postType, url, postData);
       setLoading(false);
       if (res.status_cd === 0) {
-        // showSnackbar(postType === 'post' ? 'Data Saved Successfully' : 'Data Updated Successfully', 'success');
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: postType === 'post' ? 'Data Saved Successfully' : 'Data Updated Successfully',
+            variant: 'alert',
+            alert: { color: 'success' },
+            close: false
+          })
+        );
         handleClose();
-
         getEarnings_Details(payrollid);
-        navigate(-1);
       } else {
-        // showSnackbar(JSON.stringify(res.data.data), 'error');
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: JSON.stringify(res.data.data),
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
       }
     }
   });
@@ -132,6 +175,15 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
     if (res.status_cd === 0) {
       setEarningsData(res.data);
     } else {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res.data.data),
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     }
   };
   useEffect(() => {
@@ -199,21 +251,19 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
                         <TableCell align="center">{item.is_active ? 'Active' : 'Inactive'}</TableCell>
 
                         <TableCell align="center">
-                          {item.component_name !== 'Basic' && (
-                            <ActionCell
-                              row={item}
-                              onEdit={() => handleEdit(item)}
-                              onDelete={() => handleDelete(item)}
-                              open={open}
-                              onClose={handleClose}
-                              deleteDialogData={{
-                                title: 'Delete Record',
-                                heading: 'Are you sure you want to delete this record?',
-                                description: `This action will remove ${item.component_name} from the list.`,
-                                successMessage: 'Record has been deleted.'
-                              }}
-                            />
-                          )}
+                          <ActionCell
+                            row={item}
+                            onEdit={() => handleEdit(item)}
+                            onDelete={() => handleDelete(item)}
+                            open={open}
+                            onClose={handleClose}
+                            deleteDialogData={{
+                              title: 'Delete Record',
+                              heading: 'Are you sure you want to delete this record?',
+                              description: `This action will remove ${item.component_name} from the list.`,
+                              successMessage: 'Record has been deleted.'
+                            }}
+                          />
                         </TableCell>
                       </TableRow>
                     ))
@@ -307,9 +357,12 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
                                 <Checkbox
                                   checked={values.calculation_type.type === 'Flat Amount'}
                                   onChange={(e) => {
-                                    setFieldValue('calculation_type.type', 'Flat Amount');
+                                    setFieldValue('calculation_type', {
+                                      type: 'Flat Amount',
+                                      value: 0
+                                    });
                                   }}
-                                  disabled={values.component_name === 'Basic'}
+                                  // disabled={values.component_name === 'Basic'}
                                 />
                               }
                               label="Flat Amount"
@@ -323,7 +376,10 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
                                       values.calculation_type.type === 'Percentage of Basic'
                                     }
                                     onChange={(e) => {
-                                      setFieldValue('calculation_type.type', 'Percentage of Basic');
+                                      setFieldValue('calculation_type', {
+                                        type: 'Percentage of Basic',
+                                        value: 0
+                                      });
                                     }}
                                   />
                                 }
@@ -338,7 +394,10 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
                                       values.calculation_type.type === 'Percentage of Basic'
                                     }
                                     onChange={(e) => {
-                                      setFieldValue('calculation_type.type', 'Percentage of Basic');
+                                      setFieldValue('calculation_type', {
+                                        type: 'Percentage of Basic',
+                                        value: 0
+                                      });
                                     }}
                                   />
                                 }
@@ -361,8 +420,8 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
                                 setFieldValue('calculation_type.value', numericValue);
                               }}
                               onBlur={handleBlur}
-                              // error={touched.calculation_type.value && Boolean(errors.calculation_type.value)}
-                              // helperText={touched.calculation_type.value && errors.calculation_type.value}
+                              error={touched.calculation_type?.value && Boolean(errors.calculation_type?.value)}
+                              helperText={touched.calculation_type?.value && errors.calculation_type?.value}
                               InputProps={{
                                 startAdornment: (
                                   <InputAdornment position="start" sx={{ display: 'flex', alignItems: 'center' }}>

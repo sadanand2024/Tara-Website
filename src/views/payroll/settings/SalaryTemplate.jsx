@@ -42,10 +42,39 @@ function SalaryTemplate() {
       benefits: [],
       total_ctc: { monthly: 0, annually: 0 },
       deductions: [],
-      net_salary: { monthly: 0, annually: 0 }
+      net_salary: { monthly: 0, annually: 0 },
+      errorMessage: ''
     },
     validationSchema,
     onSubmit: async (values) => {
+      // Calculate Fixed Allowance
+      const totalEarnings = values.earnings.reduce((sum, earning) => {
+        if (earning.component_name !== 'Fixed Allowance') {
+          return sum + parseFloat(earning.annually || 0);
+        }
+        return sum;
+      }, 0);
+      const annualCtc = parseFloat(values.annual_ctc || 0);
+      const fixedAllowance = annualCtc - totalEarnings;
+
+      // Validate Fixed Allowance
+      if (fixedAllowance <= 0) {
+        setValues((prev) => ({
+          ...prev,
+          errorMessage: 'The system calculated Fixed Allowance cannot be less than zero. Check and enter valid salary details.'
+        }));
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'The system calculated Fixed Allowance cannot be less than zero. Check and enter valid salary details.',
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
+        return;
+      }
+
       const postData = { ...values, payroll: payrollid };
       const url = templateId ? `/payroll/salary-templates/${templateId}` : `/payroll/salary-templates`;
       const method = templateId ? 'put' : 'post';

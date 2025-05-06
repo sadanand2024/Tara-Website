@@ -43,10 +43,9 @@ export default function DesignationDialog({ open, handleClose, fetchDesignations
             close: false
           })
         );
+        handleClose();
         fetchDesignations();
         resetForm();
-        setType('');
-        handleClose();
       } else {
         dispatchSnackbar(
           openSnackbar({
