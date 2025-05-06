@@ -7,6 +7,7 @@ import ProductPage from 'views/pages/products/ProductPage';
 
 // lazy loaded pages
 const ContactUs = Loadable(lazy(() => import('views/pages/contact-us')));
+
 const AboutUs = Loadable(lazy(() => import('views/pages/about-us')));
 const SaasPageFaqs = Loadable(lazy(() => import('views/pages/saas-pages/Faqs')));
 const SaasPagePrivacyPolicy = Loadable(lazy(() => import('views/pages/saas-pages/PrivacyPolicy')));
@@ -15,6 +16,7 @@ const ServiceCategory = Loadable(lazy(() => import('views/pages/services/Service
 // const PayrollPage = Loadable(lazy(() => import('views/pages/products/Payroll')));
 // const InvoicingPage = Loadable(lazy(() => import('views/pages/products/invoicing/InvoicingPage')));
 const KnowledgePage = Loadable(lazy(() => import('views/pages/knowledge')));
+const CompanyPage = Loadable(lazy(() => import('views/pages/company')));
 const BookConsultationPage = Loadable(lazy(() => import('views/pages/BookConsultation')));
 const ProductDetails = Loadable(lazy(() => import('views/pages/products/ProductDetails')));
 // ==============================|| SIMPLE ROUTING ||============================== //
@@ -31,6 +33,7 @@ const SimpleRoutes = {
       path: '/pages/contact-us',
       element: <ContactUs />
     },
+   
     {
       path: '/pages/faqs',
       element: <SaasPageFaqs />
@@ -43,6 +46,12 @@ const SimpleRoutes = {
       path: '/knowledge',
       element: <KnowledgePage />
     },
+    {
+      path: '/company',
+      element: <CompanyPage />
+    },
+   
+   
     {
       path: '/book-consultation',
       element: <BookConsultationPage />
