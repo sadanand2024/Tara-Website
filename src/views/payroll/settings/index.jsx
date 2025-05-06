@@ -173,6 +173,7 @@ const PayrollSetup = () => {
             close: false
           })
         );
+        fetchPayrollDetails();
       }
     } catch (err) {
       dispatch(
@@ -327,7 +328,7 @@ const StepItem = React.memo(({ step, index, onClick, onMarkStatutoryComplete, ma
       </Button>
       {/* Show Mark as Complete only for Statutory Components step when not completed */}
       {onMarkStatutoryComplete && !step.completed && (
-        <Button variant="contained" color="success" onClick={onMarkStatutoryComplete} disabled={markingComplete}>
+        <Button variant="contained" onClick={onMarkStatutoryComplete} disabled={markingComplete}>
           {markingComplete ? <CircularProgress size={20} color="inherit" /> : 'Mark as Complete'}
         </Button>
       )}
