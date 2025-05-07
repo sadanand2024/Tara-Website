@@ -85,13 +85,11 @@ export default function Login() {
                   </Grid>
                   <Grid size={12}>
                     <Grid container direction="column" sx={{ alignItems: 'center' }} size={12}>
-                      <Typography
-                        component={Link}
-                        to={isLoggedIn ? '/pages/register/register3' : authParam ? `/register?auth=${authParam}` : '/register'}
-                        variant="subtitle1"
-                        sx={{ textDecoration: 'none' }}
-                      >
-                        Don&apos;t have an account?
+                      <Typography variant="subtitle1" sx={{ textDecoration: 'none', color: 'text.primary' }}>
+                        Don&apos;t have an account?{' '}
+                        <Link to="/register" style={{ textDecoration: 'none', color: '#673ab7', fontWeight: 'bold' }}>
+                          Sign up
+                        </Link>
                       </Typography>
                     </Grid>
                   </Grid>

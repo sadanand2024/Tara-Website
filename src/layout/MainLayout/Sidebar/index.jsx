@@ -5,7 +5,9 @@ import Chip from '@mui/material/Chip';
 import Drawer from '@mui/material/Drawer';
 import Stack from '@mui/material/Stack';
 import Box from '@mui/material/Box';
-
+import CardMedia from '@mui/material/CardMedia';
+import Tarafirstlogo_png from 'assets/images/Tarafirstlogo_png.png'; // Tarafirstlogo_png
+import { Link } from 'react-router-dom';
 // third party
 import PerfectScrollbar from 'react-perfect-scrollbar';
 
@@ -71,9 +73,7 @@ function Sidebar() {
             {isVerticalOpen && drawerContent}
           </Box>
         ) : (
-          <PerfectScrollbar style={{ height: 'calc(100vh - 88px)', ...drawerSX }}
-            options={{ suppressScrollX: true }}
-          >
+          <PerfectScrollbar style={{ height: 'calc(100vh - 88px)', ...drawerSX }} options={{ suppressScrollX: true }}>
             <Box sx={hideScrollbarSx}>
               <MenuList />
               {isVerticalOpen && drawerContent}
@@ -106,7 +106,10 @@ function Sidebar() {
           ModalProps={{ keepMounted: true }}
           color="inherit"
         >
-          {downMD && logo}
+          {/* {downMD && logo} */}
+          <Link to="/dashboard/business">
+            <CardMedia component="img" src={Tarafirstlogo_png} alt="Tarafirst Logo" sx={{ width: 150 }} />
+          </Link>
           {drawer}
         </Drawer>
       ) : (

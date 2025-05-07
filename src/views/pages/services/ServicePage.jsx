@@ -13,7 +13,7 @@ import WhatsIncluded from './WhatsIncluded';
 import WhoShouldFile from './WhoShouldFile';
 import WhyChooseUs from './WhyChooseUs';
 import StickyFooterCTA from './StickyFooterCTA';
-
+import PrivateLimitedPage from './custom/PrivateLimitedPage';
 const ServicePage = () => {
   const { category, slug } = useParams();
   const categoryData = servicesData[category];
@@ -21,6 +21,9 @@ const ServicePage = () => {
 
   if (!categoryData || !pageData) {
     return <ErrorPage />;
+  }
+  if (pageData?.customComponent === 'PrivateLimitedPage') {
+    return <PrivateLimitedPage />;
   }
   return (
     <Container maxWidth={true} sx={{ mb: 3 }}>

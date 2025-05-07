@@ -40,7 +40,7 @@ const icons = {
 
 const dashboard = {
   id: 'dashboard',
-  title: 'Home',
+  // title: 'Home',
   type: 'group',
   children: [
     {
