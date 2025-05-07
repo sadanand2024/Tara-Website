@@ -5,24 +5,9 @@ import PropTypes from 'prop-types';
 import {
   Box,
   Button,
-  Checkbox,
-  Divider,
   Drawer,
   IconButton,
   Typography,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  useMediaQuery,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Avatar,
-  Chip,
   Stack
 } from '@mui/material';
 
@@ -30,26 +15,17 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import PersonIcon from '@mui/icons-material/Person';
-import EmailIcon from '@mui/icons-material/Email';
 import BusinessIcon from '@mui/icons-material/Business';
-import WorkIcon from '@mui/icons-material/Work';
 import InfoIcon from '@mui/icons-material/Info';
 
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 // material-ui
-import { alpha, useTheme } from '@mui/material/styles';
-import Alert from '@mui/material/Alert';
-import AlertTitle from '@mui/material/AlertTitle';
+import { useTheme } from '@mui/material/styles';
 import Grid from '@mui/material/Grid2';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
 import Tooltip from '@mui/material/Tooltip';
+import Divider from '@mui/material/Divider';
 // project imports
 import { ThemeMode, ThemeDirection } from 'config';
 import MainCard from 'ui-component/cards/MainCard';
@@ -69,30 +45,11 @@ import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import SvgIcon from '@mui/material/SvgIcon';
 import IconArrowLeft from '@mui/icons-material/ArrowBack';
 
-const actionLabels = {
-  create: 'Create',
-  read: 'View',
-  update: 'Update',
-  delete: 'Delete',
-  approve: 'Approve',
-  send: 'Send',
-  print: 'Print',
-  export: 'Export',
-  cancel: 'Cancel',
-  void: 'Void',
-  reconcile: 'Reconcile',
-  generate_report: 'Generate Report'
-};
-
-const commonActions = ['create', 'read', 'update', 'delete'];
-const extraActions = ['approve', 'send', 'print', 'export', 'cancel', 'void', 'reconcile', 'generate_report'];
-
 const PlanDrawer = ({ open, onClose, moduleId, type, selectedTask }) => {
   const theme = useTheme();
   const [searchParams] = useSearchParams();
   const { themeDirection } = useConfig();
   const [plans, setPlans] = useState([]);
-  const [centerIndex, setCenterIndex] = useState(1);
   const user = useSelector((state) => state).accountReducer.user;
   const priceListDisable = {
     opacity: '0.4',
@@ -118,8 +75,8 @@ const PlanDrawer = ({ open, onClose, moduleId, type, selectedTask }) => {
     }
   }, [moduleId]);
 
-  const ServicePlanCard = ({ plan, onPurchase }) => (
-    <Card
+  const ServicePlanCard = ({ plan }) => (
+    <MainCard
       sx={{
         borderRadius: 3,
         boxShadow: 2,
@@ -132,9 +89,8 @@ const PlanDrawer = ({ open, onClose, moduleId, type, selectedTask }) => {
         flexDirection: 'column'
       }}
     >
-      <CardContent sx={{ p: '0px !important', flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <Stack spacing={2} sx={{ px: 2, py: 1 }}>
-          {/* Header */}
+      <MainCard.Header
+        title={
           <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={2}>
             <Box display="flex" alignItems="center" gap={1}>
               <Avatar variant="rounded" sx={{ bgcolor: 'primary.light', color: 'secondary.main' }}>
@@ -152,10 +108,10 @@ const PlanDrawer = ({ open, onClose, moduleId, type, selectedTask }) => {
               sx={{ textTransform: 'capitalize', fontWeight: 600 }}
             />
           </Stack>
-        </Stack>
+        }
+      />
 
-        <Divider sx={{ borderColor: 'divider' }} />
-
+      <MainCard.Content>
         <Stack direction="column" justifyContent="space-between" spacing={2} sx={{ p: 2, flexGrow: 1 }}>
           {/* Description with Tooltip */}
           <Tooltip title={plan.description} placement="top" arrow>
@@ -196,7 +152,7 @@ const PlanDrawer = ({ open, onClose, moduleId, type, selectedTask }) => {
             service_id={plan.service}
             contextId={user.active_context.id}
             userId={user.user.id}
-            service_request_id={selectedTask.id || ''}
+            service_request_id={selectedTask?.id || ''}
             plan={plan}
             onSuccess={(response) => {
               console.log('Payment Success:', response);
@@ -206,8 +162,8 @@ const PlanDrawer = ({ open, onClose, moduleId, type, selectedTask }) => {
             }}
           />
         </Stack>
-      </CardContent>
-    </Card>
+      </MainCard.Content>
+    </MainCard>
   );
 
   return (
@@ -248,10 +204,6 @@ const PlanDrawer = ({ open, onClose, moduleId, type, selectedTask }) => {
             <Grid size={{ xs: 6, lg: 6, xl: 6 }} key={plan.id}>
               <ServicePlanCard
                 plan={plan}
-                onPurchase={(selectedPlan) => {
-                  // Handle purchase logic here (open Razorpay, etc.)
-                  console.log('Purchase:', selectedPlan);
-                }}
               />
             </Grid>
           ))}
@@ -265,10 +217,8 @@ PlanDrawer.propTypes = {
   open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   selectedTask: PropTypes.object,
-  selectedPlans: PropTypes.object.isRequired,
-  onPlanChange: PropTypes.func.isRequired,
-  onSave: PropTypes.func.isRequired,
-  masterPlans: PropTypes.array
+  moduleId: PropTypes.string.isRequired,
+  type: PropTypes.string.isRequired
 };
 
 export default PlanDrawer;

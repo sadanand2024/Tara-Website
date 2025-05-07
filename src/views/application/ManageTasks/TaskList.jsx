@@ -3,81 +3,25 @@ import PropTypes from 'prop-types';
 
 // material-ui
 import Chip from '@mui/material/Chip';
-import IconButton from '@mui/material/IconButton';
-import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
-import Switch from '@mui/material/Switch';
-import FormControlLabel from '@mui/material/FormControlLabel';
 import Button from '@mui/material/Button';
 
 // project imports
-import Avatar from 'ui-component/extended/Avatar';
 import Factory from 'utils/Factory';
 
 // assets
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import BlockCircleIcon from '@mui/icons-material/Block';
-import EditTwoToneIcon from '@mui/icons-material/EditTwoTone';
-import BlockTwoToneIcon from '@mui/icons-material/BlockTwoTone';
 import PersonIcon from '@mui/icons-material/Person';
 import CheckCircleTwoToneIcon from '@mui/icons-material/Check';
-import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
-import InfoIcon from '@mui/icons-material/Info';
 
 // ==============================|| USER LIST ||============================== //
-
-const getRoleColor = (roleType) => {
-  // Map of role types to background colors using primary and secondary shades
-  const colorMap = {
-    owner: {
-      bgcolor: 'primary.dark',
-      color: '#fff'
-    },
-    admin: {
-      bgcolor: 'primary.main',
-      color: '#fff'
-    },
-    manager: {
-      bgcolor: 'secondary.dark',
-      color: '#fff'
-    },
-    supervisor: {
-      bgcolor: 'secondary.main',
-      color: '#fff'
-    },
-    staff: {
-      bgcolor: 'info.dark',
-      color: '#fff'
-    },
-    user: {
-      bgcolor: 'info.main',
-      color: '#fff'
-    }
-  };
-
-  return (
-    colorMap[roleType?.toLowerCase()] || {
-      bgcolor: 'info.dark',
-      color: '#fff'
-    }
-  );
-};
-
-const getInitials = (first_name, last_name, email) => {
-  if (first_name && last_name) {
-    return `${first_name[0]}${last_name[0]}`.toUpperCase();
-  }
-  return email ? email[0].toUpperCase() : 'U';
-};
 
 const capitalizeFirstLetter = (string) => {
   if (!string) return '';
