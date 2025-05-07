@@ -1,40 +1,39 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import AddIcon from '@mui/icons-material/Add';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import ChatIcon from '@mui/icons-material/Chat';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import DescriptionIcon from '@mui/icons-material/Description';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import PendingIcon from '@mui/icons-material/Pending';
+import ReviewsIcon from '@mui/icons-material/Reviews';
+import SearchIcon from '@mui/icons-material/Search';
+import TrendingDownIcon from '@mui/icons-material/TrendingDown';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import {
   Box,
-  Typography,
-  TextField,
+  Button,
   Card,
   CardContent,
-  Button,
-  LinearProgress,
-  Stack,
-  Select,
-  MenuItem,
+  Fade,
   InputAdornment,
-  IconButton,
+  LinearProgress,
+  MenuItem,
+  Select,
+  Stack,
+  TextField,
   Tooltip,
-  Zoom,
-  Fade
+  Typography,
+  Zoom
 } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { styled } from '@mui/material/styles';
-import SearchIcon from '@mui/icons-material/Search';
-import FilterListIcon from '@mui/icons-material/FilterList';
-import ChatIcon from '@mui/icons-material/Chat';
-import AddIcon from '@mui/icons-material/Add';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import AssignmentIcon from '@mui/icons-material/Assignment';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import PendingIcon from '@mui/icons-material/Pending';
-import ReviewsIcon from '@mui/icons-material/Reviews';
-import DescriptionIcon from '@mui/icons-material/Description';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import TrendingDownIcon from '@mui/icons-material/TrendingDown';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 // Styled Components
 
@@ -149,41 +148,41 @@ export default function Services() {
     {
       title: 'ITR Filing - FY: 2024-25 (Personal)',
       status: 'In Progress',
-      progress: 60,
-      tasks: '2 Pending',
-      docs: '3/4 uploaded',
+      progress: 0,
+      tasks: '0 Pending',
+      docs: '0 uploaded',
       icon: <AssignmentIcon color="primary" sx={{ fontSize: 40 }} />
     },
     {
       title: 'ITR Filing - FY: 2024-25 (Business)',
       status: 'In Progress',
-      progress: 20,
-      tasks: '3 Pending',
-      docs: '2/5 uploaded',
+      progress: 0,
+      tasks: '0 Pending',
+      docs: '0 uploaded',
       icon: <DescriptionIcon color="primary" sx={{ fontSize: 40 }} />
     },
     {
       title: 'Company Incorporation - FY: 2024-25 (Business)',
       status: 'In Progress',
-      progress: 80,
-      tasks: '3 Pending',
-      docs: '2/5 uploaded',
+      progress: 0,
+      tasks: '0 Pending',
+      docs: '0 uploaded',
       icon: <DescriptionIcon color="primary" sx={{ fontSize: 40 }} />
     },
     {
       title: 'Auditing - FY: 2024-25 (Business)',
       status: 'In Progress',
-      progress: 90,
-      tasks: '4 Pending',
-      docs: '1/5 uploaded',
+      progress: 0,
+      tasks: '0 Pending',
+      docs: '0 uploaded',
       icon: <DescriptionIcon color="primary" sx={{ fontSize: 40 }} />
     },
     {
       title: 'Business Loan - FY: 2024-25 (Business)',
       status: 'In Progress',
-      progress: 10,
-      tasks: '6 Pending',
-      docs: '2/8 uploaded',
+      progress: 0,
+      tasks: '0 Pending',
+      docs: '0 uploaded',
       icon: <DescriptionIcon color="primary" sx={{ fontSize: 40 }} />
     }
   ];
@@ -191,7 +190,7 @@ export default function Services() {
   const statusSummary = [
     {
       label: 'Services in Progress',
-      count: 2,
+      count: 0,
       icon: <PendingIcon sx={{ fontSize: 35 }} />,
       trend: '+1 this week',
       trendIcon: <TrendingUpIcon color="success" />,
@@ -200,7 +199,7 @@ export default function Services() {
     },
     {
       label: 'Awaiting Action',
-      count: 1,
+      count: 0,
       icon: <AccessTimeIcon sx={{ fontSize: 35 }} />,
       trend: 'Due today',
       trendIcon: <TrendingDownIcon color="error" />,
@@ -209,7 +208,7 @@ export default function Services() {
     },
     {
       label: 'Under Review',
-      count: 1,
+      count: 0,
       icon: <ReviewsIcon sx={{ fontSize: 35 }} />,
       trend: '2 days left',
       trendIcon: <AccessTimeIcon color="info" />,
@@ -218,7 +217,7 @@ export default function Services() {
     },
     {
       label: 'Completed',
-      count: 1,
+      count: 0,
       icon: <CheckCircleIcon sx={{ fontSize: 35 }} />,
       trend: 'Last week',
       trendIcon: <CheckCircleOutlineIcon color="success" />,
