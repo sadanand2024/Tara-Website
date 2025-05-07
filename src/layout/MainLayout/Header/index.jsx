@@ -10,7 +10,9 @@ import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
 import IconButton from '@mui/material/IconButton';
 import Button from '@mui/material/Button';
-
+import CardMedia from '@mui/material/CardMedia';
+import Tarafirstlogo_png from 'assets/images/Tarafirstlogo_png.png'; // Tarafirstlogo_png
+import { Link } from 'react-router-dom';
 // project imports
 import LogoSection from '../LogoSection';
 import SearchSection from './SearchSection';
@@ -225,7 +227,10 @@ const Header = ({ hamburgerDisplay = 'block' }) => {
             mr: 2
           }}
         >
-          <LogoSection />
+          {/* <LogoSection /> */}
+          <Link to="/dashboard/business">
+            <CardMedia component="img" src={Tarafirstlogo_png} alt="Tarafirst Logo" sx={{ width: 150 }} />
+          </Link>
         </Box>
         {!isHorizontal && (
           <Avatar

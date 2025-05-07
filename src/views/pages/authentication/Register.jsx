@@ -87,13 +87,11 @@ export default function Register() {
                   </Grid>
                   <Grid size={12}>
                     <Grid container direction="column" sx={{ alignItems: 'center' }} size={12}>
-                      <Typography
-                        component={Link}
-                        to={isLoggedIn ? '/pages/login/login3' : authParam ? `/login?auth=${authParam}` : '/login'}
-                        variant="subtitle1"
-                        sx={{ textDecoration: 'none' }}
-                      >
-                        Already have an account?
+                      <Typography variant="subtitle1" sx={{ textDecoration: 'none' }}>
+                        Already have an account ?{' '}
+                        <Link to="/login" style={{ textDecoration: 'none', color: '#673ab7', fontWeight: 'bold' }}>
+                          Sign in
+                        </Link>
                       </Typography>
                     </Grid>
                   </Grid>

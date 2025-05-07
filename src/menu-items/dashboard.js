@@ -33,15 +33,14 @@ const icons = {
   IconHeadset,
   IconUsers,
   IconLayoutRows,
-  IconFileInvoice,
-  
+  IconFileInvoice
 };
 
 // ==============================|| DASHBOARD MENU ITEMS ||============================== //
 
 const dashboard = {
   id: 'dashboard',
-  title: 'Home',
+  // title: 'Home',
   type: 'group',
   children: [
     {

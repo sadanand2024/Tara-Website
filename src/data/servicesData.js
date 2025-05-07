@@ -184,13 +184,7 @@ const servicesData = {
           'Receive acknowledgment and resolution follow-up'
         ],
         timeline: '2–4 working days (Urgent option available)',
-        whyChooseUs: [
-          'Modern Design',
-          'Creative Design',
-          '24X7 User Support',
-          'Affordable Cost',
-          'Business Growth'
-        ],
+        whyChooseUs: ['Modern Design', 'Creative Design', '24X7 User Support', 'Affordable Cost', 'Business Growth'],
         faqs: [
           {
             question: 'Is it serious if I receive a notice?',
@@ -1248,6 +1242,8 @@ const servicesData = {
     title: 'Business Registration / Licenses',
     pages: {
       'private-limited': {
+        customComponent: 'PrivateLimitedPage',
+
         heroSection: {
           title: 'Start Your Company in 7 Days — 100% Online with CA/CS Assistance',
           subtitle: 'Private Limited, LLP, or OPC — Let Our Experts Handle the Entire Registration Process for You.',
