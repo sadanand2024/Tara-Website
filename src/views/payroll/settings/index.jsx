@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { useNavigate } from 'react-router';
-import { useSearchParams } from 'react-router';
+import { useNavigate, useLocation } from 'react-router';
 import MainCard from '../../../ui-component/cards/MainCard';
 import { Box, Stack, Typography, LinearProgress, Button, Grid2, CircularProgress, IconButton } from '@mui/material';
 import Factory from 'utils/Factory';
@@ -25,8 +24,14 @@ const PAYROLL_STEPS = [
 const PayrollSetup = () => {
   const user = useSelector((state) => state.accountReducer?.user);
   const dispatch = useDispatch();
-
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Parse search params manually
+  const searchParams = useMemo(() => {
+    const params = new URLSearchParams(location.search);
+    return params;
+  }, [location.search]);
 
   const [loading, setLoading] = useState(false);
   const [payrollDetails, setPayrollDetails] = useState({});
