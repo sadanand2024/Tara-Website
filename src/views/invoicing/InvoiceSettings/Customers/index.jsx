@@ -6,6 +6,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 import AddCustomer from './AddCustomer';
 import CustomerList from './CustomerList';
+import { ConstructionOutlined } from '@mui/icons-material';
 
 export default function TabTwo({ getCustomersData, customers, businessDetails, handleNext, handleBack }) {
   const [open, setOpen] = useState(false);
@@ -20,7 +21,7 @@ export default function TabTwo({ getCustomersData, customers, businessDetails, h
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
-
+  console.log(businessDetails);
   return (
     <>
       {/* Header Section */}
