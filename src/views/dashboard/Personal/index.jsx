@@ -4,21 +4,22 @@ import Grid from '@mui/material/Grid2';
 import { styled } from '@mui/material/styles';
 
 // Icons
-import DescriptionIcon from '@mui/icons-material/Description';
-import TaskIcon from '@mui/icons-material/Task';
-import UpdateIcon from '@mui/icons-material/Update';
-import EventIcon from '@mui/icons-material/Event';
-import UploadFileIcon from '@mui/icons-material/UploadFile';
-import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
-import EventNoteIcon from '@mui/icons-material/EventNote';
-import SupportAgentIcon from '@mui/icons-material/SupportAgent';
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
-import AssignmentIcon from '@mui/icons-material/Assignment';
-import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import DescriptionIcon from '@mui/icons-material/Description';
+import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
+import EventIcon from '@mui/icons-material/Event';
+import EventNoteIcon from '@mui/icons-material/EventNote';
+import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
+import SupportAgentIcon from '@mui/icons-material/SupportAgent';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import TaskIcon from '@mui/icons-material/Task';
+import UpdateIcon from '@mui/icons-material/Update';
+import UploadFileIcon from '@mui/icons-material/UploadFile';
+
 // Convert makeStyles to styled components
 
 const GreetingSection = styled(Box)(({ theme }) => ({
@@ -141,25 +142,25 @@ export default function Personal() {
   const services = [
     {
       title: 'Active Services',
-      count: '3',
+      count: '0',
       icon: <DescriptionIcon fontSize="large" />,
       color: 'primary'
     },
     {
       title: 'Tasks Pending',
-      count: '2',
+      count: '0',
       icon: <TaskIcon fontSize="large" />,
       color: 'warning'
     },
     {
       title: 'Docs Uploaded',
-      count: '7',
+      count: '0',
       icon: <UpdateIcon fontSize="large" />,
       color: 'info'
     },
     {
       title: 'Due Soon',
-      count: '1',
+      count: '0',
       icon: <EventIcon fontSize="large" />,
       color: 'error'
     }
