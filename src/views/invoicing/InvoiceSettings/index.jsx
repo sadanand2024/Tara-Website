@@ -103,7 +103,7 @@ export default function SimpleTabs() {
 
   useEffect(() => {
     fetch_Invoicing_profile();
-  }, []);
+  }, [value]);
 
   return (
     <MainCard title="Invoicing Settings">

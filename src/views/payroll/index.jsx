@@ -16,7 +16,7 @@ import PayrollStatusSummary from './PayrollStatusSummary';
 import PayrollComplianceSummary from './PayrollComplianceSummary';
 
 import PayrollMonthwise from './PayrollMonthwise';
-import { Button, Stack, Typography, Grid2, TextField, Chip } from '@mui/material';
+import { Button, Stack, Typography, Grid2, TextField, Chip, CircularProgress } from '@mui/material';
 import { IconSparkles, IconSettings2 } from '@tabler/icons-react';
 
 import { generateFinancialYears } from 'utils/FinancialYearsList';
@@ -188,9 +188,9 @@ const PayrollDashboard = () => {
   }, []);
 
   return loading ? (
-    <Typography variant="h6" align="center" sx={{ mt: 4 }}>
-      Loading Payroll Dashboard...
-    </Typography>
+    <Stack alignItems="center" sx={{ mt: 4 }}>
+      <CircularProgress />
+    </Stack>
   ) : (
     <MainCard
       title={`Payroll for ${businessDetails?.nameOfBusiness}`}

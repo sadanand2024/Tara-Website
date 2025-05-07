@@ -69,15 +69,30 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
       opening_balance: Yup.number().typeError('Opening Balance must be a number').required('Opening Balance is required')
     }),
     onSubmit: async (values) => {
-      const postData = { ...values, invoicing_profile: businessDetailsData?.invoicing_profile_id };
-      const url =
-        type === 'edit' ? `/invoicing/invoicing/customer_profiles/update/${selectedCustomer?.id}/` : '/invoicing/customer_profiles/create/';
+      if (!businessDetailsData?.invoicing_profile_id) {
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'Business profile not found. Please complete business profile first.',
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
+        return;
+      }
+
+      const postData = {
+        ...values,
+        invoicing_profile: businessDetailsData.invoicing_profile_id
+      };
+      const url = type === 'edit' ? `/invoicing/customer_profiles/update/${selectedCustomer?.id}/` : '/invoicing/customer_profiles/create/';
       const method = type === 'edit' ? 'put' : 'post';
       postData.opening_balance = Number(postData.opening_balance);
       const { res } = await Factory(method, url, postData);
-      console.log(res);
+
       if (res.status_cd === 0) {
-        getCustomersData(businessDetailsData?.invoicing_profile_id);
+        getCustomersData(businessDetailsData.invoicing_profile_id);
         setType('');
         resetForm();
         handleClose();
@@ -90,16 +105,17 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
             close: false
           })
         );
+      } else {
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: JSON.stringify(res.data.data) || 'Something went wrong',
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
       }
-      dispatch(
-        openSnackbar({
-          open: true,
-          message: JSON.stringify(res.data.data) || 'Something went wrong',
-          variant: 'alert',
-          alert: { color: 'error' },
-          close: false
-        })
-      );
     }
   });
 

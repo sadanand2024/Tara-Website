@@ -334,7 +334,9 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
       // Filter out Fixed Allowance from the response before setting values
       const filteredData = {
         ...res.data,
-        earnings: res.data.earnings.filter((item) => item.component_name !== 'Fixed Allowance')
+        earnings: res.data.earnings.filter((item) => item.component_name !== 'Fixed Allowance'),
+        gross_salary: res.data.gross_salary,
+        net_salary: res.data.net_salary
       };
       setValues(filteredData);
       setViewPreview(true);
@@ -597,7 +599,7 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
                         : earning.component_name === 'Fixed Allowance'
                           ? 'Remaining Balance'
                           : earning.component_name === 'Conveyance Allowance'
-                            ? earning.calculation
+                            ? earning.calculation_type
                             : earning.calculation_type}
                     </Typography>
                   </Box>
@@ -685,12 +687,14 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
             <TableCell sx={{ padding: 2 }}></TableCell>
             <TableCell>
               <Typography variant="h5">
-                {values.earnings.reduce((sum, earning) => sum + parseFloat(earning.monthly || 0), 0).toFixed(2)}
+                {/* {values.earnings.reduce((sum, earning) => sum + parseFloat(earning.monthly || 0), 0).toFixed(2)} */}
+                {values.gross_salary?.monthly?.toFixed(2)}
               </Typography>
             </TableCell>
             <TableCell>
               <Typography variant="h5">
-                {values.earnings.reduce((sum, earning) => sum + parseFloat(earning.annually || 0), 0).toFixed(2)}
+                {/* {values.earnings.reduce((sum, earning) => sum + parseFloat(earning.annually || 0), 0).toFixed(2)} */}
+                {values.gross_salary?.annually?.toFixed(2)}
               </Typography>
             </TableCell>
             <TableCell></TableCell>
