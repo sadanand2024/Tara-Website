@@ -13,9 +13,11 @@ export default function RazorparPayment({
   label,
   service_id,
   status,
-  service_request_id
+  service_request_id,
+  moduleId
 }) {
   const navigate = useNavigate();
+  // console.log(service_id);
   const handlePayment = async () => {
     let orderData = {};
     let orderURl = '/user_management/create-order/';
@@ -56,6 +58,28 @@ export default function RazorparPayment({
     }
   };
 
+  const handleTrialSubscription = async () => {
+    let orderData = {
+      context_id: contextId,
+      module_id: parseInt(moduleId),
+      subscription_plan_id: plan.id,
+      added_by: userId
+    };
+    let orderURl = '/user_management/business/subscription/add/';
+
+    try {
+      const orderRes = await Factory('post', orderURl, orderData);
+      if (orderRes.res.status_cd === 0) {
+        if (onSuccess) onSuccess(orderRes.res.data);
+      } else {
+        if (onFailure) onFailure(orderRes.res.data);
+      }
+      navigate('/app/subscriptions');
+    } catch (err) {
+      if (onFailure) onFailure();
+    }
+  };
+
   const openRazorpay = (orderId, amount) => {
     const options = {
       key: import.meta.env.VITE_APP_RAZORPAY_KEY_ID_DEVELOPMENT,
@@ -91,7 +115,13 @@ export default function RazorparPayment({
       }}
       variant="contained"
       color="primary"
-      onClick={handlePayment}
+      onClick={() => {
+        if (plan.plan_type === 'trial') {
+          handleTrialSubscription();
+        } else {
+          handlePayment();
+        }
+      }}
     >
       {label ? label : 'Order Now'}
     </Button>

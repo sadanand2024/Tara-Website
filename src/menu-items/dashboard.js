@@ -47,7 +47,7 @@ const dashboard = {
       id: 'dashboard',
       title: 'dashboard',
       type: 'item',
-      url: '/dashboard/personal',
+      url: '/dashboard',
       icon: icons.IconDashboard,
       breadcrumbs: false,
       caption: ''
@@ -202,7 +202,8 @@ const getDashboardMenu = (user, subscriptions = []) => {
   const allowedByRole = (item) => {
     if (!user || !user.user_role) return true;
     // Example: restrict 'manage-team' to admin roles
-    if (item.id === 'manage-team' && user.user_role.role_type !== 'admin') return false;
+    if (item.id === 'manage-team' && user.user_role.role_type !== 'owner') return false;
+    if (item.id === 'manage-team' && user.active_context.context_type !== 'business') return false;
     // Add more role-based restrictions here
     return true;
   };

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   Box,
   Button,
@@ -26,7 +26,8 @@ import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import WarningIcon from '@mui/icons-material/Warning';
-
+import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 const StatCard = ({ title, value, trend, trendValue }) => {
   const theme = useTheme();
   return (
@@ -175,8 +176,14 @@ const ComplianceItem = ({ title, dueDate, lastDate }) => (
 
 export default function Business() {
   const theme = useTheme();
+  const navigate = useNavigate();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-
+  const user = useSelector((state) => state.accountReducer.user);
+  useEffect(() => {
+    if (user.active_context.context_type !== 'business') {
+      navigate('/dashboard/personal');
+    }
+  }, [user.active_context]);
   const companyInfo = {
     name: 'AQUA TECH SOLUTIONS PVT LTD',
     stats: {

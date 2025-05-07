@@ -1,4 +1,4 @@
-import { memo, useState } from 'react';
+import { memo, useState, useEffect, useMemo } from 'react';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import Divider from '@mui/material/Divider';
 import List from '@mui/material/List';
@@ -30,10 +30,8 @@ function MenuList() {
 
   const user = useSelector((state) => state.accountReducer.user);
   const subscriptions = user?.module_subscriptions || [];
-  const menu = menuItems(user, subscriptions);
-
+  const menu = useMemo(() => menuItems(user, subscriptions), [user, subscriptions]);
   const [selectedID, setSelectedID] = useState('');
-  // const [menuItems, setMenuItems] = useState<{ items: NavItemType[] }>({ items: [] });
 
   // let widgetMenu = Menu();
 
@@ -108,7 +106,11 @@ function MenuList() {
     }
   });
 
-  return !isHorizontal ? <Box {...(drawerOpen && { sx: { mt: 1.5 } })}>{navItems}</Box> : <>{navItems}</>;
+  return !isHorizontal ? (
+    <Box key={user.active_context?.id} {...(drawerOpen && { sx: { mt: 1.5 } })}>{navItems}</Box>
+  ) : (
+    <Box key={user.active_context?.id}>{navItems}</Box>
+  );
 }
 
 export default memo(MenuList);

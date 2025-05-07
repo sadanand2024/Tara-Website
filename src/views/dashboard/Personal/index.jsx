@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Box, Typography, Card, CardContent, Button, Stack, alpha } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { styled } from '@mui/material/styles';
@@ -17,7 +17,8 @@ import AssignmentIcon from '@mui/icons-material/Assignment';
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-
+import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 // Convert makeStyles to styled components
 
 const GreetingSection = styled(Box)(({ theme }) => ({
@@ -130,6 +131,13 @@ const ButtonIcon = styled(Box)(({ theme }) => ({
 }));
 
 export default function Personal() {
+  const user = useSelector((state) => state.accountReducer.user);
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (user.active_context.context_type !== 'personal') {
+      navigate('/dashboard/business');
+    }
+  }, [user.active_context]);
   const services = [
     {
       title: 'Active Services',

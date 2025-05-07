@@ -402,7 +402,6 @@ const ModulesAndServices = () => {
   //     ]
   //   }
   // ];
-  console.log(services);
   const filteredModules = filterItems(modules);
   const filteredServices = filterItems(services);
 
@@ -549,37 +548,53 @@ const ModulesAndServices = () => {
         {tabValue === 0 ? (
           <>
             <Grid2 container spacing={{ xs: 2, sm: 1 }}>
-              {filteredModules.map((module, index) => (
-                <Grid2
-                  size={{ xs: 6, sm: 4, md: 3, lg: 3 }}
-                  key={index}
-                  sx={{
-                    display: 'flex',
-                    '& > *': { width: '100%' },
-                    p: { xs: 1, sm: 1.5 }
-                  }}
-                >
-                  <ProductCard {...module} type="module" />
-                </Grid2>
-              ))}
+              {filteredModules.length === 0 ? (
+                <Box sx={{ width: '100%', p: 10, textAlign: 'center' }}>
+                  <Typography variant="body1" color="text.secondary">
+                    No modules for selected context
+                  </Typography>
+                </Box>
+              ) : (
+                filteredModules.map((module, index) => (
+                  <Grid2
+                    size={{ xs: 6, sm: 4, md: 3, lg: 3 }}
+                    key={index}
+                    sx={{
+                      display: 'flex',
+                      '& > *': { width: '100%' },
+                      p: { xs: 1, sm: 1.5 }
+                    }}
+                  >
+                    <ProductCard {...module} type="module" />
+                  </Grid2>
+                ))
+              )}
             </Grid2>
           </>
         ) : (
           <>
             <Grid2 container spacing={{ xs: 2, sm: 1 }}>
-              {filteredServices.map((service, index) => (
-                <Grid2
-                  size={{ xs: 12, sm: 6, md: 4, lg: 3 }}
-                  key={index}
-                  sx={{
-                    display: 'flex',
-                    '& > *': { width: '100%' },
-                    p: { xs: 1, sm: 1.5 }
-                  }}
-                >
-                  <ProductCard {...service} type="service" />
-                </Grid2>
-              ))}
+              {filteredServices.length === 0 ? (
+                <Box sx={{ width: '100%', p: 10, textAlign: 'center' }}>
+                  <Typography variant="body1" color="text.secondary">
+                    No services for selected context
+                  </Typography>
+                </Box>
+              ) : (
+                filteredServices.map((service, index) => (
+                  <Grid2
+                    size={{ xs: 12, sm: 6, md: 4, lg: 3 }}
+                    key={index}
+                    sx={{
+                      display: 'flex',
+                      '& > *': { width: '100%' },
+                      p: { xs: 1, sm: 1.5 }
+                    }}
+                  >
+                    <ProductCard {...service} type="service" />
+                  </Grid2>
+                ))
+              )}
             </Grid2>
           </>
         )}
