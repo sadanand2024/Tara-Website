@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Box,
   TextField,
@@ -21,19 +21,32 @@ import { useSearchParams } from 'react-router';
 import { useNavigate } from 'react-router';
 import Factory from 'utils/Factory';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import EmptyDataPlaceholder from 'ui-component/extended/EmptyDataPlaceholder';
+
+// Constants
+const CALCULATION_TYPES = {
+  PERCENTAGE_CTC: 'Percentage of CTC',
+  PERCENTAGE_BASIC: 'Percentage of Basic',
+  FLAT_AMOUNT: 'Flat Amount',
+  FIXED: 'Fixed'
+};
 
 export default function RenderSalaryTemplateTable({ values, setFieldValue, setValues, enablePreviewButton, setEnablePreviewButton }) {
   const [earningsData, setEarningsData] = useState([]);
   const [fixedAllowance, setFixedAllowance] = useState({ monthly: 0, annually: 0 });
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [payrollid, setPayrollId] = useState(null);
   const [template_id, setTemplate_id] = useState(null);
   const [viewPreview, setViewPreview] = useState(false);
-  const [onBlurrRecalculate, setOnBlurrRecalculate] = useState(false);
-  // const { showSnackbar } = useSnackbar();
+
+  // Extract IDs from URL params using useMemo
+  const { payrollId, templateId } = useMemo(
+    () => ({
+      payrollId: searchParams.get('payrollid'),
+      templateId: searchParams.get('template_id')
+    }),
+    [searchParams]
+  );
 
   useEffect(() => {
     const id = searchParams.get('payrollid');
@@ -47,139 +60,210 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
       setTemplate_id(id);
     }
   }, [searchParams]);
-  const get_individual_componnet_data = async (id) => {
+
+  // Memoize calculations
+  const calculateEarnings = useCallback(
+    (earning, annualCtc, basicSalary) => {
+      if (isNaN(annualCtc) || annualCtc === '') {
+        return { monthly: 0, annually: 0 };
+      }
+
+      const basicEarning = values.earnings.find((e) => e.component_name === 'Basic');
+      const actualBasicSalary = basicEarning ? parseFloat(basicEarning.annually) : 0;
+      let monthlyAmount = 0;
+      let annualAmount = 0;
+
+      switch (earning.component_name) {
+        case 'Basic':
+          if (earning.calculation_type === CALCULATION_TYPES.PERCENTAGE_CTC) {
+            const basicPercentage = parseFloat(earning.calculation);
+            annualAmount = (annualCtc * basicPercentage) / 100;
+          } else if (earning.calculation_type === CALCULATION_TYPES.FLAT_AMOUNT) {
+            monthlyAmount = parseFloat(earning.calculation);
+            annualAmount = monthlyAmount * 12;
+          }
+          break;
+
+        case 'HRA':
+          if (earning.calculation_type === CALCULATION_TYPES.PERCENTAGE_BASIC) {
+            const hraPercentage = parseFloat(earning.calculation);
+            annualAmount = (actualBasicSalary * hraPercentage) / 100;
+          } else if (earning.calculation_type === CALCULATION_TYPES.FLAT_AMOUNT) {
+            monthlyAmount = parseFloat(earning.calculation);
+            annualAmount = monthlyAmount * 12;
+          }
+          break;
+
+        case 'Fixed Allowance':
+          const earningsTotal = values.earnings.reduce((sum, e) => sum + parseFloat(e.annually || 0), 0);
+          annualAmount = annualCtc - earningsTotal;
+          break;
+
+        default:
+          if (earning.calculation_type === CALCULATION_TYPES.PERCENTAGE_BASIC) {
+            const percentage = parseFloat(earning.calculation);
+            annualAmount = (basicSalary * percentage) / 100;
+          } else if (earning.calculation_type === CALCULATION_TYPES.FLAT_AMOUNT) {
+            monthlyAmount = parseFloat(earning.calculation);
+            annualAmount = monthlyAmount * 12;
+          }
+      }
+
+      monthlyAmount = annualAmount ? annualAmount / 12 : monthlyAmount;
+      return {
+        monthly: Math.round(monthlyAmount * 100) / 100,
+        annually: Math.round(annualAmount * 100) / 100
+      };
+    },
+    [values.earnings]
+  );
+
+  // API calls using custom hook pattern
+  const fetchData = useCallback(async (url, options = {}) => {
     setLoading(true);
-    const url = `/payroll/earnings/${id}`;
-    const { res, error } = await Factory('get', url, {});
-    setLoading(false);
-    if (res.status_cd === 0) {
-      return res.data;
+    try {
+      const { res, error } = await Factory('get', url, options);
+      if (res?.status_cd === 0) {
+        return res.data;
+      }
+      throw error || new Error('API call failed');
+    } finally {
+      setLoading(false);
     }
-  };
-  const handleEarningsChange = async (selectedEarning, index, field, componentName) => {
-    let updatedEarnings = [...values.earnings];
-    updatedEarnings[index][field] = componentName;
+  }, []);
 
-    if (!selectedEarning || !selectedEarning.id) return;
+  const handleEarningsChange = useCallback(
+    async (selectedEarning, index, field, componentName) => {
+      if (field === 'calculation') {
+        setFieldValue(
+          'earnings',
+          values.earnings.map((e, i) => (i === index ? { ...e, calculation: componentName } : e))
+        );
+        return;
+      }
 
-    const selectedItemData = await get_individual_componnet_data(selectedEarning.id);
-    updatedEarnings[index] = {
-      ...updatedEarnings[index],
-      calculation: selectedItemData.calculation_type.value,
-      component_name: selectedItemData.component_name,
-      calculation_type: selectedItemData.calculation_type.type
-    };
+      if (!selectedEarning?.id) return;
 
-    // Get the updated CTC value
-    const annualCtc = parseFloat(values.annual_ctc);
+      const selectedItemData = await fetchData(`/payroll/earnings/${selectedEarning.id}`);
+      const annualCtc = parseFloat(values.annual_ctc);
 
-    // We calculate the basic salary based on the earnings array, where Basic Salary is always a part of it
-    const basicSalary = parseFloat(updatedEarnings.find((earning) => earning.component_name === 'Basic')?.annually || 0);
+      const updatedEarnings = [...values.earnings];
+      const calculatedValues = calculateEarnings(
+        {
+          ...updatedEarnings[index],
+          calculation: selectedItemData.calculation_type.value,
+          component_name: selectedItemData.component_name,
+          calculation_type: selectedItemData.calculation_type.type
+        },
+        annualCtc,
+        parseFloat(updatedEarnings.find((e) => e.component_name === 'Basic')?.annually || 0)
+      );
 
-    const calculatedValues = calculateEarnings(updatedEarnings[index], annualCtc, basicSalary);
+      updatedEarnings[index] = {
+        ...updatedEarnings[index],
+        ...calculatedValues,
+        calculation: selectedItemData.calculation_type.value,
+        component_name: selectedItemData.component_name,
+        calculation_type: selectedItemData.calculation_type.type
+      };
 
-    updatedEarnings[index].monthly = calculatedValues.monthly;
-    updatedEarnings[index].annually = calculatedValues.annually;
+      setFieldValue('earnings', updatedEarnings);
+      setEnablePreviewButton(true);
+    },
+    [values.annual_ctc, calculateEarnings, setFieldValue]
+  );
 
-    setFieldValue('earnings', updatedEarnings);
+  // Memoize fixed allowance calculation
+  const calculateFixedAllowance = useCallback(() => {
+    const annualCtc = parseFloat(values.annual_ctc || 0);
+    if (isNaN(annualCtc) || annualCtc === 0) {
+      setFixedAllowance({ monthly: 0, annually: 0 });
+      setFieldValue('errorMessage', '');
+      return;
+    }
+
+    const totalEarnings = values.earnings.reduce(
+      (sum, earning) => (earning.component_name !== 'Fixed Allowance' ? sum + parseFloat(earning.annually || 0) : sum),
+      0
+    );
+
+    const annualFixedAllowance = annualCtc - totalEarnings;
+    const monthlyFixedAllowance = annualFixedAllowance / 12;
+
+    setFixedAllowance({
+      monthly: Math.round(monthlyFixedAllowance * 100) / 100,
+      annually: Math.round(annualFixedAllowance)
+    });
+
+    setFieldValue(
+      'errorMessage',
+      annualFixedAllowance <= 0
+        ? 'The system calculated Fixed Allowance cannot be less than zero. Check and enter valid salary details.'
+        : ''
+    );
+  }, [values.annual_ctc, values.earnings, setFieldValue]);
+
+  // Effects
+  useEffect(() => {
+    if (payrollId) {
+      fetchData(`/payroll/earnings?payroll_id=${payrollId}`).then(setEarningsData);
+    }
+  }, [payrollId, fetchData]);
+
+  useEffect(() => {
+    if (templateId) {
+      fetchData(`/payroll/salary-templates/${templateId}`).then(setValues);
+    } else if (payrollId) {
+      fetchData(`/payroll/salary-benefits-details/${payrollId}`).then((data) => {
+        setValues((prev) => ({
+          ...prev,
+          benefits: generateBenefitsArray(data),
+          deductions: generateDeductionsArray(data)
+        }));
+      });
+    }
+  }, [templateId, payrollId, setValues]);
+
+  useEffect(() => {
+    calculateFixedAllowance();
+  }, [values.earnings, values.annual_ctc, calculateFixedAllowance]);
+
+  // Handlers
+  const handleAddEarnings = () => {
+    setFieldValue('earnings', [...values.earnings, { component_name: '', calculation: 0, monthly: 0, annually: 0 }]);
     setEnablePreviewButton(true);
   };
 
-  const calculateEarnings = (earning, annualCtc, basicSalary) => {
-    let monthlyAmount = 0;
-    let annualAmount = 0;
+  const handleDeleteItem = (index) => {
+    setFieldValue(
+      'earnings',
+      values.earnings.filter((_, i) => i !== index)
+    );
+    setEnablePreviewButton(true);
+  };
 
-    if (isNaN(annualCtc) || annualCtc === '') {
-      return {
-        monthly: 0,
-        annually: 0
-      };
-    }
+  const getEarnings_Details = async (id) => {
+    const url = `/payroll/earnings?payroll_id=${id}`;
+    const data = await fetchData(url);
+    if (data) {
+      setEarningsData(data);
 
-    // Get the basic salary from earnings array
-    const basicEarning = values.earnings.find((e) => e.component_name === 'Basic');
-    const actualBasicSalary = basicEarning ? parseFloat(basicEarning.annually) : 0;
+      const basicComponent = data.find((item) => item.component_name === 'Basic');
 
-    switch (earning.component_name) {
-      case 'Basic':
-        const basicPercentage = parseFloat(earning.calculation);
+      const selectedItem = await fetchData(`/payroll/earnings/${basicComponent.id}`);
+      const annualCtc = parseFloat(values.annual_ctc || 0);
+      let monthlyAmount = 0;
+      let annualAmount = 0;
+
+      if (selectedItem.calculation_type.type === 'Percentage of CTC') {
+        const basicPercentage = parseFloat(selectedItem.calculation_type.value);
         annualAmount = (annualCtc * basicPercentage) / 100;
         monthlyAmount = annualAmount / 12;
-        break;
-
-      case 'HRA':
-        if (earning.calculation_type === 'Percentage of Basic') {
-          const hraPercentage = parseFloat(earning.calculation);
-          // Calculate HRA based on actual basic salary
-          annualAmount = (actualBasicSalary * hraPercentage) / 100;
-          monthlyAmount = annualAmount / 12;
-        } else if (earning.calculation_type === 'Flat Amount') {
-          monthlyAmount = parseFloat(earning.calculation);
-          annualAmount = monthlyAmount * 12;
-        }
-        break;
-
-      case 'Fixed Allowance':
-        // Ensure Fixed Allowance is recalculated as a residual component
-        const earningsTotal = values.earnings.reduce((sum, earning) => sum + parseFloat(earning.annually || 0), 0);
-        annualAmount = annualCtc - earningsTotal; // Subtract total of all earnings from CTC
-        monthlyAmount = annualAmount / 12;
-        break;
-      case 'Conveyance Allowance':
-        monthlyAmount = parseFloat(earning.calculation);
+      } else if (selectedItem.calculation_type.type === 'Flat Amount') {
+        monthlyAmount = parseFloat(selectedItem.calculation_type.value);
         annualAmount = monthlyAmount * 12;
-        break;
-      default:
-        if (earning.calculation_type === 'Percentage of Basic') {
-          const percentage = parseFloat(earning.calculation);
-          annualAmount = (basicSalary * percentage) / 100;
-          monthlyAmount = annualAmount / 12;
-        } else if (earning.calculation_type === 'Flat Amount') {
-          monthlyAmount = parseFloat(earning.calculation);
-          annualAmount = monthlyAmount * 12;
-        }
-        break;
-    }
+      }
 
-    return {
-      monthly: Math.round(monthlyAmount * 100) / 100, // Round to 2 decimal places
-      annually: Math.round(annualAmount * 100) / 100 // Round to 2 decimal places
-    };
-  };
-  const recalculate = () => {
-    const annualCtc = parseFloat(values.annual_ctc);
-    const basicSalary = parseFloat(values.earnings.find((earning) => earning.component_name === 'Basic')?.monthly || 0);
-
-    const updatedEarnings = values.earnings.map((earning) => {
-      const calculatedValues = calculateEarnings(earning, annualCtc, basicSalary);
-      return {
-        ...earning,
-        monthly: calculatedValues.monthly,
-        annually: calculatedValues.annually
-      };
-    });
-    setFieldValue('earnings', updatedEarnings);
-    setEnablePreviewButton(true);
-  };
-
-  const handleDeleteItem = (key, index) => {
-    if (key === 'earnings') {
-      const newEarnings = values.earnings.filter((_, i) => i !== index);
-      setFieldValue('earnings', newEarnings);
-      setEnablePreviewButton(true);
-    }
-  };
-  const getEarnings_Details = async (id) => {
-    setLoading(true);
-    const url = `/payroll/earnings?payroll_id=${id}`;
-    const { res, error } = await Factory('get', url, {});
-    setLoading(false);
-    if (res.status_cd === 0) {
-      setEarningsData(res.data);
-
-      const basicComponent = res.data.find((item) => item.component_name === 'Basic');
-
-      const selectedItem = await get_individual_componnet_data(basicComponent.id);
       setValues((prev) => {
         return {
           ...prev,
@@ -189,7 +273,9 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
                   ...earning,
                   component_name: selectedItem.component_name,
                   calculation_type: selectedItem.calculation_type.type,
-                  calculation: selectedItem?.calculation_type?.value
+                  calculation: selectedItem?.calculation_type?.value,
+                  monthly: monthlyAmount,
+                  annually: annualAmount
                 }
               : earning
           )
@@ -197,25 +283,27 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
       });
     }
   };
-  const calculateFixedAllowance = () => {
+
+  const fetch_preview = async () => {
+    // Calculate Fixed Allowance and validate
     const totalEarnings = values.earnings.reduce((sum, earning) => {
       if (earning.component_name !== 'Fixed Allowance') {
         return sum + parseFloat(earning.annually || 0);
       }
       return sum;
     }, 0);
-
     const annualCtc = parseFloat(values.annual_ctc || 0);
-    const annualFixedAllowance = annualCtc - totalEarnings;
-    const monthlyFixedAllowance = annualFixedAllowance / 12;
+    const fixedAllowance = annualCtc - totalEarnings;
 
-    setFixedAllowance({
-      monthly: Math.round(monthlyFixedAllowance * 100) / 100,
-      annually: Math.round(annualFixedAllowance)
-    });
-  };
+    // Validate Fixed Allowance
+    if (fixedAllowance <= 0) {
+      setFieldValue(
+        'errorMessage',
+        'The system calculated Fixed Allowance cannot be less than zero. Check and enter valid salary details.'
+      );
+      return;
+    }
 
-  const fetch_preview = async () => {
     let postData = { ...values };
     postData.payroll = payrollid;
     postData.earnings = postData.earnings.filter((item) => item.component_name !== 'Fixed Allowance');
@@ -223,8 +311,8 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
     postData.earnings.push({
       component_name: 'Fixed Allowance',
       calculation_type: 'Fixed',
-      monthly: 0,
-      annually: 0,
+      monthly: fixedAllowance / 12,
+      annually: fixedAllowance,
       calculation: 0
     });
 
@@ -252,6 +340,7 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
       setViewPreview(true);
     }
   };
+
   const fetch_individual_salary_templates = async (id) => {
     if (!id) return;
 
@@ -329,6 +418,7 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
       });
     }
   };
+
   useEffect(() => {
     recalculate();
   }, [values.annual_ctc]);
@@ -344,16 +434,47 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
       getEarnings_Details(payrollid);
     }
   }, [payrollid]);
-  useEffect(() => {
-    calculateFixedAllowance();
-  }, [values.earnings, values.annual_ctc]);
-  const handleAddEarnings = () => {
-    setFieldValue('earnings', [
-      ...values.earnings,
-      { component_name: '', calculation: 0, monthly: 0, annually: 0 } // Default values
-    ]);
+
+  const recalculate = () => {
+    const annualCtc = parseFloat(values.annual_ctc);
+    let updatedEarnings = [...values.earnings];
+
+    updatedEarnings = updatedEarnings.map((earning) => {
+      if (earning.component_name === 'Basic') {
+        if (earning.calculation_type === 'Flat Amount') {
+          const monthlyAmount = parseFloat(earning.calculation) || 0;
+          return {
+            ...earning,
+            monthly: monthlyAmount,
+            annually: monthlyAmount * 12
+          };
+        } else if (!isNaN(annualCtc) && annualCtc > 0) {
+          const basicPercentage = parseFloat(earning.calculation) || 0;
+          const annualAmount = (annualCtc * basicPercentage) / 100;
+          return {
+            ...earning,
+            monthly: annualAmount / 12,
+            annually: annualAmount
+          };
+        }
+      }
+
+      const calculatedValues = calculateEarnings(
+        earning,
+        annualCtc,
+        parseFloat(updatedEarnings.find((e) => e.component_name === 'Basic')?.annually || 0)
+      );
+      return {
+        ...earning,
+        monthly: calculatedValues.monthly,
+        annually: calculatedValues.annually
+      };
+    });
+
+    setFieldValue('earnings', updatedEarnings);
     setEnablePreviewButton(true);
   };
+
   return (
     <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 1 }}>
       <Table sx={{ fontSize: '0.875rem' }}>
@@ -412,7 +533,6 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
                 </TableCell>
                 <TableCell>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    {/* {(earning.component_name === 'HRA' || earning.component_name === 'Basic') && ( */}
                     <CustomInput
                       value={earning.calculation}
                       fullWidth
@@ -471,17 +591,14 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
                       }}
                     />
 
-                    {/* )} */}
                     <Typography variant="body2" sx={{ whiteSpace: 'nowrap' }}>
-                      {earning.component_name === 'Basic'
-                        ? '% of CTC'
-                        : earning.component_name === 'HRA'
-                          ? earning.calculation_type
-                          : earning.component_name === 'Fixed Allowance'
-                            ? 'Remaining Balance'
-                            : earning.component_name === 'Conveyance Allowance'
-                              ? earning.calculation
-                              : earning.calculation_type}
+                      {earning.component_name === 'HRA'
+                        ? earning.calculation_type
+                        : earning.component_name === 'Fixed Allowance'
+                          ? 'Remaining Balance'
+                          : earning.component_name === 'Conveyance Allowance'
+                            ? earning.calculation
+                            : earning.calculation_type}
                     </Typography>
                   </Box>
                 </TableCell>
@@ -496,7 +613,7 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
                         <IconTrash
                           size={16}
                           onClick={() => {
-                            handleDeleteItem('earnings', index);
+                            handleDeleteItem(index);
                           }}
                         />
                       }
@@ -529,10 +646,14 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
               <Typography>Remaining Balance</Typography>
             </TableCell>
             <TableCell>
-              <Typography>{fixedAllowance.monthly.toFixed(2)}</Typography>
+              <Typography sx={{ color: fixedAllowance.monthly < 0 ? 'error.main' : 'inherit' }}>
+                {fixedAllowance.monthly.toFixed(2)}
+              </Typography>
             </TableCell>
             <TableCell>
-              <Typography>{fixedAllowance.annually.toFixed(2)}</Typography>
+              <Typography sx={{ color: fixedAllowance.annually < 0 ? 'error.main' : 'inherit' }}>
+                {fixedAllowance.annually.toFixed(2)}
+              </Typography>
             </TableCell>
             <TableCell></TableCell>
           </TableRow>
@@ -645,4 +766,35 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
       </Table>
     </TableContainer>
   );
+}
+
+// Helper functions
+function generateBenefitsArray(data) {
+  const benefits = [];
+  if (!data.epf_details.is_disabled) {
+    if (data.epf_details.include_employer_contribution_in_ctc) {
+      benefits.push({
+        component_name: 'EPF',
+        calculation_type: data.epf_details.employer_contribution_rate,
+        monthly: 0,
+        annually: 0
+      });
+    }
+    // ... Add other benefits similarly
+  }
+  return benefits;
+}
+
+function generateDeductionsArray(data) {
+  const deductions = [];
+  if (!data.epf_details.is_disabled) {
+    deductions.push({
+      component_name: 'EPF Employee Contribution',
+      calculation_type: data.epf_details.employee_contribution_rate,
+      monthly: 0,
+      annually: 0
+    });
+    // ... Add other deductions similarly
+  }
+  return deductions;
 }

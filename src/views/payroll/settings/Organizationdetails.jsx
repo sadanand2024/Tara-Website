@@ -55,7 +55,9 @@ function Organizationdetails() {
     filling_address_line2: '',
     filling_address_state: '',
     filling_address_city: '',
-    filling_address_pincode: ''
+    filling_address_pincode: '',
+    filling_address_id: '',
+    filling_address_location_name: ''
   };
 
   const fields = [
@@ -291,7 +293,7 @@ function Organizationdetails() {
     setLoading(true);
     const url = `/payroll/orgs/${id}/`;
     const { res, error } = await Factory('get', url, {});
-    setLoading(false); // Stop loading after the request completes
+    setLoading(false);
     if (res.status_cd === 0) {
       if (res?.data) {
         const data = res.data;
@@ -315,15 +317,12 @@ function Organizationdetails() {
           org_address_state: data.business_details.headOffice?.state || '',
           org_address_city: data.business_details.headOffice?.city || '',
           org_address_pincode: data.business_details.headOffice?.pincode || '',
-
-          filling_address_line1:
-            data.filling_address_line1 === '' ? data.business_details.headOffice?.address_line1 : data.filling_address_line1,
-          filling_address_line2:
-            data.filling_address_line1 === '' ? data.business_details.headOffice?.address_line2 : data.filling_address_line2,
-          filling_address_state: data.filling_address_line1 === '' ? data.business_details.headOffice?.state : data.filling_address_state,
-          filling_address_city: data.filling_address_line1 === '' ? data.business_details.headOffice?.city : data.filling_address_city,
-          filling_address_pinCode:
-            data.filling_address_line1 === '' ? data.business_details.headOffice?.pincode : data.filling_address_pincode
+          filling_address_line1: data.filling_address_line1 || data.business_details.headOffice?.address_line1 || '',
+          filling_address_line2: data.filling_address_line2 || data.business_details.headOffice?.address_line2 || '',
+          filling_address_state: data.filling_address_state || data.business_details.headOffice?.state || '',
+          filling_address_city: data.filling_address_city || data.business_details.headOffice?.city || '',
+          filling_address_pincode: data.filling_address_pincode || data.business_details.headOffice?.pincode || '',
+          filling_address_location_name: data.filling_address_location_name || 'Head Office'
         }));
       }
     } else {
@@ -343,7 +342,7 @@ function Organizationdetails() {
     const url = `/user_management/businesses/${businessId}/`;
     const { res } = await Factory('get', url, {});
 
-    setLoading(false); // Stop loading after the request completes
+    setLoading(false);
     if (res.status_cd !== 0) {
       dispatch(
         openSnackbar({
@@ -380,7 +379,8 @@ function Organizationdetails() {
         filling_address_line2: data.headOffice?.address_line2 || '',
         filling_address_state: data.headOffice?.state || '',
         filling_address_city: data.headOffice?.city || '',
-        filling_address_pincode: data.headOffice?.pincode || ''
+        filling_address_pincode: data.headOffice?.pincode || '',
+        filling_address_location_name: 'Head Office'
       }));
     } else {
       dispatch(
@@ -461,7 +461,7 @@ function Organizationdetails() {
                   Change
                 </Button>
               </Box>
-              <Typography>This address will be used across all Forms and Payslips.</Typography>
+              <Typography variant="h5">This address will be used across all Forms and Payslips.</Typography>
 
               <Card
                 sx={{
@@ -476,6 +476,9 @@ function Organizationdetails() {
                 }}
               >
                 <CardContent>
+                  <Typography variant="h4" sx={{ mb: 2, color: 'text.secondary' }}>
+                    {values.filling_address_location_name || 'Head Office'}
+                  </Typography>
                   {[
                     { label: 'Address Line 1', value: values.filling_address_line1 },
                     { label: 'Address Line 2', value: values.filling_address_line2 },
@@ -522,6 +525,14 @@ function Organizationdetails() {
                 getOrgDetails={getOrgDetails}
                 filingAddressDialog={filingAddressDialog}
                 setFilingAddressDialog={setFilingAddressDialog}
+                currentFilingAddress={{
+                  location_name: values.filling_address_location_name || 'Head Office',
+                  address_line1: values.filling_address_line1,
+                  address_line2: values.filling_address_line2,
+                  address_state: values.filling_address_state,
+                  address_city: values.filling_address_city,
+                  address_pincode: values.filling_address_pincode
+                }}
               />
             )}
           </Box>

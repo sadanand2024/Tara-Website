@@ -165,18 +165,17 @@ const ProductsPanel = ({ onClose }) => {
           transition={{ duration: 0.2, ease: 'easeOut' }}
           sx={{
             position: 'absolute',
-            maxHeight: '75vh',
+            maxHeight: '80vh',
             overflowY: 'auto',
             top: '100%',
             left: 0,
             width: '100vw',
             zIndex: 1100,
-            background: 'linear-gradient(135deg, #f8fafc 0%, #f1f3f6 100%)',
-            px: { xs: 1, sm: 2, md: 6 },
-            py: { xs: 2, sm: 3 },
+            backgroundColor: 'background.paper',
+            px: { xs: 2, sm: 4, md: 10 },
+            py: { xs: 3, sm: 5 },
             borderTop: (theme) => `1px solid ${theme.palette.divider}`,
-            boxShadow: '0 8px 16px -4px rgba(0, 0, 0, 0.10)',
-            borderRadius: 3
+            boxShadow: '0 8px 12px -4px rgba(0, 0, 0, 0.45)' // ✅ bottom shadow only
           }}
         >
           <Container maxWidth="lg">

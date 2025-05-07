@@ -144,7 +144,7 @@ function ESIComponent({ handleNext, handleBack }) {
         <MainCard title="Employees State Insurence">
           <Grid2 container spacing={{ xs: 2, sm: 3 }}>
             <Grid2 size={12}>
-              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', textAlign: 'center' }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', textAlign: 'center' }}>
                 <Grid2 container spacing={2} sx={{ maxWidth: '600px' }}>
                   <Grid2 container spacing={2}>
                     {esiData && (
@@ -177,33 +177,33 @@ function ESIComponent({ handleNext, handleBack }) {
                       <>
                         {/* EPF Data display */}
                         <Grid2 size={6}>
-                          <Typography variant="body1" sx={{ textAlign: 'left' }}>
+                          <Typography variant="subtitle1" sx={{ textAlign: 'left' }}>
                             ESI Number:
                           </Typography>
                         </Grid2>
                         <Grid2 size={6}>
-                          <Typography variant="body1" sx={{ textAlign: 'left' }}>
+                          <Typography variant="subtitle1" sx={{ textAlign: 'left' }}>
                             {esiData.esi_number}
                           </Typography>
                         </Grid2>
                         <Grid2 size={6}>
-                          <Typography variant="body1" sx={{ textAlign: 'left' }}>
+                          <Typography variant="subtitle1" sx={{ textAlign: 'left' }}>
                             Employee Contribution Rate:
                           </Typography>
                         </Grid2>
                         <Grid2 size={6}>
-                          <Typography variant="body1" sx={{ textAlign: 'left' }}>
+                          <Typography variant="subtitle1" sx={{ textAlign: 'left' }}>
                             {esiData.employee_contribution} % of Gross Pay
                           </Typography>
                         </Grid2>
 
                         <Grid2 size={6}>
-                          <Typography variant="body1" sx={{ textAlign: 'left' }}>
+                          <Typography variant="subtitle1" sx={{ textAlign: 'left' }}>
                             Employer Contribution Rate:
                           </Typography>
                         </Grid2>
                         <Grid2 size={6}>
-                          <Typography variant="body1" sx={{ textAlign: 'left' }}>
+                          <Typography variant="subtitle1" sx={{ textAlign: 'left' }}>
                             {esiData.employer_contribution} % of Gross Pay
                           </Typography>
                         </Grid2>

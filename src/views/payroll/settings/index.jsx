@@ -2,11 +2,13 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router';
 import { useSearchParams } from 'react-router';
 import MainCard from '../../../ui-component/cards/MainCard';
-import { Box, Stack, Typography, LinearProgress, Button, Grid2, CircularProgress } from '@mui/material';
+import { Box, Stack, Typography, LinearProgress, Button, Grid2, CircularProgress, IconButton } from '@mui/material';
 import Factory from 'utils/Factory';
 import { useSelector } from 'react-redux';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+
 const PAYROLL_STEPS = [
   { nameKey: 'Business profile', path: '/payroll/settings/organization-details', dataKey: 'organisation_details' },
   { nameKey: 'Set up Work Location', path: '/payroll/settings/work-location', dataKey: 'work_locations' },
@@ -315,17 +317,48 @@ const StepItem = React.memo(({ step, index, onClick, onMarkStatutoryComplete, ma
       </Typography>
     </Stack>
     <Stack direction="row" spacing={1}>
-      <Button
-        variant="outlined"
-        sx={{
-          color: step.completed ? '#4CAF50' : '#4A90E2',
-          fontWeight: step.completed ? 500 : 400,
-          border: `1px solid ${step.completed ? '#4CAF50' : '#4A90E2'}`
-        }}
-        onClick={onClick}
-      >
-        {step.completed ? 'Completed' : 'Complete Now'}
-      </Button>
+      {step.completed ? (
+        <Stack direction="row" spacing={1} alignItems="center">
+          <Button
+            variant="outlined"
+            onClick={onClick}
+            sx={{
+              color: '#4CAF50',
+              fontWeight: 500,
+              border: '1px solid #4CAF50',
+              pr: 0.5
+            }}
+            endIcon={
+              <IconButton
+                size="small"
+                sx={{
+                  color: '#4CAF50',
+                  p: 0.5,
+                  '&:hover': {
+                    backgroundColor: 'rgba(76, 175, 80, 0.1)'
+                  }
+                }}
+              >
+                <ArrowForwardIcon fontSize="small" />
+              </IconButton>
+            }
+          >
+            Completed
+          </Button>
+        </Stack>
+      ) : (
+        <Button
+          variant="outlined"
+          sx={{
+            color: '#4A90E2',
+            fontWeight: 400,
+            border: '1px solid #4A90E2'
+          }}
+          onClick={onClick}
+        >
+          Complete Now
+        </Button>
+      )}
       {/* Show Mark as Complete only for Statutory Components step when not completed */}
       {onMarkStatutoryComplete && !step.completed && (
         <Button variant="contained" onClick={onMarkStatutoryComplete} disabled={markingComplete}>

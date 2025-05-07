@@ -8,11 +8,11 @@ import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useSelector } from 'react-redux';
-export default function FilingAddressDialog({ filingAddressDialog, setFilingAddressDialog, getOrgDetails }) {
+export default function FilingAddressDialog({ filingAddressDialog, setFilingAddressDialog, getOrgDetails, currentFilingAddress }) {
   const user = useSelector((state) => state).accountReducer.user;
 
   let businessId = user.active_context.business_id;
-  const [selctedLocation, setSelctedLocation] = useState({});
+  const [selctedLocation, setSelctedLocation] = useState(currentFilingAddress || {});
   const [workLocations, setWorkLocations] = useState([]); // Stores the list of work locations
   const [loading, setLoading] = useState(false); // State for loader
   const dispatch = useDispatch();
@@ -26,13 +26,35 @@ export default function FilingAddressDialog({ filingAddressDialog, setFilingAddr
     }
   }, [searchParams]);
 
+  useEffect(() => {
+    if (currentFilingAddress) {
+      setSelctedLocation(currentFilingAddress);
+    }
+  }, [currentFilingAddress]);
+
   const fetchWorkLocations = async () => {
     setLoading(true);
     const url = `/payroll/work-locations/?payroll_id=${payrollid}`;
     const { res, error } = await Factory('get', url, {});
     setLoading(false);
     if (res?.status_cd === 0 && Array.isArray(res?.data)) {
-      setWorkLocations(res?.data); // Successfully set work locations
+      setWorkLocations(res?.data || []);
+
+      // If we have a current filing address, find and select it in the list
+      if (currentFilingAddress) {
+        const matchingLocation = res?.data.find(
+          (loc) =>
+            loc.address_line1 === currentFilingAddress.address_line1 &&
+            loc.address_line2 === currentFilingAddress.address_line2 &&
+            loc.address_state === currentFilingAddress.address_state &&
+            loc.address_city === currentFilingAddress.address_city &&
+            loc.address_pincode === currentFilingAddress.address_pincode
+        );
+
+        if (matchingLocation) {
+          setSelctedLocation(matchingLocation);
+        }
+      }
     } else {
       setWorkLocations([]);
       dispatch(
@@ -46,6 +68,7 @@ export default function FilingAddressDialog({ filingAddressDialog, setFilingAddr
       );
     }
   };
+
   const saveFilingAddress = async () => {
     if (!selctedLocation.location_name) {
       dispatch(
@@ -62,6 +85,7 @@ export default function FilingAddressDialog({ filingAddressDialog, setFilingAddr
     let postData = new FormData();
     postData.append('business', businessId);
 
+    postData.append('filling_address_location_name', selctedLocation.location_name);
     postData.append('filling_address_line1', selctedLocation.address_line1);
     postData.append('filling_address_line2', selctedLocation.address_line2);
     postData.append('filling_address_state', selctedLocation.address_state);
@@ -71,7 +95,6 @@ export default function FilingAddressDialog({ filingAddressDialog, setFilingAddr
     const url = `/payroll/orgs/`;
     const { res, error } = await Factory('post', url, postData);
     setLoading(false);
-    console.log(res);
     if (res.status_cd === 0) {
       dispatch(
         openSnackbar({
@@ -97,9 +120,11 @@ export default function FilingAddressDialog({ filingAddressDialog, setFilingAddr
       );
     }
   };
+
   useEffect(() => {
     if (payrollid !== null) fetchWorkLocations();
   }, [payrollid]);
+
   return (
     <>
       {loading ? (
@@ -145,12 +170,15 @@ export default function FilingAddressDialog({ filingAddressDialog, setFilingAddr
                   }}
                 >
                   <CardContent>
+                    <Typography variant="subtitle2" sx={{ mb: 1, color: 'text.secondary' }}>
+                      {selctedLocation.location_name}
+                    </Typography>
                     {[
                       { label: 'Address Line 1', value: selctedLocation.address_line1 },
                       { label: 'Address Line 2', value: selctedLocation.address_line2 },
                       { label: 'Country', value: 'IN' },
-                      { label: 'City', value: selctedLocation.address_city },
                       { label: 'State', value: selctedLocation.address_state },
+                      { label: 'City', value: selctedLocation.address_city },
                       { label: 'Pincode', value: selctedLocation.address_pincode }
                     ].map((item, index) => (
                       <Typography
@@ -175,7 +203,7 @@ export default function FilingAddressDialog({ filingAddressDialog, setFilingAddr
               {/* Note Section */}
               <Grid2 size={{ xs: 12 }}>
                 <Typography variant="body2" sx={{ mt: 2, fontWeight: 'bold' }}>
-                  Note: <span style={{ fontWeight: 400 }}>Your filing address can only be one of your work locations</span>
+                  Note: <span style={{ fontWeight: 400 }}>Select a work location to use as your filing address</span>
                 </Typography>
               </Grid2>
 

@@ -14,8 +14,8 @@ const services = [
       { label: 'TDS Return filing', path: '/services/income-tax/tds-return' },
       { label: 'Advance Tax', path: '/services/income-tax/advance-tax' },
       { label: 'Tax Consultation', path: '/services/income-tax/consultation' },
-      { label: 'Form 15CA/CB filing', path: '/services/income-tax/form-15ca-cb' },
-      { label: '+More', path: '/services/income-tax' }
+      { label: 'Form 15CA/CB filing', path: '/services/income-tax/form-15ca-cb' }
+      // { label: '+More', path: '/services/income-tax' }
     ]
   },
   {
@@ -27,8 +27,8 @@ const services = [
       { label: 'Invoicing', path: '/services/accounting/invoicing' },
       { label: 'Fix My Books', path: '/services/accounting/fix-my-books' },
       { label: 'Inventory management', path: '/services/accounting/inventory-management' },
-      { label: 'MIS & Analytics', path: '/services/accounting/mis-analytics' },
-      { label: '+More', path: '/services/accounting' }
+      { label: 'MIS & Analytics', path: '/services/accounting/mis-analytics' }
+      // { label: '+More', path: '/services/accounting' }
     ]
   },
   {
@@ -40,8 +40,8 @@ const services = [
       { label: 'Startup India registration', path: '/services/registration/startup-india' },
       { label: 'Labour license', path: '/services/registration/labour-license' },
       { label: 'Trade license', path: '/services/registration/trade-license' },
-      { label: 'IEC registration', path: '/services/registration/iec' },
-      { label: '+More', path: '/services/registration' }
+      { label: 'IEC registration', path: '/services/registration/iec' }
+      // { label: '+More', path: '/services/registration' }
     ]
   },
   {
@@ -53,8 +53,8 @@ const services = [
       { label: 'DIR 3 KYC', path: '/services/legal/dir3-kyc' },
       { label: 'Draft Board Resolution', path: '/services/legal/board-resolution' },
       { label: 'Agreement Drafting', path: '/services/legal/agreement-drafting' },
-      { label: 'RERA', path: '/services/legal/rera' },
-      { label: '+More', path: '/services/legal' }
+      { label: 'RERA', path: '/services/legal/rera' }
+      // { label: '+More', path: '/services/legal' }
     ]
   },
   {
@@ -66,8 +66,8 @@ const services = [
       { label: 'Valuation', path: '/services/advisory/valuation' },
       { label: 'Financial due diligence', path: '/services/advisory/due-diligence' },
       { label: 'Internal Audit', path: '/services/advisory/internal-audit' },
-      { label: 'Working Capital Management', path: '/services/advisory/working-capital' },
-      { label: '+More', path: '/services/advisory' }
+      { label: 'Working Capital Management', path: '/services/advisory/working-capital' }
+      // { label: '+More', path: '/services/advisory' }
     ]
   },
   {
@@ -79,8 +79,8 @@ const services = [
       { label: 'Employee ITR filing (bulk)', path: '/services/payroll/employee-itr-filing' },
       { label: 'EPF/ESI Registration', path: '/services/payroll/epf-esi-registration' },
       { label: 'EPF/ESI / PT Filings', path: '/services/payroll/pt-registration' },
-      { label: 'Employee / Group Insurance', path: '/services/payroll/employee-insurance' },
-      { label: '+More', path: '/services/payroll' }
+      { label: 'Employee / Group Insurance', path: '/services/payroll/employee-insurance' }
+      // { label: '+More', path: '/services/payroll' }
     ]
   },
   {
@@ -92,8 +92,8 @@ const services = [
       { label: 'Notice Management', path: '/services/gst/notice-management' },
       { label: 'Cancellation / Revocation', path: '/services/gst/cancellation-revocation' },
       { label: 'GST Refund', path: '/services/gst/refund' },
-      { label: 'LUT filing', path: '/services/gst/lut-filing' },
-      { label: '+More', path: '/services/gst' }
+      { label: 'LUT filing', path: '/services/gst/lut-filing' }
+      // { label: '+More', path: '/services/gst' }
     ]
   },
   {
@@ -105,8 +105,8 @@ const services = [
       { label: 'Insurance', path: '/services/wealth/insurance' },
       { label: 'Retirement planning', path: '/services/wealth/retirement' },
       { label: 'Wealth Advisory', path: '/services/wealth/advisory' },
-      { label: 'FHI', path: '/services/wealth/fhi' },
-      { label: '+More', path: '/services/wealth' }
+      { label: 'FHI', path: '/services/wealth/fhi' }
+      // { label: '+More', path: '/services/wealth' }
     ]
   }
 ];
@@ -174,16 +174,17 @@ const ServicesPanel = ({ onClose }) => {
               {mergedServices.map((section, index) => (
                 <Grid2 size={{ xs: 12, sm: 6, md: 3 }} key={index}>
                   <Typography
-                    variant="subtitle2"
+                    variant="h5"
                     gutterBottom
                     sx={{
-                      fontWeight: 'bold',
                       color: section.color,
+                      fontWeight: '600',
+
                       textTransform: 'uppercase',
                       borderBottom: '1px solid',
                       borderColor: 'divider',
                       pb: 1,
-                      mb: 1,
+                      mb: 1.5,
                       textAlign: 'left'
                     }}
                   >
@@ -204,7 +205,7 @@ const ServicesPanel = ({ onClose }) => {
                         variant="body2"
                         sx={{
                           display: 'block',
-                          mb: 1,
+                          mb: 1.8,
                           cursor: 'pointer',
                           textDecoration: 'none',
                           color: 'text.primary',

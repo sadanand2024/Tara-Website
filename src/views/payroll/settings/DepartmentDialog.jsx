@@ -53,7 +53,6 @@ export default function DepartmentDialog({ open, handleClose, fetchDepartments, 
             close: false
           })
         );
-        setType('');
         fetchDepartments();
         resetForm();
         handleClose();
