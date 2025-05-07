@@ -2,14 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 // material-ui
-import {
-  Box,
-  Button,
-  Drawer,
-  IconButton,
-  Typography,
-  Stack
-} from '@mui/material';
+import { Box, Button, Drawer, IconButton, Typography, Stack } from '@mui/material';
 
 // assets
 import CloseIcon from '@mui/icons-material/Close';
@@ -17,7 +10,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import PersonIcon from '@mui/icons-material/Person';
 import BusinessIcon from '@mui/icons-material/Business';
 import InfoIcon from '@mui/icons-material/Info';
-
+import Card from '@mui/material/Card';
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
@@ -33,6 +26,8 @@ import useConfig from 'hooks/useConfig';
 import { gridSpacing } from 'store/constant';
 import Factory from 'utils/Factory';
 import RazorpayPayment from '../../ManageSubscriptions/RazorpayPayment';
+import Chip from '@mui/material/Chip';
+import Avatar from '@mui/material/Avatar';
 // assets
 import CheckTwoToneIcon from '@mui/icons-material/CheckTwoTone';
 import TwoWheelerTwoToneIcon from '@mui/icons-material/TwoWheelerTwoTone';
@@ -76,10 +71,12 @@ const PlanDrawer = ({ open, onClose, moduleId, type, selectedTask }) => {
   }, [moduleId]);
 
   const ServicePlanCard = ({ plan }) => (
-    <MainCard
+    <Card
       sx={{
         borderRadius: 3,
         boxShadow: 2,
+        px: 2,
+        pt: 2,
         border: '1px solid',
         borderColor: 'divider',
         transition: 'box-shadow 0.2s',
@@ -89,62 +86,61 @@ const PlanDrawer = ({ open, onClose, moduleId, type, selectedTask }) => {
         flexDirection: 'column'
       }}
     >
-      <MainCard.Header
-        title={
-          <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={2}>
-            <Box display="flex" alignItems="center" gap={1}>
-              <Avatar variant="rounded" sx={{ bgcolor: 'primary.light', color: 'secondary.main' }}>
-                <BusinessCenterIcon fontSize="small" />
-              </Avatar>
-              <Typography variant="h5" fontWeight={700}>
-                {plan.name}
-              </Typography>
-            </Box>
-            <Chip
-              label={capitalizeWords(plan.plan_type)}
-              color="info"
-              variant="outlined"
-              size="small"
-              sx={{ textTransform: 'capitalize', fontWeight: 600 }}
-            />
-          </Stack>
-        }
-      />
-
-      <MainCard.Content>
-        <Stack direction="column" justifyContent="space-between" spacing={2} sx={{ p: 2, flexGrow: 1 }}>
-          {/* Description with Tooltip */}
-          <Tooltip title={plan.description} placement="top" arrow>
-            <Typography
-              variant="body1"
-              color="text.primary"
-              textAlign="center"
-              sx={{
-                display: '-webkit-box',
-                WebkitLineClamp: 3,
-                WebkitBoxOrient: 'vertical',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                mt: 1,
-                mb: 2,
-                lineHeight: 1.6,
-                minHeight: '3.2em' // Keeps all cards visually even (3 lines × 1.6 lineHeight)
-              }}
-            >
-              {plan.description}
+      <Box sx={{ p: 0 }}>
+        <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={2}>
+          <Box display="flex" alignItems="center" gap={1}>
+            <Avatar variant="rounded" sx={{ bgcolor: 'primary.light', color: 'secondary.main' }}>
+              <BusinessCenterIcon fontSize="small" />
+            </Avatar>
+            <Typography variant="h5" fontWeight={700}>
+              {plan.name}
             </Typography>
-          </Tooltip>
-
-          {/* Price */}
-          <Stack direction="row" alignItems="flex-end" justifyContent="center" spacing={1} sx={{ mb: 0 }}>
-            <Typography variant="h3" color="secondary.main" fontWeight={700}>
-              ₹{plan.amount}&nbsp;
-              <Typography variant="caption" color="text.primary">
-                One Time
-              </Typography>
+          </Box>
+          <Chip
+            label={capitalizeWords(plan.plan_type)}
+            color="info"
+            variant="outlined"
+            size="small"
+            sx={{ textTransform: 'capitalize', fontWeight: 600 }}
+          />
+        </Stack>
+      </Box>
+      <Box sx={{ p: 2, pt: 0, flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+        {/* Description with Tooltip */}
+        <Tooltip title={plan.description} placement="top" arrow>
+          <Typography
+            variant="body1"
+            color="text.primary"
+            textAlign="center"
+            sx={{
+              display: '-webkit-box',
+              WebkitLineClamp: 3,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              mt: 1,
+              mb: 2,
+              lineHeight: 1.6,
+              minHeight: '3.2em' // Keeps all cards visually even (3 lines × 1.6 lineHeight)
+            }}
+          >
+            {plan.description}
+          </Typography>
+        </Tooltip>
+        {/* Price */}
+        <Stack direction="row" alignItems="flex-end" justifyContent="center" spacing={1} sx={{ mb: 0 }}>
+          <Typography variant="h3" color="secondary.main" fontWeight={700}>
+            {plan.plan_type === 'custom' || plan.plan_type === 'range' ? 'Custom Quote' : '₹' + (plan.amount ? plan.amount : 0)}&nbsp;
+            <Typography variant="caption" color="text.primary">
+              {plan.plan_type !== 'custom' || (plan.plan_type !== 'range' && 'One Time')}
             </Typography>
-          </Stack>
-
+          </Typography>
+        </Stack>
+        {plan.plan_type === 'custom' || plan.plan_type === 'range' ? (
+          <Button variant="contained" color="primary" sx={{ mt: 2, borderRadius: 2 }}>
+            Talk to expert
+          </Button>
+        ) : (
           <RazorpayPayment
             type="service"
             label="Purchase Now"
@@ -161,9 +157,9 @@ const PlanDrawer = ({ open, onClose, moduleId, type, selectedTask }) => {
               console.log('Payment Cancelled');
             }}
           />
-        </Stack>
-      </MainCard.Content>
-    </MainCard>
+        )}
+      </Box>
+    </Card>
   );
 
   return (
@@ -199,12 +195,10 @@ const PlanDrawer = ({ open, onClose, moduleId, type, selectedTask }) => {
           </Typography>
         </Box>
       ) : (
-        <Grid container spacing={4} sx={{ p: 3 }}>
+        <Grid container spacing={4} sx={{ p: 2 }}>
           {plans.map((plan) => (
-            <Grid size={{ xs: 6, lg: 6, xl: 6 }} key={plan.id}>
-              <ServicePlanCard
-                plan={plan}
-              />
+            <Grid size={{ xs: 12, md: 6, xl: 6 }} key={plan.id}>
+              <ServicePlanCard plan={plan} />
             </Grid>
           ))}
         </Grid>

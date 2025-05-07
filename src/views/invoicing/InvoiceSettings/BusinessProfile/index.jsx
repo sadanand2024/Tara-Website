@@ -17,7 +17,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
 
-export default function TabOne({ businessDetails = {}, postType, handleNext }) {
+export default function TabOne({ businessDetails = {}, postType, handleNext, setBusinessDetails }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -152,6 +152,7 @@ export default function TabOne({ businessDetails = {}, postType, handleNext }) {
         );
       } else {
         dispatch(
+          // setBusinessDetails(res.data.data),
           openSnackbar({
             open: true,
             message: 'Data Saved Successfully',
@@ -195,7 +196,6 @@ export default function TabOne({ businessDetails = {}, postType, handleNext }) {
   }, [businessDetails]);
 
   if (!businessDetails || !businessDetails.id) return <Typography>Loading business details...</Typography>;
-
   return (
     <>
       <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 2 }}>

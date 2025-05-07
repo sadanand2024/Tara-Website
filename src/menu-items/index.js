@@ -4,8 +4,10 @@ import getDashboardMenu from './dashboard';
 // ==============================|| MENU ITEMS ||============================== //
 
 // Usage: menuItems(user, subscriptions)
+
+
 const menuItems = (user, subscriptions) => ({
-  items: [getDashboardMenu(user, subscriptions), pages]
+  items: [getDashboardMenu(user, subscriptions)]
 });
 
 export default menuItems;

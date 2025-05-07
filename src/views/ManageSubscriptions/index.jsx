@@ -7,6 +7,9 @@ import StarIcon from '@mui/icons-material/Star';
 import { Avatar, Chip } from '@mui/material';
 import PaymentIcon from '@mui/icons-material/Payment';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
+import { useDispatch as useReduxDispatch } from 'react-redux';
+import { storeUser } from 'store/slices/account';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 
 // material-ui
 import {
@@ -217,8 +220,25 @@ const EmptySubscriptions = () => {
   );
 };
 
+function transformModuleResponse(apiResponse) {
+  return apiResponse.map((item) => ({
+    id: item.id,
+    module_id: item.module.id,
+    module_name: item.module.name,
+    plan_id: item.plan.id,
+    plan_name: item.plan.name,
+    plan_price: item.plan.price,
+    status: item.status,
+    start_date: item.start_date,
+    end_date: item.end_date,
+    auto_renew: item.auto_renew,
+    module_description: item.module.description,
+    plan_description: item.plan.description
+  }));
+}
 const ManageSubscriptions = () => {
   const theme = useTheme();
+  const reduxDispatch = useReduxDispatch();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(theme.breakpoints.down('md'));
   const [paymentHistory, setPaymentHistory] = useState([]);
@@ -230,7 +250,6 @@ const ManageSubscriptions = () => {
   useEffect(() => {
     const getPaymentHistory = async () => {
       const response = await Factory('get', `/user_management/payment-history?context_id=${user.active_context.id}`);
-      console.log(response.res.data);
       if (response.res.status_cd === 0) {
         setPaymentHistory([...response.res.data.module_payments, ...response.res.data.service_payments]);
       }
@@ -240,7 +259,12 @@ const ManageSubscriptions = () => {
     const getModuleSubscriptions = async () => {
       const response = await Factory('get', `/user_management/context-subscriptions/${user.active_context.id}/`);
       if (response.res.status_cd === 0) {
-        setModuleSubscriptions(response.res.data.subscriptions);
+        const transformedModuleSubscriptions = transformModuleResponse(response.res.data.subscriptions);
+        let data = { ...user };
+        data.module_subscriptions = transformedModuleSubscriptions;
+        localStorage.setItem('user', JSON.stringify(data));
+        reduxDispatch(storeUser(data));
+        setModuleSubscriptions(transformedModuleSubscriptions);
       }
     };
     getModuleSubscriptions();
@@ -350,16 +374,26 @@ const ManageSubscriptions = () => {
         {moduleSubscriptions && moduleSubscriptions.length > 0 ? (
           <Grid container spacing={{ xs: 2, sm: 3 }}>
             {moduleSubscriptions.map((subscription) => (
-              <Grid item xs={12} md={4} lg={3} key={subscription.id}>
+              <Grid item xs={12} md={6} lg={4} xl={3} key={subscription.id}>
                 <SubscriptionCard
-                  module={subscription.module.name}
-                  planName={subscription.plan.name}
-                  price={subscription.plan.price}
+                  // id: item.id,
+                  // module_id: item.module.id,
+                  // module_name: item.module.name,
+                  // plan_id: item.plan.id,
+                  // plan_name: item.plan.name,
+                  // status: item.status,
+                  // start_date: item.start_date,
+                  // end_date: item.end_date,
+                  // auto_renew: item.auto_renew
+
+                  module={subscription.module_name}
+                  planName={subscription.plan_name}
+                  price={subscription.plan_price || 0}
                   expiry={subscription.end_date ? new Date(subscription.end_date).toLocaleDateString() : ''}
                   trial={subscription.status === 'trial'}
                   status={subscription.status}
                   autoRenew={subscription.auto_renew}
-                  description={subscription.plan.description || subscription.module.description}
+                  description={subscription.plan_description}
                 />
               </Grid>
             ))}
@@ -415,117 +449,72 @@ const ManageSubscriptions = () => {
             }
           }}
         >
-          <Table>
+          <Table size="small">
             <TableHead>
               <TableRow>
-                <TableCell>Service</TableCell>
-                <TableCell>Price</TableCell>
-                <TableCell>Date</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell align="right">Actions</TableCell>
+                <TableCell sx={{ pl: 3 }}>S.No</TableCell>
+                <TableCell>Task ID</TableCell>
+                <TableCell>Service Name</TableCell>
+                <TableCell>Plan Name</TableCell>
+                <TableCell>Payment Status</TableCell>
+                <TableCell>Payment Id</TableCell>
+                <TableCell>Created At</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              <TableRow>
-                <TableCell>
-                  <Typography variant="subtitle2">Private Limited Company Reg.</Typography>
-                </TableCell>
-                <TableCell>
-                  <Typography variant="body2" color="primary.main" fontWeight={500}>
-                    ₹ 9,999
-                  </Typography>
-                </TableCell>
-                <TableCell>14/Apr</TableCell>
-                <TableCell>
-                  <Chip
-                    label="Completed"
-                    color="success.darker"
-                    size="small"
+              {servicesPurchased.length > 0 ? (
+                servicesPurchased.map((task, index) => (
+                  <TableRow
+                    hover
+                    key={task.id}
                     sx={{
-                      background: (theme) =>
-                        `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.dark} 100%)`,
-                      color: 'white',
-                      fontWeight: 500
+                      '& td, & th': {
+                        py: 1.5 // increase vertical padding on all cells
+                      }
                     }}
-                  />
-                </TableCell>
-                <TableCell align="right">
-                  <Stack direction="row" spacing={1} justifyContent="flex-end">
-                    <IconButton
-                      size="small"
-                      sx={{
-                        color: 'primary.main',
-                        '&:hover': {
-                          bgcolor: 'primary.lighter'
-                        }
-                      }}
-                    >
-                      <VisibilityIcon fontSize="small" />
-                    </IconButton>
-                    <IconButton
-                      size="small"
-                      sx={{
-                        color: 'primary.main',
-                        '&:hover': {
-                          bgcolor: 'primary.lighter'
-                        }
-                      }}
-                    >
-                      <ReceiptIcon fontSize="small" />
-                    </IconButton>
-                  </Stack>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>
-                  <Typography variant="subtitle2">MSME Registration</Typography>
-                </TableCell>
-                <TableCell>
-                  <Typography variant="body2" color="primary.main" fontWeight={500}>
-                    ₹ 9,999
-                  </Typography>
-                </TableCell>
-                <TableCell>14/Apr</TableCell>
-                <TableCell>
-                  <Chip
-                    label="Completed"
-                    color="success.darker"
-                    size="small"
-                    sx={{
-                      background: (theme) =>
-                        `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.dark} 100%)`,
-                      color: 'white',
-                      fontWeight: 500
-                    }}
-                  />
-                </TableCell>
-                <TableCell align="right">
-                  <Stack direction="row" spacing={1} justifyContent="flex-end">
-                    <IconButton
-                      size="small"
-                      sx={{
-                        color: 'primary.main',
-                        '&:hover': {
-                          bgcolor: 'primary.lighter'
-                        }
-                      }}
-                    >
-                      <VisibilityIcon fontSize="small" />
-                    </IconButton>
-                    <IconButton
-                      size="small"
-                      sx={{
-                        color: 'primary.main',
-                        '&:hover': {
-                          bgcolor: 'primary.lighter'
-                        }
-                      }}
-                    >
-                      <ReceiptIcon fontSize="small" />
-                    </IconButton>
-                  </Stack>
-                </TableCell>
-              </TableRow>
+                  >
+                    <TableCell sx={{ pl: 3 }}>{(page - 1) * rowsPerPage + index + 1}</TableCell>
+                    <TableCell>{task.id}</TableCell>
+                    <TableCell>{task.service_name.charAt(0).toUpperCase() + task.service_name.slice(1)}</TableCell>
+                    <TableCell>{task.plan_name.charAt(0).toUpperCase() + task.plan_name.slice(1)}</TableCell>
+                    <TableCell>
+                      {task.status === 'paid' ? (
+                        <Chip
+                          label={task.status.charAt(0).toUpperCase() + task.status.slice(1)}
+                          icon={<CheckCircleTwoToneIcon />}
+                          color="success"
+                          size="small"
+                          sx={{ fontWeight: 500 }}
+                        />
+                      ) : (
+                        <Button variant="outlined" color="primary" size="small" onClick={() => onOpenPlans(task)}>
+                          Complete Payment
+                        </Button>
+                      )}
+                    </TableCell>
+                    <TableCell>{task.payment_order_id || '-'}</TableCell>
+                    <TableCell>
+                      <Typography variant="body1" color="text" fontWeight={500}>
+                        {task.created_at ? new Date(task.created_at).toLocaleDateString() : '-'}
+                      </Typography>
+                      <Typography variant="body1" color="text.secondary">
+                        {task.created_at ? new Date(task.created_at).toLocaleTimeString() : '-'}
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={7} align="center" sx={{ py: 3 }}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                      <InfoOutlinedIcon color="action" fontSize="large" />
+                      <Typography variant="body1" color="text.secondary">
+                        No records found
+                      </Typography>
+                    </Box>
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </TableContainer>
@@ -590,43 +579,56 @@ const ManageSubscriptions = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {paymentHistory.map((payment) => (
-                <TableRow key={payment.id}>
-                  <TableCell>{new Date(payment.created_at).toLocaleDateString()}</TableCell>
-                  <TableCell>
-                    <Typography variant="subtitle2">{payment.plan_name || payment.suite_name}</Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2" color="primary.main" fontWeight={500}>
-                      ₹ {payment.amount}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Chip
-                      label={payment.status === 'paid' && payment.payment_captured ? 'Paid' : 'Failed'}
-                      color={payment.status === 'paid' && payment.payment_captured ? 'success' : 'error'}
-                      size="small"
-                      sx={{ fontWeight: 500 }}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2">
-                      {payment.payment_method ? payment.payment_method.charAt(0).toUpperCase() + payment.payment_method.slice(1) : ''}
-                      {payment.card_last4 ? ` ••••${payment.card_last4}` : ''}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="caption" color="text.secondary">
-                      {payment.razorpay_order_id}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="caption" color="text.secondary">
-                      {payment.razorpay_payment_id}
-                    </Typography>
+              {paymentHistory?.length > 0 ? (
+                paymentHistory.map((payment) => (
+                  <TableRow key={payment.id}>
+                    <TableCell>{new Date(payment.created_at).toLocaleDateString()}</TableCell>
+                    <TableCell>
+                      <Typography variant="subtitle2">{payment.plan_name || payment.suite_name}</Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2" color="primary.main" fontWeight={500}>
+                        ₹ {payment.amount}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        label={payment.status === 'paid' && payment.payment_captured ? 'Paid' : 'Failed'}
+                        color={payment.status === 'paid' && payment.payment_captured ? 'success' : 'error'}
+                        size="small"
+                        sx={{ fontWeight: 500 }}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2">
+                        {payment.payment_method ? payment.payment_method.charAt(0).toUpperCase() + payment.payment_method.slice(1) : ''}
+                        {payment.card_last4 ? ` ••••${payment.card_last4}` : ''}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="caption" color="text.secondary">
+                        {payment.razorpay_order_id}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="caption" color="text.secondary">
+                        {payment.razorpay_payment_id}
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={7} align="center" sx={{ py: 3 }}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                      <InfoOutlinedIcon color="action" fontSize="large" />
+                      <Typography variant="body1" color="text.secondary">
+                        No records found
+                      </Typography>
+                    </Box>
                   </TableCell>
                 </TableRow>
-              ))}
+              )}
             </TableBody>
           </Table>
         </TableContainer>

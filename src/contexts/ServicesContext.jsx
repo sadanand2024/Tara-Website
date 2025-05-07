@@ -2,11 +2,10 @@ import { createContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
-
 const ServicesContext = createContext();
 
 export const ServicesProvider = ({ children }) => {
-  let baseURL = 'http://dev-backend.tarafirst.com:8000';
+  let baseURL = import.meta.env.VITE_APP_BASE_URL;
   const [services, setServices] = useState([]);
   const dispatch = useDispatch();
 

@@ -58,6 +58,7 @@ export default function Price1() {
   const [plans, setPlans] = useState([]);
   const [centerIndex, setCenterIndex] = useState(1);
   const user = useSelector((state) => state).accountReducer.user;
+  const moduleSubscriptions = user.module_subscriptions;
   const priceListDisable = {
     opacity: '0.4',
     '& >div> svg': {
@@ -125,7 +126,14 @@ export default function Price1() {
   const getModulePricing = async () => {
     const res = await Factory('get', `/user_management/subscription-plans/list/?is_active=yes&module_id=${moduleId}`);
     if (res.res.status_cd === 0) {
-      setPlans(res.res.data.data);
+      const moduleSubscriptions = user.module_subscriptions;
+      const currentSub = moduleSubscriptions.find((sub) => sub.module_id === Number(moduleId));
+      const plansWithActive = res.res.data.data.map((plan) => ({
+        ...plan,
+        active: currentSub && plan.id === currentSub.plan_id
+      }));
+      console.log(plansWithActive);
+      setPlans(plansWithActive);
     }
   };
   const getServicePricing = async () => {
@@ -226,8 +234,8 @@ export default function Price1() {
             onSuccess={(response) => {
               console.log('Payment Success:', response);
             }}
-            onFailure={() => {
-              console.log('Payment Cancelled');
+            onFailure={(response) => {
+              console.log('Payment Cancelled:', response);
             }}
           />
         </Stack>
@@ -444,7 +452,7 @@ export default function Price1() {
                     }}
                   >
                     {/* Current Plan Badge as Diagonal Strip */}
-                    {idx === 1 && plan.active && (
+                    {plan.active && (
                       <Box
                         sx={{
                           position: 'absolute',
@@ -651,19 +659,26 @@ export default function Price1() {
                           </List>
                         </Grid>
                         <Grid size={12}>
-                          <RazorpayPayment
-                            contextId={user.active_context.id}
-                            userId={user.user.id}
-                            plan={plan}
-                            onSuccess={(response) => {
-                              // Handle success (show snackbar, update UI, etc.)
-                              console.log('Payment Success:', response);
-                            }}
-                            onFailure={() => {
-                              // Handle failure/cancel
-                              console.log('Payment Cancelled');
-                            }}
-                          />
+                          {!plan.active ? (
+                            <RazorpayPayment
+                              contextId={user.active_context.id}
+                              userId={user.user.id}
+                              plan={plan}
+                              moduleId={moduleId}
+                              onSuccess={(response) => {
+                                // Handle success (show snackbar, update UI, etc.)
+                                console.log('Payment Success:', response);
+                              }}
+                              onFailure={() => {
+                                // Handle failure/cancel
+                                console.log('Payment Cancelled');
+                              }}
+                            />
+                          ) : (
+                            <Button variant="contained" disabled color="primary">
+                              Subscribed
+                            </Button>
+                          )}
                         </Grid>
                       </Grid>
                     </MainCard>
