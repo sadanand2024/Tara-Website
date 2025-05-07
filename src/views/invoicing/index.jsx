@@ -1,5 +1,5 @@
 import Grid from '@mui/material/Grid2';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 import Factory from 'utils/Factory';
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';

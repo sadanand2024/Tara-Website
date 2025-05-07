@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Factory from 'utils/Factory';
-import { useSearchParams } from 'react-router';
-import { useNavigate } from 'react-router';
+import { useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import RenderTable from './RenderTable';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';

@@ -6,9 +6,9 @@ import Stack from '@mui/material/Stack';
 import { Box, Button, Paper, Divider, Chip, Typography } from '@mui/material';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 import { useTheme, alpha } from '@mui/material/styles';
-import { useSearchParams } from 'react-router';
+import { useSearchParams } from 'react-router-dom';
 //react
 
 // @project

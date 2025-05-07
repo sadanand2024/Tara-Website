@@ -17,8 +17,8 @@ import {
 import CustomInput from 'utils/CustomInput';
 import CustomAutocomplete from 'utils/CustomAutocomplete';
 import { IconTrash } from '@tabler/icons-react';
-import { useSearchParams } from 'react-router';
-import { useNavigate } from 'react-router';
+import { useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Factory from 'utils/Factory';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 

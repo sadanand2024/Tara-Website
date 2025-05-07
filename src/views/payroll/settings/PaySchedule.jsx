@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Card, Stack, Box, Typography, Grid2 } from '@mui/material';
-import { useSearchParams } from 'react-router';
-import { useNavigate } from 'react-router';
+import { useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import MainCard from '../../../ui-component/cards/MainCard';
 import Factory from 'utils/Factory';
 import dayjs from 'dayjs';

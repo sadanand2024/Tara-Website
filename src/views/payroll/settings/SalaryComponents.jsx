@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { useTheme } from '@mui/material/styles';
 import { Box, Button, Stack, Tab, Tabs, Typography } from '@mui/material';
 import MainCard from '../../../ui-component/cards/MainCard';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 import EarningsComponent from './Earnings';
 
 const TabPanel = ({ children, value, index }) => (

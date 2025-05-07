@@ -5,7 +5,7 @@ import { Box, Typography, Button, Grid2 } from '@mui/material';
 import CustomInput from 'utils/CustomInput';
 import Factory from 'utils/Factory';
 import CustomAutocomplete from 'utils/CustomAutocomplete';
-import { useSearchParams } from 'react-router';
+import { useSearchParams } from 'react-router-dom';
 import RenderSalaryTemplateTable from '../RenderSalaryTemplateTable';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';

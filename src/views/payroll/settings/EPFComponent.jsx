@@ -5,9 +5,8 @@ import { Button, Box, TextField, Checkbox, FormControlLabel, Typography, Stack, 
 import { IconPlus, IconEdit } from '@tabler/icons-react';
 import Modal from 'ui-component/extended/Modal';
 import CustomAutocomplete from 'utils/CustomAutocomplete';
-import { useNavigate } from 'react-router';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import Factory from 'utils/Factory';
-import { useSearchParams } from 'react-router';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import MainCard from '../../../ui-component/cards/MainCard';

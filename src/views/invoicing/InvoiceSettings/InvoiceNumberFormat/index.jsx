@@ -3,7 +3,7 @@ import { Box, Button, Typography, Stack, Grid2 } from '@mui/material';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import Factory from 'utils/Factory';
 import CustomInput from 'utils/CustomInput';

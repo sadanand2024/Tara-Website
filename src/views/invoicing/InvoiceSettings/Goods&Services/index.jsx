@@ -5,7 +5,7 @@ import { Button, Box, Stack, Typography } from '@mui/material';
 import Grid2 from '@mui/material/Grid2';
 import { IconPlus } from '@tabler/icons-react';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 import Factory from 'utils/Factory';
 import AddItem from './AddItem';
 import ItemList from './ItemList';

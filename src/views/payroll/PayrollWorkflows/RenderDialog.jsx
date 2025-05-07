@@ -5,7 +5,7 @@ import { Button, Box, Stack, Typography, FormControl, FormLabel, FormControlLabe
 import Grid2 from '@mui/material/Grid2'; // Import Grid2 from MUI system
 import CustomInput from 'utils/CustomInput';
 import Factory from 'utils/Factory';
-import { useSearchParams } from 'react-router';
+import { useSearchParams } from 'react-router-dom';
 import Modal from 'ui-component/extended/Modal';
 import CustomAutocomplete from 'utils/CustomAutocomplete';
 import dayjs from 'dayjs';

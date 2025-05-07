@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 import { Button, Stack, Box, Grid2 } from '@mui/material';
 import { IconPlus } from '@tabler/icons-react';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
