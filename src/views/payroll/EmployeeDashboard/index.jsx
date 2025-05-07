@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router';
-import { useSearchParams } from 'react-router';
+import { useNavigate } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import MainCard from '../../../ui-component/cards/MainCard';
 import MonthWiseDashboard from './MonthWiseDashboard';
 import PayrollSummary from './PayrollSummary';

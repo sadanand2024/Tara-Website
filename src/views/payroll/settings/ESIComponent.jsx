@@ -6,8 +6,7 @@ import { Button, Box, TextField, Checkbox, FormControlLabel, Typography, Stack, 
 import { IconPlus, IconEdit } from '@tabler/icons-react';
 import Modal from 'ui-component/extended/Modal';
 import MainCard from '../../../ui-component/cards/MainCard';
-import { useNavigate } from 'react-router';
-import { useSearchParams } from 'react-router';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import Factory from 'utils/Factory';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CircularProgress from '@mui/material/CircularProgress';

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 import MainCard from '@/components/MainCard';
 import { Box, Typography, Grid2, Button } from '@mui/material';
 import Factory from '@/utils/Factory';

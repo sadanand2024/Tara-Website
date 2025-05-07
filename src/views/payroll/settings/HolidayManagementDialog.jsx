@@ -5,7 +5,7 @@ import { Button, Box, Stack, Typography } from '@mui/material';
 import Grid2 from '@mui/material/Grid2';
 import CustomInput from 'utils/CustomInput';
 import Factory from 'utils/Factory';
-import { useSearchParams } from 'react-router';
+import { useSearchParams } from 'react-router-dom';
 import Modal from 'ui-component/extended/Modal';
 import dayjs from 'dayjs';
 import CustomDatePicker from 'utils/CustomDateInput';

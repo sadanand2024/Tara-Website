@@ -11,7 +11,7 @@ import CustomAutocomplete from 'utils/CustomAutocomplete';
 import Factory from 'utils/Factory';
 // import { useSnackbar } from '@/components/CustomSnackbar';
 import { IconPlus } from '@tabler/icons-react';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 import { entity_choices } from 'utils/Entity-types';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useDispatch } from 'store';

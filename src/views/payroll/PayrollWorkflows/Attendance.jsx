@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import RenderTable from './RenderTable';
 import {} from '@mui/material';
 import Factory from 'utils/Factory';
-import { useSearchParams } from 'react-router';
+import { useSearchParams } from 'react-router-dom';
 import RenderDialog from './RenderDialog';
 import { months } from 'utils/MonthsList';
 import { useDispatch } from 'store';

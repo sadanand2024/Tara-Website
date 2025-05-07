@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { useNavigate, useLocation } from 'react-router';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import MainCard from '../../../ui-component/cards/MainCard';
 import { Box, Stack, Typography, LinearProgress, Button, Grid2, CircularProgress, IconButton } from '@mui/material';
 import Factory from 'utils/Factory';
@@ -25,13 +25,7 @@ const PayrollSetup = () => {
   const user = useSelector((state) => state.accountReducer?.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const location = useLocation();
-
-  // Parse search params manually
-  const searchParams = useMemo(() => {
-    const params = new URLSearchParams(location.search);
-    return params;
-  }, [location.search]);
+  const searchParams = useSearchParams();
 
   const [loading, setLoading] = useState(false);
   const [payrollDetails, setPayrollDetails] = useState({});

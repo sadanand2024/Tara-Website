@@ -18,7 +18,7 @@ import Grid2 from '@mui/material/Grid2'; // Import Grid2 from MUI system
 import CustomInput from 'utils/CustomInput';
 import CustomAutocomplete from 'utils/CustomAutocomplete';
 import Factory from 'utils/Factory';
-import { useSearchParams } from 'react-router';
+import { useSearchParams } from 'react-router-dom';
 import Modal from 'ui-component/extended/Modal';
 
 export default function LeaveManagementDialog({ open, handleClose, selectedRecord, type, setType, fetchLeaveManagementData }) {

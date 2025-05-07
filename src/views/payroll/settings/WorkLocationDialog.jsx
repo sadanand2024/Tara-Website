@@ -6,7 +6,7 @@ import { indian_States_And_UTs } from 'utils/indian_States_And_UT';
 import CustomInput from 'utils/CustomInput';
 import CustomAutocomplete from 'utils/CustomAutocomplete';
 import Factory from 'utils/Factory';
-import { useSearchParams } from 'react-router';
+import { useSearchParams } from 'react-router-dom';
 import Modal from 'ui-component/extended/Modal';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';

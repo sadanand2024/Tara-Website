@@ -24,7 +24,7 @@ import {
   Pagination
 } from '@mui/material';
 import Modal from 'ui-component/extended/Modal';
-import { useNavigate, useSearchParams } from 'react-router';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import Factory from 'utils/Factory';
 import ActionCell from 'ui-component/extended/ActionCell';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';

@@ -13,8 +13,7 @@ import {
   Pagination,
   Grid2
 } from '@mui/material';
-import { useNavigate } from 'react-router';
-import { useSearchParams } from 'react-router';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import CircularProgress from '@mui/material/CircularProgress';
 import MainCard from '../../../ui-component/cards/MainCard';
 import ViewSlabsModel from './ViewSlabs';

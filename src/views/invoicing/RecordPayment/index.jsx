@@ -7,9 +7,9 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import Factory from 'utils/Factory';
 
-import { useSearchParams } from 'react-router';
+import { useSearchParams } from 'react-router-dom';
 import { FormControl, FormLabel, RadioGroup, FormControlLabel, Radio, Typography, Grid2, Button, Stack, Box } from '@mui/material';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 // import HomeCard from '@/components/cards/HomeCard';
 import MainCard from '../../../ui-component/cards/MainCard';

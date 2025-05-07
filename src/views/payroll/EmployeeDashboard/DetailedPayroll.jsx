@@ -18,7 +18,7 @@ import Factory from 'utils/Factory';
 import { BASE_URL } from '../../../../constants';
 import axios from 'axios';
 import EmptyDataPlaceholder from 'ui-component/extended/EmptyDataPlaceholder';
-import { useSearchParams } from 'react-router';
+import { useSearchParams } from 'react-router-dom';
 import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
 const TABLE_HEADERS = [
   'Employee Id',
