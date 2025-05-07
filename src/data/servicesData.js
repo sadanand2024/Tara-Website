@@ -121,7 +121,6 @@ const servicesData = {
           buttons: [
             { label: 'Start Filing Now', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Talk to CA', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Upload Documents', icon: 'CloudUploadOutlined', size: 24 }
           ]
         }
       },
@@ -131,8 +130,8 @@ const servicesData = {
           subtitle:
             'Expert-reviewed responses to notices under Section 139(9), 143(1), 143(2), 245, defective returns, mismatch in AIS/Form 26AS, and more.',
           ctas: [
-            { label: 'Upload Your Notice', icon: 'CloudUploadOutlined', size: 24 },
-            { label: 'Book a Consultation', icon: 'AssignmentTurnedInOutlined', size: 24 },
+            { label: 'Get Stareted', icon: 'AssignmentTurnedInOutlined', size: 24 },
+            { label: 'Book a Consultation', icon: 'PhoneOutlined', size: 24 },
            
           ],
           badges: [
@@ -222,9 +221,9 @@ const servicesData = {
         stickyFooterCta: {
           text: 'Received a tax notice? Don’t panic. Let our experts respond accurately and protect your interests.',
           buttons: [
-            { label: 'Upload Notice & Get Help', icon: 'CloudUploadOutlined', size: 24 },
+            { label: 'Get Staretd', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Talk to a CA Now', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Book a Consultation', icon: 'AssignmentTurnedInOutlined', size: 24 }
+           
           ]
         }
       },
@@ -420,7 +419,6 @@ const servicesData = {
           buttons: [
             { label: 'Calculate Advance Tax Now', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Talk to Tax Expert', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Upload Income Details', icon: 'CloudUploadOutlined', size: 24 }
           ]
         }
       },
@@ -522,7 +520,6 @@ const servicesData = {
           buttons: [
             { label: 'Book My Tax Consultation', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Talk to an Expert', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Upload Income Summary', icon: 'CloudUploadOutlined', size: 24 }
           ]
         }
       },
@@ -626,7 +623,6 @@ const servicesData = {
           buttons: [
             { label: 'File 15CA/CB Now', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Speak to a CA', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Upload Documents', icon: 'CloudUploadOutlined', size: 24 }
           ]
         }
       }
@@ -727,7 +723,6 @@ const servicesData = {
           buttons: [
             { label: 'Get Started with Invoicing', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Talk to an Expert', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Upload Invoice Format', icon: 'CloudUploadOutlined', size: 24 }
           ]
         }
       },
@@ -830,7 +825,6 @@ const servicesData = {
           buttons: [
             { label: 'Get My Accounting Plan', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Talk to an Accountant', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Upload My Financials', icon: 'CloudUploadOutlined', size: 24 }
           ]
         }
       },
@@ -840,7 +834,8 @@ const servicesData = {
           subtitle:
             'Strategic finance leadership, compliance oversight, investor readiness, and decision-making support for your growing business — all under our Virtual CFO plan.',
           ctas: [
-            { label: 'Book Free CFO Discovery Call', icon: 'AssignmentTurnedInOutlined', size: 24 },
+            { label: 'Get Started', icon: 'AssignmentTurnedInOutlined', size: 24 },
+            { label: 'Book Free CFO Discovery Call', icon: 'PhoneOutlined', size: 24 },
             
           ],
           badges: [
@@ -933,7 +928,6 @@ const servicesData = {
           buttons: [
             { label: 'Start My VCFO Journey', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Schedule a Call with CFO', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Share My Financials', icon: 'CloudUploadOutlined', size: 24 }
           ]
         }
       },
@@ -1035,7 +1029,6 @@ const servicesData = {
           buttons: [
             { label: 'Fix My Books Now', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Get a Free Assessment', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Upload My Files', icon: 'CloudUploadOutlined', size: 24 }
           ]
         }
       },
@@ -1129,7 +1122,6 @@ const servicesData = {
           text: 'Track your stock like a pro — stay compliant, profitable, and inventory-smart every month.',
           buttons: [
             { label: 'Start Inventory Setup', icon: 'AssignmentTurnedInOutlined', size: 24 },
-            { label: 'Upload Product List', icon: 'CloudUploadOutlined', size: 24 },
             { label: 'Talk to an Expert', icon: 'PhoneOutlined', size: 24 }
           ]
         }
@@ -1229,7 +1221,6 @@ const servicesData = {
           text: 'Don’t just maintain books — understand your business. Get smart, visual MIS & analytics tailored to your growth.',
           buttons: [
             { label: 'Get My MIS Reports', icon: 'AssignmentTurnedInOutlined', size: 24 },
-            { label: 'Request Sample Dashboards', icon: 'BarChartOutlined', size: 24 },
             { label: 'Talk to a Reporting Expert', icon: 'PhoneOutlined', size: 24 }
           ]
         }
@@ -1359,7 +1350,6 @@ const servicesData = {
           buttons: [
             { label: 'Start Incorporation', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Book Free Consultation', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Download Checklist', icon: 'CloudDownloadOutlined', size: 24 }
           ]
         }
       },
@@ -1457,7 +1447,6 @@ const servicesData = {
           buttons: [
             { label: 'Apply for Udyam Registration', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Talk to Our Expert', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Upload Business Info', icon: 'CloudUploadOutlined', size: 24 }
           ]
         }
       },
@@ -1560,7 +1549,6 @@ const servicesData = {
           buttons: [
             { label: 'Apply for DPIIT Recognition', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Talk to Our Expert', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Upload Company Docs', icon: 'CloudUploadOutlined', size: 24 }
           ]
         }
       },
@@ -1658,7 +1646,6 @@ const servicesData = {
           buttons: [
             { label: 'Apply for Trade License', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Talk to Our Expert', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Upload Business Info', icon: 'CloudUploadOutlined', size: 24 }
           ]
         }
       },
@@ -1751,7 +1738,6 @@ const servicesData = {
           buttons: [
             { label: 'Apply for IEC', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Talk to Our Expert', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Upload Documents', icon: 'CloudUploadOutlined', size: 24 }
           ]
         }
       },
@@ -1851,7 +1837,6 @@ const servicesData = {
           buttons: [
             { label: 'Apply for Labour License', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Talk to Our Expert', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Upload Business Info', icon: 'CloudUploadOutlined', size: 24 }
           ]
         }
       }
@@ -1959,7 +1944,6 @@ const servicesData = {
           buttons: [
             { label: 'Start Annual Filing Now', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Talk to a Compliance Expert', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Upload My Financials', icon: 'CloudUploadOutlined', size: 24 }
           ]
         }
       },
@@ -2062,7 +2046,6 @@ const servicesData = {
           buttons: [
             { label: 'Start Director/Shareholder Change', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Talk to Our Legal Expert', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Upload Company Docs', icon: 'CloudUploadOutlined', size: 24 }
           ]
         }
       },
@@ -2162,7 +2145,6 @@ const servicesData = {
           buttons: [
             { label: 'Start KYC Filing', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Talk to MCA Expert', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Upload PAN & Aadhaar', icon: 'CloudUploadOutlined', size: 24 }
           ]
         }
       },
@@ -2260,7 +2242,6 @@ const servicesData = {
           buttons: [
             { label: 'Get My Resolution Drafted', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Talk to a CS Now', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Upload Company Info', icon: 'CloudUploadOutlined', size: 24 }
           ]
         }
       },
@@ -2359,7 +2340,6 @@ const servicesData = {
           buttons: [
             { label: 'Get My Agreement Drafted', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Talk to a Legal Expert', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Upload My Draft or Brief', icon: 'CloudUploadOutlined', size: 24 }
           ]
         }
       },
@@ -2461,7 +2441,6 @@ const servicesData = {
           buttons: [
             { label: 'Start My RERA Filing', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Talk to a RERA Specialist', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Upload Project Info', icon: 'CloudUploadOutlined', size: 24 }
           ]
         }
       }
@@ -2569,7 +2548,6 @@ const servicesData = {
           buttons: [
             { label: 'Get My Financial Model', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Talk to a Financial Analyst', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Upload Business Plan', icon: 'CloudUploadOutlined', size: 24 }
           ]
         }
       },
@@ -2673,7 +2651,6 @@ const servicesData = {
           buttons: [
             { label: 'Get My Pitch Deck', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Talk to a Deck Strategist', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Upload Startup Details', icon: 'CloudUploadOutlined', size: 24 }
           ]
         }
       },
@@ -2772,7 +2749,6 @@ const servicesData = {
           buttons: [
             { label: 'Get My Valuation Now', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Book a Free Discovery Call', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Upload My Financials', icon: 'CloudUploadOutlined', size: 24 }
           ]
         }
       },
@@ -2782,6 +2758,7 @@ const servicesData = {
           subtitle:
             'Revenue forecasts, cost structures, profitability, cash flow — turned into a dynamic Excel model tailored to your startup or business.',
           ctas: [
+            { label: 'Get Started', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Book Free Discovery Call', icon: 'PhoneOutlined', size: 24 }
           ],
           badges: [
@@ -2874,7 +2851,6 @@ const servicesData = {
           buttons: [
             { label: 'Get My Financial Model', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Talk to a Financial Analyst', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Upload Business Plan', icon: 'CloudUploadOutlined', size: 24 }
           ]
         }
       },
@@ -2979,7 +2955,6 @@ const servicesData = {
           buttons: [
             { label: 'Start My Internal Audit', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Talk to a CA Now', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Upload Company Info', icon: 'CloudUploadOutlined', size: 24 }
           ]
         }
       },
@@ -3085,7 +3060,6 @@ const servicesData = {
           buttons: [
             { label: 'Optimize My Working Capital', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Talk to a Strategist', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Upload Financial Docs', icon: 'CloudUploadOutlined', size: 24 }
           ]
         }
       }
@@ -3195,7 +3169,6 @@ const servicesData = {
           buttons: [
             { label: 'Start Payroll Processing', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Talk to a Payroll Expert', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Upload Employee Data', icon: 'CloudUploadOutlined', size: 24 }
           ]
         }
       },
@@ -3292,7 +3265,6 @@ const servicesData = {
           buttons: [
             { label: 'Get Salary Structures Now', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Talk to an Expert', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Upload CTCs', icon: 'CloudUploadOutlined', size: 24 }
           ]
         }
       },
@@ -3395,7 +3367,6 @@ const servicesData = {
           buttons: [
             { label: 'Launch ITR Help for Employees', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Talk to Our Tax Team', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Upload Form 16 Files', icon: 'CloudUploadOutlined', size: 24 }
           ]
         }
       },
@@ -3487,7 +3458,6 @@ const servicesData = {
           buttons: [
             { label: 'Register for EPF/ESI', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Talk to a Compliance Expert', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Upload Business Details', icon: 'CloudUploadOutlined', size: 24 }
           ]
         }
       },
@@ -3580,7 +3550,6 @@ const servicesData = {
           buttons: [
             { label: 'Register for PT Now', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Talk to a Compliance Expert', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Upload Business Details', icon: 'CloudUploadOutlined', size: 24 }
           ]
         }
       },
@@ -3687,7 +3656,6 @@ const servicesData = {
           buttons: [
             { label: 'Start Employee Insurance Setup', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Talk to a Benefits Advisor', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Upload Company & Employee Data', icon: 'CloudUploadOutlined', size: 24 }
           ]
         }
       }
@@ -3796,7 +3764,6 @@ const servicesData = {
           buttons: [
             { label: 'Apply for GST', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Talk to an Expert', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Download Checklist', icon: 'CloudDownloadOutlined', size: 24 }
           ]
         }
       },
@@ -3893,7 +3860,6 @@ const servicesData = {
           buttons: [
             { label: 'Start Filing Now', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Talk to a GST Expert', icon: 'PhoneOutlined', size: 24 },
-            { label: 'View Plans', icon: 'CloudUploadOutlined', size: 24 }
           ]
         }
       },
@@ -3902,7 +3868,7 @@ const servicesData = {
           title: 'Respond to GST Notices with Confidence',
           subtitle: 'Got a notice from the GST department? Our experts will review, prepare, and file a proper response on your behalf.',
           ctas: [
-            { label: 'Upload GST Notice', icon: 'CloudUploadOutlined', size: 24 },
+            { label: 'Get GST Notice', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Book Expert Consultation', icon: 'PhoneOutlined', size: 24 },
           ],
           badges: [
@@ -3993,9 +3959,9 @@ const servicesData = {
         stickyFooterCta: {
           text: 'Don’t ignore a GST notice — let our experts handle it and safeguard your GSTIN.',
           buttons: [
-            { label: 'Upload Notice & Get Help', icon: 'CloudUploadOutlined', size: 24 },
+            { label: 'Learn More About GST Notices', icon: 'InfoOutlined', size: 24 },
             { label: 'Talk to GST Expert', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Learn More About GST Notices', icon: 'InfoOutlined', size: 24 }
+         
           ]
         }
       },
@@ -4094,7 +4060,6 @@ const servicesData = {
         stickyFooterCta: {
           text: 'Shut it down or bring it back — we’ll handle your GSTIN cancellation or revival with full compliance.',
           buttons: [
-            { label: 'Cancel GST Now', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Apply for Revocation', icon: 'ReplayCircleFilledOutlined', size: 24 },
             { label: 'Talk to a GST Expert', icon: 'PhoneOutlined', size: 24 }
           ]
@@ -4211,7 +4176,6 @@ const servicesData = {
           buttons: [
             { label: 'Apply for Refund Now', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Talk to GST Expert', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Download Document List', icon: 'CloudUploadOutlined', size: 24 }
           ]
         }
       },
@@ -4311,7 +4275,6 @@ const servicesData = {
           buttons: [
             { label: 'File LUT Today', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Talk to Our Expert', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Download Checklist', icon: 'CloudDownloadOutlined', size: 24 }
           ]
         }
       }
@@ -4417,7 +4380,6 @@ const servicesData = {
           buttons: [
             { label: 'Get My Loan Strategy', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Talk to a Loan Advisor', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Upload My Financials', icon: 'CloudUploadOutlined', size: 24 }
           ]
         }
       },
@@ -4515,7 +4477,6 @@ const servicesData = {
           buttons: [
             { label: 'Start My Investment Plan', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Talk to a Certified Advisor', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Upload My Financial Goals', icon: 'CloudUploadOutlined', size: 24 }
           ]
         }
       },
@@ -4622,7 +4583,6 @@ const servicesData = {
           buttons: [
             { label: 'Get My Policy Reviewed', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Talk to a Certified Advisor', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Upload Existing Policy or Info', icon: 'CloudUploadOutlined', size: 24 }
           ]
         }
       },
@@ -4715,7 +4675,6 @@ const servicesData = {
           buttons: [
             { label: 'Get My Tax + Retirement Plan', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Talk to a Planner', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Upload My Income Details', icon: 'CloudUploadOutlined', size: 24 }
           ]
         }
       },
@@ -4812,7 +4771,6 @@ const servicesData = {
           buttons: [
             { label: 'Book Wealth Advisory Now', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Talk to a Planner', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Upload My Financial Snapshot', icon: 'CloudUploadOutlined', size: 24 }
           ]
         }
       },
@@ -4914,7 +4872,6 @@ const servicesData = {
           buttons: [
             { label: 'Check My FHI Score Now', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Talk to a Financial Advisor', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Upload Financial Info Securely', icon: 'CloudUploadOutlined', size: 24 }
           ]
         }
       }

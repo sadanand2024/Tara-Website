@@ -1,5 +1,5 @@
-import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Box, Button, Container, Stack, Typography, useTheme } from '@mui/material';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import React, { useEffect, useState } from 'react';
 import { Fade } from 'react-awesome-reveal';
@@ -121,7 +121,10 @@ const HeroWithFinalTouch = ({ data }) => {
                 size="large"
                 color="primary"
                 fullWidth={true}
-                onClick={() => navigate(`/register?id=${service_id}&context=${service_type}&type=service`)}
+                onClick={() => idx === 0 
+                  ? navigate(`/register?id=${service_id}&context=${service_type}&type=service`)
+                  : navigate(`/book-consultation?id=${service_id}&context=${service_type}&type=service`)
+                }
                 sx={{
                   borderRadius: 3,
                   fontWeight: 600,
