@@ -9,7 +9,6 @@ const servicesData = {
           ctas: [
             { label: 'File My ITR Now', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Talk to a Tax Expert', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Upload My Documents', icon: 'CloudUploadOutlined', size: 24 }
           ],
           badges: [
             { text: 'Salaried, Business, Freelancers, NRIs', icon: 'PersonOutlined', size: 20 },
@@ -134,7 +133,7 @@ const servicesData = {
           ctas: [
             { label: 'Upload Your Notice', icon: 'CloudUploadOutlined', size: 24 },
             { label: 'Book a Consultation', icon: 'AssignmentTurnedInOutlined', size: 24 },
-            { label: 'Talk to a CA Now', icon: 'PhoneOutlined', size: 24 }
+           
           ],
           badges: [
             { text: 'CA-Led Notice Handling', icon: 'VerifiedUserOutlined', size: 20 },
@@ -236,7 +235,6 @@ const servicesData = {
           ctas: [
             { label: 'Help Me Choose TDS Form', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Schedule a Call', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Upload Deduction Sheet', icon: 'CloudUploadOutlined', size: 24 }
           ],
           badges: [
             { text: 'Quarterly Filing (24Q, 26Q, 27Q, 26QB)', icon: 'ReceiptOutlined', size: 20 },
@@ -338,7 +336,7 @@ const servicesData = {
           ctas: [
             { label: 'Calculate My Advance Tax', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Talk to a Tax Advisor', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Upload Income Details', icon: 'CloudUploadOutlined', size: 24 }
+       
           ],
           badges: [
             { text: 'Quarterly Payment Guidance', icon: 'EventNoteOutlined', size: 20 },
@@ -434,7 +432,7 @@ const servicesData = {
           ctas: [
             { label: 'Book My Tax Consultation', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Schedule Free Discovery Call', icon: 'EventAvailableOutlined', size: 24 },
-            { label: 'Upload Income Details', icon: 'CloudUploadOutlined', size: 24 }
+            
           ],
           badges: [
             { text: 'Salaried, Business, Freelancers, NRIs', icon: 'BusinessCenterOutlined', size: 20 },
@@ -536,7 +534,7 @@ const servicesData = {
           ctas: [
             { label: 'Start 15CA/CB Filing', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Talk to a Chartered Accountant', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Upload Remittance Details', icon: 'CloudUploadOutlined', size: 24 }
+            
           ],
           badges: [
             { text: 'For Remittances Outside India', icon: 'PublicOutlined', size: 20 },
@@ -643,7 +641,6 @@ const servicesData = {
           subtitle: 'Generate, customize, and manage GST-compliant invoices effortlessly — one-time setup or ongoing monthly service.',
           ctas: [
             { label: 'Set Up My Invoicing System', icon: 'AssignmentTurnedInOutlined', size: 24 },
-            { label: 'Upload My Invoice Format or Data', icon: 'CloudUploadOutlined', size: 24 },
             { label: 'Talk to an Accounting Expert', icon: 'PhoneOutlined', size: 24 }
           ],
           badges: [
@@ -740,9 +737,8 @@ const servicesData = {
           subtitle:
             'Stay compliant and financially organized with expert-managed accounting services tailored to your business type and size.',
           ctas: [
-            { label: 'Get a Quote for My Business', icon: 'AssignmentTurnedInOutlined', size: 24 },
+            { label: 'Get Started', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Schedule Free Accounting Consultation', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Upload Previous Books / Trial Balance', icon: 'CloudUploadOutlined', size: 24 }
           ],
           badges: [
             { text: 'Monthly, Quarterly & Annual Plans', icon: 'ReceiptLongOutlined', size: 20 },
@@ -845,8 +841,7 @@ const servicesData = {
             'Strategic finance leadership, compliance oversight, investor readiness, and decision-making support for your growing business — all under our Virtual CFO plan.',
           ctas: [
             { label: 'Book Free CFO Discovery Call', icon: 'AssignmentTurnedInOutlined', size: 24 },
-            { label: 'Share Company Details for Quote', icon: 'CloudUploadOutlined', size: 24 },
-            { label: 'Talk to Our VCFO Team', icon: 'PhoneOutlined', size: 24 }
+            
           ],
           badges: [
             { text: 'Monthly Reporting & Insights', icon: 'AssessmentOutlined', size: 20 },
@@ -949,7 +944,6 @@ const servicesData = {
             'Whether your books are missing, messed up, outdated, or mismanaged — we’ll clean them up, reconcile everything, and hand over a fresh, audit-ready set.',
           ctas: [
             { label: 'Fix My Books Now', icon: 'AssignmentTurnedInOutlined', size: 24 },
-            { label: 'Upload Your Current Files', icon: 'CloudUploadOutlined', size: 24 },
             { label: 'Talk to a Cleanup Expert', icon: 'PhoneOutlined', size: 24 }
           ],
           badges: [
@@ -1052,7 +1046,6 @@ const servicesData = {
             'Get your inventory tracked, valued, and reconciled monthly — integrated with your invoicing, accounting, and GST returns.',
           ctas: [
             { label: 'Get Inventory Support Now', icon: 'AssignmentTurnedInOutlined', size: 24 },
-            { label: 'Upload My Stock List', icon: 'CloudUploadOutlined', size: 24 },
             { label: 'Talk to an Inventory Specialist', icon: 'PhoneOutlined', size: 24 }
           ],
           badges: [
@@ -1148,7 +1141,6 @@ const servicesData = {
             'We turn your financial and operational data into powerful insights with customized MIS dashboards and visual reporting.',
           ctas: [
             { label: 'Get My MIS Setup', icon: 'AssignmentTurnedInOutlined', size: 24 },
-            { label: 'View Sample Dashboards', icon: 'BarChartOutlined', size: 24 },
             { label: 'Schedule a Free Reporting Consultation', icon: 'PhoneOutlined', size: 24 }
           ],
           badges: [
@@ -1253,7 +1245,6 @@ const servicesData = {
           subtitle: 'Private Limited, LLP, or OPC — Let Our Experts Handle the Entire Registration Process for You.',
           ctas: [
             { label: 'Incorporate Now', icon: 'AssignmentTurnedInOutlined', size: 24 },
-            { label: 'Compare Company Types', icon: 'GavelOutlined', size: 24 },
             { label: 'Schedule Free Consultation', icon: 'PhoneOutlined', size: 24 }
           ],
           badges: [
@@ -1379,7 +1370,6 @@ const servicesData = {
             'Official recognition as a Micro, Small, or Medium Enterprise (MSME) — unlock benefits, subsidies, and ease of doing business.',
           ctas: [
             { label: 'Apply for Udyam Registration', icon: 'AssignmentTurnedInOutlined', size: 24 },
-            { label: 'Upload Business Details', icon: 'CloudUploadOutlined', size: 24 },
             { label: 'Talk to a Registration Expert', icon: 'PhoneOutlined', size: 24 }
           ],
           badges: [
@@ -1478,7 +1468,6 @@ const servicesData = {
             'Register under the Startup India scheme and unlock tax benefits, funding access, tender eligibility, and branding opportunities.',
           ctas: [
             { label: 'Apply for Startup India Recognition', icon: 'AssignmentTurnedInOutlined', size: 24 },
-            { label: 'Upload Company Details', icon: 'CloudUploadOutlined', size: 24 },
             { label: 'Talk to a Startup Advisor', icon: 'PhoneOutlined', size: 24 }
           ],
           badges: [
@@ -1582,7 +1571,6 @@ const servicesData = {
             'Start your business operations legally with a trade license from your municipal corporation — fast, reliable, and expert-handled.',
           ctas: [
             { label: 'Apply for Trade License', icon: 'AssignmentTurnedInOutlined', size: 24 },
-            { label: 'Upload Business Details', icon: 'CloudUploadOutlined', size: 24 },
             { label: 'Talk to a License Consultant', icon: 'PhoneOutlined', size: 24 }
           ],
           badges: [
@@ -1680,7 +1668,6 @@ const servicesData = {
           subtitle: 'Start your international trade journey with a DGFT-approved IEC. Mandatory for import/export of goods and services.',
           ctas: [
             { label: 'Apply for IEC Now', icon: 'AssignmentTurnedInOutlined', size: 24 },
-            { label: 'Upload Business Details', icon: 'CloudUploadOutlined', size: 24 },
             { label: 'Talk to a Trade Expert', icon: 'PhoneOutlined', size: 24 }
           ],
           badges: [
@@ -1775,7 +1762,6 @@ const servicesData = {
             'Labour license registration under the Contract Labour (Regulation & Abolition) Act for companies hiring more than 20 contract workers.',
           ctas: [
             { label: 'Apply for Labour License', icon: 'AssignmentTurnedInOutlined', size: 24 },
-            { label: 'Upload Company Details', icon: 'CloudUploadOutlined', size: 24 },
             { label: 'Talk to a Compliance Expert', icon: 'PhoneOutlined', size: 24 }
           ],
           badges: [
@@ -1881,7 +1867,6 @@ const servicesData = {
             'We help companies and LLPs file AOC-4, MGT-7, MGT-7A, and Form 8/11 on time, accurately, and with CA/CS-backed compliance.',
           ctas: [
             { label: 'Start My Annual Filing', icon: 'AssignmentTurnedInOutlined', size: 24 },
-            { label: 'Upload Financials & Company Info', icon: 'CloudUploadOutlined', size: 24 },
             { label: 'Talk to a ROC Expert', icon: 'PhoneOutlined', size: 24 }
           ],
           badges: [
@@ -1985,7 +1970,6 @@ const servicesData = {
             'Whether you’re bringing in a co-founder, exiting a partner, or realigning shareholding — we’ll handle the entire process, filings, and documentation.',
           ctas: [
             { label: 'Request Change Filing', icon: 'AssignmentTurnedInOutlined', size: 24 },
-            { label: 'Upload Company Details', icon: 'CloudUploadOutlined', size: 24 },
             { label: 'Talk to a Legal Compliance Expert', icon: 'PhoneOutlined', size: 24 }
           ],
           badges: [
@@ -2089,7 +2073,6 @@ const servicesData = {
             'Mandatory KYC for directors and designated partners — avoid DIN deactivation, penalties, and MCA non-compliance with our hassle-free filing support.',
           ctas: [
             { label: 'Start DIR-3 KYC Filing', icon: 'AssignmentTurnedInOutlined', size: 24 },
-            { label: 'Upload PAN & Aadhaar', icon: 'CloudUploadOutlined', size: 24 },
             { label: 'Talk to a MCA Filing Expert', icon: 'PhoneOutlined', size: 24 }
           ],
           badges: [
@@ -2190,7 +2173,6 @@ const servicesData = {
             'Whether it’s for director changes, bank approvals, investments, share transfers, or statutory compliance — we help you draft and document board decisions accurately.',
           ctas: [
             { label: 'Request a Board Resolution', icon: 'AssignmentTurnedInOutlined', size: 24 },
-            { label: 'Upload Company Details & Purpose', icon: 'CloudUploadOutlined', size: 24 },
             { label: 'Talk to a Company Secretary', icon: 'PhoneOutlined', size: 24 }
           ],
           badges: [
@@ -2289,7 +2271,6 @@ const servicesData = {
             'From founder agreements to NDAs, vendor contracts, ESOP docs, and more — we draft, vet, and finalize your agreements with clarity and compliance.',
           ctas: [
             { label: 'Request Agreement Drafting', icon: 'AssignmentTurnedInOutlined', size: 24 },
-            { label: 'Upload Draft or Share Your Needs', icon: 'CloudUploadOutlined', size: 24 },
             { label: 'Talk to a Legal Drafting Expert', icon: 'PhoneOutlined', size: 24 }
           ],
           badges: [
@@ -2389,7 +2370,6 @@ const servicesData = {
             "Get expert help with RERA registration, quarterly updates, and ongoing project filings — whether you're a builder, developer, or real estate agent.",
           ctas: [
             { label: 'Start My RERA Compliance', icon: 'AssignmentTurnedInOutlined', size: 24 },
-            { label: 'Upload Project/Agent Details', icon: 'CloudUploadOutlined', size: 24 },
             { label: 'Talk to a RERA Filing Expert', icon: 'PhoneOutlined', size: 24 }
           ],
           badges: [
@@ -2497,7 +2477,6 @@ const servicesData = {
             'Revenue forecasts, cost structures, profitability, cash flow — turned into a dynamic Excel model tailored to your startup or business.',
           ctas: [
             { label: 'Request Financial Model', icon: 'AssignmentTurnedInOutlined', size: 24 },
-            { label: 'Upload Business Details', icon: 'CloudUploadOutlined', size: 24 },
             { label: 'Book Free Discovery Call', icon: 'PhoneOutlined', size: 24 }
           ],
           badges: [
@@ -2601,7 +2580,6 @@ const servicesData = {
             'Professionally designed, narrative-driven pitch decks with all the financial and strategic content investors expect — and love.',
           ctas: [
             { label: 'Build My Pitch Deck', icon: 'AssignmentTurnedInOutlined', size: 24 },
-            { label: 'Upload My Startup Details', icon: 'CloudUploadOutlined', size: 24 },
             { label: 'Book Free Deck Consultation', icon: 'PhoneOutlined', size: 24 }
           ],
           badges: [
@@ -2705,7 +2683,6 @@ const servicesData = {
           subtitle: 'Get a clear, CA-certified business valuation for fundraising, M&A, buy-sell agreements, or strategic planning.',
           ctas: [
             { label: 'Get My Business Valued', icon: 'AssignmentTurnedInOutlined', size: 24 },
-            { label: 'Upload Financials / Pitch Deck', icon: 'CloudUploadOutlined', size: 24 },
             { label: 'Talk to a Valuation Expert', icon: 'PhoneOutlined', size: 24 }
           ],
           badges: [
@@ -2805,8 +2782,6 @@ const servicesData = {
           subtitle:
             'Revenue forecasts, cost structures, profitability, cash flow — turned into a dynamic Excel model tailored to your startup or business.',
           ctas: [
-            { label: 'Request Financial Model', icon: 'AssignmentTurnedInOutlined', size: 24 },
-            { label: 'Upload Business Details', icon: 'CloudUploadOutlined', size: 24 },
             { label: 'Book Free Discovery Call', icon: 'PhoneOutlined', size: 24 }
           ],
           badges: [
@@ -2910,7 +2885,6 @@ const servicesData = {
             'Our Internal Audit services give you clarity, confidence, and control over your operations, processes, and finances. Tailored for startups, SMEs, and growing enterprises.',
           ctas: [
             { label: 'Book Internal Audit Consultation', icon: 'AssignmentTurnedInOutlined', size: 24 },
-            { label: 'Upload Company Info', icon: 'CloudUploadOutlined', size: 24 },
             { label: 'Talk to an Audit Specialist', icon: 'PhoneOutlined', size: 24 }
           ],
           badges: [
@@ -3016,7 +2990,6 @@ const servicesData = {
             'Expert-driven working capital strategies to optimize receivables, payables, and inventory cycles — all without new funding.',
           ctas: [
             { label: 'Book a Free Working Capital Review', icon: 'AssignmentTurnedInOutlined', size: 24 },
-            { label: 'Upload Business Financials', icon: 'CloudUploadOutlined', size: 24 },
             { label: 'Talk to a Finance Strategist', icon: 'PhoneOutlined', size: 24 }
           ],
           badges: [
@@ -3128,7 +3101,6 @@ const servicesData = {
             'From payslip generation to TDS, EPF, ESI, PT filings — we handle your entire payroll process so you can focus on growing your business.',
           ctas: [
             { label: 'Get Payroll Support', icon: 'AssignmentTurnedInOutlined', size: 24 },
-            { label: 'Upload Employee Data', icon: 'CloudUploadOutlined', size: 24 },
             { label: 'Talk to a Payroll Expert', icon: 'PhoneOutlined', size: 24 }
           ],
           badges: [
@@ -3234,7 +3206,6 @@ const servicesData = {
             'We help you create tax-optimized, compliant, and flexible salary structures for employees across levels — without complexity.',
           ctas: [
             { label: 'Request Salary Structuring Help', icon: 'AssignmentTurnedInOutlined', size: 24 },
-            { label: 'Upload CTC Details', icon: 'CloudUploadOutlined', size: 24 },
             { label: 'Talk to a Compensation Expert', icon: 'PhoneOutlined', size: 24 }
           ],
           badges: [
@@ -3332,7 +3303,6 @@ const servicesData = {
             'Offer value-added tax support to your employees. We handle their income tax returns, exemptions, deductions, and more — so they can stay focused and stress-free.',
           ctas: [
             { label: 'Offer ITR Filing for My Team', icon: 'AssignmentTurnedInOutlined', size: 24 },
-            { label: 'Upload Employee List or Connect with HR', icon: 'CloudUploadOutlined', size: 24 },
             { label: 'Talk to a Tax Expert', icon: 'PhoneOutlined', size: 24 }
           ],
           badges: [
@@ -3435,7 +3405,6 @@ const servicesData = {
           subtitle: 'We help you register, file returns, and manage contributions under EPFO and ESIC — accurately and on time.',
           ctas: [
             { label: 'Register for EPF/ESI Now', icon: 'AssignmentTurnedInOutlined', size: 24 },
-            { label: 'Upload Company & Employee Details', icon: 'CloudUploadOutlined', size: 24 },
             { label: 'Talk to a Compliance Expert', icon: 'PhoneOutlined', size: 24 }
           ],
           badges: [
@@ -3529,7 +3498,6 @@ const servicesData = {
             'We handle PT registration, monthly/annual return filings, and challans across all applicable Indian states — seamlessly and on time.',
           ctas: [
             { label: 'Register for PT Now', icon: 'AssignmentTurnedInOutlined', size: 24 },
-            { label: 'Upload Business & Employee Details', icon: 'CloudUploadOutlined', size: 24 },
             { label: 'Talk to a PT Compliance Expert', icon: 'PhoneOutlined', size: 24 }
           ],
           badges: [
@@ -3623,7 +3591,6 @@ const servicesData = {
             'We help you set up and manage group insurance plans for your employees — health, term life, personal accident, and more — with expert support and zero complexity.',
           ctas: [
             { label: 'Set Up Employee Insurance', icon: 'AssignmentTurnedInOutlined', size: 24 },
-            { label: 'Upload Company & Employee Data', icon: 'CloudUploadOutlined', size: 24 },
             { label: 'Talk to a Benefits Specialist', icon: 'PhoneOutlined', size: 24 }
           ],
           badges: [
@@ -3736,7 +3703,6 @@ const servicesData = {
           ctas: [
             { label: 'Register for GST Now', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Schedule Free Consultation', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Download Document Checklist', icon: 'CloudDownloadOutlined', size: 24 }
           ],
           badges: [
             { text: 'Govt. Approved Process', icon: 'GavelOutlined', size: 20 },
@@ -3841,7 +3807,6 @@ const servicesData = {
           ctas: [
             { label: 'File My GST Return', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Book Consultation', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Explore Plans', icon: 'CloudUploadOutlined', size: 24 }
           ],
           badges: [
             { text: 'Timely Filing Guarantee', icon: 'TimerOutlined', size: 20 },
@@ -3939,7 +3904,6 @@ const servicesData = {
           ctas: [
             { label: 'Upload GST Notice', icon: 'CloudUploadOutlined', size: 24 },
             { label: 'Book Expert Consultation', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Know Your Response Deadline', icon: 'EventOutlined', size: 24 }
           ],
           badges: [
             { text: 'Managed by CAs & Tax Lawyers', icon: 'ShieldOutlined', size: 20 },
@@ -4042,7 +4006,6 @@ const servicesData = {
           ctas: [
             { label: 'Cancel My GSTIN', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Revoke My Cancelled GST', icon: 'ReplayCircleFilledOutlined', size: 24 },
-            { label: 'Schedule Free Consultation', icon: 'CalendarTodayOutlined', size: 24 }
           ],
           badges: [
             { text: 'CA-Verified Process', icon: 'VerifiedUserOutlined', size: 20 },
@@ -4145,7 +4108,6 @@ const servicesData = {
           ctas: [
             { label: 'Apply for GST Refund', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Book a Free Consultation', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Download Checklist', icon: 'CloudUploadOutlined', size: 24 }
           ],
           badges: [
             { text: 'Refunds for Exporters, ITC, Excess Tax', icon: 'CurrencyRupeeOutlined', size: 20 },
@@ -4260,7 +4222,6 @@ const servicesData = {
           ctas: [
             { label: 'File LUT Now', icon: 'AssignmentTurnedInOutlined', size: 24 },
             { label: 'Talk to an Export Expert', icon: 'PhoneOutlined', size: 24 },
-            { label: 'Download LUT Checklist', icon: 'CloudDownloadOutlined', size: 24 }
           ],
           badges: [
             { text: 'For Exporters & SEZ Units', icon: 'PublicOutlined', size: 20 },
@@ -4366,7 +4327,6 @@ const servicesData = {
             'Whether it’s a business loan, working capital, OD/CC, personal loan, or loan against property — we match you with the right lender, paperwork, and strategy.',
           ctas: [
             { label: 'Get Loan Advisory Now', icon: 'AssignmentTurnedInOutlined', size: 24 },
-            { label: 'Upload Basic Financials', icon: 'CloudUploadOutlined', size: 24 },
             { label: 'Talk to a Loan Expert', icon: 'PhoneOutlined', size: 24 }
           ],
           badges: [
@@ -4468,7 +4428,6 @@ const servicesData = {
             'Whether you’re a first-time investor or building a long-term portfolio, we guide you with research-backed, goal-based investment planning.',
           ctas: [
             { label: 'Start My Investment Plan', icon: 'AssignmentTurnedInOutlined', size: 24 },
-            { label: 'Share My Financial Goals', icon: 'CloudUploadOutlined', size: 24 },
             { label: 'Talk to a SEBI-Registered Advisor', icon: 'PhoneOutlined', size: 24 }
           ],
           badges: [
@@ -4567,7 +4526,6 @@ const servicesData = {
             'Health, life, term, property, or business insurance — we help you choose the right policy with IRDAI-approved partners and expert-led analysis.',
           ctas: [
             { label: 'Get My Insurance Plan Reviewed', icon: 'AssignmentTurnedInOutlined', size: 24 },
-            { label: 'Upload Current Policy or Requirements', icon: 'CloudUploadOutlined', size: 24 },
             { label: 'Talk to an Insurance Advisor', icon: 'PhoneOutlined', size: 24 }
           ],
           badges: [
@@ -4675,7 +4633,6 @@ const servicesData = {
             "Whether you're 28 or 58 — it's never too early (or late) to plan your retirement. We build tax-saving, goal-based plans that secure your future while saving money today.",
           ctas: [
             { label: 'Start Retirement Planning', icon: 'AssignmentTurnedInOutlined', size: 24 },
-            { label: 'Share My Income & Goals', icon: 'CloudUploadOutlined', size: 24 },
             { label: 'Talk to a Tax + Investment Advisor', icon: 'PhoneOutlined', size: 24 }
           ],
           badges: [
@@ -4769,7 +4726,6 @@ const servicesData = {
             'Our comprehensive wealth advisory helps you balance risk, taxes, and growth across investments, insurance, estate planning, and more.',
           ctas: [
             { label: 'Book Wealth Advisory Session', icon: 'AssignmentTurnedInOutlined', size: 24 },
-            { label: 'Share My Financial Overview', icon: 'CloudUploadOutlined', size: 24 },
             { label: 'Talk to a Certified Wealth Planner', icon: 'PhoneOutlined', size: 24 }
           ],
           badges: [
@@ -4867,7 +4823,6 @@ const servicesData = {
             'The FHI Score (Financial Health Index) is a comprehensive assessment of your personal or business financial strength — covering cash flow, debt, savings, insurance, taxes, and investments.',
           ctas: [
             { label: 'Check My FHI Score', icon: 'AssignmentTurnedInOutlined', size: 24 },
-            { label: 'Upload Financial Snapshot or Statements', icon: 'CloudUploadOutlined', size: 24 },
             { label: 'Talk to a Financial Analyst', icon: 'PhoneOutlined', size: 24 }
           ],
           badges: [
