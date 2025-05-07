@@ -3,11 +3,9 @@ import { cloneElement, useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 
 // material-ui
-import { useTheme } from '@mui/material/styles';
-import useScrollTrigger from '@mui/material/useScrollTrigger';
 import MuiAppBar from '@mui/material/AppBar';
+import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import Container from '@mui/material/Container';
 import Drawer from '@mui/material/Drawer';
 import IconButton from '@mui/material/IconButton';
 import Link from '@mui/material/Link';
@@ -16,32 +14,27 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
+import { useTheme } from '@mui/material/styles';
 import Toolbar from '@mui/material/Toolbar';
-import Box from '@mui/material/Box';
+import useScrollTrigger from '@mui/material/useScrollTrigger';
 
 // project imports
 import { ThemeMode } from 'config';
-import tarafirstLogo from 'assets/images/Svgtarafirst.svg';
 // import Logo from 'ui-component/Logo';
-import Tarafirstlogo_png from 'assets/images/Tarafirstlogo_png.png'; // Tarafirstlogo_png
 import CardMedia from '@mui/material/CardMedia';
+import Tarafirstlogo_png from 'assets/images/Tarafirstlogo_png.png'; // Tarafirstlogo_png
 
 // assets
+import MenuIcon from '@mui/icons-material/Menu';
 import {
-  IconBook,
-  IconCreditCard,
-  IconDashboard,
-  IconHome2,
-  IconBuildingStore,
   IconApps,
-  IconBuildingSkyscraper,
   IconBrain,
+  IconBuildingSkyscraper,
+  IconBuildingStore,
   IconCalendarTime
 } from '@tabler/icons-react';
-import MenuIcon from '@mui/icons-material/Menu';
-import ServicesPanel from './ServicesPanel';
 import ProductsPanel from './ProductsPanel';
+import ServicesPanel from './ServicesPanel';
 function ElevationScroll({ children, window }) {
   const theme = useTheme();
   const trigger = useScrollTrigger({
@@ -108,7 +101,9 @@ export default function AppBar({ ...others }) {
             <Button color="inherit" onClick={handleProductsToggle}>
               Products
             </Button>
-            <Button color="inherit">Company</Button>
+            <Button color="inherit" component={Link} href="/company">
+            company
+            </Button>
             <Button color="inherit" component={Link} href="/knowledge">
               Knowledge
             </Button>
@@ -165,11 +160,11 @@ export default function AppBar({ ...others }) {
                       </Box>
                     )}
 
-                    <ListItemButton>
+                    <ListItemButton component={Link} href="/company">
                       <ListItemIcon>
                         <IconBuildingSkyscraper />
                       </ListItemIcon>
-                      <ListItemText primary="Company" />
+                      <ListItemText primary="company"/>
                     </ListItemButton>
 
                     <ListItemButton component={Link} href="/knowledge">
