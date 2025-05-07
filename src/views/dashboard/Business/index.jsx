@@ -1,3 +1,4 @@
+import React, { useEffect } from 'react';
 import {
   alpha,
   Box,
@@ -13,7 +14,6 @@ import {
   useMediaQuery,
   useTheme
 } from '@mui/material';
-import React from 'react';
 
 // icons
 import AddIcon from '@mui/icons-material/Add';
@@ -22,6 +22,9 @@ import DescriptionIcon from '@mui/icons-material/Description';
 import GroupIcon from '@mui/icons-material/Group';
 import PendingActionsIcon from '@mui/icons-material/PendingActions';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
+import WarningIcon from '@mui/icons-material/Warning';
+import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 
@@ -173,8 +176,14 @@ const ComplianceItem = ({ title, dueDate, lastDate }) => (
 
 export default function Business() {
   const theme = useTheme();
+  const navigate = useNavigate();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-
+  const user = useSelector((state) => state.accountReducer.user);
+  useEffect(() => {
+    if (user.active_context.context_type !== 'business') {
+      navigate('/dashboard/personal');
+    }
+  }, [user.active_context]);
   const companyInfo = {
     name: 'AQUA TECH SOLUTIONS PVT LTD',
     stats: {

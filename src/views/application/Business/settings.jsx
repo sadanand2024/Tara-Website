@@ -87,11 +87,11 @@ const tabsOption = [
     icon: <MoneyTwoToneIcon />,
     caption: 'TAN, TDS, PAN Details'
   },
-  {
-    label: 'Payroll Compliance',
-    icon: <BadgeTwoToneIcon />,
-    caption: 'EPF, ESI, PT Compliance'
-  },
+  // {
+  //   label: 'Payroll Compliance',
+  //   icon: <BadgeTwoToneIcon />,
+  //   caption: 'EPF, ESI, PT Compliance'
+  // },
   {
     label: 'Licenses',
     icon: <GavelTwoToneIcon />,
@@ -211,13 +211,13 @@ export default function Profile2() {
                 <TabPanel value={value} index={4}>
                   <TDSAndIncomeTax user={user} tabChange={handleChange} tabval={value} />
                 </TabPanel>
-                <TabPanel value={value} index={5}>
+                {/* <TabPanel value={value} index={5}>
                   <PayrollCompliance user={user} tabChange={handleChange} tabval={value} />
-                </TabPanel>
-                <TabPanel value={value} index={6}>
+                </TabPanel> */}
+                <TabPanel value={value} index={5}>
                   <Licenses user={user} tabChange={handleChange} tabval={value} />
                 </TabPanel>
-                <TabPanel value={value} index={7}>
+                <TabPanel value={value} index={6}>
                   <DSCRegister user={user} tabChange={handleChange} tabval={value} />
                 </TabPanel>
               </CardContent>

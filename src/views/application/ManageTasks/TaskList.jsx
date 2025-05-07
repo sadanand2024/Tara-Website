@@ -122,36 +122,31 @@ const TaskList = ({ page, rowsPerPage, searchQuery, onTotalUsers, onOpenPlans, l
               key={task.id}
               sx={{
                 '& td, & th': {
-                  py:1.5  // increase vertical padding on all cells
+                  py: 1.5 // increase vertical padding on all cells
                 }
               }}
             >
-              <TableCell sx={{ pl: 3 }}>
-                {(page - 1) * rowsPerPage + index + 1}
-              </TableCell>
+              <TableCell sx={{ pl: 3 }}>{(page - 1) * rowsPerPage + index + 1}</TableCell>
               <TableCell>{task.id}</TableCell>
+              <TableCell>{task.service_name?.charAt(0).toUpperCase() + task.service_name?.slice(1)}</TableCell>
               <TableCell>
-                {task.service_name.charAt(0).toUpperCase() + task.service_name.slice(1)}
-              </TableCell>
-              <TableCell>
-                {task.plan_name.charAt(0).toUpperCase() + task.plan_name.slice(1)}
+                {task.plan_name ? (
+                  task.plan_name?.charAt(0).toUpperCase() + task.plan_name?.slice(1)
+                ) : (
+                  <Chip label="Pending" color="warning" size="small" variant="outlined" sx={{ fontWeight: 500 }} />
+                )}
               </TableCell>
               <TableCell>
                 {task.status === 'paid' ? (
                   <Chip
-                    label={task.status.charAt(0).toUpperCase() + task.status.slice(1)}
+                    label={task.status?.charAt(0).toUpperCase() + task.status?.slice(1)}
                     icon={<CheckCircleTwoToneIcon />}
                     color="success"
                     size="small"
                     sx={{ fontWeight: 500 }}
                   />
                 ) : (
-                  <Button
-                    variant="outlined"
-                    color="primary"
-                    size="small"
-                    onClick={() => onOpenPlans(task)}
-                  >
+                  <Button variant="outlined" color="primary" size="small" onClick={() => onOpenPlans(task)}>
                     Complete Payment
                   </Button>
                 )}

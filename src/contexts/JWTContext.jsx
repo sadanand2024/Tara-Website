@@ -121,6 +121,7 @@ export function JWTProvider({ children }) {
       } else if (type === 'service') {
         __postData.name = context_type === 'business' ? organizationName : email;
         __postData.service_id = moduleId;
+        __postData.account_type = 'personal';
       }
       const response = await axios.post(url, __postData);
       if (response.status === 201 && response.statusText === 'Created') {

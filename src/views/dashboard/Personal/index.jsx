@@ -1,7 +1,7 @@
-import { Box, Button, Card, CardContent, Stack, Typography, alpha } from '@mui/material';
+import React, { useEffect } from 'react';
+import { Box, Typography, Card, CardContent, Button, Stack, alpha } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { styled } from '@mui/material/styles';
-import React from 'react';
 
 // Icons
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
@@ -14,6 +14,8 @@ import EventIcon from '@mui/icons-material/Event';
 import EventNoteIcon from '@mui/icons-material/EventNote';
 import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 import SupportAgentIcon from '@mui/icons-material/SupportAgent';
+import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import TaskIcon from '@mui/icons-material/Task';
 import UpdateIcon from '@mui/icons-material/Update';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
@@ -130,6 +132,13 @@ const ButtonIcon = styled(Box)(({ theme }) => ({
 }));
 
 export default function Personal() {
+  const user = useSelector((state) => state.accountReducer.user);
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (user.active_context.context_type !== 'personal') {
+      navigate('/dashboard/business');
+    }
+  }, [user.active_context]);
   const services = [
     {
       title: 'Active Services',
