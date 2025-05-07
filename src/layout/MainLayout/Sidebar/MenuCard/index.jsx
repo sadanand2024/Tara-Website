@@ -88,7 +88,7 @@ function MenuCard() {
         }
       }}
     >
-      <Box sx={{ p: 2 }}>
+      {/* <Box sx={{ p: 2 }}>
         <List disablePadding sx={{ pb: 1,
           maxHeight: 120,
           minHeight: 120,
@@ -126,7 +126,7 @@ function MenuCard() {
           </ListItem>
         </List>
         <LinearProgressWithLabel value={80} />
-      </Box>
+      </Box> */}
     </Card>
   );
 }
