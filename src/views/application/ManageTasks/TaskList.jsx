@@ -98,7 +98,7 @@ const getFullName = (first_name, last_name, email) => {
   return 'Unknown User';
 };
 
-const UserList = ({ page, rowsPerPage, searchQuery, onTotalUsers, onOpenPermissions, loading, users }) => {
+const TaskList = ({ page, rowsPerPage, searchQuery, onTotalUsers, onOpenPlans, loading, users }) => {
   console.log(users);
   const filteredUsers = React.useMemo(() => {
     if (!searchQuery) return users;
@@ -166,39 +166,61 @@ const UserList = ({ page, rowsPerPage, searchQuery, onTotalUsers, onOpenPermissi
             <TableCell>Task ID</TableCell>
             <TableCell>Service Name</TableCell>
             <TableCell>Plan Name</TableCell>
-            <TableCell>Status</TableCell>
+            <TableCell>Payment Status</TableCell>
+            <TableCell>Payment Id</TableCell>
             <TableCell>Created At</TableCell>
-            <TableCell>Updated At</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {filteredUsers.map((task, index) => (
-            <TableRow hover key={task.id}>
-              <TableCell sx={{ pl: 3 }}>{(page - 1) * rowsPerPage + index + 1}</TableCell>
+            <TableRow
+              hover
+              key={task.id}
+              sx={{
+                '& td, & th': {
+                  py:1.5  // increase vertical padding on all cells
+                }
+              }}
+            >
+              <TableCell sx={{ pl: 3 }}>
+                {(page - 1) * rowsPerPage + index + 1}
+              </TableCell>
               <TableCell>{task.id}</TableCell>
-              <TableCell>{task.service_name}</TableCell>
-              <TableCell>{task.plan_name}</TableCell>
+              <TableCell>
+                {task.service_name.charAt(0).toUpperCase() + task.service_name.slice(1)}
+              </TableCell>
+              <TableCell>
+                {task.plan_name.charAt(0).toUpperCase() + task.plan_name.slice(1)}
+              </TableCell>
               <TableCell>
                 {task.status === 'paid' ? (
                   <Chip
                     label={task.status.charAt(0).toUpperCase() + task.status.slice(1)}
+                    icon={<CheckCircleTwoToneIcon />}
                     color="success"
                     size="small"
                     sx={{ fontWeight: 500 }}
                   />
                 ) : (
                   <Button
-                    variant="text"
+                    variant="outlined"
                     color="primary"
                     size="small"
-                    onClick={() => onOpenPermissions(task)}
+                    onClick={() => onOpenPlans(task)}
                   >
                     Complete Payment
                   </Button>
                 )}
               </TableCell>
-              <TableCell>{task.created_at ? new Date(task.created_at).toLocaleString() : '-'}</TableCell>
-              <TableCell>{task.updated_at ? new Date(task.updated_at).toLocaleString() : '-'}</TableCell>
+              <TableCell>{task.payment_order_id || '-'}</TableCell>
+              <TableCell>
+                <Typography variant="body1" color="text" fontWeight={500}>
+                  {task.created_at ? new Date(task.created_at).toLocaleDateString() : '-'}
+                </Typography>
+                <Typography variant="body1" color="text.secondary">
+                  {task.created_at ? new Date(task.created_at).toLocaleTimeString() : '-'}
+                </Typography>
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -207,14 +229,14 @@ const UserList = ({ page, rowsPerPage, searchQuery, onTotalUsers, onOpenPermissi
   );
 };
 
-UserList.propTypes = {
+TaskList.propTypes = {
   page: PropTypes.number.isRequired,
   rowsPerPage: PropTypes.number.isRequired,
   searchQuery: PropTypes.string.isRequired,
   onTotalUsers: PropTypes.func.isRequired,
-  onOpenPermissions: PropTypes.func.isRequired,
+  onOpenPlans: PropTypes.func.isRequired,
   loading: PropTypes.bool.isRequired,
   users: PropTypes.array.isRequired
 };
 
-export default UserList;
+export default TaskList;

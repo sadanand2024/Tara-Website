@@ -14,9 +14,9 @@ import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 
 // project imports
-import UserList from './UserList';
+import TaskList from './TaskList';
 import AddUser from './AddUser';
-import PlanDrawer from './PermissionsDrawer';
+import PlanDrawer from './PlanDrawer';
 import MainCard from 'ui-component/cards/MainCard';
 import { gridSpacing } from 'store/constant';
 import Factory from 'utils/Factory';
@@ -37,10 +37,10 @@ export default function ManageTasks() {
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [totalTasks, setTotalTasks] = React.useState(0);
   const [searchQuery, setSearchQuery] = React.useState('');
-  const [openPermissionDrawer, setOpenPermissionDrawer] = React.useState(false);
-  const [selectedPermissions, setSelectedPermissions] = React.useState({});
-  const [selectedUser, setSelectedUser] = React.useState(null);
-  const [masterPermissions, setMasterPermissions] = React.useState([]);
+  const [openPlanDrawer, setOpenPlanDrawer] = React.useState(false);
+  const [selectedPlans, setSelectedPlans] = React.useState({});
+  const [selectedTask, setSelectedTask] = React.useState(null);
+  const [masterPlans, setMasterPlans] = React.useState([]);
   const [tasks, setTasks] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [snackbar, setSnackbar] = React.useState({
@@ -84,38 +84,21 @@ export default function ManageTasks() {
     setTotalTasks(total);
   };
 
-  const handleOpenPermissionDrawer = (user) => {
-    setSelectedUser(user);
-    const permissionsObject = {};
-
-    // Check if user has permissions array
-    if (Array.isArray(user.permissions)) {
-      // Iterate through each module's permissions
-      user.permissions.forEach((modulePermission) => {
-        // Check if module has service_actions array
-        if (Array.isArray(modulePermission.service_actions)) {
-          // Add each service action to the permissions object
-          modulePermission.service_actions.forEach((serviceAction) => {
-            permissionsObject[serviceAction] = true;
-          });
-        }
-      });
-    }
-
-    setSelectedPermissions(permissionsObject);
-    setOpenPermissionDrawer(true);
+  const handleOpenPlanDrawer = (service_request) => {
+    setSelectedTask(service_request);
+    setOpenPlanDrawer(true);
   };
 
-  const handleClosePermissionDrawer = () => {
-    setOpenPermissionDrawer(false);
-    setSelectedUser(null);
-    setSelectedPermissions({});
+  const handleClosePlanDrawer = () => {
+    setOpenPlanDrawer(false);
+    setSelectedTask(null);
+    setSelectedPlans({});
   };
 
-  const handlePermissionChange = (permissionId, checked) => {
-    setSelectedPermissions((prev) => ({
+  const handlePlanChange = (PlanId, checked) => {
+    setSelectedPlans((prev) => ({
       ...prev,
-      [permissionId]: checked
+      [PlanId]: checked
     }));
   };
 
@@ -134,11 +117,11 @@ export default function ManageTasks() {
     });
   };
 
-  const handleSavePermissions = async () => {
+  const handleSavePlans = async () => {
     //   try {
-    //     // Group permissions by module
-    //     const modulePermissions = masterPermissions.reduce((acc, module) => {
-    //       const moduleServiceActions = Object.entries(selectedPermissions)
+    //     // Group Plans by module
+    //     const modulePlans = masterPlans.reduce((acc, module) => {
+    //       const moduleServiceActions = Object.entries(selectedPlans)
     //         .filter(([key, value]) => value)
     //         .map(([key, _]) => key)
     //         .filter((key) => {
@@ -152,20 +135,20 @@ export default function ManageTasks() {
     //     }, []);
     //     const response = await Factory(
     //       'put',
-    //       `/user_management/user-feature-permissions/user-context-role/${selectedUser?.role.user_context_role_id}/bulk-update/`,
-    //       modulePermissions,
+    //       `/user_management/user-feature-Plans/user-context-role/${selectedTask?.role.user_context_role_id}/bulk-update/`,
+    //       modulePlans,
     //       {}
     //     );
     //     if (response.res.status_cd === 0) {
-    //       showSnackbar('Task permissions updated successfully');
+    //       showSnackbar('Task Plans updated successfully');
     //       getTasks();
     //     } else {
-    //       showSnackbar(response.res.status_msg || 'Failed to update task permissions', 'error');
+    //       showSnackbar(response.res.status_msg || 'Failed to update task Plans', 'error');
     //     }
-    //     handleClosePermissionDrawer();
+    //     handleClosePlanDrawer();
     //   } catch (error) {
-    //     console.error('Error saving permissions:', error);
-    //     showSnackbar('Failed to update task permissions. Please try again.', 'error');
+    //     console.error('Error saving Plans:', error);
+    //     showSnackbar('Failed to update task Plans. Please try again.', 'error');
     //   }
   };
 
@@ -194,13 +177,13 @@ export default function ManageTasks() {
   useEffect(() => {
     getTasks();
     //   const context_id = user.active_context.id;
-    //   const getUsersPermissions = async () => {
+    //   const getUsersPlans = async () => {
     //     const response = await Factory('get', `/user_management/context/${context_id}/module-features`, {}, {});
     //     if (response.res.status_cd === 0) {
-    //       setMasterPermissions(response.res.data.data);
+    //       setMasterPlans(response.res.data.data);
     //     }
     //   };
-    //   getUsersPermissions();
+    //   getUsersPlans();
     //   getTasks(); // Call getTasks when component mounts
   }, [user.active_context.id]);
 
@@ -221,12 +204,12 @@ export default function ManageTasks() {
         }
         content={false}
       >
-        <UserList
+        <TaskList
           page={page}
           rowsPerPage={rowsPerPage}
           searchQuery={searchQuery}
           onTotalUsers={handleTotalUsers}
-          onOpenPermissions={handleOpenPermissionDrawer}
+          onOpenPlans={handleOpenPlanDrawer}
           loading={loading}
           users={tasks}
         />
@@ -271,14 +254,14 @@ export default function ManageTasks() {
         {/* <AddUser open={openAddDialog} onClose={handleAddDialogClose} user={user} getTasks={getTasks} /> */}
         <PlanDrawer
           type="service"
-          moduleId={selectedUser?.service}
-          open={openPermissionDrawer}
-          onClose={handleClosePermissionDrawer}
-          selectedUser={selectedUser}
-          selectedPermissions={selectedPermissions}
-          onPermissionChange={handlePermissionChange}
-          onSave={handleSavePermissions}
-          masterPermissions={masterPermissions}
+          moduleId={selectedTask?.service}
+          open={openPlanDrawer}
+          onClose={handleClosePlanDrawer}
+          selectedTask={selectedTask}
+          selectedPlans={selectedPlans}
+          onPlanChange={handlePlanChange}
+          onSave={handleSavePlans}
+          masterPlans={masterPlans}
         />
       </MainCard>
       <Snackbar

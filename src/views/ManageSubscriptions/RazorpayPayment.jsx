@@ -49,7 +49,8 @@ export default function RazorparPayment({
       } else {
         if (onFailure) onFailure();
       }
-      navigate('/app/subscriptions');
+      if (status === 'pending') navigate('/app/manage-tasks');
+      else navigate('/app/subscriptions');
     } catch (err) {
       if (onFailure) onFailure();
     }
