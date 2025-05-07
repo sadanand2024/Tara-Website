@@ -2,8 +2,13 @@
 import { Box, Button, Container, Stack, Typography } from '@mui/material';
 import React from 'react';
 import { Fade } from 'react-awesome-reveal';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 const StickyFooterCTA = ({ data }) => {
+   const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
+    const service_id = searchParams.get('id');
+    const service_type = searchParams.get('type');
   return (
     <Box
       sx={{
@@ -51,6 +56,10 @@ const StickyFooterCTA = ({ data }) => {
                   variant={idx === 0 ? 'contained' : 'outlined'}
                   fullWidth
                   size="size"
+                  onClick={() => idx === 0 
+                    ? navigate(`/register?id=${service_id}&context=${service_type}&type=service`)
+                    : navigate(`/book-consultation?id=${service_id}&context=${service_type}&type=service`)
+                  }
                   sx={{
                     borderRadius: 2,
                     px: 3,
