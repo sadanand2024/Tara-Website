@@ -1,5 +1,5 @@
-import React from 'react';
 import {
+  alpha,
   Box,
   Button,
   Card,
@@ -10,22 +10,20 @@ import {
   Grid,
   Stack,
   Typography,
-  IconButton,
-  useTheme,
   useMediaQuery,
-  alpha
+  useTheme
 } from '@mui/material';
+import React from 'react';
 
 // icons
 import AddIcon from '@mui/icons-material/Add';
-import GroupIcon from '@mui/icons-material/Group';
-import DescriptionIcon from '@mui/icons-material/Description';
-import UploadFileIcon from '@mui/icons-material/UploadFile';
-import PendingActionsIcon from '@mui/icons-material/PendingActions';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import WarningIcon from '@mui/icons-material/Warning';
+import DescriptionIcon from '@mui/icons-material/Description';
+import GroupIcon from '@mui/icons-material/Group';
+import PendingActionsIcon from '@mui/icons-material/PendingActions';
+import TrendingDownIcon from '@mui/icons-material/TrendingDown';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import UploadFileIcon from '@mui/icons-material/UploadFile';
 
 const StatCard = ({ title, value, trend, trendValue }) => {
   const theme = useTheme();
@@ -180,15 +178,15 @@ export default function Business() {
   const companyInfo = {
     name: 'AQUA TECH SOLUTIONS PVT LTD',
     stats: {
-      modules: 5,
-      teamMembers: 6,
-      docsUploaded: 42,
-      ongoingReturns: 3
+      modules: 0,
+      teamMembers: 0,
+      docsUploaded: 0,
+      ongoingReturns: 0
     },
     plan: {
       name: 'Growth',
-      subscription: '₹ 4,999/- per month',
-      nextRenewal: '13th May 2025'
+      subscription: 0,
+      nextRenewal: '7th May 2025'
     }
   };
 
@@ -489,16 +487,16 @@ export default function Business() {
       <Box>
         <Grid container spacing={2} sx={{ mb: 2 }}>
           <Grid item xs={12} sm={6} md={3}>
-            <StatCard title="Monthly Revenue" value="10,50,000" trend="up" trendValue="12.4" />
+            <StatCard title="Monthly Revenue" value="0" trend="up" trendValue="0" />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <StatCard title="Expenses" value="4,85,000" trend="down" trendValue="31.2" />
+            <StatCard title="Expenses" value="0" trend="down" trendValue="0" />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <StatCard title="Receivables" value="1,05,000" trend="up" trendValue="3.7" />
+            <StatCard title="Receivables" value="0" trend="up" trendValue="0" />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
-            <StatCard title="Total Payroll" value="2,25,000" trend="down" trendValue="2.1" />
+            <StatCard title="Total Payroll" value="0" trend="down" trendValue="0" />
           </Grid>
         </Grid>
 
@@ -528,31 +526,31 @@ export default function Business() {
                       <Typography variant="body1" sx={{ color: 'text.secondary', display: 'flex', justifyContent: 'space-between' }}>
                         Monthly Revenue{' '}
                         <Typography component="span" color="text.primary" fontWeight={600}>
-                          ₹10,50,000
+                          0
                         </Typography>
                       </Typography>
                       <Typography variant="body1" sx={{ color: 'text.secondary', display: 'flex', justifyContent: 'space-between' }}>
                         Expenses{' '}
                         <Typography component="span" color="text.primary" fontWeight={600}>
-                          ₹4,85,000
+                          0
                         </Typography>
                       </Typography>
                       <Typography variant="body1" sx={{ color: 'text.secondary', display: 'flex', justifyContent: 'space-between' }}>
                         Cash Reserve{' '}
                         <Typography component="span" color="text.primary" fontWeight={600}>
-                          ₹6,25,000
+                          0
                         </Typography>
                       </Typography>
                       <Typography variant="body1" sx={{ color: 'text.secondary', display: 'flex', justifyContent: 'space-between' }}>
                         Net Profit{' '}
                         <Typography component="span" color="text.primary" fontWeight={600}>
-                          ₹5,65,000
+                          0
                         </Typography>
                       </Typography>
                       <Typography variant="body1" sx={{ color: 'text.secondary', display: 'flex', justifyContent: 'space-between' }}>
                         Expense Ratio{' '}
                         <Typography component="span" color="text.primary" fontWeight={600}>
-                          46.2%
+                          0
                         </Typography>
                       </Typography>
                     </Stack>
@@ -607,7 +605,7 @@ export default function Business() {
                     >
                       <Box sx={{ textAlign: 'center' }}>
                         <Typography variant="h6" color="primary.main">
-                          3
+                          0
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
                           To Start
@@ -616,7 +614,7 @@ export default function Business() {
                       <Divider orientation="vertical" flexItem />
                       <Box sx={{ textAlign: 'center' }}>
                         <Typography variant="h6" color="primary.main">
-                          6
+                          0
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
                           In Progress
@@ -625,7 +623,7 @@ export default function Business() {
                       <Divider orientation="vertical" flexItem />
                       <Box sx={{ textAlign: 'center' }}>
                         <Typography variant="h6" color="error.main">
-                          2
+                          0
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
                           Overdue
