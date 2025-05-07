@@ -2,8 +2,13 @@
 import { Box, Button, Card, CardActions, CardContent, CardHeader, Container, Grid, Typography } from '@mui/material';
 import React from 'react';
 import { Fade } from 'react-awesome-reveal';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 const PricingPlans = ({ data }) => {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const service_id = searchParams.get('id');
+  const service_type = searchParams.get('type');
   if (!data) return null;
 
   const gradients = [
@@ -21,12 +26,7 @@ const PricingPlans = ({ data }) => {
         </Typography>
 
         {/* Responsive Plans Grid */}
-        <Grid
-          container
-          spacing={{ xs: 2, md: 3 }}
-          justifyContent="center"
-          sx={{ mt: 3 }}
-        >
+        <Grid container spacing={{ xs: 2, md: 3 }} justifyContent="center" sx={{ mt: 3 }}>
           {data.plans?.map((plan, idx) => (
             <Grid item xs={12} sm={6} md={4} lg={3} key={idx}>
               <Card
@@ -37,7 +37,7 @@ const PricingPlans = ({ data }) => {
                   flexDirection: 'column',
                   borderRadius: 2,
                   transition: 'transform 0.3s ease',
-                  '&:hover': { transform: 'translateY(-5px)' },
+                  '&:hover': { transform: 'translateY(-5px)' }
                 }}
               >
                 <CardHeader
@@ -58,13 +58,15 @@ const PricingPlans = ({ data }) => {
                     py: { xs: 1.5, sm: 2 }
                   }}
                 />
-                <CardContent sx={{
-                  flexGrow: 1,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  py: { xs: 1.5, sm: 2 }
-                }}>
+                <CardContent
+                  sx={{
+                    flexGrow: 1,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    py: { xs: 1.5, sm: 2 }
+                  }}
+                >
                   <Typography
                     variant="h5"
                     fontWeight={700}
@@ -76,7 +78,7 @@ const PricingPlans = ({ data }) => {
                     {plan.price}
                   </Typography>
                   {plan.features && (
-                    <Box sx={{width: '100%', mt: 1.5}}>
+                    <Box sx={{ width: '100%', mt: 1.5 }}>
                       {plan.features.map((feature, featureIdx) => (
                         <Typography
                           key={featureIdx}
@@ -102,6 +104,9 @@ const PricingPlans = ({ data }) => {
                     sx={{
                       py: 1,
                       borderRadius: 1.5
+                    }}
+                    onClick={(e) => {
+                      navigate(`/register?id=${service_id}&context=${service_type}&type=service`);
                     }}
                   >
                     Get Started
