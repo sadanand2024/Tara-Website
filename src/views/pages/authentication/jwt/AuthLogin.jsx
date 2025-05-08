@@ -70,39 +70,40 @@ export default function JWTLogin({ ...others }) {
           .test('no-leading-trailing-whitespace', 'Password can not start or end with spaces', (value) => value === value.trim())
       })}
       onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
-        // try {
-        //   const trimmedEmail = values.email.trim();
-        //   await login?.(trimmedEmail, values.password);
-        //   if (scriptedRef.current) {
-        //     setStatus({ success: true });
-        //     setSubmitting(false);
-        //     dispatch(
-        //       openSnackbar({
-        //         open: true,
-        //         message: 'Login successful',
-        //         variant: 'alert',
-        //         alert: { color: 'success' },
-        //         close: false
-        //       })
-        //     );
-        //   }
-        // } catch (err) {
-        //   const message = err?.error || 'Invalid email or password';
-        //   dispatch(
-        //     openSnackbar({
-        //       open: true,
-        //       message: message,
-        //       variant: 'alert',
-        //       alert: { color: 'error' },
-        //       close: false
-        //     })
-        //   );
-        //   if (scriptedRef.current) {
-        //     setStatus({ success: false });
-        //     setErrors({ submit: err.error });
-        //     setSubmitting(false);
-        //   }
-        // }
+        try {
+          const trimmedEmail = values.email.trim();
+          await login?.(trimmedEmail, values.password);
+
+          if (scriptedRef.current) {
+            setStatus({ success: true });
+            setSubmitting(false);
+            dispatch(
+              openSnackbar({
+                open: true,
+                message: 'Login successful',
+                variant: 'alert',
+                alert: { color: 'success' },
+                close: false
+              })
+            );
+          }
+        } catch (err) {
+          const message = err?.error || 'Invalid email or password';
+          dispatch(
+            openSnackbar({
+              open: true,
+              message: message,
+              variant: 'alert',
+              alert: { color: 'error' },
+              close: false
+            })
+          );
+          if (scriptedRef.current) {
+            setStatus({ success: false });
+            setErrors({ submit: err.error });
+            setSubmitting(false);
+          }
+        }
       }}
     >
       {({ errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values }) => (
