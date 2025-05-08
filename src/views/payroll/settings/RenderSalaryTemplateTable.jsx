@@ -605,9 +605,11 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
                 <TableCell>{earning.monthly.toFixed(2)}</TableCell>
                 <TableCell>{earning.annually.toFixed(2)}</TableCell>
                 <TableCell>
-                  <Button color="error" onClick={() => handleDeleteEarning(index)}>
-                    <IconTrash size={16} />
-                  </Button>
+                  {index !== 0 && (
+                    <Button color="error" onClick={() => handleDeleteEarning(index)}>
+                      <IconTrash size={16} />
+                    </Button>
+                  )}
                 </TableCell>
               </TableRow>
             ))}
@@ -617,7 +619,9 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
             </TableCell>
           </TableRow>
           <TableRow>
-            <TableCell>Fixed Allowance</TableCell>
+            <TableCell>
+              <Typography variant="h5"> Fixed Allowance (Monthly CTC - Sum of all other components) </Typography>
+            </TableCell>{' '}
             <TableCell>Remaining Balance</TableCell>
             <TableCell>
               <Typography sx={{ color: fixedAllowance.monthly < 0 ? 'error.main' : 'inherit' }}>

@@ -83,17 +83,17 @@ function Organizationdetails() {
 
   const validationSchema = Yup.object({
     business_name: Yup.string().required('Organization name is required'),
-    logo: Yup.mixed()
-      .required('Logo is required')
-      .test('fileSize', 'File size is too large', (value) => {
-        // If value is a string (URL), it's valid
-        if (typeof value === 'string') return true;
-        // If value is a file object, check its size
-        if (value && value.size) {
-          return value.size <= 5242880; // 5MB in bytes
-        }
-        return false;
-      }),
+    // logo: Yup.mixed()
+    //   .required('Logo is required')
+    //   .test('fileSize', 'File size is too large', (value) => {
+    //     // If value is a string (URL), it's valid
+    //     if (typeof value === 'string') return true;
+    //     // If value is a file object, check its size
+    //     if (value && value.size) {
+    //       return value.size <= 5242880; // 5MB in bytes
+    //     }
+    //     return false;
+    //   }),
     business_nature: Yup.string().required('Business Nature is required'),
     pan: Yup.string()
       .required('PAN Number is required')

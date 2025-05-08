@@ -21,7 +21,7 @@ import MainCard from '../../../ui-component/cards/MainCard';
 // @assets
 import { IconArrowUp, IconFilter, IconReload, IconAlertCircle } from '@tabler/icons-react';
 import { Autocomplete, Box, Button, FormHelperText, InputLabel, TextField, Avatar } from '@mui/material';
-import { BASE_URL } from '../../../../constants';
+let baseURL = import.meta.env.VITE_APP_BASE_URL;
 import { indianCurrency } from 'utils/CurrencyToggle';
 import { ThemeMode } from 'config';
 
@@ -312,7 +312,7 @@ export default function OverviewCard({ invoicing_profile_data, businessId, open,
   const downloadInvoice = async (id) => {
     try {
       const tokens = JSON.parse(localStorage.getItem('user'));
-      const response = await axios.get(`${BASE_URL}/invoicing/create-pdf/${id}`, {
+      const response = await axios.get(`${baseURL}/invoicing/create-pdf/${id}`, {
         responseType: 'arraybuffer',
         headers: {
           Authorization: `Bearer ${tokens.access_token}`

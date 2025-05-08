@@ -33,8 +33,8 @@ export default function DepartmentDialog({ open, handleClose, fetchDepartments, 
     },
     validationSchema: Yup.object({
       dept_name: Yup.string().required('Department Name is required'),
-      dept_code: Yup.string().required('Department Code is required'),
-      description: Yup.string().required('Description is required')
+      dept_code: Yup.string().required('Department Code is required')
+      // description: Yup.string().required('Description is required')
     }),
     onSubmit: async (values) => {
       const postData = { ...values, payroll: payrollid };
@@ -117,9 +117,7 @@ export default function DepartmentDialog({ open, handleClose, fetchDepartments, 
         <Grid2 container spacing={3}>
           {departmentFields.map((field) => (
             <Grid2 key={field.name} xs={12}>
-              <Typography gutterBottom>
-                {field.label} <span style={{ color: 'red' }}>*</span>
-              </Typography>
+              <Typography gutterBottom>{field.label}</Typography>
               <CustomInput
                 fullWidth
                 name={field.name}

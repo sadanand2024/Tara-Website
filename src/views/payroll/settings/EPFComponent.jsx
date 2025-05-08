@@ -15,7 +15,7 @@ import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
 
 const pfFields = [
-  { name: 'epf_number', label: 'EPF Number' },
+  { name: 'epf_number', label: 'EPF Number (EX: ABCDE2405151000)' },
   { name: 'employee_contribution_rate', label: 'Employee Contribution Rate' },
   { name: 'employer_contribution_rate', label: 'Employer Contribution Rate' }
 ];
@@ -481,7 +481,7 @@ function EpfComponent({ handleNext }) {
                       onChange={(e) => formik.setFieldValue('apply_components_if_wage_below_15k', e.target.checked)}
                     />
                   }
-                  label="Consider all applicable salary components if the PF wage is less than ₹150,000 after loss of pay."
+                  label="Consider all applicable salary components if the PF wage is less than ₹15,000 after loss of pay."
                 />{' '}
               </FormGroup>
             </Box>

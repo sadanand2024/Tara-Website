@@ -24,7 +24,7 @@ import { useSnackbar } from '@/components/CustomSnackbar';
 import Factory from '@/utils/Factory';
 import { ThemeDirection } from '@/config';
 import { SECTION_COMMON_PY } from '@/utils/constant';
-import { BASE_URL } from 'constants';
+let baseURL = import.meta.env.VITE_APP_BASE_URL;
 
 /***************************  EARLY ACCESS  ***************************/
 
@@ -498,7 +498,7 @@ export default function EarlyAccess() {
   const downloadInvoice = async (id) => {
     try {
       const tokens = JSON.parse(localStorage.getItem('auth-user'));
-      const response = await axios.get(`${BASE_URL}/invoicing/create-pdf/${id}`, {
+      const response = await axios.get(`${baseURL}/invoicing/create-pdf/${id}`, {
         responseType: 'arraybuffer',
         headers: {
           Authorization: `Bearer ${tokens.access_token}`
