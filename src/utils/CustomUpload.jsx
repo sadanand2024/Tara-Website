@@ -74,7 +74,6 @@ const CustomUpload = ({ title, setData, logoDetails, onDelete }) => {
               }}
             />
             <Stack direction="row" spacing={1} alignItems="center">
-              {/* Delete Icon */}
               <IconButton color="error" onClick={handleDeleteLogo} aria-label="delete">
                 <IconTrash size={16} stroke={1.5} />
               </IconButton>

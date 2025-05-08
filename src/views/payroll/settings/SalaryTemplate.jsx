@@ -147,26 +147,31 @@ function SalaryTemplate() {
             <Typography variant="subtitle1" sx={{ mb: 0.5 }}>
               Annual CTC <span style={{ color: 'red' }}>*</span>
             </Typography>
-            <TextField
-              fullWidth
-              size="small"
-              name="annual_ctc"
-              value={values.annual_ctc}
-              onChange={(e) => {
-                setFieldValue('annual_ctc', e.target.value);
-                setEnablePreviewButton(true);
-              }}
-              onBlur={handleBlur}
-              error={touched.annual_ctc && Boolean(errors.annual_ctc)}
-              helperText={touched.annual_ctc && errors.annual_ctc}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    ₹<Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
-                  </InputAdornment>
-                )
-              }}
-            />
+            <Stack direction="row" spacing={2} alignItems="center">
+              <TextField
+                fullWidth
+                size="small"
+                name="annual_ctc"
+                value={values.annual_ctc}
+                onChange={(e) => {
+                  setFieldValue('annual_ctc', e.target.value);
+                  setEnablePreviewButton(true);
+                }}
+                onBlur={handleBlur}
+                error={touched.annual_ctc && Boolean(errors.annual_ctc)}
+                helperText={touched.annual_ctc && errors.annual_ctc}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      ₹<Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
+                    </InputAdornment>
+                  )
+                }}
+              />
+              <Typography variant="subtitle1" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
+                Per year
+              </Typography>
+            </Stack>
           </Grid2>
         </Grid2>
 

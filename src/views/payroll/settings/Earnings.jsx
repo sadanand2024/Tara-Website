@@ -30,12 +30,22 @@ import ActionCell from 'ui-component/extended/ActionCell';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
+import BlockIcon from '@mui/icons-material/Block';
+
 const validationSchema = Yup.object({
   component_name: Yup.string().required('Name is required'),
   component_type: Yup.string().required('Type is required'),
-  calculation_type: Yup.object().shape({
-    type: Yup.string().required('Calculation type is required'),
-    value: Yup.number().required('Value is required').min(0.01, 'Value must be greater than 0').typeError('Please enter a valid number')
+  calculation_type: Yup.object().when('component_name', {
+    is: (val) => val !== 'Commission' && val !== 'Bonus',
+    then: (schema) =>
+      schema.shape({
+        type: Yup.string().required('Calculation type is required'),
+        value: Yup.number()
+          .required('Value is required')
+          .min(0, 'Value must be greater than or equal to 0')
+          .typeError('Please enter a valid number')
+      }),
+    otherwise: (schema) => schema.nullable()
   })
 });
 
@@ -46,6 +56,8 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
   const [payrollid, setPayrollId] = useState(null);
   const [searchParams] = useSearchParams();
   const [currentPage, setCurrentPage] = useState(1);
+  const [hovered, setHovered] = useState(false);
+
   const rowsPerPage = 8;
   const dispatch = useDispatch();
   const handlePageChange = (event, value) => {
@@ -166,7 +178,6 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
       }
     }
   });
-
   const getEarnings_Details = async (id) => {
     setLoading(true);
     const url = `/payroll/earnings?payroll_id=${id}`;
@@ -192,6 +203,7 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
     }
   }, [payrollid]);
   const { values, setValues, handleChange, errors, touched, handleSubmit, handleBlur, resetForm, setFieldValue } = formik;
+  console.log(errors);
 
   return (
     <>
@@ -348,7 +360,7 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
                           }
                         />
                       </Grid2>
-                      {values.component_name !== 'Commission' && (
+                      {values.component_name !== 'Commission' && values.component_name !== 'Bonus' && (
                         <Grid2>
                           <Typography variant="subtitle1">Calculation Type:</Typography>
                           <FormGroup row sx={{ mt: 1 }}>
@@ -493,7 +505,6 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
                                   values.component_name === 'Conveyance Allowance' ||
                                   values.component_name === 'Children Education Allowance' ||
                                   values.component_name === 'Transport Allowance' ||
-                                  values.component_name === 'Commission' ||
                                   values.component_name === 'Travelling Allowance' ||
                                   values.component_name === 'Overtime Allowance'
                                 }
@@ -569,11 +580,14 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
                                 onChange={(e) => {
                                   let val = e.target.checked;
                                   setFieldValue('includes_epf_contribution', val);
+                                  setFieldValue('always_consider_epf_inclusion', val);
+                                  setFieldValue('pf_wage_less_than_15k', val);
                                 }}
                                 disabled={
                                   values.component_name === 'Basic' ||
                                   values.component_name === 'HRA' ||
-                                  values.component_name === 'Overtime Allowance'
+                                  values.component_name === 'Overtime Allowance' ||
+                                  values.component_name === 'Bonus'
                                 }
                               />
                             }
@@ -584,35 +598,46 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
                               }
                             }}
                           />
-                          {(values.component_name === 'Basic' ||
+                          {console.log(values)}
+                          {((values.component_name === 'Basic' ||
                             values.component_name === 'Fixed Allowance' ||
                             values.component_name === 'Conveyance Allowance' ||
                             values.component_name == 'Commission' ||
                             values.component_name === 'Children Education Allowance' ||
                             values.component_name === 'Transport Allowance' ||
                             values.component_name === 'Travelling Allowance') &&
-                            values.includes_epf_contribution === true && (
+                            values.includes_epf_contribution === true) ||
+                            (values.includes_epf_contribution === true && (
                               <Box sx={{ ml: 3 }}>
                                 <FormControlLabel
+                                  onMouseEnter={() => setHovered(true)}
+                                  onMouseLeave={() => setHovered(false)}
                                   control={
-                                    <Checkbox
-                                      checked={values.always_consider_epf_inclusion}
-                                      onChange={(e) => setFieldValue('always_consider_epf_inclusion', e.target.checked)}
-                                      disabled={
-                                        values.component_name === 'Basic' ||
-                                        values.component_name === 'Fixed Allowance' ||
-                                        values.component_name === 'Commission' ||
-                                        values.component_name === 'Travelling Allowance'
-                                      }
-                                    />
+                                    <Box sx={{ position: 'relative', display: 'inline-block' }}>
+                                      <Checkbox
+                                        checked={values.always_consider_epf_inclusion}
+                                        onChange={(e) => setFieldValue('always_consider_epf_inclusion', e.target.checked)}
+                                        disabled={values.component_name === 'Conveyance Allowance'}
+                                      />
+                                      {hovered && values.component_name === 'Conveyance Allowance' && (
+                                        <BlockIcon
+                                          color="error"
+                                          fontSize="small"
+                                          sx={{
+                                            position: 'absolute',
+                                            top: '50%',
+                                            left: '50%',
+                                            transform: 'translate(-50%, -50%)',
+                                            pointerEvents: 'none',
+                                            opacity: 0.9
+                                          }}
+                                        />
+                                      )}
+                                    </Box>
                                   }
                                   label="Always"
-                                  sx={{
-                                    '& .MuiFormControlLabel-label': {
-                                      color: 'black !important'
-                                    }
-                                  }}
                                 />
+
                                 <FormControlLabel
                                   control={
                                     <Checkbox
@@ -629,7 +654,7 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
                                   }}
                                 />
                               </Box>
-                            )}
+                            ))}
 
                           <FormControlLabel
                             control={
@@ -665,7 +690,9 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
                                   values.component_name === 'Bonus' ||
                                   values.component_name === 'Commission' ||
                                   values.component_name === 'Travelling Allowance' ||
-                                  values.component_name === 'Overtime Allowance'
+                                  values.component_name === 'Overtime Allowance' ||
+                                  values.component_name === 'Children Education Allowance' ||
+                                  values.component_name === 'Transport Allowance'
                                 }
                               />
                             }
