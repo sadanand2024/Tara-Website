@@ -32,7 +32,7 @@ const AboutUsCard = () => {
             We’re Redefining Financial Simplicity
           </Typography>
           <Typography variant="h6" color="text.secondary" sx={{ textAlign: 'center', maxWidth: 720, mx: 'auto', mb: 6 }}>
-            Tarafirst empowers individuals and businesses to take control of their finances through a unified platform that combines expert
+            Tara First empowers individuals and businesses to take control of their finances through a unified platform that combines expert
             support, modern tools, and automated compliance — making finance stress-free and streamlined.
           </Typography>
         </motion.div>

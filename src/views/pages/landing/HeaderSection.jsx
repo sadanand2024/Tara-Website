@@ -105,7 +105,7 @@ export default function HeaderSection() {
                       ...headerSX
                     }}
                   >
-                    Tarafirst
+                    Tara First
                   </Typography>
                 </Stack>
               </motion.div>

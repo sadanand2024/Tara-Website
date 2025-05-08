@@ -13,7 +13,8 @@ import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { Link } from '@mui/material';
-
+import axios from 'axios';
+import { useSnackbar } from 'notistack';
 // Common styles
 const styles = {
   pageWrapper: {
@@ -157,6 +158,7 @@ function generateTimeSlots(date) {
 const daysInMonth = (month, year) => new Date(year, month + 1, 0).getDate();
 
 const BookConsultationPage = () => {
+  const { enqueueSnackbar } = useSnackbar();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const today = new Date();
@@ -173,6 +175,14 @@ const BookConsultationPage = () => {
   const days = daysInMonth(month, year);
   const selectedDateObj = new Date(year, month, selectedDate);
   const timeSlots = generateTimeSlots(selectedDateObj);
+
+  const handleReset = () => {
+    setStep('calendar');
+    setSelectedDate(today.getDate());
+    setSelectedTime('');
+    setForm({ name: '', email: '', mobile_number: '', notes: '' });
+    setErrors({});
+  };
 
   // Calendar navigation
   const handlePrevMonth = () => {
@@ -249,19 +259,35 @@ const BookConsultationPage = () => {
     const formattedDate = selectedDateObj.toISOString().split('T')[0];
 
     let data = {
-      date: formattedDate,
-      firstName: form.name,
-      email: form.email,
-      message: form.notes,
-      time: selectedTime,
-      phone: form.mobile_number,
       name: form.name,
-      mobile_number: form.mobile_number
+      email: form.email,
+      mobile_number: form.mobile_number,
+      message: form.notes,
+      date: formattedDate,
+      time: selectedTime
     };
 
     if (Object.keys(newErrors).length === 0) {
-      // Submit form or show success
       console.log('Submitting data:', data);
+      const apiUrl = `${import.meta.env.VITE_APP_BASE_URL}/user_management/consultation`;
+      axios
+        .post(apiUrl, data)
+        .then((response) => {
+          console.log(response);
+          enqueueSnackbar('Consultation booked successfully!', {
+            variant: 'success',
+            anchorOrigin: { vertical: 'top', horizontal: 'right' },
+            autoHideDuration: 3000
+          });
+          handleReset();
+        })
+        .catch((error) => {
+          enqueueSnackbar('Error booking consultation!', {
+            variant: 'error',
+            anchorOrigin: { vertical: 'top', horizontal: 'right' },
+            autoHideDuration: 3000
+          });
+        });
     }
   };
 
