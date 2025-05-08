@@ -121,10 +121,15 @@ const HeroWithFinalTouch = ({ data }) => {
                 size="large"
                 color="primary"
                 fullWidth={true}
-                onClick={() => idx === 0 
-                  ? navigate(`/register?id=${service_id}&context=${service_type}&type=service`)
-                  : navigate(`/book-consultation?id=${service_id}&context=${service_type}&type=service`)
-                }
+                onClick={() => {
+                  if (idx === 0) {
+                    navigate(`/register?id=${service_id}&context=${service_type}&type=service`);
+                  } else if (cta.label === "Book a Consultation") {
+                    navigate(`/book-consultation?id=${service_id}&context=${service_type}&type=service`);
+                  } else {
+                    navigate('/pages/contact-us');
+                  }
+                }}
                 sx={{
                   borderRadius: 3,
                   fontWeight: 600,
