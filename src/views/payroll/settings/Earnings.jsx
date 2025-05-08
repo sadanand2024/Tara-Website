@@ -406,10 +406,17 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
                                       values.calculation_type.type === 'Percentage of Basic'
                                     }
                                     onChange={(e) => {
-                                      setFieldValue('calculation_type', {
-                                        type: 'Percentage of Basic',
-                                        value: 0
-                                      });
+                                      if (values.component_name === 'Basic') {
+                                        setFieldValue('calculation_type', {
+                                          type: 'Percentage of CTC',
+                                          value: 0
+                                        });
+                                      } else {
+                                        setFieldValue('calculation_type', {
+                                          type: 'Percentage of Basic',
+                                          value: 0
+                                        });
+                                      }
                                     }}
                                   />
                                 }

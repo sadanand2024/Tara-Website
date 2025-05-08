@@ -22,10 +22,20 @@ import CustomInput from 'utils/CustomInput';
 import CustomAutocomplete from 'utils/CustomAutocomplete';
 import Factory from 'utils/Factory';
 
-export default function RenderSalaryTemplateTable({ values, setFieldValue, setValues, enablePreviewButton, setEnablePreviewButton }) {
+export default function RenderSalaryTemplateTable({
+  source,
+  values,
+  setFieldValue,
+  setValues,
+  enablePreviewButton,
+  setEnablePreviewButton,
+  createdEmployeeId
+}) {
+  console.log(createdEmployeeId);
   const [searchParams] = useSearchParams();
   const payrollId = searchParams.get('payrollid');
   const template_id = searchParams.get('template_id');
+  const employee_id = searchParams.get('employee_id');
   const [earningsData, setEarningsData] = useState([]);
   const [fixedAllowance, setFixedAllowance] = useState({ monthly: 0, annually: 0 });
   const [loading, setLoading] = useState(false);
@@ -508,17 +518,35 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
 
     setFieldValue('earnings', finalEarnings);
   }, [values.annual_ctc]);
+  ////////////////
   useEffect(() => {
     if (!payrollId) return;
 
-    getEarnings_Details(payrollId); // dropdown always
+    // Always fetch earnings details
+    getEarnings_Details(payrollId);
 
     if (!template_id) {
-      setBasicFromMaster(payrollId); // for new template
+      // Only set basic if no created employee
+      if (!createdEmployeeId) {
+        setBasicFromMaster(payrollId); // for new template
+      }
     } else {
       fetch_individual_salary_templates(template_id); // existing
     }
-  }, [payrollId, template_id]);
+  }, [payrollId, template_id, createdEmployeeId]);
+
+  // useEffect(() => {
+  //   if (!payrollId) return;
+
+  //   getEarnings_Details(payrollId); // dropdown always
+
+  //   if (!template_id) {
+  //     setBasicFromMaster(payrollId); // for new template
+  //   } else {
+  //     fetch_individual_salary_templates(template_id); // existing
+  //   }
+  // }, [payrollId, template_id]);
+  //////////////////
   useEffect(() => {
     const hasBenefits = values.benefits?.length > 0;
     const hasDeductions = values.deductions?.length > 0;
@@ -526,7 +554,6 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
       setViewPreview(true);
     }
   }, [values.benefits, values.deductions]);
-
   return (
     <TableContainer
       component={Paper}
@@ -605,7 +632,9 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
                     >
                       {earning.component_name === 'Basic' && earning.calculation_type === 'Flat Amount'
                         ? 'Flat Amount of CTC'
-                        : earning.calculation_type || '—'}
+                        : earning.component_name === 'Basic' && earning.calculation_type === 'Percentage of Basic'
+                          ? 'Percentage of CTC'
+                          : earning.calculation_type || '—'}
                     </Typography>
                   </Stack>
                 </TableCell>

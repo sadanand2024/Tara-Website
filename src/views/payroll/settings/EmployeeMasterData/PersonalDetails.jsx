@@ -11,7 +11,7 @@ import CustomAutocomplete from 'utils/CustomAutocomplete';
 import { indian_States_And_UTs } from 'utils/indian_States_And_UT';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
-function PersonalDetails({ employeeData, createdEmployeeId }) {
+function PersonalDetails({ fetchEmployeeData, employeeData, createdEmployeeId }) {
   const [payrollid, setPayrollId] = useState(null);
   const [employeeId, setEmployeeId] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -120,6 +120,8 @@ function PersonalDetails({ employeeData, createdEmployeeId }) {
             close: false
           })
         );
+        const employeeId = employeeData?.id || createdEmployeeId;
+        await fetchEmployeeData(employeeId);
       } else {
         dispatch(
           openSnackbar({

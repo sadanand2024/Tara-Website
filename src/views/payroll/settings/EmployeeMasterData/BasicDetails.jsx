@@ -24,7 +24,7 @@ const employeeFields = [
   { name: 'designation', label: 'Designation' },
   { name: 'department', label: 'Department' }
 ];
-function BasicDetails({ employeeData, setCreatedEmployeeId }) {
+function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId }) {
   const [loading, setLoading] = useState(false); // State for loader
   const dispatch = useDispatch();
 
@@ -110,6 +110,9 @@ function BasicDetails({ employeeData, setCreatedEmployeeId }) {
         );
         if (!employeeData?.id && res?.id) {
           setCreatedEmployeeId(res.id);
+        } else if (employeeData?.id) {
+          // ✅ Refetch employee data after update
+          fetchEmployeeData(employeeData.id);
         }
       } else {
         dispatch(
