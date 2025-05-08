@@ -97,7 +97,7 @@ function SalaryDetails({ employeeData, createdEmployeeId }) {
       <Grid2 key={field.name} size={{ xs: 12, sm: 6 }}>
         {field.name === 'salary_template' ? (
           <>
-            {employeeData?.employee_salary?.length === 0 && (
+            {employeeData?.employee_salary?.length !== 0 && (
               <>
                 <Typography variant="subtitle2" sx={{ color: 'grey.800', mb: 0.5 }}>
                   {field.label}
@@ -132,7 +132,17 @@ function SalaryDetails({ employeeData, createdEmployeeId }) {
               inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
               onChange={(e) => {
                 const { name, value } = e.target;
-                setFieldValue(field.name, value);
+                setFieldValue(name, value);
+
+                if (name === 'annual_ctc') {
+                  setEnablePreviewButton(true); // ✅ Show preview button
+
+                  // ✅ Force recalculation of earnings (especially Fixed Allowance)
+                  setValues((prev) => ({
+                    ...prev,
+                    earnings: [...prev.earnings] // Trigger reactivity in dependent useEffects
+                  }));
+                }
               }}
             />
           </>
@@ -160,6 +170,7 @@ function SalaryDetails({ employeeData, createdEmployeeId }) {
   useEffect(() => {
     if (employeeData?.employee_salary?.length > 0) {
       let lastSalary = employeeData.employee_salary[employeeData?.employee_salary?.length - 1];
+      console.log(lastSalary);
       setValues((prev) => ({
         ...prev,
         ...lastSalary
