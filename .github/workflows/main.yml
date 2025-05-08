@@ -1,4 +1,4 @@
-name: Dev
+name: Prod
 
 on:
   workflow_dispatch:
