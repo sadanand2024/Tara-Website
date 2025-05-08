@@ -9,7 +9,7 @@ import FormHelperText from '@mui/material/FormHelperText';
 import InputLabel from '@mui/material/InputLabel';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import Box from '@mui/material/Box';
-
+import axios from 'utils/axios';
 // third party
 import * as Yup from 'yup';
 import { Formik } from 'formik';
@@ -48,27 +48,48 @@ export default function AuthForgotPassword({ link, ...others }) {
         try {
           await resetPassword?.(values.email).then(
             () => {
-              setStatus({ success: true });
-              setSubmitting(false);
-              dispatch(
-                openSnackbar({
-                  open: true,
-                  message: 'Check mail for reset password link',
-                  variant: 'alert',
-                  alert: {
-                    color: 'success'
-                  },
-                  close: false
+              axios
+                .post(`${import.meta.env.VITE_APP_BASE_URL}/user_management/forgot-password/`, {
+                  email: values.email
                 })
-              );
-              setTimeout(() => {
-                navigate(
-                  isLoggedIn ? `/pages/check-mail/${link || 'check-mail3'}` : authParam ? `/check-mail?auth=${authParam}` : '/check-mail',
-                  {
-                    replace: true
-                  }
-                );
-              }, 1500);
+                .then((response) => {
+                  console.log(response);
+                  setStatus({ success: true });
+                  setSubmitting(false);
+                  dispatch(
+                    openSnackbar({
+                      open: true,
+                      message: 'Check mail for reset password link',
+                      variant: 'alert',
+                      alert: {
+                        color: 'success'
+                      },
+                      close: false
+                    })
+                  );
+                })
+                .catch((error) => {
+                  console.log(error);
+                  dispatch(
+                    openSnackbar({
+                      open: true,
+                      message: 'Failed to send reset password link',
+                      variant: 'alert',
+                      alert: {
+                        color: 'error'
+                      },
+                      close: false
+                    })
+                  );
+                });
+              // setTimeout(() => {
+              //   navigate(
+              //     isLoggedIn ? `/pages/check-mail/${link || 'check-mail3'}` : authParam ? `/check-mail?auth=${authParam}` : '/check-mail',
+              //     {
+              //       replace: true
+              //     }
+              //   );
+              // }, 1500);
 
               // WARNING: do not set any formik state here as formik might be already destroyed here. You may get following error by doing so.
               // Warning: Can't perform a React state update on an unmounted component. This is a no-op, but it indicates a memory leak in your application.

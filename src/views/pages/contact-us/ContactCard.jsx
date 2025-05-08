@@ -14,7 +14,9 @@ import MenuItem from '@mui/material/MenuItem';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-
+import { Formik, Form, Field } from 'formik';
+import * as Yup from 'yup';
+import axios from 'axios';
 // third party
 import { PatternFormat } from 'react-number-format';
 
@@ -73,7 +75,7 @@ export default function ContactCard() {
   return (
     <Container>
       <Grid container spacing={gridSpacing} sx={{ justifyContent: 'center' }}>
-        <Grid sx={{ mt: { md: 12.5, xs: 2.5 }, mb: { md: 12.5, xs: 2.5 } }} size={{ sm: 10, md: 7 }}>
+        <Grid sx={{ mt: { md: 12.5, xs: 2.5 }, mb: { md: 4, xs: 2.5 } }} size={{ sm: 10, md: 7 }}>
           <Grid container spacing={gridSpacing}>
             <Grid size={12}>
               <Typography
@@ -109,7 +111,7 @@ export default function ContactCard() {
             sx={{
               mb: -0.081,
               position: 'absolute',
-              bottom: -90,
+              bottom: -130,
               right: 0,
               width: 400,
               maxWidth: 1,
@@ -120,88 +122,158 @@ export default function ContactCard() {
         <Grid sx={{ mb: -37.5 }} size={10}>
           <Card sx={{ mb: 6.25 }} elevation={4}>
             <CardContent sx={{ p: 4 }}>
-              <Grid container spacing={gridSpacing}>
-                <Grid size={{ xs: 12, sm: 6 }}>
-                  <FormControl fullWidth>
-                    <InputLabel>Name</InputLabel>
-                    <OutlinedInput type="text" label="Name" placeholder="Enter Your Name" />
-                  </FormControl>
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6 }}>
-                  <FormControl fullWidth>
-                    <InputLabel>Company Name</InputLabel>
-                    <OutlinedInput type="text" label="Company Name" placeholder="Enter Your Company Name" />
-                  </FormControl>
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6 }}>
-                  <FormControl fullWidth>
-                    <InputLabel>Email Address</InputLabel>
-                    <OutlinedInput type="text" label="Email Address" placeholder="Enter Your Email Address" />
-                  </FormControl>
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6 }}>
-                  <FormControl fullWidth>
-                    <PatternFormat
-                      format="+1 (###) ###-####"
-                      mask="_"
-                      fullWidth
-                      customInput={TextField}
-                      label="Phone Number"
-                      placeholder="Enter Your Contact Number"
-                    />
-                  </FormControl>
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6 }}>
-                  <FormControl fullWidth sx={{ textAlign: 'left' }}>
-                    <TextField id="outlined-select-Size" select fullWidth label="Company Size" value={size} onChange={handleChange1}>
-                      {sizes.map((option, index) => (
-                        <MenuItem key={index} value={option.value}>
-                          {option.label}
-                        </MenuItem>
-                      ))}
-                    </TextField>
-                  </FormControl>
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6 }}>
-                  <FormControl fullWidth sx={{ textAlign: 'left' }}>
-                    <TextField id="outlined-select-budget" select fullWidth label="Project Budget" value={budget} onChange={handleChange}>
-                      {currencies.map((option, index) => (
-                        <MenuItem key={index} value={option.value}>
-                          {option.label}
-                        </MenuItem>
-                      ))}
-                    </TextField>
-                  </FormControl>
-                </Grid>
-                <Grid size={12}>
-                  <FormControl fullWidth>
-                    <TextField id="outlined-multiline-static1" placeholder="Message" multiline fullWidth rows={4} defaultValue="" />
-                  </FormControl>
-                </Grid>
-                <Grid size={12}>
-                  <Grid container spacing={gridSpacing}>
-                    <Grid size={{ sm: 'grow' }}>
-                      <Typography align="left" variant="body2">
-                        By submitting this, you agree to the
-                        <Typography variant="subtitle1" component={Link} to="#" color="primary" sx={{ mx: 0.5 }}>
-                          Privacy Policy
-                        </Typography>
-                        and
-                        <Typography variant="subtitle1" component={Link} to="#" color="primary" sx={{ ml: 0.5 }}>
-                          Cookie Policy
-                        </Typography>
-                      </Typography>
+              <Formik
+                initialValues={{
+                  first_name: '',
+                  last_name: '',
+                  email: '',
+                  mobile_number: '',
+                  message: ''
+                }}
+                validationSchema={Yup.object().shape({
+                  first_name: Yup.string().required('First name is required'),
+                  last_name: Yup.string().required('Last name is required'),
+                  email: Yup.string().email('Invalid email address').required('Email is required'),
+                  mobile_number: Yup.string().required('Phone number is required'),
+                  message: Yup.string().required('Message is required')
+                })}
+                onSubmit={(values, { setSubmitting, resetForm }) => {
+                  // Handle form submission here
+                  console.log('Form submitted:', values);
+                  const apiUrl = `${import.meta.env.VITE_APP_BASE_URL}/user_management/contact`;
+                  axios
+                    .post(apiUrl, values)
+                    .then((response) => {
+                      enqueueSnackbar('Thank you for contacting us!', {
+                        variant: 'success',
+                        anchorOrigin: { vertical: 'top', horizontal: 'right' },
+                        autoHideDuration: 3000
+                      });
+                    })
+                    .catch((error) => {
+                      enqueueSnackbar('Error submitting form!', {
+                        variant: 'error',
+                        anchorOrigin: { vertical: 'top', horizontal: 'right' },
+                        autoHideDuration: 3000
+                      });
+                    })
+                    .finally(() => {
+                      setSubmitting(false);
+                      resetForm();
+                    });
+                }}
+              >
+                {({ errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values }) => (
+                  <form onSubmit={handleSubmit}>
+                    <Grid container spacing={gridSpacing}>
+                      <Grid size={{ xs: 12, sm: 6 }}>
+                        <FormControl fullWidth error={Boolean(touched.first_name && errors.first_name)}>
+                          <InputLabel>First Name</InputLabel>
+                          <OutlinedInput
+                            type="text"
+                            name="first_name"
+                            value={values.first_name}
+                            onBlur={handleBlur}
+                            onChange={handleChange}
+                            label="First Name"
+                            placeholder="Enter Your First Name"
+                          />
+                          {touched.first_name && errors.first_name && <FormHelperText error>{errors.first_name}</FormHelperText>}
+                        </FormControl>
+                      </Grid>
+                      <Grid size={{ xs: 12, sm: 6 }}>
+                        <FormControl fullWidth error={Boolean(touched.last_name && errors.last_name)}>
+                          <InputLabel>Last Name</InputLabel>
+                          <OutlinedInput
+                            type="text"
+                            name="last_name"
+                            value={values.last_name}
+                            onBlur={handleBlur}
+                            onChange={handleChange}
+                            label="Last Name"
+                            placeholder="Enter Your Last Name"
+                          />
+                          {touched.last_name && errors.last_name && <FormHelperText error>{errors.last_name}</FormHelperText>}
+                        </FormControl>
+                      </Grid>
+                      <Grid size={{ xs: 12, sm: 6 }}>
+                        <FormControl fullWidth error={Boolean(touched.email && errors.email)}>
+                          <InputLabel>Email Address</InputLabel>
+                          <OutlinedInput
+                            type="text"
+                            name="email"
+                            value={values.email}
+                            onBlur={handleBlur}
+                            onChange={handleChange}
+                            label="Email Address"
+                            placeholder="Enter Your Email Address"
+                          />
+                          {touched.email && errors.email && <FormHelperText error>{errors.email}</FormHelperText>}
+                        </FormControl>
+                      </Grid>
+                      <Grid size={{ xs: 12, sm: 6 }}>
+                        <FormControl fullWidth error={Boolean(touched.mobile_number && errors.mobile_number)}>
+                          <TextField
+                            type="tel"
+                            name="mobile_number"
+                            value={values.mobile_number}
+                            onBlur={handleBlur}
+                            onChange={handleChange}
+                            label="Phone Number"
+                            placeholder="Enter Your Contact Number"
+                            error={Boolean(touched.mobile_number && errors.mobile_number)}
+                            helperText={touched.mobile_number && errors.mobile_number}
+                            inputProps={{
+                              inputMode: 'numeric',
+                              pattern: '[0-9]*'
+                            }}
+                          />
+                        </FormControl>
+                      </Grid>
+                      <Grid size={12}>
+                        <FormControl fullWidth error={Boolean(touched.message && errors.message)}>
+                          <TextField
+                            id="outlined-multiline-static1"
+                            name="message"
+                            value={values.message}
+                            onBlur={handleBlur}
+                            onChange={handleChange}
+                            placeholder="Message"
+                            multiline
+                            fullWidth
+                            rows={4}
+                            error={Boolean(touched.message && errors.message)}
+                            helperText={touched.message && errors.message}
+                          />
+                        </FormControl>
+                      </Grid>
+                      <Grid size={12}>
+                        <Grid container spacing={gridSpacing}>
+                          <Grid size={{ sm: 'grow' }}>
+                            <Typography align="left" variant="body2">
+                              By submitting this, you agree to the
+                              <Typography variant="subtitle1" component={Link} to="#" color="primary" sx={{ mx: 0.5 }}>
+                                Privacy Policy
+                              </Typography>
+                              and
+                              <Typography variant="subtitle1" component={Link} to="#" color="primary" sx={{ ml: 0.5 }}>
+                                Cookie Policy
+                              </Typography>
+                            </Typography>
+                          </Grid>
+                          <Grid>
+                            <AnimateButton>
+                              <Button variant="contained" color="secondary" type="submit" disabled={isSubmitting}>
+                                Submit
+                              </Button>
+                            </AnimateButton>
+                          </Grid>
+                        </Grid>
+                      </Grid>
                     </Grid>
-                    <Grid>
-                      <AnimateButton>
-                        <Button variant="contained" color="secondary">
-                          Get Started
-                        </Button>
-                      </AnimateButton>
-                    </Grid>
-                  </Grid>
-                </Grid>
-              </Grid>
+                  </form>
+                )}
+              </Formik>
             </CardContent>
           </Card>
         </Grid>

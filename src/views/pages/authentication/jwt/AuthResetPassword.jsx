@@ -31,7 +31,7 @@ import { openSnackbar } from 'store/slices/snackbar';
 // assets
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
-
+import axios from 'utils/axios';
 // ========================|| JWT - RESET PASSWORD ||======================== //
 
 export default function AuthResetPassword({ link, ...others }) {
@@ -64,7 +64,8 @@ export default function AuthResetPassword({ link, ...others }) {
   }, []);
 
   const [searchParams] = useSearchParams();
-  const authParam = searchParams.get('auth');
+  const uid = searchParams.get('uid');
+  const token = searchParams.get('token');
 
   return (
     <Formik
@@ -82,35 +83,55 @@ export default function AuthResetPassword({ link, ...others }) {
       onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
         try {
           // password reset
-          if (scriptedRef.current) {
-            setStatus({ success: true });
-            setSubmitting(false);
+          axios
+            .post(`${import.meta.env.VITE_APP_BASE_URL}/user_management/reset-password?uid=${uid}&token=${token}`, {
+              password: values.password
+            })
+            .then((response) => {
+              setStatus({ success: true });
+              setSubmitting(false);
 
-            dispatch(
-              openSnackbar({
-                open: true,
-                message: 'Successfuly reset password.',
-                variant: 'alert',
-                alert: {
-                  color: 'success'
-                },
-                close: false
-              })
-            );
+              dispatch(
+                openSnackbar({
+                  open: true,
+                  message: 'Password changed successfully.',
+                  variant: 'alert',
+                  alert: {
+                    color: 'success'
+                  },
+                  close: false
+                })
+              );
+              navigate('/login');
+            })
+            .catch((error) => {
+              console.log(error);
+              setStatus({ success: false });
+              setSubmitting(false);
 
-            setTimeout(() => {
-              navigate(isLoggedIn ? `/pages/login/${link || 'login3'}` : authParam ? `/login?auth=${authParam}` : '/login', {
-                replace: true
-              });
-            }, 1500);
-          }
+              dispatch(
+                openSnackbar({
+                  open: true,
+                  message: 'Failed to reset password.',
+                  variant: 'alert',
+                  alert: {
+                    color: 'error'
+                  },
+                  close: false
+                })
+              );
+            });
+
+          // setTimeout(() => {
+          //   navigate(isLoggedIn ? `/pages/login/${link || 'login3'}` : authParam ? `/login?auth=${authParam}` : '/login', {
+          //     replace: true
+          //   });
+          // }, 1500);
         } catch (err) {
           console.error(err);
-          if (scriptedRef.current) {
-            setStatus({ success: false });
-            setErrors({ submit: err.message });
-            setSubmitting(false);
-          }
+          setStatus({ success: false });
+          setErrors({ submit: err.message });
+          setSubmitting(false);
         }
       }}
     >
