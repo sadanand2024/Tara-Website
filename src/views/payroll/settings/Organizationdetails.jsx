@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { CardContent, Button, Box, Typography, Tooltip, Card } from '@mui/material';
+import { CardContent, Button, Box, Typography, Tooltip, Card, IconButton } from '@mui/material';
 import Grid2 from '@mui/material/Grid2';
 import CustomUpload from 'utils/CustomUpload';
 import { indian_States_And_UTs } from 'utils/indian_States_And_UT';
@@ -17,6 +17,7 @@ import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
 import { useSelector } from 'react-redux';
 import CircularProgress from '@mui/material/CircularProgress';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 import MainCard from 'ui-component/cards/MainCard';
 import CustomAutocomplete from 'utils/CustomAutocomplete';
@@ -33,6 +34,7 @@ function Organizationdetails() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const payrollId = searchParams.get('payrollid');
 
   const initialData = {
     business_name: '',
@@ -181,6 +183,41 @@ function Organizationdetails() {
     }
   });
 
+  const handleDeleteLogo = async () => {
+    if (!payrollId) return;
+
+    setLoading(true);
+    const url = `/payroll/clear-payroll-org-logo/${payrollId}/`;
+    const { res, error } = await Factory('delete', url, {});
+    setLoading(false);
+
+    if (res.status_cd === 0) {
+      setValues((prev) => ({
+        ...prev,
+        logo: null
+      }));
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Logo deleted successfully',
+          variant: 'alert',
+          alert: { color: 'success' },
+          close: false
+        })
+      );
+    } else {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: res.data.data ? JSON.stringify(res.data.data) : 'Failed to delete logo',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
+    }
+  };
+
   const renderFields = (fields) => {
     return fields.map((field) => {
       if (field.name === 'logo') {
@@ -189,17 +226,24 @@ function Organizationdetails() {
             <Typography gutterBottom>
               {field.label} {<span style={{ color: 'red' }}>*</span>}
             </Typography>
-            <CustomUpload
-              title="Upload Logo"
-              setData={(data) => {
-                setLogoDetails(data);
-                formik.setFieldTouched('logo', true, false);
-              }}
-              logoDetails={values.logo}
-              existingImageUrl={values.logo}
-              error={touched.logo && Boolean(errors.logo)}
-              helperText={touched.logo && errors.logo}
-            />
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <CustomUpload
+                title="Upload Logo"
+                setData={(data) => {
+                  setLogoDetails(data);
+                  formik.setFieldTouched('logo', true, false);
+                }}
+                logoDetails={values.logo}
+                existingImageUrl={values.logo}
+                error={touched.logo && Boolean(errors.logo)}
+                helperText={touched.logo && errors.logo}
+              />
+              {values.logo && (
+                <IconButton onClick={handleDeleteLogo} color="error" sx={{ mt: 1 }} title="Delete Logo">
+                  <DeleteIcon />
+                </IconButton>
+              )}
+            </Box>
             {touched.logo && errors.logo && (
               <Typography color="error" variant="caption" sx={{ mt: 1, display: 'block' }}>
                 {errors.logo}

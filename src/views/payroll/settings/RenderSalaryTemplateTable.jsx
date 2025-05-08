@@ -597,7 +597,10 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
                         minWidth: '130px' // Keeps consistent spacing
                       }}
                     >
-                      {earning.calculation_type || '—'}
+                      {console.log(earning)}
+                      {earning.component_name === 'Basic' && earning.calculation_type === 'Flat Amount'
+                        ? 'Flat Amount of CTC'
+                        : earning.calculation_type || '—'}
                     </Typography>
                   </Stack>
                 </TableCell>
@@ -660,10 +663,14 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
             </TableCell>
             <TableCell sx={{ padding: 2 }}></TableCell>
             <TableCell>
-              <Typography variant="h5">{values.gross_salary?.monthly?.toFixed(2) || '-'}</Typography>
+              <Typography variant="h5">
+                {typeof values.gross_salary?.monthly === 'number' ? values.gross_salary.monthly.toFixed(2) : '-'}
+              </Typography>
             </TableCell>
             <TableCell>
-              <Typography variant="h5">{values.gross_salary?.annually?.toFixed(2) || '-'}</Typography>
+              <Typography variant="h5">
+                {typeof values.gross_salary?.annually === 'number' ? values.gross_salary.annually.toFixed(2) : '-'}
+              </Typography>
             </TableCell>
             <TableCell></TableCell>
           </TableRow>
