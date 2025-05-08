@@ -79,7 +79,7 @@ export default function ResetPassword() {
                   <Grid size={12}>{AuthResetPasswordComponent && <AuthResetPasswordComponent />}</Grid>
                 </Grid>
               </AuthCardWrapper>
-              {!isLoggedIn && (
+              {/* {!isLoggedIn && (
                 <Box
                   sx={{
                     maxWidth: { xs: 400, lg: 475 },
@@ -92,7 +92,7 @@ export default function ResetPassword() {
                 >
                   <LoginProvider currentLoginWith={APP_AUTH} />
                 </Box>
-              )}
+              )} */}
             </Grid>
           </Grid>
         </Grid>

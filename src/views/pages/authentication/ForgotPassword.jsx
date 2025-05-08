@@ -94,7 +94,7 @@ export default function ForgotPassword() {
                   </Grid>
                 </Grid>
               </AuthCardWrapper>
-              {!isLoggedIn && (
+              {/* {!isLoggedIn && (
                 <Box
                   sx={{
                     maxWidth: { xs: 400, lg: 475 },
@@ -107,7 +107,7 @@ export default function ForgotPassword() {
                 >
                   <LoginProvider currentLoginWith={APP_AUTH} />
                 </Box>
-              )}
+              )} */}
             </Grid>
           </Grid>
         </Grid>
