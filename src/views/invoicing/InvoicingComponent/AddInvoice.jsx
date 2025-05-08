@@ -12,7 +12,8 @@ import CustomInput from 'utils/CustomInput';
 import CustomAutocomplete from 'utils/CustomAutocomplete';
 import { IconPlus } from '@tabler/icons-react';
 import { IconTrash } from '@tabler/icons-react';
-import { BASE_URL } from '../../../../constants';
+let baseURL = import.meta.env.VITE_APP_BASE_URL;
+
 import InvoiceDetailsForm from './InvoiceDetailsForm';
 import BillingShippingForm from './BillingShippingForm';
 import ItemDetailsAndNotes from './ItemDetailsAndNotes';
@@ -196,10 +197,9 @@ const AddItem = ({
     }
   });
   const downloadInvoice = async (id) => {
-    console.log(BASE_URL);
     try {
       const tokens = JSON.parse(localStorage.getItem('user'));
-      const response = await axios.get(`${BASE_URL}/invoicing/create-pdf/${id}`, {
+      const response = await axios.get(`${baseURL}/invoicing/create-pdf/${id}`, {
         responseType: 'arraybuffer',
         headers: {
           Authorization: `Bearer ${tokens.access_token}`

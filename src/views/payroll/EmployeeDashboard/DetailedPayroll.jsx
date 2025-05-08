@@ -15,7 +15,8 @@ import {
 } from '@mui/material';
 import MainCard from '../../../ui-component/cards/MainCard';
 import Factory from 'utils/Factory';
-import { BASE_URL } from '../../../../constants';
+let baseURL = import.meta.env.VITE_APP_BASE_URL;
+
 import axios from 'axios';
 import EmptyDataPlaceholder from 'ui-component/extended/EmptyDataPlaceholder';
 import { useSearchParams } from 'react-router-dom';
@@ -94,7 +95,7 @@ const DetailedPayroll = ({ payrollId, month }) => {
     try {
       const tokens = JSON.parse(localStorage.getItem('auth-user'));
       const response = await axios.get(
-        `${BASE_URL}/payroll/employee-monthly-salary-template?employee_id=${employee_id}&month=${month}&financial_year=${financial_year}&year=${new Date().getFullYear()}`,
+        `${baseURL}/payroll/employee-monthly-salary-template?employee_id=${employee_id}&month=${month}&financial_year=${financial_year}&year=${new Date().getFullYear()}`,
         {
           responseType: 'arraybuffer',
           headers: {
