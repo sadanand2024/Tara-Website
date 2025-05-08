@@ -65,7 +65,7 @@ export default function UpgradePlanCard() {
           </Grid>
           <Grid>
             <Stack direction="row">
-              <Link sx={{ textDecoration: 'none' }} href="https://links.codedthemes.com/hsqll" target="_blank">
+              <Link sx={{ textDecoration: 'none' }} href="#">
                 <AnimateButton>
                   <Button
                     variant="contained"
