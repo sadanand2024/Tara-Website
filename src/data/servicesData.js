@@ -227,7 +227,7 @@ const servicesData = {
           subtitle: 'Hassle-free quarterly TDS filing with CA expert review — for businesses, employers, and property buyers.',
           ctas: [
             { label: 'Help Me Choose TDS Form', icon: 'AssignmentTurnedInOutlined', size: 24 },
-            { label: 'Schedule a Call', icon: 'PhoneOutlined', size: 24 },
+            { label: 'Book a Consultation', icon: 'PhoneOutlined', size: 24 },
           ],
           badges: [
             { text: 'Quarterly Filing (24Q, 26Q, 27Q, 26QB)', icon: 'ReceiptOutlined', size: 20 },
@@ -423,7 +423,7 @@ const servicesData = {
             'Personalized tax planning consultation by qualified Chartered Accountants to help you reduce taxes and maximize savings.',
           ctas: [
             { label: 'Book My Tax Consultation', icon: 'AssignmentTurnedInOutlined', size: 24 },
-            { label: 'Schedule Free Discovery Call', icon: 'EventAvailableOutlined', size: 24 },
+            { label: 'Book a Consultation', icon: 'EventAvailableOutlined', size: 24 },
             
           ],
           badges: [
@@ -727,7 +727,7 @@ const servicesData = {
             'Stay compliant and financially organized with expert-managed accounting services tailored to your business type and size.',
           ctas: [
             { label: 'Get Started', icon: 'AssignmentTurnedInOutlined', size: 24 },
-            { label: 'Schedule Free Accounting Consultation', icon: 'PhoneOutlined', size: 24 },
+            { label: 'Book a Consultation', icon: 'PhoneOutlined', size: 24 },
           ],
           badges: [
             { text: 'Monthly, Quarterly & Annual Plans', icon: 'ReceiptLongOutlined', size: 20 },
@@ -829,7 +829,7 @@ const servicesData = {
             'Strategic finance leadership, compliance oversight, investor readiness, and decision-making support for your growing business — all under our Virtual CFO plan.',
           ctas: [
             { label: 'Get Started', icon: 'AssignmentTurnedInOutlined', size: 24 },
-            { label: 'Book Free CFO Discovery Call', icon: 'PhoneOutlined', size: 24 },
+            { label: 'Book a Consultation', icon: 'PhoneOutlined', size: 24 },
             
           ],
           badges: [
@@ -921,7 +921,7 @@ const servicesData = {
           text: 'Run your business like the big guys — with a Virtual CFO in your corner.',
           buttons: [
             { label: 'Start My VCFO Journey', icon: 'AssignmentTurnedInOutlined', size: 24 },
-            { label: 'Schedule a Call with CFO', icon: 'PhoneOutlined', size: 24 },
+            { label: 'Book a Consultation', icon: 'PhoneOutlined', size: 24 },
           ]
         }
       },
@@ -1127,7 +1127,7 @@ const servicesData = {
             'We turn your financial and operational data into powerful insights with customized MIS dashboards and visual reporting.',
           ctas: [
             { label: 'Get My MIS Setup', icon: 'AssignmentTurnedInOutlined', size: 24 },
-            { label: 'Schedule a Free Reporting Consultation', icon: 'PhoneOutlined', size: 24 }
+            { label: 'Book a Consultation', icon: 'PhoneOutlined', size: 24 }
           ],
           badges: [
             { text: 'Monthly, Quarterly, Custom Reports', icon: 'InsertChartOutlined', size: 20 },
@@ -1232,7 +1232,7 @@ const servicesData = {
           subtitle: 'Private Limited, LLP, or OPC — Let Our Experts Handle the Entire Registration Process for You.',
           ctas: [
             { label: 'Incorporate Now', icon: 'AssignmentTurnedInOutlined', size: 24 },
-            { label: 'Schedule Free Consultation', icon: 'PhoneOutlined', size: 24 }
+            { label: 'Book a Consultation', icon: 'PhoneOutlined', size: 24 }
           ],
           badges: [
             { text: '⭐ Trusted by 1,000+ Startups', icon: 'VerifiedUserOutlined', size: 20 },
@@ -1345,7 +1345,7 @@ const servicesData = {
           text: 'Start your company the right way — MCA-compliant, fast, and expert-led.',
           buttons: [
             { label: 'Start Incorporation', icon: 'AssignmentTurnedInOutlined', size: 24 },
-            { label: 'Book Free Consultation', icon: 'PhoneOutlined', size: 24 },
+            { label: 'Book a Consultation', icon: 'PhoneOutlined', size: 24 },
           ]
         }
       },
@@ -2452,7 +2452,7 @@ const servicesData = {
             'Revenue forecasts, cost structures, profitability, cash flow — turned into a dynamic Excel model tailored to your startup or business.',
           ctas: [
             { label: 'Request Financial Model', icon: 'AssignmentTurnedInOutlined', size: 24 },
-            { label: 'Book Free Discovery Call', icon: 'PhoneOutlined', size: 24 }
+            { label: 'Book a Consultation', icon: 'PhoneOutlined', size: 24 }
           ],
           badges: [
             { text: 'Ideal for Fundraising, Strategic Planning, Internal Decision-Making', icon: 'TrendingUpOutlined', size: 20 },
@@ -2744,7 +2744,7 @@ const servicesData = {
           text: "Whether you're raising funds or planning your next move — know your worth with a professional valuation report.",
           buttons: [
             { label: 'Get My Valuation Now', icon: 'AssignmentTurnedInOutlined', size: 24 },
-            { label: 'Book a Free Discovery Call', icon: 'PhoneOutlined', size: 24 },
+            { label: 'Book a Consultation', icon: 'PhoneOutlined', size: 24 },
           ]
         }
       },
@@ -2755,7 +2755,7 @@ const servicesData = {
             'Revenue forecasts, cost structures, profitability, cash flow — turned into a dynamic Excel model tailored to your startup or business.',
           ctas: [
             { label: 'Get Started', icon: 'AssignmentTurnedInOutlined', size: 24 },
-            { label: 'Book Free Discovery Call', icon: 'PhoneOutlined', size: 24 }
+            { label: 'Book a Consultation', icon: 'PhoneOutlined', size: 24 }
           ],
           badges: [
             { text: 'Ideal for Fundraising, Strategic Planning, Internal Decision-Making', icon: 'TrendingUpOutlined', size: 20 },
@@ -3666,7 +3666,7 @@ const servicesData = {
           subtitle: 'Completely online, CA-assisted GST registration for businesses, professionals, and startups.',
           ctas: [
             { label: 'Register for GST Now', icon: 'AssignmentTurnedInOutlined', size: 24 },
-            { label: 'Schedule Free Consultation', icon: 'PhoneOutlined', size: 24 },
+            { label: 'Book a Consultation', icon: 'PhoneOutlined', size: 24 },
           ],
           badges: [
             { text: 'Govt. Approved Process', icon: 'GavelOutlined', size: 20 },
@@ -3769,7 +3769,7 @@ const servicesData = {
           subtitle: 'Avoid penalties and stay compliant — CA-assisted monthly/quarterly GST return filing for businesses of all sizes.',
           ctas: [
             { label: 'File My GST Return', icon: 'AssignmentTurnedInOutlined', size: 24 },
-            { label: 'Book Consultation', icon: 'PhoneOutlined', size: 24 },
+            { label: 'Book a Consultation', icon: 'PhoneOutlined', size: 24 },
           ],
           badges: [
             { text: 'Timely Filing Guarantee', icon: 'TimerOutlined', size: 20 },
@@ -3865,7 +3865,7 @@ const servicesData = {
           subtitle: 'Got a notice from the GST department? Our experts will review, prepare, and file a proper response on your behalf.',
           ctas: [
             { label: 'Get GST Notice', icon: 'AssignmentTurnedInOutlined', size: 24 },
-            { label: 'Book Expert Consultation', icon: 'PhoneOutlined', size: 24 },
+            { label: 'Book a Consultation', icon: 'PhoneOutlined', size: 24 },
           ],
           badges: [
             { text: 'Managed by CAs & Tax Lawyers', icon: 'ShieldOutlined', size: 20 },
