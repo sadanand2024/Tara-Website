@@ -44,6 +44,7 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
     const url = `/payroll/earnings?payroll_id=${id}`;
     const { res } = await Factory('get', url, {});
     setLoading(false);
+    console.log(res.data);
 
     if (res?.status_cd === 0) {
       setEarningsData(res.data); // 🔁 Always update dropdown options
@@ -234,6 +235,8 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
   };
 
   const handleComponentChange = async (newValue, index) => {
+    if (!newValue) return;
+
     const selected = earningsData.find((item) => item.component_name === newValue);
     if (!selected) return;
 
@@ -242,33 +245,32 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
 
     const annualCtc = parseFloat(values.annual_ctc || 0);
     const updated = [...values.earnings];
-    const basic = updated.find((e) => e.component_name === 'Basic');
-    const basicAnnual = parseFloat(basic?.annually || 0);
+    const basicAnnual = parseFloat(updated.find((e) => e.component_name === 'Basic')?.annually || 0);
 
-    const updatedEarning = {
+    // ✅ Recalculate only the selected row
+    updated[index] = {
       ...updated[index],
       component_name: selectedItem.component_name,
-      calculation_type: selectedItem.calculation_type.type,
-      calculation: selectedItem.calculation_type.value
+      calculation_type: selectedItem.calculation_type?.type || '',
+      calculation: selectedItem.calculation_type?.value || 0,
+      ...calculateEarnings(
+        {
+          component_name: selectedItem.component_name,
+          calculation_type: selectedItem.calculation_type?.type || '',
+          calculation: selectedItem.calculation_type?.value || 0
+        },
+        annualCtc,
+        basicAnnual
+      )
     };
 
-    updated[index] = {
-      ...updatedEarning,
-      ...calculateEarnings(updatedEarning, annualCtc, basicAnnual)
-    };
+    // ✅ Remove accidental extra blank rows (if any)
+    const cleaned = updated.filter((e, i) => e.component_name || i === index);
 
-    const recalculated = updated.map((earning) => {
-      const result = calculateEarnings(earning, annualCtc, basicAnnual);
-      return {
-        ...earning,
-        monthly: result.monthly,
-        annually: result.annually
-      };
-    });
-
-    setFieldValue('earnings', recalculated);
+    setFieldValue('earnings', cleaned);
     setEnablePreviewButton(true);
   };
+
   const handleCalculationChange = (value, index) => {
     const annualCtc = parseFloat(values.annual_ctc || 0);
 
@@ -326,7 +328,6 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
       monthly: 0,
       annually: 0
     };
-
     const updated = [...values.earnings, newComponent];
     setFieldValue('earnings', updated);
     setEnablePreviewButton(true);
@@ -417,7 +418,7 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
     const url = `/payroll/earnings?payroll_id=${payrollId}`;
     const { res } = await Factory('get', url, {});
     if (res?.status_cd !== 0) return;
-
+    console.log(res.data);
     const basicComponent = res.data.find((item) => item.component_name === 'Basic');
     if (!basicComponent) return;
 
@@ -520,7 +521,6 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
       fetch_individual_salary_templates(template_id); // existing
     }
   }, [payrollId, template_id]);
-
   return (
     <TableContainer
       component={Paper}
@@ -542,6 +542,14 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
           </TableRow>
         </TableHead>
         <TableBody>
+          <TableRow>
+            <TableCell colSpan={5}>
+              <Typography variant="subtitle1" sx={{ color: 'primary.main' }}>
+                {' '}
+                Earnings{' '}
+              </Typography>
+            </TableCell>
+          </TableRow>
           {values.earnings
             .filter((e) => e.component_name !== 'Fixed Allowance')
             .map((earning, index) => (

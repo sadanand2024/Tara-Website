@@ -104,42 +104,49 @@ export default function JWTRegister({ ...others }) {
             .test('no-leading-trailing-whitespace', 'Password can not start or end with spaces', (value) => value === value.trim())
         })}
         onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
-          // try {
-          //   const trimmedEmail = values.email.trim();
-          //   const response = await register(trimmedEmail, values.password, values.organizationName, moduleId, type, context_type);
-          //   setStatus({ success: true });
-          //   setSubmitting(false);
-          //   dispatch(
-          //     openSnackbar({
-          //       open: true,
-          //       message: response.message || 'Your registration has been successfully completed.',
-          //       variant: 'alert',
-          //       alert: { color: 'success' },
-          //       close: false
-          //     })
-          //   );
-          //   setTimeout(() => {
-          //     navigate(authParam ? `/login?auth=${authParam}` : '/login', { replace: true });
-          //   }, 1500);
-          // } catch (err) {
-          //   console.error('Registration failed:', err);
-          //   setStatus({ success: false });
-          //   let errorMsg = err.error || 'Registration failed. Please try again.';
-          //   if (err.error) {
-          //     errorMsg = err.error;
-          //   }
-          //   setErrors({ submit: errorMsg });
-          //   setSubmitting(false);
-          //   dispatch(
-          //     openSnackbar({
-          //       open: true,
-          //       message: errorMsg,
-          //       variant: 'alert',
-          //       alert: { color: 'error' },
-          //       close: false
-          //     })
-          //   );
-          // }
+          try {
+            const trimmedEmail = values.email.trim();
+            const response = await register(trimmedEmail, values.password, values.organizationName, moduleId, type, context_type);
+
+            setStatus({ success: true });
+            setSubmitting(false);
+
+            dispatch(
+              openSnackbar({
+                open: true,
+                message: response.message || 'Your registration has been successfully completed.',
+                variant: 'alert',
+                alert: { color: 'success' },
+                close: false
+              })
+            );
+
+            setTimeout(() => {
+              navigate(authParam ? `/login?auth=${authParam}` : '/login', { replace: true });
+            }, 1500);
+          } catch (err) {
+            console.error('Registration failed:', err);
+
+            setStatus({ success: false });
+
+            let errorMsg = err.error || 'Registration failed. Please try again.';
+            if (err.error) {
+              errorMsg = err.error;
+            }
+
+            setErrors({ submit: errorMsg });
+            setSubmitting(false);
+
+            dispatch(
+              openSnackbar({
+                open: true,
+                message: errorMsg,
+                variant: 'alert',
+                alert: { color: 'error' },
+                close: false
+              })
+            );
+          }
         }}
       >
         {({ errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values }) => (
@@ -264,7 +271,10 @@ export default function JWTRegister({ ...others }) {
 
             <Box sx={{ mt: 2 }}>
               <AnimateButton>
-                <Button disableElevation disabled={isSubmitting} fullWidth size="large" type="submit" variant="contained" color="secondary">
+                {/* <Button disableElevation disabled={isSubmitting} fullWidth size="large" type="submit" variant="contained" color="secondary">
+                  Sign up
+                </Button> */}
+                <Button disableElevation disabled={true} fullWidth size="large" type="submit" variant="contained" color="secondary">
                   Sign up
                 </Button>
               </AnimateButton>
