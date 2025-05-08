@@ -44,7 +44,6 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
     const url = `/payroll/earnings?payroll_id=${id}`;
     const { res } = await Factory('get', url, {});
     setLoading(false);
-    console.log(res.data);
 
     if (res?.status_cd === 0) {
       setEarningsData(res.data); // 🔁 Always update dropdown options
@@ -418,7 +417,6 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
     const url = `/payroll/earnings?payroll_id=${payrollId}`;
     const { res } = await Factory('get', url, {});
     if (res?.status_cd !== 0) return;
-    console.log(res.data);
     const basicComponent = res.data.find((item) => item.component_name === 'Basic');
     if (!basicComponent) return;
 
@@ -521,6 +519,14 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
       fetch_individual_salary_templates(template_id); // existing
     }
   }, [payrollId, template_id]);
+  useEffect(() => {
+    const hasBenefits = values.benefits?.length > 0;
+    const hasDeductions = values.deductions?.length > 0;
+    if (hasBenefits || hasDeductions) {
+      setViewPreview(true);
+    }
+  }, [values.benefits, values.deductions]);
+
   return (
     <TableContainer
       component={Paper}
@@ -597,7 +603,6 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
                         minWidth: '130px' // Keeps consistent spacing
                       }}
                     >
-                      {console.log(earning)}
                       {earning.component_name === 'Basic' && earning.calculation_type === 'Flat Amount'
                         ? 'Flat Amount of CTC'
                         : earning.calculation_type || '—'}
