@@ -219,7 +219,7 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
                 <TableHead>
                   <TableRow sx={{ bgcolor: 'grey.100' }}>
                     {['Component Name', 'Calculation', 'Consider for EPF', 'Consider for ESI', 'Status', 'Actions'].map((head, idx) => (
-                      <TableCell key={idx} align="center" sx={{ fontWeight: 'bold', whiteSpace: 'nowrap', fontSize: '0.9rem' }}>
+                      <TableCell key={idx} align="left" sx={{ fontWeight: 'bold', whiteSpace: 'nowrap', fontSize: '0.9rem' }}>
                         {head}
                       </TableCell>
                     ))}
@@ -247,7 +247,7 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
                         }}
                       >
                         <TableCell
-                          align="center"
+                          align="left"
                           sx={{ cursor: 'pointer', color: 'primary.main', textDecoration: 'underline' }}
                           onClick={() => {
                             setPostType('put');
@@ -257,12 +257,12 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
                           {item.component_name}
                         </TableCell>
 
-                        <TableCell align="center">{item.calculation}</TableCell>
-                        <TableCell align="center">{item.consider_for_epf ? 'Yes' : 'No'}</TableCell>
-                        <TableCell align="center">{item.consider_for_esi ? 'Yes' : 'No'}</TableCell>
-                        <TableCell align="center">{item.is_active ? 'Active' : 'Inactive'}</TableCell>
+                        <TableCell align="left">{item.calculation}</TableCell>
+                        <TableCell align="left">{item.consider_for_epf ? 'Yes' : 'No'}</TableCell>
+                        <TableCell align="left">{item.consider_for_esi ? 'Yes' : 'No'}</TableCell>
+                        <TableCell align="left">{item.is_active ? 'Active' : 'Inactive'}</TableCell>
 
-                        <TableCell align="center">
+                        <TableCell align="left">
                           <ActionCell
                             row={item}
                             onEdit={() => handleEdit(item)}

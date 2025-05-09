@@ -43,16 +43,28 @@ function SalaryDetails({ fetchEmployeeData, employeeData, createdEmployeeId }) {
       annual_ctc: 0,
 
       earnings: [...initialEarnings],
-      gross_salary: { monthly: '', annually: '' },
+      gross_salary: { monthly: 0, annually: 0 },
       benefits: [],
-      total_ctc: { monthly: '', annually: '' },
+      total_ctc: { monthly: 0, annually: 0 },
       deductions: [],
-      net_salary: { monthly: '', annually: '' }
+      net_salary: { monthly: 0, annually: 0 }
     },
     validationSchema,
 
     onSubmit: async (values) => {
       let postData = { ...values };
+      if (values.errorMessage) {
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: values.errorMessage,
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
+        return;
+      }
 
       if (employeeData?.id) {
         postData.employee = employeeData.id;
@@ -143,6 +155,7 @@ function SalaryDetails({ fetchEmployeeData, employeeData, createdEmployeeId }) {
 
                 if (name === 'annual_ctc') {
                   setEnablePreviewButton(true);
+                  setFieldValue('errorMessage', ''); // ✅ clear previous error
                 }
               }}
               inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
