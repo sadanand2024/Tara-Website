@@ -9,13 +9,16 @@ import { useSearchParams } from 'react-router-dom';
 import RenderSalaryTemplateTable from '../RenderSalaryTemplateTable';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
+import { TextField } from '@mui/material';
+
 const validationSchema = Yup.object({
   // template_name: Yup.string().required('Template Name is required'),
   annual_ctc: Yup.number().required('Annual CTC is required').positive('Annual CTC must be a positive number')
 });
 const initialEarnings = [{ component_name: 'Basic', calculation_type: 'Fixed', monthly: 0, annually: 0, calculation: 0 }];
 
-function SalaryDetails({ employeeData, createdEmployeeId }) {
+function SalaryDetails({ fetchEmployeeData, employeeData, createdEmployeeId }) {
+  // console.log(employeeData);
   const [open, setOpen] = useState(false);
   const [payrollid, setPayrollId] = useState(null);
   const [salary_teamplates_data, setSalary_teamplates_data] = useState([]);
@@ -37,7 +40,8 @@ function SalaryDetails({ employeeData, createdEmployeeId }) {
     initialValues: {
       template_name: '',
       description: '',
-      annual_ctc: '',
+      annual_ctc: 0,
+
       earnings: [...initialEarnings],
       gross_salary: { monthly: '', annually: '' },
       benefits: [],
@@ -89,6 +93,8 @@ function SalaryDetails({ employeeData, createdEmployeeId }) {
             close: false
           })
         );
+        const employeeId = employeeData?.id || createdEmployeeId;
+        await fetchEmployeeData(employeeId);
       }
     }
   });
@@ -97,7 +103,7 @@ function SalaryDetails({ employeeData, createdEmployeeId }) {
       <Grid2 key={field.name} size={{ xs: 12, sm: 6 }}>
         {field.name === 'salary_template' ? (
           <>
-            {employeeData?.employee_salary?.length !== 0 && (
+            {salary_teamplates_data?.length !== 0 && (
               <>
                 <Typography variant="subtitle2" sx={{ color: 'grey.800', mb: 0.5 }}>
                   {field.label}
@@ -126,24 +132,20 @@ function SalaryDetails({ employeeData, createdEmployeeId }) {
             <Typography variant="subtitle2" sx={{ color: 'grey.800', mb: 0.5 }}>
               {field.label}
             </Typography>
-            <CustomInput
-              value={values[field.name]}
+            <TextField
               fullWidth
-              inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+              name="annual_ctc"
+              value={values.annual_ctc}
               onChange={(e) => {
                 const { name, value } = e.target;
-                setFieldValue(name, value);
+                const numericValue = value === '' ? '' : Number(value);
+                setFieldValue(name, numericValue);
 
                 if (name === 'annual_ctc') {
-                  setEnablePreviewButton(true); // ✅ Show preview button
-
-                  // ✅ Force recalculation of earnings (especially Fixed Allowance)
-                  setValues((prev) => ({
-                    ...prev,
-                    earnings: [...prev.earnings] // Trigger reactivity in dependent useEffects
-                  }));
+                  setEnablePreviewButton(true);
                 }
               }}
+              inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
             />
           </>
         )}
@@ -166,17 +168,25 @@ function SalaryDetails({ employeeData, createdEmployeeId }) {
     if (payrollid !== null) fetch_salary_templates();
   }, [payrollid]);
   const { values, setValues, handleChange, errors, touched, handleSubmit, handleBlur, resetForm, setFieldValue } = formik;
+  // useEffect(() => {
+  //   // Recalculate earnings whenever annual_ctc changes
+  //   setValues((prev) => ({
+  //     ...prev,
+  //     earnings: [...prev.earnings]
+  //   }));
+  // }, [values.annual_ctc]);
 
   useEffect(() => {
     if (employeeData?.employee_salary?.length > 0) {
       let lastSalary = employeeData.employee_salary[employeeData?.employee_salary?.length - 1];
-      console.log(lastSalary);
+      // console.log(lastSalary);
       setValues((prev) => ({
         ...prev,
         ...lastSalary
       }));
     }
   }, [employeeData]);
+  console.log(values);
   return (
     <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -185,11 +195,13 @@ function SalaryDetails({ employeeData, createdEmployeeId }) {
         </Grid2>
 
         <RenderSalaryTemplateTable
+          source="salarydetails"
           values={values}
           setValues={setValues}
           setFieldValue={setFieldValue}
           enablePreviewButton={enablePreviewButton}
           setEnablePreviewButton={setEnablePreviewButton}
+          createdEmployeeId={employeeData?.id || createdEmployeeId}
         />
 
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>

@@ -177,6 +177,7 @@ function SalaryTemplate() {
 
         <Box mt={4}>
           <RenderSalaryTemplateTable
+            source="template"
             values={values}
             setValues={setValues}
             setFieldValue={setFieldValue}

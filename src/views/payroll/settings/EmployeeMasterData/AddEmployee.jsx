@@ -23,20 +23,53 @@ function StepperComponent() {
 
   const steps = ['Basic Details', 'Salary Details', 'Personal Details', 'Payment Information'];
 
-  const handleNext = () => setActiveStep((prev) => Math.min(prev + 1, steps.length - 1));
-  const handleBack = () => setActiveStep((prev) => Math.max(prev - 1, 0));
+  const handleNext = async () => {
+    const newStep = Math.min(activeStep + 1, steps.length - 1);
+    setActiveStep(newStep);
+    if (employeeId) await fetchEmployeeData(employeeId); // ✅ refresh on next
+  };
+
+  const handleBack = async () => {
+    const newStep = Math.max(activeStep - 1, 0);
+    setActiveStep(newStep);
+    if (employeeId) await fetchEmployeeData(employeeId); // ✅ refresh on back
+  };
+
   const handleReset = () => setActiveStep(0);
 
   const renderStepContent = (step) => {
     switch (step) {
       case 0:
-        return <BasicDetails employeeData={employeeData} setCreatedEmployeeId={setCreatedEmployeeId} />;
+        return (
+          <BasicDetails
+            employeeData={employeeData}
+            onNext={handleNext}
+            setCreatedEmployeeId={setCreatedEmployeeId}
+            fetchEmployeeData={fetchEmployeeData}
+          />
+        );
       case 1:
-        return <SalaryDetails employeeData={employeeData} createdEmployeeId={createdEmployeeId} />;
+        return (
+          <SalaryDetails
+            employeeData={employeeData}
+            onNext={handleNext}
+            createdEmployeeId={createdEmployeeId}
+            fetchEmployeeData={fetchEmployeeData}
+          />
+        );
       case 2:
-        return <PersonalDetails employeeData={employeeData} createdEmployeeId={createdEmployeeId} />;
+        return (
+          <PersonalDetails
+            employeeData={employeeData}
+            onNext={handleNext}
+            createdEmployeeId={createdEmployeeId}
+            fetchEmployeeData={fetchEmployeeData}
+          />
+        );
       case 3:
-        return <PaymentInformation employeeData={employeeData} createdEmployeeId={createdEmployeeId} />;
+        return (
+          <PaymentInformation employeeData={employeeData} createdEmployeeId={createdEmployeeId} fetchEmployeeData={fetchEmployeeData} />
+        );
       default:
         return <Typography>Unknown Step</Typography>;
     }
@@ -47,7 +80,6 @@ function StepperComponent() {
     const url = `/payroll/employees/${id}`;
     const { res } = await Factory('get', url, {});
     setLoading(false);
-    console.log(res);
     if (res?.status_cd === 0) {
       setEmployeeData(res.data);
     } else {

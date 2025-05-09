@@ -24,7 +24,7 @@ const employeeFields = [
   { name: 'designation', label: 'Designation' },
   { name: 'department', label: 'Department' }
 ];
-function BasicDetails({ employeeData, setCreatedEmployeeId }) {
+function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, onNext }) {
   const [loading, setLoading] = useState(false); // State for loader
   const dispatch = useDispatch();
 
@@ -110,7 +110,11 @@ function BasicDetails({ employeeData, setCreatedEmployeeId }) {
         );
         if (!employeeData?.id && res?.id) {
           setCreatedEmployeeId(res.id);
+        } else if (employeeData?.id) {
+          // ✅ Refetch employee data after update
+          fetchEmployeeData(employeeData.id);
         }
+        onNext();
       } else {
         dispatch(
           openSnackbar({
@@ -427,7 +431,7 @@ function BasicDetails({ employeeData, setCreatedEmployeeId }) {
 
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 2, gap: 2 }}>
           <Button variant="contained" color="primary" type="submit">
-            Submit
+            Save & Continue
           </Button>
         </Box>
       </form>
