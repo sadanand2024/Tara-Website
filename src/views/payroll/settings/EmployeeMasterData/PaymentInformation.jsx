@@ -75,7 +75,6 @@ function PaymentInformation({ employeeData, createdEmployeeId }) {
         method === 'post' ? `/payroll/employee-bank-details` : `/payroll/employee-bank-details/${employeeData?.employee_bank_details?.id}`;
 
       const { res } = await Factory(method, url, postData);
-
       if (res.status_cd === 0) {
         dispatch(
           openSnackbar({
@@ -88,13 +87,15 @@ function PaymentInformation({ employeeData, createdEmployeeId }) {
         );
         navigate(-1);
       } else {
-        openSnackbar({
-          open: true,
-          message: JSON.stringify(res.data.data),
-          variant: 'alert',
-          alert: { color: 'error' },
-          close: false
-        });
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: JSON.stringify(res.data.data.errors),
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
       }
 
       setLoading(false);

@@ -19,7 +19,8 @@ import TabTwo from './Customers';
 import TabThree from './Goods&Services';
 import TabFour from './InvoiceNumberFormat';
 import { Grid2 } from '@mui/material';
-
+import { useDispatch } from 'store';
+import { openSnackbar } from 'store/slices/snackbar';
 function TabPanel({ children, value, index, ...other }) {
   return (
     <div role="tabpanel" hidden={value !== index} id={`simple-tabpanel-${index}`} aria-labelledby={`simple-tab-${index}`} {...other}>
@@ -60,6 +61,16 @@ export default function SimpleTabs() {
     const { res } = await Factory('get', `/invoicing/customer_profiles/?invoicing_profile_id=${id}`, {});
     if (res?.status_cd === 0) {
       setCustomers(res.data.customer_profiles);
+    } else {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res?.data?.data) || 'Failed to load customers',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     }
   };
 
@@ -69,6 +80,16 @@ export default function SimpleTabs() {
     const { res } = await Factory('get', url, {});
     if (res?.status_cd === 0) {
       setBusinessDetails(res.data);
+    } else {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res?.data?.data) || 'Failed to load business details',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     }
   };
 
@@ -96,6 +117,17 @@ export default function SimpleTabs() {
       getCustomersData(invoicingProfile.id);
     } else if (res.status === 404 && res.data.message === 'Invoicing profile not found.') {
       await fetch_business_Details_by_businessId(); // this returns already flattened structure
+      setPostType('post');
+    } else {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res?.data?.data) || 'Failed to load invoicing profile',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
       setPostType('post');
     }
     setLoading(false);

@@ -29,27 +29,51 @@ TabPanel.propTypes = {
   index: PropTypes.number.isRequired
 };
 
-// Custom Hook for Payroll Data
-// Move this outside the main component
-const usePayrollData = (payrollId, month, financialYear) => {
+const PayrollWorkflows = ({ type }) => {
+  const [activeTab, setActiveTab] = useState(0);
+  const [openDialog, setOpenDialog] = useState(false);
+  const theme = useTheme();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [employeeMasterData, setEmployeeMasterData] = useState([]);
   const [attendanceData, setAttendanceData] = useState([]);
   const dispatch = useDispatch();
+  const payrollId = searchParams.get('payrollid');
+  const month = searchParams.get('month');
+  const financialYear = searchParams.get('financial_year');
+  // const fetchEmployeeMasterData = async () => {
+  //   setLoading(true);
+  //   const url = `/payroll/employees?payroll_id=${payrollId}&month=${month}&financial_year=${financialYear}`;
+  //   const { res } = await Factory('get', url, {});
+  //   setLoading(false);
+  //   if (res?.status_cd === 0) {
+  //     setEmployeeMasterData(res.data);
+  //   } else {
+  //     setEmployeeMasterData([]);
+  //   }
+  // };
 
-  // ✅ Define this function before useEffect
-  const fetchEmployeeMasterData = async () => {
+  const getAttandanceData = async () => {
+    if (!payrollId || !financialYear || !month) return;
     setLoading(true);
-    const url = `/payroll/employees?payroll_id=${payrollId}&month=${month}&financial_year=${financialYear}`;
+    const url = `/payroll/employee_attendance_filtered?payroll_id=${payrollId}&financial_year=${financialYear}&month=${month}`;
     const { res } = await Factory('get', url, {});
     setLoading(false);
-    if (res?.status_cd === 0) {
-      setEmployeeMasterData(res.data);
+    if (res.status_cd === 0) {
+      setAttendanceData(res.data || []);
     } else {
-      setEmployeeMasterData([]);
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res.data.message),
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     }
   };
-
   const generateAttandance = async () => {
     if (!month) return;
     setLoading(true);
@@ -57,7 +81,17 @@ const usePayrollData = (payrollId, month, financialYear) => {
     const { res } = await Factory('post', url, {});
     setLoading(false);
     if (res?.status_cd === 0) {
-      setAttendanceData(res.data || []);
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: res.message,
+          variant: 'alert',
+          alert: { color: 'success' },
+          close: false
+        })
+      );
+      // ✅ Immediately fetch updated attendance
+      getAttandanceData();
     } else {
       dispatch(
         openSnackbar({
@@ -68,47 +102,6 @@ const usePayrollData = (payrollId, month, financialYear) => {
           close: false
         })
       );
-    }
-    return res;
-  };
-
-  useEffect(() => {
-    if (payrollId) {
-      fetchEmployeeMasterData();
-    }
-  }, [payrollId]);
-
-  return {
-    loading,
-    employeeMasterData,
-    attendanceData,
-    generateAttandance
-  };
-};
-
-// Main Component
-const PayrollWorkflows = ({ type }) => {
-  const [activeTab, setActiveTab] = useState(0);
-  const [openDialog, setOpenDialog] = useState(false);
-  const theme = useTheme();
-  const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
-
-  const payrollId = searchParams.get('payrollid');
-  const month = searchParams.get('month');
-  const financialYear = searchParams.get('financial_year');
-  const {
-    loading,
-    employeeMasterData,
-    attendanceData,
-    generateAttandance: originalGenerateAttandance
-  } = usePayrollData(payrollId, month, financialYear);
-  const getAttandanceDataRef = useRef(null);
-
-  const generateAttandance = async () => {
-    const res = await originalGenerateAttandance();
-    if (res?.status_cd === 0 && getAttandanceDataRef.current) {
-      getAttandanceDataRef.current();
     }
   };
 
@@ -144,7 +137,8 @@ const PayrollWorkflows = ({ type }) => {
           { name: 'sick_leaves', label: 'Sick Leaves' },
           { name: 'earned_leaves', label: 'Earned Leaves' },
           { name: 'loss_of_pay', label: 'Loss of Pay' }
-        ]
+        ],
+        fetchAttendance: getAttandanceData // ✅ pass fetch function here
       },
       {
         label: 'Loans & Advances',
@@ -262,9 +256,7 @@ const PayrollWorkflows = ({ type }) => {
               fields={tab.fields}
               loading={loading}
               employeeMasterData={employeeMasterData}
-              attendanceData={tab.label === 'Attendance' ? attendanceData : undefined}
-              generateAttandance={tab.label === 'Attendance' ? generateAttandance : undefined}
-              getAttandanceDataRef={tab.label === 'Attendance' ? getAttandanceDataRef : undefined}
+              fetchAttendance={tab.fetchAttendance} //
             />
           </TabPanel>
         ))}

@@ -17,6 +17,8 @@ import {
 import { IconTrash } from '@tabler/icons-react';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { useSearchParams } from 'react-router-dom';
+import { useDispatch } from 'store';
+import { openSnackbar } from 'store/slices/snackbar';
 
 import CustomInput from 'utils/CustomInput';
 import CustomAutocomplete from 'utils/CustomAutocomplete';
@@ -41,6 +43,7 @@ export default function RenderSalaryTemplateTable({
   const [fixedAllowance, setFixedAllowance] = useState({ monthly: 0, annually: 0 });
   const [loading, setLoading] = useState(false);
   const [viewPreview, setViewPreview] = useState(false);
+  const dispatch = useDispatch();
 
   const get_individual_componnet_data = async (id) => {
     setLoading(true);
@@ -327,6 +330,7 @@ export default function RenderSalaryTemplateTable({
     }
 
     setFieldValue('earnings', finalEarnings);
+    setFieldValue('errorMessage', ''); // ✅ clear previous error
     setEnablePreviewButton(true);
   };
 
@@ -340,17 +344,22 @@ export default function RenderSalaryTemplateTable({
     };
     const updated = [...values.earnings, newComponent];
     setFieldValue('earnings', updated);
+
+    setFieldValue('errorMessage', ''); // ✅ clear previous error
     setEnablePreviewButton(true);
   };
 
   const handleDeleteEarning = (index) => {
     const updated = values.earnings.filter((_, i) => i !== index);
     setFieldValue('earnings', updated);
+
+    setFieldValue('errorMessage', ''); // ✅ clear previous error
     setEnablePreviewButton(true);
   };
 
   const fetch_preview = async () => {
     const annualCtc = parseFloat(values.annual_ctc || 0);
+    console.log(values.errorMessage);
 
     // Step 1: Recalculate all rows with latest data
     let basicAnnual = 0;
@@ -379,15 +388,22 @@ export default function RenderSalaryTemplateTable({
 
     const fixedAnnual = annualCtc - totalWithoutFA;
     const fixedMonthly = fixedAnnual / 12;
-
     if (fixedAnnual <= 0) {
-      setFieldValue(
-        'errorMessage',
-        'The system calculated Fixed Allowance cannot be less than zero. Check and enter valid salary details.'
+      const error = 'The system calculated Fixed Allowance cannot be less than zero. Check and enter valid salary details.';
+      setFieldValue('errorMessage', error);
+
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: error,
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
       );
+
       return;
     }
-
     const finalPayload = {
       ...values,
       payroll: payrollId,
@@ -518,6 +534,8 @@ export default function RenderSalaryTemplateTable({
     }
 
     setFieldValue('earnings', finalEarnings);
+    setFieldValue('errorMessage', ''); // ✅ clear previous error
+    setEnablePreviewButton(true);
   }, [values.annual_ctc]);
   ////////////////
   useEffect(() => {
@@ -570,6 +588,8 @@ export default function RenderSalaryTemplateTable({
       setViewPreview(true);
     }
   }, [values.benefits, values.deductions]);
+  console.log(values.errorMessage);
+
   return (
     <TableContainer
       component={Paper}

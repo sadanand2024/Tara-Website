@@ -1,32 +1,25 @@
-import React, { useState, useEffect } from 'react';
+'use client';
+import React, { useEffect, useState } from 'react';
 import { useFormik, FormikProvider } from 'formik';
 import * as Yup from 'yup';
-import { TextField, Button, Box, Grid2, Typography } from '@mui/material';
-import { useSearchParams } from 'react-router-dom';
-import CustomDatePicker from 'utils/CustomDateInput';
-import Factory from 'utils/Factory'; // Ensure this function is defined
+import { Box, Grid, Typography, Button } from '@mui/material';
 import dayjs from 'dayjs';
-import CustomInput from 'utils/CustomInput';
-import CustomAutocomplete from 'utils/CustomAutocomplete';
-import { indian_States_And_UTs } from 'utils/indian_States_And_UT';
+import { useSearchParams } from 'react-router-dom';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
-function PersonalDetails({ fetchEmployeeData, employeeData, createdEmployeeId }) {
-  const [payrollid, setPayrollId] = useState(null);
-  const [employeeId, setEmployeeId] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const dispatch = useDispatch();
+import Factory from 'utils/Factory';
+import CustomInput from 'utils/CustomInput';
+import CustomAutocomplete from 'utils/CustomAutocomplete';
+import CustomDatePicker from 'utils/CustomDateInput';
+import { indian_States_And_UTs } from 'utils/indian_States_And_UT';
 
+const PersonalDetails = ({ fetchEmployeeData, employeeData, createdEmployeeId }) => {
   const [searchParams] = useSearchParams();
+  const dispatch = useDispatch();
+  const payrollId = searchParams.get('payrollid');
+  const employeeId = searchParams.get('employee_id');
 
-  useEffect(() => {
-    const id = searchParams.get('payrollid');
-    const empId = searchParams.get('employee_id');
-
-    if (id) setPayrollId(id);
-    if (empId) setEmployeeId(empId);
-  }, [searchParams]);
-
+  const [loading, setLoading] = useState(false);
   const employeeFields = [
     { name: 'dob', label: 'Date of Birth' },
     { name: 'guardian_name', label: 'Guardian Name' },
@@ -46,203 +39,191 @@ function PersonalDetails({ fetchEmployeeData, employeeData, createdEmployeeId })
     { name: 'address_state', label: 'State' },
     { name: 'address_pinCode', label: 'Pincode' }
   ];
+  const initialValues = {
+    dob: '',
+    guardian_name: '',
+    pan: '',
+    aadhar: '',
+    age: '',
+    alternate_contact_number: '',
+    marital_status: '',
+    blood_group: '',
+    address: {
+      address_line1: '',
+      address_line2: '',
+      address_city: '',
+      address_state: '',
+      address_pinCode: ''
+    }
+  };
 
   const validationSchema = Yup.object({
-    dob: Yup.date().required('Date of Birth is required'),
-    guardian_name: Yup.string().required('Guardian Name is required'),
+    dob: Yup.date().required('Required'),
+    guardian_name: Yup.string().required('Required'),
     pan: Yup.string()
-      .required('PAN is required')
-      .matches(/^[A-Z]{5}\d{4}[A-Z]{1}$/, 'Invalid PAN format (ABCDE1234F)'),
+      .required()
+      .matches(/^[A-Z]{5}\d{4}[A-Z]{1}$/, 'Invalid PAN'),
     aadhar: Yup.string()
-      .matches(/^\d{12}$/, 'Aadhar must be 12 digits')
-      .required('Aadhar number is required'),
-    age: Yup.number().positive('Invalid age').integer('Invalid age').required('Age is required'),
+      .required()
+      .matches(/^\d{12}$/, 'Must be 12 digits'),
+    age: Yup.number().required().positive().integer(),
     alternate_contact_number: Yup.string()
-      .matches(/^\d{10}$/, 'Alternate contact must be 10 digits')
-      .required('Alternate contact is required'),
-    marital_status: Yup.string().required('Marital Status is required'),
-    blood_group: Yup.string().required('Blood Group is required'),
-
-    address: Yup.object({
-      address_line1: Yup.string().required('Address Line 1 is required'),
-      address_line2: Yup.string(), // optional
-      address_city: Yup.string().required('City is required'),
-      address_state: Yup.string().required('State is required'),
+      .required()
+      .matches(/^\d{10}$/, 'Must be 10 digits'),
+    marital_status: Yup.string().required('Required'),
+    blood_group: Yup.string().required('Required'),
+    address: Yup.object().shape({
+      address_line1: Yup.string().required('Required'),
+      address_city: Yup.string().required('Required'),
+      address_state: Yup.string().required('Required'),
       address_pinCode: Yup.string()
+        .required()
         .matches(/^\d{6}$/, 'Invalid Pincode')
-        .required('Pincode is required')
     })
   });
 
   const formik = useFormik({
-    initialValues: {
-      dob: '',
-      age: '',
-      guardian_name: '',
-      pan: '',
-      aadhar: '',
-      address: {
-        address_line1: '',
-        address_line2: '',
-        address_city: '',
-        address_state: '',
-        address_pinCode: ''
-      },
-      alternate_contact_number: '',
-      marital_status: '',
-      blood_group: ''
-    },
+    initialValues,
     validationSchema,
     onSubmit: async (values) => {
       setLoading(true);
-      const postData = { ...values, payroll: Number(payrollid) };
-      if (employeeData?.id) {
-        postData.employee = employeeData.id;
-      } else if (createdEmployeeId) {
-        postData.employee = createdEmployeeId;
-      }
-      postData.marital_status = values.marital_status.toLowerCase();
+      const postData = {
+        ...values,
+        payroll: Number(payrollId),
+        employee: employeeData?.id || createdEmployeeId,
+        marital_status: values.marital_status.toLowerCase()
+      };
 
-      let method = employeeData?.employee_personal_details?.id ? 'put' : 'post';
-      let url =
+      const method = employeeData?.employee_personal_details?.id ? 'put' : 'post';
+      const url =
         method === 'post'
           ? `/payroll/employee-personal-details`
-          : `/payroll/employee-personal-details/${employeeData?.employee_personal_details?.id}`;
+          : `/payroll/employee-personal-details/${employeeData.employee_personal_details.id}`;
+
       const { res } = await Factory(method, url, postData);
 
       if (res.status_cd === 0) {
         dispatch(
           openSnackbar({
             open: true,
-            message: 'Data Saved Successfully',
+            message: 'Saved Successfully',
             variant: 'alert',
-            alert: { color: 'success' },
-            close: false
+            alert: { color: 'success' }
           })
         );
-        const employeeId = employeeData?.id || createdEmployeeId;
-        await fetchEmployeeData(employeeId);
+        fetchEmployeeData(postData.employee);
       } else {
         dispatch(
           openSnackbar({
             open: true,
-            message: JSON.stringify(res.data.data),
+            message: JSON.stringify(res.data?.data || 'Something went wrong'),
             variant: 'alert',
-            alert: { color: 'error' },
-            close: false
+            alert: { color: 'error' }
           })
         );
       }
-
       setLoading(false);
     }
   });
 
-  const renderFields = (fields, prefix = '') => {
-    return fields.map((field) => {
-      const fieldName = prefix ? `${prefix}${field.name}` : field.name;
+  const { values, setValues, setFieldValue, handleSubmit, handleBlur, touched, errors } = formik;
 
-      return (
-        <Grid2 key={fieldName} size={{ xs: 12, sm: 6, md: 4 }}>
-          <Typography variant="subtitle2" sx={{ color: 'grey.800', mb: 0.8 }}>
-            {field.label}
-          </Typography>
-
-          {field.name === 'dob' ? (
-            <CustomDatePicker
-              name={fieldName}
-              value={(() => {
-                const rawValue = fieldName.split('.').reduce((obj, key) => (obj ? obj[key] : ''), values);
-                return rawValue ? dayjs(rawValue) : null;
-              })()}
-              onChange={(newDate) => {
-                const formattedDate = newDate ? dayjs(newDate).format('YYYY-MM-DD') : '';
-                setFieldValue(fieldName, formattedDate);
-              }}
-              onBlur={handleBlur}
-              inputFormat="DD-MM-YYYY"
-              error={
-                Boolean(fieldName.split('.').reduce((obj, key) => (obj ? obj[key] : ''), touched)) &&
-                Boolean(fieldName.split('.').reduce((obj, key) => (obj ? obj[key] : ''), errors))
-              }
-              helperText={fieldName.split('.').reduce((obj, key) => (obj ? obj[key] : ''), errors)}
-            />
-          ) : field.name === 'address_state' || field.name === 'marital_status' || field.name === 'blood_group' ? (
-            <CustomAutocomplete
-              value={prefix ? values.address?.[field.name] || '' : values[field.name]}
-              onChange={(e, newValue) => {
-                setFieldValue(fieldName, newValue);
-              }}
-              options={
-                field.name === 'marital_status'
-                  ? ['Single', 'Married']
-                  : field.name === 'blood_group'
-                    ? ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-', 'Unknown']
-                    : indian_States_And_UTs
-              }
-            />
-          ) : (
-            <CustomInput
-              fullWidth
-              name={fieldName}
-              value={fieldName.split('.').reduce((obj, key) => (obj ? obj[key] : ''), values)}
-              onChange={(e) => {
-                let value = e.target.value;
-
-                if (field.name === 'pan' && value.length > 10) {
-                  return; // Exit early if PAN length exceeds 10
-                }
-
-                if (field.name === 'pan' && value.length <= 10) {
-                  value = value.toUpperCase();
-                }
-
-                setFieldValue(fieldName, value);
-              }}
-              onBlur={handleBlur}
-              error={
-                Boolean(fieldName.split('.').reduce((obj, key) => (obj ? obj[key] : ''), touched)) &&
-                Boolean(fieldName.split('.').reduce((obj, key) => (obj ? obj[key] : ''), errors))
-              }
-              helperText={fieldName.split('.').reduce((obj, key) => (obj ? obj[key] : ''), errors)}
-            />
-          )}
-        </Grid2>
-      );
-    });
-  };
-  const { values, setValues, setFieldValue, handleChange, errors, touched, handleSubmit, handleBlur } = formik;
+  // Prefill on mount
   useEffect(() => {
-    if (employeeData && employeeData.employee_personal_details) {
-      setValues((prev) => ({
-        ...prev,
+    if (employeeData?.employee_personal_details) {
+      setValues({
+        ...initialValues,
+        ...employeeData.employee_personal_details,
         marital_status:
-          employeeData.employee_personal_details.marital_status.charAt(0).toUpperCase() +
-          employeeData.employee_personal_details.marital_status.slice(1),
-        ...employeeData.employee_personal_details
-      }));
+          employeeData.employee_personal_details.marital_status?.charAt(0).toUpperCase() +
+          employeeData.employee_personal_details.marital_status?.slice(1)
+      });
     }
   }, [employeeData]);
+
+  const renderField = (field, prefix = '') => {
+    const fieldName = prefix ? `${prefix}.${field.name}` : field.name;
+    const value = prefix ? values[prefix]?.[field.name] : values[field.name];
+    const error = prefix ? errors[prefix]?.[field.name] : errors[field.name];
+    const isTouched = prefix ? touched[prefix]?.[field.name] : touched[field.name];
+
+    return (
+      <>
+        <Typography variant="subtitle2" sx={{ color: 'grey.800', mb: 0.8 }}>
+          {field.label}
+        </Typography>
+
+        {field.name === 'dob' ? (
+          <CustomDatePicker
+            name={fieldName}
+            value={value ? dayjs(value) : null}
+            onChange={(date) => setFieldValue(fieldName, date ? date.format('YYYY-MM-DD') : '')}
+            onBlur={handleBlur}
+            error={Boolean(isTouched && error)}
+            helperText={isTouched && error}
+          />
+        ) : field.name === 'address_state' || field.name === 'marital_status' || field.name === 'blood_group' ? (
+          <CustomAutocomplete
+            name={fieldName}
+            value={value || ''}
+            options={
+              field.name === 'marital_status'
+                ? ['Single', 'Married']
+                : field.name === 'blood_group'
+                  ? ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-', 'Unknown']
+                  : indian_States_And_UTs
+            }
+            onChange={(e, newValue) => setFieldValue(fieldName, newValue)}
+            error={Boolean(isTouched && error)}
+            helperText={isTouched && error}
+          />
+        ) : (
+          <CustomInput
+            fullWidth
+            name={fieldName}
+            value={value || ''}
+            onChange={(e) => {
+              let val = e.target.value;
+              if (field.name === 'pan') val = val.toUpperCase();
+              setFieldValue(fieldName, val);
+            }}
+            onBlur={handleBlur}
+            error={Boolean(isTouched && error)}
+            helperText={isTouched && error}
+          />
+        )}
+      </>
+    );
+  };
 
   return (
     <Box sx={{ mt: 2 }}>
       <FormikProvider value={formik}>
         <form onSubmit={handleSubmit}>
-          <Grid2 container spacing={2}>
-            {renderFields(employeeFields)}
-          </Grid2>
+          <Typography variant="h5" gutterBottom>
+            Personal Details
+          </Typography>
+          <Grid container spacing={2}>
+            {employeeFields.map((f, i) => (
+              <Grid item xs={12} sm={6} md={4} key={i}>
+                {renderField(f)}
+              </Grid>
+            ))}
+          </Grid>
 
-          <Grid2 size={{ xs: 12 }}>
-            <Typography variant="h6" sx={{ mt: 2 }}>
-              Address Details
-            </Typography>
-          </Grid2>
-          <Grid2 container spacing={2} sx={{ mt: 2 }}>
-            {renderFields(addressFields, 'address.')}
-          </Grid2>
+          <Typography variant="h6" mt={4} gutterBottom>
+            Address Details
+          </Typography>
+          <Grid container spacing={2}>
+            {addressFields.map((f, i) => (
+              <Grid item xs={12} sm={6} md={4} key={i}>
+                {renderField(f, 'address')}
+              </Grid>
+            ))}
+          </Grid>
 
-          <Box sx={{ mt: 2, textAlign: 'center' }}>
-            <Button variant="contained" color="primary" type="submit">
+          <Box sx={{ mt: 3, textAlign: 'center' }}>
+            <Button type="submit" variant="contained" color="primary">
               Save
             </Button>
           </Box>
@@ -250,6 +231,6 @@ function PersonalDetails({ fetchEmployeeData, employeeData, createdEmployeeId })
       </FormikProvider>
     </Box>
   );
-}
+};
 
 export default PersonalDetails;

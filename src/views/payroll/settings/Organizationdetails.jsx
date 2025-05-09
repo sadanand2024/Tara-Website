@@ -223,9 +223,7 @@ function Organizationdetails() {
       if (field.name === 'logo') {
         return (
           <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4 }}>
-            <Typography gutterBottom>
-              {field.label} {<span style={{ color: 'red' }}>*</span>}
-            </Typography>
+            <Typography gutterBottom>{field.label}</Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <CustomUpload
                 title="Upload Logo"
@@ -237,18 +235,10 @@ function Organizationdetails() {
                 existingImageUrl={values.logo}
                 error={touched.logo && Boolean(errors.logo)}
                 helperText={touched.logo && errors.logo}
+                onDelete={handleDeleteLogo}
+                sx={{ width: '100%' }}
               />
-              {values.logo && (
-                <IconButton onClick={handleDeleteLogo} color="error" sx={{ mt: 1 }} title="Delete Logo">
-                  <DeleteIcon />
-                </IconButton>
-              )}
             </Box>
-            {touched.logo && errors.logo && (
-              <Typography color="error" variant="caption" sx={{ mt: 1, display: 'block' }}>
-                {errors.logo}
-              </Typography>
-            )}
           </Grid2>
         );
       }

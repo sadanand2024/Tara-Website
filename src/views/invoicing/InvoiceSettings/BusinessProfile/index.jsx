@@ -2,14 +2,13 @@ import React, { useEffect, useState } from 'react';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
-import { FormControl, TextField, Radio, RadioGroup, FormControlLabel, FormLabel, Grid2, Box } from '@mui/material';
+import { FormControl, TextField, Radio, RadioGroup, FormControlLabel, FormLabel, Grid2, Box, CircularProgress } from '@mui/material';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import CustomInput from 'utils/CustomInput';
 import { indian_States_And_UTs } from 'utils/indian_States_And_UT';
 import CustomAutocomplete from 'utils/CustomAutocomplete';
 import Factory from 'utils/Factory';
-// import { useSnackbar } from '@/components/CustomSnackbar';
 import { IconPlus } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
 import { entity_choices } from 'utils/Entity-types';
@@ -44,9 +43,7 @@ export default function TabOne({ businessDetails = {}, postType, handleNext, set
       { name: 'swift_code', label: 'Swift Code' }
     ]
   });
-  // const { showSnackbar } = useSnackbar();
 
-  // Formik validation schema
   const validationSchema = Yup.object({
     nameOfBusiness: Yup.string().required('Business Name is required'),
     registrationNumber: Yup.string().required('Registration Number is required'),
@@ -195,7 +192,14 @@ export default function TabOne({ businessDetails = {}, postType, handleNext, set
     }
   }, [businessDetails]);
 
-  if (!businessDetails || !businessDetails.id) return <Typography>Loading business details...</Typography>;
+  if (!businessDetails || !businessDetails.id) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   return (
     <>
       <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 2 }}>

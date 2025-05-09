@@ -158,6 +158,11 @@ function SalaryTemplate() {
                   setEnablePreviewButton(true);
                 }}
                 onBlur={handleBlur}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                  }
+                }}
                 error={touched.annual_ctc && Boolean(errors.annual_ctc)}
                 helperText={touched.annual_ctc && errors.annual_ctc}
                 InputProps={{

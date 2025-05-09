@@ -7,7 +7,7 @@ import RenderDialog from './RenderDialog';
 import { months } from 'utils/MonthsList';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
-export default function Attendance({ employeeMasterData, from, openDialog, fields, setOpenDialog, attendanceData, getAttandanceDataRef }) {
+export default function Attendance({ fetchAttendance, employeeMasterData, from, openDialog, fields, setOpenDialog, attendanceData }) {
   const headerData = [
     'Employee Name',
     'LOP',
@@ -61,7 +61,8 @@ export default function Attendance({ employeeMasterData, from, openDialog, field
     if (!payrollid || !financialYear || !month) return;
     setLoading(true);
     const url = `/payroll/employee_attendance_filtered?payroll_id=${payrollid}&financial_year=${financialYear}&month=${month}`;
-    const { res, error } = await Factory('get', url, {});
+    const { res } = await Factory('get', url, {});
+    console.log(res);
     setLoading(false);
     if (res.status_cd === 0) {
       setData(res.data || []);
@@ -77,6 +78,12 @@ export default function Attendance({ employeeMasterData, from, openDialog, field
       );
     }
   };
+  useEffect(() => {
+    if (payrollid && financialYear && month) {
+      fetchAttendance(); // Use parent-controlled fetch function
+    }
+  }, [payrollid, financialYear, month]);
+
   const handleEdit = async (item) => {
     let url = `/payroll/employee-attendance/${item.id}`;
     const { res } = await Factory('get', url, {});
@@ -129,17 +136,6 @@ export default function Attendance({ employeeMasterData, from, openDialog, field
       getAttandanceData();
     }
   };
-  useEffect(() => {
-    if (payrollid && financialYear && month) {
-      getAttandanceData();
-    }
-  }, [payrollid, financialYear, month]);
-
-  useEffect(() => {
-    if (getAttandanceDataRef) {
-      getAttandanceDataRef.current = getAttandanceData;
-    }
-  }, [getAttandanceDataRef]);
 
   return (
     <>
