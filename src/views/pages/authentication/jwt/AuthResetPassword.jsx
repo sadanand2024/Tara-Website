@@ -90,7 +90,6 @@ export default function AuthResetPassword({ link, ...others }) {
             .then((response) => {
               setStatus({ success: true });
               setSubmitting(false);
-
               dispatch(
                 openSnackbar({
                   open: true,
@@ -112,7 +111,7 @@ export default function AuthResetPassword({ link, ...others }) {
               dispatch(
                 openSnackbar({
                   open: true,
-                  message: 'Failed to reset password.',
+                  message: error.message || 'Failed to reset password.',
                   variant: 'alert',
                   alert: {
                     color: 'error'
@@ -121,12 +120,6 @@ export default function AuthResetPassword({ link, ...others }) {
                 })
               );
             });
-
-          // setTimeout(() => {
-          //   navigate(isLoggedIn ? `/pages/login/${link || 'login3'}` : authParam ? `/login?auth=${authParam}` : '/login', {
-          //     replace: true
-          //   });
-          // }, 1500);
         } catch (err) {
           console.error(err);
           setStatus({ success: false });
