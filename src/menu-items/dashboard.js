@@ -92,7 +92,7 @@ const dashboard = {
       id: 'document-wallet',
       title: 'document-wallet',
       type: 'item',
-      url: '/app/documents',
+      url: '/app/document-wallet',
       icon: icons.IconFolder,
       breadcrumbs: false,
       caption: ''

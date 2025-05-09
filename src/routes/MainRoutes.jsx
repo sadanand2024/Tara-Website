@@ -4,7 +4,7 @@ import { lazy } from 'react';
 import MainLayout from 'layout/MainLayout';
 import Loadable from 'ui-component/Loadable';
 import AuthGuard from 'utils/route-guard/AuthGuard';
-
+import RoleGuard from 'utils/route-guard/roleguard';
 // payroll module
 const PayrollDashboard = Loadable(lazy(() => import('views/payroll'))); // ✅ works because index.jsx exists
 
@@ -49,13 +49,19 @@ const AppBusinessSettings = Loadable(lazy(() => import('views/application/Busine
 const AppAccountSettings = Loadable(lazy(() => import('views/application/users/Account')));
 const ManagePlans = Loadable(lazy(() => import('views/ManageSubscriptions/ManagePlans')));
 const ManageTasks = Loadable(lazy(() => import('views/application/ManageTasks')));
+const DocumentWallet = Loadable(lazy(() => import('views/application/Document-Wallet')));
+const ContactUsInfo = Loadable(lazy(() => import('views/ContactUsInfo')));
+const ConsultationInfo = Loadable(lazy(() => import('views/ConsultationInfo')));
+
 // ==============================|| MAIN ROUTING ||============================== //
 
 const MainRoutes = {
   path: '/',
   element: (
     <AuthGuard>
-      <MainLayout />
+      <RoleGuard>
+        <MainLayout />
+      </RoleGuard>
     </AuthGuard>
   ),
   children: [
@@ -114,6 +120,18 @@ const MainRoutes = {
     {
       path: '/app/subscriptions/modules-and-services/plans',
       element: <ManagePlans />
+    },
+    {
+      path: '/app/document-wallet',
+      element: <DocumentWallet />
+    },
+    {
+      path: '/app/contact-us',
+      element: <ContactUsInfo />
+    },
+    {
+      path: '/app/consultation',
+      element: <ConsultationInfo />
     },
     {
       path: '/app/payroll',

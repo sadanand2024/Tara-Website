@@ -13,7 +13,6 @@ import axios from 'utils/axios';
 // third party
 import * as Yup from 'yup';
 import { Formik } from 'formik';
-
 // project imports
 import AnimateButton from 'ui-component/extended/AnimateButton';
 import useAuth from 'hooks/useAuth';
@@ -53,12 +52,12 @@ export default function AuthForgotPassword({ link, ...others }) {
                   email: values.email
                 })
                 .then((response) => {
-                  console.log(response);
                   setStatus({ success: true });
                   setSubmitting(false);
                   dispatch(
                     openSnackbar({
                       open: true,
+                      anchorOrigin: { vertical: 'top', horizontal: 'right' },
                       message: 'Check mail for reset password link',
                       variant: 'alert',
                       alert: {
@@ -67,12 +66,14 @@ export default function AuthForgotPassword({ link, ...others }) {
                       close: false
                     })
                   );
+                  navigate('/login');
                 })
                 .catch((error) => {
                   console.log(error);
                   dispatch(
                     openSnackbar({
                       open: true,
+                      anchorOrigin: { vertical: 'top', horizontal: 'right' },
                       message: 'Failed to send reset password link',
                       variant: 'alert',
                       alert: {
