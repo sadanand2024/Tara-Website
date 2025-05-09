@@ -103,7 +103,7 @@ function SalaryDetails({ fetchEmployeeData, employeeData, createdEmployeeId }) {
       <Grid2 key={field.name} size={{ xs: 12, sm: 6 }}>
         {field.name === 'salary_template' ? (
           <>
-            {employeeData?.employee_salary?.length !== 0 && (
+            {salary_teamplates_data?.length !== 0 && (
               <>
                 <Typography variant="subtitle2" sx={{ color: 'grey.800', mb: 0.5 }}>
                   {field.label}
@@ -186,7 +186,7 @@ function SalaryDetails({ fetchEmployeeData, employeeData, createdEmployeeId }) {
       }));
     }
   }, [employeeData]);
-  // console.log(values);
+  console.log(values);
   return (
     <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>

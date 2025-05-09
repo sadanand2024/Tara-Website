@@ -31,7 +31,8 @@ export default function RenderSalaryTemplateTable({
   setEnablePreviewButton,
   createdEmployeeId
 }) {
-  console.log(createdEmployeeId);
+  // console.log(values);
+  // console.log(createdEmployeeId);
   const [searchParams] = useSearchParams();
   const payrollId = searchParams.get('payrollid');
   const template_id = searchParams.get('template_id');
@@ -522,18 +523,33 @@ export default function RenderSalaryTemplateTable({
   useEffect(() => {
     if (!payrollId) return;
 
-    // Always fetch earnings details
+    // Always fetch earnings dropdown
     getEarnings_Details(payrollId);
 
-    if (!template_id) {
-      // Only set basic if no created employee
-      if (!createdEmployeeId) {
-        setBasicFromMaster(payrollId); // for new template
+    const timeout = setTimeout(() => {
+      const hasCreatedEmployeeId = !!createdEmployeeId;
+      const hasValuesId = !!values?.id;
+
+      if (!template_id) {
+        // New template
+        if (hasCreatedEmployeeId && !hasValuesId) {
+          setBasicFromMaster(payrollId); // ✅ Only call in this case
+        } else if (!hasCreatedEmployeeId && !hasValuesId) {
+          setBasicFromMaster(payrollId); // ✅ Also call if neither exists yet
+        }
+        // ❌ Do not call if both exist
+      } else {
+        // Existing template
+        fetch_individual_salary_templates(template_id);
+
+        if (hasCreatedEmployeeId && !hasValuesId) {
+          setBasicFromMaster(payrollId); // ✅ Only call here too
+        }
       }
-    } else {
-      fetch_individual_salary_templates(template_id); // existing
-    }
-  }, [payrollId, template_id, createdEmployeeId]);
+    }, 200); // Wait 200ms to ensure async values are set
+
+    return () => clearTimeout(timeout); // Cleanup on unmount
+  }, [payrollId, template_id, createdEmployeeId, values?.id]);
 
   // useEffect(() => {
   //   if (!payrollId) return;

@@ -41,12 +41,31 @@ function StepperComponent() {
     switch (step) {
       case 0:
         return (
-          <BasicDetails employeeData={employeeData} setCreatedEmployeeId={setCreatedEmployeeId} fetchEmployeeData={fetchEmployeeData} />
+          <BasicDetails
+            employeeData={employeeData}
+            onNext={handleNext}
+            setCreatedEmployeeId={setCreatedEmployeeId}
+            fetchEmployeeData={fetchEmployeeData}
+          />
         );
       case 1:
-        return <SalaryDetails employeeData={employeeData} createdEmployeeId={createdEmployeeId} fetchEmployeeData={fetchEmployeeData} />;
+        return (
+          <SalaryDetails
+            employeeData={employeeData}
+            onNext={handleNext}
+            createdEmployeeId={createdEmployeeId}
+            fetchEmployeeData={fetchEmployeeData}
+          />
+        );
       case 2:
-        return <PersonalDetails employeeData={employeeData} createdEmployeeId={createdEmployeeId} fetchEmployeeData={fetchEmployeeData} />;
+        return (
+          <PersonalDetails
+            employeeData={employeeData}
+            onNext={handleNext}
+            createdEmployeeId={createdEmployeeId}
+            fetchEmployeeData={fetchEmployeeData}
+          />
+        );
       case 3:
         return (
           <PaymentInformation employeeData={employeeData} createdEmployeeId={createdEmployeeId} fetchEmployeeData={fetchEmployeeData} />
