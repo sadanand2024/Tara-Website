@@ -473,7 +473,7 @@ const ManageSubscriptions = () => {
                       }
                     }}
                   >
-                    <TableCell sx={{ pl: 3 }}>{(page - 1) * rowsPerPage + index + 1}</TableCell>
+                    <TableCell sx={{ pl: 3 }}>{index + 1}</TableCell>
                     <TableCell>{task.id}</TableCell>
                     <TableCell>{task.service_name.charAt(0).toUpperCase() + task.service_name.slice(1)}</TableCell>
                     <TableCell>{task.plan_name.charAt(0).toUpperCase() + task.plan_name.slice(1)}</TableCell>
