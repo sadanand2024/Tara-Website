@@ -1,19 +1,17 @@
-import { Link, useSearchParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 
-import useMediaQuery from '@mui/material/useMediaQuery';
 import Grid from '@mui/material/Grid2';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import Box from '@mui/material/Box';
+import useMediaQuery from '@mui/material/useMediaQuery';
 
 // project imports
-import AuthWrapper1 from './AuthWrapper1';
 import AuthCardWrapper from './AuthCardWrapper';
+import AuthWrapper1 from './AuthWrapper1';
 import ViewOnlyAlert from './ViewOnlyAlert';
-import LoginProvider from './LoginProvider';
 
-import Logo from 'ui-component/Logo';
+import TarapngLogo from 'ui-component/TarapngLogo';
 import AuthFooter from 'ui-component/cards/AuthFooter';
 
 import { APP_AUTH } from 'config';
@@ -59,7 +57,7 @@ export default function ResetPassword() {
                 <Grid container spacing={2} sx={{ alignItems: 'center', justifyContent: 'center' }}>
                   <Grid sx={{ mb: 3 }}>
                     <Link to="#" aria-label="theme logo">
-                      <Logo />
+                      <TarapngLogo/>
                     </Link>
                   </Grid>
                   <Grid size={12}>
