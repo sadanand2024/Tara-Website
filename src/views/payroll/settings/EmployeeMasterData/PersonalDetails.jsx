@@ -184,7 +184,38 @@ const PersonalDetails = ({ fetchEmployeeData, employeeData, createdEmployeeId })
             value={value || ''}
             onChange={(e) => {
               let val = e.target.value;
-              if (field.name === 'pan') val = val.toUpperCase();
+
+              // PAN should be uppercase only
+              if (field.name === 'pan') {
+                val = val.toUpperCase();
+                val = val.replace(/[^A-Z0-9]/g, ''); // restrict to uppercase letters and numbers
+              }
+
+              // Aadhar - digits only
+              if (field.name === 'aadhar') {
+                val = val.replace(/\D/g, '');
+              }
+
+              // Age - digits only
+              if (field.name === 'age') {
+                val = val.replace(/\D/g, '');
+              }
+
+              // Alternate contact number - digits only
+              if (field.name === 'alternate_contact_number') {
+                val = val.replace(/\D/g, '');
+              }
+
+              // Guardian name - allow only alphabets and space
+              if (field.name === 'guardian_name') {
+                val = val.replace(/[^a-zA-Z\s]/g, '');
+              }
+
+              // Address Pincode - digits only
+              if (field.name === 'address_pinCode') {
+                val = val.replace(/\D/g, '');
+              }
+
               setFieldValue(fieldName, val);
             }}
             onBlur={handleBlur}
