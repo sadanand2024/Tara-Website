@@ -199,7 +199,6 @@ function SalaryDetails({ fetchEmployeeData, employeeData, createdEmployeeId }) {
       }));
     }
   }, [employeeData]);
-  console.log(values);
   return (
     <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>

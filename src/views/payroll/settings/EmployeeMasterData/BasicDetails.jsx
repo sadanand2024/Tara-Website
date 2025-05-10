@@ -46,7 +46,6 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
 
   const validationSchema = Yup.object({
     first_name: Yup.string().required('First Name is required'),
-    // middle_name: Yup.string(),
     last_name: Yup.string().required('Last Name is required'),
     associate_id: Yup.string().required('Employee ID is required'),
     doj: Yup.date().required('Date of Joining is required'),
@@ -54,11 +53,41 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
     mobile_number: Yup.string()
       .required('Mobile Number is required')
       .matches(/^[0-9]{10}$/, 'Mobile Number must be exactly 10 digits'),
-
     gender: Yup.string().required('Gender is required'),
     work_location: Yup.string().required('Work Location is required'),
     designation: Yup.string().required('Designation is required'),
-    department: Yup.string().required('Department is required')
+    department: Yup.string().required('Department is required'),
+
+    statutory_components: Yup.object().shape({
+      epf_enabled: Yup.boolean(),
+      esi_enabled: Yup.boolean(),
+      professional_tax: Yup.boolean(),
+
+      employee_provident_fund: Yup.lazy((_, { parent }) => {
+        return Yup.object().shape({
+          pf_account_number: parent?.epf_enabled
+            ? Yup.string()
+                .required('PF Account Number is required')
+                .matches(/^[A-Z0-9]+$/, 'Invalid PF Account Number')
+            : Yup.string().nullable(),
+          uan: parent?.epf_enabled
+            ? Yup.string()
+                .required('UAN is required')
+                .matches(/^[0-9]{12}$/, 'UAN must be a 12-digit number')
+            : Yup.string().nullable()
+        });
+      }),
+
+      employee_state_insurance: Yup.lazy((_, { parent }) => {
+        return Yup.object().shape({
+          esi_number: parent?.esi_enabled
+            ? Yup.string()
+                .required('ESI Number is required')
+                .matches(/^[0-9]{10}$/, 'ESI Number must be 10 digits')
+            : Yup.string().nullable()
+        });
+      })
+    })
   });
 
   const formik = useFormik({
@@ -210,7 +239,27 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
           <CustomInput
             fullWidth
             value={values[field.name]}
-            onChange={(e) => setFieldValue(field.name, e.target.value)}
+            onChange={(e) => {
+              let val = e.target.value;
+
+              // Restrict first, middle, and last name to letters and space only
+              if (['first_name', 'middle_name', 'last_name'].includes(field.name)) {
+                val = val.replace(/[^a-zA-Z\s]/g, '');
+              }
+
+              // Associate ID - Alphanumeric, no special characters
+              if (field.name === 'associate_id') {
+                val = val.replace(/[^a-zA-Z0-9]/g, '');
+              }
+
+              // Work Email - let Yup handle validation, no need to filter input
+              // Mobile Number - digits only
+              if (field.name === 'mobile_number') {
+                val = val.replace(/\D/g, '');
+              }
+
+              setFieldValue(field.name, val);
+            }}
             onBlur={handleBlur}
             error={touched[field.name] && Boolean(errors[field.name])}
             helperText={touched[field.name] && errors[field.name]}
@@ -359,24 +408,48 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
             <Grid2 container spacing={2} sx={{ mt: 1, ml: 3 }}>
               <Grid2 size={{ xs: 12, sm: 6 }}>
                 <Typography variant="subtitle2" sx={{ color: 'grey.800', mb: 0.5 }}>
-                  PF Account Number
+                  PF Account Number{' '}
+                  <Typography component="span" sx={{ fontSize: '0.75rem', color: 'grey.600' }}>
+                    (e.g. ABCD1234567)
+                  </Typography>
                 </Typography>
                 <TextField
                   fullWidth
                   value={values.statutory_components.employee_provident_fund.pf_account_number}
                   onChange={(e) => setFieldValue('statutory_components.employee_provident_fund.pf_account_number', e.target.value)}
                   onBlur={handleBlur}
+                  name="statutory_components.employee_provident_fund.pf_account_number"
+                  error={
+                    touched?.statutory_components?.employee_provident_fund?.pf_account_number &&
+                    Boolean(errors?.statutory_components?.employee_provident_fund?.pf_account_number)
+                  }
+                  helperText={
+                    touched?.statutory_components?.employee_provident_fund?.pf_account_number &&
+                    errors?.statutory_components?.employee_provident_fund?.pf_account_number
+                  }
                 />
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6 }}>
                 <Typography variant="subtitle2" sx={{ color: 'grey.800', mb: 0.5 }}>
-                  UAN Number
+                  UAN Number{' '}
+                  <Typography component="span" sx={{ fontSize: '0.75rem', color: 'grey.600' }}>
+                    (e.g. 123456789012)
+                  </Typography>
                 </Typography>
                 <TextField
                   fullWidth
                   value={values.statutory_components.employee_provident_fund.uan || ''}
                   onChange={(e) => setFieldValue('statutory_components.employee_provident_fund.uan', e.target.value)}
                   onBlur={handleBlur}
+                  name="statutory_components.employee_provident_fund.uan"
+                  error={
+                    touched?.statutory_components?.employee_provident_fund?.uan &&
+                    Boolean(errors?.statutory_components?.employee_provident_fund?.uan)
+                  }
+                  helperText={
+                    touched?.statutory_components?.employee_provident_fund?.uan &&
+                    errors?.statutory_components?.employee_provident_fund?.uan
+                  }
                 />
               </Grid2>
             </Grid2>
@@ -401,13 +474,25 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
             <Grid2 container spacing={2} sx={{ mt: 1, ml: 3 }}>
               <Grid2 size={{ xs: 12, sm: 6 }}>
                 <Typography variant="subtitle2" sx={{ color: 'grey.800', mb: 0.5 }}>
-                  ESI Number
+                  ESI Number{' '}
+                  <Typography component="span" sx={{ fontSize: '0.75rem', color: 'grey.600' }}>
+                    (e.g. 1234567890)
+                  </Typography>
                 </Typography>
                 <TextField
                   fullWidth
                   value={values.statutory_components.employee_state_insurance.esi_number}
                   onChange={(e) => setFieldValue('statutory_components.employee_state_insurance.esi_number', e.target.value)}
                   onBlur={handleBlur}
+                  name="statutory_components.employee_state_insurance.esi_number"
+                  error={
+                    touched?.statutory_components?.employee_state_insurance?.esi_number &&
+                    Boolean(errors?.statutory_components?.employee_state_insurance?.esi_number)
+                  }
+                  helperText={
+                    touched?.statutory_components?.employee_state_insurance?.esi_number &&
+                    errors?.statutory_components?.employee_state_insurance?.esi_number
+                  }
                 />
               </Grid2>
             </Grid2>

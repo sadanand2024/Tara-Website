@@ -119,8 +119,19 @@ function PaymentInformation({ employeeData, createdEmployeeId }) {
             onChange={(e) => {
               let value = e.target.value;
 
+              // Convert specific fields to uppercase
               if (field.name === 'ifsc_code' || field.name === 'branch_name') {
                 value = value.toUpperCase();
+              }
+
+              // Allow only digits for account_number
+              if (field.name === 'account_number') {
+                value = value.replace(/\D/g, ''); // Remove non-digits
+              }
+
+              // Allow only alphabets and spaces for names
+              if (field.name === 'account_holder_name' || field.name === 'bank_name' || field.name === 'branch_name') {
+                value = value.replace(/[^a-zA-Z\s]/g, ''); // Allow letters and spaces only
               }
 
               setFieldValue(fieldName, value);

@@ -359,7 +359,6 @@ export default function RenderSalaryTemplateTable({
 
   const fetch_preview = async () => {
     const annualCtc = parseFloat(values.annual_ctc || 0);
-    console.log(values.errorMessage);
 
     // Step 1: Recalculate all rows with latest data
     let basicAnnual = 0;
@@ -588,7 +587,6 @@ export default function RenderSalaryTemplateTable({
       setViewPreview(true);
     }
   }, [values.benefits, values.deductions]);
-  console.log(values.errorMessage);
 
   return (
     <TableContainer
@@ -693,8 +691,8 @@ export default function RenderSalaryTemplateTable({
           </TableRow>
           <TableRow>
             <TableCell>
-              <Typography variant="h5"> Fixed Allowance (Monthly CTC - Sum of all other components) </Typography>
-            </TableCell>{' '}
+              <Typography variant="h5">Fixed Allowance (Monthly CTC - Sum of all other components)</Typography>
+            </TableCell>
             <TableCell>Remaining Balance</TableCell>
             <TableCell>
               <Typography sx={{ color: fixedAllowance.monthly < 0 ? 'error.main' : 'inherit' }}>
@@ -707,6 +705,7 @@ export default function RenderSalaryTemplateTable({
               </Typography>
             </TableCell>
           </TableRow>
+
           <TableRow sx={{ backgroundColor: '#ede7f6', borderRadius: 2 }}>
             <TableCell sx={{ padding: 2 }}>
               <Stack direction="row" alignItems="center" spacing={1}>
