@@ -3,16 +3,8 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
-import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
 import FolderIcon from '@mui/icons-material/Folder';
+import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import DescriptionIcon from '@mui/icons-material/Description';
@@ -34,31 +26,13 @@ import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutl
 import { useSnackbar } from 'notistack';
 import { useSelector } from 'react-redux';
 import CircularProgress from '@mui/material/CircularProgress';
-
+import HomeIcon from '@mui/icons-material/Home';
+import ImageIcon from '@mui/icons-material/Image';
 const folders = {
   PermanentWorkingPapers: 'Permanent Working Papers',
   CurrentWorkPapers: 'Current Working Papers',
   OtherDocuments: 'Other Documents'
 };
-
-const recentFiles = [
-  { name: 'Krishna Sai kannekanti.pdf', date: '2021-20-21' },
-  { name: 'Mockups.csv', date: '2021-20-21' },
-  { name: 'Employee Plan.docx', date: '2021-20-21' },
-  { name: '3f7e22c2-b74d-4a9e-8102-4c303fa32b34.csv', date: '2021-20-21' },
-  { name: 'Mockups.pdf', date: '2021-20-21' },
-  { name: 'Krishna Sai kannekanti.pdf', date: '2021-20-21' },
-  { name: 'Profile.docx', date: '2021-20-21' }
-];
-
-const allFiles = [
-  { name: 'Milestone', size: '32 KB', type: 'folder', lastEdit: 'March 1, 2022 By, Nazar Becks' },
-  { name: 'Public Documents', size: '24 MB', type: 'folder', lastEdit: 'March 1, 2022 By, Alex Hal' },
-  { name: 'Architectures for Projects', size: '50 MB', type: 'doc', lastEdit: 'March 1, 2022 By, John DC' },
-  { name: 'Timelines', size: '15 KB', type: 'pdf', lastEdit: 'March 1, 2022 By, King Kong' },
-  { name: 'Project Videos', size: '24 MB', type: 'folder', lastEdit: 'March 1, 2022 By, Sarah Williams' },
-  { name: 'Floor Plan Details', size: '50 MB', type: 'csv', lastEdit: 'March 1, 2022 By, Rajan Mani Poudel' }
-];
 
 const getFileType = (file) => {
   if (typeof file.type === 'string' && file.type.length > 0) return file.type;
@@ -67,6 +41,7 @@ const getFileType = (file) => {
     if (['pdf', 'doc', 'csv'].includes(ext)) return ext;
     if (['xlsx', 'xls'].includes(ext)) return 'csv';
     if (['docx'].includes(ext)) return 'doc';
+    if (['png', 'jpg', 'jpeg', 'gif', 'bmp', 'tiff', 'ico', 'webp'].includes(ext)) return 'image';
     if (ext && ext.length < 8) return ext; // fallback for short extensions
   }
   return '';
@@ -82,6 +57,8 @@ const getFileIcon = (type) => {
       return <TableChartIcon fontSize="large" sx={{ color: '#388e3c' }} />;
     case 'folder':
       return <FolderIcon fontSize="large" sx={{ color: '#fbc02d' }} />;
+    case 'image':
+      return <ImageIcon fontSize="large" sx={{ color: 'primary.main' }} />;
     default:
       return <InsertDriveFileIcon fontSize="large" sx={{ color: '#757575' }} />;
   }
@@ -107,18 +84,13 @@ const TooltipMUI = ({ name, children }) => {
   );
 };
 
-const MUIGrid = ({ children, name, details, detailskey, idx }) => {
+const MUIGrid = ({ children, name, details, detailskey, idx, viewFile }) => {
   return (
     <Grid
       key={idx}
       size={{ xs: 12, sm: 6, md: 4, lg: 3, xl: 2 }}
       onClick={() => {
-        if (detailskey === 'folder') {
-          //OPEN Files and Folders in the folder
-          console.log(details.id);
-        } else {
-          console.log('files');
-        }
+        viewFile(details);
       }}
       sx={{
         cursor: 'pointer',
@@ -185,6 +157,10 @@ const DocumentWallet = () => {
   const [folderName, setFolderName] = useState('');
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [recentFiles, setRecentFiles] = useState([]);
+  const [previewUrl, setPreviewUrl] = useState('');
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewLoading, setPreviewLoading] = useState(false);
 
   const getInitialFolders = async () => {
     setLoading(true);
@@ -206,8 +182,18 @@ const DocumentWallet = () => {
     setLoading(false);
   };
 
+  const getRecentFiles = async () => {
+    setLoading(true);
+    const response = await Factory('get', `/docwallet/list_last_10_uploaded_files?context_id=${user.active_context.id}`, {}, {});
+    if (response.res.status_cd === 0) {
+      setRecentFiles(response.res.data);
+    }
+    setLoading(false);
+  };
+
   useEffect(() => {
     getInitialFolders();
+    getRecentFiles();
   }, []);
 
   const handleChange = (e) => {
@@ -284,7 +270,9 @@ const DocumentWallet = () => {
         if (customBreadcrumbs) {
           setBreadcrumbs(customBreadcrumbs);
         } else {
-          setBreadcrumbs((prev) => (isRoot ? [{ id: folderId, name: folderName }] : [...prev, { id: folderId, name: folderName }]));
+          setBreadcrumbs((prev) =>
+            isRoot ? [{ id: folderId, name: folders[folderName] || folderName }] : [...prev, { id: folderId, name: folderName }]
+          );
         }
       } else {
         console.log('Failed to load folder contents.', response);
@@ -327,6 +315,33 @@ const DocumentWallet = () => {
     setLoading(false);
   };
 
+  const viewFile = async (fileDetails) => {
+    setPreviewLoading(true);
+    const response = await Factory('get', `/docwallet/generate_presigned_url?url=${fileDetails.file}`, {}, {});
+    if (response.res.status_cd === 0) {
+      let url = response.res.data.url;
+      const type = getFileType(fileDetails);
+      if (type === 'pdf') {
+        url += '#view=FitH';
+        setPreviewUrl(url);
+        setPreviewOpen(true);
+      } else if (type === 'csv' || type === 'xlsx' || type === 'xls' || type === 'docx') {
+        // Download and close preview
+        window.open(url, '_blank');
+        setPreviewOpen(false);
+        setPreviewUrl('');
+        setPreviewLoading(false);
+        enqueueSnackbar('This file type cannot be previewed. Downloading...', { variant: 'info', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
+      } else {
+        setPreviewUrl(url);
+        setPreviewOpen(true);
+      }
+    } else {
+      enqueueSnackbar('Error generating presigned url.', { variant: 'error', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
+      setPreviewLoading(false);
+    }
+  };
+
   return (
     <Box
       sx={{
@@ -335,7 +350,8 @@ const DocumentWallet = () => {
         p: { xs: 1, sm: 2, md: 3 },
 
         boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-        width: '100%'
+        width: '100%',
+        minHeight: '80vh'
       }}
     >
       <Box
@@ -349,11 +365,11 @@ const DocumentWallet = () => {
         }}
       >
         <Box>
-          <Typography variant="h5" fontWeight={600} sx={{ m: 0, fontSize: { xs: 18, sm: 22 } }}>
+          <Typography variant="h5" fontWeight={600} sx={{ m: 0, mb: 0.5, fontSize: { xs: 18, sm: 22 } }}>
             Document Library
           </Typography>
           {/* Breadcrumb Data */}
-          <Breadcrumbs>
+          <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />}>
             <Typography
               key="root"
               variant="body2"
@@ -382,23 +398,24 @@ const DocumentWallet = () => {
             ))}
           </Breadcrumbs>
         </Box>
-        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', width: { xs: '100%', sm: 'auto' } }}>
-          <TextField size="small" placeholder="Search..." sx={{ minWidth: { xs: 120, sm: 180 }, flex: 1 }} />
-          <Button variant="contained" startIcon={<AddIcon />} onClick={handleUploadClick} color="primary">
-            Upload File
-          </Button>
-          <input type="file" ref={fileInputRef} style={{ display: 'none' }} multiple onChange={handleFileInputChange} />
-          <Button
-            startIcon={<AddIcon />}
-            variant="outlined"
-            color="primary"
-            onClick={() => {
-              setNewFolderPopup(true);
-            }}
-          >
-            New Folder
-          </Button>
-        </Box>
+        {currentFolderId !== null && (
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', width: { xs: '100%', sm: 'auto' } }}>
+            <Button variant="contained" startIcon={<AddIcon />} onClick={handleUploadClick} color="primary">
+              Upload File
+            </Button>
+            <input type="file" ref={fileInputRef} style={{ display: 'none' }} multiple onChange={handleFileInputChange} />
+            <Button
+              startIcon={<AddIcon />}
+              variant="outlined"
+              color="primary"
+              onClick={() => {
+                setNewFolderPopup(true);
+              }}
+            >
+              New Folder
+            </Button>
+          </Box>
+        )}
       </Box>
       {/* Folders */}
       {currentFolderId === null ? (
@@ -439,7 +456,7 @@ const DocumentWallet = () => {
                   >
                     <FolderIcon fontSize="large" sx={{ color: '#fbc02d', flexShrink: 0 }} />
                     <Box sx={{ width: 0, flex: 1, minWidth: 0 }}>
-                      <Tooltip title={folder.name} placement="bottom">
+                      <TooltipMUI name={folders[folder.name]} placement="bottom">
                         <Typography
                           fontWeight={500}
                           sx={{
@@ -453,7 +470,7 @@ const DocumentWallet = () => {
                         >
                           {folders[folder.name] || folder.name}
                         </Typography>
-                      </Tooltip>
+                      </TooltipMUI>
                       <Typography variant="caption" color="text.secondary">
                         {''}
                       </Typography>
@@ -538,7 +555,7 @@ const DocumentWallet = () => {
                 </Typography>
                 <Grid container spacing={2}>
                   {currentContents.files.map((file, idx) => (
-                    <MUIGrid name={file.name} details={file.date} detailskey={'file'} key={idx} idx={idx}>
+                    <MUIGrid name={file.name} details={file} detailskey={'file'} key={idx} idx={idx} viewFile={viewFile}>
                       <Stack
                         direction="row"
                         className="file-item"
@@ -588,11 +605,11 @@ const DocumentWallet = () => {
       {/* Recently Accessed */}
       <Box sx={{ mb: 4 }}>
         <Typography fontWeight={500} sx={{ mb: 1, fontSize: { xs: 15, sm: 17 } }}>
-          Recently Accessed
+          Recently Accessed Files
         </Typography>
         <Grid container spacing={2}>
           {recentFiles.map((file, idx) => (
-            <MUIGrid name={file.name} details={file.date} detailskey={'file'} key={idx} idx={idx}>
+            <MUIGrid name={file.name} details={file} detailskey={'file'} key={idx} idx={idx} viewFile={viewFile}>
               <Stack
                 direction="row"
                 className="recent-item"
@@ -635,77 +652,6 @@ const DocumentWallet = () => {
         </Grid>
       </Box>
 
-      {/* All Files Table */}
-      <Box>
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: { xs: 'column', sm: 'row' },
-            justifyContent: 'space-between',
-            alignItems: { xs: 'flex-start', sm: 'center' },
-            mb: 1,
-            gap: 1
-          }}
-        >
-          <Typography fontWeight={500}>All Folders & Files</Typography>
-          <Select size="small" defaultValue="Sort By" sx={{ minWidth: 120 }}>
-            <MenuItem value="Sort By">Sort By</MenuItem>
-            <MenuItem value="Name">Name</MenuItem>
-            <MenuItem value="Date">Date</MenuItem>
-            <MenuItem value="Type">Type</MenuItem>
-          </Select>
-        </Box>
-        <TableContainer component={Paper} sx={{ borderRadius: 1.5 }}>
-          <Table size="small">
-            <TableHead sx={{ background: '#f5f5f5' }}>
-              <TableRow>
-                <TableCell>Name</TableCell>
-                <TableCell>Size</TableCell>
-                <TableCell>Type</TableCell>
-                <TableCell>Last Edit</TableCell>
-                <TableCell></TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {allFiles.map((file, idx) => (
-                <TableRow key={file.name + idx}>
-                  <TableCell sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
-                    {getFileIcon(getFileType(file))}
-                    <Box sx={{ width: 0, flex: 1, minWidth: 0 }}>
-                      <TooltipMUI name={file.name}>
-                        <Typography
-                          fontWeight={500}
-                          sx={{
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            width: '100%',
-                            maxWidth: '100%',
-                            fontSize: { xs: 13, sm: 15 }
-                          }}
-                        >
-                          {file.name}
-                        </Typography>
-                      </TooltipMUI>
-                    </Box>
-                  </TableCell>
-                  <TableCell>{file.size}</TableCell>
-                  <TableCell>
-                    {(() => {
-                      const type = getFileType(file);
-                      return type ? type.charAt(0).toUpperCase() + type.slice(1) : 'Unknown';
-                    })()}
-                  </TableCell>
-                  <TableCell>{file.lastEdit}</TableCell>
-                  <TableCell>
-                    <Typography sx={{ cursor: 'pointer' }}>⋮</Typography>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Box>
       <Dialog open={newFolderPopup} onClose={() => setNewFolderPopup(false)}>
         <DialogContent>
           <Box>
@@ -745,6 +691,55 @@ const DocumentWallet = () => {
           <Button onClick={() => setNewFolderPopup(false)}>Cancel</Button>
           <Button onClick={createFolder}>Create</Button>
         </DialogActions>
+      </Dialog>
+      <Dialog
+        open={previewOpen}
+        onClose={() => {
+          setPreviewOpen(false);
+          setPreviewUrl('');
+          setPreviewLoading(false);
+        }}
+        maxWidth="xl"
+        fullWidth
+      >
+        <DialogContent sx={{ p: 0, height: '80vh', bgcolor: '#222', overflow: 'hidden', position: 'relative' }}>
+          {previewUrl && (
+            <iframe
+              src={previewUrl}
+              title="File Preview"
+              width="100%"
+              height="100%"
+              style={{
+                border: 0,
+                background: '#fff',
+                display: 'block',
+                maxWidth: '100vw',
+                minWidth: 0,
+                minHeight: 0,
+                overflow: 'hidden'
+              }}
+              onLoad={() => setPreviewLoading(false)}
+            />
+          )}
+          {previewLoading && (
+            <Box
+              sx={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                bgcolor: 'rgba(255,255,255,0.5)',
+                zIndex: 2
+              }}
+            >
+              <CircularProgress size={48} thickness={5} />
+            </Box>
+          )}
+        </DialogContent>
       </Dialog>
       {loading && (
         <Box
