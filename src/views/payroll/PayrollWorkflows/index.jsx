@@ -16,6 +16,7 @@ import OtherDeductions from './OtherDeductions';
 import Factory from 'utils/Factory';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
+import { CoPresentOutlined } from '@mui/icons-material';
 // TabPanel Component
 const TabPanel = ({ children, value, index }) => (
   <div role="tabpanel" hidden={value !== index} id={`tabpanel-${index}`} aria-labelledby={`tab-${index}`}>
@@ -55,6 +56,7 @@ const PayrollWorkflows = ({ type }) => {
   // };
 
   const getAttandanceData = async () => {
+    console.log('vhg');
     if (!payrollId || !financialYear || !month) return;
     setLoading(true);
     const url = `/payroll/employee_attendance_filtered?payroll_id=${payrollId}&financial_year=${financialYear}&month=${month}`;
@@ -137,8 +139,7 @@ const PayrollWorkflows = ({ type }) => {
           { name: 'sick_leaves', label: 'Sick Leaves' },
           { name: 'earned_leaves', label: 'Earned Leaves' },
           { name: 'loss_of_pay', label: 'Loss of Pay' }
-        ],
-        fetchAttendance: getAttandanceData // ✅ pass fetch function here
+        ]
       },
       {
         label: 'Loans & Advances',
@@ -256,7 +257,8 @@ const PayrollWorkflows = ({ type }) => {
               fields={tab.fields}
               loading={loading}
               employeeMasterData={employeeMasterData}
-              fetchAttendance={tab.fetchAttendance} //
+              fetchAttendance={tab.label === 'Attendance' ? getAttandanceData : undefined}
+              attendanceData={tab.label === 'Attendance' ? attendanceData : undefined}
             />
           </TabPanel>
         ))}

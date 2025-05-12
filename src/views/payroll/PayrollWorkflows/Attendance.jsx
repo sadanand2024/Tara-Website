@@ -7,7 +7,7 @@ import RenderDialog from './RenderDialog';
 import { months } from 'utils/MonthsList';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
-export default function Attendance({ fetchAttendance, employeeMasterData, from, openDialog, fields, setOpenDialog, attendanceData }) {
+export default function Attendance({ attendanceData, fetchAttendance, employeeMasterData, from, openDialog, fields, setOpenDialog }) {
   const headerData = [
     'Employee Name',
     'LOP',
@@ -33,7 +33,6 @@ export default function Attendance({ fetchAttendance, employeeMasterData, from, 
   ];
   const [payrollid, setPayrollId] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [data, setData] = useState([]);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [month, setMonth] = useState(null);
   const dispatch = useDispatch();
@@ -57,27 +56,6 @@ export default function Attendance({ fetchAttendance, employeeMasterData, from, 
     if (financialYear) setFinancialYear(financialYear);
   }, [searchParams]);
 
-  const getAttandanceData = async () => {
-    if (!payrollid || !financialYear || !month) return;
-    setLoading(true);
-    const url = `/payroll/employee_attendance_filtered?payroll_id=${payrollid}&financial_year=${financialYear}&month=${month}`;
-    const { res } = await Factory('get', url, {});
-    console.log(res);
-    setLoading(false);
-    if (res.status_cd === 0) {
-      setData(res.data || []);
-    } else {
-      dispatch(
-        openSnackbar({
-          open: true,
-          message: JSON.stringify(res.data.message),
-          variant: 'alert',
-          alert: { color: 'error' },
-          close: false
-        })
-      );
-    }
-  };
   useEffect(() => {
     if (payrollid && financialYear && month) {
       fetchAttendance(); // Use parent-controlled fetch function
@@ -133,7 +111,7 @@ export default function Attendance({ fetchAttendance, employeeMasterData, from, 
           close: false
         })
       );
-      getAttandanceData();
+      fetchAttendance();
     }
   };
 
@@ -141,12 +119,12 @@ export default function Attendance({ fetchAttendance, employeeMasterData, from, 
     <>
       <RenderTable
         headerData={headerData}
-        tableData={data}
         handleEdit={handleEdit}
         handleDelete={handleDelete}
         body_keys={body_keys}
         selectedRecord={selectedRecord}
         setSelectedRecord={setSelectedRecord}
+        tableData={attendanceData}
       />
       <RenderDialog
         from={from}
@@ -154,10 +132,9 @@ export default function Attendance({ fetchAttendance, employeeMasterData, from, 
         setOpenDialog={setOpenDialog}
         fields={fields}
         selectedRecord={selectedRecord}
-        setData={setData}
         setLoading={setLoading}
         employeeMasterData={employeeMasterData}
-        getAttandanceData={getAttandanceData}
+        // fetchAttendance={fetchAttendance}
       />
     </>
   );
