@@ -18,6 +18,7 @@ import AuthFooter from 'ui-component/cards/AuthFooter';
 
 import useAuth from 'hooks/useAuth';
 import { APP_AUTH } from 'config';
+import TarapngLogo from '../../../ui-component/TarapngLogo';
 
 // ==============================|| AUTH3 - CHECK MAIL ||============================== //
 
@@ -39,7 +40,7 @@ export default function CheckMail() {
                 <Grid container spacing={2} sx={{ alignItems: 'center', justifyContent: 'center' }}>
                   <Grid sx={{ mb: 3 }}>
                     <Link to="#" aria-label="theme logo">
-                      <Logo />
+                      <TarapngLogo />
                     </Link>
                   </Grid>
                   <Grid size={12}>
