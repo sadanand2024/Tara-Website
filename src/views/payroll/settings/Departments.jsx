@@ -24,7 +24,9 @@ import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
 import EmptyDataPlaceholder from 'ui-component/extended/EmptyDataPlaceholder';
 import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
-
+import DeleteDialog from '../../../ui-component/extended/DeleteDialog'; // adjust path accordingly
+import { IconButton, Tooltip } from '@mui/material'; // Add these if not already
+import { Edit, Delete } from '@mui/icons-material';
 function Departments() {
   const [departments, setDepartments] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
@@ -34,7 +36,16 @@ function Departments() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [selectedRow, setSelectedRow] = useState(null);
+  const handleOpenDeleteDialog = (row) => {
+    setSelectedRow(row);
+    setOpenDeleteDialog(true);
+  };
+  const handleConfirmDelete = () => {
+    handleDelete(selectedRow);
+    setOpenDeleteDialog(false);
+  };
   const paginatedData = departments.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 
   const payrollid = searchParams.get('payrollid');
@@ -82,7 +93,7 @@ function Departments() {
           open: true,
           message: 'Record Deleted Successfully',
           variant: 'alert',
-          alert: { color: 'error' },
+          alert: { color: 'success' },
           close: false
         })
       );
@@ -120,7 +131,7 @@ function Departments() {
         </Grid2>
 
         <TableContainer component={Paper} sx={{ width: '100%', borderRadius: 2, boxShadow: 1, overflowX: 'auto' }}>
-          <Table>
+          <Table size="small">
             <TableHead>
               <TableRow sx={{ bgcolor: 'grey.100' }}>
                 {['S No', 'Department Name', 'Department Code', 'Description', 'No of Employees', 'Actions'].map((header, idx) => (
@@ -154,25 +165,30 @@ function Departments() {
                     </TableCell>
                     <TableCell align="center">{department.employee_count || 0}</TableCell>
                     <TableCell align="center">
-                      <ActionCell
-                        row={department}
-                        onEdit={() => handleEdit(department)}
-                        onDelete={() => handleDelete(department)}
-                        open={openDialog}
-                        onClose={handleCloseDialog}
-                        deleteDialogData={{
-                          title: 'Delete Record',
-                          heading: 'Are you sure you want to delete this Record?',
-                          description: `This action will remove ${department.dept_name} from the list.`,
-                          successMessage: 'Record has been deleted.'
-                        }}
-                      />
+                      <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
+                        <IconButton color="primary" onClick={() => handleEdit(department)}>
+                          <Edit />
+                        </IconButton>
+                        <IconButton color="error" onClick={() => handleOpenDeleteDialog(department)}>
+                          <Delete />
+                        </IconButton>
+                      </Box>
                     </TableCell>
                   </TableRow>
                 ))
               )}
             </TableBody>
           </Table>
+          <DeleteDialog
+            open={openDeleteDialog}
+            onClose={() => setOpenDeleteDialog(false)}
+            onConfirm={handleConfirmDelete}
+            dialogData={{
+              title: 'Delete Record',
+              heading: 'Are you sure?',
+              description: 'This action will permanently delete the record.'
+            }}
+          />
         </TableContainer>
 
         {departments.length > 0 && (

@@ -43,20 +43,19 @@ const PayrollWorkflows = ({ type }) => {
   const payrollId = searchParams.get('payrollid');
   const month = searchParams.get('month');
   const financialYear = searchParams.get('financial_year');
-  // const fetchEmployeeMasterData = async () => {
-  //   setLoading(true);
-  //   const url = `/payroll/employees?payroll_id=${payrollId}&month=${month}&financial_year=${financialYear}`;
-  //   const { res } = await Factory('get', url, {});
-  //   setLoading(false);
-  //   if (res?.status_cd === 0) {
-  //     setEmployeeMasterData(res.data);
-  //   } else {
-  //     setEmployeeMasterData([]);
-  //   }
-  // };
+  const fetchEmployeeMasterData = async () => {
+    setLoading(true);
+    const url = `/payroll/employees?payroll_id=${payrollId}&month=${month}&financial_year=${financialYear}`;
+    const { res } = await Factory('get', url, {});
+    setLoading(false);
+    if (res?.status_cd === 0) {
+      setEmployeeMasterData(res.data);
+    } else {
+      setEmployeeMasterData([]);
+    }
+  };
 
   const getAttandanceData = async () => {
-    console.log('vhg');
     if (!payrollId || !financialYear || !month) return;
     setLoading(true);
     const url = `/payroll/employee_attendance_filtered?payroll_id=${payrollId}&financial_year=${financialYear}&month=${month}`;
@@ -201,7 +200,11 @@ const PayrollWorkflows = ({ type }) => {
     const tabValue = searchParams.get('tabValue');
     if (tabValue) setActiveTab(Number(tabValue));
   }, [searchParams]);
-
+  useEffect(() => {
+    if (payrollId) {
+      fetchEmployeeMasterData();
+    }
+  }, [payrollId]);
   return (
     <MainCard
       title="Employee Dashboard"

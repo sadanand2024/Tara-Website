@@ -25,7 +25,9 @@ import Factory from 'utils/Factory';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
 import EmptyDataPlaceholder from 'ui-component/extended/EmptyDataPlaceholder';
-
+import DeleteDialog from '../../../ui-component/extended/DeleteDialog'; // adjust path accordingly
+import { IconButton, Tooltip } from '@mui/material'; // Add these if not already
+import { Edit, Delete } from '@mui/icons-material';
 function Worklocation() {
   const [openDialog, setOpenDialog] = useState(false);
   const [workLocations, setWorkLocations] = useState([]);
@@ -44,7 +46,18 @@ function Worklocation() {
   const handlePageChange = (event, value) => setCurrentPage(value);
   const handleOpenDialog = () => setOpenDialog(true);
   const handleCloseDialog = () => setOpenDialog(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [selectedRow, setSelectedRow] = useState(null);
 
+  const handleOpenDeleteDialog = (row) => {
+    setSelectedRow(row);
+    setOpenDeleteDialog(true);
+  };
+
+  const handleConfirmDelete = () => {
+    handleDelete(selectedRow);
+    setOpenDeleteDialog(false);
+  };
   useEffect(() => {
     const id = searchParams.get('payrollid');
     if (id) setPayrollId(id);
@@ -151,7 +164,7 @@ function Worklocation() {
                 overflowX: 'auto'
               }}
             >
-              <Table>
+              <Table size="small">
                 <TableHead>
                   <TableRow sx={{ bgcolor: 'grey.100' }}>
                     {['S No', 'Name', 'Address', 'State', 'No of Employees', 'Actions'].map((header, idx) => (
@@ -196,19 +209,14 @@ function Worklocation() {
                         <TableCell align="center">{location.employees || 0}</TableCell>
                         <TableCell align="center">
                           {index !== 0 && (
-                            <ActionCell
-                              row={location}
-                              onEdit={() => handleEdit(location)}
-                              onDelete={() => handleDelete(location)}
-                              open={openDialog}
-                              onClose={handleCloseDialog}
-                              deleteDialogData={{
-                                title: 'Delete Record',
-                                heading: 'Are you sure you want to delete this Record?',
-                                description: `This action will remove ${location.location_name} from the list.`,
-                                successMessage: 'Record has been deleted.'
-                              }}
-                            />
+                            <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
+                              <IconButton color="primary" onClick={() => handleEdit(department)}>
+                                <Edit />
+                              </IconButton>
+                              <IconButton color="error" onClick={() => handleOpenDeleteDialog(department)}>
+                                <Delete />
+                              </IconButton>
+                            </Box>
                           )}
                         </TableCell>
                       </TableRow>
@@ -216,6 +224,16 @@ function Worklocation() {
                   )}
                 </TableBody>
               </Table>
+              <DeleteDialog
+                open={openDeleteDialog}
+                onClose={() => setOpenDeleteDialog(false)}
+                onConfirm={handleConfirmDelete}
+                dialogData={{
+                  title: 'Delete Record',
+                  heading: 'Are you sure?',
+                  description: 'This action will permanently delete the record.'
+                }}
+              />
             </TableContainer>
             {workLocations.length > 0 && (
               <Grid2 size={12}>
