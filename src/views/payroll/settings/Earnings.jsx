@@ -34,7 +34,7 @@ import BlockIcon from '@mui/icons-material/Block';
 import { IconButton } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
 import DeleteDialog from 'ui-component/extended/DeleteDialog';
-
+import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
 const validationSchema = Yup.object({
   component_name: Yup.string().required('Name is required'),
   component_type: Yup.string().required('Type is required'),
@@ -70,12 +70,7 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
     handleDelete(selectedRow);
     setOpenDeleteDialog(false);
   };
-  const rowsPerPage = 8;
   const dispatch = useDispatch();
-  const handlePageChange = (event, value) => {
-    setCurrentPage(value);
-  };
-  const paginatedData = earningsData.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
   useEffect(() => {
     const id = searchParams.get('payrollid');
     if (id) {

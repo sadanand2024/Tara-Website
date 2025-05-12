@@ -1,6 +1,6 @@
 // File: ItemDetailsAndNotes.jsx (Updated with compact UI inside Card)
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Typography,
@@ -27,6 +27,7 @@ import {
 import { IconPlus, IconTrash } from '@tabler/icons-react';
 import CustomInput from 'utils/CustomInput';
 import CustomAutocomplete from 'utils/CustomAutocomplete';
+import AddItem from '../InvoiceSettings/Goods&Services/AddItem';
 
 const ItemDetailsAndNotes = ({
   formik,
@@ -44,8 +45,22 @@ const ItemDetailsAndNotes = ({
   handleApplyTaxChange,
   handleGSTRateChange,
   gstRates,
-  totalDiscount
+  totalDiscount,
+  businessDetailsData,
+  get_Goods_and_Services_Data
 }) => {
+  const [openAddItem, setOpenAddItem] = useState(false);
+  const [type, setType] = useState('');
+
+  const handleOpenAddItem = () => {
+    setOpenAddItem(true);
+  };
+
+  const handleCloseAddItem = () => {
+    setOpenAddItem(false);
+    setType('');
+  };
+
   // Prevent Enter key from submitting the form in item input fields
   const handleItemInputKeyDown = (event) => {
     if (event.key === 'Enter') {
@@ -55,9 +70,22 @@ const ItemDetailsAndNotes = ({
 
   return (
     <Box sx={{ mb: 4 }}>
-      <Typography variant="h6" sx={{ mb: 2 }}>
-        Item Details
-      </Typography>
+      <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Typography variant="h6">Item Details</Typography>
+        <Button
+          variant="contained"
+          startIcon={<IconPlus />}
+          onClick={handleOpenAddItem}
+          sx={{
+            bgcolor: 'primary.main',
+            '&:hover': {
+              bgcolor: 'primary.dark'
+            }
+          }}
+        >
+          Add New Item
+        </Button>
+      </Box>
 
       <TableContainer
         component={Paper}
@@ -71,12 +99,12 @@ const ItemDetailsAndNotes = ({
         <Table>
           <TableHead>
             <TableRow sx={{ bgcolor: 'grey.100' }}>
-              <TableCell sx={{ minWidth: '250px' }}>Item</TableCell>
-              <TableCell sx={{ minWidth: '100px' }}>Note</TableCell>
-              <TableCell sx={{ minWidth: '100px' }}>Quantity</TableCell>
+              <TableCell>Item</TableCell>
+              <TableCell>Note</TableCell>
+              <TableCell>Quantity</TableCell>
               <TableCell>Rate</TableCell>
-              <TableCell sx={{ minWidth: '100px' }}>Discount type</TableCell>
-              <TableCell sx={{ minWidth: '80px' }}>Discount</TableCell>
+              <TableCell>Discount type</TableCell>
+              <TableCell>Discount</TableCell>
               <TableCell>Amount</TableCell>
               <TableCell>Tax %</TableCell>
               <TableCell>Tax Amount</TableCell>
@@ -94,22 +122,24 @@ const ItemDetailsAndNotes = ({
                     value={item.item || ''}
                     onChange={(e, val) => handleItemChange(index, val)}
                     onKeyDown={handleItemInputKeyDown}
-                    renderInput={(params) => <TextField {...params} sx={{ width: 250 }} />}
+                    renderInput={(params) => <TextField {...params} sx={{ minWidth: 200, maxWidth: 200 }} />}
                   />
                 </TableCell>
                 <TableCell>
                   <CustomInput
                     value={item.note}
                     onChange={(e) => handleNoteChange(index, e.target.value)}
-                    sx={{ width: 150 }}
+                    sx={{ minWidth: 100, maxWidth: 100 }}
                     onKeyDown={handleItemInputKeyDown}
+                    multiline={true}
+                    minRows={1}
                   />
                 </TableCell>
                 <TableCell>
                   <CustomInput
                     value={item.quantity}
                     onChange={(e) => handleQuantityChange(index, e.target.value)}
-                    sx={{ width: 100 }}
+                    sx={{ minWidth: 100, maxWidth: 100 }}
                     onKeyDown={handleItemInputKeyDown}
                   />
                 </TableCell>
@@ -118,7 +148,7 @@ const ItemDetailsAndNotes = ({
                   <CustomInput
                     value={item.rate}
                     onChange={(e) => handleRateChange(index, e.target.value)}
-                    sx={{ width: '80%' }}
+                    sx={{ minWidth: 150, maxWidth: 150 }}
                     onKeyDown={handleItemInputKeyDown}
                   />
                 </TableCell>
@@ -129,7 +159,7 @@ const ItemDetailsAndNotes = ({
                     value={item.discount_type || ''}
                     onChange={(e, val) => handleDiscountTypeChange(index, val)}
                     onKeyDown={handleItemInputKeyDown}
-                    renderInput={(params) => <TextField {...params} sx={{ width: 80 }} />}
+                    renderInput={(params) => <TextField {...params} sx={{ minWidth: 100, maxWidth: 100 }} />}
                   />
                 </TableCell>
 
@@ -137,7 +167,7 @@ const ItemDetailsAndNotes = ({
                   <CustomInput
                     value={item.discount}
                     onChange={(e) => handleDiscountChange(index, e.target.value)}
-                    sx={{ width: '60%' }}
+                    sx={{ minWidth: 100, maxWidth: 100 }}
                     onKeyDown={handleItemInputKeyDown}
                   />
                 </TableCell>
@@ -159,14 +189,51 @@ const ItemDetailsAndNotes = ({
         </Table>
       </TableContainer>
 
-      <Box sx={{ mt: 2, display: 'flex', gap: 2 }}>
-        <Button variant="contained" startIcon={<IconPlus />} onClick={handleAddItemRow}>
+      <Box sx={{ mt: 2, display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+        <Button
+          variant="outlined"
+          startIcon={<IconPlus />}
+          onClick={handleAddItemRow}
+          sx={{
+            borderColor: 'primary.main',
+            color: 'primary.main',
+            '&:hover': {
+              borderColor: 'primary.dark',
+              bgcolor: 'primary.light',
+              color: 'primary.dark'
+            }
+          }}
+        >
           Add New Row
         </Button>
-        <Button variant="contained" startIcon={<IconPlus />} onClick={openBulkItemsModal}>
+        <Button
+          variant="outlined"
+          startIcon={<IconPlus />}
+          onClick={openBulkItemsModal}
+          sx={{
+            borderColor: 'secondary.main',
+            color: 'secondary.main',
+            '&:hover': {
+              borderColor: 'secondary.dark',
+              bgcolor: 'secondary.light',
+              color: 'secondary.dark'
+            }
+          }}
+        >
           Add Items in Bulk
         </Button>
       </Box>
+
+      <AddItem
+        businessDetailsData={businessDetailsData}
+        open={openAddItem}
+        handleOpen={handleOpenAddItem}
+        handleClose={handleCloseAddItem}
+        get_Goods_and_Services_Data={get_Goods_and_Services_Data}
+        type={type}
+        setType={setType}
+        from={'itemDetails'}
+      />
 
       <Card sx={{ mt: 4, borderRadius: 2, boxShadow: 2 }}>
         <CardContent>

@@ -132,10 +132,10 @@ const BulkItems = ({
   };
 
   return (
-    <Dialog open={bulkItemsDialogue} onClose={() => setBulkItemsDialogue(false)} maxWidth="md">
+    <Dialog open={bulkItemsDialogue} onClose={() => setBulkItemsDialogue(false)} maxWidth="md" fullWidth>
       <DialogTitle>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+          <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
             Add Items in Bulk
           </Typography>
           <IconButton
@@ -152,7 +152,7 @@ const BulkItems = ({
       </DialogTitle>
       <Divider sx={{ mb: 2 }} />
 
-      <DialogContent sx={{ width: '1000px' }}>
+      <DialogContent>
         <Grid container spacing={3}>
           {/* Search and Select Items */}
           <Grid item xs={12} sm={6}>
@@ -195,7 +195,7 @@ const BulkItems = ({
 
           {/* Display selected items with quantity control */}
           <Grid item xs={12} sm={6}>
-            <Typography variant="h6" gutterBottom>
+            <Typography variant="h5" gutterBottom>
               Selected Items: {selectedItems.length}
             </Typography>
             {selectedItems.length > 0 ? (

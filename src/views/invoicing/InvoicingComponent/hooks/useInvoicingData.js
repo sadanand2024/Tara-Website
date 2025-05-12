@@ -129,6 +129,7 @@ export const useInvoicingData = () => {
     itemsList,
     invoiceNumberFormat,
     selectedInvoice,
-    getInvoiceFormat
+    getInvoiceFormat,
+    getGoodsAndServicesData
   };
 };

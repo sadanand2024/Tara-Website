@@ -4,7 +4,8 @@ import MainCard from '../../../ui-component/cards/MainCard';
 import { useInvoicingData } from './hooks/useInvoicingData';
 
 const InvoicingComponent = () => {
-  const { businessDetails, customers, itemsList, invoiceNumberFormat, selectedInvoice, getInvoiceFormat } = useInvoicingData();
+  const { businessDetails, customers, itemsList, invoiceNumberFormat, selectedInvoice, getInvoiceFormat, getGoodsAndServicesData } =
+    useInvoicingData();
 
   return (
     <MainCard title="Invoice Generation">
@@ -15,6 +16,7 @@ const InvoicingComponent = () => {
         itemsList={itemsList}
         selectedInvoice={selectedInvoice}
         getInvoiceFormat={getInvoiceFormat}
+        getGoodsAndServicesData={getGoodsAndServicesData}
       />
     </MainCard>
   );

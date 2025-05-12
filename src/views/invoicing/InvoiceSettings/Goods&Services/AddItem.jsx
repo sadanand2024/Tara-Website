@@ -46,7 +46,7 @@ const unitsDropdown = [
 const taxPreferencesDropdown = ['Taxable', 'Non-Taxable', 'Out of Scope', 'Non-GST Supply'];
 const gstRatesDropdown = ['0', '5', '12', '18', '28'];
 
-const AddItem = ({ type, setType, open, handleOpen, handleClose, selectedItem, businessDetailsData, get_Goods_and_Services_Data }) => {
+const AddItem = ({ type, setType, open, from, handleClose, selectedItem, businessDetailsData, get_Goods_and_Services_Data }) => {
   const dispatch = useDispatch();
 
   const formik = useFormik({
@@ -77,7 +77,7 @@ const AddItem = ({ type, setType, open, handleOpen, handleClose, selectedItem, b
     onSubmit: async (values) => {
       const postData = {
         ...values,
-        invoicing_profile: businessDetailsData?.invoicing_profile_id,
+        invoicing_profile: from === 'itemDetails' ? businessDetailsData.id : businessDetailsData?.invoicing_profile_id,
         sku_value: Number(values.sku_value),
         gst_rate: Number(values.gst_rate),
         selling_price: Number(values.selling_price)
@@ -156,7 +156,7 @@ const AddItem = ({ type, setType, open, handleOpen, handleClose, selectedItem, b
         resetForm();
         handleClose();
       }}
-      header={{ title: type === 'edit' ? 'Update Item' : 'Add New Item' }}
+      title={'Add or Edit Item'}
       footer={
         <Stack direction="row" spacing={2} justifyContent="space-between" sx={{ width: '100%' }}>
           <Button

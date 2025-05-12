@@ -17,6 +17,8 @@ import {
 import { IconPlus, IconReload, IconFilter } from '@tabler/icons-react';
 import { useSearchParams } from 'react-router-dom';
 import EmptyDataPlaceholder from 'ui-component/extended/EmptyDataPlaceholder';
+import { IconButton } from '@mui/material';
+import { Edit, Delete } from '@mui/icons-material';
 
 import MainCard from 'ui-component/cards/MainCard';
 import ActionCell from 'ui-component/extended/ActionCell';
@@ -26,7 +28,7 @@ import FilterDialog from './FilterDialog';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
 import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
-
+import DeleteDialog from 'ui-component/extended/DeleteDialog';
 function HolidayManagement() {
   const [holidayManagementData, setHolidayManagementData] = useState([]);
   const [workLocations, setWorkLocations] = useState([]);
@@ -41,7 +43,16 @@ function HolidayManagement() {
   const [postType, setPostType] = useState('');
   const [payrollId, setPayrollId] = useState(null);
   const [loading, setLoading] = useState(false);
-
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [selectedRow, setSelectedRow] = useState(null);
+  const handleOpenDeleteDialog = (designation) => {
+    setSelectedRow(designation);
+    setOpenDeleteDialog(true);
+  };
+  const handleConfirmDelete = () => {
+    handleDelete(selectedRow);
+    setOpenDeleteDialog(false);
+  };
   const [currentPage, setCurrentPage] = useState(1);
 
   const [searchParams] = useSearchParams();
@@ -195,10 +206,10 @@ function HolidayManagement() {
               overflowX: 'auto'
             }}
           >
-            <Table>
+            <Table size="small">
               <TableHead>
                 <TableRow sx={{ bgcolor: 'grey.100' }}>
-                  {['Holiday Name', 'Date', 'Description', 'Locations', 'Actions'].map((header, idx) => (
+                  {['S.No', 'Holiday Name', 'Date', 'Description', 'Locations', 'Actions'].map((header, idx) => (
                     <TableCell key={idx} sx={{ fontWeight: 'bold', textAlign: 'center' }}>
                       {header}
                     </TableCell>
@@ -213,8 +224,9 @@ function HolidayManagement() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  paginatedData.map((item) => (
+                  paginatedData.map((item, index) => (
                     <TableRow key={item.id} hover>
+                      <TableCell align="center">{index + 1}</TableCell>
                       <TableCell align="center">{item.holiday_name}</TableCell>
                       <TableCell align="center">{`${item.start_date} - ${item.end_date}`}</TableCell>
                       <TableCell align="center">
@@ -222,25 +234,30 @@ function HolidayManagement() {
                       </TableCell>
                       <TableCell align="center">{item.applicable_for}</TableCell>
                       <TableCell align="center">
-                        <ActionCell
-                          row={item}
-                          onEdit={() => handleEdit(item)}
-                          onDelete={() => handleDelete(item)}
-                          open={openDialog}
-                          onClose={handleCloseDialog}
-                          deleteDialogData={{
-                            title: 'Delete Record',
-                            heading: 'Are you sure you want to delete this holiday?',
-                            description: `This action will remove ${item.holiday_name}.`,
-                            successMessage: 'Holiday deleted successfully'
-                          }}
-                        />
+                        <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
+                          <IconButton color="primary" onClick={() => handleEdit(item)}>
+                            <Edit />
+                          </IconButton>
+                          <IconButton color="error" onClick={() => handleOpenDeleteDialog(item)}>
+                            <Delete />
+                          </IconButton>
+                        </Box>
                       </TableCell>
                     </TableRow>
                   ))
                 )}
               </TableBody>
             </Table>
+            <DeleteDialog
+              open={openDeleteDialog}
+              onClose={() => setOpenDeleteDialog(false)}
+              onConfirm={handleConfirmDelete}
+              dialogData={{
+                title: 'Delete Record',
+                heading: 'Are you sure you want to delete this Record?',
+                description: 'This action will permanently delete the record.'
+              }}
+            />
           </TableContainer>
         )}
 
