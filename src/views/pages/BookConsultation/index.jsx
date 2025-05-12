@@ -242,6 +242,9 @@ const BookConsultationPage = () => {
     if (!form.email.trim()) newErrors.email = 'Email is required.';
     else if (!/^\S+@\S+\.\S+$/.test(form.email)) newErrors.email = 'Enter a valid email address.';
     if (!form.mobile_number.trim() || form.mobile_number.length !== 10) newErrors.mobile_number = 'Mobile Number is required.';
+    // Notes validation
+    if (!form.notes || form.notes.length < 30) newErrors.notes = 'Please enter at least 30 characters.';
+    else if (form.notes.length > 200) newErrors.notes = 'Maximum 200 characters allowed.';
     return newErrors;
   };
 
@@ -269,25 +272,25 @@ const BookConsultationPage = () => {
 
     if (Object.keys(newErrors).length === 0) {
       console.log('Submitting data:', data);
-      const apiUrl = `${import.meta.env.VITE_APP_BASE_URL}/user_management/consultation`;
-      axios
-        .post(apiUrl, data)
-        .then((response) => {
-          console.log(response);
-          enqueueSnackbar('Consultation booked successfully!', {
-            variant: 'success',
-            anchorOrigin: { vertical: 'top', horizontal: 'right' },
-            autoHideDuration: 3000
-          });
-          handleReset();
-        })
-        .catch((error) => {
-          enqueueSnackbar('Error booking consultation!', {
-            variant: 'error',
-            anchorOrigin: { vertical: 'top', horizontal: 'right' },
-            autoHideDuration: 3000
-          });
-        });
+      // const apiUrl = `${import.meta.env.VITE_APP_BASE_URL}/user_management/consultation`;
+      // axios
+      //   .post(apiUrl, data)
+      //   .then((response) => {
+      //     console.log(response);
+      //     enqueueSnackbar('Consultation booked successfully!', {
+      //       variant: 'success',
+      //       anchorOrigin: { vertical: 'top', horizontal: 'right' },
+      //       autoHideDuration: 3000
+      //     });
+      //     handleReset();
+      //   })
+      //   .catch((error) => {
+      //     enqueueSnackbar('Error booking consultation!', {
+      //       variant: 'error',
+      //       anchorOrigin: { vertical: 'top', horizontal: 'right' },
+      //       autoHideDuration: 3000
+      //     });
+      //   });
     }
   };
 
@@ -666,13 +669,25 @@ const BookConsultationPage = () => {
           <Typography variant="subtitle1" sx={{ textAlign: 'left', mb: 0.5, color: theme.palette.text.primary }}>
             Please share anything that will help prepare for our meeting.
           </Typography>
+
           <TextField
             fullWidth
             multiline
             minRows={{ xs: 2, sm: 3 }}
             sx={styles.textField}
             value={form.notes}
-            onChange={handleFormChange('notes')}
+            onChange={e => {
+              if (e.target.value.length <= 200) {
+                handleFormChange('notes')(e);
+              }
+            }}
+            error={!!errors.notes}
+            helperText={
+              errors.notes
+                ? errors.notes
+                : `${form.notes.length}/200 characters` + (form.notes.length > 0 && form.notes.length < 30 ? ' (minimum 30 characters)' : '')
+            }
+            inputProps={{ maxLength: 200 }}
           />
           <Typography variant="caption" sx={{ color: theme.palette.text.secondary, mb: 2, display: 'block' }}>
             By proceeding, you confirm that you have read and agree to{' '}

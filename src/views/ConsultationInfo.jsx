@@ -37,152 +37,151 @@ const ConsultationInfo = () => {
   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return (
-    <Box sx={{ background: '#f7f8fa', minHeight: '100vh', p: { xs: 1, sm: 2, md: 3 } }}>
-      <Paper sx={{ maxWidth: '100%', borderRadius: 3, p: 0, mx: 'auto', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 3, py: 2, borderBottom: '1px solid #eee' }}>
-          <Typography variant="h3" fontWeight={600}>
-            Consultation Info
-          </Typography>
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              background: '#f7f8fa',
-              borderRadius: 2,
-              px: 1,
-              py: 0.5,
-              border: '1px solid #e3e3e3'
+    <Paper sx={{ borderRadius: 3, p: 0, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 3, py: 2, borderBottom: '1px solid #eee' }}>
+        <Typography variant="h3" fontWeight={600}>
+          Consultation Info
+        </Typography>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            background: '#f7f8fa',
+            borderRadius: 2,
+            px: 1,
+            py: 0.5,
+            border: '1px solid #e3e3e3'
+          }}
+        >
+          <InputBase
+            placeholder="Search by name, mobile, email"
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
             }}
-          >
-            <InputBase
-              placeholder="Search by name, mobile, email"
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setPage(1);
-              }}
-              sx={{ ml: 1, flex: 1, fontSize: 16 }}
-            />
-            <IconButton size="small" sx={{ color: '#888' }}>
-              <SearchIcon />
-            </IconButton>
-          </Box>
+            sx={{ ml: 1, flex: 1, fontSize: 16 }}
+          />
+          <IconButton size="small" sx={{ color: '#888' }}>
+            <SearchIcon />
+          </IconButton>
         </Box>
-        <Box sx={{ p: { xs: 1, sm: 2, md: 3 } }}>
-          <Grid2 container spacing={3}>
-            {paginated.map((info, idx) => (
-              <Grid2 size={{ xs: 12, sm: 12, md: 6, lg: 3, xl: 3 }} key={info.id || info.email + idx}>
-                <Card
+      </Box>
+      <Box sx={{ p: { xs: 1, sm: 2, md: 3 } }}>
+        <Grid2 container spacing={3}>
+          {paginated.map((info, idx) => (
+            <Grid2 size={{ xs: 12, sm: 12, md: 6, lg: 3, xl: 3 }} key={info.id || info.email + idx}>
+              <Card
+                sx={{
+                  height: { xs: '398px', sm: '398px', md: '598px', lg: '498px', xl: '450px' },
+                  border: '1px solid #e3e3e3',
+                  backgroundColor: '#f8fafc',
+                  boxShadow: 'none',
+                  borderRadius: 2,
+                  position: 'relative',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  '&:hover': {
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
+                  }
+                }}
+              >
+                <IconButton sx={{ position: 'absolute', top: 8, right: 8 }}>
+                  <MoreVertIcon />
+                </IconButton>
+
+                <CardContent
                   sx={{
-                    height: '400px',
-                    border: '1px solid #e3e3e3',
-                    backgroundColor: '#f8fafc',
-                    boxShadow: 'none',
-                    borderRadius: 2,
-                    position: 'relative',
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'space-between',
-                    '&:hover': {
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
-                    }
+                    height: '100%',
+                    paddingBottom: '16px !important'
                   }}
                 >
-                  <IconButton sx={{ position: 'absolute', top: 8, right: 8 }}>
-                    <MoreVertIcon />
-                  </IconButton>
-
-                  <CardContent
-                    sx={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'space-between',
-                      height: '100%',
-                      paddingBottom: '16px !important'
-                    }}
-                  >
-                    <Stack spacing={2} sx={{ flexGrow: 1 }}>
-                      {/* Avatar & Name */}
-                      <Stack direction="row" alignItems="center" spacing={2} mb={2}>
-                        <Avatar
-                          alt={info.name}
-                          sx={{
-                            width: 56,
-                            height: 56,
-                            bgcolor: 'primary.light',
-                            fontSize: '1.5rem',
-                            fontWeight: 600
-                          }}
-                        >
-                          {info.name?.charAt(0)}
-                        </Avatar>
-                        <Box>
-                          <Typography variant="h4" fontWeight={600}>
-                            {info.name}
-                          </Typography>
-                        </Box>
-                      </Stack>
-
-                      {/* Message */}
-                      <Typography variant="body2" color="text.secondary">
-                        {info.message}
-                      </Typography>
-
-                      {/* Email */}
-                      <Box>
-                        <Typography variant="body2" mb={0.5}>
-                          <b>Email</b>
-                        </Typography>
-                        <Typography variant="body2" sx={{ color: '#1976d2' }}>
-                          {info.email}
-                        </Typography>
-                      </Box>
-
-                      {/* Mobile & Date/Time */}
-                      <Stack direction="row" spacing={2}>
-                        <Typography variant="body2">
-                          <b>Mobile</b>
-                          <br />
-                          {info.mobile_number}
-                        </Typography>
-                        <Typography variant="body2">
-                          <b>Date & Time</b>
-                          <br />
-                          {info.created_date} {info.created_time}
-                        </Typography>
-                      </Stack>
-                    </Stack>
-
-                    {/* Action Buttons */}
-                    <Stack direction="row" spacing={2} mt={2}>
-                      <Button variant="outlined" startIcon={<ChatBubbleOutlineIcon />} sx={{ flex: 1 }}>
-                        Reviewed
-                      </Button>
-                      <Button
-                        variant="outlined"
-                        color="error"
-                        startIcon={<Delete />}
+                  <Stack spacing={2} sx={{ flexGrow: 1 }}>
+                    {/* Avatar & Name */}
+                    <Stack direction="row" alignItems="center" spacing={2} mb={2}>
+                      <Avatar
+                        alt={info.name}
                         sx={{
-                          flex: 1,
-                          borderColor: '#f44336',
-                          color: '#f44336',
-                          '&:hover': { bgcolor: '#fdecea' }
+                          width: 52,
+                          height: 52,
+                          bgcolor: 'primary.light',
+                          fontSize: '1.6rem',
+                          fontWeight: 600
                         }}
                       >
-                        Delete
-                      </Button>
+                        {info.name?.charAt(0)}
+                      </Avatar>
+                      <Box>
+                        <Typography variant="h4" fontWeight={600}>
+                          {info.name}
+                        </Typography>
+                      </Box>
                     </Stack>
-                  </CardContent>
-                </Card>
-              </Grid2>
-            ))}
-          </Grid2>
-          <Stack alignItems="center" mt={4}>
-            <Pagination count={pageCount} page={page} onChange={(_, value) => setPage(value)} color="primary" />
-          </Stack>
-        </Box>
-      </Paper>
-    </Box>
+
+                    {/* Message */}
+                    <Box>
+                      <Typography variant="body2" mb={0.5}>
+                        <b>Message</b>
+                      </Typography>
+                      <Typography variant="body2" color="text.primary">
+                        {info.message}
+                      </Typography>
+                    </Box>
+                    {/* Email */}
+                    <Box>
+                      <Typography variant="body2" mb={0.5}>
+                        <b>Email</b>
+                      </Typography>
+                      <Typography variant="body2" color="text.primary">
+                        {info.email}
+                      </Typography>
+                    </Box>
+
+                    {/* Mobile & Date/Time */}
+                    <Stack direction="row" spacing={2}>
+                      <Typography variant="body2">
+                        <b>Mobile</b>
+                        <br />
+                        {info.mobile_number}
+                      </Typography>
+                      <Typography variant="body2">
+                        <b>Date & Time</b>
+                        <br />
+                        {new Date(`${info.created_date} ${info.created_time}`).toLocaleString('en-US', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                          hour: 'numeric',
+                          minute: 'numeric',
+                          hour12: true
+                        })}
+                      </Typography>
+                    </Stack>
+                  </Stack>
+
+                  {/* Action Buttons */}
+                  <Stack direction="row" spacing={2} mt={2}>
+                    <Button variant="outlined" startIcon={<ChatBubbleOutlineIcon />} sx={{ flex: 1 }}>
+                      Reviewed
+                    </Button>
+                    <Button variant="outlined" color="error" startIcon={<Delete />} sx={{ flex: 1 }}>
+                      Delete
+                    </Button>
+                  </Stack>
+                </CardContent>
+              </Card>
+            </Grid2>
+          ))}
+        </Grid2>
+        <Stack alignItems="center" mt={4}>
+          <Pagination count={pageCount} page={page} onChange={(_, value) => setPage(value)} color="primary" />
+        </Stack>
+      </Box>
+    </Paper>
   );
 };
 

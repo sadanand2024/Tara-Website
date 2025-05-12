@@ -218,5 +218,8 @@
   "business-bank-details": "Business Bank Details",
   "msme-settings": "MSME Settings",
   "gst-settings": "GST Settings",
-  "tds-income-tax": "TDS & Income Tax"
+  "tds-income-tax": "TDS & Income Tax",
+  "admin": "Admin",
+  "consultation": "Consultation",
+  "contact-us": "Contact Us"
 }

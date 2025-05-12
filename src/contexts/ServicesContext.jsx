@@ -15,16 +15,16 @@ export const ServicesProvider = ({ children }) => {
       .then((res) => setServices(res.data))
       .catch((err) => {
         setServices([]);
-        dispatch(
-          openSnackbar({
-            open: true,
-            message: 'Failed to fetch services. Please try again later.',
-            variant: 'alert',
-            severity: 'error',
-            alert: { color: 'error', variant: 'filled' },
-            transition: 'SlideUp'
-          })
-        );
+        // dispatch(
+        //   openSnackbar({
+        //     open: true,
+        //     message: 'Failed to fetch services. Please try again later.',
+        //     variant: 'alert',
+        //     severity: 'error',
+        //     alert: { color: 'error', variant: 'filled' },
+        //     transition: 'SlideUp'
+        //   })
+        // );
       });
   }, [dispatch]);
 

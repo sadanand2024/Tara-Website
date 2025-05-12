@@ -89,7 +89,7 @@ export default function ContactCard() {
                   whiteSpace: 'nowrap'
                 }}
               >
-                We’d love to hear from you
+                We'd love to hear from you
               </Typography>
             </Grid>
             <Grid size={12}>
@@ -135,7 +135,10 @@ export default function ContactCard() {
                   last_name: Yup.string().required('Last name is required'),
                   email: Yup.string().email('Invalid email address').required('Email is required'),
                   mobile_number: Yup.string().required('Phone number is required'),
-                  message: Yup.string().required('Message is required')
+                  message: Yup.string()
+                    .required('Message is required')
+                    .min(30, 'Please enter at least 30 characters')
+                    .max(200, 'Maximum 200 characters allowed')
                 })}
                 onSubmit={(values, { setSubmitting, resetForm }) => {
                   // Handle form submission here
@@ -243,7 +246,13 @@ export default function ContactCard() {
                             fullWidth
                             rows={4}
                             error={Boolean(touched.message && errors.message)}
-                            helperText={touched.message && errors.message}
+                            helperText={
+                              touched.message && errors.message
+                                ? errors.message
+                                : `${values.message.length}/200 characters` +
+                                  (values.message.length > 0 && values.message.length < 30 ? ' (minimum 30 characters)' : '')
+                            }
+                            inputProps={{ maxLength: 200 }}
                           />
                         </FormControl>
                       </Grid>

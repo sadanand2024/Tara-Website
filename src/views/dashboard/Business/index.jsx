@@ -212,8 +212,8 @@ export default function Business() {
           borderRadius: 1
         }}
       >
-        <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, letterSpacing: '-0.5px' }}>
-          {companyInfo.name}
+        <Typography variant="h3" gutterBottom sx={{ fontWeight: 700, letterSpacing: '-0.5px', mb:2 }}>
+          {user.active_context.name}
         </Typography>
 
         <Grid container spacing={2} sx={{ mb: 2 }}>
