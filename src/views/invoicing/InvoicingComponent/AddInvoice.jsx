@@ -532,8 +532,8 @@ const AddItem = ({
           formik.handleSubmit(); // Calls Formik's submission logic
         }}
       >
-        <Box sx={{ mb: 1 }}>
-          <Typography variant="h6">Invoice Details</Typography>
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="h4">Invoice Details</Typography>
         </Box>
 
         <Grid2 container spacing={2}>

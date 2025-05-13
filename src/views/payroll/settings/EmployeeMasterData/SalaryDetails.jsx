@@ -17,7 +17,7 @@ const validationSchema = Yup.object({
 });
 const initialEarnings = [{ component_name: 'Basic', calculation_type: 'Fixed', monthly: 0, annually: 0, calculation: 0 }];
 
-function SalaryDetails({ fetchEmployeeData, employeeData, createdEmployeeId }) {
+function SalaryDetails({ fetchEmployeeData, employeeData, createdEmployeeId, setSubmitRef, onNext }) {
   // console.log(employeeData);
   const [open, setOpen] = useState(false);
   const [payrollid, setPayrollId] = useState(null);
@@ -105,6 +105,7 @@ function SalaryDetails({ fetchEmployeeData, employeeData, createdEmployeeId }) {
             close: false
           })
         );
+        onNext();
         const employeeId = employeeData?.id || createdEmployeeId;
         await fetchEmployeeData(employeeId);
       }
@@ -199,6 +200,11 @@ function SalaryDetails({ fetchEmployeeData, employeeData, createdEmployeeId }) {
       }));
     }
   }, [employeeData]);
+  useEffect(() => {
+    if (setSubmitRef) {
+      setSubmitRef(formik.submitForm);
+    }
+  }, [setSubmitRef, formik.submitForm]);
   return (
     <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -215,12 +221,6 @@ function SalaryDetails({ fetchEmployeeData, employeeData, createdEmployeeId }) {
           setEnablePreviewButton={setEnablePreviewButton}
           createdEmployeeId={employeeData?.id || createdEmployeeId}
         />
-
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
-          <Button variant="contained" color="primary" type="submit">
-            Save Template
-          </Button>
-        </Box>
       </Box>
     </Box>
   );

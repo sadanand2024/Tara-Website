@@ -24,7 +24,7 @@ const employeeFields = [
   { name: 'designation', label: 'Designation' },
   { name: 'department', label: 'Department' }
 ];
-function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, onNext }) {
+function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, onNext, setSubmitRef }) {
   const [loading, setLoading] = useState(false); // State for loader
   const dispatch = useDispatch();
 
@@ -361,6 +361,12 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
       }));
     }
   }, [employeeData]);
+  useEffect(() => {
+    if (setSubmitRef) {
+      setSubmitRef(formik.submitForm);
+    }
+  }, [setSubmitRef, formik.submitForm]);
+
   return (
     <Box sx={{ mt: 2 }}>
       <form onSubmit={handleSubmit}>
@@ -513,12 +519,6 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
             label="Professional tax"
           />
         </FormGroup>
-
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 2, gap: 2 }}>
-          <Button variant="contained" color="primary" type="submit">
-            Save & Continue
-          </Button>
-        </Box>
       </form>
     </Box>
   );

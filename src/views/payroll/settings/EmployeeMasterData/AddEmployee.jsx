@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Box, Button, Typography, Stepper, Step, StepLabel, Stack } from '@mui/material';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -23,10 +23,11 @@ function StepperComponent() {
 
   const steps = ['Basic Details', 'Salary Details', 'Personal Details', 'Payment Information'];
 
+  const formRefs = useRef({});
+
   const handleNext = async () => {
-    const newStep = Math.min(activeStep + 1, steps.length - 1);
-    setActiveStep(newStep);
-    if (employeeId) await fetchEmployeeData(employeeId); // ✅ refresh on next
+    const submit = formRefs.current[activeStep];
+    if (submit) await submit(); // trigger child form submit
   };
 
   const handleBack = async () => {
@@ -38,38 +39,27 @@ function StepperComponent() {
   const handleReset = () => setActiveStep(0);
 
   const renderStepContent = (step) => {
+    const setSubmitRef = (submitFn) => {
+      formRefs.current[step] = submitFn;
+    };
+
+    const commonProps = {
+      employeeData,
+      createdEmployeeId,
+      fetchEmployeeData,
+      onNext: () => setActiveStep((prev) => prev + 1),
+      setSubmitRef // 👈 pass this to child
+    };
+
     switch (step) {
       case 0:
-        return (
-          <BasicDetails
-            employeeData={employeeData}
-            onNext={handleNext}
-            setCreatedEmployeeId={setCreatedEmployeeId}
-            fetchEmployeeData={fetchEmployeeData}
-          />
-        );
+        return <BasicDetails {...commonProps} setCreatedEmployeeId={setCreatedEmployeeId} />;
       case 1:
-        return (
-          <SalaryDetails
-            employeeData={employeeData}
-            onNext={handleNext}
-            createdEmployeeId={createdEmployeeId}
-            fetchEmployeeData={fetchEmployeeData}
-          />
-        );
+        return <SalaryDetails {...commonProps} />;
       case 2:
-        return (
-          <PersonalDetails
-            employeeData={employeeData}
-            onNext={handleNext}
-            createdEmployeeId={createdEmployeeId}
-            fetchEmployeeData={fetchEmployeeData}
-          />
-        );
+        return <PersonalDetails {...commonProps} />;
       case 3:
-        return (
-          <PaymentInformation employeeData={employeeData} createdEmployeeId={createdEmployeeId} fetchEmployeeData={fetchEmployeeData} />
-        );
+        return <PaymentInformation {...commonProps} />;
       default:
         return <Typography>Unknown Step</Typography>;
     }
@@ -142,8 +132,8 @@ function StepperComponent() {
                   </Button>
                 </Stack>
 
-                <Button variant="contained" color="primary" onClick={handleNext} disabled={activeStep === steps.length - 1}>
-                  Next
+                <Button variant="contained" color="primary" onClick={handleNext}>
+                  Save & Continue
                 </Button>
               </Stack>
             </>

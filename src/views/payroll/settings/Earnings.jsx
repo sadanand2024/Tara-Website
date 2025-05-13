@@ -70,6 +70,8 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
     handleDelete(selectedRow);
     setOpenDeleteDialog(false);
   };
+  const paginatedData = earningsData.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+
   const dispatch = useDispatch();
   useEffect(() => {
     const id = searchParams.get('payrollid');

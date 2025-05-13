@@ -28,6 +28,8 @@ import EmptyDataPlaceholder from 'ui-component/extended/EmptyDataPlaceholder';
 import DeleteDialog from '../../../ui-component/extended/DeleteDialog'; // adjust path accordingly
 import { IconButton, Tooltip } from '@mui/material'; // Add these if not already
 import { Edit, Delete } from '@mui/icons-material';
+import BulkUploadWorkLocationDialog from './BulkUploadWorkLocationDialog';
+
 function Worklocation() {
   const [openDialog, setOpenDialog] = useState(false);
   const [workLocations, setWorkLocations] = useState([]);
@@ -36,6 +38,7 @@ function Worklocation() {
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [openBulkDialog, setOpenBulkDialog] = useState(false);
 
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -131,18 +134,29 @@ function Worklocation() {
         <MainCard
           title="Work Location Details"
           secondary={
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={() => {
-                setPostType('post');
-                handleOpenDialog();
-              }}
-            >
-              Add Work Location
-            </Button>
+            <Stack direction="row" spacing={2}>
+              {/* <Button variant="outlined" color="secondary" onClick={() => setOpenBulkDialog(true)}>
+                Bulk Upload
+              </Button> */}
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => {
+                  setPostType('post');
+                  handleOpenDialog();
+                }}
+              >
+                Add Work Location
+              </Button>
+            </Stack>
           }
         >
+          <BulkUploadWorkLocationDialog
+            open={openBulkDialog}
+            handleClose={() => setOpenBulkDialog(false)}
+            fetchWorkLocations={fetchWorkLocations}
+            payrollid={payrollid}
+          />
           <Grid2 container spacing={{ xs: 2, sm: 3 }}>
             <Grid2 xs={12}>
               <WorkLocationDialog

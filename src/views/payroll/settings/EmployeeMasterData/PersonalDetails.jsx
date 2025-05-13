@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useFormik, FormikProvider } from 'formik';
 import * as Yup from 'yup';
-import { Box, Grid, Typography, Button } from '@mui/material';
+import { Box, Grid2, Typography, Button } from '@mui/material';
 import dayjs from 'dayjs';
 import { useSearchParams } from 'react-router-dom';
 import { useDispatch } from 'store';
@@ -13,7 +13,7 @@ import CustomAutocomplete from 'utils/CustomAutocomplete';
 import CustomDatePicker from 'utils/CustomDateInput';
 import { indian_States_And_UTs } from 'utils/indian_States_And_UT';
 
-const PersonalDetails = ({ fetchEmployeeData, employeeData, createdEmployeeId }) => {
+const PersonalDetails = ({ fetchEmployeeData, employeeData, createdEmployeeId, setSubmitRef, onNext }) => {
   const [searchParams] = useSearchParams();
   const dispatch = useDispatch();
   const payrollId = searchParams.get('payrollid');
@@ -111,6 +111,7 @@ const PersonalDetails = ({ fetchEmployeeData, employeeData, createdEmployeeId })
             alert: { color: 'success' }
           })
         );
+        onNext();
         fetchEmployeeData(postData.employee);
       } else {
         dispatch(
@@ -226,38 +227,36 @@ const PersonalDetails = ({ fetchEmployeeData, employeeData, createdEmployeeId })
       </>
     );
   };
-
+  useEffect(() => {
+    if (setSubmitRef) {
+      setSubmitRef(formik.submitForm);
+    }
+  }, [setSubmitRef, formik.submitForm]);
   return (
     <Box sx={{ mt: 2 }}>
       <FormikProvider value={formik}>
         <form onSubmit={handleSubmit}>
-          <Typography variant="h5" gutterBottom>
+          <Typography variant="h4" gutterBottom>
             Personal Details
           </Typography>
-          <Grid container spacing={2}>
+          <Grid2 container spacing={2}>
             {employeeFields.map((f, i) => (
-              <Grid item xs={12} sm={6} md={4} key={i}>
+              <Grid2 size={{ xs: 12, sm: 6, md: 4 }} key={i}>
                 {renderField(f)}
-              </Grid>
+              </Grid2>
             ))}
-          </Grid>
+          </Grid2>
 
-          <Typography variant="h6" mt={4} gutterBottom>
+          <Typography variant="h4" mt={4} gutterBottom>
             Address Details
           </Typography>
-          <Grid container spacing={2}>
+          <Grid2 container spacing={2}>
             {addressFields.map((f, i) => (
-              <Grid item xs={12} sm={6} md={4} key={i}>
+              <Grid2 size={{ xs: 12, sm: 6, md: 4 }} key={i}>
                 {renderField(f, 'address')}
-              </Grid>
+              </Grid2>
             ))}
-          </Grid>
-
-          <Box sx={{ mt: 3, textAlign: 'center' }}>
-            <Button type="submit" variant="contained" color="primary">
-              Save
-            </Button>
-          </Box>
+          </Grid2>
         </form>
       </FormikProvider>
     </Box>

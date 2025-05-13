@@ -15,7 +15,7 @@ import { entity_choices } from 'utils/Entity-types';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
-
+import { businessTypesArray } from 'utils/businessTypesArray';
 export default function TabOne({ businessDetails = {}, postType, handleNext, setBusinessDetails }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -296,8 +296,10 @@ export default function TabOne({ businessDetails = {}, postType, handleNext, set
                     onChange={(e, newValue) => setFieldValue(item.name, newValue)}
                     options={
                       item.name === 'entityType'
-                        ? entity_choices // Use entity choices if the field is entityType
-                        : indian_States_And_UTs // Use indian_States_And_UTs for state field
+                        ? values.pan && values.pan.length >= 4
+                          ? businessTypesArray[values.pan[3]] || entity_choices
+                          : entity_choices
+                        : indian_States_And_UTs
                     }
                     error={touched[item.name] && Boolean(errors[item.name])}
                     helperText={touched[item.name] && errors[item.name]}
@@ -321,6 +323,14 @@ export default function TabOne({ businessDetails = {}, postType, handleNext, set
                         // Check if the PAN length is greater than 10
                         if (upperValue.length <= 10) {
                           setFieldValue(item.name, upperValue);
+                          // If we have 4 characters, check the 4th letter to set business type
+                          if (upperValue.length >= 4) {
+                            const fourthLetter = upperValue[3];
+                            const businessTypes = businessTypesArray[fourthLetter];
+                            if (businessTypes && businessTypes.length > 0) {
+                              setFieldValue('entityType', businessTypes[0]); // Set the first business type as default
+                            }
+                          }
                         } else {
                           // Optionally handle the error or set the value to an empty string
                           setFieldValue(item.name, upperValue.substring(0, 10)); // Limit to 10 characters

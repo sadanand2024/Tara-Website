@@ -10,14 +10,17 @@ import {
   Stack,
   Pagination,
   Typography,
-  CircularProgress
+  CircularProgress,
+  Box
 } from '@mui/material';
 import Factory from 'utils/Factory';
 import AddItem from './AddItem';
 import ActionCell from '../../../../ui-component/extended/ActionCell';
 import { useDispatch } from 'react-redux';
 import { openSnackbar } from '../../../../store/slices/snackbar';
-
+import DeleteDialog from 'ui-component/extended/DeleteDialog'; // adjust path accordingly
+import { IconButton, Tooltip } from '@mui/material'; // Add these if not already
+import { Edit, Delete } from '@mui/icons-material';
 const ItemList = ({ type, setType, handleClose, handleOpen, open, businessDetailsData, itemsData, get_Goods_and_Services_Data }) => {
   const dispatch = useDispatch();
   const [itemsList, setItemsList] = useState([]);
@@ -25,7 +28,18 @@ const ItemList = ({ type, setType, handleClose, handleOpen, open, businessDetail
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const rowsPerPage = 8;
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [selectedRow, setSelectedRow] = useState(null);
 
+  const handleOpenDeleteDialog = (row) => {
+    setSelectedRow(row);
+    setOpenDeleteDialog(true);
+  };
+
+  const handleConfirmDelete = () => {
+    handleDelete(selectedRow);
+    setOpenDeleteDialog(false);
+  };
   const handlePageChange = (event, value) => {
     setCurrentPage(value);
   };
@@ -124,25 +138,30 @@ const ItemList = ({ type, setType, handleClose, handleOpen, open, businessDetail
                   <TableCell>{item.gst_rate}</TableCell>
                   <TableCell>{item.selling_price}</TableCell>
                   <TableCell align="center">
-                    <ActionCell
-                      row={item}
-                      onEdit={() => handleEdit(item)}
-                      onDelete={() => handleDelete(item)}
-                      open={open}
-                      onClose={handleCloseModal}
-                      deleteDialogData={{
-                        title: 'Delete Item',
-                        heading: 'Are you sure you want to delete this item?',
-                        description: `This action will remove ${item.name} from the list.`,
-                        successMessage: 'Item has been deleted.'
-                      }}
-                    />
+                    <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
+                      <IconButton color="primary" onClick={() => handleEdit(item)}>
+                        <Edit />
+                      </IconButton>
+                      <IconButton color="error" onClick={() => handleOpenDeleteDialog(item)}>
+                        <Delete />
+                      </IconButton>
+                    </Box>
                   </TableCell>
                 </TableRow>
               ))
             )}
           </TableBody>
         </Table>
+        <DeleteDialog
+          open={openDeleteDialog}
+          onClose={() => setOpenDeleteDialog(false)}
+          onConfirm={handleConfirmDelete}
+          dialogData={{
+            title: 'Delete Record',
+            heading: 'Are you sure?',
+            description: 'This action will permanently delete the record.'
+          }}
+        />
       </TableContainer>
 
       {itemsList.length > 0 && (
