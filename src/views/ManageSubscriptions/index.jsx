@@ -10,6 +10,7 @@ import AutorenewIcon from '@mui/icons-material/Autorenew';
 import { useDispatch as useReduxDispatch } from 'react-redux';
 import { storeUser } from 'store/slices/account';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import CheckCircleTwoToneIcon from '@mui/icons-material/CheckCircleTwoTone';
 
 // material-ui
 import {

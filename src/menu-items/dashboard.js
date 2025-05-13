@@ -185,7 +185,7 @@ const dashboard = {
 const moduleToMenuId = {
   invoice: 'invoicing',
   payroll: 'payroll',
-  documents: 'document-wallet',
+  // documents: 'document-wallet',
   'income-tax': 'income-tax',
   tds: 'tds',
   insurance: 'insurance',
