@@ -105,7 +105,7 @@ const BillingShippingForm = ({ formik, onStateChange }) => {
 
   return (
     <Box sx={{ mb: 2 }}>
-      <Typography variant="h6">Billing & Shipping Information</Typography>
+      <Typography variant="h4">Billing & Shipping Information</Typography>
       <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', my: 2 }}>
         <FormControlLabel
           control={<Checkbox checked={values.same_address} onChange={handleSameAddress} />}

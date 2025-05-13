@@ -8,7 +8,7 @@ import CustomInput from 'utils/CustomInput';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
 import { useNavigate } from 'react-router-dom';
-function PaymentInformation({ employeeData, createdEmployeeId }) {
+function PaymentInformation({ employeeData, createdEmployeeId, onNext, setSubmitRef }) {
   const [payrollid, setPayrollId] = useState(null);
   const [employeeId, setEmployeeId] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -153,7 +153,11 @@ function PaymentInformation({ employeeData, createdEmployeeId }) {
       }));
     }
   }, [employeeData]);
-
+  useEffect(() => {
+    if (setSubmitRef) {
+      setSubmitRef(formik.submitForm);
+    }
+  }, [setSubmitRef, formik.submitForm]);
   return (
     <Box sx={{ mt: 2 }}>
       <FormikProvider value={formik}>
@@ -161,12 +165,6 @@ function PaymentInformation({ employeeData, createdEmployeeId }) {
           <Grid2 container spacing={2}>
             {renderFields(employeeFields)}
           </Grid2>
-
-          <Box sx={{ mt: 2, textAlign: 'center' }}>
-            <Button variant="contained" color="primary" type="submit">
-              Save
-            </Button>
-          </Box>
         </form>
       </FormikProvider>
     </Box>

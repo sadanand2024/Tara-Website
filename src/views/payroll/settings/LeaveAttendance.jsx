@@ -39,7 +39,7 @@ const LeaveAttendance = ({ type }) => {
 
   return (
     <MainCard title="Leave & Attendance" tagline="Setup your organization before starting payroll">
-      <Box sx={{ width: '100%', mb: 2 }}>
+      <Box sx={{ width: '100%' }}>
         <Tabs
           value={activeTab}
           onChange={handleTabChange}

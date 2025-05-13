@@ -71,7 +71,7 @@ const ItemDetailsAndNotes = ({
   return (
     <Box sx={{ mb: 4 }}>
       <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="h6">Item Details</Typography>
+        <Typography variant="h4">Item Details</Typography>
         <Button
           variant="contained"
           startIcon={<IconPlus />}
