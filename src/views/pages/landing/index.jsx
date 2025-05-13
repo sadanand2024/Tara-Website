@@ -88,7 +88,7 @@ export default function Landing() {
           </Box>
           */}
       {/* footer section */}
-      <Box sx={{ py: 12.5, bgcolor: theme.palette.mode === ThemeMode.DARK ? 'background.default' : 'dark.900', pb: 0 }}>
+      <Box sx={{ py: 12.5, bgcolor: theme.palette.mode === ThemeMode.DARK ? 'background.default' : 'dark.900', pb: 0 ,textAlign: 'left'}}>
         <FooterSection />
       </Box>
       <Customization />

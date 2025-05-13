@@ -1,17 +1,20 @@
-import React from 'react';
-import { useParams } from 'react-router-dom';
-import { Container, Box, Typography, Grid, Button } from '@mui/material';
+import { Box, Container } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
+import { ThemeMode } from 'config';
 import productsData from 'data/productsData';
+import { useParams } from 'react-router-dom';
 import ErrorPage from 'views/pages/maintenance/Error';
-import { IconArrowRight } from '@tabler/icons-react';
 import PricingComponent from './components/ProductsPricingComponent';
 // Import common components
+import FooterSection from '../landing/FooterSection';
+import FirstSection from './components/FirstSection';
 import HeroSection from './components/HeroSection';
 import KeyFeaturesSection from './components/KeyFeaturesSection';
-import FirstSection from './components/FirstSection';
 import TargetAudienceSection from './components/TargetAudienceSection';
 
+
 const ProductPage = () => {
+  const theme = useTheme();
   const { category } = useParams();
   const productData = productsData[category];
   console.log(productData);
@@ -45,6 +48,10 @@ const ProductPage = () => {
       <Box id="pricing" sx={{ py: { xs: 4, md: 8 } }}>
         <PricingComponent plans={productData.plans} planList={productData.planList} />
       </Box>
+       <Box sx={{ py: 12.5, bgcolor: theme.palette.mode === ThemeMode.DARK ? 'background.default' : 'dark.900', pb: 0,textAlign: 'left' }}>
+              <FooterSection />
+            </Box>
+      
     </Box>
   );
 };

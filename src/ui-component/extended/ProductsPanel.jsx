@@ -1,16 +1,16 @@
-import React from 'react';
-import { Box, Typography, Grid2, Paper, ClickAwayListener, Container, Button } from '@mui/material';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Box, Button, ClickAwayListener, Container, Grid2, Paper, Typography } from '@mui/material';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Link as RouterLink } from 'react-router-dom';
+import React from 'react';
 
 // Import icons
-import CreditCardIcon from '@mui/icons-material/CreditCard';
-import ReceiptIcon from '@mui/icons-material/Receipt';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
-import FolderIcon from '@mui/icons-material/Folder';
-import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
-import CalculateIcon from '@mui/icons-material/Calculate';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import CalculateIcon from '@mui/icons-material/Calculate';
+import CreditCardIcon from '@mui/icons-material/CreditCard';
+import FolderIcon from '@mui/icons-material/Folder';
+import ReceiptIcon from '@mui/icons-material/Receipt';
+import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
 
 const products = [
   {
@@ -51,7 +51,7 @@ const products = [
     color: '#FFA94D',
     id: 4,
     context_type: 'business',
-    is_active: false
+    is_active: true
   },
   {
     title: 'Compliance Tracker',
