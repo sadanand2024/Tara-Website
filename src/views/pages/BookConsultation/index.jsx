@@ -1,20 +1,20 @@
-import React, { useState } from 'react';
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import Card from '@mui/material/Card';
-import Button from '@mui/material/Button';
-import IconButton from '@mui/material/IconButton';
-import TextField from '@mui/material/TextField';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
-import PublicIcon from '@mui/icons-material/Public';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import { useTheme } from '@mui/material/styles';
-import useMediaQuery from '@mui/material/useMediaQuery';
+import PublicIcon from '@mui/icons-material/Public';
 import { Link } from '@mui/material';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Card from '@mui/material/Card';
+import IconButton from '@mui/material/IconButton';
+import { useTheme } from '@mui/material/styles';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import axios from 'axios';
 import { useSnackbar } from 'notistack';
+import { useState } from 'react';
 // Common styles
 const styles = {
   pageWrapper: {
@@ -272,25 +272,25 @@ const BookConsultationPage = () => {
 
     if (Object.keys(newErrors).length === 0) {
       console.log('Submitting data:', data);
-      // const apiUrl = `${import.meta.env.VITE_APP_BASE_URL}/user_management/consultation`;
-      // axios
-      //   .post(apiUrl, data)
-      //   .then((response) => {
-      //     console.log(response);
-      //     enqueueSnackbar('Consultation booked successfully!', {
-      //       variant: 'success',
-      //       anchorOrigin: { vertical: 'top', horizontal: 'right' },
-      //       autoHideDuration: 3000
-      //     });
-      //     handleReset();
-      //   })
-      //   .catch((error) => {
-      //     enqueueSnackbar('Error booking consultation!', {
-      //       variant: 'error',
-      //       anchorOrigin: { vertical: 'top', horizontal: 'right' },
-      //       autoHideDuration: 3000
-      //     });
-      //   });
+      const apiUrl = `${import.meta.env.VITE_APP_BASE_URL}/user_management/consultation`;
+      axios
+        .post(apiUrl, data)
+        .then((response) => {
+          console.log(response);
+          enqueueSnackbar('Consultation booked successfully!', {
+            variant: 'success',
+            anchorOrigin: { vertical: 'top', horizontal: 'right' },
+            autoHideDuration: 3000
+          });
+          handleReset();
+        })
+        .catch((error) => {
+          enqueueSnackbar('Error booking consultation!', {
+            variant: 'error',
+            anchorOrigin: { vertical: 'top', horizontal: 'right' },
+            autoHideDuration: 3000
+          });
+        });
     }
   };
 
@@ -472,7 +472,7 @@ const BookConsultationPage = () => {
           </Box>
           {/* Calendar Days */}
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1, px: 0.5 }}>
-            {['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'].map((d) => (
+            {['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'].map((d) => (
               <Typography
                 key={d}
                 variant="caption"
@@ -489,31 +489,38 @@ const BookConsultationPage = () => {
             ))}
           </Box>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 2, px: 0.5 }}>
-            {[...Array(days)].map((_, i) => {
-              const day = i + 1;
-              const isSelected = day === selectedDate;
-              const disabled = isPastDate(day);
-              return (
-                <Button
-                  key={day}
-                  variant={isSelected ? 'contained' : disabled ? 'text' : 'outlined'}
-                  color={isSelected ? 'primary' : 'inherit'}
-                  disabled={disabled}
-                  sx={{
-                    ...styles.calendarButton,
-                    bgcolor: isSelected ? theme.palette.primary.main : 'none',
-                    color: isSelected ? '#fff' : disabled ? theme.palette.text.secondary : theme.palette.text.secondary,
-                    border: isSelected ? `1.5px solid ${theme.palette.primary.main}` : 'none',
-                    boxShadow: isSelected ? 2 : 0,
-                    cursor: disabled ? 'not-allowed' : 'pointer',
-                    opacity: disabled ? 0.5 : 1
-                  }}
-                  onClick={() => !disabled && setSelectedDate(day)}
-                >
-                  {day}
-                </Button>
-              );
-            })}
+            {(() => {
+              const firstDayOfMonth = new Date(year, month, 1).getDay();
+              const paddingDays = Array(firstDayOfMonth).fill(null);
+              const monthDays = [...Array(days)].map((_, i) => i + 1);
+              return [...paddingDays, ...monthDays].map((day, i) => {
+                if (day === null) {
+                  return <Box key={`padding-${i}`} sx={{ width: { xs: 32, sm: 36 }, height: 36 }} />;
+                }
+                const isSelected = day === selectedDate;
+                const disabled = isPastDate(day);
+                return (
+                  <Button
+                    key={day}
+                    variant={isSelected ? 'contained' : disabled ? 'text' : 'outlined'}
+                    color={isSelected ? 'primary' : 'inherit'}
+                    disabled={disabled}
+                    sx={{
+                      ...styles.calendarButton,
+                      bgcolor: isSelected ? theme.palette.primary.main : 'none',
+                      color: isSelected ? '#fff' : disabled ? theme.palette.text.secondary : theme.palette.text.secondary,
+                      border: isSelected ? `1.5px solid ${theme.palette.primary.main}` : 'none',
+                      boxShadow: isSelected ? 2 : 0,
+                      cursor: disabled ? 'not-allowed' : 'pointer',
+                      opacity: disabled ? 0.5 : 1
+                    }}
+                    onClick={() => !disabled && setSelectedDate(day)}
+                  >
+                    {day}
+                  </Button>
+                );
+              });
+            })()}
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2, mt: 1 }}>
             <Typography variant="body2" sx={{ color: theme.palette.text.secondary, fontWeight: 500, fontSize: { xs: 13, sm: 15 } }}>
