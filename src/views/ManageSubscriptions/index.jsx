@@ -375,7 +375,7 @@ const ManageSubscriptions = () => {
         {moduleSubscriptions && moduleSubscriptions.length > 0 ? (
           <Grid container spacing={{ xs: 2, sm: 3 }}>
             {moduleSubscriptions.map((subscription) => (
-              <Grid item xs={12} md={6} lg={4} xl={3} key={subscription.id}>
+              <Grid item xs={12} md={6} lg={4} xl={4} xxl={3} key={subscription.id}>
                 <SubscriptionCard
                   // id: item.id,
                   // module_id: item.module.id,
