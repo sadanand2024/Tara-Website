@@ -27,10 +27,18 @@ import { useSnackbar } from 'notistack';
 import { useSelector } from 'react-redux';
 import CircularProgress from '@mui/material/CircularProgress';
 import HomeIcon from '@mui/icons-material/Home';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 import ImageIcon from '@mui/icons-material/Image';
+import DialogTitle from '@mui/material/DialogTitle';
+import IconButton from '@mui/material/IconButton';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+
 const folders = {
   PermanentWorkingPapers: 'Permanent Working Papers',
-  CurrentWorkPapers: 'Current Working Papers',
+  CurrentWorkingPapers: 'Current Working Papers',
   OtherDocuments: 'Other Documents'
 };
 
@@ -88,7 +96,7 @@ const MUIGrid = ({ children, name, details, detailskey, idx, viewFile }) => {
   return (
     <Grid
       key={idx}
-      size={{ xs: 12, sm: 6, md: 4, lg: 3, xl: 2 }}
+      size={{ xs: 12, sm: 6, md: 4, lg: 3, xl: 2.6 }}
       onClick={() => {
         viewFile(details);
       }}
@@ -154,18 +162,56 @@ const DocumentWallet = () => {
   const [isRootFolder, setIsRootFolder] = useState(true);
   const [breadcrumbs, setBreadcrumbs] = useState([]);
   const [currentContents, setCurrentContents] = useState({ folders: [], files: [], subFolders: [] });
-  const [folderName, setFolderName] = useState('');
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [recentFiles, setRecentFiles] = useState([]);
   const [previewUrl, setPreviewUrl] = useState('');
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewLoading, setPreviewLoading] = useState(false);
+  const [menuAnchorEl, setMenuAnchorEl] = useState(null);
+  const [menuTarget, setMenuTarget] = useState(null);
+  const [actions, setActions] = useState({
+    data: null,
+    edit: false,
+    delete: false
+  });
+  const [folderName, setFolderName] = useState('');
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
+  useEffect(() => {
+    if (actions.data) {
+      setFolderName(actions.data.name);
+    }
+  }, [actions.data]);
+
+  const createInitialFolders = async () => {
+    setLoading(true);
+    try {
+      const response = await Factory(
+        'post',
+        `/docwallet/context-docs`,
+        {
+          context: user.active_context.id
+        },
+        {}
+      );
+      if (response.res.status_cd === 0) {
+        window.location.reload();
+      }
+    } catch (error) {
+      console.log('Error loading folders.', error);
+    }
+    setLoading(false);
+  };
 
   const getInitialFolders = async () => {
     setLoading(true);
     try {
       const response = await Factory('get', `/docwallet/wallet-info?context_id=${user.active_context.id}`, {}, {});
+      if (response.res.status === 404) {
+        createInitialFolders();
+      }
       if (response.res.status_cd === 0) {
         if (response.res.data.length > 0) {
           setInitialFolders(response.res.data);
@@ -196,21 +242,6 @@ const DocumentWallet = () => {
     getRecentFiles();
   }, []);
 
-  const handleChange = (e) => {
-    const value = e.target.value.replace(/\D/g, '').slice(0, 4);
-    setFolderName(value);
-    setStartYear(value);
-  };
-  const handleKeyDown = (e) => {
-    console.log(e);
-  };
-
-  const getFormattedValue = () => {
-    if (startYear.length === 0) return '';
-    if (startYear.length < 4) return startYear;
-    const suffix = (parseInt(startYear.slice(2), 10) + 1).toString().padStart(2, '0');
-    return `${startYear}-${suffix}`;
-  };
   const handleUploadClick = () => {
     fileInputRef.current.click();
   };
@@ -299,12 +330,24 @@ const DocumentWallet = () => {
       parent: currentFolderId
     };
     try {
-      const response = await Factory('post', '/docwallet/folders/', __create_folder_data, {});
+      let apiType = actions.edit ? 'put' : 'post';
+      let url = actions.edit ? `/docwallet/folders/${actions.data.id}/` : `/docwallet/folders/`;
+
+      const response = await Factory(apiType, url, __create_folder_data, {});
       if (response.res.status_cd === 0) {
         console.log(response.res);
         let folderContents = currentContents;
-        setCurrentContents({ ...folderContents, subFolders: [...folderContents.subFolders, response.res] });
-        enqueueSnackbar('Folder created successfully.', { variant: 'success', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
+        if (actions.edit) {
+          folderContents.subFolders = folderContents.subFolders.map((folder) =>
+            folder.id === response.res.data.id ? response.res.data : folder
+          );
+        } else {
+          setCurrentContents({ ...folderContents, subFolders: [...folderContents.subFolders, response.res] });
+        }
+        enqueueSnackbar(`Folder ${actions.edit ? 'updated' : 'created'} successfully.`, {
+          variant: 'success',
+          anchorOrigin: { vertical: 'top', horizontal: 'right' }
+        });
         setNewFolderPopup(false);
       } else {
         enqueueSnackbar('Failed to create folder.', { variant: 'error', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
@@ -331,7 +374,10 @@ const DocumentWallet = () => {
         setPreviewOpen(false);
         setPreviewUrl('');
         setPreviewLoading(false);
-        enqueueSnackbar('This file type cannot be previewed. Downloading...', { variant: 'info', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
+        enqueueSnackbar('This file type cannot be previewed. Downloading...', {
+          variant: 'info',
+          anchorOrigin: { vertical: 'top', horizontal: 'right' }
+        });
       } else {
         setPreviewUrl(url);
         setPreviewOpen(true);
@@ -340,6 +386,70 @@ const DocumentWallet = () => {
       enqueueSnackbar('Error generating presigned url.', { variant: 'error', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
       setPreviewLoading(false);
     }
+  };
+
+  const handleStartYearChange = (e) => {
+    const value = e.target.value.replace(/\D/g, '').slice(0, 4);
+    if (value.length === 4) {
+      let folderName = value + '-' + ((parseInt(value.slice(2)) + 1) % 100);
+      setFolderName(folderName);
+    }
+    setStartYear(value);
+  };
+
+  const getEndYearShort = () => {
+    if (startYear.length === 4) return ((parseInt(startYear.slice(2)) + 1) % 100).toString().padStart(2, '0');
+    return '';
+  };
+
+  const handleMenuOpen = (event, target) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setMenuAnchorEl(event.currentTarget);
+    setMenuTarget(target);
+  };
+
+  const handleMenuClose = () => {
+    setMenuAnchorEl(null);
+    setMenuTarget(null);
+  };
+
+  const resetActions = () => {
+    setStartYear('');
+    setFolderName('');
+    setActions({ data: null, edit: false, delete: false });
+    setNewFolderPopup(false);
+  };
+
+  const handleDeleteClick = () => {
+    handleMenuClose();
+    setConfirmDeleteOpen(true);
+  };
+
+  const handleConfirmDeleteClose = () => {
+    setConfirmDeleteOpen(false);
+  };
+
+  const handleConfirmDelete = async () => {
+    setDeleteLoading(true);
+    if (actions.data) {
+      if (actions.data.detailskey === 'file') {
+        const response = await Factory('delete', `/docwallet/remove_file/${actions.data.id}/`, {}, {});
+        if (response.res.status_cd === 0) {
+          setCurrentContents({ ...currentContents, files: currentContents.files.filter((file) => file.id !== actions.data.id) });
+        }
+      } else {
+        const response = await Factory('delete', `/docwallet/delete_folder/${actions.data.id}/`, {}, {});
+        if (response.res.status_cd === 0) {
+          setCurrentContents({
+            ...currentContents,
+            subFolders: currentContents.subFolders.filter((folder) => folder.id !== actions.data.id)
+          });
+        }
+      }
+    }
+    setDeleteLoading(false);
+    setConfirmDeleteOpen(false);
   };
 
   return (
@@ -430,7 +540,7 @@ const DocumentWallet = () => {
               {initialFolders.map((folder, idx) => (
                 <Grid
                   key={folder.id}
-                  size={{ xs: 12, sm: 6, md: 4, lg: 3, xl: 2 }}
+                  size={{ xs: 12, sm: 6, md: 4, lg: 3, xl: 2.6 }}
                   onClick={() => handleRootFolderClick(folder)}
                   sx={{
                     cursor: 'pointer',
@@ -471,9 +581,7 @@ const DocumentWallet = () => {
                           {folders[folder.name] || folder.name}
                         </Typography>
                       </TooltipMUI>
-                      <Typography variant="caption" color="text.secondary">
-                        {''}
-                      </Typography>
+                      <Typography variant="caption" color="text.secondary"></Typography>
                     </Box>
                   </Box>
                 </Grid>
@@ -494,7 +602,7 @@ const DocumentWallet = () => {
                 {currentContents.subFolders.map((folder, idx) => (
                   <Grid
                     key={folder.id}
-                    size={{ xs: 12, sm: 6, md: 4, lg: 3, xl: 2 }}
+                    size={{ xs: 12, sm: 6, md: 4, lg: 3, xl: 2.6 }}
                     onClick={() => fetchFolderContents(folder.id, folder.name)}
                     sx={{
                       cursor: 'pointer',
@@ -539,6 +647,20 @@ const DocumentWallet = () => {
                           {''}
                         </Typography>
                       </Box>
+                      <IconButton
+                        size="small"
+                        onClick={(e) => {
+                          setActions({
+                            data: folder,
+                            edit: true,
+                            delete: false
+                          });
+                          handleMenuOpen(e, folder);
+                        }}
+                        sx={{ ml: 1 }}
+                      >
+                        <MoreVertIcon />
+                      </IconButton>
                     </Box>
                   </Grid>
                 ))}
@@ -592,6 +714,16 @@ const DocumentWallet = () => {
                             {new Date(file.uploaded_at).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' })}
                           </Typography>
                         </Box>
+                        <IconButton
+                          size="small"
+                          onClick={(e) => {
+                            setActions({ data: file, edit: true, delete: false });
+                            handleMenuOpen(e, file);
+                          }}
+                          sx={{ ml: 1 }}
+                        >
+                          <MoreVertIcon />
+                        </IconButton>
                       </Stack>
                     </MUIGrid>
                   ))}
@@ -643,53 +775,113 @@ const DocumentWallet = () => {
                     </Typography>
                   </TooltipMUI>
                   <Typography variant="caption" color="text.secondary">
-                    Date: {file.date}
+                    Uploaded:{' '}
+                    {new Date(file.uploaded_at).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}
                   </Typography>
                 </Box>
+                <IconButton
+                  size="small"
+                  onClick={(e) => {
+                    setActions({ data: file, edit: true, delete: false });
+                    handleMenuOpen(e, file);
+                  }}
+                  sx={{ ml: 1 }}
+                >
+                  <MoreVertIcon />
+                </IconButton>
               </Stack>
             </MUIGrid>
           ))}
         </Grid>
       </Box>
 
-      <Dialog open={newFolderPopup} onClose={() => setNewFolderPopup(false)}>
+      <Dialog
+        open={newFolderPopup}
+        onClose={() => {
+          resetActions();
+        }}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>
+          <Typography variant="h3" mb={0.5} textAlign="left" sx={{ fontWeight: 400 }}>
+            {actions.edit ? 'Rename' : 'New Folder'}
+          </Typography>
+        </DialogTitle>
         <DialogContent>
           <Box>
-            <Typography variant="h4" mb={0.5} textAlign="left" color="text.primary">
-              Folder Name
-            </Typography>
-            {currentFolderId === 'CurrentWorkPapers' ? (
-              <>
-                <InputBase
-                  fullWidth
-                  value={getFormattedValue()}
-                  onChange={handleChange}
-                  onKeyDown={handleKeyDown}
-                  inputProps={{
-                    inputMode: 'numeric',
-                    maxLength: 4
-                  }}
-                  sx={{
-                    fontSize: '1rem',
-                    padding: '8px 12px',
-                    borderBottom: '1px solid rgba(0,0,0,0.3)',
-                    fontFamily: 'monospace',
-                    letterSpacing: '0.1em'
-                  }}
-                />
+            {breadcrumbs.length > 0 && breadcrumbs[breadcrumbs.length - 1].name === 'Current Working Papers' ? (
+              <Box sx={{ width: 'fit-content' }}>
+                <Stack direction="row" spacing={2} alignItems="center" mb={2}>
+                  <TextField
+                    variant="standard"
+                    value={startYear}
+                    onChange={handleStartYearChange}
+                    placeholder="YYYY"
+                    inputProps={{ inputMode: 'numeric', maxLength: 4 }}
+                    sx={{
+                      width: 80,
+                      '& input': {
+                        textAlign: 'center',
+                        fontSize: '1.3rem',
+                        fontFamily: 'monospace',
+                        letterSpacing: '0.4rem'
+                      },
+                      '& .MuiInputBase-root': { p: 0, m: 0 }
+                    }}
+                  />
+                  <Typography variant="h6" sx={{ fontFamily: 'monospace' }}>
+                    –
+                  </Typography>
+                  <TextField
+                    variant="standard"
+                    value={getEndYearShort()}
+                    placeholder="YY"
+                    InputProps={{ readOnly: true }}
+                    sx={{
+                      width: 40,
+                      '& input': {
+                        textAlign: 'center',
+                        fontSize: '1.3rem',
+                        fontFamily: 'monospace',
+                        color: 'text.secondary',
+                        letterSpacing: '0.3rem'
+                      },
+                      '& .MuiInputBase-root': { p: 0, m: 0 }
+                    }}
+                  />
+                </Stack>
 
-                <Typography variant="caption" fullWidth sx={{ mt: 0.5, color: 'text.secondary', width: '500px' }}>
-                  Enter starting year only (e.g. 2023 → 2023-24)
-                </Typography>
-              </>
+                {startYear.length === 4 && (
+                  <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                    Financial Year: {startYear}-{getEndYearShort()}
+                  </Typography>
+                )}
+              </Box>
             ) : (
-              <TextField fullWidth onChange={(e) => setFolderName(e.target.value)} value={folderName} placeholder="Enter Folder Name" />
+              <TextField
+                fullWidth
+                onChange={(e) => setFolderName(e.target.value)}
+                value={folderName}
+                focused
+                placeholder="Enter Folder Name"
+              />
             )}
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setNewFolderPopup(false)}>Cancel</Button>
-          <Button onClick={createFolder}>Create</Button>
+          <Button
+            onClick={() => {
+              resetActions();
+            }}
+          >
+            Cancel
+          </Button>
+          <Button onClick={createFolder}>{actions.edit ? 'Update' : 'Create'}</Button>
         </DialogActions>
       </Dialog>
       <Dialog
@@ -702,7 +894,7 @@ const DocumentWallet = () => {
         maxWidth="xl"
         fullWidth
       >
-        <DialogContent sx={{ p: 0, height: '80vh', bgcolor: '#222', overflow: 'hidden', position: 'relative' }}>
+        <DialogContent sx={{ p: 0, height: '100vh', bgcolor: '#222', overflow: 'hidden', position: 'relative' }}>
           {previewUrl && (
             <iframe
               src={previewUrl}
@@ -740,6 +932,42 @@ const DocumentWallet = () => {
             </Box>
           )}
         </DialogContent>
+      </Dialog>
+      <Menu
+        anchorEl={menuAnchorEl}
+        open={Boolean(menuAnchorEl)}
+        onClose={handleMenuClose}
+        onClick={(e) => e.stopPropagation()}
+        PaperProps={{ sx: { minWidth: 180 } }}
+      >
+        <MenuItem
+          sx={{ minWidth: 180 }}
+          onClick={() => {
+            handleMenuClose(); /* trigger rename logic here */
+          }}
+        >
+          <EditIcon color="primary" sx={{ mr: 1 }} /> Rename
+        </MenuItem>
+        <MenuItem sx={{ minWidth: 180 }} onClick={handleDeleteClick}>
+          <DeleteIcon color="error" sx={{ mr: 1 }} /> Delete
+        </MenuItem>
+      </Menu>
+      <Dialog open={confirmDeleteOpen} onClose={handleConfirmDeleteClose}>
+        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogContent>
+          <Typography>Are you sure you want to delete this {menuTarget?.detailskey === 'file' ? 'file' : 'folder'}?</Typography>
+          <Typography fontWeight={500} sx={{ mt: 1 }}>
+            {menuTarget?.name || menuTarget?.folderName}
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleConfirmDeleteClose} disabled={deleteLoading}>
+            Cancel
+          </Button>
+          <Button onClick={handleConfirmDelete} color="error" disabled={deleteLoading}>
+            {deleteLoading ? <CircularProgress size={20} /> : 'Delete'}
+          </Button>
+        </DialogActions>
       </Dialog>
       {loading && (
         <Box
