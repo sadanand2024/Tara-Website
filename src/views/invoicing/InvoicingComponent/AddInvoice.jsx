@@ -35,7 +35,8 @@ const AddItem = ({
   customers,
   open,
   onClose,
-  itemsList
+  itemsList,
+  getGoodsAndServicesData
 }) => {
   const [addInvoiceData] = useState({
     invoice_data: [
@@ -601,6 +602,8 @@ const AddItem = ({
             gstRates={gstRates}
             handleNoteChange={handleNoteChange}
             totalDiscount={formik.values.total_discount || 0}
+            businessDetailsData={businessDetailsData}
+            get_Goods_and_Services_Data={getGoodsAndServicesData}
           />
         </Grid2>
 

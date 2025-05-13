@@ -31,7 +31,10 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
 import BlockIcon from '@mui/icons-material/Block';
-
+import { IconButton } from '@mui/material';
+import { Edit, Delete } from '@mui/icons-material';
+import DeleteDialog from 'ui-component/extended/DeleteDialog';
+import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
 const validationSchema = Yup.object({
   component_name: Yup.string().required('Name is required'),
   component_type: Yup.string().required('Type is required'),
@@ -57,13 +60,17 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
   const [searchParams] = useSearchParams();
   const [currentPage, setCurrentPage] = useState(1);
   const [hovered, setHovered] = useState(false);
-
-  const rowsPerPage = 8;
-  const dispatch = useDispatch();
-  const handlePageChange = (event, value) => {
-    setCurrentPage(value);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [selectedRow, setSelectedRow] = useState(null);
+  const handleOpenDeleteDialog = (designation) => {
+    setSelectedRow(designation);
+    setOpenDeleteDialog(true);
   };
-  const paginatedData = earningsData.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+  const handleConfirmDelete = () => {
+    handleDelete(selectedRow);
+    setOpenDeleteDialog(false);
+  };
+  const dispatch = useDispatch();
   useEffect(() => {
     const id = searchParams.get('payrollid');
     if (id) {
@@ -215,11 +222,19 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
             <Box sx={{ width: '100%', display: 'flex', justifyContent: 'flex-end', mb: 2 }} />
 
             <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 1 }}>
-              <Table>
+              <Table size="small">
                 <TableHead>
                   <TableRow sx={{ bgcolor: 'grey.100' }}>
                     {['Component Name', 'Calculation', 'Consider for EPF', 'Consider for ESI', 'Status', 'Actions'].map((head, idx) => (
-                      <TableCell key={idx} align="left" sx={{ fontWeight: 'bold', whiteSpace: 'nowrap', fontSize: '0.9rem' }}>
+                      <TableCell
+                        key={idx}
+                        sx={{
+                          fontWeight: 'bold',
+                          whiteSpace: 'nowrap',
+                          fontSize: '0.9rem',
+                          textAlign: idx === 5 ? 'center' : 'left'
+                        }}
+                      >
                         {head}
                       </TableCell>
                     ))}
@@ -263,25 +278,30 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
                         <TableCell align="left">{item.is_active ? 'Active' : 'Inactive'}</TableCell>
 
                         <TableCell align="left">
-                          <ActionCell
-                            row={item}
-                            onEdit={() => handleEdit(item)}
-                            onDelete={() => handleDelete(item)}
-                            open={open}
-                            onClose={handleClose}
-                            deleteDialogData={{
-                              title: 'Delete Record',
-                              heading: 'Are you sure you want to delete this record?',
-                              description: `This action will remove ${item.component_name} from the list.`,
-                              successMessage: 'Record has been deleted.'
-                            }}
-                          />
+                          <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
+                            <IconButton color="primary" onClick={() => handleEdit(item)}>
+                              <Edit />
+                            </IconButton>
+                            <IconButton color="error" onClick={() => handleOpenDeleteDialog(item)}>
+                              <Delete />
+                            </IconButton>
+                          </Box>
                         </TableCell>
                       </TableRow>
                     ))
                   )}
                 </TableBody>
               </Table>
+              <DeleteDialog
+                open={openDeleteDialog}
+                onClose={() => setOpenDeleteDialog(false)}
+                onConfirm={handleConfirmDelete}
+                dialogData={{
+                  title: 'Delete Record',
+                  heading: 'Are you sure you want to delete this Record?',
+                  description: 'This action will permanently delete the record.'
+                }}
+              />
             </TableContainer>
 
             {earningsData.length > rowsPerPage && (

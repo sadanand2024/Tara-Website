@@ -16,10 +16,12 @@ import {
 } from '@mui/material';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
+import DeleteDialog from '../../../ui-component/extended/DeleteDialog'; // adjust path accordingly
+import { IconButton, Tooltip } from '@mui/material'; // Add these if not already
 
 import ActionCell from '../../../ui-component/extended/ActionCell';
 import EmptyDataPlaceholder from 'ui-component/extended/EmptyDataPlaceholder';
-
+import { Edit, Delete } from '@mui/icons-material';
 const RenderTable = ({
   headerData,
   tableData = [],
@@ -35,6 +37,18 @@ const RenderTable = ({
   const [payrollId, setPayrollId] = useState(null);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [selectedRow, setSelectedRow] = useState(null);
+
+  const handleOpenDeleteDialog = (row) => {
+    setSelectedRow(row);
+    setOpenDeleteDialog(true);
+  };
+
+  const handleConfirmDelete = () => {
+    handleDelete(selectedRow);
+    setOpenDeleteDialog(false);
+  };
 
   useEffect(() => {
     const id = searchParams.get('payrollid');
@@ -47,7 +61,6 @@ const RenderTable = ({
 
   const safeTableData = Array.isArray(tableData) ? tableData : [];
   const paginatedData = safeTableData.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
-
   return (
     <Stack spacing={3}>
       {loading ? (
@@ -56,7 +69,7 @@ const RenderTable = ({
         </Box>
       ) : (
         <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 1 }}>
-          <Table size="medium">
+          <Table size="small">
             <TableHead>
               <TableRow sx={{ bgcolor: 'grey.100' }}>
                 {headerData.map((header, index) => (
@@ -64,7 +77,9 @@ const RenderTable = ({
                     {header}
                   </TableCell>
                 ))}
-                <TableCell sx={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>Actions</TableCell>
+                <TableCell align="center" sx={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>
+                  Actions
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -90,19 +105,14 @@ const RenderTable = ({
                           Edit Pay Structure
                         </Button>
                       ) : (
-                        <ActionCell
-                          row={row}
-                          onEdit={() => handleEdit(row)}
-                          onDelete={() => handleDelete(row)}
-                          open={openDialog}
-                          onClose={handleCloseDialog}
-                          deleteDialogData={{
-                            title: 'Delete Record',
-                            heading: 'Are you sure you want to delete this record?',
-                            description: `This action will remove ${row.dept_name || 'this item'} from the list.`,
-                            successMessage: 'Record has been deleted.'
-                          }}
-                        />
+                        <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
+                          <IconButton color="primary" onClick={() => handleEdit(row)}>
+                            <Edit />
+                          </IconButton>
+                          <IconButton color="error" onClick={() => handleOpenDeleteDialog(row)}>
+                            <Delete />
+                          </IconButton>
+                        </Box>
                       )}
                     </TableCell>
                   </TableRow>
@@ -110,6 +120,16 @@ const RenderTable = ({
               )}
             </TableBody>
           </Table>
+          <DeleteDialog
+            open={openDeleteDialog}
+            onClose={() => setOpenDeleteDialog(false)}
+            onConfirm={handleConfirmDelete}
+            dialogData={{
+              title: 'Delete Record',
+              heading: 'Are you sure?',
+              description: 'This action will permanently delete the record.'
+            }}
+          />
         </TableContainer>
       )}
 

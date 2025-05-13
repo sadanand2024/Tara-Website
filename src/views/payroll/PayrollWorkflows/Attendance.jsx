@@ -9,6 +9,7 @@ import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
 export default function Attendance({ attendanceData, fetchAttendance, employeeMasterData, from, openDialog, fields, setOpenDialog }) {
   const headerData = [
+    'Employee ID',
     'Employee Name',
     'LOP',
     // 'Absent',
@@ -22,6 +23,7 @@ export default function Attendance({ attendanceData, fetchAttendance, employeeMa
   ];
 
   const body_keys = [
+    'id',
     'employee_name',
     'loss_of_pay',
     'earned_leaves',
@@ -89,7 +91,7 @@ export default function Attendance({ attendanceData, fetchAttendance, employeeMa
     }
   };
   const handleDelete = async (item) => {
-    let url = `/payroll/employee-exit/${item.id}`;
+    let url = `/payroll/employee-attendance/${item.id}`;
     const { res } = await Factory('delete', url, {});
     if (res.status_cd === 1) {
       dispatch(

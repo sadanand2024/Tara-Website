@@ -23,7 +23,7 @@ import { rowsPerPage } from '../../../ui-component/extended/RowsPerPage';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
 import EmptyDataPlaceholder from 'ui-component/extended/EmptyDataPlaceholder';
-
+import { Edit } from '@mui/icons-material';
 const ProfessionalTax = ({ handleNext, handleBack }) => {
   const [ptData, setPtData] = useState([]);
   const [selectedRecord, setSelectedRecord] = useState(null);
@@ -77,11 +77,11 @@ const ProfessionalTax = ({ handleNext, handleBack }) => {
         <MainCard title="Professional Tax Details">
           <Grid2 container spacing={2}>
             <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 1 }}>
-              <Table>
+              <Table size="medium">
                 <TableHead>
                   <TableRow sx={{ bgcolor: 'grey.100' }}>
                     {['S No', 'Work Location', 'PT Number', 'State', 'PT Slabs'].map((col, idx) => (
-                      <TableCell key={idx} sx={{ whiteSpace: 'nowrap', fontWeight: 'bold' }}>
+                      <TableCell key={idx} sx={{ whiteSpace: 'nowrap', fontWeight: 'bold' }} align={col === 'PT Slabs' ? 'center' : 'left'}>
                         {col}
                       </TableCell>
                     ))}
@@ -101,14 +101,15 @@ const ProfessionalTax = ({ handleNext, handleBack }) => {
                         <TableCell>{item.work_location_name}</TableCell>
                         <TableCell>{item.pt_number}</TableCell>
                         <TableCell>{item.state}</TableCell>
-                        <TableCell
-                          sx={{ color: 'primary.main', cursor: 'pointer', textDecoration: 'underline' }}
-                          onClick={() => {
-                            setSelectedRecord(item);
-                            setViewSlabsDialog(true);
-                          }}
-                        >
-                          View / Edit
+                        <TableCell sx={{ color: 'primary.main', cursor: 'pointer', textDecoration: 'underline' }}>
+                          <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
+                            <Edit
+                              onClick={() => {
+                                setSelectedRecord(item);
+                                setViewSlabsDialog(true);
+                              }}
+                            />
+                          </Box>
                         </TableCell>
                       </TableRow>
                     ))
