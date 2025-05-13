@@ -52,7 +52,7 @@ const ServicePage = () => {
         {pageData.stickyFooterCta && <StickyFooterCTA data={pageData.stickyFooterCta} />}
       </Container>
 
-      <Box sx={{ py: 12.5, bgcolor: theme.palette.mode === ThemeMode.DARK ? 'background.default' : 'dark.900', pb: 0,mb:10}}>
+      <Box sx={{ py: 12.5, bgcolor: theme.palette.mode === ThemeMode.DARK ? 'background.default' : 'dark.900', pb: 0,mb:10,textAlign: 'left' }}>
           <FooterSection />
           </Box>
     </Box>
