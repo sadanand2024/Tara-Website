@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 import { logout } from './api';
-const Factory = (api, URL, payload, headers = {}) => {
+const Factory = (api, URL, payload, headers = {}, config = {}) => {
   URL = import.meta.env.VITE_APP_BASE_URL + URL;
   const token = localStorage.getItem('serviceToken');
   const getErrorMessage = (api) => {
@@ -28,7 +28,8 @@ const Factory = (api, URL, payload, headers = {}) => {
       Authorization: `Bearer ${token}`,
       ...headers
     },
-    data: payload
+    data: payload,
+    ...config
   })
     .then((res) => {
       if (res?.status == 200 || res?.status == 204) {

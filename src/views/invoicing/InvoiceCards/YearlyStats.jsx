@@ -21,7 +21,6 @@ const yearlyStatsData = [
     title: "Today's Revenue",
     href: 'pending',
     value: '0',
-
     icon: IconCurrencyRupee,
     color: 'primary.main',
     bgcolor: 'primary.lighter'
@@ -31,7 +30,6 @@ const yearlyStatsData = [
     title: 'Revenue this month',
     href: 'in_progress',
     value: '0',
-
     icon: IconCalendarStats,
     color: 'info.main',
     bgcolor: 'info.lighter'
@@ -42,7 +40,7 @@ const yearlyStatsData = [
     href: 'in_progress',
     value: '0',
     icon: IconCalendarStats,
-    color: 'warning.main',
+    color: 'primary.main',
     bgcolor: 'warning.lighter'
   },
   {
@@ -95,31 +93,95 @@ const YearlyStats = ({ theme, title, setTitle, financialYear, setFinancialYear, 
                     cursor: 'pointer',
                     bgcolor: item.title === title ? 'primary.lighter' : 'background.paper',
                     transition: 'all 0.3s ease-in-out',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    height: '180px',
+                    width: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
                     '&:hover': {
                       transform: 'translateY(-4px)',
-                      boxShadow: theme.customShadows.z4
+                      boxShadow: theme.customShadows.z4,
+                      '& .stats-icon': {
+                        transform: 'scale(1.1)'
+                      },
+                      '& .card-content': {
+                        transform: 'translateY(-4px)'
+                      }
+                    },
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: '3px',
+                      bgcolor: item.color,
+                      opacity: 0.7
                     }
                   }}
                 >
-                  <Stack spacing={2} alignItems="center">
+                  <Stack
+                    spacing={1.5}
+                    alignItems="center"
+                    justifyContent="space-between"
+                    className="card-content"
+                    sx={{
+                      height: '100%',
+                      transition: 'transform 0.3s ease-in-out'
+                    }}
+                  >
                     <Box
+                      className="stats-icon"
                       sx={{
-                        width: 56,
-                        height: 56,
+                        width: 48,
+                        height: 48,
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         borderRadius: '50%',
                         bgcolor: item.bgcolor,
-                        color: item.color
+                        color: item.color,
+                        transition: 'transform 0.3s ease-in-out',
+                        position: 'relative',
+                        '&::after': {
+                          content: '""',
+                          position: 'absolute',
+                          width: '100%',
+                          height: '100%',
+                          borderRadius: '50%',
+                          border: `2px solid ${item.color}`,
+                          opacity: 0.2,
+                          transform: 'scale(1.2)'
+                        }
                       }}
                     >
                       <item.icon size={30} />
                     </Box>
-                    <Typography variant="h4" color="text.secondary">
-                      {item.title}
-                    </Typography>
-                    <Typography variant="h3">₹&nbsp;{dashboardData[item.id] || 0}</Typography>
+                    <Stack spacing={1} alignItems="center" width="100%">
+                      <Typography
+                        variant="subtitle1"
+                        color="text.secondary"
+                        sx={{
+                          fontWeight: 500,
+                          textAlign: 'center',
+                          lineHeight: 1.2
+                        }}
+                      >
+                        {item.title}
+                      </Typography>
+                      <Typography
+                        variant="h4"
+                        sx={{
+                          fontWeight: 600,
+                          color: item.color,
+                          textAlign: 'center',
+                          lineHeight: 1.2
+                        }}
+                      >
+                        ₹&nbsp;{dashboardData[item.id] || 0}
+                      </Typography>
+                    </Stack>
                   </Stack>
                 </SubCard>
               </Grid2>

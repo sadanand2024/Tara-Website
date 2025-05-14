@@ -26,6 +26,7 @@ import EmptyDataPlaceholder from 'ui-component/extended/EmptyDataPlaceholder';
 import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
 import { IconButton } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
+import BulkUploadDialog from 'ui-component/extended/BulkUploadDialog';
 function Designations() {
   const [designations, setDesignations] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
@@ -34,9 +35,13 @@ function Designations() {
   const [currentPage, setCurrentPage] = useState(1);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
+  const [openBulkDialog, setOpenBulkDialog] = useState(false);
   const handleOpenDeleteDialog = (designation) => {
     setSelectedRow(designation);
     setOpenDeleteDialog(true);
+  };
+  const closeBulkDialog = () => {
+    setOpenBulkDialog(false);
   };
   const handleConfirmDelete = () => {
     handleDelete(selectedRow);
@@ -86,18 +91,33 @@ function Designations() {
     <MainCard
       title="Designation Details"
       secondary={
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => {
-            setPostType('post');
-            handleOpenDialog();
-          }}
-        >
-          Add Designation
-        </Button>
+        <Stack direction="row" spacing={2}>
+          <Button variant="outlined" color="secondary" onClick={() => setOpenBulkDialog(true)}>
+            Bulk Upload
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => {
+              setPostType('post');
+              handleOpenDialog();
+            }}
+          >
+            Add Designation
+          </Button>
+        </Stack>
       }
     >
+      <BulkUploadDialog
+        open={openBulkDialog}
+        handleClose={closeBulkDialog}
+        getData={fetchDesignations}
+        payrollid={payrollid}
+        type="Designations"
+        bulkUploadUrl="/payroll/designations/"
+        xlsxTemplateUrl="/payroll/download-template/xlsx?type=designation"
+        csvTemplateUrl="/payroll/download-template/csv?type=designation"
+      />
       <Grid2 container spacing={3}>
         <Grid2 xs={12}>
           <DesignationDialog
