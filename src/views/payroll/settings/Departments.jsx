@@ -27,6 +27,7 @@ import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
 import DeleteDialog from '../../../ui-component/extended/DeleteDialog'; // adjust path accordingly
 import { IconButton, Tooltip } from '@mui/material'; // Add these if not already
 import { Edit, Delete } from '@mui/icons-material';
+import BulkUploadDialog from 'ui-component/extended/BulkUploadDialog';
 function Departments() {
   const [departments, setDepartments] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
@@ -38,6 +39,7 @@ function Departments() {
   const dispatch = useDispatch();
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
+  const [openBulkDialog, setOpenBulkDialog] = useState(false);
   const handleOpenDeleteDialog = (row) => {
     setSelectedRow(row);
     setOpenDeleteDialog(true);
@@ -49,7 +51,9 @@ function Departments() {
   const paginatedData = departments.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 
   const payrollid = searchParams.get('payrollid');
-
+  const closeBulkDialog = () => {
+    setOpenBulkDialog(false);
+  };
   useEffect(() => {
     if (payrollid) fetchDepartments();
   }, [payrollid]);
@@ -105,18 +109,33 @@ function Departments() {
     <MainCard
       title="Departments Details"
       secondary={
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => {
-            setPostType('post');
-            handleOpenDialog();
-          }}
-        >
-          Add Department
-        </Button>
+        <Stack direction="row" spacing={2}>
+          <Button variant="outlined" color="secondary" onClick={() => setOpenBulkDialog(true)}>
+            Bulk Upload
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => {
+              setPostType('post');
+              handleOpenDialog();
+            }}
+          >
+            Add Department
+          </Button>
+        </Stack>
       }
     >
+      <BulkUploadDialog
+        open={openBulkDialog}
+        handleClose={closeBulkDialog}
+        getData={fetchDepartments}
+        payrollid={payrollid}
+        type="Departments"
+        bulkUploadUrl="/payroll/departments/bulk-department-upload/"
+        xlsxTemplateUrl="/payroll/download-template/xlsx?type=department"
+        csvTemplateUrl="/payroll/download-template/csv?type=department"
+      />
       <Grid2 container spacing={{ xs: 2, sm: 3 }}>
         <Grid2 xs={12}>
           <DepartmentDialog

@@ -28,8 +28,7 @@ import EmptyDataPlaceholder from 'ui-component/extended/EmptyDataPlaceholder';
 import DeleteDialog from '../../../ui-component/extended/DeleteDialog'; // adjust path accordingly
 import { IconButton, Tooltip } from '@mui/material'; // Add these if not already
 import { Edit, Delete } from '@mui/icons-material';
-import BulkUploadWorkLocationDialog from './BulkUploadWorkLocationDialog';
-
+import BulkUploadDialog from 'ui-component/extended/BulkUploadDialog';
 function Worklocation() {
   const [openDialog, setOpenDialog] = useState(false);
   const [workLocations, setWorkLocations] = useState([]);
@@ -61,6 +60,10 @@ function Worklocation() {
     handleDelete(selectedRow);
     setOpenDeleteDialog(false);
   };
+  const closeBulkDialog = () => {
+    setOpenBulkDialog(false);
+  };
+
   useEffect(() => {
     const id = searchParams.get('payrollid');
     if (id) setPayrollId(id);
@@ -135,9 +138,9 @@ function Worklocation() {
           title="Work Location Details"
           secondary={
             <Stack direction="row" spacing={2}>
-              {/* <Button variant="outlined" color="secondary" onClick={() => setOpenBulkDialog(true)}>
+              <Button variant="outlined" color="secondary" onClick={() => setOpenBulkDialog(true)}>
                 Bulk Upload
-              </Button> */}
+              </Button>
               <Button
                 variant="contained"
                 color="primary"
@@ -151,11 +154,15 @@ function Worklocation() {
             </Stack>
           }
         >
-          <BulkUploadWorkLocationDialog
+          <BulkUploadDialog
             open={openBulkDialog}
-            handleClose={() => setOpenBulkDialog(false)}
-            fetchWorkLocations={fetchWorkLocations}
+            handleClose={closeBulkDialog}
+            getData={fetchWorkLocations}
             payrollid={payrollid}
+            type="Work Locations"
+            bulkUploadUrl="/payroll/work-locations/bulk-upload/"
+            xlsxTemplateUrl="/payroll/download-template/xlsx?type=work_location"
+            csvTemplateUrl="/payroll/download-template/csv?type=work_location"
           />
           <Grid2 container spacing={{ xs: 2, sm: 3 }}>
             <Grid2 xs={12}>
@@ -224,10 +231,10 @@ function Worklocation() {
                         <TableCell align="center">
                           {index !== 0 && (
                             <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
-                              <IconButton color="primary" onClick={() => handleEdit(department)}>
+                              <IconButton color="primary" onClick={() => handleEdit(location)}>
                                 <Edit />
                               </IconButton>
-                              <IconButton color="error" onClick={() => handleOpenDeleteDialog(department)}>
+                              <IconButton color="error" onClick={() => handleOpenDeleteDialog(location)}>
                                 <Delete />
                               </IconButton>
                             </Box>
