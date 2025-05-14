@@ -2,24 +2,18 @@ import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 
-export const restrictedRoutes = {
-  'service-provider': [
-    '/dashboard/user/business',
-    '/dashboard/user/indivial',
-    '/dashboard/user/ca-firms',
-    '/dashboard/user/service-providers'
-  ],
+const restrictedRoutes = {
+  'not-super-admin': ['/app/contact-us/', '/app/contact-us', '/app/consultation/', '/app/consultation'],
   'corporate-admin': [],
   'charted-accountant-firm': ['/dashboard/user/ca-firms'],
-  individual: ['/dashboard/user/indivial'],
-  'super-admin': []
+  individual: ['/dashboard/user/indivial']
 };
 
-const RoleGuard = ({ allowedRoles, children }) => {
+const RoleGuard = ({ children }) => {
   const user = useSelector((state) => state).accountReducer.user;
   const location = useLocation();
-  console.log(user);
-  if (allowedRoles && !allowedRoles.includes(user?.user_role?.role_type)) {
+  let isSuperAdmin = user.user.is_super_user;
+  if (!isSuperAdmin && restrictedRoutes['not-super-admin'].includes(location.pathname))
     return (
       <div
         style={{
@@ -36,16 +30,7 @@ const RoleGuard = ({ allowedRoles, children }) => {
         <p style={{ fontSize: '18px', color: '#666' }}>You don't have permission to access this URL</p>
       </div>
     );
-  }
-
-  return children;
+  else return children;
 };
 
 export default RoleGuard;
-
-const allowedByRole = (item, user) => {
-  if (!user || !user.user_role) return true;
-  const role = user.user_role.role_type;
-  const restricted = restrictedRoutes[role] || [];
-  return !restricted.includes(item.url);
-};

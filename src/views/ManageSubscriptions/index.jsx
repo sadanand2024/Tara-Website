@@ -19,7 +19,7 @@ import {
   Card,
   CardContent,
   Divider,
-  Grid,
+  Grid2,
   Stack,
   Table,
   TableBody,
@@ -373,9 +373,9 @@ const ManageSubscriptions = () => {
           Active Subscriptions
         </Typography>
         {moduleSubscriptions && moduleSubscriptions.length > 0 ? (
-          <Grid container spacing={{ xs: 2, sm: 3 }}>
+          <Grid2 container spacing={{ xs: 2, sm: 3 }}>
             {moduleSubscriptions.map((subscription) => (
-              <Grid item xs={12} md={6} lg={4} xl={4} xxl={3} key={subscription.id}>
+              <Grid2 size={{ xs: 12, md: 6, lg: 4, xl: 4 }} key={subscription.id}>
                 <SubscriptionCard
                   // id: item.id,
                   // module_id: item.module.id,
@@ -396,9 +396,9 @@ const ManageSubscriptions = () => {
                   autoRenew={subscription.auto_renew}
                   description={subscription.plan_description}
                 />
-              </Grid>
+              </Grid2>
             ))}
-          </Grid>
+          </Grid2>
         ) : (
           <EmptySubscriptions />
         )}
