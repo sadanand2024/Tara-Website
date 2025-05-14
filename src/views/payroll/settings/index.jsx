@@ -203,7 +203,7 @@ const PayrollSetup = () => {
     <Box>
       <Box sx={{ mb: 2 }}>
         <Typography variant="h3" textAlign="center" sx={{ mb: 1 }}>
-          Welcome {user.active_context.name}
+          Welcome {user?.active_context?.name || 'User'}
         </Typography>
         <Typography variant="h4" textAlign="center" sx={{ color: 'text.disabled' }}>
           Set up your organization before starting payroll

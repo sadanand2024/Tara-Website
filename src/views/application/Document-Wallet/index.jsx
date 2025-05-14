@@ -31,10 +31,13 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import ImageIcon from '@mui/icons-material/Image';
 import DialogTitle from '@mui/material/DialogTitle';
 import IconButton from '@mui/material/IconButton';
+import CodeIcon from '@mui/icons-material/Code';
+import JavascriptIcon from '@mui/icons-material/Javascript';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { IconFileTypeJs, IconJson, IconCode, IconBrandJavascript } from '@tabler/icons-react';
 
 const folders = {
   PermanentWorkingPapers: 'Permanent Working Papers',
@@ -48,6 +51,9 @@ const getFileType = (file) => {
     const ext = file.name.split('.').pop().toLowerCase();
     if (['pdf', 'doc', 'csv'].includes(ext)) return ext;
     if (['xlsx', 'xls'].includes(ext)) return 'csv';
+    if (['js'].includes(ext)) return 'js';
+    if (['json'].includes(ext)) return 'json';
+    if (['txt'].includes(ext)) return 'txt';
     if (['docx'].includes(ext)) return 'doc';
     if (['png', 'jpg', 'jpeg', 'gif', 'bmp', 'tiff', 'ico', 'webp'].includes(ext)) return 'image';
     if (ext && ext.length < 8) return ext; // fallback for short extensions
@@ -63,6 +69,12 @@ const getFileIcon = (type) => {
       return <DescriptionIcon fontSize="large" sx={{ color: '#1976d2' }} />;
     case 'csv':
       return <TableChartIcon fontSize="large" sx={{ color: '#388e3c' }} />;
+    case 'js':
+      return <IconBrandJavascript fontSize="large" width="2.5rem" height="2.5rem" color="#ef6a37" />;
+    case 'json':
+      return <IconCode fontSize="large" width="2.5rem" height="2.5rem" color="#638ed4" />;
+    case 'txt':
+      return <DescriptionIcon fontSize="large" sx={{ color: '#1976d2' }} />;
     case 'folder':
       return <FolderIcon fontSize="large" sx={{ color: '#fbc02d' }} />;
     case 'image':
@@ -179,6 +191,13 @@ const DocumentWallet = () => {
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
+  const resetActions = () => {
+    setStartYear('');
+    setFolderName('');
+    setActions({ data: null, edit: false, delete: false });
+    setNewFolderPopup(false);
+  };
+
   useEffect(() => {
     if (actions.data) {
       setFolderName(actions.data.name);
@@ -238,9 +257,14 @@ const DocumentWallet = () => {
   };
 
   useEffect(() => {
+    if (user.active_context) {
+      setCurrentFolderId(null);
+      setBreadcrumbs([]);
+      fetchFolderContents(null, null, true);
+    }
     getInitialFolders();
     getRecentFiles();
-  }, []);
+  }, [user.active_context]);
 
   const handleUploadClick = () => {
     fileInputRef.current.click();
@@ -270,7 +294,7 @@ const DocumentWallet = () => {
         setSelectedFiles([]);
         fileInputRef.current.value = '';
         // Optionally refresh folder contents
-        if (currentFolderId) fetchFolderContents(currentFolderId, breadcrumbs[breadcrumbs.length - 1]?.name, true);
+        if (currentFolderId) fetchFolderContents(currentFolderId, breadcrumbs[breadcrumbs.length - 1]?.name, false, null, false);
       } else {
         enqueueSnackbar('Failed to upload files.', { variant: 'error', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
       }
@@ -286,7 +310,7 @@ const DocumentWallet = () => {
   };
 
   // Fetch folder contents by id
-  const fetchFolderContents = async (folderId, folderName, isRoot = false, customBreadcrumbs = null) => {
+  const fetchFolderContents = async (folderId, folderName, isRoot = false, customBreadcrumbs = null, refresh = true) => {
     setLoading(true);
     try {
       const url = `/docwallet/folders/${folderId}/files/`;
@@ -298,12 +322,14 @@ const DocumentWallet = () => {
           subFolders: response.res.data.subfolders || []
         });
         setCurrentFolderId(folderId);
-        if (customBreadcrumbs) {
-          setBreadcrumbs(customBreadcrumbs);
-        } else {
-          setBreadcrumbs((prev) =>
-            isRoot ? [{ id: folderId, name: folders[folderName] || folderName }] : [...prev, { id: folderId, name: folderName }]
-          );
+        if (refresh) {
+          if (customBreadcrumbs) {
+            setBreadcrumbs(customBreadcrumbs);
+          } else {
+            setBreadcrumbs((prev) =>
+              isRoot ? [{ id: folderId, name: folders[folderName] || folderName }] : [...prev, { id: folderId, name: folderName }]
+            );
+          }
         }
       } else {
         console.log('Failed to load folder contents.', response);
@@ -335,7 +361,6 @@ const DocumentWallet = () => {
 
       const response = await Factory(apiType, url, __create_folder_data, {});
       if (response.res.status_cd === 0) {
-        console.log(response.res);
         let folderContents = currentContents;
         if (actions.edit) {
           folderContents.subFolders = folderContents.subFolders.map((folder) =>
@@ -355,6 +380,7 @@ const DocumentWallet = () => {
     } catch (error) {
       enqueueSnackbar('Error creating folder.', { variant: 'error', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
     }
+    resetActions();
     setLoading(false);
   };
 
@@ -414,13 +440,6 @@ const DocumentWallet = () => {
     setMenuTarget(null);
   };
 
-  const resetActions = () => {
-    setStartYear('');
-    setFolderName('');
-    setActions({ data: null, edit: false, delete: false });
-    setNewFolderPopup(false);
-  };
-
   const handleDeleteClick = () => {
     handleMenuClose();
     setConfirmDeleteOpen(true);
@@ -433,10 +452,11 @@ const DocumentWallet = () => {
   const handleConfirmDelete = async () => {
     setDeleteLoading(true);
     if (actions.data) {
-      if (actions.data.detailskey === 'file') {
+      if (actions.data.file) {
         const response = await Factory('delete', `/docwallet/remove_file/${actions.data.id}/`, {}, {});
         if (response.res.status_cd === 0) {
           setCurrentContents({ ...currentContents, files: currentContents.files.filter((file) => file.id !== actions.data.id) });
+          getRecentFiles();
         }
       } else {
         const response = await Factory('delete', `/docwallet/delete_folder/${actions.data.id}/`, {}, {});
@@ -445,11 +465,49 @@ const DocumentWallet = () => {
             ...currentContents,
             subFolders: currentContents.subFolders.filter((folder) => folder.id !== actions.data.id)
           });
+          getRecentFiles();
         }
       }
     }
     setDeleteLoading(false);
     setConfirmDeleteOpen(false);
+  };
+
+  const fileNameChange = async (target) => {
+    setLoading(true);
+    let formData = new FormData();
+    formData.append('name', folderName + '.' + actions.fileType);
+    try {
+      const response = await Factory('patch', `/docwallet/documents/${target.id}/`, formData, {});
+      if (response.res.status_cd === 0) {
+        if (currentFolderId) fetchFolderContents(currentFolderId, breadcrumbs[breadcrumbs.length - 1]?.name, false, null, false);
+        getRecentFiles();
+        enqueueSnackbar('File name changed successfully.', { variant: 'success', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
+      } else {
+        enqueueSnackbar('Failed to upload files.', { variant: 'error', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
+      }
+    } catch (error) {
+      enqueueSnackbar('Error uploading files.', { variant: 'error', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
+    }
+    resetActions();
+    setLoading(false);
+  };
+
+  const nameChange = (target) => {
+    if (target.file) {
+      let fileName = target?.name;
+      const fileType = fileName.split('.').pop();
+      fileName = fileName.replace(`.${fileType}`, '');
+      setFolderName(fileName);
+      setActions({ data: target, edit: true, delete: false, fileType: fileType });
+      setNewFolderPopup(true);
+      handleMenuClose();
+    } else {
+      setActions({ data: target, edit: true, delete: false });
+      setFolderName(target?.name);
+      setNewFolderPopup(true);
+      handleMenuClose();
+    }
   };
 
   return (
@@ -647,20 +705,28 @@ const DocumentWallet = () => {
                           {''}
                         </Typography>
                       </Box>
-                      <IconButton
-                        size="small"
-                        onClick={(e) => {
-                          setActions({
-                            data: folder,
-                            edit: true,
-                            delete: false
-                          });
-                          handleMenuOpen(e, folder);
-                        }}
-                        sx={{ ml: 1 }}
-                      >
-                        <MoreVertIcon />
-                      </IconButton>
+                      {(() => {
+                        const isCWP = breadcrumbs[breadcrumbs.length - 2]?.name === 'Current Working Papers';
+                        if (!isCWP || (isCWP && idx > 2)) {
+                          return (
+                            <IconButton
+                              size="small"
+                              onClick={(e) => {
+                                setActions({
+                                  data: folder,
+                                  edit: true,
+                                  delete: false
+                                });
+                                handleMenuOpen(e, folder);
+                              }}
+                              sx={{ ml: 1 }}
+                            >
+                              <MoreVertIcon />
+                            </IconButton>
+                          );
+                        }
+                        return null;
+                      })()}
                     </Box>
                   </Grid>
                 ))}
@@ -737,7 +803,7 @@ const DocumentWallet = () => {
       {/* Recently Accessed */}
       <Box sx={{ mb: 4 }}>
         <Typography fontWeight={500} sx={{ mb: 1, fontSize: { xs: 15, sm: 17 } }}>
-          Recently Accessed Files
+          Recently Uploaded Files
         </Typography>
         <Grid container spacing={2}>
           {recentFiles.map((file, idx) => (
@@ -881,7 +947,17 @@ const DocumentWallet = () => {
           >
             Cancel
           </Button>
-          <Button onClick={createFolder}>{actions.edit ? 'Update' : 'Create'}</Button>
+          <Button
+            onClick={() => {
+              if (actions.fileType) {
+                fileNameChange(actions.data);
+              } else {
+                createFolder();
+              }
+            }}
+          >
+            {actions.edit ? 'Update' : 'Create'}
+          </Button>
         </DialogActions>
       </Dialog>
       <Dialog
@@ -938,33 +1014,33 @@ const DocumentWallet = () => {
         open={Boolean(menuAnchorEl)}
         onClose={handleMenuClose}
         onClick={(e) => e.stopPropagation()}
-        PaperProps={{ sx: { minWidth: 180 } }}
+        PaperProps={{ sx: { minWidth: 180, borderRadius: 1.5 } }}
       >
         <MenuItem
           sx={{ minWidth: 180 }}
           onClick={() => {
-            handleMenuClose(); /* trigger rename logic here */
+            nameChange(menuTarget);
           }}
         >
           <EditIcon color="primary" sx={{ mr: 1 }} /> Rename
         </MenuItem>
+        <Divider />
         <MenuItem sx={{ minWidth: 180 }} onClick={handleDeleteClick}>
           <DeleteIcon color="error" sx={{ mr: 1 }} /> Delete
         </MenuItem>
       </Menu>
       <Dialog open={confirmDeleteOpen} onClose={handleConfirmDeleteClose}>
-        <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
-          <Typography>Are you sure you want to delete this {menuTarget?.detailskey === 'file' ? 'file' : 'folder'}?</Typography>
-          <Typography fontWeight={500} sx={{ mt: 1 }}>
-            {menuTarget?.name || menuTarget?.folderName}
+          <Typography variant="h2" mb={3} textAlign="left" sx={{ fontWeight: 400 }}>
+            Delete Forever?
           </Typography>
+          <Typography>"{actions?.data?.name}" will be deleted permanently. This can't be undone.</Typography>
         </DialogContent>
-        <DialogActions>
+        <DialogActions sx={{ justifyContent: 'space-between', px: 3 }}>
           <Button onClick={handleConfirmDeleteClose} disabled={deleteLoading}>
             Cancel
           </Button>
-          <Button onClick={handleConfirmDelete} color="error" disabled={deleteLoading}>
+          <Button onClick={handleConfirmDelete} color="primary" disabled={deleteLoading} variant="contained">
             {deleteLoading ? <CircularProgress size={20} /> : 'Delete'}
           </Button>
         </DialogActions>

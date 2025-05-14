@@ -160,15 +160,15 @@ const dashboard = {
       breadcrumbs: false,
       caption: ''
     },
-    {
-      id: 'investments',
-      title: 'investments',
-      type: 'item',
-      url: '/app/investments',
-      icon: icons.IconPigMoney,
-      breadcrumbs: false,
-      caption: ''
-    },
+    // {
+    //   id: 'investments',
+    //   title: 'investments',
+    //   type: 'item',
+    //   url: '/app/investments',
+    //   icon: icons.IconPigMoney,
+    //   breadcrumbs: false,
+    //   caption: ''
+    // },
     {
       id: 'support&chat',
       title: 'support&chat',
@@ -190,7 +190,7 @@ const moduleToMenuId = {
   tds: 'tds',
   insurance: 'insurance',
   loan: 'loan',
-  investments: 'investments',
+  // investments: 'investments',
   'support&chat': 'support&chat'
   // add more mappings as needed
 };

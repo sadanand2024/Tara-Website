@@ -30,9 +30,7 @@ const Personal = ({ open, onClose, onSubmit, isSubmitting, cancel }) => {
   const requiredLabel = (label) => (
     <Box component="span" sx={{ display: 'flex', alignItems: 'center' }}>
       {label}
-      <Typography component="span" sx={{ color: 'error.main', ml: 0.5 }}>
-        *
-      </Typography>
+      <Typography component="span" sx={{ color: 'error.main', ml: 0.5 }}></Typography>
     </Box>
   );
 
@@ -44,14 +42,12 @@ const Personal = ({ open, onClose, onSubmit, isSubmitting, cancel }) => {
     pan_number: Yup.string()
       .required('PAN Number is required')
       .matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN Number format'),
-    aadhaar_number: Yup.string()
-      .required('Aadhaar Number is required')
-      .matches(/^\d{12}$/, 'Aadhaar Number should be 12 digits'),
-    date: Yup.date()
-      .required('Date of Birth is required')
+    aadhaar_number: Yup.string().matches(/^\d{12}$/, 'Aadhaar Number should be 12 digits'),
+    dob: Yup.date()
+      .nullable()
       .max(new Date(), 'Date of Birth cannot be in the future')
       .test('age', 'Must be at least 18 years old', (value) => {
-        if (!value) return false;
+        if (!value) return true; // allow empty
         return dayjs().diff(dayjs(value), 'year') >= 18;
       }),
     // icai_number: Yup.string()
@@ -60,14 +56,10 @@ const Personal = ({ open, onClose, onSubmit, isSubmitting, cancel }) => {
     address: Yup.object({
       address_line1: Yup.string().required('Address Line 1 is required').min(5, 'Address should be at least 5 characters'),
       address_line2: Yup.string(),
-      pinCode: Yup.string()
-        .required('PIN Code is required')
-        .matches(/^\d{6}$/, 'PIN Code should be 6 digits'),
-      state: Yup.string().required('State is required'),
+      pinCode: Yup.string().matches(/^\d{6}$/, 'PIN Code should be 6 digits'),
       city: Yup.string()
         .required('City is required')
-        .matches(/^[a-zA-Z\s]+$/, 'City should only contain letters'),
-      country: Yup.string().required('Country is required')
+        .matches(/^[a-zA-Z\s]+$/, 'City should only contain letters')
     })
   });
 
@@ -76,7 +68,7 @@ const Personal = ({ open, onClose, onSubmit, isSubmitting, cancel }) => {
       name: '',
       pan_number: '',
       aadhaar_number: '',
-      date: null,
+      dob: null,
       //   icai_number: '',
       address: {
         address_line1: '',
@@ -92,7 +84,7 @@ const Personal = ({ open, onClose, onSubmit, isSubmitting, cancel }) => {
       try {
         const submissionData = {
           ...values,
-          date: values.date ? dayjs(values.date).format('YYYY-MM-DD') : null,
+          dob: values.dob ? dayjs(values.dob).format('YYYY-MM-DD') : null,
           address: {
             ...values.address,
             pinCode: values.address.pinCode ? parseInt(values.address.pinCode, 10) : ''
@@ -129,11 +121,18 @@ const Personal = ({ open, onClose, onSubmit, isSubmitting, cancel }) => {
       </DialogTitle>
       <form onSubmit={formik.handleSubmit}>
         <DialogContent sx={{ ...DIALOG_CONTENT_PADDING }} dividers>
-          <Grid container spacing={2} disableEqualOverflow>
+          <Grid container spacing={2}>
             <Grid size={{ xs: 12 }}>
               <TextField
                 fullWidth
-                label={requiredLabel('Full Name')}
+                label={
+                  <Box component="span" sx={{ display: 'flex', alignItems: 'center' }}>
+                    Full Name
+                    <Typography component="span" sx={{ color: 'error.main', ml: 0.5 }}>
+                      *
+                    </Typography>
+                  </Box>
+                }
                 name="name"
                 value={formik.values.name}
                 onChange={formik.handleChange}
@@ -147,7 +146,14 @@ const Personal = ({ open, onClose, onSubmit, isSubmitting, cancel }) => {
             <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 fullWidth
-                label={requiredLabel('PAN Number')}
+                label={
+                  <Box component="span" sx={{ display: 'flex', alignItems: 'center' }}>
+                    PAN Number
+                    <Typography component="span" sx={{ color: 'error.main', ml: 0.5 }}>
+                      *
+                    </Typography>
+                  </Box>
+                }
                 name="pan_number"
                 value={formik.values.pan_number}
                 onChange={(e) => formik.setFieldValue('pan_number', e.target.value.toUpperCase())}
@@ -178,15 +184,15 @@ const Personal = ({ open, onClose, onSubmit, isSubmitting, cancel }) => {
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <DatePicker
                   label={requiredLabel('Date of Birth')}
-                  value={formik.values.date}
-                  onChange={(value) => formik.setFieldValue('date', value)}
-                  onBlur={() => formik.setFieldTouched('date', true)}
+                  value={formik.values.dob}
+                  onChange={(value) => formik.setFieldValue('dob', value)}
+                  onBlur={() => formik.setFieldTouched('dob', true)}
                   slotProps={{
                     textField: {
                       size: 'small',
                       fullWidth: true,
-                      error: formik.touched.date && Boolean(formik.errors.date),
-                      helperText: formik.touched.date && formik.errors.date
+                      error: formik.touched.dob && Boolean(formik.errors.dob),
+                      helperText: formik.touched.dob && formik.errors.dob
                     }
                   }}
                 />

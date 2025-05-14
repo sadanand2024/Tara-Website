@@ -28,29 +28,19 @@ const BusinessKYCDialog = ({ open, onClose, onSubmit, isSubmitting }) => {
 
   const validationSchema = Yup.object({
     nameOfBusiness: Yup.string().required('Business name is required').min(3, 'Business name should be at least 3 characters'),
-    registrationNumber: Yup.string()
-      .required('Registration number is required')
-      .min(6, 'Registration number should be at least 6 characters'),
+    registrationNumber: Yup.string().min(6, 'Registration number should be at least 6 characters'),
     entityType: Yup.string().required('Entity type is required'),
     pan: Yup.string()
       .required('PAN is required')
       .matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN format'),
-    business_nature: Yup.string().required('Nature of business is required'),
-    trade_name: Yup.string().required('Trade name is required'),
-    mobile_number: Yup.string()
-      .required('Mobile number is required')
-      .matches(/^[0-9]{10}$/, 'Invalid mobile number'),
-    email: Yup.string().required('Email is required').email('Invalid email format'),
-    dob_or_incorp_date: Yup.date().required('Date of incorporation is required').max(new Date(), 'Date cannot be in the future'),
+    mobile_number: Yup.string().matches(/^[0-9]{10}$/, 'Invalid mobile number'),
+    email: Yup.string().email('Invalid email format'),
+    dob_or_incorp_date: Yup.date().max(new Date(), 'Date cannot be in the future'),
     headOffice: Yup.object({
-      address_line1: Yup.string().required('Address line 1 is required').min(5, 'Address should be at least 5 characters'),
+      address_line1: Yup.string().min(5, 'Address should be at least 5 characters'),
       address_line2: Yup.string(),
-      city: Yup.string()
-        .required('City is required')
-        .matches(/^[a-zA-Z\s]+$/, 'City should only contain letters'),
-      state: Yup.string().required('State is required'),
-      country: Yup.string().required('Country is required'),
-      pincode: Yup.number().required('PIN code is required').min(100000, 'Invalid PIN code').max(999999, 'Invalid PIN code')
+      city: Yup.string().matches(/^[a-zA-Z\s]+$/, 'City should only contain letters'),
+      pincode: Yup.number().min(100000, 'Invalid PIN code').max(999999, 'Invalid PIN code')
     })
   });
 
@@ -91,9 +81,6 @@ const BusinessKYCDialog = ({ open, onClose, onSubmit, isSubmitting }) => {
   const requiredLabel = (label) => (
     <Box component="span" sx={{ display: 'flex', alignItems: 'center' }}>
       {label}
-      <Typography component="span" sx={{ color: 'error.main', ml: 0.5 }}>
-        *
-      </Typography>
     </Box>
   );
 
@@ -117,11 +104,18 @@ const BusinessKYCDialog = ({ open, onClose, onSubmit, isSubmitting }) => {
       </DialogTitle>
       <form onSubmit={formik.handleSubmit}>
         <DialogContent sx={{ ...DIALOG_CONTENT_PADDING }} dividers>
-        <Grid container spacing={2}>
+          <Grid container spacing={2}>
             <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 fullWidth
-                label={requiredLabel('Business Name')}
+                label={
+                  <Box component="span" sx={{ display: 'flex', alignItems: 'center' }}>
+                    Business Name
+                    <Typography component="span" sx={{ color: 'error.main', ml: 0.5 }}>
+                      *
+                    </Typography>
+                  </Box>
+                }
                 name="nameOfBusiness"
                 value={formik.values.nameOfBusiness}
                 onChange={formik.handleChange}
@@ -170,7 +164,14 @@ const BusinessKYCDialog = ({ open, onClose, onSubmit, isSubmitting }) => {
             <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 fullWidth
-                label={requiredLabel('PAN')}
+                label={
+                  <Box component="span" sx={{ display: 'flex', alignItems: 'center' }}>
+                    PAN
+                    <Typography component="span" sx={{ color: 'error.main', ml: 0.5 }}>
+                      *
+                    </Typography>
+                  </Box>
+                }
                 name="pan"
                 value={formik.values.pan}
                 onChange={(e) => formik.setFieldValue('pan', e.target.value.toUpperCase())}
@@ -298,8 +299,8 @@ const BusinessKYCDialog = ({ open, onClose, onSubmit, isSubmitting }) => {
             </Grid>
 
             <Grid size={{ xs: 12, sm: 6 }}>
-            <TextField
-              fullWidth
+              <TextField
+                fullWidth
                 label={requiredLabel('City')}
                 name="headOffice.city"
                 value={formik.values.headOffice.city}
@@ -308,8 +309,8 @@ const BusinessKYCDialog = ({ open, onClose, onSubmit, isSubmitting }) => {
                 error={formik.touched.headOffice?.city && Boolean(formik.errors.headOffice?.city)}
                 helperText={formik.touched.headOffice?.city && formik.errors.headOffice?.city}
                 size="small"
-            />
-          </Grid>
+              />
+            </Grid>
 
             <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
@@ -333,8 +334,8 @@ const BusinessKYCDialog = ({ open, onClose, onSubmit, isSubmitting }) => {
             </Grid>
 
             <Grid size={{ xs: 12, sm: 6 }}>
-            <TextField
-              fullWidth
+              <TextField
+                fullWidth
                 label={requiredLabel('Country')}
                 name="headOffice.country"
                 value={formik.values.headOffice.country}

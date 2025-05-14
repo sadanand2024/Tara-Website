@@ -184,8 +184,8 @@ export default function Personal() {
   return (
     <Box>
       <GreetingSection>
-        <Heading variant="h1" color="secondary.main">
-          Hello Ratan!
+        <Heading variant="h1" color="primary.dark">
+          Hello {user.active_context.name || 'User'}!
         </Heading>
         <Typography variant="h4" color="text.secondary">
           Let's stay on top of your finances!
