@@ -549,10 +549,38 @@ const ModulesAndServices = () => {
           <>
             <Grid2 container spacing={{ xs: 2, sm: 1 }}>
               {filteredModules.length === 0 ? (
-                <Box sx={{ width: '100%', p: 10, textAlign: 'center' }}>
-                  <Typography variant="body1" color="text.secondary">
-                    No modules for selected context
+                <Box sx={{
+                  width: '100%',
+                  py: 8,
+                  px: 2,
+                  textAlign: 'center',
+                  bgcolor: 'background.neutral',
+                  borderRadius: 2,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  minHeight: 320
+                }}>
+                  <ExtensionIcon sx={{ fontSize: 64, color: 'primary.light', mb: 2 }} />
+                  <Typography variant="h5" fontWeight={600} gutterBottom>
+                    No Modules Found
                   </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+                    We couldn't find any modules matching your search or selected category.<br />
+                    Try exploring all modules or adjusting your filters.
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => {
+                      setSearchQuery('');
+                      setSelectedCategory('all');
+                    }}
+                    sx={{ mt: 1 }}
+                  >
+                    Explore All Modules
+                  </Button>
                 </Box>
               ) : (
                 filteredModules.map((module, index) => (
@@ -575,10 +603,38 @@ const ModulesAndServices = () => {
           <>
             <Grid2 container spacing={{ xs: 2, sm: 1 }}>
               {filteredServices.length === 0 ? (
-                <Box sx={{ width: '100%', p: 10, textAlign: 'center' }}>
-                  <Typography variant="body1" color="text.secondary">
-                    No services for selected context
+                <Box sx={{
+                  width: '100%',
+                  py: 8,
+                  px: 2,
+                  textAlign: 'center',
+                  bgcolor: 'background.neutral',
+                  borderRadius: 2,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  minHeight: 320
+                }}>
+                  <BusinessCenterIcon sx={{ fontSize: 64, color: 'primary.light', mb: 2 }} />
+                  <Typography variant="h5" fontWeight={600} gutterBottom>
+                    No Services Found
                   </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+                    We couldn't find any services matching your search or selected category.<br />
+                    Try exploring all services or adjusting your filters.
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => {
+                      setSearchQuery('');
+                      setSelectedCategory('all');
+                    }}
+                    sx={{ mt: 1 }}
+                  >
+                    Explore All Services
+                  </Button>
                 </Box>
               ) : (
                 filteredServices.map((service, index) => (

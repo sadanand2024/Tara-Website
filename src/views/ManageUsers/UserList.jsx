@@ -31,7 +31,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import CheckCircleTwoToneIcon from '@mui/icons-material/Check';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import InfoIcon from '@mui/icons-material/Info';
-
+import { useSnackbar } from 'notistack';
 // ==============================|| USER LIST ||============================== //
 
 const getRoleColor = (roleType) => {
@@ -63,10 +63,12 @@ const getRoleColor = (roleType) => {
     }
   };
 
-  return colorMap[roleType?.toLowerCase()] || {
-    bgcolor: 'info.dark',
-    color: '#fff'
-  };
+  return (
+    colorMap[roleType?.toLowerCase()] || {
+      bgcolor: 'info.dark',
+      color: '#fff'
+    }
+  );
 };
 
 const getInitials = (first_name, last_name, email) => {
@@ -95,7 +97,8 @@ const getFullName = (first_name, last_name, email) => {
   return 'Unknown User';
 };
 
-const UserList = ({ page, rowsPerPage, searchQuery, onTotalUsers, onOpenPermissions, loading, users }) => {
+const UserList = ({ page, rowsPerPage, searchQuery, onTotalUsers, onOpenPermissions, loading, users, setUsers }) => {
+  const { enqueueSnackbar } = useSnackbar();
   const filteredUsers = React.useMemo(() => {
     if (!searchQuery) return users;
 
@@ -115,14 +118,37 @@ const UserList = ({ page, rowsPerPage, searchQuery, onTotalUsers, onOpenPermissi
   const handleStatusChange = async (userId, currentStatus) => {
     try {
       const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
-      const response = await Factory('put', `/user_management/team/member/${userId}/status/`, { status: newStatus }, {});
+      const response = await Factory('put', `/user_management/users/${userId}/`, { status: newStatus }, {});
       if (response.res.status_cd === 0) {
         // The parent component should handle refreshing the user list
-        console.log('Status updated successfully');
+        setUsers(users.map((user) => (user.user_id === userId ? { ...user, status: newStatus } : user)));
+        enqueueSnackbar(response.res.data.message || 'Status updated successfully', {
+          variant: 'success',
+          anchorOrigin: {
+            vertical: 'top',
+            horizontal: 'right',
+            autoHideDuration: 3000
+          }
+        });
       } else {
+        enqueueSnackbar(response.res.data.message || 'Failed to update user status', {
+          variant: 'error',
+          anchorOrigin: {
+            vertical: 'top',
+            horizontal: 'right',
+            autoHideDuration: 3000
+          }
+        });
         console.error('Failed to update status:', response.res.message);
       }
     } catch (error) {
+      // enqueueSnackbar(error.res.message || 'Failed to update user status', {
+      //   variant: 'error',
+      //   anchorOrigin: {
+      //     vertical: 'top',
+      //     horizontal: 'right'
+      //   }
+      // });
       console.error('Error updating status:', error);
     }
   };
@@ -203,7 +229,7 @@ const UserList = ({ page, rowsPerPage, searchQuery, onTotalUsers, onOpenPermissi
                   <Chip
                     label={user.role.role_name}
                     size="small"
-                    sx={{ 
+                    sx={{
                       height: 20,
                       bgcolor: (theme) => getRoleColor(user.role.role_type).bgcolor,
                       color: getRoleColor(user.role.role_type).color,
