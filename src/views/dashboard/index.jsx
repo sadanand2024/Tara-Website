@@ -76,7 +76,9 @@ export default function Dashboard() {
 
   useEffect(() => {
     console.log(user);
-    if (user.all_contexts.length === 0) {
+    if (user.user.is_superuser) {
+      navigate('/dashboard/superuser');
+    } else if (user.all_contexts.length === 0) {
       setAccDialog(true);
     } else if (user.active_context.context_type === 'business') {
       navigate('/dashboard/business');

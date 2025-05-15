@@ -31,19 +31,23 @@ import InfoIcon from '@mui/icons-material/Info';
 const validationSchema = Yup.object({
   first_name: Yup.string().when('userType', {
     is: 'new',
-    then: () => Yup.string().required('First Name is required')
+    then: (schema) => schema.required('First Name is required'),
+    otherwise: (schema) => schema.notRequired()
   }),
   last_name: Yup.string().when('userType', {
     is: 'new',
-    then: () => Yup.string().required('Last Name is required')
+    then: (schema) => schema.required('Last Name is required'),
+    otherwise: (schema) => schema.notRequired()
   }),
-  email: Yup.string().email('Invalid email format').required('Email is required'),
+  email: Yup.string().when('userType', {
+    is: 'new',
+    then: (schema) => schema.email('Invalid email format').required('Email is required'),
+    otherwise: (schema) => schema.email('Invalid email format').notRequired()
+  }),
   mobile_number: Yup.string().when('userType', {
     is: 'new',
-    then: () =>
-      Yup.string()
-        .matches(/^[0-9]{10}$/, 'Phone number must be 10 digits')
-        .required('Phone number is required')
+    then: (schema) => schema.matches(/^[0-9]{10}$/, 'Phone number must be 10 digits').required('Phone number is required'),
+    otherwise: (schema) => schema.notRequired()
   }),
   role: Yup.object().required('Role is required'),
   userType: Yup.string().required('Please select user type')

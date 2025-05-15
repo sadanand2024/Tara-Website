@@ -142,7 +142,7 @@ export default function CustomizeSection() {
 
         <Grid size={12} sx={{ mt: { xs: 6, md: 10 } }}>
           <Grid container spacing={4} alignItems="flex-start" justifyContent="center">
-            <Grid item xs={12} md={6}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <Typography
                 variant="h2"
                 sx={{
@@ -158,7 +158,7 @@ export default function CustomizeSection() {
 
           <Grid container spacing={4} sx={{ mt: { xs: 6, md: 10 } }} justifyContent="center">
             {benefitCards.map((card, index) => (
-              <Grid key={index} item xs={12} md={4} sx={{ textAlign: 'center' }}>
+              <Grid key={index} size={{ xs: 12, md: 4 }} sx={{ textAlign: 'center' }}>
                 <Box
                   sx={{
                     display: 'flex',
