@@ -1,4 +1,4 @@
-'use client';
+import React from 'react';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import BookIcon from '@mui/icons-material/Book';
 import DescriptionIcon from '@mui/icons-material/Description';
@@ -9,16 +9,16 @@ import { Box, Paper, Stack, Typography } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { IconCircleCheck } from '@tabler/icons-react';
 
-import React from 'react';
 
 const iconMap = [
-  { icon: <FolderIcon />, color: '#5e35b1' },
-  { icon: <AccountBalanceIcon />, color:'rgb(234, 235, 239)' },
-  { icon: <ReceiptLongIcon />, color: '#039be5' },
-  { icon: <DescriptionIcon />, color: '#00897b' },
-  { icon: <BookIcon />, color: '#6d4c41' },
-  { icon: <PeopleAltIcon />, color: '#3949ab' }
+  { icon: <FolderIcon />, color: '#e53935' },        // red
+  { icon: <AccountBalanceIcon />, color: '#8e24aa' }, // purple
+  { icon: <ReceiptLongIcon />, color: '#43a047' },    // green
+  { icon: <DescriptionIcon />, color: '#fb8c00' },     // orange
+  { icon: <BookIcon />, color: '#1e88e5' },            // blue
+  { icon: <PeopleAltIcon />, color:'rgb(241, 16, 16)' }  // brown
 ];
+
 
 const DocumentsRequired = ({ documents }) => {
   const theme = useTheme();
@@ -32,7 +32,7 @@ const DocumentsRequired = ({ documents }) => {
             px: { xs: 1, sm: 4, md: 6 },
             py: { xs: 2, sm: 4, md: 5 },
             minWidth: { xs: '95vw', sm: 350, md: 500 },
-            maxWidth: 600,
+            maxWidth: 700,
             width: '100%',
             boxShadow: '0 4px 24px 0 rgba(0,0,0,0.08)'
           }}
