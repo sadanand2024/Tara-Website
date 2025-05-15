@@ -34,6 +34,16 @@ const products = [
     is_active: true
   },
   {
+    title: 'Document Wallet',
+    description: 'Securely store and access all your financial documents.',
+    icon: <FolderIcon sx={{ fontSize: 30, color: '#FFA94D' }} />,
+    path: '/products/document-vault',
+    color: '#FFA94D',
+    id: 4,
+    context_type: 'business',
+    is_active: true
+  },
+  {
     title: 'Accounting',
     description: 'Track income, expenses, and manage books easily.',
     icon: <AccountBalanceIcon sx={{ fontSize: 30, color: '#00C9A7' }} />,
@@ -42,16 +52,6 @@ const products = [
     id: 3,
     context_type: 'business',
     is_active: false
-  },
-  {
-    title: 'Document Vault',
-    description: 'Securely store and access all your financial documents.',
-    icon: <FolderIcon sx={{ fontSize: 30, color: '#FFA94D' }} />,
-    path: '/products/document-vault',
-    color: '#FFA94D',
-    id: 4,
-    context_type: 'business',
-    is_active: true
   },
   {
     title: 'Compliance Tracker',
@@ -75,7 +75,7 @@ const products = [
   }
 ];
 
-const MotionPaper = motion(Paper);
+const MotionPaper = motion.create(Paper);
 
 const panelVariants = {
   hidden: { opacity: 0, y: -20 },
@@ -89,9 +89,6 @@ const ProductCard = ({ product, onClose }) => (
     sx={{
       p: 1,
       height: '100%',
-      maxWidth: 320,
-      minWidth: 320,
-      mx: 'auto',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
@@ -181,7 +178,7 @@ const ProductsPanel = ({ onClose }) => {
           <Container maxWidth="lg">
             <Grid2 container spacing={2} sx={{ px: { xs: 1, sm: 0 } }}>
               {products.map((product, index) => (
-                <Grid2 xs={12} sm={6} md={4} lg={3} key={index} sx={{ display: 'flex', justifyContent: 'center' }}>
+                <Grid2 size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={index}>
                   <ProductCard product={product} onClose={onClose} />
                 </Grid2>
               ))}

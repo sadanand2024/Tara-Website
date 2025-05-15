@@ -36,6 +36,7 @@ const EditInvoice = Loadable(lazy(() => import('views/invoicing/InvoicingCompone
 // dashboard routing
 const Dashboard = Loadable(lazy(() => import('views/dashboard')));
 const DashboardDefault = Loadable(lazy(() => import('views/dashboard/Default')));
+const DashboardSuperAdmin = Loadable(lazy(() => import('views/dashboard/SuperAdmin')));
 const DashboardPersonal = Loadable(lazy(() => import('views/dashboard/Personal')));
 const DashboardBusiness = Loadable(lazy(() => import('views/dashboard/Business')));
 const MyServices = Loadable(lazy(() => import('views/Services')));
@@ -68,6 +69,10 @@ const MainRoutes = {
     {
       path: '/dashboard',
       element: <Dashboard />
+    },
+    {
+      path: '/dashboard/super-admin',
+      element: <DashboardSuperAdmin />
     },
     {
       path: '/dashboard/default',

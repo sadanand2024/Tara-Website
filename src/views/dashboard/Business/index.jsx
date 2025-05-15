@@ -473,18 +473,20 @@ export default function Business() {
                   }}
                 />
               </Stack>
-              <Stack spacing={0.5}>
-                <Typography variant="body2" sx={{ color: 'text.secondary', display: 'flex', justifyContent: 'space-between' }}>
-                  Subscription{' '}
-                  <Typography color="text.primary" fontWeight={600}>
-                    {companyInfo.plan.subscription}
-                  </Typography>
+              <Stack direction="row" alignItems="center" justifyContent="space-between">
+                <Typography variant="body1" sx={{ color: 'text.secondary', display: 'flex', justifyContent: 'space-between' }}>
+                  Subscription
                 </Typography>
-                <Typography variant="body2" sx={{ color: 'text.secondary', display: 'flex', justifyContent: 'space-between' }}>
+                <Typography variant="body1" color="text.primary" fontWeight={600}>
+                  {companyInfo.plan.subscription}
+                </Typography>
+              </Stack>
+              <Stack direction="row" alignItems="center" justifyContent="space-between">
+                <Typography variant="body1" sx={{ color: 'text.secondary', display: 'flex', justifyContent: 'space-between' }}>
                   Next Renewal
-                  <Typography color="text.primary" fontWeight={600}>
-                    {companyInfo.plan.nextRenewal}
-                  </Typography>
+                </Typography>
+                <Typography variant="body1" color="text.primary" fontWeight={600}>
+                  {companyInfo.plan.nextRenewal}
                 </Typography>
               </Stack>
             </Stack>

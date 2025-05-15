@@ -31,26 +31,11 @@ import { __IndianStates } from '../../../utils/indianStates';
 import { DIALOG_TITLE_PADDING, DIALOG_CONTENT_PADDING } from 'config';
 const validationSchema = Yup.object({
   business_name: Yup.string().required('Business name is required'),
-  registration_number: Yup.string().required('Registration number is required'),
-  entity_type: Yup.string().required('Entity type is required'),
-  head_office: Yup.object().shape({
-    address_line1: Yup.string().required('Address is required'),
-    address_line2: Yup.string().required('Address is required'),
-    city: Yup.string().required('City is required'),
-    state: Yup.string().required('State is required'),
-    country: Yup.string().required('Country is required'),
-    pincode: Yup.string().required('Pincode is required')
-  }),
-  pan: Yup.string()
-    .matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN Number')
-    .required('PAN is required'),
-  business_nature: Yup.string().required('Business nature is required'),
-  trade_name: Yup.string().required('Trade name is required'),
-  mobile_number: Yup.string()
-    .matches(/^\+?[1-9]\d{1,14}$/, 'Invalid phone number')
-    .required('Mobile number is required'),
-  email: Yup.string().email('Invalid email format').required('Email is required'),
-  dob_or_incorp_date: Yup.date().required('Date of incorporation is required').max(new Date(), 'Date cannot be in the future')
+
+  pan: Yup.string().matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN Number'),
+  mobile_number: Yup.string().matches(/^\+?[1-9]\d{1,14}$/, 'Invalid phone number'),
+  email: Yup.string().matches(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, 'Invalid email format'),
+  dob_or_incorp_date: Yup.date().max(new Date(), 'Date cannot be in the future')
 });
 
 const entityTypes = [
@@ -82,7 +67,6 @@ const AddBusiness = ({ open, onClose, userData, setUserData, getContext }) => {
       trade_name: '',
       mobile_number: '',
       email: '',
-      dob_or_incorp_date: ''
     },
 
     validationSchema,
@@ -159,7 +143,14 @@ const AddBusiness = ({ open, onClose, userData, setUserData, getContext }) => {
                 size="small"
                 id="business_name"
                 name="business_name"
-                label="Business Name"
+                label={
+                  <Typography>
+                    Business Name{' '}
+                    <Typography variant="caption" color="error">
+                      *
+                    </Typography>
+                  </Typography>
+                }
                 value={formik.values.business_name}
                 onChange={formik.handleChange}
                 error={formik.touched.business_name && Boolean(formik.errors.business_name)}

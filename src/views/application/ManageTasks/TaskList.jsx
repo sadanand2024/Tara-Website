@@ -20,6 +20,7 @@ import Factory from 'utils/Factory';
 // assets
 import PersonIcon from '@mui/icons-material/Person';
 import CheckCircleTwoToneIcon from '@mui/icons-material/Check';
+import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
 
 // ==============================|| USER LIST ||============================== //
 
@@ -86,17 +87,28 @@ const TaskList = ({ page, rowsPerPage, searchQuery, onTotalUsers, onOpenPlans, l
       <Box
         sx={{
           display: 'flex',
+          flexDirection: 'column',
           justifyContent: 'center',
           alignItems: 'center',
           minHeight: 400,
-          flexDirection: 'column',
+          bgcolor: 'background.neutral',
+          borderRadius: 2,
+          p: 4,
           gap: 2
         }}
       >
-        <PersonIcon sx={{ fontSize: 48, color: 'text.secondary', opacity: 0.5 }} />
-        <Typography variant="h6" color="text.secondary">
-          {searchQuery ? 'No tasks found matching your search' : 'No tasks found'}
+        <AssignmentTurnedInIcon sx={{ fontSize: 64, color: 'primary.light', mb: 1 }} />
+        <Typography variant="h4" color="text.secondary" fontWeight={600} gutterBottom>
+          {searchQuery ? 'No Tasks Match Your Search' : 'No Tasks Found'}
         </Typography>
+        <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
+          {searchQuery ? 'Try adjusting your search or clearing filters to find tasks.' : 'There are currently no tasks to display.'}
+        </Typography>
+        {searchQuery && (
+          <Button variant="contained" color="primary" onClick={() => onTotalUsers(users.length)}>
+            Clear Search
+          </Button>
+        )}
       </Box>
     );
   }

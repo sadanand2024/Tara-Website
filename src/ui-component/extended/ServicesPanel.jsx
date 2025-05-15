@@ -110,7 +110,7 @@ const services = [
     ]
   }
 ];
-const MotionPaper = motion(Paper);
+const MotionPaper = motion.create(Paper);
 
 const panelVariants = {
   hidden: { opacity: 0, y: -20 },

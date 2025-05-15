@@ -18,10 +18,10 @@ import { useState } from 'react';
 // Common styles
 const styles = {
   pageWrapper: {
-    minHeight: '100vh',
+    minHeight: '80vh',
     display: 'flex',
     justifyContent: 'center',
-    alignItems: 'center',
+    // alignItems: 'center',
     py: 4,
     px: { xs: 2, sm: 4 },
     mt: { xs: 4, sm: 0 }
@@ -69,14 +69,14 @@ const styles = {
   timeSlotsWrapper: {
     minWidth: { xs: '100%', sm: 260 },
     flex: { xs: '0 0 auto', sm: 1 },
-    pt: { xs: 3, sm: 5 },
+    pt: { sm: 0, md: 5 },
     px: { xs: 3, sm: 0 },
     pr: { sm: 4 },
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    height: { xs: '100%', sm: 'auto' }
+    height: { xs: 'auto', sm: 'auto' }
   },
   timeSlotsList: {
     display: 'flex',
@@ -683,7 +683,7 @@ const BookConsultationPage = () => {
             minRows={{ xs: 2, sm: 3 }}
             sx={styles.textField}
             value={form.notes}
-            onChange={e => {
+            onChange={(e) => {
               if (e.target.value.length <= 200) {
                 handleFormChange('notes')(e);
               }
@@ -692,7 +692,8 @@ const BookConsultationPage = () => {
             helperText={
               errors.notes
                 ? errors.notes
-                : `${form.notes.length}/200 characters` + (form.notes.length > 0 && form.notes.length < 30 ? ' (minimum 30 characters)' : '')
+                : `${form.notes.length}/200 characters` +
+                  (form.notes.length > 0 && form.notes.length < 30 ? ' (minimum 30 characters)' : '')
             }
             inputProps={{ maxLength: 200 }}
           />
@@ -730,12 +731,32 @@ const BookConsultationPage = () => {
   );
 
   return (
-    <Box sx={{ ...styles.pageWrapper, bgcolor: theme.palette.background.default }}>
-      <Card sx={styles.card}>
-        {renderLeftPanel()}
-        {step === 'calendar' ? renderCalendarView() : renderDetailsForm()}
-      </Card>
-    </Box>
+    <>
+      <Box
+        sx={{
+          mx: 'auto',
+          mt: { xs: 10, md: 8 },
+          mb: 0,
+          display: 'flex',
+          flexDirection: { xs: 'column', md: 'row' },
+          alignItems: { md: 'center' },
+          boxShadow: 0
+        }}
+      >
+        <Box sx={{ flex: 1 }}>
+          <Typography variant="h1" color="primary.main" gutterBottom>
+            Book a Consultation
+          </Typography>
+          <Typography color="text.secondary">Let’s Talk – Book Your Consultation Now! </Typography>
+        </Box>
+      </Box>
+      <Box sx={{ ...styles.pageWrapper, bgcolor: theme.palette.background.default }}>
+        <Card sx={styles.card}>
+          {renderLeftPanel()}
+          {step === 'calendar' ? renderCalendarView() : renderDetailsForm()}
+        </Card>
+      </Box>
+    </>
   );
 };
 
