@@ -249,6 +249,7 @@ export default function ManageUsers() {
           onOpenPermissions={handleOpenPermissionDrawer}
           loading={loading}
           users={users}
+          setUsers={setUsers}
         />
         <Grid sx={{ p: 1.5 }} size={12}>
           <Grid container spacing={gridSpacing} sx={{ justifyContent: 'space-between' }}>

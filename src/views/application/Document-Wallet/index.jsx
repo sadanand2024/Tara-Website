@@ -803,7 +803,7 @@ const DocumentWallet = () => {
       {/* Recently Accessed */}
       <Box sx={{ mb: 4 }}>
         <Typography fontWeight={500} sx={{ mb: 1, fontSize: { xs: 15, sm: 17 } }}>
-          Recently Uploaded Files
+          Recently Accessed Files
         </Typography>
         <Grid container spacing={2}>
           {recentFiles.map((file, idx) => (

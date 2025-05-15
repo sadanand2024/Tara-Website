@@ -16,7 +16,14 @@ import OtherDeductions from './OtherDeductions';
 import Factory from 'utils/Factory';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
-import { CoPresentOutlined } from '@mui/icons-material';
+import CoPresentOutlined from '@mui/icons-material/CoPresentOutlined';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import LogoutIcon from '@mui/icons-material/Logout';
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
+import React from 'react';
 // TabPanel Component
 const TabPanel = ({ children, value, index }) => (
   <div role="tabpanel" hidden={value !== index} id={`tabpanel-${index}`} aria-labelledby={`tab-${index}`}>
@@ -205,6 +212,17 @@ const PayrollWorkflows = ({ type }) => {
       fetchEmployeeMasterData();
     }
   }, [payrollId]);
+
+  const tabIcons = [
+    PersonAddIcon, // New Joiners
+    LogoutIcon, // Exits
+    CoPresentOutlined, // Attendance
+    AccountBalanceWalletIcon, // Loans & Advances
+    EmojiEventsIcon, // Bonus & Incentives
+    TrendingUpIcon, // Salary Revisions
+    RemoveCircleOutlineIcon // Other Deductions
+  ];
+
   return (
     <MainCard
       title="Employee Dashboard"
@@ -239,8 +257,8 @@ const PayrollWorkflows = ({ type }) => {
               key={`tab-${index}`}
               label={
                 <Stack direction="row" sx={{ alignItems: 'center' }}>
-                  <Avatar variant="rounded" sx={{ mr: 1, bgcolor: 'grey.300', width: 32, height: 30 }}>
-                    <IconBolt color={theme.palette.text.primary} />
+                  <Avatar variant="rounded" sx={{ mr: 1, bgcolor: 'primary.light', width: 36, height: 36 }}>
+                    {tabIcons[index] && React.createElement(tabIcons[index], { color: theme.palette.text.primary })}
                   </Avatar>
                   <Typography variant="subtitle1">{tab.label}</Typography>
                 </Stack>
