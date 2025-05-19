@@ -136,7 +136,7 @@ export default function Attendance({ attendanceData, fetchAttendance, employeeMa
         selectedRecord={selectedRecord}
         setLoading={setLoading}
         employeeMasterData={employeeMasterData}
-        // fetchAttendance={fetchAttendance}
+        getData={fetchAttendance}
       />
     </>
   );

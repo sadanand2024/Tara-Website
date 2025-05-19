@@ -23,7 +23,9 @@ import { industries } from 'utils/industries';
 import { entity_choices } from 'utils/Entity-types';
 import { __IndianStates } from 'utils/indianStates';
 import Factory from 'utils/Factory';
-
+import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
+import IconButton from '@mui/material/IconButton';
 // Add a mapping for entity types
 const entityTypeMapping = {
   privateLimitedCompany: 'Private Limited Company',
@@ -72,6 +74,18 @@ const validationSchema = Yup.object({
     is: 'yes',
     then: () => Yup.string().required('MSME number is required'),
     otherwise: () => Yup.string().nullable()
+  }),
+  is_multiple_branches: Yup.string().oneOf(['yes', 'no']).required(),
+  branches: Yup.array().when('is_multiple_branches', {
+    is: 'yes',
+    then: () =>
+      Yup.array().of(
+        Yup.object({
+          branch_name: Yup.string().required('Branch name is required'),
+          branch_code: Yup.string().required('Branch code is required')
+        })
+      ),
+    otherwise: () => Yup.array().nullable()
   })
 });
 
@@ -80,7 +94,8 @@ const BusinessProfile = ({ user, tabChange, tabval }) => {
   const [logoFile, setLogoFile] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-
+  const [branches, setBranches] = useState([]);
+  const [isMultipleBranches, setIsMultipleBranches] = useState('no');
   const formik = useFormik({
     initialValues: {
       nameOfBusiness: '',
@@ -150,13 +165,53 @@ const BusinessProfile = ({ user, tabChange, tabval }) => {
     }
   };
 
+  const handleAddBranch = () => {
+    const newBranches = [...branches, { branch_name: '', branch_code: '' }];
+    setBranches(newBranches);
+  };
+
+  const handleRemoveBranch = async (index) => {
+    let url = `/user_management/branches/${branches[index].id}/`;
+
+    let response = await Factory('delete', url, {});
+    if (response.res.status_cd === 0) {
+      enqueueSnackbar(response.res.message || 'Branch deleted successfully', {
+        variant: 'success',
+        anchorOrigin: { vertical: 'top', horizontal: 'right' }
+      });
+      const branchesResponse = await Factory('get', `/user_management/branches/${user.active_context.business_id}/`, {}, {});
+      if (branchesResponse.res.status_cd === 0) {
+        if (branchesResponse.res.data.length > 0) {
+          setIsMultipleBranches('yes');
+          setBranches(branchesResponse.res.data);
+        } else {
+          setIsMultipleBranches('no');
+          setBranches([]);
+        }
+      }
+    } else {
+      enqueueSnackbar(response.res.message || 'Failed to delete branch', {
+        variant: 'error',
+        anchorOrigin: { vertical: 'top', horizontal: 'right' }
+      });
+    }
+  };
+
+  const handleBranchChange = (index, field, value) => {
+    const newBranches = [...branches];
+    newBranches[index] = { ...newBranches[index], [field]: value };
+    setBranches(newBranches);
+  };
+
+  // Single useEffect for all data fetching
   useEffect(() => {
-    const getBusinessProfile = async () => {
+    const fetchAllData = async () => {
       try {
         setIsLoading(true);
-        const response = await Factory('get', `/user_management/businesses/${user.active_context.business_id}/`, {}, {});
-        if (response.res.status_cd === 0) {
-          const profileData = response.res.data;
+        // Fetch business profile
+        const profileResponse = await Factory('get', `/user_management/businesses/${user.active_context.business_id}/`, {}, {});
+        if (profileResponse.res.status_cd === 0) {
+          const profileData = profileResponse.res.data;
           formik.setValues({
             nameOfBusiness: profileData.nameOfBusiness || '',
             business_nature: profileData.business_nature || '',
@@ -179,9 +234,21 @@ const BusinessProfile = ({ user, tabChange, tabval }) => {
             trade_name: profileData.trade_name || ''
           });
         }
+
+        // Fetch branches
+        const branchesResponse = await Factory('get', `/user_management/branches/${user.active_context.business_id}/`, {}, {});
+        if (branchesResponse.res.status_cd === 0) {
+          if (branchesResponse.res.data.length > 0) {
+            setIsMultipleBranches('yes');
+            setBranches(branchesResponse.res.data);
+          } else {
+            setIsMultipleBranches('no');
+            setBranches([]);
+          }
+        }
       } catch (error) {
-        console.error('Error fetching business profile:', error);
-        enqueueSnackbar('Failed to load business profile', {
+        console.error('Error fetching data:', error);
+        enqueueSnackbar('Failed to load data', {
           variant: 'error',
           anchorOrigin: { vertical: 'top', horizontal: 'right' },
           ContentProps: {
@@ -194,8 +261,47 @@ const BusinessProfile = ({ user, tabChange, tabval }) => {
         setIsLoading(false);
       }
     };
-    getBusinessProfile();
-  }, []);
+
+    fetchAllData();
+  }, [user.active_context.business_id]);
+
+  const handleSaveBranch = async (index) => {
+    let branchesdata = branches[index];
+    let data = {
+      branch_name: branchesdata.branch_name,
+      branch_code: branchesdata.branch_code,
+      business: user.active_context.business_id
+    };
+
+    try {
+      let response;
+      if (branchesdata.id) {
+        // If branch has an ID, use PUT to update existing branch
+        response = await Factory('put', `/user_management/branches/${branchesdata.id}/`, data);
+      } else {
+        // If no ID, use POST to create new branch
+        response = await Factory('post', '/user_management/branches/', data);
+      }
+
+      if (response.res.status_cd === 0) {
+        enqueueSnackbar('Branch saved successfully', {
+          variant: 'success',
+          anchorOrigin: { vertical: 'top', horizontal: 'right' }
+        });
+        // Refresh branches after saving
+        const branchesResponse = await Factory('get', `/user_management/branches/${user.active_context.business_id}/`, {}, {});
+        if (branchesResponse.res.status_cd === 0) {
+          setBranches(branchesResponse.res.data || []);
+        }
+      }
+    } catch (error) {
+      console.error('Error saving branch:', error);
+      enqueueSnackbar('Failed to save branch', {
+        variant: 'error',
+        anchorOrigin: { vertical: 'top', horizontal: 'right' }
+      });
+    }
+  };
 
   if (isLoading) {
     return (
@@ -245,7 +351,7 @@ const BusinessProfile = ({ user, tabChange, tabval }) => {
         </Grid>
 
         {/* <Grid item xs={12} sm={4}> */}
-          {/* <Box sx={{ mb: 2 }}>
+        {/* <Box sx={{ mb: 2 }}>
             <input accept="image/*" style={{ display: 'none' }} id="logo-upload" type="file" onChange={handleLogoChange} />
             <label htmlFor="logo-upload">
               <Button variant="outlined" component="span" size="small">
@@ -511,6 +617,68 @@ const BusinessProfile = ({ user, tabChange, tabval }) => {
             {isSubmitting ? 'Saving...' : 'Save & Continue'}
           </Button>
         </Grid>
+        {/* multiple branches */}
+        <Grid item xs={12}>
+          <FormControl component="fieldset">
+            <Typography variant="subtitle1" gutterBottom>
+              Do you have multiple branches?
+            </Typography>
+            <RadioGroup row name="is_multiple_branches" value={isMultipleBranches} onChange={(e) => setIsMultipleBranches(e.target.value)}>
+              <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
+              <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
+            </RadioGroup>
+          </FormControl>
+        </Grid>
+
+        {isMultipleBranches === 'yes' && (
+          <>
+            {branches.map((branch, index) => (
+              <Grid container spacing={2} key={index} sx={{ mt: 1 }}>
+                <Grid item xs={12}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Typography variant="subtitle2">Branch {index + 1}</Typography>
+                    <IconButton
+                      color="error"
+                      size="small"
+                      onClick={() => handleRemoveBranch(index)}
+                      // disabled={formik.values.branches.length === 1}
+                    >
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  </Box>
+                </Grid>
+                <Grid item xs={12} sm={6} md={3}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="Branch Name"
+                    value={branch.branch_name}
+                    onChange={(e) => handleBranchChange(index, 'branch_name', e.target.value)}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6} md={3}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="Branch Code"
+                    value={branch.branch_code}
+                    onChange={(e) => handleBranchChange(index, 'branch_code', e.target.value)}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6} md={3}>
+                  <Button type="button" variant="outlined" color="primary" onClick={() => handleSaveBranch(index)} size="small">
+                    Save Branch
+                  </Button>
+                </Grid>
+              </Grid>
+            ))}
+            <Grid item xs={12} md={12} sm={12} sx={{ mt: 2 }}>
+              <Button variant="outlined" color="primary" onClick={handleAddBranch} startIcon={<AddIcon />} size="small">
+                Add Branch
+              </Button>
+            </Grid>
+          </>
+        )}
       </Grid>
     </Box>
   );
