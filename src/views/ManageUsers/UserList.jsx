@@ -173,8 +173,8 @@ const UserList = ({ page, rowsPerPage, searchQuery, onTotalUsers, onOpenPermissi
           gap: 2
         }}
       >
-        <PersonIcon sx={{ fontSize: 48, color: 'text.secondary', opacity: 0.5 }} />
-        <Typography variant="h6" color="text.secondary">
+        <PersonIcon sx={{ fontSize: 68, color: 'text.secondary', opacity: 0.5 }} />
+        <Typography sx={{ fontSize: 14, color: 'text.secondary' }}>
           {searchQuery ? 'No users found matching your search' : 'No users found'}
         </Typography>
       </Box>
