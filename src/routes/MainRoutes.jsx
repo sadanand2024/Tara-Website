@@ -39,8 +39,6 @@ const DashboardDefault = Loadable(lazy(() => import('views/dashboard/Default')))
 const DashboardSuperAdmin = Loadable(lazy(() => import('views/dashboard/SuperAdmin')));
 const DashboardPersonal = Loadable(lazy(() => import('views/dashboard/Personal')));
 const DashboardBusiness = Loadable(lazy(() => import('views/dashboard/Business')));
-const MyServices = Loadable(lazy(() => import('views/Services')));
-const ITRSummary = Loadable(lazy(() => import('views/Services/ITR')));
 const ManageUsers = Loadable(lazy(() => import('views/ManageUsers')));
 const ManageSubscriptions = Loadable(lazy(() => import('views/ManageSubscriptions')));
 const ManageModulesAndServices = Loadable(lazy(() => import('views/ManageSubscriptions/ModulesAndServices')));
@@ -53,6 +51,11 @@ const ManageTasks = Loadable(lazy(() => import('views/application/ManageTasks'))
 const DocumentWallet = Loadable(lazy(() => import('views/application/Document-Wallet')));
 const ContactUsInfo = Loadable(lazy(() => import('views/ContactUsInfo')));
 const ConsultationInfo = Loadable(lazy(() => import('views/ConsultationInfo')));
+
+// Service Dashboards
+const MyServices = Loadable(lazy(() => import('views/Services')));
+const ITRSummary = Loadable(lazy(() => import('views/Services/ITR')));
+const MSMEDashboard = Loadable(lazy(() => import('views/Services/MSME')));
 
 // ==============================|| MAIN ROUTING ||============================== //
 
@@ -105,6 +108,11 @@ const MainRoutes = {
     {
       path: '/app/my-services/itr-dashboard',
       element: <ITRSummary />
+    },
+    ,
+    {
+      path: '/app/my-services/msme-dashboard',
+      element: <MSMEDashboard />
     },
     {
       path: '/app/users',
