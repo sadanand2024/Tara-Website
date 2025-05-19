@@ -2,7 +2,18 @@ import React, { useEffect, useState } from 'react';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
-import { FormControl, TextField, Radio, RadioGroup, FormControlLabel, FormLabel, Grid2, Box, CircularProgress } from '@mui/material';
+import {
+  FormControl,
+  TextField,
+  Radio,
+  RadioGroup,
+  FormControlLabel,
+  FormLabel,
+  Grid2,
+  Box,
+  CircularProgress,
+  Divider
+} from '@mui/material';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import CustomInput from 'utils/CustomInput';
@@ -92,6 +103,8 @@ export default function TabOne({ businessDetails = {}, postType, handleNext, set
     //     /^[A-Za-z]{4}[A-Za-z]{2}[A-Za-z0-9]{2}([A-Za-z0-9]{3})?$/,
     //     'SWIFT Code must be 8 or 11 characters: 4 letters, 2 letters, 2 alphanumeric, and optionally 3 alphanumeric'
     //   )
+    // branch: Yup.string().required('Branch is required'),
+    // branch_code: Yup.string().required('Branch Code is required')
   });
 
   const formik = useFormik({
@@ -112,7 +125,9 @@ export default function TabOne({ businessDetails = {}, postType, handleNext, set
       bank_name: '',
       account_number: '',
       ifsc_code: '',
-      swift_code: ''
+      swift_code: '',
+      branch: '',
+      branch_code: ''
     },
     validationSchema,
     onSubmit: async (values) => {
@@ -170,13 +185,15 @@ export default function TabOne({ businessDetails = {}, postType, handleNext, set
         nameOfBusiness: businessDetails.nameOfBusiness || '',
         registrationNumber: businessDetails.registrationNumber || '',
         entityType: businessDetails.entityType || '',
-        gst_registered: Array.isArray(businessDetails?.gst_details) && businessDetails.gst_details.length > 0 ? 'Yes' : 'No',
-        gstin:
-          businessDetails?.gst_details?.length !== 0 && businessDetails.gstin === 'NA'
-            ? ''
-            : businessDetails?.gst_details?.length === 0
-              ? 'NA'
-              : businessDetails.gstin,
+        // gst_registered: Array.isArray(businessDetails?.gst_details) && businessDetails.gst_details.length > 0 ? 'Yes' : 'No',
+        gst_registered: businessDetails.gst_registered === true ? 'Yes' : 'No',
+        // gstin:
+        //   businessDetails?.gst_details?.length !== 0 && businessDetails.gstin === 'NA'
+        //     ? ''
+        //     : businessDetails?.gst_details?.length === 0
+        //       ? 'NA'
+        //       : businessDetails.gstin,
+        gstin: businessDetails.gstin || 'NA',
         state: businessDetails?.headOffice?.state || businessDetails?.state || '',
         email: businessDetails.email || '',
         pincode: businessDetails?.headOffice?.pincode || businessDetails?.pincode || '',
@@ -351,6 +368,25 @@ export default function TabOne({ businessDetails = {}, postType, handleNext, set
         ))}
       </Grid2>
 
+      <Divider />
+      <Box>
+        <Typography variant="h4" sx={{ fontWeight: 'bold', pt: 3, mb: 2 }}>
+          Branch Details
+        </Typography>
+      </Box>
+      <Grid2 container spacing={2}>
+        <Grid2 size={{ xs: 12, sm: 6 }}>
+          <CustomAutocomplete
+            value={values.branch}
+            onChange={(e, newValue) => setFieldValue('branch', newValue)}
+            options={businessDetails.branches || []}
+            name="branch"
+          />
+        </Grid2>
+        <Grid2 size={{ xs: 12, sm: 6 }}>
+          <CustomInput name="branch_code" value={values.branch_code} onChange={(e) => setFieldValue('branch_code', e.target.value)} />
+        </Grid2>
+      </Grid2>
       <Typography variant="h4" sx={{ fontWeight: 'bold', pt: 3, mb: 2 }}>
         Bank Details
       </Typography>

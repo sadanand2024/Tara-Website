@@ -235,7 +235,8 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
         setLoading(true);
         let url = selectedRecord?.id ? `/payroll/employee-attendance/${selectedRecord?.id}` : `/payroll/employee-attendance`;
         let method = selectedRecord?.id ? 'put' : 'Post';
-        const monthNumber = months.indexOf(values.month) + 1;
+
+        const monthNumber = values.month;
 
         let postData = {
           ...values,
