@@ -17,7 +17,7 @@ const validationSchema = Yup.object({
 });
 const initialEarnings = [{ component_name: 'Basic', calculation_type: 'Fixed', monthly: 0, annually: 0, calculation: 0 }];
 
-function SalaryDetails({ fetchEmployeeData, employeeData, createdEmployeeId, setSubmitRef, onNext }) {
+function SalaryDetails({ fetchEmployeeData, employeeData, createdEmployeeId, setSubmitRef, onNext, from }) {
   // console.log(employeeData);
   const [open, setOpen] = useState(false);
   const [payrollid, setPayrollId] = useState(null);
@@ -82,7 +82,10 @@ function SalaryDetails({ fetchEmployeeData, employeeData, createdEmployeeId, set
           url = `/payroll/employee-salary/${lastSalaryRecord.id}`;
         }
       }
-
+      if (from === 'Salary Revisions') {
+        method = 'post';
+        url = '/payroll/employee-salary';
+      }
       const { res } = await Factory(method, url, postData);
 
       if (res?.status_cd === 1) {

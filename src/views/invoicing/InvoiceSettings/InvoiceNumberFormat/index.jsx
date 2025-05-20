@@ -22,7 +22,11 @@ import { useNavigate } from 'react-router-dom';
 const InvoiceNumberFormat = ({ businessDetails, handleBack }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [selectedRecord, setSelectedRecord] = useState(null);
+  const [selectedRecord, setSelectedRecord] = useState({
+    id: null,
+    format_version: null,
+    gstin: null
+  });
   const [selectedGSTIN, setSelectedGSTIN] = useState(null);
   const [postType, setPostType] = useState('');
 
@@ -47,10 +51,6 @@ const InvoiceNumberFormat = ({ businessDetails, handleBack }) => {
     startingNumber: '1'
   });
 
-  const gstins = [
-    { gstin: '37ABCDE1234F1Z5', format: 'INV-HYD-25-26-0001' },
-    { gstin: '29ABCDE1234F1Z6', format: 'INV-BNG-25-26-0001' }
-  ];
   const handleChange =
     (field, isConfig = false) =>
     (event) => {
@@ -65,6 +65,10 @@ const InvoiceNumberFormat = ({ businessDetails, handleBack }) => {
             sameFormatForAllGST: true,
             separateFormatForEachGST: false
           }));
+          setFormValues({
+            prefix: '',
+            startingNumber: '1'
+          });
           setSelectedGSTIN(null); // 🧼 clear selected GSTIN
         } else if (field === 'separateFormatForEachGST' && checked) {
           setFormatOptions((prev) => ({
@@ -72,6 +76,10 @@ const InvoiceNumberFormat = ({ businessDetails, handleBack }) => {
             sameFormatForAllGST: false,
             separateFormatForEachGST: true
           }));
+          setFormValues({
+            prefix: '',
+            startingNumber: '1'
+          });
         } else {
           setFormatOptions((prev) => ({ ...prev, [field]: checked }));
         }
@@ -87,7 +95,7 @@ const InvoiceNumberFormat = ({ businessDetails, handleBack }) => {
     const parts = [];
     if (formatOptions.usePrefix && formValues.prefix) parts.push(formValues.prefix);
     // if (formatOptions.useBranchCode) parts.push('HYD'); // Simulated branch code
-    if (formatOptions.useFY) parts.push('25-26'); // Simulated FY from invoice date
+    if (formatOptions.useFY) parts.push('2025-26'); // Simulated FY from invoice date
     // if (formatOptions.useSeriesCode) parts.push('A'); // Placeholder
     if (formatOptions.useRunningNumber && formValues.startingNumber) parts.push(formValues.startingNumber.padStart(4, '0'));
 
@@ -97,7 +105,7 @@ const InvoiceNumberFormat = ({ businessDetails, handleBack }) => {
     setSelectedGSTIN(gstin);
 
     const formatToEdit = businessDetails.invoice_format.find((f) => f.gstin === gstin);
-
+    console.log(formatToEdit);
     if (formatToEdit) {
       setFormatOptions((prev) => ({
         ...prev,
@@ -120,10 +128,44 @@ const InvoiceNumberFormat = ({ businessDetails, handleBack }) => {
         prefix: formatToEdit.prefix || '',
         startingNumber: String(formatToEdit.running_number_start || '1')
       });
+      setPostType('put');
+      setSelectedRecord({
+        id: formatToEdit.id,
+        format_version: formatToEdit.format_version,
+        gstin: formatToEdit.gstin
+      });
+    } else {
+      setFormatOptions((prev) => ({
+        ...prev,
+        sameFormatForAllGST: false,
+        separateFormatForEachGST: true,
+        usePrefix: false,
+        useBranchCode: false,
+        useFY: true,
+        useSeriesCode: false,
+        useRunningNumber: true
+      }));
+
+      setConfigOptions({
+        resetEveryFY: false,
+        separateSequencePerBranch: false,
+        separateSequencePerGSTIN: false
+      });
+      setFormValues({
+        prefix: '',
+        startingNumber: '1'
+      });
+      setPostType('post');
+      setSelectedRecord({
+        id: null,
+        format_version: null,
+        gstin: null
+      });
     }
   };
 
   const handleSave = async () => {
+    console.log(selectedRecord);
     const postData = {
       invoicing_profile: businessDetails.invoicing_profile_id,
       gstin: selectedGSTIN || 'NA', // Use selected GSTIN or 'NA' for common
@@ -133,14 +175,17 @@ const InvoiceNumberFormat = ({ businessDetails, handleBack }) => {
       include_series_code: formatOptions.useSeriesCode,
       include_running_number: formatOptions.useRunningNumber,
       series_code: '',
-      running_number_start: formValues.startingNumber,
+      running_number_start: Number(formValues.startingNumber),
       reset_every_fy: configOptions.resetEveryFY,
       maintain_sequence_per_branch: configOptions.separateSequencePerBranch,
       maintain_sequence_per_gstin: configOptions.separateSequencePerGSTIN
     };
+    postData.format_version = postType === 'put' ? Number(selectedRecord.format_version || 1) + 1 : 1;
 
-    if (formatOptions.sameFormatForAllGST) {
+    if (formatOptions.sameFormatForAllGST === true) {
       postData.is_common_format = true;
+    } else {
+      postData.is_common_format = false;
     }
 
     const url = postType === 'post' ? `/invoicing/invoice-formats/` : `/invoicing/invoice-formats/${selectedRecord.id}/`;
@@ -178,20 +223,21 @@ const InvoiceNumberFormat = ({ businessDetails, handleBack }) => {
       setPostType('put');
     }
 
-    if (businessDetails?.invoice_format?.length) {
+    if (businessDetails?.invoice_format?.length > 0) {
       const formats = businessDetails.invoice_format;
 
-      if (formats.length > 1) {
-        // More than one format = separate formats per GST
+      if (formats.find((f) => f.is_common_format === false)) {
         setFormatOptions((prev) => ({
           ...prev,
           sameFormatForAllGST: false,
           separateFormatForEachGST: true
         }));
-        setSelectedRecord(formats[0]);
-
-        // Optionally store or set these formats for editing
-        // setGSTINFormats(formats); (only if needed)
+        // setSelectedRecord({
+        //   id: formats[0].id,
+        //   format_version: formats[0].format_version,
+        //   gstin: formats[0].gstin
+        // });
+        // setSelectedGSTIN(formats[0].gstin);
       } else {
         // Only one format = treat as common format
         const format = formats[0];
@@ -217,11 +263,10 @@ const InvoiceNumberFormat = ({ businessDetails, handleBack }) => {
           prefix: format.prefix || '',
           startingNumber: String(format.running_number_start || '1')
         });
-        setSelectedRecord(format);
+        // setSelectedRecord(format);
       }
     }
   }, [businessDetails]);
-
   return (
     <Box>
       <Typography variant="h5" gutterBottom>
@@ -229,14 +274,69 @@ const InvoiceNumberFormat = ({ businessDetails, handleBack }) => {
       </Typography>
 
       <FormControlLabel
-        control={<Checkbox checked={formatOptions.sameFormatForAllGST} onChange={handleChange('sameFormatForAllGST')} />}
+        control={
+          <Checkbox
+            checked={formatOptions.sameFormatForAllGST}
+            onChange={handleChange('sameFormatForAllGST')}
+            disabled={formatOptions.separateFormatForEachGST || businessDetails.invoice_format.find((f) => f.is_common_format === true)}
+          />
+        }
         label="Follow same format across all GST numbers"
       />
       <FormControlLabel
-        control={<Checkbox checked={formatOptions.separateFormatForEachGST} onChange={handleChange('separateFormatForEachGST')} />}
+        control={
+          <Checkbox
+            checked={formatOptions.separateFormatForEachGST}
+            onChange={handleChange('separateFormatForEachGST')}
+            disabled={formatOptions.sameFormatForAllGST || businessDetails.invoice_format.find((f) => f.is_common_format === false)}
+          />
+        }
         label="Create Seperate format for each GST number"
       />
 
+      {formatOptions.separateFormatForEachGST && (
+        <>
+          <Typography variant="h5">GSTIN-wise Formats</Typography>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>GSTIN</TableCell>
+                {/* <TableCell>Format Preview</TableCell> */}
+                <TableCell>Action</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {businessDetails.gst_details.map((gst) => (
+                <TableRow key={gst.gstin}>
+                  <TableCell>{gst.gstin}</TableCell>
+                  {/* <TableCell>
+                    {[
+                      gst.prefix,
+                      gst.include_branch_code && 'BR',
+                      gst.include_financial_year && '2025-26',
+                      gst.include_series_code && 'SC',
+                      gst.include_running_number && String(gst.running_number_start).padStart(4, '0')
+                    ]
+                      .filter(Boolean)
+                      .join('-')}
+                  </TableCell> */}
+                  <TableCell>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      onClick={() => {
+                        handleEdit(gst.gstin);
+                      }}
+                    >
+                      Edit
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </>
+      )}
       <Divider sx={{ my: 2 }} />
       {(formatOptions.sameFormatForAllGST || selectedGSTIN) && (
         <>
@@ -323,46 +423,6 @@ const InvoiceNumberFormat = ({ businessDetails, handleBack }) => {
             }
             label="Maintain separate sequence per GSTIN"
           />
-        </>
-      )}
-      {formatOptions.separateFormatForEachGST && (
-        <>
-          <Divider sx={{ my: 2 }} />
-          <Typography variant="h6">GSTIN-wise Formats</Typography>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>GSTIN</TableCell>
-                <TableCell>Format Preview</TableCell>
-                <TableCell>Action</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {businessDetails.invoice_format
-                .filter((f) => f.gstin !== 'NA')
-                .map((format, index) => (
-                  <TableRow key={index}>
-                    <TableCell>{format.gstin}</TableCell>
-                    <TableCell>
-                      {[
-                        format.prefix,
-                        format.include_branch_code && 'BR',
-                        format.include_financial_year && 'FY',
-                        format.include_series_code && 'SC',
-                        format.include_running_number && String(format.running_number_start).padStart(4, '0')
-                      ]
-                        .filter(Boolean)
-                        .join('-')}
-                    </TableCell>
-                    <TableCell>
-                      <Button variant="outlined" size="small" onClick={() => handleEdit(format.gstin)}>
-                        Edit
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-            </TableBody>
-          </Table>
         </>
       )}
 

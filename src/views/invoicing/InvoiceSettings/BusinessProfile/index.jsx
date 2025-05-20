@@ -369,7 +369,7 @@ export default function TabOne({ businessDetails = {}, postType, handleNext, set
       </Grid2>
 
       <Divider />
-      <Box>
+      {/* <Box>
         <Typography variant="h4" sx={{ fontWeight: 'bold', pt: 3, mb: 2 }}>
           Branch Details
         </Typography>
@@ -386,7 +386,7 @@ export default function TabOne({ businessDetails = {}, postType, handleNext, set
         <Grid2 size={{ xs: 12, sm: 6 }}>
           <CustomInput name="branch_code" value={values.branch_code} onChange={(e) => setFieldValue('branch_code', e.target.value)} />
         </Grid2>
-      </Grid2>
+      </Grid2> */}
       <Typography variant="h4" sx={{ fontWeight: 'bold', pt: 3, mb: 2 }}>
         Bank Details
       </Typography>

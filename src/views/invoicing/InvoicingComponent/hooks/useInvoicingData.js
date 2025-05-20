@@ -10,14 +10,15 @@ export const useInvoicingData = () => {
   const [invoiceNumberFormat, setInvoiceNumberFormat] = useState('');
   const [itemsList, setItemsList] = useState([]);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
+  const [branches, setBranches] = useState([]);
+  const user = useSelector((state) => state.accountReducer.user);
+  const businessId = user.active_context.business_id;
 
   const dispatch = useDispatch();
-  const user = useSelector((state) => state.accountReducer.user);
   const [searchParams] = useSearchParams();
   const invoiceId = searchParams.get('id');
 
   const fetchBusinessDetails = async () => {
-    const businessId = user.active_context.business_id;
     const url = `/invoicing/invoicing-profiles/?business_id=${businessId}`;
     const { res } = await Factory('get', url, {});
     if (res.status_cd === 0) {
@@ -35,6 +36,17 @@ export const useInvoicingData = () => {
     }
   };
 
+  const getBranchesData = async () => {
+    let url = `/user_management/branches/${businessId}/`;
+    const { res } = await Factory('get', url, {});
+    if (res.status_cd === 0) {
+      if (res.data.length > 0) {
+        setBranches(res.data);
+      } else {
+        setBranches([]);
+      }
+    }
+  };
   const getCustomersData = async (id) => {
     const { res } = await Factory('get', `/invoicing/customer_profiles/?invoicing_profile_id=${id}`, {});
     if (res.status_cd === 0) {
@@ -108,7 +120,7 @@ export const useInvoicingData = () => {
 
   useEffect(() => {
     fetchBusinessDetails();
-  }, []);
+  }, [businessId]);
 
   useEffect(() => {
     if (businessDetails?.id) {
@@ -122,7 +134,9 @@ export const useInvoicingData = () => {
       getIndividualInvoiceData();
     }
   }, [invoiceId]);
-
+  useEffect(() => {
+    getBranchesData();
+  }, [businessId]);
   return {
     businessDetails,
     customers,
@@ -130,6 +144,7 @@ export const useInvoicingData = () => {
     invoiceNumberFormat,
     selectedInvoice,
     getInvoiceFormat,
-    getGoodsAndServicesData
+    getGoodsAndServicesData,
+    branches
   };
 };

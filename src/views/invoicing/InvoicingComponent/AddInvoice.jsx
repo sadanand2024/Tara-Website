@@ -36,7 +36,8 @@ const AddItem = ({
   open,
   onClose,
   itemsList,
-  getGoodsAndServicesData
+  getGoodsAndServicesData,
+  branches
 }) => {
   const [addInvoiceData] = useState({
     invoice_data: [
@@ -545,9 +546,35 @@ const AddItem = ({
               onChange={async (event, newgstin) => {
                 setSelectedgstin(newgstin || 'NA');
                 setFieldValue('gstin', newgstin || 'NA');
-                const url = `/invoicing/invoicing-profiles/${businessDetailsData.id}/update/`;
+                // const url = `/invoicing/invoicing-profiles/${businessDetailsData.id}/update/`;
+                // let formdata = new FormData();
+                // formdata.append('gstin', newgstin || 'NA');
+                // const { res } = await Factory('put', url, formdata);
+                // if (res.status_cd === 0) {
+                //   getInvoiceFormat();
+                // } else {
+                //   dispatch(openSnackbar({ message: JSON.stringify(res.data.data), variant: 'error' }));
+                // }
+              }}
+              options={
+                businessDetailsData?.gst_details?.length > 0 ? businessDetailsData.gst_details.map((item) => item.gstin || 'NA') : ['NA']
+              }
+              error={touched.gstin && Boolean(errors.gstin)}
+              helperText={touched.gstin && errors.gstin}
+            />
+          </Grid2>
+          <Grid2 size={{ xs: 6 }}>
+            <Typography gutterBottom>Select Branch</Typography>
+            <CustomAutocomplete
+              name="branch"
+              value={values.branch || ''}
+              onChange={async (event, newbranch) => {
+                setSelectedbranch(newbranch || 'NA');
+                setFieldValue('branch', newbranch || 'NA');
+                const url = `/invoicing/invoicing-profiles/${businessDetailsData.id}/update/${newbranch.branch_code}/`;
                 let formdata = new FormData();
-                formdata.append('gstin', newgstin || 'NA');
+                formdata.append('gstin', values.gstin || 'NA');
+                formdata.append('branch', newbranch || 'NA');
                 const { res } = await Factory('put', url, formdata);
                 if (res.status_cd === 0) {
                   getInvoiceFormat();
