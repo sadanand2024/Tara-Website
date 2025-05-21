@@ -646,6 +646,55 @@ export default function ITR() {
               </Grid2>
             </Box>
           )}
+
+          {/* Review & Filing Step */}
+          {step === 3 && (
+            <Box>
+              <Typography variant="h5" mb={3} sx={{ textDecoration: 'underline' }}>
+                Draft Income Tax Computation
+              </Typography>
+              <Stack direction="row" spacing={2} mb={3}>
+                <Button variant="outlined">View</Button>
+                <Button variant="contained">Upload</Button>
+              </Stack>
+
+              <Typography variant="h5" mb={2} sx={{ textDecoration: 'underline' }}>
+                Approval / Workflow
+              </Typography>
+              <Stack direction="row" spacing={2} mb={3}>
+                <Button variant="outlined">View</Button>
+                <Button variant="contained" color="success">Approve</Button>
+                <Button variant="contained" color="warning">Rework</Button>
+              </Stack>
+
+              <Typography variant="h5" mb={2} sx={{ textDecoration: 'underline' }}>
+                Proceed to Filing
+              </Typography>
+              <Stack direction="row" spacing={2} mb={2}>
+                <Button variant="outlined">View</Button>
+                <Button variant="contained" color="primary">Proceed to File</Button>
+              </Stack>
+              <Box mb={4}>
+                <Typography mb={1}>Mode of e-verification?</Typography>
+                <Autocomplete
+                  size="small"
+                  fullWidth
+                  options={["Aadhaar OTP", "Net Banking", "DSC", "EVC"]}
+                  renderInput={(params) => <TextField {...params} placeholder="Select mode" />}
+                  sx={{ maxWidth: 300 }}
+                />
+              </Box>
+
+              <Stack direction="row" spacing={6} mt={4}>
+                <Paper elevation={2} sx={{ p: 3, minWidth: 120, textAlign: 'center', bgcolor: '#f8fafc' }}>
+                  <Typography variant="h6">Filing</Typography>
+                </Paper>
+                <Paper elevation={2} sx={{ p: 3, minWidth: 120, textAlign: 'center', bgcolor: '#f8fafc' }}>
+                  <Typography variant="h6">Ack</Typography>
+                </Paper>
+              </Stack>
+            </Box>
+          )}
         </Paper>
       </Box>
     </Card>
