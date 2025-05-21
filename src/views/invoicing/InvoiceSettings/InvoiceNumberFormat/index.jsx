@@ -183,9 +183,9 @@ const InvoiceNumberFormat = ({ businessDetails, handleBack }) => {
     postData.format_version = postType === 'put' ? Number(selectedRecord.format_version || 1) + 1 : 1;
 
     if (formatOptions.sameFormatForAllGST === true) {
-      postData.is_common_format = true;
+      postData.is_common_format = 'yes';
     } else {
-      postData.is_common_format = false;
+      postData.is_common_format = 'no';
     }
 
     const url = postType === 'post' ? `/invoicing/invoice-formats/` : `/invoicing/invoice-formats/${selectedRecord.id}/`;
@@ -226,7 +226,7 @@ const InvoiceNumberFormat = ({ businessDetails, handleBack }) => {
     if (businessDetails?.invoice_format?.length > 0) {
       const formats = businessDetails.invoice_format;
 
-      if (formats.find((f) => f.is_common_format === false)) {
+      if (formats.find((f) => f.is_common_format === 'no')) {
         setFormatOptions((prev) => ({
           ...prev,
           sameFormatForAllGST: false,
@@ -278,7 +278,7 @@ const InvoiceNumberFormat = ({ businessDetails, handleBack }) => {
           <Checkbox
             checked={formatOptions.sameFormatForAllGST}
             onChange={handleChange('sameFormatForAllGST')}
-            disabled={formatOptions.separateFormatForEachGST || businessDetails.invoice_format.find((f) => f.is_common_format === true)}
+            disabled={formatOptions.separateFormatForEachGST || businessDetails.invoice_format.find((f) => f.is_common_format === 'yes')}
           />
         }
         label="Follow same format across all GST numbers"
@@ -288,7 +288,7 @@ const InvoiceNumberFormat = ({ businessDetails, handleBack }) => {
           <Checkbox
             checked={formatOptions.separateFormatForEachGST}
             onChange={handleChange('separateFormatForEachGST')}
-            disabled={formatOptions.sameFormatForAllGST || businessDetails.invoice_format.find((f) => f.is_common_format === false)}
+            disabled={formatOptions.sameFormatForAllGST || businessDetails.invoice_format.find((f) => f.is_common_format === 'no')}
           />
         }
         label="Create Seperate format for each GST number"

@@ -40,7 +40,7 @@ export default function BonusAndIncentives({ employeeMasterData, from, openDialo
 
   const getData = async () => {
     setLoading(true);
-    const year = financialYear.split('-')[1];
+    const year = financialYear.split('-')[0];
     const url = `/payroll/bonus-incentives/by-payroll-month?payroll_id=${payrollid}&month=${month}&year=${year}`;
     const { res, error } = await Factory('get', url, {});
     setLoading(false);

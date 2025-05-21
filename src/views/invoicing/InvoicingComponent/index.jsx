@@ -12,7 +12,8 @@ const InvoicingComponent = () => {
     selectedInvoice,
     getInvoiceFormat,
     getGoodsAndServicesData,
-    branches
+    branches,
+    setInvoiceNumberFormat
   } = useInvoicingData();
 
   return (
@@ -26,6 +27,7 @@ const InvoicingComponent = () => {
         getInvoiceFormat={getInvoiceFormat}
         getGoodsAndServicesData={getGoodsAndServicesData}
         branches={branches}
+        setInvoiceNumberFormat={setInvoiceNumberFormat}
       />
     </MainCard>
   );

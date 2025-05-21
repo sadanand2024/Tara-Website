@@ -166,7 +166,7 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
         resetForm(); // Optional
         handleClose(); // <- this closes the modal
       }}
-      header={{ title: type === 'edit' ? 'Update Customer' : 'Add New Customer' }}
+      title={type === 'edit' ? 'Update Customer' : 'Add New Customer'}
       footer={
         <Stack direction="row" spacing={2} justifyContent="space-between" sx={{ width: '100%' }}>
           <Button

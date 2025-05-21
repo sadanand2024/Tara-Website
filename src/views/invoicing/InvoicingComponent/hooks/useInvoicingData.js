@@ -83,9 +83,9 @@ export const useInvoicingData = () => {
     }
   };
 
-  const getInvoiceFormat = async () => {
-    const { res } = await Factory('get', `/invoicing/latest/${businessDetails?.id}/`, {});
-    console.log(res);
+  const getInvoiceFormat = async (gstin, branch_code) => {
+    let url = `/invoicing/latest/${businessDetails?.id}/?branch_code=${branch_code}&gstin=${gstin}`;
+    const { res } = await Factory('get', url, {});
     if (res.status_cd === 0) {
       setInvoiceNumberFormat(res.data.latest_invoice_number);
     } else {
@@ -142,6 +142,7 @@ export const useInvoicingData = () => {
     customers,
     itemsList,
     invoiceNumberFormat,
+    setInvoiceNumberFormat,
     selectedInvoice,
     getInvoiceFormat,
     getGoodsAndServicesData,

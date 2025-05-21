@@ -367,7 +367,6 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
               setFieldValue(field.name, newValue?.id || '');
               setFieldValue('department', newValue.department_name);
               setFieldValue('designation', newValue.designation_name);
-              console.log(newValue);
               if (from === 'Salary Revisions') {
                 // setFieldValue('current_ctc', newValue.current_ctc);
                 // setFieldValue('revised_ctc', newValue.current_ctc);
@@ -505,7 +504,7 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
     ));
   };
   const { values, setValues, handleChange, errors, touched, handleSubmit, handleBlur, resetForm, setFieldValue } = formik;
-
+  console.log(values);
   useEffect(() => {
     if (selectedRecord !== null) {
       // Convert month name to numeric value if it exists

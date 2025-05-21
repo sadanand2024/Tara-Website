@@ -156,7 +156,7 @@ const AddItem = ({ type, setType, open, from, handleClose, selectedItem, busines
         resetForm();
         handleClose();
       }}
-      title={'Add or Edit Item'}
+      title={type === 'edit' ? 'Edit Item' : 'Add Item'}
       footer={
         <Stack direction="row" spacing={2} justifyContent="space-between" sx={{ width: '100%' }}>
           <Button
