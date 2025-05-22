@@ -61,6 +61,8 @@ const LabourLicence = Loadable(lazy(() => import('views/Services/LabourLicence')
 
 //Admin Panel
 const UserManagement = Loadable(lazy(() => import('views/SuperAdmin/UserManagement')));
+const NewRequests = Loadable(lazy(() => import('views/SuperAdmin/ServiceManagement/NewRequests')));
+const TaskManagement = Loadable(lazy(() => import('views/SuperAdmin/ServiceManagement/TaskManagement')));
 // ==============================|| MAIN ROUTING ||============================== //
 
 const MainRoutes = {
@@ -129,9 +131,18 @@ const MainRoutes = {
       path: '/app/users',
       element: <ManageUsers />
     },
+    //Admin Panel
     {
       path: '/app/user-management',
       element: <UserManagement />
+    },
+    {
+      path: '/app/new-requests',
+      element: <NewRequests />
+    },
+    {
+      path: '/app/task-management',
+      element: <TaskManagement />
     },
     {
       path: '/app/manage-tasks',

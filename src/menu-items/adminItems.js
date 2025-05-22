@@ -30,10 +30,10 @@ const adminItems = {
   type: 'group',
   children: [
     {
-      id: 'new-services',
-      title: 'new-services',
+      id: 'new-requests',
+      title: 'new-requests',
       type: 'item',
-      url: '/app/new-services',
+      url: '/app/new-requests',
       icon: icons.IconGitPullRequest,
       breadcrumbs: false
     },
