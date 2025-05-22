@@ -56,7 +56,11 @@ const ConsultationInfo = Loadable(lazy(() => import('views/ConsultationInfo')));
 const MyServices = Loadable(lazy(() => import('views/Services')));
 const ITRSummary = Loadable(lazy(() => import('views/Services/ITR')));
 const MSMEDashboard = Loadable(lazy(() => import('views/Services/MSME')));
+const TradeLicence = Loadable(lazy(() => import('views/Services/TradeLicence')));
+const LabourLicence = Loadable(lazy(() => import('views/Services/LabourLicence')));
 
+//Admin Panel
+const UserManagement = Loadable(lazy(() => import('views/SuperAdmin/UserManagement')));
 // ==============================|| MAIN ROUTING ||============================== //
 
 const MainRoutes = {
@@ -109,14 +113,25 @@ const MainRoutes = {
       path: '/app/my-services/itr-dashboard',
       element: <ITRSummary />
     },
-    ,
     {
       path: '/app/my-services/msme-dashboard',
       element: <MSMEDashboard />
     },
     {
+      path: '/app/my-services/trade-licence',
+      element: <TradeLicence />
+    },
+    {
+      path: '/app/my-services/labour-licence',
+      element: <LabourLicence />
+    },
+    {
       path: '/app/users',
       element: <ManageUsers />
+    },
+    {
+      path: '/app/user-management',
+      element: <UserManagement />
     },
     {
       path: '/app/manage-tasks',
