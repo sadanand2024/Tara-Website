@@ -27,6 +27,8 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
 import { businessTypesArray } from 'utils/businessTypesArray';
+import CustomUpload from 'utils/CustomUpload';
+
 export default function TabOne({ businessDetails = {}, postType, handleNext, setBusinessDetails }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -35,6 +37,7 @@ export default function TabOne({ businessDetails = {}, postType, handleNext, set
     basic_details: [
       { name: 'nameOfBusiness', label: 'Business Name' },
       { name: 'registrationNumber', label: 'Business Registration Number' },
+      { name: 'logo', label: 'Logo' },
       { name: 'gst_registered', label: 'GST Registered' },
       { name: 'gstin', label: 'GSTIN' },
       { name: 'pan', label: 'PAN' },
@@ -227,7 +230,26 @@ export default function TabOne({ businessDetails = {}, postType, handleNext, set
         {busineesprofileFields.basic_details.map((item, index) => (
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }} key={item.name}>
             <FormControl fullWidth>
-              {item.name === 'gst_registered' ? (
+              {item.name === 'logo' ? (
+                <Grid2 key={item.name} size={{ xs: 12 }}>
+                  <Typography gutterBottom>{item.label}</Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <CustomUpload
+                      title="Upload Logo"
+                      setData={(data) => {
+                        setFieldValue(item.name, data);
+                        formik.setFieldTouched(item.name, true, false);
+                      }}
+                      logoDetails={values[item.name]}
+                      existingImageUrl={values[item.name]}
+                      error={touched[item.name] && Boolean(errors[item.name])}
+                      helperText={touched[item.name] && errors[item.name]}
+                      // onDelete={handleDeleteLogo}
+                      sx={{ width: '100%' }}
+                    />
+                  </Box>
+                </Grid2>
+              ) : item.name === 'gst_registered' ? (
                 <Stack spacing={1}>
                   <FormLabel sx={{ fontWeight: 500 }}>
                     GST Registered <span style={{ color: 'red' }}>*</span>
@@ -402,6 +424,7 @@ export default function TabOne({ businessDetails = {}, postType, handleNext, set
               <TextField
                 name={item.name}
                 value={values[item.name]}
+                size="small"
                 onChange={(e) => {
                   if (item.name === 'pan' || item.name === 'ifsc_code' || item.name === 'bank_name') {
                     setFieldValue(item.name, e.target.value.toUpperCase());

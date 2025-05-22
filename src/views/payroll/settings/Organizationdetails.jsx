@@ -231,8 +231,7 @@ function Organizationdetails() {
                   setLogoDetails(data);
                   formik.setFieldTouched('logo', true, false);
                 }}
-                logoDetails={values.logo}
-                existingImageUrl={values.logo}
+                initialValue={values.logo}
                 error={touched.logo && Boolean(errors.logo)}
                 helperText={touched.logo && errors.logo}
                 onDelete={handleDeleteLogo}

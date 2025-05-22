@@ -75,7 +75,7 @@ const BerryDialog = ({
       </DialogContent>
 
       {/* Footer */}
-      {footer && <DialogActions sx={{ pt: 2 }}>{footer}</DialogActions>}
+      {footer && <DialogActions sx={{ pb: 2, pt: 2, pl: 3, pr: 3 }}>{footer}</DialogActions>}
     </Dialog>
   );
 };

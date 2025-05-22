@@ -12,14 +12,16 @@ import {
   TableRow,
   Button,
   Divider,
-  Grid2
+  Grid2,
+  Stack
 } from '@mui/material';
 import Factory from 'utils/Factory';
 
 import { useDispatch } from 'react-redux';
 import { openSnackbar } from 'store/slices/snackbar';
 import { useNavigate } from 'react-router-dom';
-const InvoiceNumberFormat = ({ businessDetails, handleBack }) => {
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+const InvoiceNumberFormat = ({ businessDetails, handleBack, handleNext }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [selectedRecord, setSelectedRecord] = useState({
@@ -105,7 +107,6 @@ const InvoiceNumberFormat = ({ businessDetails, handleBack }) => {
     setSelectedGSTIN(gstin);
 
     const formatToEdit = businessDetails.invoice_format.find((f) => f.gstin === gstin);
-    console.log(formatToEdit);
     if (formatToEdit) {
       setFormatOptions((prev) => ({
         ...prev,
@@ -165,7 +166,6 @@ const InvoiceNumberFormat = ({ businessDetails, handleBack }) => {
   };
 
   const handleSave = async () => {
-    console.log(selectedRecord);
     const postData = {
       invoicing_profile: businessDetails.invoicing_profile_id,
       gstin: selectedGSTIN || 'NA', // Use selected GSTIN or 'NA' for common
@@ -187,7 +187,6 @@ const InvoiceNumberFormat = ({ businessDetails, handleBack }) => {
     } else {
       postData.is_common_format = 'no';
     }
-
     const url = postType === 'post' ? `/invoicing/invoice-formats/` : `/invoicing/invoice-formats/${selectedRecord.id}/`;
 
     const { res } = await Factory(postType, url, postData);
@@ -202,7 +201,7 @@ const InvoiceNumberFormat = ({ businessDetails, handleBack }) => {
           close: false
         })
       );
-      navigate('/app/invoice');
+      // navigate('/app/invoice');
     } else {
       dispatch(
         openSnackbar({
@@ -225,7 +224,6 @@ const InvoiceNumberFormat = ({ businessDetails, handleBack }) => {
 
     if (businessDetails?.invoice_format?.length > 0) {
       const formats = businessDetails.invoice_format;
-
       if (formats.find((f) => f.is_common_format === 'no')) {
         setFormatOptions((prev) => ({
           ...prev,
@@ -264,6 +262,8 @@ const InvoiceNumberFormat = ({ businessDetails, handleBack }) => {
           startingNumber: String(format.running_number_start || '1')
         });
         // setSelectedRecord(format);
+        setSelectedGSTIN(format.gstin);
+        setSelectedRecord(format);
       }
     }
   }, [businessDetails]);
@@ -278,7 +278,9 @@ const InvoiceNumberFormat = ({ businessDetails, handleBack }) => {
           <Checkbox
             checked={formatOptions.sameFormatForAllGST}
             onChange={handleChange('sameFormatForAllGST')}
-            disabled={formatOptions.separateFormatForEachGST || businessDetails.invoice_format.find((f) => f.is_common_format === 'yes')}
+            disabled={
+              formatOptions.separateFormatForEachGST || Boolean(businessDetails.invoice_format.find((f) => f.is_common_format === 'yes'))
+            }
           />
         }
         label="Follow same format across all GST numbers"
@@ -288,7 +290,7 @@ const InvoiceNumberFormat = ({ businessDetails, handleBack }) => {
           <Checkbox
             checked={formatOptions.separateFormatForEachGST}
             onChange={handleChange('separateFormatForEachGST')}
-            disabled={formatOptions.sameFormatForAllGST || businessDetails.invoice_format.find((f) => f.is_common_format === 'no')}
+            disabled={formatOptions.sameFormatForAllGST || Boolean(businessDetails.invoice_format.find((f) => f.is_common_format === 'no'))}
           />
         }
         label="Create Seperate format for each GST number"
@@ -365,9 +367,7 @@ const InvoiceNumberFormat = ({ businessDetails, handleBack }) => {
             />
           </Box>
 
-          <Divider sx={{ my: 2 }} />
-
-          <Typography variant="h6">Component Details</Typography>
+          <Typography variant="h5">Component Details</Typography>
 
           <Grid2 container spacing={2} my={2}>
             <Grid2 size={{ xs: 6 }}>
@@ -397,7 +397,7 @@ const InvoiceNumberFormat = ({ businessDetails, handleBack }) => {
 
           <Divider sx={{ my: 2 }} />
 
-          <Typography variant="h6">Preview</Typography>
+          <Typography variant="h5">Preview</Typography>
           <Grid2 container spacing={2} my={2}>
             <Grid2 size={{ xs: 6 }}>
               <TextField size="small" fullWidth value={generatePreview()} disabled sx={{ backgroundColor: 'white' }} />
@@ -405,7 +405,7 @@ const InvoiceNumberFormat = ({ businessDetails, handleBack }) => {
           </Grid2>
 
           <Divider sx={{ my: 2 }} />
-          <Typography variant="h6">Configurations</Typography>
+          <Typography variant="h5">Configurations</Typography>
 
           <FormControlLabel
             control={<Checkbox checked={configOptions.resetEveryFY} onChange={handleChange('resetEveryFY', true)} />}
@@ -427,9 +427,22 @@ const InvoiceNumberFormat = ({ businessDetails, handleBack }) => {
       )}
 
       <Divider sx={{ my: 2 }} />
-      <Button onClick={handleSave} variant="contained" color="primary" sx={{ float: 'right' }}>
-        Save
-      </Button>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
+        <Button
+          variant="outlined"
+          startIcon={<ArrowBackIcon />}
+          onClick={() => {
+            navigate('/app/invoice');
+          }}
+        >
+          Back to Dashboard
+        </Button>
+        <Stack direction="row" spacing={2}>
+          <Button variant="outlined" onClick={handleBack}>
+            Back
+          </Button>
+        </Stack>
+      </Box>
     </Box>
   );
 };

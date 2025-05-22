@@ -6,6 +6,7 @@ import { Grid2, Stack, Box, Typography, Autocomplete, TextField, IconButton, Men
 import MainCard from '../../../ui-component/cards/MainCard';
 import SubCard from '../../../ui-component/cards/SubCard';
 import { IconCurrencyRupee, IconCalendarStats, IconChartBar } from '@tabler/icons-react';
+import BillCard from '../../../ui-component/cards/BillCard';
 const yearlyStatsData = [
   {
     id: 'total_revenue',
@@ -78,7 +79,7 @@ const YearlyStats = ({ theme, title, setTitle, financialYear, setFinancialYear, 
           <Grid2 container spacing={2}>
             {yearlyStatsData.map((item, index) => (
               <Grid2 key={index} size={{ xs: 12, sm: 6, md: 4, lg: 2.4 }}>
-                <SubCard
+                <BillCard
                   onClick={() => {
                     if (item.title === title) {
                       getInvoices(businessId);
@@ -87,103 +88,22 @@ const YearlyStats = ({ theme, title, setTitle, financialYear, setFinancialYear, 
                       getStatsData(item.id);
                     }
                   }}
-                  content={false}
-                  sx={{
-                    p: 2,
-                    cursor: 'pointer',
-                    bgcolor: item.title === title ? 'primary.lighter' : 'background.paper',
-                    transition: 'all 0.3s ease-in-out',
-                    position: 'relative',
-                    overflow: 'hidden',
-                    height: '180px',
-                    width: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    '&:hover': {
-                      transform: 'translateY(-4px)',
-                      boxShadow: theme.customShadows.z4,
-                      '& .stats-icon': {
-                        transform: 'scale(1.1)'
-                      },
-                      '& .card-content': {
-                        transform: 'translateY(-4px)'
-                      }
-                    },
-                    '&::before': {
-                      content: '""',
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      width: '100%',
-                      height: '3px',
-                      bgcolor: item.color,
-                      opacity: 0.7
-                    }
-                  }}
-                >
-                  <Stack
-                    spacing={1.5}
-                    alignItems="center"
-                    justifyContent="space-between"
-                    className="card-content"
-                    sx={{
-                      height: '100%',
-                      transition: 'transform 0.3s ease-in-out'
-                    }}
-                  >
-                    <Box
-                      className="stats-icon"
-                      sx={{
-                        width: 48,
-                        height: 48,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        borderRadius: '50%',
-                        bgcolor: item.bgcolor,
-                        color: item.color,
-                        transition: 'transform 0.3s ease-in-out',
-                        position: 'relative',
-                        '&::after': {
-                          content: '""',
-                          position: 'absolute',
-                          width: '100%',
-                          height: '100%',
-                          borderRadius: '50%',
-                          border: `2px solid ${item.color}`,
-                          opacity: 0.2,
-                          transform: 'scale(1.2)'
-                        }
-                      }}
-                    >
-                      <item.icon size={30} />
-                    </Box>
-                    <Stack spacing={1} alignItems="center" width="100%">
-                      <Typography
-                        variant="subtitle1"
-                        color="text.secondary"
-                        sx={{
-                          fontWeight: 500,
-                          textAlign: 'center',
-                          lineHeight: 1.2
-                        }}
-                      >
-                        {item.title}
-                      </Typography>
-                      <Typography
-                        variant="h4"
-                        sx={{
-                          fontWeight: 600,
-                          color: item.color,
-                          textAlign: 'center',
-                          lineHeight: 1.2
-                        }}
-                      >
-                        ₹&nbsp;{dashboardData[item.id] || 0}
-                      </Typography>
-                    </Stack>
-                  </Stack>
-                </SubCard>
+                  icon={item.icon ? <item.icon size={32} color={item.color} /> : null}
+                  title={item.title}
+                  secondary={`₹ ${dashboardData[item.id] || 0}`}
+                  color={item.color}
+                  bg={
+                    index === 0
+                      ? 'orange.light'
+                      : index === 1
+                        ? 'warning.light'
+                        : index === 2
+                          ? 'success.light'
+                          : index === 3
+                            ? 'success.light'
+                            : 'orange.light'
+                  }
+                />
               </Grid2>
             ))}
           </Grid2>

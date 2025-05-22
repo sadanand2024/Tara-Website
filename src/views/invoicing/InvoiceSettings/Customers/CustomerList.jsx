@@ -51,7 +51,7 @@ const CustomerList = ({ type, open, handleOpen, handleClose, setType, businessDe
   return (
     <>
       <TableContainer component={Paper} sx={{ mt: 2, borderRadius: 2, boxShadow: 1 }}>
-        <Table sx={{ minWidth: 750 }}>
+        <Table sx={{ minWidth: 750 }} size="small">
           <TableHead>
             <TableRow sx={{ bgcolor: 'grey.100' }}>
               <TableCell>Name</TableCell>
