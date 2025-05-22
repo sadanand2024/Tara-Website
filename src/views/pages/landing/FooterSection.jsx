@@ -6,7 +6,6 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import PhoneIcon from '@mui/icons-material/Phone';
 import Box from '@mui/material/Box';
 import CardMedia from '@mui/material/CardMedia';
-import Chip from '@mui/material/Chip';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid2';
 import IconButton from '@mui/material/IconButton';
@@ -17,17 +16,14 @@ import Typography from '@mui/material/Typography';
 // project imports
 import taralogoWhite from 'assets/images/taralogoWhite.png'; // Tarafirstlogo_png
 import { ThemeMode } from 'config';
-import { frameworks } from './FrameworkSection';
 // assets
-import { IconBrandDiscord } from '@tabler/icons-react';
 
+import FacebookIcon from '@mui/icons-material/Facebook';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import InstagramIcon from '@mui/icons-material/Instagram';
 import PublicIcon from '@mui/icons-material/Public';
-import SportsBasketballIcon from '@mui/icons-material/SportsBasketball';
 import XIcon from '@mui/icons-material/X';
 import YouTubeIcon from '@mui/icons-material/YouTube';
-import FacebookIcon from '@mui/icons-material/Facebook';
 // Link - custom style
 const FooterLink = styled(Link)(({ theme }) => ({
   color: theme.palette.mode === ThemeMode.DARK ? theme.palette.text.secondary : theme.palette.text.hint,
@@ -54,7 +50,7 @@ export default function FooterSection() {
               <Grid size={{ xs: 12, md: 4 }}>
                 <Stack spacing={{ xs: 2, md: 5 }}>
                   <Typography component={RouterLink} to="/" aria-label="theme-logo">
-                    <CardMedia component="img" src={taralogoWhite} alt="defaultLayout" sx={{ width: 200 }} />
+                    <CardMedia component="img" src={taralogoWhite} alt="defaultLayout" sx={{ width: 200,ml:-3.5 }} />
                   </Typography>
                   <Typography variant="body2" color={textColor}>
                     Tara First is a unified fintech platform for managing personal and business finances. From company registration to GST,
@@ -108,12 +104,12 @@ export default function FooterSection() {
                         <FooterLink to={'/pages/contact-us'} component={RouterLink} underline="none">
                           Contact Us
                         </FooterLink>
-                        <FooterLink href="#" underline="none">
+                        {/* <FooterLink href="#" underline="none">
                           Blog
-                        </FooterLink>
-                        <FooterLink underline="none">Documentation</FooterLink>
+                        </FooterLink> */}
+                        <FooterLink underline="none">Terms & Conditions</FooterLink>
                         <FooterLink href="#" underline="none">
-                          Change Log
+                         Privacy Policy
                         </FooterLink>
                         <FooterLink to={'/book-consultation'} component={RouterLink} underline="none">
                           Support
