@@ -32,6 +32,7 @@ const Settings = Loadable(lazy(() => import('views/invoicing/InvoiceSettings')))
 const PaymentHistory = Loadable(lazy(() => import('views/invoicing/PaymentHistory')));
 const RecordPayment = Loadable(lazy(() => import('views/invoicing/RecordPayment')));
 const EditInvoice = Loadable(lazy(() => import('views/invoicing/InvoicingComponent')));
+const Support = Loadable(lazy(() => import('views/application/Support')));
 
 // dashboard routing
 const Dashboard = Loadable(lazy(() => import('views/dashboard')));
@@ -115,6 +116,11 @@ const MainRoutes = {
       path: '/app/my-services/itr-dashboard',
       element: <ITRSummary />
     },
+    {
+     path: '/app/support-chat',
+      element: <Support />
+    },
+
     {
       path: '/app/my-services/msme-dashboard',
       element: <MSMEDashboard />
