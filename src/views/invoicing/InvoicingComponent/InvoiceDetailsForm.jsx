@@ -9,8 +9,15 @@ import { indian_States_And_UTs } from 'utils/indian_States_And_UT';
 import dayjs from 'dayjs';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
-const InvoiceDetailsForm = ({ formik, invoiceData, businessDetailsData, customers }) => {
-  const dispatch = useDispatch();
+const InvoiceDetailsForm = ({
+  formik,
+  invoiceDetailsFields,
+  businessDetailsData,
+  customers,
+  getInvoiceFormat,
+  branches,
+  setInvoiceNumberFormat
+}) => {
   const termsDropdown = [
     'NET 15',
     'NET 30',
@@ -20,17 +27,6 @@ const InvoiceDetailsForm = ({ formik, invoiceData, businessDetailsData, customer
     'Due end of next MONTH',
     'Due on Receipt',
     'Custom'
-  ];
-
-  const fields = invoiceData || [
-    { name: 'customer', label: 'Customer Name' },
-    { name: 'place_of_supply', label: 'Place of Supply' },
-    { name: 'invoice_number', label: 'Invoice Number' },
-    { name: 'invoice_date', label: 'Invoice Date' },
-    { name: 'terms', label: 'Terms' },
-    { name: 'due_date', label: 'Due Date' },
-    { name: 'order_number', label: 'Order Number' },
-    { name: 'sales_person', label: 'Sales Person' }
   ];
 
   const handleTermsChange = (newValue) => {
@@ -116,13 +112,52 @@ const InvoiceDetailsForm = ({ formik, invoiceData, businessDetailsData, customer
           helperText={formik.touched[fieldName] && formik.errors[fieldName]}
         />
       );
-    } else if (['place_of_supply', 'state'].includes(fieldName)) {
+    } else if (['place_of_supply', 'state', 'gstin', 'branch_code'].includes(fieldName)) {
       return (
         <CustomAutocomplete
           name={fieldName}
           value={value || ''}
-          onChange={(_, val) => formik.setFieldValue(fieldName, val)}
-          options={indian_States_And_UTs}
+          onChange={(_, val) => {
+            if (fieldName === 'gstin') {
+              formik.setFieldValue('gstin', val || 'NA');
+              if (businessDetailsData?.invoice_format?.find((item) => item.gstin === val && item.include_branch_code === false)) {
+                console.log('hjb');
+                getInvoiceFormat(val, 'NA');
+                formik.setFieldValue('branch_code', 'NA');
+                formik.setFieldValue('invoice_number', '');
+                setInvoiceNumberFormat('');
+              } else {
+                console.log('hjb2');
+                formik.setFieldValue('branch_code', 'NA');
+                formik.setFieldValue('invoice_number', '');
+                setInvoiceNumberFormat('');
+              }
+            } else if (fieldName === 'branch_code') {
+              formik.setFieldValue('branch_code', val || 'NA');
+              if (
+                businessDetailsData?.invoice_format?.find((item) => item.gstin === formik.values.gstin && item.include_branch_code === true)
+              ) {
+                getInvoiceFormat(formik.values.gstin, val);
+              }
+            }
+            formik.setFieldValue(fieldName, val);
+          }}
+          disabled={
+            (fieldName === 'branch_code' &&
+              businessDetailsData?.invoice_format?.find(
+                (item) => item.gstin === formik.values.gstin && item.include_branch_code === false
+              )) ||
+            (fieldName === 'branch_code' && formik.values.gstin === '')
+          }
+          options={
+            fieldName === 'gstin'
+              ? businessDetailsData?.gst_details?.length > 0
+                ? businessDetailsData.gst_details.map((item) => item.gstin || 'NA')
+                : ['NA']
+              : fieldName === 'branch_code'
+                ? branches?.map((item) => item.branch_code || 'NA')
+                : indian_States_And_UTs
+          }
           error={formik.touched[fieldName] && Boolean(formik.errors[fieldName])}
           helperText={formik.touched[fieldName] && formik.errors[fieldName]}
         />
@@ -157,15 +192,15 @@ const InvoiceDetailsForm = ({ formik, invoiceData, businessDetailsData, customer
           onChange={(e) => formik.setFieldValue(fieldName, e.target.value)}
           error={formik.touched[fieldName] && Boolean(formik.errors[fieldName])}
           helperText={formik.touched[fieldName] && formik.errors[fieldName]}
-          disabled={fieldName === 'invoice_number'}
+          disabled={fieldName === 'invoice_number' || fieldName === 'customer_gstin' || fieldName === 'customer_pan'}
         />
       );
     }
   };
-
+  console.log(formik.errors);
   return (
     <Grid2 container spacing={2}>
-      {fields.map((item) => (
+      {invoiceDetailsFields.map((item) => (
         <Grid2 size={{ xs: 12, sm: 6 }} key={item.name}>
           <Typography sx={{ mb: 1 }}>{item.label}</Typography>
           {renderField(item)}

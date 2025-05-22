@@ -28,11 +28,13 @@ import { months } from 'utils/MonthsList';
 import { generateFinancialYears } from 'utils/FinancialYearsList';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
+import { useNavigate } from 'react-router-dom';
 export default function RenderDialog({ from, openDialog, fields, setOpenDialog, setLoading, employeeMasterData, selectedRecord, getData }) {
   const [searchParams] = useSearchParams();
   const [payrollid, setPayrollId] = useState(null); // Payroll ID fetched from URL
   const financialYearOptions = generateFinancialYears();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   // Update payroll ID from search params
   useEffect(() => {
@@ -355,7 +357,7 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
   const renderFields = (fields) => {
     return fields.map((field) => (
       <Grid2 key={field.name} size={{ xs: 12, sm: 6 }}>
-        <div style={{ paddingBottom: '8px' }}>
+        <div style={{ paddingBottom: '5px' }}>
           <Typography variant="body2">{field.label}</Typography>
         </div>
         {field.name === 'employee' ? (
@@ -365,9 +367,15 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
               setFieldValue(field.name, newValue?.id || '');
               setFieldValue('department', newValue.department_name);
               setFieldValue('designation', newValue.designation_name);
+              if (from === 'Salary Revisions') {
+                // setFieldValue('current_ctc', newValue.current_ctc);
+                // setFieldValue('revised_ctc', newValue.current_ctc);
+              }
             }}
             options={employeeMasterData || []}
             getOptionLabel={(option) => `${option.first_name || ''} ${option.middle_name || ''} ${option.last_name || ''}`.trim()}
+            getOptionKey={(option) => option.id}
+            isOptionEqualToValue={(option, value) => option.id === value.id}
             sx={{ width: '100%' }}
             onBlur={handleBlur}
             error={touched[field.name] && Boolean(errors[field.name])}
@@ -496,7 +504,7 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
     ));
   };
   const { values, setValues, handleChange, errors, touched, handleSubmit, handleBlur, resetForm, setFieldValue } = formik;
-
+  console.log(values);
   useEffect(() => {
     if (selectedRecord !== null) {
       // Convert month name to numeric value if it exists
@@ -549,8 +557,8 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
         </Stack>
       }
     >
-      <Box component="form" onSubmit={handleSubmit} sx={{ padding: 2 }}>
-        <Grid2 container spacing={3}>
+      <Box component="form" onSubmit={handleSubmit}>
+        <Grid2 container spacing={2}>
           {/* Render dynamic fields for department */}
           {renderFields(fields)}
         </Grid2>
@@ -633,6 +641,33 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
             size="small"
             inputFormat="YYYY-MM-DD" // Display in YYYY-MM-DD format
           />
+        )}
+        {from === 'Salary Revisions' && (
+          <Grid2 container spacing={3} sx={{ mt: 2 }}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => {
+                if (values.employee !== '' && values.employee !== null) {
+                  navigate(
+                    `/payroll/settings/add-employee?employee_id=${values.employee}&payrollid=${payrollid}&from=${'Salary Revisions'}&tabValue=${Number(1)}`
+                  );
+                } else {
+                  dispatch(
+                    openSnackbar({
+                      open: true,
+                      message: 'Please select an employee',
+                      variant: 'alert',
+                      alert: { color: 'error' },
+                      close: false
+                    })
+                  );
+                }
+              }}
+            >
+              Edit Pay Structure
+            </Button>
+          </Grid2>
         )}
       </Box>
     </Modal>

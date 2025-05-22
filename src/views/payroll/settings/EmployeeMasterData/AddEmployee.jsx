@@ -20,7 +20,7 @@ function StepperComponent() {
   const [employeeData, setEmployeeData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [createdEmployeeId, setCreatedEmployeeId] = useState(null);
-
+  const [from, setFrom] = useState(null);
   const steps = ['Basic Details', 'Salary Details', 'Personal Details', 'Payment Information'];
 
   const formRefs = useRef({});
@@ -55,7 +55,7 @@ function StepperComponent() {
       case 0:
         return <BasicDetails {...commonProps} setCreatedEmployeeId={setCreatedEmployeeId} />;
       case 1:
-        return <SalaryDetails {...commonProps} />;
+        return <SalaryDetails {...commonProps} from={from} />;
       case 2:
         return <PersonalDetails {...commonProps} />;
       case 3:
@@ -84,6 +84,7 @@ function StepperComponent() {
 
   useEffect(() => {
     const tabValue = searchParams.get('tabValue');
+    console.log(Number(tabValue));
     if (tabValue) setActiveStep(Number(tabValue));
   }, [searchParams]);
 
@@ -91,7 +92,11 @@ function StepperComponent() {
     const empId = searchParams.get('employee_id');
     if (empId) setEmployeeId(empId);
   }, [searchParams]);
-
+  useEffect(() => {
+    const from = searchParams.get('from');
+    if (from) setFrom(from);
+  }, [searchParams]);
+  console.log(from);
   useEffect(() => {
     if (employeeId) fetchEmployeeData(employeeId);
   }, [employeeId]);
