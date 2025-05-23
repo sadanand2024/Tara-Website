@@ -81,6 +81,7 @@ const OverallStats = ({ theme, title, setTitle, dashboardData, getInvoices, getS
                       ? 'success.light'
                       : 'orange.light'
             }
+            index={index}
             sx={{
               p: 2,
               cursor: 'pointer',

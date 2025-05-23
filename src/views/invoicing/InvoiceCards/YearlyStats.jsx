@@ -92,6 +92,7 @@ const YearlyStats = ({ theme, title, setTitle, financialYear, setFinancialYear, 
                   title={item.title}
                   secondary={`₹ ${dashboardData[item.id] || 0}`}
                   color={item.color}
+                  index={index}
                   bg={
                     index === 0
                       ? 'orange.light'
