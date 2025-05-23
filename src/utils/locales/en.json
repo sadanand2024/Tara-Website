@@ -221,5 +221,11 @@
   "tds-income-tax": "TDS & Income Tax",
   "admin": "Admin",
   "consultation": "Consultation",
-  "contact-us": "Contact Us"
+  "contact-us": "Contact Us",
+  "super-admin": "Super Admin",
+  "new-services": "New Services",
+  "new-requests": "New Requests",
+  "service-summary": "Service Summary",
+  "task-management": "Task Management",
+  "user-management": "User Management"
 }

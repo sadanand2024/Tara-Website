@@ -3,602 +3,700 @@ import {
   Box,
   Typography,
   Paper,
+  TextField,
   Button,
-  Stack,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  Divider,
-  IconButton,
-  LinearProgress,
-  alpha,
-  Card
+  Grid2,
+  Stepper,
+  Step,
+  StepLabel,
+  Autocomplete,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
+  Card,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Stack
 } from '@mui/material';
-import { styled } from '@mui/material/styles';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
-import ChatIcon from '@mui/icons-material/Chat';
-import UploadFileIcon from '@mui/icons-material/UploadFile';
-import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
-import EventIcon from '@mui/icons-material/Event';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import IncomeDetails from './IncomeDetails';
+import DeleteIcon from '@mui/icons-material/Delete';
+import IconButton from '@mui/material/IconButton';
 
-const StyledCard = styled(Card)(({ theme }) => ({
-  position: 'relative',
-  overflow: 'hidden',
-  borderRadius: theme.shape.borderRadius * 2,
-  border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
-  boxShadow: theme.shadows[1],
-  '&::before': {
-    content: '""',
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    width: '40%',
-    height: '100%',
-    background: (theme) => `linear-gradient(135deg, transparent 40%, ${alpha(theme.palette.primary.light, 0.1)})`,
-    clipPath: 'path("M 100 0 Q 50 50 100 100")',
-    transition: 'all 0.3s ease',
-    opacity: 0.8,
-    zIndex: 0
-  }
-}));
+const steps = ['Personal Info', 'Income Details', 'Deductions', 'Review & Filing'];
 
-const StatusChip = styled(Box)(({ theme, status }) => ({
-  display: 'inline-flex',
-  alignItems: 'center',
-  padding: theme.spacing(0.5, 1.5),
-  borderRadius: theme.shape.borderRadius * 4,
-  fontSize: '0.8rem',
-  fontWeight: 500,
-  ...(status === 'completed' && {
-    backgroundColor: alpha(theme.palette.success.dark, 0.1),
-    color: theme.palette.text.primary,
-    border: `1px solid ${theme.palette.success.dark}`
-  }),
-  ...(status === 'pending' && {
-    backgroundColor: alpha(theme.palette.warning.dark, 0.1),
-    color: theme.palette.text.primary,
-    border: `1px solid ${theme.palette.warning.dark}`
-  })
-}));
+export default function ITR() {
+  const [step, setStep] = React.useState(0);
+  const [gender, setGender] = React.useState('');
+  const [resStatus, setResStatus] = React.useState('');
+  const [panFile, setPanFile] = React.useState(null);
+  const [aadhaarFile, setAadhaarFile] = React.useState(null);
+  const [as26File, setAs26File] = React.useState(null);
+  const [aisFile, setAisFile] = React.useState(null);
+  const [name, setName] = React.useState(['', '', '']);
+  const [mobile, setMobile] = React.useState('');
+  const [email, setEmail] = React.useState('');
+  const [challans, setChallans] = React.useState([]);
+  const [donations, setDonations] = React.useState([{ name: '', amount: '', mode: '', receipt: null }]);
+  const [eduLoan, setEduLoan] = React.useState({ amount: '', educationOf: '', borrower: '', approved: 'no' });
+  const [savings, setSavings] = React.useState({ savings: '', fdrd: '' });
+  const [disability, setDisability] = React.useState({ nature: '', severity: '', amount: '', cert: null });
+  const [rentHra, setRentHra] = React.useState({ paid: 'no', amount: '' });
+  const [firstHome, setFirstHome] = React.useState({ isFirst: 'no', interest: '', date: '' });
+  const [political, setPolitical] = React.useState({ donated: 'no', amount: '' });
+  const donationModes = ['Cash', 'Cheque', 'Bank'];
+  const educationOfOptions = ['Self', 'Spouse', 'Children', 'Dependent'];
+  const disabilityNature = [
+    'Blindness',
+    'Low vision',
+    'Leprosy-cured',
+    'Hearing impairment',
+    'Locomotor disability',
+    'Mental illness',
+    'Others'
+  ];
+  const disabilitySeverity = ['40%-80%', '>80%'];
+  const [investments, setInvestments] = React.useState([{ type: '', amount: '', doc: null }]);
+  const [mediclaim, setMediclaim] = React.useState({
+    selfFamily: '',
+    selfSenior: '',
+    parents: '',
+    parentsSenior: '',
+    checkup: '',
+    receipts: []
+  });
+  const investmentTypes = ['PPF', 'NSC', 'ELSS', 'Life Insurance', 'Tuition Fees', 'Others'];
 
-const TimelineItem = styled(ListItem)(({ theme, completed }) => ({
-  position: 'relative',
-  '&:not(:last-child)': {
-    marginBottom: theme.spacing(2)
-  }
-}));
-
-export default function ITRFilingDetails() {
-  const progress = 60;
-  
   return (
-    <Box>
-      {/* Header Section */}
-      <Stack spacing={1} sx={{ mb: 4 }}>
-        <Typography
-          variant="h2"
-          sx={{
-            fontWeight: 700,
-            color: 'secondary.main',
-            letterSpacing: '-0.5px'
-          }}
-        >
-          ITR Filing Details
-        </Typography>
-        <Typography variant="h4" color="text.secondary" sx={{ opacity: 0.8 }}>
-          Financial Year: 2023-24 (Salaried)
+    <Card sx={{ minHeight: '100vh', p: { xs: 1, md: 4 } }}>
+      <Typography variant="h3" mb={0.5}>
+        Income Tax Return (ITR)
       </Typography>
-      </Stack>
-
-      <Stack direction={{ xs: 'column', lg: 'row' }} spacing={3}>
-        {/* Left Section */}
-        <Box sx={{ flex: 2 }}>
-          {/* Progress Overview */}
-          <StyledCard sx={{ mb: 3 }}>
-            <Box sx={{ p: 3 }}>
-              <Typography variant="h4" sx={{ fontWeight: 600, color: 'text.primary', mb: 3 }}>
-                Service Filling - FY 2023-24 (Salaried)
-              </Typography>
-              <Stack direction="row" alignItems="center">
-                <Stack spacing={0.5} sx={{ borderRight: '1px solid #e0e0e0', pr: 4 }}>
-                  <Typography color="text.secondary" variant="body2">
-                    Status:
-                  </Typography>
-                  <Stack direction="row" spacing={1} alignItems="center">
-                    <CheckCircleIcon sx={{ color: 'success.main', fontSize: 16 }} />
-                    <Typography variant="subtitle1" fontWeight={500}>
-                      In Progress
-                    </Typography>
-                  </Stack>
-                </Stack>
-                <Stack spacing={0.5} sx={{ borderRight: '1px solid #e0e0e0', px: 4 }}>
-                  <Typography color="text.secondary" variant="body2">
-                    Progress:
-                  </Typography>
-                  <Typography variant="subtitle1" fontWeight={500}>
-                    3/5 Tasks Done
-                  </Typography>
-                </Stack>
-                <Stack spacing={0.5} sx={{ px: 4 }}>
-                  <Typography color="text.secondary" variant="body2">
-                    Started On
-                  </Typography>
-                  <Typography variant="subtitle1" fontWeight={500}>
-                    12 Apr 2025
-            </Typography>
-                </Stack>
-                <Button
-                  variant="outlined"
-                  startIcon={<ChatIcon />}
-                  size="medium"
-                  sx={{
-                    ml: 'auto',
-                    borderRadius: 1,
-                    textTransform: 'none',
-                    px: 2
-                  }}
-                >
-                  Chat with Support
-                </Button>
-              </Stack>
-          </Box>
-          </StyledCard>
-
-          {/* Task Timeline */}
-          <StyledCard>
-            <Box sx={{ p: 3 }}>
-              <Typography variant="h4" fontWeight={600} sx={{ mb: 1 }}>
-                Filing Timeline
-              </Typography>
-              <List sx={{ '& .MuiListItem-root': { px: 0 } }}>
-                {/* Document Collection */}
-                <TimelineItem completed>
-                  <ListItemText
-                    primary={
-                      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
-                        <Stack spacing={0.5}>
-                          <Stack direction="row" spacing={1} alignItems="center">
-                            <CheckCircleIcon color="success" />
-                            <Typography variant="subtitle1" fontWeight={600}>
-                              Document Collection
-                            </Typography>
-                          </Stack>
-                          <Typography variant="body2" color="text.secondary">
-                            All required documents for ITR filing
-                          </Typography>
-                        </Stack>
-                        <Stack direction="row" spacing={1} alignItems="center">
-                          <StatusChip status="completed">Completed</StatusChip>
-                          <Button
-                            variant="outlined"
-                            size="small"
-                            startIcon={<CloudUploadIcon />}
-                            sx={{
-                              borderColor: (theme) => alpha(theme.palette.success.main, 0.5),
-                              color: 'success.darker',
-                              '&:hover': {
-                                borderColor: 'success.main',
-                                bgcolor: (theme) => alpha(theme.palette.success.main, 0.04)
-                              }
-                            }}
-                          >
-                            View Files
-                          </Button>
-                        </Stack>
-                      </Stack>
-                    }
-                    secondary={
-                      <Box sx={{ mt: 1, ml: 4 }}>
-                        <Stack spacing={2}>
-                          {['PAN Card', 'Form 16', '26AS'].map((doc, index) => (
-                            <Stack key={index} direction="row" alignItems="center" spacing={2}>
-                              <CheckCircleIcon color="success" fontSize="small" />
-                              <Typography variant="body2" sx={{ flex: 1 }}>
-                                {doc}
-                              </Typography>
-                              <Typography variant="caption" color="success.darker">
-                                Verified
-            </Typography>
-                            </Stack>
-                          ))}
-                        </Stack>
-          </Box>
-                    }
-                  />
-                </TimelineItem>
-
-                {/* Prepare Draft Return */}
-                <TimelineItem>
-                  <ListItemText
-                    primary={
-                      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
-                        <Stack spacing={0.5}>
-                          <Stack direction="row" spacing={1} alignItems="center">
-                            <RadioButtonUncheckedIcon color="primary" />
-                            <Typography variant="subtitle1" fontWeight={600}>
-                              Prepare Draft Return
-                            </Typography>
-                          </Stack>
-                          <Typography variant="body2" color="text.secondary">
-                            Our experts are preparing your draft return
-                          </Typography>
-                        </Stack>
-                        <Stack direction="row" spacing={1} alignItems="center">
-                          <StatusChip status="pending">In Progress</StatusChip>
-                          <Button
-                            variant="outlined"
-                            size="small"
-                            startIcon={<CloudUploadIcon />}
-                            sx={{
-                              borderColor: (theme) => alpha(theme.palette.primary.main, 0.5),
-                              color: 'primary.main',
-                              '&:hover': {
-                                borderColor: 'primary.main',
-                                bgcolor: (theme) => alpha(theme.palette.primary.main, 0.04)
-                              }
-                            }}
-                          >
-                            Upload Additional Docs
-                          </Button>
-                        </Stack>
-                      </Stack>
-                    }
-                  />
-                </TimelineItem>
-
-                {/* Review Draft with User */}
-                <TimelineItem>
-                  <ListItemText
-                    primary={
-                      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
-                        <Stack spacing={0.5}>
-                          <Stack direction="row" spacing={1} alignItems="center">
-                            <RadioButtonUncheckedIcon color="disabled" />
-                            <Typography variant="subtitle1" fontWeight={600}>
-                              Review Draft with User
-                            </Typography>
-                          </Stack>
-                          <Typography variant="body2" color="text.secondary">
-                            Schedule a call to review your draft return
-                          </Typography>
-                        </Stack>
-                        <Stack direction="row" spacing={1} alignItems="center">
-                          <StatusChip status="pending">Pending</StatusChip>
-                          <Button
-                            variant="outlined"
-                            size="small"
-                            startIcon={<EventIcon />}
-                            sx={{
-                              borderColor: (theme) => alpha(theme.palette.secondary.main, 0.5),
-                              color: 'secondary.main',
-                              '&:hover': {
-                                borderColor: 'secondary.main',
-                                bgcolor: (theme) => alpha(theme.palette.secondary.main, 0.04)
-                              }
-                            }}
-                          >
-                            Schedule Review
-                          </Button>
-                        </Stack>
-                      </Stack>
-                    }
-                  />
-                </TimelineItem>
-
-                {/* File the Return */}
-                <TimelineItem>
-                  <ListItemText
-                    primary={
-                      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
-                        <Stack spacing={0.5}>
-                          <Stack direction="row" spacing={1} alignItems="center">
-                            <RadioButtonUncheckedIcon color="disabled" />
-                            <Typography variant="subtitle1" fontWeight={600}>
-                              File the Return
-            </Typography>
-                          </Stack>
-                          <Typography variant="body2" color="text.secondary">
-                            Final submission of your ITR
-            </Typography>
-                        </Stack>
-                        <StatusChip status="pending">Pending</StatusChip>
-                      </Stack>
-                    }
-                  />
-                </TimelineItem>
-
-                {/* Share Acknowledgement */}
-                <TimelineItem>
-                  <ListItemText
-                    primary={
-                      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
-                        <Stack spacing={0.5}>
-                          <Stack direction="row" spacing={1} alignItems="center">
-                            <RadioButtonUncheckedIcon color="disabled" />
-                            <Typography variant="subtitle1" fontWeight={600}>
-                              Share Acknowledgement
-          </Typography>
-                          </Stack>
-                          <Typography variant="body2" color="text.secondary">
-                            Download your ITR acknowledgement
-          </Typography>
-                        </Stack>
-                        <StatusChip status="pending">Pending</StatusChip>
-                      </Stack>
-                    }
-                  />
-                </TimelineItem>
-              </List>
-            </Box>
-          </StyledCard>
-        </Box>
-
-        {/* Right Section */}
-        <Box sx={{ flex: 1 }}>
-          <StyledCard>
-            <Box sx={{ p: 3 }}>
-              <Typography variant="h4" fontWeight={600} sx={{ mb: 3 }}>
-                Document Summary
-              </Typography>
-
-              <Stack spacing={4}>
-                {/* Document Stats */}
-                <Stack direction="row" spacing={3}>
-                  <Stack
-                    direction="row"
-                    alignItems="center"
-                    justifyContent="center"
-                    sx={{
-                      p: 2,
-                      borderRadius: 2,
-                      bgcolor: (theme) => alpha(theme.palette.success.main, 0.1),
-                      justifyContent: 'space-between',
-                      flex: 1
-                    }}
-                  >
-                    <Typography variant="h4" color="success.darker" fontWeight={700}>
-                      3
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Uploaded
-                    </Typography>
-                  </Stack>
-                  <Stack
-                    direction="row"
-                    sx={{
-                      p: 2,
-                      borderRadius: 2,
-                      bgcolor: (theme) => alpha(theme.palette.warning.main, 0.1),
-                      justifyContent: 'space-between',
-                      flex: 1
-                    }}
-                  >
-                    <Typography variant="h4" color="warning.dark" fontWeight={700}>
-                      1
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Pending
-                    </Typography>
-                  </Stack>
-                  <Stack
-                    direction="row"
-                    sx={{
-                      p: 2,
-                      borderRadius: 2,
-                      bgcolor: (theme) => alpha(theme.palette.error.main, 0.1),
-                      justifyContent: 'space-between',
-                      flex: 1
-                    }}
-                  >
-                    <Typography variant="h4" color="error.dark" fontWeight={700}>
-                      2
-                    </Typography>
-                    <Typography variant="body2" color="error.secondary">
-                      Missing
-                    </Typography>
-                  </Stack>
-                </Stack>
-
-                {/* Missing Documents */}
-                <Box>
-                  <Typography variant="h4" fontWeight={600} sx={{ mb: 2 }}>
-                    Missing Documents
-                  </Typography>
-                  <Box
-                    sx={{
-                      p: 2,
-                      borderRadius: 2,
-                      bgcolor: (theme) => alpha(theme.palette.error.main, 0.04),
-                      border: 1,
-                      borderColor: (theme) => alpha(theme.palette.error.main, 0.1)
-                    }}
-                  >
-                    <Stack spacing={2}>
-                      <Stack direction="row" alignItems="center" spacing={2}>
-                        <Box
-          sx={{ 
-                            width: 8,
-            height: 8, 
-                            borderRadius: '50%',
-                            bgcolor: 'error.main'
-                          }}
-                        />
-                        <Box flex={1}>
-                          <Typography variant="body2" fontWeight={500}>
-                            Form 26AS
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            Required for income verification
-                          </Typography>
-                        </Box>
-                        <Button
-                          variant="outlined"
-                          size="small"
-                          startIcon={<CloudUploadIcon />}
-                          sx={{
-                            borderColor: (theme) => alpha(theme.palette.error.main, 0.5),
-                            color: 'error.main',
-                            '&:hover': {
-                              borderColor: 'error.main',
-                              bgcolor: (theme) => alpha(theme.palette.error.main, 0.04)
-                            }
-                          }}
-                        >
-                          Upload
-                        </Button>
-                      </Stack>
-                      <Stack direction="row" alignItems="center" spacing={2}>
-                        <Box
-                          sx={{
-                            width: 8,
-                            height: 8,
-                            borderRadius: '50%',
-                            bgcolor: 'error.main'
-                          }}
-                        />
-                        <Box flex={1}>
-                          <Typography variant="body2" fontWeight={500}>
-                            Bank Statement
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            Required for bank interest details
-                          </Typography>
-                        </Box>
-                        <Button
-                          variant="outlined"
-                          size="small"
-                          startIcon={<CloudUploadIcon />}
-                          sx={{
-                            borderColor: (theme) => alpha(theme.palette.error.main, 0.5),
-                            color: 'error.main',
-                            '&:hover': {
-                              borderColor: 'error.main',
-                              bgcolor: (theme) => alpha(theme.palette.error.main, 0.04)
-                            }
-                          }}
-                        >
-                          Upload
-                        </Button>
-                      </Stack>
-                    </Stack>
-                  </Box>
-      </Box>
-
-                {/* Recent Uploads */}
-                <Box>
-                  <Typography variant="h4" fontWeight={600} sx={{ mb: 2 }}>
-                    Recent Uploads
-                  </Typography>
-                  <Stack spacing={2}>
-                    {['PAN Card.pdf', 'Form 16.pdf', 'Aadhaar.jpg'].map((doc, index) => (
-                      <Stack
-                        key={index}
-                        direction="row"
-                        spacing={2}
-                        alignItems="center"
-                        sx={{
-                          p: 0.3,
-                          borderRadius: 1,
-                          bgcolor: 'background.neutral'
-                        }}
-                      >
-                        <InsertDriveFileIcon sx={{ color: 'primary.main' }} />
-                        <Box flex={1}>
-                          <Typography variant="body2" fontWeight={500}>
-                            {doc}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            Uploaded on 04 Apr
-            </Typography>
-          </Box>
-                      </Stack>
-                    ))}
-                  </Stack>
-      </Box>
-
-                {/* Action Buttons */}
-                <Stack spacing={2}>
-          <Button 
-                    variant="contained"
-            startIcon={<CloudUploadIcon />} 
-                    sx={{
-                      py: 1.5,
-                      borderRadius: 2,
-                      textTransform: 'none',
-                      fontWeight: 600
-                    }}
-                  >
-                    Upload Documents
-          </Button>
-          <Button 
-                    variant="outlined"
-            startIcon={<ChatIcon />} 
-                    sx={{
-                      py: 1.5,
-                      borderRadius: 2,
-                      textTransform: 'none',
-                      fontWeight: 600
-                    }}
-                  >
-                    View All Uploads
-                  </Button>
-                </Stack>
-
-                {/* Help Section */}
+      <Typography variant="caption" color="text.secondary">
+        File your ITR in a few easy steps.
+      </Typography>
+      <Box maxWidth="1100px" mx="auto" sx={{ mt: 2 }}>
+        <Paper elevation={0} sx={{ bgcolor: '#eef2f6', p: { xs: 2, sm: 4 }, borderRadius: 3, minHeight: 700 }}>
+          {/* Stepper */}
+          <Box sx={{ width: '100%', display: 'flex', alignItems: 'center', mb: 4 }}>
+            {steps.map((label, idx) => (
+              <React.Fragment key={label}>
                 <Box
                   sx={{
-                    p: 2.5,
-                    borderRadius: 2,
-                    bgcolor: (theme) => alpha(theme.palette.primary.main, 0.04),
-                    border: 1,
-                    borderColor: (theme) => alpha(theme.palette.primary.main, 0.1)
+                    width: 220,
+                    px: 1,
+                    py: 1.2,
+                    bgcolor: idx === step ? 'primary.main' : '#fff',
+                    color: idx === step ? '#fff' : 'text.secondary',
+                    border: idx === step ? 'none' : '1.5px solid #697586',
+                    borderRadius: 999,
+                    fontWeight: 700,
+                    fontSize: 16,
+                    textAlign: 'center',
+                    transition: 'all 0.2s',
+                    display: 'inline-block',
+                    lineHeight: 1.5,
+                    cursor: 'pointer'
                   }}
+                  onClick={() => setStep(idx)}
                 >
-                  <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 1 }}>
-                    Need Assistance?
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                    Our experts are here to help you with your ITR filing
-                  </Typography>
-                  <Stack spacing={1}>
-                    <Button
-                      fullWidth
-            variant="outlined" 
-                      startIcon={<QuestionAnswerIcon />}
-                      sx={{
-                        justifyContent: 'flex-start',
-                        py: 1,
-                        textTransform: 'none'
-                      }}
-                    >
-                      Ask a Question
-          </Button>
-          <Button 
-                      fullWidth
-            variant="outlined" 
-                      startIcon={<EventIcon />}
-                      sx={{
-                        justifyContent: 'flex-start',
-                        py: 1,
-                        textTransform: 'none'
-                      }}
-                    >
-                      Schedule a Call
-          </Button>
-                  </Stack>
+                  {label}
                 </Box>
+                {idx < steps.length - 1 && (
+                  <Box
+                    sx={{
+                      flex: 1,
+                      height: 2,
+                      bgcolor: '#e0e3e8',
+                      minWidth: 24
+                    }}
+                  />
+                )}
+              </React.Fragment>
+            ))}
+          </Box>
+
+          {/* Step 1: Personal Info */}
+          {step === 0 && (
+            <Box>
+              <Typography variant="h5" fontWeight={700} mb={2}>
+                <span style={{ textDecoration: 'underline' }}>Personal Information</span>
+              </Typography>
+              <Grid2 container spacing={2} alignItems="center">
+                {/* Upload PAN */}
+                <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+                  <Typography>Upload PAN</Typography>
+                </Grid2>
+                <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+                  <TextField
+                    size="small"
+                    fullWidth
+                    value={panFile ? panFile.name : ''}
+                    placeholder="Upload PAN"
+                    InputProps={{ readOnly: true }}
+                    onClick={() => document.getElementById('panFileInput').click()}
+                  />
+                  <input id="panFileInput" type="file" hidden onChange={(e) => setPanFile(e.target.files[0])} />
+                </Grid2>
+                {/* Upload Aadhaar */}
+                <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+                  <Typography>Upload Aadhaar</Typography>
+                </Grid2>
+                <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+                  <TextField
+                    size="small"
+                    fullWidth
+                    value={aadhaarFile ? aadhaarFile.name : ''}
+                    placeholder="Upload Aadhaar"
+                    InputProps={{ readOnly: true }}
+                    onClick={() => document.getElementById('aadhaarFileInput').click()}
+                  />
+                  <input id="aadhaarFileInput" type="file" hidden onChange={(e) => setAadhaarFile(e.target.files[0])} />
+                </Grid2>
+                {/* Mobile number */}
+                <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+                  <Typography>Mobile number</Typography>
+                </Grid2>
+                <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+                  <TextField size="small" fullWidth value={mobile} onChange={(e) => setMobile(e.target.value)} />
+                </Grid2>
+                {/* Email Id */}
+                <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+                  <Typography>Email Id</Typography>
+                </Grid2>
+                <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+                  <TextField size="small" fullWidth value={email} onChange={(e) => setEmail(e.target.value)} />
+                </Grid2>
+                {/* Name (3 fields) */}
+                <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+                  <Typography>Name</Typography>
+                </Grid2>
+                <Grid2 size={{ xs: 12, sm: 6, md: 4 }} container spacing={1}>
+                  <Grid2 size={{ xs: 12, sm: 4 }}>
+                    <TextField
+                      size="small"
+                      fullWidth
+                      value={name[0]}
+                      onChange={(e) => setName([e.target.value, name[1], name[2]])}
+                      placeholder="First"
+                    />
+                  </Grid2>
+                  <Grid2 size={{ xs: 12, sm: 4 }}>
+                    <TextField
+                      size="small"
+                      fullWidth
+                      value={name[1]}
+                      onChange={(e) => setName([name[0], e.target.value, name[2]])}
+                      placeholder="Middle"
+                    />
+                  </Grid2>
+                  <Grid2 size={{ xs: 12, sm: 4 }}>
+                    <TextField
+                      size="small"
+                      fullWidth
+                      value={name[2]}
+                      onChange={(e) => setName([name[0], name[1], e.target.value])}
+                      placeholder="Last"
+                    />
+                  </Grid2>
+                </Grid2>
+                {/* Gender */}
+                <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+                  <Typography>Gender</Typography>
+                </Grid2>
+                <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+                  <RadioGroup row value={gender} onChange={(e) => setGender(e.target.value)}>
+                    <FormControlLabel value="male" control={<Radio size="small" />} label="Male" />
+                    <FormControlLabel value="female" control={<Radio size="small" />} label="Female" />
+                  </RadioGroup>
+                </Grid2>
+                {/* Residential Status */}
+                <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+                  <Typography>Residential Status</Typography>
+                </Grid2>
+                <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+                  <Autocomplete
+                    size="small"
+                    fullWidth
+                    options={['Resident', 'Non-Resident', 'Resident but Not Ordinarily Resident']}
+                    value={resStatus}
+                    onChange={(e, value) => setResStatus(value || '')}
+                    renderInput={(params) => <TextField {...params} placeholder="Select status" />}
+                  />
+                </Grid2>
+              </Grid2>
+              <Typography variant="h5" fontWeight={700} mt={5} mb={2}>
+                <span style={{ textDecoration: 'underline' }}>Tax Paid Details</span>
+              </Typography>
+              <Grid2 container spacing={2} alignItems="center">
+                {/* Upload 26AS */}
+                <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+                  <Typography>Upload 26AS</Typography>
+                </Grid2>
+                <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+                  <TextField
+                    size="small"
+                    fullWidth
+                    value={as26File ? as26File.name : ''}
+                    placeholder="Upload 26AS"
+                    InputProps={{ readOnly: true }}
+                    onClick={() => document.getElementById('as26FileInput').click()}
+                  />
+                  <input id="as26FileInput" type="file" hidden onChange={(e) => setAs26File(e.target.files[0])} />
+                </Grid2>
+                {/* Upload AIS */}
+                <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+                  <Typography>Upload AIS</Typography>
+                </Grid2>
+                <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+                  <TextField
+                    size="small"
+                    fullWidth
+                    value={aisFile ? aisFile.name : ''}
+                    placeholder="Upload AIS"
+                    InputProps={{ readOnly: true }}
+                    onClick={() => document.getElementById('aisFileInput').click()}
+                  />
+                  <input id="aisFileInput" type="file" hidden onChange={(e) => setAisFile(e.target.files[0])} />
+                </Grid2>
+                {/* Advance tax / Self Assisted Tax Challan */}
+                <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+                  <Typography>Advance tax / Self Assisted Tax Challan</Typography>
+                </Grid2>
+                <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+                  {challans.map((file, idx) => (
+                    <Box key={idx} display="flex" alignItems="center" mb={1} gap={1}>
+                      <TextField
+                        size="small"
+                        fullWidth
+                        value={file ? file.name : ''}
+                        placeholder="Upload Challan"
+                        InputProps={{ readOnly: true }}
+                        onClick={() => document.getElementById(`challanInput${idx}`).click()}
+                      />
+                      <input
+                        id={`challanInput${idx}`}
+                        type="file"
+                        hidden
+                        onChange={(e) => {
+                          const newFiles = [...challans];
+                          newFiles[idx] = e.target.files[0];
+                          setChallans(newFiles);
+                        }}
+                      />
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        disabled={!file}
+                        onClick={() => file && window.open(URL.createObjectURL(file), '_blank')}
+                      >
+                        View
+                      </Button>
+                    </Box>
+                  ))}
+                  <Box display="flex" alignItems="center" gap={1}>
+                    <TextField
+                      size="small"
+                      fullWidth
+                      value={''}
+                      placeholder="Upload Challan"
+                      InputProps={{ readOnly: true }}
+                      onClick={() => document.getElementById('challanInputNew').click()}
+                    />
+                    <input
+                      id="challanInputNew"
+                      type="file"
+                      hidden
+                      onChange={(e) => {
+                        if (e.target.files[0]) setChallans([...challans, e.target.files[0]]);
+                      }}
+                    />
+                    <Button size="small" variant="outlined" disabled>
+                      View
+                    </Button>
+                    <Button size="small" variant="contained" onClick={() => document.getElementById('challanInputNew').click()}>
+                      Add
+                    </Button>
+                  </Box>
+                </Grid2>
+              </Grid2>
+            </Box>
+          )}
+
+          {/* Step 2: Income Details Accordions */}
+          {step === 1 && (
+            <Box>
+              <Accordion>
+                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                  <Typography>Salary Income</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  {/* Salary Income form goes here */}
+                  <IncomeDetails type="salary" />
+                </AccordionDetails>
+              </Accordion>
+              <Accordion>
+                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                  <Typography>House Property Income</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  {/* House Property Income form goes here */}
+                  <IncomeDetails type="house" />
+                </AccordionDetails>
+              </Accordion>
+              <Accordion>
+                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                  <Typography>Capital Gains</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  {/* Capital Gains form goes here */}
+                  <IncomeDetails type="capital" />
+                </AccordionDetails>
+              </Accordion>
+              <Accordion>
+                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                  <Typography>Business/Professional Income</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  {/* Business/Professional Income form goes here */}
+                  <IncomeDetails type="business" />
+                </AccordionDetails>
+              </Accordion>
+              <Accordion>
+                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                  <Typography>Other Income</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  {/* Other Income form goes here */}
+                  <IncomeDetails type="other" />
+                </AccordionDetails>
+              </Accordion>
+              <Accordion>
+                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                  <Typography>Agriculture Income</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  {/* Agriculture Income form goes here */}
+                  <IncomeDetails type="agriculture" />
+                </AccordionDetails>
+              </Accordion>
+            </Box>
+          )}
+
+          {/* Deductions Step */}
+          {step === 2 && (
+            <Box>
+              {/* Section 80G - Donations */}
+              <Typography variant="h6" mb={2} sx={{ textDecoration: 'underline' }}>
+                Section 80G - Donations
+              </Typography>
+              {donations.map((row, idx) => (
+                <Paper key={idx} sx={{ p: 2, mb: 2, borderRadius: 2, bgcolor: '#f8fafc' }}>
+                  <Grid2 container spacing={2} alignItems="center">
+                    <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                      <TextField size="small" fullWidth label="Name of Donee" />
+                    </Grid2>
+                    <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+                      <TextField size="small" fullWidth label="Amount" />
+                    </Grid2>
+                    <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+                      <Autocomplete
+                        size="small"
+                        fullWidth
+                        options={donationModes}
+                        renderInput={(params) => <TextField {...params} label="Mode" />}
+                      />
+                    </Grid2>
+                    <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                      <Button size="small" variant="contained" component="label">
+                        Upload
+                        <input type="file" hidden />
+                      </Button>
+                    </Grid2>
+                    {donations.length > 1 && (
+                      <Grid2 size={{ xs: 12, sm: 6, md: 2 }} display="flex" justifyContent="flex-end">
+                        <IconButton size="small" color="error" onClick={() => setDonations(donations.filter((_, i) => i !== idx))}>
+                          <DeleteIcon />
+                        </IconButton>
+                      </Grid2>
+                    )}
+                  </Grid2>
+                </Paper>
+              ))}
+              <Box display="flex" justifyContent="flex-end">
+                <Button
+                  size="small"
+                  variant="outlined"
+                  onClick={() => setDonations([...donations, { name: '', amount: '', mode: '', receipt: null }])}
+                >
+                  Add Row
+                </Button>
+              </Box>
+
+              {/* Section 80E - Interest on Education Loan */}
+              <Typography variant="h5" mt={0} mb={2} sx={{ textDecoration: 'underline' }}>
+                Section 80E - Interest on Education Loan
+              </Typography>
+              <Grid2 container spacing={2} alignItems="center" mb={2}>
+                <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+                  <TextField size="small" fullWidth label="Amount" />
+                </Grid2>
+                <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                  <Autocomplete
+                    size="small"
+                    fullWidth
+                    options={educationOfOptions}
+                    renderInput={(params) => <TextField {...params} label="Education of" />}
+                  />
+                </Grid2>
+                <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                  <TextField size="small" fullWidth label="Borrower Name" />
+                </Grid2>
+                <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+                  <Typography>Is it an approved Bank/NBFC?</Typography>
+                  <RadioGroup row value={eduLoan.approved}>
+                    <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
+                    <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
+                  </RadioGroup>
+                </Grid2>
+              </Grid2>
+
+              {/* Section 80TTA/80TTB - Interest on Savings */}
+              <Typography variant="h5" mt={0} mb={2} sx={{ textDecoration: 'underline' }}>
+                Section 80TTA/80TTB - Interest on Savings
+              </Typography>
+              <Grid2 container spacing={2} alignItems="center" mb={2}>
+                <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                  <TextField size="small" fullWidth label="Total savings interest" />
+                </Grid2>
+                <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                  <TextField size="small" fullWidth label="Total FD/RD interest (above 60 yrs)" />
+                </Grid2>
+              </Grid2>
+
+              {/* Section 80U - Person with Disability */}
+              <Typography variant="h5" mt={0} mb={2} sx={{ textDecoration: 'underline' }}>
+                Section 80U - Person with Disability
+              </Typography>
+              <Grid2 container spacing={2} alignItems="center" mb={2}>
+                <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                  <Autocomplete
+                    size="small"
+                    fullWidth
+                    options={disabilityNature}
+                    renderInput={(params) => <TextField {...params} label="Nature of Disability" />}
+                  />
+                </Grid2>
+                <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+                  <Autocomplete
+                    size="small"
+                    fullWidth
+                    options={disabilitySeverity}
+                    renderInput={(params) => <TextField {...params} label="Severity" />}
+                  />
+                </Grid2>
+                <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                  <TextField size="small" fullWidth label="Deduction Amount" />
+                </Grid2>
+                <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+                  <Button size="small" variant="contained" component="label">
+                    Upload Certificate
+                    <input type="file" hidden />
+                  </Button>
+                </Grid2>
+              </Grid2>
+
+              {/* Other Deductions */}
+              <Typography variant="h5" mt={0} mb={2} sx={{ textDecoration: 'underline' }}>
+                Other Deductions
+              </Typography>
+              <Grid2 container spacing={2} alignItems="center" mb={2}>
+                <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+                  <Typography>Did you pay Rent without receiving HRA?</Typography>
+                  <RadioGroup row value={rentHra.paid}>
+                    <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
+                    <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
+                  </RadioGroup>
+                </Grid2>
+                <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+                  <TextField size="small" fullWidth label="Amount" />
+                </Grid2>
+                <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+                  <Typography>Are you a first time homebuyer?</Typography>
+                  <RadioGroup row value={firstHome.isFirst}>
+                    <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
+                    <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
+                  </RadioGroup>
+                </Grid2>
+                <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+                  <TextField size="small" fullWidth label="Amount of interest paid" />
+                </Grid2>
+                <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+                  <TextField size="small" fullWidth label="Date of loan sanctioned" type="date" InputLabelProps={{ shrink: true }} />
+                </Grid2>
+                <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+                  <Typography>Donation made to political/party (80GGC)?</Typography>
+                  <RadioGroup row value={political.donated}>
+                    <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
+                    <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
+                  </RadioGroup>
+                </Grid2>
+                <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+                  <TextField size="small" fullWidth label="Amount" />
+                </Grid2>
+              </Grid2>
+
+              {/* Section 80C - Claim deductions for investments made */}
+              <Typography variant="h5" mt={0} mb={2} sx={{ textDecoration: 'underline' }}>
+                Section 80C - Claim deductions for investments made
+              </Typography>
+              {investments.map((row, idx) => (
+                <Paper key={idx} sx={{ p: 2, mb: 2, borderRadius: 2, bgcolor: '#f8fafc' }}>
+                  <Grid2 container spacing={2} alignItems="center">
+                    <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+                      <Autocomplete
+                        size="small"
+                        fullWidth
+                        options={investmentTypes}
+                        renderInput={(params) => <TextField {...params} label="Investment/Payment" />}
+                      />
+                    </Grid2>
+                    <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                      <TextField size="small" fullWidth label="Amount" />
+                    </Grid2>
+                    <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                      <Button size="small" variant="contained" component="label">
+                        Upload
+                        <input type="file" hidden />
+                      </Button>
+                    </Grid2>
+                    {investments.length > 1 && (
+                      <Grid2 size={{ xs: 12, sm: 6, md: 2 }} display="flex" justifyContent="flex-end">
+                        <IconButton size="small" color="error" onClick={() => setInvestments(investments.filter((_, i) => i !== idx))}>
+                          <DeleteIcon />
+                        </IconButton>
+                      </Grid2>
+                    )}
+                  </Grid2>
+                </Paper>
+              ))}
+              <Box display="flex" justifyContent="flex-end">
+                <Button
+                  size="small"
+                  variant="outlined"
+                  onClick={() => setInvestments([...investments, { type: '', amount: '', doc: null }])}
+                >
+                  Add Row
+                </Button>
+              </Box>
+
+              {/* Section 80D - Claim deduction for medical insurance paid */}
+              <Typography variant="h5" mt={0} mb={2} sx={{ textDecoration: 'underline' }}>
+                Section 80D - Claim deduction for medical insurance paid
+              </Typography>
+              <Grid2 container spacing={2} alignItems="center" mb={2}>
+                <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+                  <Typography>Self & Family (Non-senior citizen)</Typography>
+                </Grid2>
+                <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+                  <TextField size="small" fullWidth label="Amount" />
+                </Grid2>
+                <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+                  <Typography>Self (Senior Citizen)</Typography>
+                </Grid2>
+                <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+                  <TextField size="small" fullWidth label="Amount" />
+                </Grid2>
+                <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+                  <Typography>Parents (Non-senior)</Typography>
+                </Grid2>
+                <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+                  <TextField size="small" fullWidth label="Amount" />
+                </Grid2>
+                <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+                  <Typography>Parents (Senior)</Typography>
+                </Grid2>
+                <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+                  <TextField size="small" fullWidth label="Amount" />
+                </Grid2>
+                <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+                  <Typography>Preventive Health Checkup</Typography>
+                </Grid2>
+                <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+                  <TextField size="small" fullWidth label="Amount" />
+                </Grid2>
+                <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+                  <Typography>Upload premium receipts</Typography>
+                </Grid2>
+                <Grid2 size={{ xs: 12, sm: 6, md: 8 }}>
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <Button size="small" variant="contained" component="label">
+                      Upload
+                      <input type="file" hidden />
+                    </Button>
+                    <Button size="small" variant="outlined">
+                      View
+                    </Button>
+                    <Button size="small" variant="outlined">
+                      Add
+                    </Button>
+                  </Stack>
+                </Grid2>
+              </Grid2>
+            </Box>
+          )}
+
+          {/* Review & Filing Step */}
+          {step === 3 && (
+            <Box>
+              <Typography variant="h5" mb={3} sx={{ textDecoration: 'underline' }}>
+                Draft Income Tax Computation
+              </Typography>
+              <Stack direction="row" spacing={2} mb={3}>
+                <Button variant="outlined">View</Button>
+                <Button variant="contained">Upload</Button>
               </Stack>
-        </Box>
-          </StyledCard>
-        </Box>
-      </Stack>
+
+              <Typography variant="h5" mb={2} sx={{ textDecoration: 'underline' }}>
+                Approval / Workflow
+              </Typography>
+              <Stack direction="row" spacing={2} mb={3}>
+                <Button variant="outlined">View</Button>
+                <Button variant="contained" color="success">Approve</Button>
+                <Button variant="contained" color="warning">Rework</Button>
+              </Stack>
+
+              <Typography variant="h5" mb={2} sx={{ textDecoration: 'underline' }}>
+                Proceed to Filing
+              </Typography>
+              <Stack direction="row" spacing={2} mb={2}>
+                <Button variant="outlined">View</Button>
+                <Button variant="contained" color="primary">Proceed to File</Button>
+              </Stack>
+              <Box mb={4}>
+                <Typography mb={1}>Mode of e-verification?</Typography>
+                <Autocomplete
+                  size="small"
+                  fullWidth
+                  options={["Aadhaar OTP", "Net Banking", "DSC", "EVC"]}
+                  renderInput={(params) => <TextField {...params} placeholder="Select mode" />}
+                  sx={{ maxWidth: 300 }}
+                />
+              </Box>
+
+              <Stack direction="row" spacing={6} mt={4}>
+                <Paper elevation={2} sx={{ p: 3, minWidth: 120, textAlign: 'center', bgcolor: '#f8fafc' }}>
+                  <Typography variant="h6">Filing</Typography>
+                </Paper>
+                <Paper elevation={2} sx={{ p: 3, minWidth: 120, textAlign: 'center', bgcolor: '#f8fafc' }}>
+                  <Typography variant="h6">Ack</Typography>
+                </Paper>
+              </Stack>
+            </Box>
+          )}
+        </Paper>
       </Box>
+    </Card>
   );
 }

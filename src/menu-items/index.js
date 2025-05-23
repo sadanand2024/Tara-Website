@@ -7,9 +7,9 @@ import getDashboardMenu from './dashboard';
 
 const menuItems = (user, subscriptions) => {
   const items = [];
-  if (user?.user?.is_super_user) {
-    items.push(adminItems);
-  }
+  // if (user?.user?.is_super_user) {
+  items.push(adminItems);
+  // }
   items.push(getDashboardMenu(user, subscriptions));
   return { items };
 };

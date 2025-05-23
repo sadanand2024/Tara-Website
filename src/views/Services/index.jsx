@@ -151,15 +151,17 @@ export default function Services() {
       progress: 0,
       tasks: '0 Pending',
       docs: '0 uploaded',
-      icon: <AssignmentIcon color="primary" sx={{ fontSize: 40 }} />
+      icon: <AssignmentIcon color="primary" sx={{ fontSize: 40 }} />,
+      href: '/app/my-services/itr-dashboard'
     },
     {
-      title: 'ITR Filing - FY: 2024-25 (Business)',
+      title: 'MSME Registration - FY: 2024-25 (Business)',
       status: 'In Progress',
       progress: 0,
       tasks: '0 Pending',
       docs: '0 uploaded',
-      icon: <DescriptionIcon color="primary" sx={{ fontSize: 40 }} />
+      icon: <DescriptionIcon color="primary" sx={{ fontSize: 40 }} />,
+      href: '/app/my-services/msme-dashboard'
     },
     {
       title: 'Company Incorporation - FY: 2024-25 (Business)',
@@ -167,23 +169,26 @@ export default function Services() {
       progress: 0,
       tasks: '0 Pending',
       docs: '0 uploaded',
-      icon: <DescriptionIcon color="primary" sx={{ fontSize: 40 }} />
+      icon: <DescriptionIcon color="primary" sx={{ fontSize: 40 }} />,
+      href: '/app/my-services/msme-dashboard'
     },
     {
-      title: 'Auditing - FY: 2024-25 (Business)',
+      title: 'Labour Licence - FY: 2024-25 (Business)',
       status: 'In Progress',
       progress: 0,
       tasks: '0 Pending',
       docs: '0 uploaded',
-      icon: <DescriptionIcon color="primary" sx={{ fontSize: 40 }} />
+      icon: <DescriptionIcon color="primary" sx={{ fontSize: 40 }} />,
+      href: '/app/my-services/labour-licence'
     },
     {
-      title: 'Business Loan - FY: 2024-25 (Business)',
+      title: 'Trade Licence - FY: 2024-25 (Business)',
       status: 'In Progress',
       progress: 0,
       tasks: '0 Pending',
       docs: '0 uploaded',
-      icon: <DescriptionIcon color="primary" sx={{ fontSize: 40 }} />
+      icon: <DescriptionIcon color="primary" sx={{ fontSize: 40 }} />,
+      href: '/app/my-services/trade-licence'
     }
   ];
 
@@ -425,7 +430,7 @@ export default function Services() {
                       <Tooltip title="View service details" arrow>
                         <AnimatedButton
                           startIcon={<VisibilityIcon />}
-                          onClick={() => navigate('/app/my-services/itr-dashboard')}
+                          onClick={() => navigate(service.href)}
                           variant="outlined"
                           color="secondary"
                           fullWidth

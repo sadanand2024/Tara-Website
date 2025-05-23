@@ -257,6 +257,7 @@ const Header = ({ hamburgerDisplay = 'block' }) => {
       </Box>
 
       {/* business selector */}
+      
       <Box sx={{ display: { xs: 'block', sm: 'block' }, mx: 2, width: 300 }}>
         <Autocomplete
           value={selectedOption}
