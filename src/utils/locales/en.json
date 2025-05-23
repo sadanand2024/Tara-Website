@@ -227,5 +227,7 @@
   "new-requests": "New Requests",
   "service-summary": "Service Summary",
   "task-management": "Task Management",
-  "user-management": "User Management"
+  "user-management": "Manage Users",
+  "team-tara": "Team Tara",
+  "tara-users": "Tara Users"
 }

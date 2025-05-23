@@ -12,7 +12,7 @@ const restrictedRoutes = {
 const RoleGuard = ({ children }) => {
   const user = useSelector((state) => state).accountReducer.user;
   const location = useLocation();
-  let isSuperAdmin = user.user.is_super_user;
+  let isSuperAdmin = user.user.is_super_admin;
   if (!isSuperAdmin && restrictedRoutes['not-super-admin'].includes(location.pathname))
     return (
       <div

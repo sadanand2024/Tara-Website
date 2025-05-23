@@ -179,7 +179,7 @@ export default function Services() {
       tasks: '0 Pending',
       docs: '0 uploaded',
       icon: <DescriptionIcon color="primary" sx={{ fontSize: 40 }} />,
-      href: '/app/my-services/labour-licence'
+      href: '/app/my-services/labour-license'
     },
     {
       title: 'Trade Licence - FY: 2024-25 (Business)',
@@ -188,7 +188,7 @@ export default function Services() {
       tasks: '0 Pending',
       docs: '0 uploaded',
       icon: <DescriptionIcon color="primary" sx={{ fontSize: 40 }} />,
-      href: '/app/my-services/trade-licence'
+      href: '/app/my-services/trade-license'
     }
   ];
 

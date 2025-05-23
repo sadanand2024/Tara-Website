@@ -11,6 +11,7 @@ import { useDispatch as useReduxDispatch } from 'react-redux';
 import { storeUser } from 'store/slices/account';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import CheckCircleTwoToneIcon from '@mui/icons-material/CheckCircleTwoTone';
+import PlanDrawer from './PlanDrawer';
 
 // material-ui
 import {
@@ -244,6 +245,8 @@ const ManageSubscriptions = () => {
   const isTablet = useMediaQuery(theme.breakpoints.down('md'));
   const [paymentHistory, setPaymentHistory] = useState([]);
   const [moduleSubscriptions, setModuleSubscriptions] = useState([]);
+  const [openPlanDrawer, setOpenPlanDrawer] = useState(false);
+  const [selectedServiceRequest, setSelectedServiceRequest] = useState(null);
   const [servicesPurchased, setServicesPurchased] = useState([]);
   const navigate = useNavigate();
   const user = useSelector((state) => state).accountReducer.user;
@@ -278,6 +281,11 @@ const ManageSubscriptions = () => {
     };
     getServicesPurchased();
   }, [user.active_context]);
+
+  const handleOpenPlanDrawer = (service_request) => {
+    setSelectedServiceRequest(service_request);
+    setOpenPlanDrawer(true);
+  };
 
   return (
     <Stack spacing={{ xs: 2, sm: 3, md: 4 }}>
@@ -488,7 +496,7 @@ const ManageSubscriptions = () => {
                           sx={{ fontWeight: 500 }}
                         />
                       ) : (
-                        <Button variant="outlined" color="primary" size="small" onClick={() => onOpenPlans(task)}>
+                        <Button variant="outlined" color="primary" size="small" onClick={() => handleOpenPlanDrawer(task)}>
                           Complete Payment
                         </Button>
                       )}
@@ -634,6 +642,16 @@ const ManageSubscriptions = () => {
           </Table>
         </TableContainer>
       </Box>
+      <PlanDrawer
+        type="service"
+        moduleId={selectedServiceRequest?.service}
+        open={openPlanDrawer}
+        onClose={() => {
+          setSelectedServiceRequest(null);
+          setOpenPlanDrawer(false);
+        }}
+        selectedTask={selectedServiceRequest}
+      />
     </Stack>
   );
 };

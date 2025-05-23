@@ -11,7 +11,7 @@ import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 import { useSnackbar } from 'notistack';
 import Factory from 'utils/Factory';
-import ServiceRequests from './TableList';
+import ServiceRequests from './ServiceTable';
 import { useSelector } from 'store';
 import { gridSpacing } from 'store/constant';
 
