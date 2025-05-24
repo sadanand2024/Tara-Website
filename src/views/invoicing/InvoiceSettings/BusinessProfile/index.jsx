@@ -12,7 +12,8 @@ import {
   Grid2,
   Box,
   CircularProgress,
-  Divider
+  Divider,
+  Avatar
 } from '@mui/material';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
@@ -27,10 +28,17 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
 import { businessTypesArray } from 'utils/businessTypesArray';
+import CustomUpload from 'utils/CustomUpload';
+import DeleteIcon from '@mui/icons-material/Delete';
+
 export default function TabOne({ businessDetails = {}, postType, handleNext, setBusinessDetails }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
+  const [logoUrlDetails, setLogoUrlDetails] = useState(null);
+  const [logoFile, setLogoFile] = useState(null);
+  const [logoposttype, setLogoposttype] = useState('post');
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [fileInputRef, setFileInputRef] = useState(null);
   const [busineesprofileFields] = useState({
     basic_details: [
       { name: 'nameOfBusiness', label: 'Business Name' },
@@ -209,6 +217,40 @@ export default function TabOne({ businessDetails = {}, postType, handleNext, set
     }
   }, [businessDetails]);
 
+  const getLogoDetails = async () => {
+    const logoResponse = await Factory('get', `/user_management/business-logo/${businessDetails.id}/`, {}, {});
+    if (logoResponse.res.status_cd === 0) {
+      setLogoUrlDetails(logoResponse.res.data);
+      setLogoposttype('put');
+    } else {
+      setLogoUrlDetails(null);
+      setLogoposttype('post');
+    }
+  };
+
+  useEffect(() => {
+    if (businessDetails && businessDetails.id) {
+      getLogoDetails();
+    }
+  }, [businessDetails]);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setFieldValue('logo', file);
+      formik.setFieldTouched('logo', true, false);
+      // Create preview URL
+      const fileUrl = URL.createObjectURL(file);
+      setPreviewUrl(fileUrl);
+    }
+  };
+
+  const handleDeleteLogo = () => {
+    setFieldValue('logo', null);
+    setPreviewUrl(null);
+    formik.setFieldTouched('logo', true, false);
+  };
+
   if (!businessDetails || !businessDetails.id) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>
@@ -216,6 +258,42 @@ export default function TabOne({ businessDetails = {}, postType, handleNext, set
       </Box>
     );
   }
+  const handleLogoChange = async (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setLogoFile(file);
+
+      let url = logoposttype === 'put' ? `/user_management/business-logo/${logoUrlDetails.id}/` : '/user_management/business-logo/';
+      let formData = new FormData();
+      formData.append('logo', file);
+      logoposttype === 'post' && formData.append('business', businessDetails.id);
+      let { res, error } = await Factory(logoposttype, url, formData);
+      console.log(res);
+      if (res.status_cd === 0) {
+        setLogoUrlDetails(res.data);
+        setLogoposttype('put');
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'Logo updated successfully',
+            variant: 'alert',
+            alert: { color: 'success' },
+            close: false
+          })
+        );
+      } else {
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: JSON.stringify(error),
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
+      }
+    }
+  };
 
   return (
     <>
@@ -224,6 +302,44 @@ export default function TabOne({ businessDetails = {}, postType, handleNext, set
       </Typography>
 
       <Grid2 container spacing={2}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+          <input
+            accept="image/*"
+            style={{ display: 'none' }}
+            id="profile-image-upload"
+            type="file"
+            onChange={handleLogoChange}
+            ref={fileInputRef}
+          />
+
+          <Box display="flex" alignItems="center" gap={10}>
+            <Avatar
+              alt="Profile"
+              src={logoUrlDetails?.logo || (logoFile ? URL.createObjectURL(logoFile) : '')}
+              sx={{
+                width: 100,
+                height: 100,
+                boxShadow: 3,
+                border: '2px solid #fff',
+                background: '#fff'
+              }}
+              imgProps={{
+                style: {
+                  objectFit: 'contain',
+                  width: '100%',
+                  height: '100%'
+                }
+              }}
+            />
+
+            <label htmlFor="profile-image-upload">
+              <Button variant="contained" size="small" component="span">
+                Upload / Change Logo
+              </Button>
+            </label>
+          </Box>
+        </Grid2>
+
         {busineesprofileFields.basic_details.map((item, index) => (
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }} key={item.name}>
             <FormControl fullWidth>
@@ -369,24 +485,7 @@ export default function TabOne({ businessDetails = {}, postType, handleNext, set
       </Grid2>
 
       <Divider />
-      {/* <Box>
-        <Typography variant="h4" sx={{ fontWeight: 'bold', pt: 3, mb: 2 }}>
-          Branch Details
-        </Typography>
-      </Box>
-      <Grid2 container spacing={2}>
-        <Grid2 size={{ xs: 12, sm: 6 }}>
-          <CustomAutocomplete
-            value={values.branch}
-            onChange={(e, newValue) => setFieldValue('branch', newValue)}
-            options={businessDetails.branches || []}
-            name="branch"
-          />
-        </Grid2>
-        <Grid2 size={{ xs: 12, sm: 6 }}>
-          <CustomInput name="branch_code" value={values.branch_code} onChange={(e) => setFieldValue('branch_code', e.target.value)} />
-        </Grid2>
-      </Grid2> */}
+
       <Typography variant="h4" sx={{ fontWeight: 'bold', pt: 3, mb: 2 }}>
         Bank Details
       </Typography>
@@ -402,6 +501,7 @@ export default function TabOne({ businessDetails = {}, postType, handleNext, set
               <TextField
                 name={item.name}
                 value={values[item.name]}
+                size="small"
                 onChange={(e) => {
                   if (item.name === 'pan' || item.name === 'ifsc_code' || item.name === 'bank_name') {
                     setFieldValue(item.name, e.target.value.toUpperCase());

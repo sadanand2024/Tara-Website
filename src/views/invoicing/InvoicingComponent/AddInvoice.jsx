@@ -185,8 +185,8 @@ const InvoiceDetails = ({
       const postData = { ...values };
       postData.invoicing_profile = businessDetailsData?.id;
       postData.financial_year = financialYear;
-      let selcted_gstin_format_version = businessDetailsData.invoice_format.find((item) => item.gstin === postData.gstin);
-      console.log(selcted_gstin_format_version);
+      let selcted_gstin_format_version = businessDetailsData.invoice_format.find((item) => item.gstin === postData.gstin || 'NA');
+      console.log(businessDetailsData.invoice_format);
       postData.format_version = Number(selcted_gstin_format_version.format_version);
       if (postData.not_applicablefor_shipping === true) {
         postData.shipping_address = {};
@@ -315,11 +315,6 @@ const InvoiceDetails = ({
       item.total_amount = amountAfterDiscount + taxAmount;
 
       // Update CGST, SGST, IGST amounts based on place of supply logic
-      console.log('States comparison:', {
-        place_of_supply: values.place_of_supply,
-        billing_state: values.billing_address.state,
-        shipping_state: values.shipping_address.state
-      });
 
       // Normalize state values for comparison
       const normalizeState = (state) => (state ? state.toString().trim().toLowerCase() : '');
@@ -332,14 +327,6 @@ const InvoiceDetails = ({
       const effectiveShippingState = shippingState === 'NA' || shippingState === '' ? billingState : normalizeState(shippingState);
 
       const isIntraState = placeOfSupply === billingState && placeOfSupply === effectiveShippingState;
-
-      console.log('Normalized States:', {
-        placeOfSupply,
-        billingState,
-        shippingState,
-        effectiveShippingState,
-        isIntraState
-      });
 
       if (isIntraState) {
         // If place of supply and both addresses are in same state, CGST and SGST
@@ -469,7 +456,6 @@ const InvoiceDetails = ({
       formik.setFieldValue('invoice_number', invoice_number_format);
     }
   }, [invoice_number_format]);
-  console.log(invoice_number_format);
   const bulkItemSave = (data) => {
     formik.setFieldValue('item_details', [...formik.values.item_details, ...data]);
     recalculateTotals();

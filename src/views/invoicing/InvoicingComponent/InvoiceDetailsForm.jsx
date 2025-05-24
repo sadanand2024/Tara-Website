@@ -120,22 +120,26 @@ const InvoiceDetailsForm = ({
           onChange={(_, val) => {
             if (fieldName === 'gstin') {
               formik.setFieldValue('gstin', val || 'NA');
-              if (businessDetailsData?.invoice_format?.find((item) => item.gstin === val && item.include_branch_code === false)) {
+              if (businessDetailsData?.invoice_format?.find((item) => item.gstin === val || ('NA' && item.include_branch_code === false))) {
                 console.log('hjb');
                 getInvoiceFormat(val, 'NA');
-                formik.setFieldValue('branch_code', 'NA');
+                formik.setFieldValue('branch_code', '');
                 formik.setFieldValue('invoice_number', '');
                 setInvoiceNumberFormat('');
               } else {
                 console.log('hjb2');
-                formik.setFieldValue('branch_code', 'NA');
+                console.log(businessDetailsData?.invoice_format);
+                formik.setFieldValue('branch_code', '');
                 formik.setFieldValue('invoice_number', '');
                 setInvoiceNumberFormat('');
               }
             } else if (fieldName === 'branch_code') {
-              formik.setFieldValue('branch_code', val || 'NA');
+              formik.setFieldValue('branch_code', val || '');
+              console.log(businessDetailsData?.invoice_format);
               if (
-                businessDetailsData?.invoice_format?.find((item) => item.gstin === formik.values.gstin && item.include_branch_code === true)
+                businessDetailsData?.invoice_format?.find(
+                  (item) => item.gstin === formik.values.gstin || ('NA' && item.include_branch_code === true)
+                )
               ) {
                 getInvoiceFormat(formik.values.gstin, val);
               }
@@ -145,7 +149,7 @@ const InvoiceDetailsForm = ({
           disabled={
             (fieldName === 'branch_code' &&
               businessDetailsData?.invoice_format?.find(
-                (item) => item.gstin === formik.values.gstin && item.include_branch_code === false
+                (item) => item.gstin === formik.values.gstin || ('NA' && item.include_branch_code === false)
               )) ||
             (fieldName === 'branch_code' && formik.values.gstin === '')
           }
@@ -197,7 +201,6 @@ const InvoiceDetailsForm = ({
       );
     }
   };
-  console.log(formik.errors);
   return (
     <Grid2 container spacing={2}>
       {invoiceDetailsFields.map((item) => (

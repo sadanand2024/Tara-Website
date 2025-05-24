@@ -10,6 +10,17 @@ import * as serviceWorker from 'serviceWorker';
 import reportWebVitals from 'reportWebVitals';
 import { ConfigProvider } from 'contexts/ConfigContext';
 
+// Suppress React Router v7 warning
+if (process.env.NODE_ENV === 'development') {
+  const originalWarn = console.warn;
+  console.warn = (...args) => {
+    if (typeof args[0] === 'string' && args[0].includes('React Router Future Flag Warning')) {
+      return;
+    }
+    originalWarn.apply(console, args);
+  };
+}
+
 // style + assets
 import 'assets/scss/style.scss';
 

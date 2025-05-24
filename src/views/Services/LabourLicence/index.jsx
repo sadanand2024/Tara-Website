@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Paper,
@@ -23,12 +23,20 @@ import {
   Card,
   Radio,
   FormGroup,
-  Stack
+  Stack,
+  IconButton
 } from '@mui/material';
 import IconSave from '@mui/icons-material/Save';
 import IconArrowForward from '@mui/icons-material/ArrowForward';
+import IconDownload from '@mui/icons-material/Download';
+import IconDelete from '@mui/icons-material/Delete';
+import IconUpload from '@mui/icons-material/Upload';
 import { useFormik } from 'formik';
-
+import * as Yup from 'yup';
+import { useDispatch } from 'react-redux';
+import { openSnackbar } from 'store/slices/snackbar';
+import Factory from 'utils/Factory';
+import StepOne from './components/StepOne';
 const steps = [
   { label: 'Applicant & Business Details', width: 200 },
   { label: 'Documents & Declaration', width: 200 },
@@ -36,16 +44,113 @@ const steps = [
 ];
 
 const typeOfBusinessOptions = [
-  { value: 'proprietorship', label: 'Proprietorship' },
-  { value: 'partnership', label: 'Partnership' },
-  { value: 'pvtltd', label: 'Pvt Ltd' }
+  'Proprietorship',
+  'Partnership',
+  'Pvt Ltd',
+  'Public Ltd',
+  'OPC',
+  'HUF',
+  'Trust',
+  'Society',
+  'Section 8',
+  'Co-operative',
+  'Joint Venture',
+  'Branch Office',
+  'Liaison Office',
+  'Foreign Company'
 ];
 const natureOfBusinessOptions = [
   { value: 'manufacturing', label: 'Manufacturing' },
   { value: 'service', label: 'Service' }
 ];
 
-function BusinessIdentityStructureSection({ values, errors, touched, handleChange, setFieldValue, handleBlur }) {
+const businessIdentitySchema = Yup.object().shape({
+  classificationOfEstablishment: Yup.string().required('Classification of Establishment is required'),
+  categoryOfEstablishment: Yup.string().required('Category of Establishment is required'),
+  legalNameOfBusiness: Yup.string().required('Legal Name of Business is required'),
+  natureOfBusiness: Yup.string().required('Nature of Business is required'),
+  panOfBusiness: Yup.mixed().required('PAN of Business is required'),
+  dateOfCommencement: Yup.date().required('Date of Commencement is required')
+});
+
+function BusinessIdentityStructureSection({
+  values,
+  errors,
+  touched,
+  handleChange,
+  setFieldValue,
+  handleBlur,
+  setErrors,
+  getBusinessIdentity,
+  businessIdentityposttype
+}) {
+  const dispatch = useDispatch();
+  const handleSaveBusinessIdentity = async (service_task_id, posttype) => {
+    console.log(values);
+    const url = posttype === 'put' ? `/labourlicense/business-identity/${values.id}/` : `/labourlicense/business-identity/`;
+
+    const formData = new FormData();
+
+    // Append all form values to the FormData object
+    formData.append('service_request', 24);
+    formData.append('service_task', service_task_id);
+    formData.append('business_pan', values.panOfBusiness);
+    formData.append('date_of_commencement', values.dateOfCommencement);
+    formData.append('nature_of_business', values.natureOfBusiness);
+    formData.append('legal_name_of_business', values.legalNameOfBusiness);
+    formData.append('category_of_establishment', values.categoryOfEstablishment);
+    formData.append('classification_of_establishment', values.classificationOfEstablishment);
+    formData.append('status', 'in progress');
+
+    const { res } = await Factory(posttype, url, formData);
+    if (res.status_cd === 1) {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res.data.data) || 'Something went wrong',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
+    } else {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Data Saved Successfully',
+          variant: 'alert',
+          alert: { color: 'success' },
+          close: false
+        })
+      );
+      handleNext();
+    }
+  };
+  const handleFieldChange = (field, value) => {
+    setFieldValue(field, value);
+    // Validate the field immediately after change
+    businessIdentitySchema
+      .validateAt(field, { [field]: value })
+      .then(() => {
+        // Clear error for this field if validation passes
+        if (errors[field]) {
+          setErrors({ ...errors, [field]: undefined });
+        }
+      })
+      .catch((err) => {
+        // Set error for this field if validation fails
+        setErrors({ ...errors, [field]: err.message });
+      });
+  };
+
+  const handleDeletePan = () => {
+    setFieldValue('panOfBusiness', null);
+  };
+
+  const handleDownloadPan = (url) => {
+    window.open(url, '_blank');
+  };
+
   return (
     <Box>
       <Typography variant="h5" fontWeight={700} mb={2}>
@@ -60,10 +165,19 @@ function BusinessIdentityStructureSection({ values, errors, touched, handleChang
           <Autocomplete
             size="small"
             fullWidth
-            options={['Proprietorship', 'P. firm', 'Company']}
+            options={typeOfBusinessOptions}
             value={values.classificationOfEstablishment || ''}
-            onChange={(e, value) => setFieldValue('classificationOfEstablishment', value)}
-            renderInput={(params) => <TextField {...params} label="" size="small" />}
+            onChange={(e, value) => handleFieldChange('classificationOfEstablishment', value)}
+            onBlur={() => handleBlur({ target: { name: 'classificationOfEstablishment' } })}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label=""
+                size="small"
+                error={touched.classificationOfEstablishment && Boolean(errors.classificationOfEstablishment)}
+                helperText={touched.classificationOfEstablishment && errors.classificationOfEstablishment}
+              />
+            )}
           />
         </Grid2>
         {/* 2. Category of Establishment */}
@@ -76,8 +190,17 @@ function BusinessIdentityStructureSection({ values, errors, touched, handleChang
             fullWidth
             options={['Shop', 'Commercial Establishment']}
             value={values.categoryOfEstablishment || ''}
-            onChange={(e, value) => setFieldValue('categoryOfEstablishment', value)}
-            renderInput={(params) => <TextField {...params} label="" size="small" />}
+            onChange={(e, value) => handleFieldChange('categoryOfEstablishment', value)}
+            onBlur={() => handleBlur({ target: { name: 'categoryOfEstablishment' } })}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label=""
+                size="small"
+                error={touched.categoryOfEstablishment && Boolean(errors.categoryOfEstablishment)}
+                helperText={touched.categoryOfEstablishment && errors.categoryOfEstablishment}
+              />
+            )}
           />
         </Grid2>
         {/* 3. Legal Name of Business */}
@@ -91,8 +214,10 @@ function BusinessIdentityStructureSection({ values, errors, touched, handleChang
             label=""
             name="legalNameOfBusiness"
             value={values.legalNameOfBusiness || ''}
-            onChange={handleChange}
+            onChange={(e) => handleFieldChange('legalNameOfBusiness', e.target.value)}
             onBlur={handleBlur}
+            error={touched.legalNameOfBusiness && Boolean(errors.legalNameOfBusiness)}
+            helperText={touched.legalNameOfBusiness && errors.legalNameOfBusiness}
           />
         </Grid2>
         {/* 4. Nature of Business */}
@@ -105,8 +230,17 @@ function BusinessIdentityStructureSection({ values, errors, touched, handleChang
             fullWidth
             options={['Manufacturing', 'Service', 'Trading']}
             value={values.natureOfBusiness || ''}
-            onChange={(e, value) => setFieldValue('natureOfBusiness', value)}
-            renderInput={(params) => <TextField {...params} label="" size="small" />}
+            onChange={(e, value) => handleFieldChange('natureOfBusiness', value)}
+            onBlur={() => handleBlur({ target: { name: 'natureOfBusiness' } })}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label=""
+                size="small"
+                error={touched.natureOfBusiness && Boolean(errors.natureOfBusiness)}
+                helperText={touched.natureOfBusiness && errors.natureOfBusiness}
+              />
+            )}
           />
         </Grid2>
         {/* 5. PAN of Business (Upload) */}
@@ -114,25 +248,54 @@ function BusinessIdentityStructureSection({ values, errors, touched, handleChang
           <Typography fontWeight={500}>PAN of Business</Typography>
         </Grid2>
         <Grid2 size={{ sm: 6, md: 3 }}>
-          <TextField
-            fullWidth
-            size="small"
-            label=""
-            name="panOfBusiness"
-            value={values.panOfBusiness ? values.panOfBusiness.name : ''}
-            placeholder="Upload PAN"
-            InputProps={{ readOnly: true }}
-            onClick={() => document.getElementById('panOfBusinessInput').click()}
-          />
-          <input
-            id="panOfBusinessInput"
-            type="file"
-            hidden
-            name="panOfBusiness"
-            onChange={(e) => setFieldValue('panOfBusiness', e.currentTarget.files[0])}
-            onBlur={handleBlur}
-          />
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            {typeof values.panOfBusiness === 'string' && values.panOfBusiness.startsWith('http') ? (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
+                <Button
+                  variant="text"
+                  color="primary"
+                  startIcon={<IconDownload />}
+                  onClick={() => handleDownloadPan(values.panOfBusiness)}
+                  sx={{ textTransform: 'none', minWidth: 0, p: 0 }}
+                >
+                  {values.panOfBusiness.split('/').pop()}
+                </Button>
+
+                <IconButton size="small" onClick={handleDeletePan} sx={{ pr: 10 }}>
+                  <IconDelete fontSize="small" />
+                </IconButton>
+              </Box>
+            ) : (
+              <>
+                <input
+                  type="file"
+                  id="panOfBusinessInput"
+                  onChange={(e) => {
+                    const file = e.currentTarget.files[0];
+                    handleFieldChange('panOfBusiness', file);
+                    handleBlur({ target: { name: 'panOfBusiness' } });
+                  }}
+                  style={{ display: 'none' }}
+                />
+                <Button variant="outlined" component="label" htmlFor="panOfBusinessInput" startIcon={<IconUpload />} sx={{ flex: 1 }}>
+                  {values.panOfBusiness ? values.panOfBusiness.name : 'Upload PAN'}
+                </Button>
+                {values.panOfBusiness && (
+                  <IconButton size="small" onClick={handleDeletePan} sx={{ p: 0.5 }}>
+                    <IconDelete fontSize="small" />
+                  </IconButton>
+                )}
+              </>
+            )}
+          </Box>
+
+          {touched.panOfBusiness && errors.panOfBusiness && (
+            <Typography color="error" variant="caption" sx={{ mt: 0.5, display: 'block' }}>
+              {errors.panOfBusiness}
+            </Typography>
+          )}
         </Grid2>
+
         {/* 6. Date of Commencement of Business */}
         <Grid2 size={{ sm: 6, md: 3 }}>
           <Typography fontWeight={500}>Date of Commencement of Business</Typography>
@@ -145,12 +308,28 @@ function BusinessIdentityStructureSection({ values, errors, touched, handleChang
             name="dateOfCommencement"
             type="date"
             value={values.dateOfCommencement || ''}
-            onChange={handleChange}
+            onChange={(e) => handleFieldChange('dateOfCommencement', e.target.value)}
             onBlur={handleBlur}
             InputLabelProps={{ shrink: true }}
+            error={touched.dateOfCommencement && Boolean(errors.dateOfCommencement)}
+            helperText={touched.dateOfCommencement && errors.dateOfCommencement}
           />
         </Grid2>
       </Grid2>
+      <Stack direction="row" justifyContent="flex-end" spacing={2} mt={4}>
+        <Button
+          variant="contained"
+          onClick={() => {
+            // Mark all fields as touched
+            Object.keys(values).forEach((key) => {
+              handleBlur({ target: { name: key } });
+            });
+            handleSaveBusinessIdentity(6, businessIdentityposttype);
+          }}
+        >
+          Save
+        </Button>
+      </Stack>
     </Box>
   );
 }
@@ -167,6 +346,7 @@ const LabourLicenceRegistration = () => {
   const [declared, setDeclared] = React.useState(false);
   // Additional place of business
   const [hasAdditionalPlace, setHasAdditionalPlace] = React.useState(false);
+  const [businessIdentityposttype, setBusinessIdentityposttype] = useState('');
 
   // Stepper navigation
   const activeStep = step;
@@ -189,10 +369,18 @@ const LabourLicenceRegistration = () => {
   // Formik for the entire first step
   const formik = useFormik({
     initialValues: {
+      // Business Identity & Structure
+      classificationOfEstablishment: '',
+      categoryOfEstablishment: '',
+      legalNameOfBusiness: '',
+      natureOfBusiness: '',
+      panOfBusiness: null,
+      dateOfCommencement: '',
+
+      // Additional fields for other sections
       typeOfBusiness: '',
       legalName: '',
       panFile: null,
-      natureOfBusiness: '',
       mobile: '',
       email: '',
       businessName: '',
@@ -232,13 +420,123 @@ const LabourLicenceRegistration = () => {
           sameAsAadhaar: true,
           address: ''
         }
+      ],
+      businessPremises: [
+        {
+          addressLine1: '',
+          addressLine2: '',
+          city: '',
+          district: '',
+          state: '',
+          pincode: '',
+          natureOfPossession: '',
+          rentAgreement: null,
+          electricityBill: null,
+          propertyTax: null,
+          nameBoardPhoto: null
+        }
       ]
     },
+    validationSchema: businessIdentitySchema,
     onSubmit: (values) => {
       setStep(1);
     }
   });
+  const getBusinessIdentity = async () => {
+    const url = `/labourlicense/business-identity/by-request-or-task?service_request_id=24`;
+    const { res } = await Factory('get', url);
+    console.log(res);
+    if (res.status_cd === 0) {
+      // Map API response to form fields
+      const responseData = {
+        // Business Identity & Structure
+        classificationOfEstablishment: res.data.classification_of_establishment || '',
+        categoryOfEstablishment: res.data.category_of_establishment || '',
+        legalNameOfBusiness: res.data.legal_name_of_business || '',
+        natureOfBusiness: res.data.nature_of_business || '',
+        panOfBusiness: res.data.business_pan || '',
 
+        dateOfCommencement: res.data.date_of_commencement || '',
+
+        // Keep other fields with their initial values
+        typeOfBusiness: '',
+        legalName: '',
+        panFile: null,
+        mobile: '',
+        email: '',
+        businessName: '',
+        legalUse: '',
+        pan: '',
+        numEmployees: '',
+        flat: '',
+        premise: '',
+        road: '',
+        village: '',
+        city: '',
+        district: '',
+        state: '',
+        pin: '',
+        tradeDesc: '',
+        tradeType: '',
+        tradeZone: '',
+        tradeSubType: '',
+        bestCity: '',
+        applicantName: '',
+        designation: '',
+        aadhaarFile: null,
+        applicantPANFile: null,
+        photoFile: null,
+        applicantMobile: '',
+        applicantEmail: '',
+        sameAsAadhaar: true,
+        applicantAddress: '',
+        promoters: [
+          {
+            name: '',
+            aadhaarFile: null,
+            panFile: null,
+            photoFile: null,
+            mobile: '',
+            email: '',
+            sameAsAadhaar: true,
+            address: ''
+          }
+        ],
+        businessPremises: res.data.businessPremises || [
+          {
+            addressLine1: '',
+            addressLine2: '',
+            city: '',
+            district: '',
+            state: '',
+            pincode: '',
+            natureOfPossession: '',
+            rentAgreement: null,
+            electricityBill: null,
+            propertyTax: null,
+            nameBoardPhoto: null
+          }
+        ]
+      };
+      formik.setValues(responseData);
+      setBusinessIdentityposttype('put');
+    }
+    if (res.status_cd === 1) {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res.data.data) || 'Something went wrong',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
+      setBusinessIdentityposttype('post');
+    }
+  };
+  useEffect(() => {
+    getBusinessIdentity();
+  }, []);
   return (
     <Card sx={{ minHeight: '100vh', p: { xs: 1, md: 4 } }}>
       <Typography variant="h3" mb={1}>
@@ -247,7 +545,7 @@ const LabourLicenceRegistration = () => {
       <Typography variant="caption" color="text.secondary">
         Register your business for a Labour Licence as required by your local municipal authority.
       </Typography>
-      <Box maxWidth="1100px" mx="auto" sx={{ mt: 2 }}>
+      <Box sx={{ mt: 2 }}>
         <Paper elevation={0} sx={{ bgcolor: '#eef2f6', p: { xs: 2, sm: 4 }, borderRadius: 3, minHeight: 700 }}>
           {/* Stepper */}
           <Box sx={{ width: '100%', display: 'flex', alignItems: 'center', mb: 4 }}>
@@ -290,591 +588,17 @@ const LabourLicenceRegistration = () => {
 
           {/* Step 1: Applicant & Business Details */}
           {step === 0 && (
-            <form onSubmit={formik.handleSubmit} autoComplete="off">
-              {/* Business Identity & Structure Section */}
-              <BusinessIdentityStructureSection
-                values={formik.values}
-                errors={formik.errors}
-                touched={formik.touched}
-                handleChange={formik.handleChange}
-                setFieldValue={formik.setFieldValue}
-                handleBlur={formik.handleBlur}
-              />
-              {/* Promoter/Signatory Details Section */}
-              <Box mt={4}>
-                <Typography variant="h5" fontWeight={700} mb={2}>
-                  <span style={{ textDecoration: 'underline' }}>Promoter / Signatory Details</span>
-                </Typography>
-                <Box display="flex" alignItems="center" mb={2}>
-                  <Typography>No. of Promoters/Directors/Managing Partners</Typography>
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    sx={{ minWidth: 32, ml: 2, px: 0 }}
-                    onClick={() => {
-                      if (formik.values.promoters.length > 1) {
-                        formik.setFieldValue('promoters', formik.values.promoters.slice(0, -1));
-                      }
-                    }}
-                  >
-                    -
-                  </Button>
-                  <Typography mx={2}>{formik.values.promoters.length}</Typography>
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    sx={{ minWidth: 32, px: 0 }}
-                    onClick={() => {
-                      if (formik.values.promoters.length < 10) {
-                        formik.setFieldValue('promoters', [
-                          ...formik.values.promoters,
-                          {
-                            name: '',
-                            aadhaarFile: null,
-                            panFile: null,
-                            photoFile: null,
-                            mobile: '',
-                            email: '',
-                            sameAsAadhaar: true,
-                            address: ''
-                          }
-                        ]);
-                      }
-                    }}
-                  >
-                    +
-                  </Button>
-                </Box>
-                <Paper elevation={2} sx={{ borderRadius: 2, overflow: 'hidden' }}>
-                  <Table>
-                    <TableHead>
-                      <TableRow sx={{ bgcolor: 'primary.main' }}>
-                        <TableCell sx={{ color: 'white !important', textAlign: 'center', p: 1.5 }}>Name</TableCell>
-                        <TableCell sx={{ color: 'white !important', textAlign: 'center', p: 1.5 }}>Aadhaar</TableCell>
-                        <TableCell sx={{ color: 'white !important', textAlign: 'center', p: 1.5 }}>PAN</TableCell>
-                        <TableCell sx={{ color: 'white !important', textAlign: 'center', p: 1.5 }}>Photo</TableCell>
-                        <TableCell sx={{ color: 'white !important', textAlign: 'center', p: 1.5 }}>Mobile</TableCell>
-                        <TableCell sx={{ color: 'white !important', textAlign: 'center', p: 1.5 }}>Email</TableCell>
-                        <TableCell sx={{ color: 'white !important', textAlign: 'center', p: 1.5 }}>Address</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {formik.values.promoters.map((promoter, idx) => (
-                        <TableRow key={idx}>
-                          <TableCell sx={{ textAlign: 'center', p: 0.5, pt: 2 }}>
-                            <TextField
-                              fullWidth
-                              size="small"
-                              label="Name"
-                              name={`promoters[${idx}].name`}
-                              value={promoter.name}
-                              onChange={formik.handleChange}
-                              onBlur={formik.handleBlur}
-                              error={formik.touched.promoters?.[idx]?.name && Boolean(formik.errors.promoters?.[idx]?.name)}
-                              helperText={
-                                formik.touched.promoters?.[idx]?.name && formik.errors.promoters?.[idx]?.name
-                                  ? formik.errors.promoters[idx].name
-                                  : '\u00A0'
-                              }
-                            />
-                          </TableCell>
-                          <TableCell sx={{ textAlign: 'center', p: 0.5, pt: 2 }}>
-                            <TextField
-                              fullWidth
-                              size="small"
-                              label="Aadhaar Upload"
-                              name={`promoters[${idx}].aadhaarFile`}
-                              value={promoter.aadhaarFile ? promoter.aadhaarFile.name : ''}
-                              placeholder="Upload Aadhaar"
-                              InputProps={{ readOnly: true }}
-                              onClick={() => document.getElementById(`aadhaarFileInput${idx}`).click()}
-                              error={formik.touched.promoters?.[idx]?.aadhaarFile && Boolean(formik.errors.promoters?.[idx]?.aadhaarFile)}
-                              helperText={
-                                formik.touched.promoters?.[idx]?.aadhaarFile && formik.errors.promoters?.[idx]?.aadhaarFile
-                                  ? formik.errors.promoters[idx].aadhaarFile
-                                  : '\u00A0'
-                              }
-                            />
-                            <input
-                              id={`aadhaarFileInput${idx}`}
-                              type="file"
-                              hidden
-                              name={`promoters[${idx}].aadhaarFile`}
-                              onChange={(e) => formik.setFieldValue(`promoters[${idx}].aadhaarFile`, e.currentTarget.files[0])}
-                              onBlur={formik.handleBlur}
-                            />
-                          </TableCell>
-                          <TableCell sx={{ textAlign: 'center', p: 0.5, pt: 2 }}>
-                            <TextField
-                              fullWidth
-                              size="small"
-                              label="PAN Upload"
-                              name={`promoters[${idx}].panFile`}
-                              value={promoter.panFile ? promoter.panFile.name : ''}
-                              placeholder="Upload PAN"
-                              InputProps={{ readOnly: true }}
-                              onClick={() => document.getElementById(`panFileInput${idx}`).click()}
-                              error={formik.touched.promoters?.[idx]?.panFile && Boolean(formik.errors.promoters?.[idx]?.panFile)}
-                              helperText={
-                                formik.touched.promoters?.[idx]?.panFile && formik.errors.promoters?.[idx]?.panFile
-                                  ? formik.errors.promoters[idx].panFile
-                                  : '\u00A0'
-                              }
-                            />
-                            <input
-                              id={`panFileInput${idx}`}
-                              type="file"
-                              hidden
-                              name={`promoters[${idx}].panFile`}
-                              onChange={(e) => formik.setFieldValue(`promoters[${idx}].panFile`, e.currentTarget.files[0])}
-                              onBlur={formik.handleBlur}
-                            />
-                          </TableCell>
-                          <TableCell sx={{ textAlign: 'center', p: 0.5, pt: 2 }}>
-                            <TextField
-                              fullWidth
-                              size="small"
-                              label="Photo Upload"
-                              name={`promoters[${idx}].photoFile`}
-                              value={promoter.photoFile ? promoter.photoFile.name : ''}
-                              placeholder="Upload Photo"
-                              InputProps={{ readOnly: true }}
-                              onClick={() => document.getElementById(`photoFileInput${idx}`).click()}
-                              error={formik.touched.promoters?.[idx]?.photoFile && Boolean(formik.errors.promoters?.[idx]?.photoFile)}
-                              helperText={
-                                formik.touched.promoters?.[idx]?.photoFile && formik.errors.promoters?.[idx]?.photoFile
-                                  ? formik.errors.promoters[idx].photoFile
-                                  : '\u00A0'
-                              }
-                            />
-                            <input
-                              id={`photoFileInput${idx}`}
-                              type="file"
-                              hidden
-                              name={`promoters[${idx}].photoFile`}
-                              onChange={(e) => formik.setFieldValue(`promoters[${idx}].photoFile`, e.currentTarget.files[0])}
-                              onBlur={formik.handleBlur}
-                            />
-                          </TableCell>
-                          <TableCell sx={{ textAlign: 'center', p: 0.5, pt: 2 }}>
-                            <TextField
-                              fullWidth
-                              size="small"
-                              label="Mobile"
-                              name={`promoters[${idx}].mobile`}
-                              value={promoter.mobile}
-                              onChange={formik.handleChange}
-                              onBlur={formik.handleBlur}
-                              error={formik.touched.promoters?.[idx]?.mobile && Boolean(formik.errors.promoters?.[idx]?.mobile)}
-                              helperText={
-                                formik.touched.promoters?.[idx]?.mobile && formik.errors.promoters?.[idx]?.mobile
-                                  ? formik.errors.promoters[idx].mobile
-                                  : '\u00A0'
-                              }
-                            />
-                          </TableCell>
-                          <TableCell sx={{ textAlign: 'center', p: 0.5, pt: 2 }}>
-                            <TextField
-                              fullWidth
-                              size="small"
-                              label="Email"
-                              name={`promoters[${idx}].email`}
-                              value={promoter.email}
-                              onChange={formik.handleChange}
-                              onBlur={formik.handleBlur}
-                              error={formik.touched.promoters?.[idx]?.email && Boolean(formik.errors.promoters?.[idx]?.email)}
-                              helperText={
-                                formik.touched.promoters?.[idx]?.email && formik.errors.promoters?.[idx]?.email
-                                  ? formik.errors.promoters[idx].email
-                                  : '\u00A0'
-                              }
-                            />
-                          </TableCell>
-                          <TableCell
-                            sx={{
-                              textAlign: 'center',
-                              p: 0.5,
-                              pt: 2,
-                              pr: 2,
-                              display: 'flex',
-                              alignItems: 'flex-start',
-                              justifyContent: 'center',
-                              border: 'none'
-                            }}
-                          >
-                            <Stack direction="row" alignItems="flex-start" justifyContent="center">
-                              <Tooltip title="Same as per Aadhaar" arrow>
-                                <Checkbox
-                                  sx={{ p: 0, m: 0, pt: 1 }}
-                                  checked={promoter.sameAsAadhaar}
-                                  onChange={(e) => formik.setFieldValue(`promoters[${idx}].sameAsAadhaar`, e.target.checked)}
-                                  name={`promoters[${idx}].sameAsAadhaar`}
-                                />
-                              </Tooltip>
-                              {promoter.sameAsAadhaar && (
-                                <Typography variant="body2" mr={1}>
-                                  Same as per aadhaar
-                                </Typography>
-                              )}
-                              {!promoter.sameAsAadhaar && (
-                                <TextField
-                                  fullWidth
-                                  size="small"
-                                  name={`promoters[${idx}].address`}
-                                  placeholder="Enter Residential Address"
-                                  value={promoter.address}
-                                  onChange={formik.handleChange}
-                                  onBlur={formik.handleBlur}
-                                  error={formik.touched.promoters?.[idx]?.address && Boolean(formik.errors.promoters?.[idx]?.address)}
-                                  helperText={
-                                    formik.touched.promoters?.[idx]?.address && formik.errors.promoters?.[idx]?.address
-                                      ? formik.errors.promoters[idx].address
-                                      : '\u00A0'
-                                  }
-                                  sx={{ ml: 1 }}
-                                />
-                              )}
-                            </Stack>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </Paper>
-              </Box>
-              <Box mt={4}>
-                <Typography variant="h5" fontWeight={700} mb={2}>
-                  <span style={{ textDecoration: 'underline' }}>Business premises, location & proofs</span>
-                </Typography>
-                <Grid2 container spacing={2} alignItems="center">
-                  <Grid2 size={{ xs: 12 }}>
-                    <Typography variant="subtitle1" color="text.secondary" fontWeight={700}>
-                      Principal place of business
-                    </Typography>
-                  </Grid2>
-                  <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                    <TextField
-                      fullWidth
-                      size="small"
-                      label="Address Line 1"
-                      name="addressLine1"
-                      value={formik.values.addressLine1 || ''}
-                      onChange={formik.handleChange}
-                    />
-                  </Grid2>
-                  <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                    <TextField
-                      fullWidth
-                      size="small"
-                      label="Address Line 2"
-                      name="addressLine2"
-                      value={formik.values.addressLine2 || ''}
-                      onChange={formik.handleChange}
-                    />
-                  </Grid2>
-                  <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                    <TextField
-                      fullWidth
-                      size="small"
-                      label="City"
-                      name="city"
-                      value={formik.values.city || ''}
-                      onChange={formik.handleChange}
-                    />
-                  </Grid2>
-                  <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                    <TextField
-                      fullWidth
-                      size="small"
-                      label="District"
-                      name="district"
-                      value={formik.values.district || ''}
-                      onChange={formik.handleChange}
-                    />
-                  </Grid2>
-                  <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                    <TextField
-                      fullWidth
-                      size="small"
-                      label="State"
-                      name="state"
-                      value={formik.values.state || ''}
-                      onChange={formik.handleChange}
-                    />
-                  </Grid2>
-                  <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                    <TextField
-                      fullWidth
-                      size="small"
-                      label="Pincode"
-                      name="pincode"
-                      value={formik.values.pincode || ''}
-                      onChange={formik.handleChange}
-                    />
-                  </Grid2>
-                  {/* Nature of possession and trade area */}
-                  <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                    <Autocomplete
-                      size="small"
-                      fullWidth
-                      options={['Self-owned', 'Leased', 'Rented']}
-                      value={formik.values.natureOfPossession || ''}
-                      onChange={(e, value) => formik.setFieldValue('natureOfPossession', value)}
-                      renderInput={(params) => <TextField {...params} label="Nature of possession" size="small" />}
-                    />
-                  </Grid2>
-
-                  {/* Address proof, Rental Agreement/NOC, Bank Statement/Cancelled Cheque uploads */}
-                  <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                    <TextField
-                      fullWidth
-                      size="small"
-                      label="Address proof"
-                      name="addressProof"
-                      value={formik.values.addressProof ? formik.values.addressProof.name : ''}
-                      placeholder="Upload Address Proof"
-                      InputProps={{ readOnly: true }}
-                      onClick={() => document.getElementById('addressProofInput').click()}
-                    />
-                    <input
-                      id="addressProofInput"
-                      type="file"
-                      hidden
-                      name="addressProof"
-                      onChange={(e) => formik.setFieldValue('addressProof', e.currentTarget.files[0])}
-                    />
-                  </Grid2>
-                  <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                    <TextField
-                      fullWidth
-                      size="small"
-                      label="Rental Agreement/NOC"
-                      name="rentalAgreement"
-                      value={formik.values.rentalAgreement ? formik.values.rentalAgreement.name : ''}
-                      placeholder="Upload Rental Agreement/NOC"
-                      InputProps={{ readOnly: true }}
-                      onClick={() => document.getElementById('rentalAgreementInput').click()}
-                    />
-                    <input
-                      id="rentalAgreementInput"
-                      type="file"
-                      hidden
-                      name="rentalAgreement"
-                      onChange={(e) => formik.setFieldValue('rentalAgreement', e.currentTarget.files[0])}
-                    />
-                  </Grid2>
-                  <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                    <TextField
-                      fullWidth
-                      size="small"
-                      label="Bank Statement/Cancelled Cheque"
-                      name="bankStatement"
-                      value={formik.values.bankStatement ? formik.values.bankStatement.name : ''}
-                      placeholder="Upload Bank Statement/Cancelled Cheque"
-                      InputProps={{ readOnly: true }}
-                      onClick={() => document.getElementById('bankStatementInput').click()}
-                    />
-                    <input
-                      id="bankStatementInput"
-                      type="file"
-                      hidden
-                      name="bankStatement"
-                      onChange={(e) => formik.setFieldValue('bankStatement', e.currentTarget.files[0])}
-                    />
-                  </Grid2>
-                  {/* Additional place of business */}
-                  <Grid2 size={{ xs: 12, sm: 6, md: 5 }}>
-                    <Box display="flex" alignItems="center" gap={2}>
-                      <Typography>Additional place of business?</Typography>
-                      <FormGroup row>
-                        <FormControlLabel
-                          label="Yes"
-                          control={
-                            <Radio
-                              checked={formik.values.hasAdditionalPlace === 'yes'}
-                              onChange={() => formik.setFieldValue('hasAdditionalPlace', 'yes')}
-                            />
-                          }
-                        />
-                        <FormControlLabel
-                          label="No"
-                          control={
-                            <Radio
-                              checked={formik.values.hasAdditionalPlace === 'no'}
-                              onChange={() => formik.setFieldValue('hasAdditionalPlace', 'no')}
-                            />
-                          }
-                        />
-                      </FormGroup>
-                    </Box>
-                  </Grid2>
-                  <Grid2 size={{ xs: 12, sm: 6, md: 6 }}>
-                    {formik.values.hasAdditionalPlace === 'yes' && (
-                      <Autocomplete
-                        size="small"
-                        fullWidth
-                        options={['Office', 'Godown', 'Warehouse']}
-                        value={formik.values.additionalWorkplace || ''}
-                        onChange={(e, value) => formik.setFieldValue('additionalWorkplace', value)}
-                        renderInput={(params) => <TextField {...params} label="Workplace" size="small" />}
-                        sx={{ minWidth: 180, ml: 2 }}
-                      />
-                    )}
-                  </Grid2>
-                </Grid2>
-                <Grid2 container spacing={2} alignItems="center">
-                  {formik.values.hasAdditionalPlace === 'yes' && (
-                    <>
-                      <Grid2 size={{ xs: 12 }} mt={2}>
-                        <Typography variant="subtitle1" fontWeight={700} mb={0}>
-                          <span style={{ textDecoration: 'underline' }}>Additional Place of Business</span>
-                        </Typography>
-                      </Grid2>
-                      {/* Principal place of business */}
-                      <Grid2 size={{ xs: 12 }}>
-                        <Typography variant="subtitle1" color="text.secondary" fontWeight={700}>
-                          Principal place of business
-                        </Typography>
-                      </Grid2>
-                      <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                        <TextField
-                          fullWidth
-                          size="small"
-                          label="Address Line 1"
-                          name="additionalAddressLine1"
-                          value={formik.values.additionalAddressLine1 || ''}
-                          onChange={formik.handleChange}
-                        />
-                      </Grid2>
-                      <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                        <TextField
-                          fullWidth
-                          size="small"
-                          label="Address Line 2"
-                          name="additionalAddressLine2"
-                          value={formik.values.additionalAddressLine2 || ''}
-                          onChange={formik.handleChange}
-                        />
-                      </Grid2>
-                      <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                        <TextField
-                          fullWidth
-                          size="small"
-                          label="City"
-                          name="additionalCity"
-                          value={formik.values.additionalCity || ''}
-                          onChange={formik.handleChange}
-                        />
-                      </Grid2>
-                      <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                        <TextField
-                          fullWidth
-                          size="small"
-                          label="District"
-                          name="additionalDistrict"
-                          value={formik.values.additionalDistrict || ''}
-                          onChange={formik.handleChange}
-                        />
-                      </Grid2>
-                      <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                        <TextField
-                          fullWidth
-                          size="small"
-                          label="State"
-                          name="additionalState"
-                          value={formik.values.additionalState || ''}
-                          onChange={formik.handleChange}
-                        />
-                      </Grid2>
-                      <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                        <TextField
-                          fullWidth
-                          size="small"
-                          label="Pincode"
-                          name="additionalPincode"
-                          value={formik.values.additionalPincode || ''}
-                          onChange={formik.handleChange}
-                        />
-                      </Grid2>
-                      {/* Nature of possession and trade area */}
-                      <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                        <Autocomplete
-                          size="small"
-                          fullWidth
-                          options={['Self-owned', 'Leased', 'Rented']}
-                          value={formik.values.additionalNatureOfPossession || ''}
-                          onChange={(e, value) => formik.setFieldValue('additionalNatureOfPossession', value)}
-                          renderInput={(params) => <TextField {...params} label="Nature of possession" size="small" />}
-                        />
-                      </Grid2>
-                      {/* Address proof, Rental Agreement/NOC, Bank Statement/Cancelled Cheque uploads */}
-                      <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                        <TextField
-                          fullWidth
-                          size="small"
-                          label="Address proof"
-                          name="additionalAddressProof"
-                          value={formik.values.additionalAddressProof ? formik.values.additionalAddressProof.name : ''}
-                          placeholder="Upload Address Proof"
-                          InputProps={{ readOnly: true }}
-                          onClick={() => document.getElementById('additionalAddressProofInput').click()}
-                        />
-                        <input
-                          id="additionalAddressProofInput"
-                          type="file"
-                          hidden
-                          name="additionalAddressProof"
-                          onChange={(e) => formik.setFieldValue('additionalAddressProof', e.currentTarget.files[0])}
-                        />
-                      </Grid2>
-                      <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                        <TextField
-                          fullWidth
-                          size="small"
-                          label="Rental Agreement/NOC"
-                          name="additionalRentalAgreement"
-                          value={formik.values.additionalRentalAgreement ? formik.values.additionalRentalAgreement.name : ''}
-                          placeholder="Upload Rental Agreement/NOC"
-                          InputProps={{ readOnly: true }}
-                          onClick={() => document.getElementById('additionalRentalAgreementInput').click()}
-                        />
-                        <input
-                          id="additionalRentalAgreementInput"
-                          type="file"
-                          hidden
-                          name="additionalRentalAgreement"
-                          onChange={(e) => formik.setFieldValue('additionalRentalAgreement', e.currentTarget.files[0])}
-                        />
-                      </Grid2>
-                      <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                        <TextField
-                          fullWidth
-                          size="small"
-                          label="Bank Statement/Cancelled Cheque"
-                          name="additionalBankStatement"
-                          value={formik.values.additionalBankStatement ? formik.values.additionalBankStatement.name : ''}
-                          placeholder="Upload Bank Statement/Cancelled Cheque"
-                          InputProps={{ readOnly: true }}
-                          onClick={() => document.getElementById('additionalBankStatementInput').click()}
-                        />
-                        <input
-                          id="additionalBankStatementInput"
-                          type="file"
-                          hidden
-                          name="additionalBankStatement"
-                          onChange={(e) => formik.setFieldValue('additionalBankStatement', e.currentTarget.files[0])}
-                        />
-                      </Grid2>
-                    </>
-                  )}
-                </Grid2>
-              </Box>
-              <Box display="flex" justifyContent="flex-end" mt={4}>
-                <Button type="submit" size="medium" variant="contained" startIcon={<IconSave />} color="primary">
-                  Save & Continue
-                </Button>
-              </Box>
-            </form>
+            <StepOne
+              values={formik.values}
+              errors={formik.errors}
+              touched={formik.touched}
+              handleChange={formik.handleChange}
+              setFieldValue={formik.setFieldValue}
+              handleBlur={formik.handleBlur}
+              setErrors={formik.setErrors}
+              getBusinessIdentity={getBusinessIdentity}
+              businessIdentityposttype={businessIdentityposttype}
+            />
           )}
 
           {/* Step 2: Documents & Declaration */}

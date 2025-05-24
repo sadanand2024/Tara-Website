@@ -140,7 +140,6 @@ export default function WorkLocationDialog({ open, handleClose, fetchWorkLocatio
         resetForm(); // Optional
         handleClose(); // <- this closes the modal
       }}
-      header={{ title: `${type === 'edit' ? 'Update' : 'Add'} work Location`, subheader: '' }}
       footer={
         <Stack direction="row" sx={{ width: 1, justifyContent: 'space-between', gap: 2 }}>
           <Button

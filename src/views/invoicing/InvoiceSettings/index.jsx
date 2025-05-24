@@ -14,13 +14,16 @@ import PanoramaTwoToneIcon from '@mui/icons-material/PanoramaTwoTone';
 import PeopleAltTwoToneIcon from '@mui/icons-material/PeopleAltTwoTone';
 import RecentActorsTwoToneIcon from '@mui/icons-material/RecentActorsTwoTone';
 import Factory from 'utils/Factory';
-import TabOne from './BusinessProfile';
-import TabTwo from './Customers';
-import TabThree from './Goods&Services';
-import TabFour from './InvoiceNumberFormat';
+import BusinessProfile from './BusinessProfile';
+import BranchesInfo from './BranchesInfo';
+import Customers from './Customers';
+import GoodsServices from './Goods&Services';
+import InvoiceNumberFormat from './InvoiceNumberFormat';
 import { Grid2 } from '@mui/material';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
+import LocationCityIcon from '@mui/icons-material/LocationCity';
+
 function TabPanel({ children, value, index, ...other }) {
   return (
     <div role="tabpanel" hidden={value !== index} id={`simple-tabpanel-${index}`} aria-labelledby={`simple-tab-${index}`} {...other}>
@@ -50,7 +53,7 @@ export default function SimpleTabs() {
   };
 
   const handleNext = () => {
-    if (value < 3) setValue((prev) => prev + 1);
+    if (value < 4) setValue((prev) => prev + 1);
   };
 
   const handleBack = () => {
@@ -164,34 +167,50 @@ export default function SimpleTabs() {
               label="Business Profile"
               {...a11yProps(0)}
             />
+
+            <Tab
+              icon={<LocationCityIcon sx={{ fontSize: '1.3rem' }} />}
+              iconPosition="start"
+              label="Branches - Info"
+              disabled={!businessDetails?.invoicing_profile_id}
+              {...a11yProps(1)}
+            />
             <Tab
               icon={<RecentActorsTwoToneIcon sx={{ fontSize: '1.3rem' }} />}
               iconPosition="start"
               label="Customers"
               disabled={!businessDetails?.invoicing_profile_id}
-              {...a11yProps(1)}
+              {...a11yProps(2)}
             />
             <Tab
               icon={<PeopleAltTwoToneIcon sx={{ fontSize: '1.3rem' }} />}
               label={'Goods & Services'}
               iconPosition="start"
               disabled={!businessDetails?.invoicing_profile_id}
-              {...a11yProps(2)}
+              {...a11yProps(3)}
             />
             <Tab
               icon={<PanoramaTwoToneIcon sx={{ fontSize: '1.3rem' }} />}
               iconPosition="start"
               label="Invoice Number Format"
               disabled={!businessDetails?.invoicing_profile_id}
-              {...a11yProps(3)}
+              {...a11yProps(4)}
             />
           </Tabs>
 
           <TabPanel value={value} index={0}>
-            <TabOne businessDetails={businessDetails} setBusinessDetails={setBusinessDetails} postType={postType} handleNext={handleNext} />
+            <BusinessProfile
+              businessDetails={businessDetails}
+              setBusinessDetails={setBusinessDetails}
+              postType={postType}
+              handleNext={handleNext}
+            />
           </TabPanel>
           <TabPanel value={value} index={1}>
-            <TabTwo
+            <BranchesInfo handleNext={handleNext} handleBack={handleBack} />
+          </TabPanel>
+          <TabPanel value={value} index={2}>
+            <Customers
               getCustomersData={getCustomersData}
               customers={customers}
               businessDetails={businessDetails}
@@ -200,16 +219,16 @@ export default function SimpleTabs() {
               handleBack={handleBack}
             />
           </TabPanel>
-          <TabPanel value={value} index={2}>
-            <TabThree
+          <TabPanel value={value} index={3}>
+            <GoodsServices
               businessDetails={businessDetails}
               setBusinessDetails={setBusinessDetails}
               handleNext={handleNext}
               handleBack={handleBack}
             />
           </TabPanel>
-          <TabPanel value={value} index={3}>
-            <TabFour
+          <TabPanel value={value} index={4}>
+            <InvoiceNumberFormat
               getCustomersData={getCustomersData}
               customers={customers}
               businessDetails={businessDetails}
