@@ -1,7 +1,70 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Typography, TextField, Button, Stepper, Step, StepLabel, StepContent, MenuItem } from '@mui/material';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
+import { useDispatch } from 'react-redux';
+import { openSnackbar } from 'store/slices/snackbar';
+import Factory from 'utils/Factory';
 
-const StepThree = ({ formik, verticalStep, setVerticalStep }) => {
+const StepThree = () => {
+  const dispatch = useDispatch();
+  const [verticalStep, setVerticalStep] = useState(0);
+  const formik = useFormik({
+    initialValues: {
+      id: '',
+      review_certificate: '',
+      filing_status: '',
+      approval_status: ''
+    },
+    validationSchema: Yup.object({
+      review_certificate: Yup.string().required('Review status is required'),
+      filing_status: Yup.string().required('Filing status is required'),
+      approval_status: Yup.string().required('Approval status is required')
+    }),
+    onSubmit: async (values) => {
+      let url = values.id ? `/labourlicense/review-filing/${values.id}/` : `/labourlicense/review-filing/`;
+      let formData = new FormData();
+      formData.append('service_request', 24);
+      formData.append('service_task', 10);
+      formData.append('review_certificate', values.review_certificate);
+      formData.append('filing_status', values.filing_status);
+      formData.append('approval_status', values.approval_status);
+
+      const { res } = await Factory(values.id ? 'put' : 'post', url, formData);
+      if (res.status_cd === 0) {
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: values.id ? 'Review, Filing & Certificate updated successfully' : 'Review, Filing & Certificate saved successfully',
+            variant: 'alert',
+            alert: { color: 'success' },
+            close: false
+          })
+        );
+        getReviewFiling();
+      } else {
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'Review, Filing & Certificate not saved',
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
+      }
+    }
+  });
+  const getReviewFiling = async () => {
+    const url = `/labourlicense/review-filing/by-request-or-task?service_request_id=24`;
+    const { res } = await Factory('get', url);
+    if (res.status_cd === 0) {
+      formik.setValues(res.data);
+    }
+  };
+  useEffect(() => {
+    getReviewFiling();
+  }, []);
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 10 }}>
       <form autoComplete="off">
@@ -18,8 +81,8 @@ const StepThree = ({ formik, verticalStep, setVerticalStep }) => {
                 fullWidth
                 size="small"
                 label="Review"
-                name="reviewStatus"
-                value={formik.values.reviewStatus || ''}
+                name="review_certificate"
+                value={formik.values.review_certificate || ''}
                 onChange={formik.handleChange}
                 sx={{ mr: 2, mb: 2 }}
               >
@@ -41,8 +104,8 @@ const StepThree = ({ formik, verticalStep, setVerticalStep }) => {
                 fullWidth
                 size="small"
                 label="Filing"
-                name="filingStatus"
-                value={formik.values.filingStatus || ''}
+                name="filing_status"
+                value={formik.values.filing_status || ''}
                 onChange={formik.handleChange}
                 sx={{ mr: 2, mb: 2 }}
               >
@@ -64,8 +127,8 @@ const StepThree = ({ formik, verticalStep, setVerticalStep }) => {
                 fullWidth
                 size="small"
                 label="Approval"
-                name="approvalStatus"
-                value={formik.values.approvalStatus || ''}
+                name="approval_status"
+                value={formik.values.approval_status || ''}
                 onChange={formik.handleChange}
                 sx={{ mr: 2, mb: 2 }}
               >
@@ -87,7 +150,7 @@ const StepThree = ({ formik, verticalStep, setVerticalStep }) => {
                 variant="contained"
                 size="small"
                 color="primary"
-                disabled={formik.values.approvalStatus !== 'approval'}
+                disabled={formik.values.approval_status !== 'approval'}
                 sx={{ mt: 2, mb: 2 }}
               >
                 Download

@@ -1,10 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Typography,
-  TextField,
   Button,
-  Grid2,
   Table,
   TableBody,
   TableCell,
@@ -14,25 +12,30 @@ import {
   Paper,
   Checkbox,
   Stack,
-  Tooltip
+  Tooltip,
+  TextField
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import DeleteIcon from '@mui/icons-material/Delete';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-const PromoterSignatorySection = ({}) => {
+import { useDispatch } from 'react-redux';
+import { openSnackbar } from 'store/slices/snackbar';
+import Factory from 'utils/Factory';
+import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
+const PromoterSignatorySection = () => {
+  const dispatch = useDispatch();
+  const [signatoryDetails, setSignatoryDetails] = useState([]);
   const formik = useFormik({
     initialValues: {
       promoters: [
         {
           name: '',
-          aadhaarFile: null,
-          panFile: null,
-          photoFile: null,
+          aadhar_image: null,
+          pan_image: null,
+          photo_image: null,
           address: '',
           email: '',
-          mobile: '',
-          sameAsAadhaar: true
+          mobile_number: '',
+          residential_address: true
         }
       ]
     },
@@ -40,259 +43,340 @@ const PromoterSignatorySection = ({}) => {
       promoters: Yup.array().of(
         Yup.object({
           name: Yup.string().required('Name is required'),
-          aadhaarFile: Yup.mixed().required('Aadhaar file is required'),
-          panFile: Yup.mixed().required('PAN file is required'),
-          photoFile: Yup.mixed().required('Photo file is required'),
+          aadhar_image: Yup.mixed().required('Aadhaar file is required'),
+          pan_image: Yup.mixed().required('PAN file is required'),
+          photo_image: Yup.mixed().required('Photo file is required'),
           address: Yup.string().required('Address is required'),
           email: Yup.string().email('Invalid email').required('Email is required'),
-          mobile: Yup.string().required('Mobile is required'),
-          sameAsAadhaar: Yup.boolean().required('Same as Aadhaar is required')
+          mobile_number: Yup.string().required('Mobile is required'),
+          residential_address: Yup.boolean()
         })
       )
-    })
+    }),
+    onSubmit: (values) => {
+      console.log('Submitted data:', values);
+    }
   });
 
+  const { values, errors, touched, handleChange, handleBlur, setFieldValue } = formik;
+
+  const addPromoter = () => {
+    if (values.promoters.length < 10) {
+      setFieldValue('promoters', [
+        ...values.promoters,
+        {
+          name: '',
+          aadhar_image: null,
+          pan_image: null,
+          photo_image: null,
+          address: '',
+          email: '',
+          mobile_number: '',
+          residential_address: true
+        }
+      ]);
+    }
+  };
+
+  const removePromoter = () => {
+    if (values.promoters.length > 1) {
+      setFieldValue('promoters', values.promoters.slice(0, -1));
+    }
+  };
+
+  const handleIndividualSave = async (index) => {
+    const promoter = values.promoters[index];
+    const schema = Yup.object({
+      name: Yup.string().required('Name is required'),
+      aadhar_image: Yup.mixed().required('Aadhaar file is required'),
+      pan_image: Yup.mixed().required('PAN file is required'),
+      photo_image: Yup.mixed().required('Photo file is required'),
+      // address: Yup.string().required('Address is required'),
+      email: Yup.string().email('Invalid email').required('Email is required'),
+      mobile_number: Yup.string().required('Mobile is required'),
+      residential_address: Yup.boolean()
+    });
+    let formData = new FormData();
+    formData.append('service_request', 24);
+    formData.append('service_task', 7);
+    formData.append('name', promoter.name);
+    if (promoter.aadhar_image && typeof promoter.aadhar_image !== 'string') {
+      formData.append('aadhar_image', promoter.aadhar_image);
+    }
+    if (promoter.pan_image && typeof promoter.pan_image !== 'string') {
+      formData.append('pan_image', promoter.pan_image);
+    }
+    if (promoter.photo_image && typeof promoter.photo_image !== 'string') {
+      formData.append('photo_image', promoter.photo_image);
+    }
+    formData.append('email', promoter.email);
+    formData.append('mobile_number', promoter.mobile_number);
+    formData.append('address', promoter.address);
+    formData.append('residential_address', promoter.residential_address ? 'yes' : 'no');
+    formData.append('status', 'in progress');
+
+    let url = promoter.id ? `/labourlicense/signatory-details/${promoter.id}/` : `/labourlicense/signatory-details/`;
+    const { res } = await Factory(promoter.id ? 'put' : 'post', url, formData);
+
+    if (res.status_cd === 1) {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res.data.data) || 'Something went wrong',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
+    } else {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: promoter.id ? 'Data Updated Successfully' : 'Data Saved Successfully',
+          variant: 'alert',
+          alert: { color: 'success' },
+          close: false
+        })
+      );
+      getSignatoryDetails();
+    }
+  };
+
+  const handleIndividualDelete = async (index) => {
+    const promoter = formik.values.promoters[index];
+    if (!promoter.id) {
+      // Just remove from form state, no API call
+      const updatedPromoters = [...formik.values.promoters];
+      updatedPromoters.splice(index, 1);
+      formik.setFieldValue('promoters', updatedPromoters);
+      return;
+    }
+    // Otherwise, make API call
+    let url = `/labourlicense/signatory-details/${promoter.id}/`;
+    const { res } = await Factory('delete', url);
+    if (res.status_cd === 0) {
+      const updatedPromoters = [...formik.values.promoters];
+      updatedPromoters.splice(index, 1);
+      formik.setFieldValue('promoters', updatedPromoters);
+    }
+    if (res.status_cd === 1) {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res.data.data) || 'Something went wrong',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
+    }
+  };
+
+  const getSignatoryDetails = async () => {
+    const url = `/labourlicense/signatory-details/by-request?service_request_id=24`;
+    const { res } = await Factory('get', url);
+
+    if (res.status_cd === 0) {
+      const promoters =
+        res.data?.map((item) => ({
+          name: item.name || '',
+          aadhar_image: item.aadhar_image || null,
+          pan_image: item.pan_image || null,
+          photo_image: item.photo_image || null,
+          address: item.address || '',
+          email: item.email || '',
+          mobile_number: item.mobile_number || '',
+          residential_address: item.residential_address === 'yes',
+          id: item.id || ''
+        })) || [];
+
+      if (promoters.length) {
+        formik.setFieldValue('promoters', promoters);
+      }
+      setSignatoryDetails(res.data);
+    }
+
+    if (res.status_cd === 1) {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res.data.data) || 'Something went wrong',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
+    }
+  };
+
+  useEffect(() => {
+    getSignatoryDetails();
+  }, []);
   return (
     <Box mt={4}>
       <Typography variant="h5" fontWeight={700} mb={2}>
-        <span style={{ textDecoration: 'underline' }}>Promoter / Signatory Details</span>
+        <u>Promoter / Signatory Details</u>
       </Typography>
+
       <Box display="flex" alignItems="center" mb={2}>
         <Typography>No. of Promoters/Directors/Managing Partners</Typography>
-        <Button
-          size="small"
-          variant="outlined"
-          sx={{ minWidth: 32, ml: 2, px: 0 }}
-          onClick={() => {
-            if (formik.values.promoters.length > 1) {
-              formik.setFieldValue('promoters', formik.values.promoters.slice(0, -1));
-            }
-          }}
-        >
+        <Button variant="outlined" size="small" sx={{ ml: 2 }} onClick={removePromoter}>
           -
         </Button>
-        <Typography mx={2}>{formik.values.promoters.length}</Typography>
-        <Button
-          size="small"
-          variant="outlined"
-          sx={{ minWidth: 32, px: 0 }}
-          onClick={() => {
-            if (formik.values.promoters.length < 10) {
-              formik.setFieldValue('promoters', [
-                ...formik.values.promoters,
-                {
-                  name: '',
-                  aadhaarFile: null,
-                  panFile: null,
-                  photoFile: null,
-                  mobile: '',
-                  email: '',
-                  sameAsAadhaar: true,
-                  address: ''
-                }
-              ]);
-            }
-          }}
-        >
+        <Typography mx={2}>{values.promoters.length}</Typography>
+        <Button variant="outlined" size="small" onClick={addPromoter}>
           +
         </Button>
       </Box>
-      <Paper elevation={2} sx={{ borderRadius: 2, overflow: 'hidden' }}>
+
+      <TableContainer component={Paper} elevation={2} sx={{ borderRadius: 2 }}>
         <Table>
           <TableHead>
             <TableRow sx={{ bgcolor: 'primary.main' }}>
-              <TableCell sx={{ color: 'white !important', textAlign: 'center', p: 1.5 }}>Name</TableCell>
-              <TableCell sx={{ color: 'white !important', textAlign: 'center', p: 1.5 }}>Aadhaar</TableCell>
-              <TableCell sx={{ color: 'white !important', textAlign: 'center', p: 1.5 }}>PAN</TableCell>
-              <TableCell sx={{ color: 'white !important', textAlign: 'center', p: 1.5 }}>Photo</TableCell>
-              <TableCell sx={{ color: 'white !important', textAlign: 'center', p: 1.5 }}>Mobile</TableCell>
-              <TableCell sx={{ color: 'white !important', textAlign: 'center', p: 1.5 }}>Email</TableCell>
-              <TableCell sx={{ color: 'white !important', textAlign: 'center', p: 1.5 }}>Address</TableCell>
+              {['Name', 'Aadhaar', 'PAN', 'Photo', 'Mobile', 'Email', 'Address', 'Same As Aadhaar', 'Action'].map((head) => (
+                <TableCell key={head} sx={{ color: 'white', textAlign: 'center', whiteSpace: 'nowrap' }}>
+                  {head}
+                </TableCell>
+              ))}
             </TableRow>
           </TableHead>
+
           <TableBody>
-            {formik.values.promoters.map((promoter, idx) => (
+            {values.promoters.map((promoter, idx) => (
               <TableRow key={idx}>
-                <TableCell sx={{ textAlign: 'center', p: 0.5, pt: 2 }}>
+                {/* Name */}
+                <TableCell>
                   <TextField
                     fullWidth
                     size="small"
                     label="Name"
                     name={`promoters[${idx}].name`}
                     value={promoter.name}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    error={formik.touched.promoters?.[idx]?.name && Boolean(formik.errors.promoters?.[idx]?.name)}
-                    helperText={
-                      formik.touched.promoters?.[idx]?.name && formik.errors.promoters?.[idx]?.name
-                        ? formik.errors.promoters[idx].name
-                        : '\u00A0'
-                    }
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    error={touched.promoters?.[idx]?.name && Boolean(errors.promoters?.[idx]?.name)}
+                    helperText={touched.promoters?.[idx]?.name && errors.promoters?.[idx]?.name}
                   />
                 </TableCell>
-                <TableCell sx={{ textAlign: 'center', p: 0.5, pt: 2 }}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label="Aadhaar Upload"
-                    name={`promoters[${idx}].aadhaarFile`}
-                    value={promoter.aadhaarFile ? promoter.aadhaarFile.name : ''}
-                    placeholder="Upload Aadhaar"
-                    InputProps={{ readOnly: true }}
-                    onClick={() => document.getElementById(`aadhaarFileInput${idx}`).click()}
-                    error={formik.touched.promoters?.[idx]?.aadhaarFile && Boolean(formik.errors.promoters?.[idx]?.aadhaarFile)}
-                    helperText={
-                      formik.touched.promoters?.[idx]?.aadhaarFile && formik.errors.promoters?.[idx]?.aadhaarFile
-                        ? formik.errors.promoters[idx].aadhaarFile
-                        : '\u00A0'
-                    }
-                  />
-                  <input
-                    id={`aadhaarFileInput${idx}`}
-                    type="file"
-                    hidden
-                    name={`promoters[${idx}].aadhaarFile`}
-                    onChange={(e) => formik.setFieldValue(`promoters[${idx}].aadhaarFile`, e.currentTarget.files[0])}
-                    onBlur={formik.handleBlur}
+
+                {/* Aadhaar Upload */}
+                <TableCell>
+                  <RenderFileUpload
+                    label="Aadhaar"
+                    fieldName={`promoters[${idx}].aadhar_image`}
+                    file={promoter.aadhar_image}
+                    setFieldValue={setFieldValue}
+                    touched={touched.promoters?.[idx]?.aadhar_image}
+                    errors={errors.promoters?.[idx]?.aadhar_image}
                   />
                 </TableCell>
-                <TableCell sx={{ textAlign: 'center', p: 0.5, pt: 2 }}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label="PAN Upload"
-                    name={`promoters[${idx}].panFile`}
-                    value={promoter.panFile ? promoter.panFile.name : ''}
-                    placeholder="Upload PAN"
-                    InputProps={{ readOnly: true }}
-                    onClick={() => document.getElementById(`panFileInput${idx}`).click()}
-                    error={formik.touched.promoters?.[idx]?.panFile && Boolean(formik.errors.promoters?.[idx]?.panFile)}
-                    helperText={
-                      formik.touched.promoters?.[idx]?.panFile && formik.errors.promoters?.[idx]?.panFile
-                        ? formik.errors.promoters[idx].panFile
-                        : '\u00A0'
-                    }
-                  />
-                  <input
-                    id={`panFileInput${idx}`}
-                    type="file"
-                    hidden
-                    name={`promoters[${idx}].panFile`}
-                    onChange={(e) => formik.setFieldValue(`promoters[${idx}].panFile`, e.currentTarget.files[0])}
-                    onBlur={formik.handleBlur}
+
+                {/* PAN Upload */}
+                <TableCell>
+                  <RenderFileUpload
+                    label="PAN"
+                    fieldName={`promoters[${idx}].pan_image`}
+                    file={promoter.pan_image}
+                    setFieldValue={setFieldValue}
+                    touched={touched.promoters?.[idx]?.pan_image}
+                    errors={errors.promoters?.[idx]?.pan_image}
                   />
                 </TableCell>
-                <TableCell sx={{ textAlign: 'center', p: 0.5, pt: 2 }}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label="Photo Upload"
-                    name={`promoters[${idx}].photoFile`}
-                    value={promoter.photoFile ? promoter.photoFile.name : ''}
-                    placeholder="Upload Photo"
-                    InputProps={{ readOnly: true }}
-                    onClick={() => document.getElementById(`photoFileInput${idx}`).click()}
-                    error={formik.touched.promoters?.[idx]?.photoFile && Boolean(formik.errors.promoters?.[idx]?.photoFile)}
-                    helperText={
-                      formik.touched.promoters?.[idx]?.photoFile && formik.errors.promoters?.[idx]?.photoFile
-                        ? formik.errors.promoters[idx].photoFile
-                        : '\u00A0'
-                    }
-                  />
-                  <input
-                    id={`photoFileInput${idx}`}
-                    type="file"
-                    hidden
-                    name={`promoters[${idx}].photoFile`}
-                    onChange={(e) => formik.setFieldValue(`promoters[${idx}].photoFile`, e.currentTarget.files[0])}
-                    onBlur={formik.handleBlur}
+
+                {/* Photo Upload */}
+                <TableCell>
+                  <RenderFileUpload
+                    label="Photo"
+                    fieldName={`promoters[${idx}].photo_image`}
+                    file={promoter.photo_image}
+                    setFieldValue={setFieldValue}
+                    touched={touched.promoters?.[idx]?.photo_image}
+                    errors={errors.promoters?.[idx]?.photo_image}
                   />
                 </TableCell>
-                <TableCell sx={{ textAlign: 'center', p: 0.5, pt: 2 }}>
+
+                {/* Mobile */}
+                <TableCell>
                   <TextField
                     fullWidth
                     size="small"
                     label="Mobile"
-                    name={`promoters[${idx}].mobile`}
-                    value={promoter.mobile}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    error={formik.touched.promoters?.[idx]?.mobile && Boolean(formik.errors.promoters?.[idx]?.mobile)}
-                    helperText={
-                      formik.touched.promoters?.[idx]?.mobile && formik.errors.promoters?.[idx]?.mobile
-                        ? formik.errors.promoters[idx].mobile
-                        : '\u00A0'
-                    }
+                    name={`promoters[${idx}].mobile_number`}
+                    value={promoter.mobile_number}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    error={touched.promoters?.[idx]?.mobile_number && Boolean(errors.promoters?.[idx]?.mobile_number)}
+                    helperText={touched.promoters?.[idx]?.mobile_number && errors.promoters?.[idx]?.mobile_number}
                   />
                 </TableCell>
-                <TableCell sx={{ textAlign: 'center', p: 0.5, pt: 2 }}>
+
+                {/* Email */}
+                <TableCell>
                   <TextField
                     fullWidth
                     size="small"
                     label="Email"
                     name={`promoters[${idx}].email`}
                     value={promoter.email}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    error={formik.touched.promoters?.[idx]?.email && Boolean(formik.errors.promoters?.[idx]?.email)}
-                    helperText={
-                      formik.touched.promoters?.[idx]?.email && formik.errors.promoters?.[idx]?.email
-                        ? formik.errors.promoters[idx].email
-                        : '\u00A0'
-                    }
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    error={touched.promoters?.[idx]?.email && Boolean(errors.promoters?.[idx]?.email)}
+                    helperText={touched.promoters?.[idx]?.email && errors.promoters?.[idx]?.email}
                   />
                 </TableCell>
-                <TableCell
-                  sx={{
-                    textAlign: 'center',
-                    p: 0.5,
-                    pt: 2,
-                    pr: 2,
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    justifyContent: 'center',
-                    border: 'none'
-                  }}
-                >
-                  <Stack direction="row" alignItems="flex-start" justifyContent="center">
-                    <Tooltip title="Same as per Aadhaar" arrow>
-                      <Checkbox
-                        sx={{ p: 0, m: 0, pt: 1 }}
-                        checked={promoter.sameAsAadhaar}
-                        onChange={(e) => formik.setFieldValue(`promoters[${idx}].sameAsAadhaar`, e.target.checked)}
-                        name={`promoters[${idx}].sameAsAadhaar`}
-                      />
-                    </Tooltip>
-                    {promoter.sameAsAadhaar && (
-                      <Typography variant="body2" mr={1}>
-                        Same as per aadhaar
-                      </Typography>
-                    )}
-                    {!promoter.sameAsAadhaar && (
-                      <TextField
-                        fullWidth
-                        size="small"
-                        name={`promoters[${idx}].address`}
-                        placeholder="Enter Residential Address"
-                        value={promoter.address}
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur}
-                        error={formik.touched.promoters?.[idx]?.address && Boolean(formik.errors.promoters?.[idx]?.address)}
-                        helperText={
-                          formik.touched.promoters?.[idx]?.address && formik.errors.promoters?.[idx]?.address
-                            ? formik.errors.promoters[idx].address
-                            : '\u00A0'
+
+                {/* Address */}
+                <TableCell>
+                  {promoter.residential_address ? (
+                    <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                      Address as per Aadhaar
+                    </Typography>
+                  ) : (
+                    <TextField
+                      fullWidth
+                      size="small"
+                      label="Address"
+                      name={`promoters[${idx}].address`}
+                      value={promoter.address}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      error={touched.promoters?.[idx]?.address && Boolean(errors.promoters?.[idx]?.address)}
+                      helperText={touched.promoters?.[idx]?.address && errors.promoters?.[idx]?.address}
+                    />
+                  )}
+                </TableCell>
+
+                {/* Checkbox */}
+                <TableCell align="center">
+                  <Tooltip title="Same as per Aadhaar">
+                    <Checkbox
+                      checked={promoter.residential_address}
+                      onChange={(e) => {
+                        setFieldValue(`promoters[${idx}].residential_address`, e.target.checked);
+                        if (e.target.checked) {
+                          setFieldValue(`promoters[${idx}].address`, '');
                         }
-                        sx={{ ml: 1 }}
-                      />
-                    )}
+                      }}
+                    />
+                  </Tooltip>
+                </TableCell>
+
+                {/* Action */}
+                <TableCell align="center">
+                  <Stack direction="row" spacing={1}>
+                    <Button variant="contained" size="small" onClick={() => handleIndividualSave(idx)}>
+                      Save
+                    </Button>
+                    <Button variant="contained" color="error" size="small" onClick={() => handleIndividualDelete(idx)}>
+                      Delete
+                    </Button>
                   </Stack>
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
-      </Paper>
+      </TableContainer>
     </Box>
   );
 };
