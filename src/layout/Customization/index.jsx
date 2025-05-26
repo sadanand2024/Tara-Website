@@ -34,7 +34,7 @@ export default function Customization() {
   return (
     <>
       {/* toggle button */}
-      <Tooltip title="Live Customize">
+      {/* <Tooltip title="Live Customize">
         <Fab
           component="div"
           onClick={handleToggle}
@@ -60,7 +60,7 @@ export default function Customization() {
             </IconButton>
           </AnimateButton>
         </Fab>
-      </Tooltip>
+      </Tooltip> */}
       <Drawer anchor="right" onClose={handleToggle} open={open} PaperProps={{ sx: { width: 280 } }}>
         <PerfectScrollbar>
           <Grid container spacing={2}>

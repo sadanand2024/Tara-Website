@@ -1,16 +1,17 @@
-import { Link as RouterLink } from 'react-router-dom';
 import { useMemo } from 'react';
+import { Link as RouterLink } from 'react-router-dom';
 
 // material-ui
-import { styled } from '@mui/material/styles';
+import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import CardMedia from '@mui/material/CardMedia';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid2';
-import Link from '@mui/material/Link';
 import Stack from '@mui/material/Stack';
+import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
-import Box from '@mui/material/Box';
+import Icon1 from 'assets/images/icons/Icon1.svg';
+import Icon2 from 'assets/images/icons/Icon2.svg';
+import Icon3 from 'assets/images/icons/Icon3.svg';
 
 // third party
 import { motion } from 'framer-motion';
@@ -18,31 +19,18 @@ import { motion } from 'framer-motion';
 // project imports
 import AnimateButton from 'ui-component/extended/AnimateButton';
 
-import { ThemeDirection, ThemeMode, DASHBOARD_PATH } from 'config';
+import { ThemeDirection, ThemeMode } from 'config';
 import useConfig from 'hooks/useConfig';
 
 // assets
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import TechLight from 'assets/images/landing/tech-light.svg';
-import TechDark from 'assets/images/landing/tech-dark.svg';
-import dashboard from 'assets/images/landing/hero-dashboard.png';
-import widget1 from 'assets/images/landing/hero-widget-1.png';
-import widget2 from 'assets/images/landing/hero-widget-2.png';
 import BgDark from 'assets/images/landing/bg-hero-block-dark.png';
 import BgLight from 'assets/images/landing/bg-hero-block-light.png';
+import dashboard from 'assets/images/landing/Invoicedashboard.png';
 
 // styles
 const HeaderImage = styled('img')(({ theme }) => ({
   maxWidth: '100%',
   borderRadius: 20,
-  transform: theme.direction === 'rtl' ? 'scale(1.63)' : 'scale(1.55)',
-  transformOrigin: theme.direction === 'rtl' ? '100% 50%' : '0 50%',
-  [theme.breakpoints.down('xl')]: {
-    transform: 'scale(1.5)'
-  },
-  [theme.breakpoints.down('lg')]: {
-    transform: 'scale(1.2)'
-  }
 }));
 
 const HeaderAnimationImage = styled('img')({
@@ -55,7 +43,7 @@ const HeaderAnimationImage = styled('img')({
 export default function HeaderSection() {
   const { mode, themeDirection } = useConfig();
 
-  const headerSX = { fontSize: { xs: '2rem', sm: '3rem', md: '3.5rem', lg: '3.5rem' } };
+  const headerSX = { fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem', lg: '2.5rem' } };
 
   const HeaderAnimationImagememo = useMemo(
     () => (
@@ -78,39 +66,84 @@ export default function HeaderSection() {
   );
 
   return (
-    <Container sx={{ height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+    <Container sx={{ 
+      height: { xs: 'auto', md: '100vh' }, 
+      display: 'flex', 
+      justifyContent: 'center', 
+      alignItems: 'center',
+      py: { xs: 4, md: 0 },
+      mt: { xs: -5, sm: -8, md: -10 },
+      px: { xs: 2, sm: 3, md: 4 }
+    }}>
       <Grid
         container
-        sx={{ justifyContent: 'space-between', alignItems: 'center', mt: { xs: 10, sm: 6, md: 18.75 }, mb: { xs: 2.5, md: 10 } }}
+        spacing={{ xs: 3, sm: 4, md: 2 }}
+        sx={{
+          justifyContent: { xs: 'center', md: 'space-between' },
+          alignItems: { xs: 'center', md: 'flex-start' },
+          mt: { xs: 3, sm: 5, md: 18.75 },
+          mb: { xs: 3, sm: 4, md: 10 },
+        }}
       >
-        <Grid size={{ xs: 12, md: 5 }}>
-          <Grid container spacing={6}>
+        <Grid size={{ xs: 12, md: 4 }}>
+          <Grid container spacing={{ xs: 2, sm: 3, md: 4 }} sx={{ mt: { xs: 2, sm: 3, md: 5 } }}>
             <Grid size={12}>
               <motion.div
                 initial={{ opacity: 0, translateY: 550 }}
                 animate={{ opacity: 1, translateY: 0 }}
                 transition={{ type: 'spring', stiffness: 150, damping: 30 }}
               >
-                <Stack spacing={1}>
-                  <Typography variant="h1" sx={{ textAlign: { xs: 'center', md: 'left' }, ...headerSX }}>
-                    Power Your Finance with
-                  </Typography>
-
-                  <Typography
+                <Box sx={{ 
+                  mt: { xs: 2, sm: 4, md: 6 },
+                  display: 'flex',
+                  flexDirection: 'column', 
+                  alignItems: { xs: 'center', sm: 'center', md: 'flex-start' },
+                  textAlign: { xs: 'center', sm: 'center', md: 'left' },
+                  gap: { xs: 0.5, md: 1 },
+                }}>
+                  <Typography 
                     variant="h1"
-                    color="primary"
-                    sx={{
-                      textAlign: { xs: 'center', md: 'left' },
-
-                      ...headerSX
+                    sx={{ 
+                      ...headerSX, 
+                      fontWeight: 700,
+                      lineHeight: 1.0,
+                      display: 'block',
+                      fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' },
+                      whiteSpace: { xs: 'normal', md: 'nowrap' }
                     }}
                   >
-                    Tara First
+                    Unified Software for
                   </Typography>
-                </Stack>
+                  <Typography
+                    variant="h1"
+                    sx={{
+                      ...headerSX,
+                      fontWeight: 700,
+                      lineHeight: 1.0,
+                      display: 'block',
+                      fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' },
+                      whiteSpace: { xs: 'normal', md: 'nowrap' }
+                    }}
+                  >
+                    Invoicing, Payroll, ITR, GST,
+                  </Typography>
+                  <Typography 
+                    variant="h1" 
+                    sx={{ 
+                      ...headerSX, 
+                      fontWeight: 700,
+                      lineHeight: 1,
+                      display: 'block',
+                      fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' },
+                      whiteSpace: { xs: 'normal', md: 'nowrap' }
+                    }}
+                  >
+                    Accounting & More
+                  </Typography>
+                </Box>
               </motion.div>
             </Grid>
-            <Grid sx={{ mt: -2.5, textAlign: { xs: 'center', md: 'left' } }} size={12}>
+            <Grid sx={{ mt: { xs: 0, md: -2.5 }, textAlign: { xs: 'center', sm: 'center', md: 'left' } }} size={12}>
               <motion.div
                 initial={{ opacity: 0, translateY: 550 }}
                 animate={{ opacity: 1, translateY: 0 }}
@@ -118,20 +151,54 @@ export default function HeaderSection() {
               >
                 <Typography
                   variant="body1"
-                  sx={{ textAlign: { xs: 'center', md: 'left' }, color: 'text.primary', fontSize: { xs: '1rem', md: '1.125rem' } }}
+                  sx={{
+                    mt: { xs: 1, sm: 1.5, md: 2 }, 
+                    textAlign: { xs: 'center', sm: 'center', md: 'left' }, 
+                    color: 'text.secondary', 
+                    fontSize: { xs: '0.875rem', sm: '1rem', md: '1.125rem' },
+                    mb: { xs: 2, sm: 2.5, md: 3 }, 
+                    lineHeight: 1.4,
+                    fontWeight: 400,
+                    px: { xs: 1, sm: 2, md: 0 }
+                  }}
                 >
-                  Level up your business with unified software and professional service support — your trusted partner for all financial
-                  needs,&nbsp;
-                  <Link component={RouterLink} to="/register" color="secondary" underline="hover" sx={{ fontWeight: 600, mx: 0.5 }}>
-                    Personal
-                  </Link>
-                  or
-                  <Link component={RouterLink} to="/register" color="secondary" underline="hover" sx={{ fontWeight: 600, mx: 0.5 }}>
-                    Business
-                  </Link>
-                  . Embrace complete financial clarity and take control like never before with an all-in-one suite designed to manage your
-                  finances effortlessly.
+                  No more juggling tools—just one simple platform.A complete 
+                  <br className="hidden md:block" />
+                  financial suite for all your Business + Personal finance needs.
                 </Typography>
+              </motion.div>
+            </Grid>
+
+            <Grid size={12} sx={{ mt: { xs: 2, sm: 3, md: 0 } }}>
+              <motion.div
+                initial={{ opacity: 0, translateY: 550 }}
+                animate={{ opacity: 1, translateY: 0 }}
+                transition={{ type: 'spring', stiffness: 150, damping: 30, delay: 0.6 }}
+              >
+                <Stack 
+                  direction={{ xs: 'row', sm: 'row' }} 
+                  spacing={{ xs: 2, sm: 4 }} 
+                  sx={{ 
+                    alignItems: 'center', 
+                    justifyContent: { xs: 'center', sm: 'center', md: 'flex-start' }, 
+                    mb: { xs: 3, sm: 4, md: 5 },
+                    mt: { xs: -2, sm: -3, md: -4 }
+                  }}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                    <img src={Icon1} alt="Integration Icon" style={{ width: '30.81px', height: '32.3px' }} />
+                    <Typography variant="h4" color="text.secondary" sx={{ fontWeight: 500, fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' } }}>Integration</Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                    <img src={Icon2} alt="Automation Icon" style={{ width: '30.81px', height: '32.3px' }} />
+                    <Typography variant="h4" color="text.secondary" sx={{ fontWeight: 500, fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' } }}>Automation</Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                    <img src={Icon3} alt="Simple Icon" style={{ width: '30.81px', height: '32.3px' }} />
+
+                    <Typography variant="h4" color="text.secondary" sx={{ fontWeight: 500, fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' } }}>Simple</Typography>
+                  </Box>
+                </Stack>
               </motion.div>
             </Grid>
 
@@ -141,7 +208,15 @@ export default function HeaderSection() {
                 animate={{ opacity: 1, translateY: 0 }}
                 transition={{ type: 'spring', stiffness: 150, damping: 30, delay: 0.4 }}
               >
-                <Grid container spacing={2} sx={{ justifyContent: { xs: 'center', md: 'flex-start' } }}>
+                <Grid 
+                  container 
+                  spacing={2} 
+                  sx={{ 
+                    justifyContent: { xs: 'center', sm: 'center', md: 'flex-start' }, 
+                    mb: { xs: 3, sm: 4, md: 5 },
+                    mt: { xs: -2, sm: -3, md: -4 }
+                  }}
+                >
                   <Grid>
                     <AnimateButton>
                       <Button
@@ -149,79 +224,58 @@ export default function HeaderSection() {
                         to="/register"
                         size="large"
                         variant="contained"
-                        color="secondary"
-                        startIcon={<PlayArrowIcon />}
+                        color="primary"
+                        sx={{
+                          width: { xs: '100%', sm: 'auto' },
+                          fontSize: { xs: '0.875rem', sm: '1rem' }
+                        }}
                       >
                         Get started for free
                       </Button>
                     </AnimateButton>
                   </Grid>
                   <Grid>
-                    {/* <Button component={Link} href="https://links.codedthemes.com/hsqll" target="_blank" size="large">
-                      Purchase Now
-                    </Button> */}
+                    <AnimateButton>
+                      <Button
+                        size="large"
+                        variant="contained"
+                        color="white"
+                        sx={{
+                          width: { xs: '100%', sm: 'auto' },
+                          fontSize: { xs: '0.875rem', sm: '1rem' },
+                      }}
+                      >
+                        View Live Demo
+                      </Button>
+                    </AnimateButton>
                   </Grid>
                 </Grid>
               </motion.div>
             </Grid>
-            <Grid size={12}>
-              {/* <motion.div
-                initial={{ opacity: 0, translateY: 550 }}
-                animate={{ opacity: 1, translateY: 0 }}
-                transition={{ type: 'spring', stiffness: 150, damping: 30, delay: 0.6 }}
-              >
-                <Stack direction="row" spacing={2} sx={{ alignItems: 'center', justifyContent: { xs: 'center', md: 'flex-start' } }}>
-                  <CardMedia
-                    component="img"
-                    image={mode === ThemeMode.DARK ? TechDark : TechLight}
-                    alt="Tara Tech"
-                    sx={{ width: { xs: '75%', sm: '50%', md: '75%' } }}
-                  />
-                </Stack>
-              </motion.div> */}
-            </Grid>
           </Grid>
         </Grid>
-        <Grid sx={{ display: { xs: 'none', md: 'flex' } }} size={{ xs: 12, md: 7 }}>
-          <Box sx={{ position: 'relative', mt: 8.75, zIndex: 9 }}>
-            <HeaderImage src={dashboard} alt="Tara" />
-            <Box
+        <Grid size={{ xs: 12, md: 8}} sx={{ mb: { xs: 3, sm: 4, md: 15 } }}>
+          <Box
+            sx={{
+              position: 'relative',
+              mt: { xs: 4, sm: 5, md: 6.75 },
+              zIndex: 9,
+              width: '100%',
+              display: 'flex',
+              justifyContent: { xs: 'center', sm: 'center', md: 'flex-end' },
+              alignItems: 'center',
+              ml: { xs: 0, sm: 0, md: 35 },
+            }}
+          >
+            <HeaderImage 
+              src={dashboard} 
+              alt="Tara" 
               sx={{
-                position: 'absolute',
-                top: { md: -35, lg: -110 },
-                right: themeDirection === ThemeDirection.RTL ? 170 : { md: -50, lg: -140, xl: -220 },
-                width: { md: 220, lg: 290 },
-                animation: '10s slideY linear infinite'
+                width: { xs: '100%', sm: '90%', md: '100%' },
+                maxWidth: '100%',
               }}
-            >
-              <motion.div
-                initial={{ opacity: 0, scale: 0 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ type: 'spring', stiffness: 150, damping: 30, delay: 0.2 }}
-              >
-                <HeaderAnimationImage src={widget1} alt="Tara" />
-              </motion.div>
-            </Box>
-            <Box
-              sx={{
-                position: 'absolute',
-                bottom: { md: -20, lg: -90 },
-                left: { md: 100, lg: 300 },
-                width: { md: 220, lg: 280 },
-                animation: '10s slideY linear infinite',
-                animationDelay: '2s'
-              }}
-            >
-              <motion.div
-                initial={{ opacity: 0, scale: 0 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ type: 'spring', stiffness: 150, damping: 30, delay: 0.4 }}
-              >
-                <HeaderAnimationImage src={widget2} alt="Tara" />
-              </motion.div>
-            </Box>
+            />
           </Box>
-          {HeaderAnimationImagememo}
         </Grid>
       </Grid>
     </Container>
