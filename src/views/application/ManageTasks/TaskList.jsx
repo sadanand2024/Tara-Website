@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { useNavigate } from 'react-router-dom';
 
 // material-ui
 import Chip from '@mui/material/Chip';
@@ -13,6 +14,7 @@ import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import Link from '@mui/material/Link';
 
 // project imports
 import Factory from 'utils/Factory';
@@ -44,7 +46,7 @@ const getFullName = (first_name, last_name, email) => {
 };
 
 const TaskList = ({ page, rowsPerPage, searchQuery, onTotalUsers, onOpenPlans, loading, users }) => {
-  console.log(users);
+  const navigate = useNavigate();
   const filteredUsers = React.useMemo(() => {
     if (!searchQuery) return users;
     return users.filter(
@@ -113,6 +115,9 @@ const TaskList = ({ page, rowsPerPage, searchQuery, onTotalUsers, onOpenPlans, l
     );
   }
 
+  const handleServiceClick = (serviceName, serviceId) => {
+    navigate(`/app/my-services/${serviceName}?id=${serviceId}`);
+  };
   return (
     <TableContainer>
       <Table size="small">
@@ -134,13 +139,18 @@ const TaskList = ({ page, rowsPerPage, searchQuery, onTotalUsers, onOpenPlans, l
               key={task.id}
               sx={{
                 '& td, & th': {
-                  py: 1.5 // increase vertical padding on all cells
+                  py: 1.5
                 }
               }}
             >
               <TableCell sx={{ pl: 3 }}>{(page - 1) * rowsPerPage + index + 1}</TableCell>
               <TableCell>{task.id}</TableCell>
-              <TableCell>{task.service_name?.charAt(0).toUpperCase() + task.service_name?.slice(1)}</TableCell>
+
+              <TableCell>
+                <Link sx={{ cursor: 'pointer' }} onClick={() => handleServiceClick(task.service_name, task.id)}>
+                  {task.service_name?.charAt(0).toUpperCase() + task.service_name?.slice(1)}
+                </Link>
+              </TableCell>
               <TableCell>
                 {task.plan_name ? (
                   task.plan_name?.charAt(0).toUpperCase() + task.plan_name?.slice(1)

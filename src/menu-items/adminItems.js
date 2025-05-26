@@ -7,11 +7,13 @@ import {
   IconGitPullRequest,
   IconBrandAsana,
   IconBriefcase,
+  IconDashboard,
   IconUsers
 } from '@tabler/icons-react';
 
 // constant
 const icons = {
+  IconDashboard,
   IconAddressBook,
   IconShadow,
   IconWindmill,
@@ -29,6 +31,15 @@ const adminItems = {
   title: 'super-admin',
   type: 'group',
   children: [
+    {
+      id: 'dashboard',
+      title: 'dashboard',
+      type: 'item',
+      url: '/dashboard',
+      icon: icons.IconDashboard,
+      breadcrumbs: false,
+      caption: ''
+    },
     {
       id: 'new-requests',
       title: 'new-requests',

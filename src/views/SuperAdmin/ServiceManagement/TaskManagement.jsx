@@ -11,7 +11,8 @@ import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 import { useSnackbar } from 'notistack';
 import Factory from 'utils/Factory';
-import ServiceRequests from './TableList';
+import ServiceRequests from './ServiceTable';
+import TaskTable from './TaskTable';
 import { useSelector } from 'store';
 import { gridSpacing } from 'store/constant';
 import Tabs from '@mui/material/Tabs';
@@ -179,11 +180,7 @@ export default function TaskManagement() {
             </Grid>
           </Grid> */}
           {tab === 0 && <ServiceRequests searchQuery={searchQuery} assigned={true} />}
-          {tab === 1 && (
-            <Box sx={{ p: 3, textAlign: 'center', color: 'grey.600' }}>
-              <Typography variant="h6">Tasks Table (Coming Soon)</Typography>
-            </Box>
-          )}
+          {tab === 1 && <TaskTable searchQuery={searchQuery} assigned={true} />}
           {tab === 2 && (
             <Box sx={{ p: 3, textAlign: 'center', color: 'grey.600' }}>
               <Typography variant="h6">Sub Tasks Table (Coming Soon)</Typography>

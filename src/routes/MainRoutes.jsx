@@ -126,11 +126,11 @@ const MainRoutes = {
       element: <MSMEDashboard />
     },
     {
-      path: '/app/my-services/trade-licence',
+      path: '/app/my-services/trade-license',
       element: <TradeLicence />
     },
     {
-      path: '/app/my-services/labour-licence',
+      path: '/app/my-services/labour-license',
       element: <LabourLicence />
     },
     {

@@ -1,45 +1,27 @@
 import React, { useEffect } from 'react';
 
 // material-ui
-import MainCard from 'ui-component/cards/MainCard';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid2';
-import InputAdornment from '@mui/material/InputAdornment';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
-import OutlinedInput from '@mui/material/OutlinedInput';
 import Pagination from '@mui/material/Pagination';
-import Typography from '@mui/material/Typography';
-import Stack from '@mui/material/Stack';
-import Snackbar from '@mui/material/Snackbar';
-import Alert from '@mui/material/Alert';
-import Chip from '@mui/material/Chip';
-import IconButton from '@mui/material/IconButton';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import Tooltip from '@mui/material/Tooltip';
 import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
-import Switch from '@mui/material/Switch';
-import FormControlLabel from '@mui/material/FormControlLabel';
 import { useSnackbar } from 'notistack';
-import PersonIcon from '@mui/icons-material/Person';
 import Avatar from '@mui/material/Avatar';
 import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
 import { gridSpacing } from 'store/constant';
 import Factory from 'utils/Factory';
 import { useSelector } from 'store';
-
-// assets
-import { IconSearch } from '@tabler/icons-react';
 import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded';
-import AddIcon from '@mui/icons-material/Add';
-import { ConstructionOutlined } from '@mui/icons-material';
 
 // ==============================|| MANAGE USERS ||============================== //
 
@@ -82,7 +64,7 @@ const ServiceRequests = ({ searchQuery, setUsers, assigned, setSearchQuery }) =>
       setLoading(false);
     }
   };
-  
+
   const getData = async () => {
     try {
       setLoading(true);
@@ -160,13 +142,25 @@ const ServiceRequests = ({ searchQuery, setUsers, assigned, setSearchQuery }) =>
     setRequests(__requests);
   };
 
-  const assignService = (rowData) => {
+  const assignService = async (rowData) => {
     const assigned = assignedUsers[rowData.id] || {};
     const assigneeId = assigned.assignee !== undefined ? assigned.assignee : rowData.assignee;
     const reviewerId = assigned.reviewer !== undefined ? assigned.reviewer : rowData.reviewer;
-    // Post assigneeId and reviewerId as needed
-    console.log('Assigning:', { requestId: rowData.id, assigneeId, reviewerId });
-    // ...existing logic...
+    const res = await Factory(
+      'put',
+      `/user_management/service-request/${rowData.id}/assignment/`,
+      {
+        assignee_id: assigneeId,
+        reviewer_id: reviewerId
+      },
+      {}
+    );
+    if (res.res.status_cd === 0) {
+      enqueueSnackbar('Service assigned successfully', { variant: 'success' });
+      getData();
+    } else {
+      enqueueSnackbar('Error assigning service', { variant: 'error' });
+    }
   };
 
   return (
@@ -180,7 +174,6 @@ const ServiceRequests = ({ searchQuery, setUsers, assigned, setSearchQuery }) =>
               <TableCell sx={{ p: 1.5 }}>Category</TableCell>
               <TableCell sx={{ p: 1.5 }}>Client</TableCell>
               <TableCell sx={{ p: 1.5 }}>Created On</TableCell>
-              <TableCell sx={{ p: 1.5 }}>Source</TableCell>
               <TableCell sx={{ p: 1.5 }}>Assignee</TableCell>
               <TableCell sx={{ p: 1.5 }}>Reviewer</TableCell>
               {!assigned && <TableCell sx={{ p: 1.5 }}>Action</TableCell>}
@@ -195,16 +188,15 @@ const ServiceRequests = ({ searchQuery, setUsers, assigned, setSearchQuery }) =>
                   <TableCell sx={{ pl: 3 }}>{row.id}</TableCell>
                   <TableCell sx={{ p: 1.5 }}>{row.service_name}</TableCell>
                   <TableCell sx={{ p: 1.5 }}>{row.category}</TableCell>
-                  <TableCell sx={{ p: 1.5 }}>{row.client_name}</TableCell>
+                   <TableCell sx={{ p: 1.5 }}>{row.user.full_name || 'Unnamed '}</TableCell>
                   <TableCell sx={{ p: 1.5 }}>
                     {new Date(row.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                   </TableCell>
-                  <TableCell sx={{ p: 1.5 }}>{row.source}</TableCell>
                   <TableCell sx={{ p: 1.5 }}>
                     <Autocomplete
                       size="small"
                       options={userOptions}
-                      disabled={row.assignee !== null}
+                      disabled={assigned}
                       getOptionLabel={(option) => option.name || option.first_name || option.email || ''}
                       value={assigneeObj}
                       onChange={(_, value) => handleARChange(row, value, 'assignee', idx)}
@@ -222,7 +214,7 @@ const ServiceRequests = ({ searchQuery, setUsers, assigned, setSearchQuery }) =>
                     <Autocomplete
                       size="small"
                       options={userOptions}
-                      disabled={row.reviewer !== null}
+                      disabled={assigned}
                       getOptionLabel={(option) => option.name || option.first_name || option.email || ''}
                       value={reviewerObj}
                       onChange={(_, value) => handleARChange(row, value, 'reviewer', idx)}
@@ -238,7 +230,13 @@ const ServiceRequests = ({ searchQuery, setUsers, assigned, setSearchQuery }) =>
                   </TableCell>
                   {!assigned && (
                     <TableCell sx={{ p: 1.5 }}>
-                      <Button variant="contained" size="small" sx={{ minWidth: 80 }} onClick={() => assignService(row)}>
+                      <Button
+                        variant="contained"
+                        size="small"
+                        disabled={!assigneeObj || !reviewerObj}
+                        sx={{ minWidth: 80 }}
+                        onClick={() => assignService(row)}
+                      >
                         Assign
                       </Button>
                     </TableCell>

@@ -1,75 +1,64 @@
 import React, { useEffect } from 'react';
 
 // material-ui
-import Button from '@mui/material/Button';
+import MainCard from 'ui-component/cards/MainCard';
 import Grid from '@mui/material/Grid2';
-import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
-import Pagination from '@mui/material/Pagination';
+import InputAdornment from '@mui/material/InputAdornment';
+import OutlinedInput from '@mui/material/OutlinedInput';
 import Typography from '@mui/material/Typography';
+import Stack from '@mui/material/Stack';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
-
-// project imports
-import TaskList from './TaskList';
-import PlanDrawer from './PlanDrawer';
-import MainCard from 'ui-component/cards/MainCard';
-import { gridSpacing } from 'store/constant';
+import { useSnackbar } from 'notistack';
 import Factory from 'utils/Factory';
+import ServiceRequests from './ServiceTable';
+import TaskTable from './TaskTable';
 import { useSelector } from 'store';
+import { gridSpacing } from 'store/constant';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
+import Checkbox from '@mui/material/Checkbox';
+import FormControlLabel from '@mui/material/FormControlLabel';
 
-// assets
-import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded';
+import { IconSearch } from '@tabler/icons-react';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import TaskIcon from '@mui/icons-material/Task';
+import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck';
 
-// ==============================|| MANAGE USERS ||============================== //
-
-export default function ManageTasks() {
+export default function TaskManagement() {
+  const { enqueueSnackbar } = useSnackbar();
   const user = useSelector((state) => state).accountReducer.user;
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const [page, setPage] = React.useState(1);
-  const [rowsPerPage, setRowsPerPage] = React.useState(10);
-  const [totalTasks, setTotalTasks] = React.useState(0);
+  const [tab, setTab] = React.useState(0);
   const [searchQuery, setSearchQuery] = React.useState('');
-  const [openPlanDrawer, setOpenPlanDrawer] = React.useState(false);
-  const [selectedTask, setSelectedTask] = React.useState(null);
-  const [tasks, setTasks] = React.useState([]);
-  const [loading, setLoading] = React.useState(true);
+  const [category, setCategory] = React.useState('');
+  const [service, setService] = React.useState('');
+  const [client, setClient] = React.useState('');
+  const [assignee, setAssignee] = React.useState('');
+  const [source, setSource] = React.useState('');
+  const [reviewer, setReviewer] = React.useState('');
+  const [statusFilters, setStatusFilters] = React.useState({
+    pending: false,
+    inProgress: false,
+    sentToReview: false,
+    underReview: false,
+    requestChanges: false,
+    overDue: false,
+    completed: false
+  });
   const [snackbar, setSnackbar] = React.useState({
     open: false,
     message: '',
     severity: 'success'
   });
 
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (value) => {
-    setRowsPerPage(value);
-    setPage(1);
-    handleClose();
-  };
-
-  const handleTotalUsers = (total) => {
-    setTotalTasks(total);
-  };
-
-  const handleOpenPlanDrawer = (service_request) => {
-    setSelectedTask(service_request);
-    setOpenPlanDrawer(true);
-  };
-
-  const handleClosePlanDrawer = () => {
-    setOpenPlanDrawer(false);
-    setSelectedTask(null);
+  const handleTabChange = (event, newValue) => setTab(newValue);
+  const handleSearch = (event) => setSearchQuery(event.target.value);
+  const handleStatusChange = (event) => {
+    setStatusFilters({ ...statusFilters, [event.target.name]: event.target.checked });
   };
 
   const handleCloseSnackbar = (event, reason) => {
@@ -79,51 +68,6 @@ export default function ManageTasks() {
     setSnackbar({ ...snackbar, open: false });
   };
 
-  const showSnackbar = (message, severity = 'success') => {
-    setSnackbar({
-      open: true,
-      message,
-      severity
-    });
-  };
-
-  const getTasks = async () => {
-    try {
-      setLoading(true);
-      const response = await Factory('get', `/user_management/context-service-requests/${user.active_context.id}/`, {}, {});
-      if (response.res.status_cd === 0) {
-        console.log(response.res.data);
-        setTasks(response.res.data);
-        setTotalTasks(response.res.data.total || response.res.data.length);
-      } else {
-        console.log('1');
-        setTasks([]);
-        setTotalTasks(0);
-      }
-    } catch (error) {
-      console.error('Error fetching tasks:', error);
-      setTasks([]);
-      setTotalTasks(0);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    getTasks();
-    //   const context_id = user.active_context.id;
-    //   const getUsersPlans = async () => {
-    //     const response = await Factory('get', `/user_management/context/${context_id}/module-features`, {}, {});
-    //     if (response.res.status_cd === 0) {
-    //       setMasterPlans(response.res.data.data);
-    //     }
-    //   };
-    //   getUsersPlans();
-    //   getTasks(); // Call getTasks when component mounts
-  }, [user.active_context.id]);
-
-  // Add effect to refresh users when page or rowsPerPage changes
-
   return (
     <>
       <MainCard
@@ -131,69 +75,118 @@ export default function ManageTasks() {
           <Grid container spacing={gridSpacing} sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
             <Grid>
               <Typography variant="h3" sx={{ p: 0 }}>
-                Task List
+                Task Management
               </Typography>
             </Grid>
-            <Grid></Grid>
+            <Grid>
+              <Stack direction="row" spacing={2}>
+                <OutlinedInput
+                  id="input-search-list-style1"
+                  placeholder="Search"
+                  value={searchQuery}
+                  onChange={handleSearch}
+                  startAdornment={
+                    <InputAdornment position="start">
+                      <IconSearch stroke={1.5} size="16px" />
+                    </InputAdornment>
+                  }
+                  size="small"
+                />
+                {/* <Button variant="contained" color="primary" size="small">
+                  Add Service
+                </Button> */}
+              </Stack>
+            </Grid>
           </Grid>
         }
         content={false}
       >
-        <TaskList
-          page={page}
-          rowsPerPage={rowsPerPage}
-          searchQuery={searchQuery}
-          onTotalUsers={handleTotalUsers}
-          onOpenPlans={handleOpenPlanDrawer}
-          loading={loading}
-          users={tasks}
-        />
-        <Grid sx={{ p: 1.5 }} size={12}>
-          <Grid container spacing={gridSpacing} sx={{ justifyContent: 'space-between' }}>
-            <Grid>
-              <Pagination
-                count={Math.ceil(totalTasks / rowsPerPage)}
-                page={page}
-                onChange={handleChangePage}
-                color="primary"
-                shape="rounded"
-              />
+        <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
+          <Tabs value={tab} onChange={handleTabChange} variant="fullWidth" sx={{ width: '100%', minHeight: 36 }}>
+            <Tab
+              icon={<AssignmentIcon fontSize="small" />}
+              iconPosition="start"
+              label="Services"
+              sx={{ minHeight: 36, minWidth: 0, p: 2, gap: 0.5 }}
+            />
+            <Tab
+              icon={<TaskIcon fontSize="small" />}
+              iconPosition="start"
+              label="Tasks"
+              sx={{ minHeight: 36, minWidth: 0, p: 2, gap: 0.5 }}
+            />
+            <Tab
+              icon={<PlaylistAddCheckIcon fontSize="small" />}
+              iconPosition="start"
+              label="Sub Tasks"
+              sx={{ minHeight: 36, minWidth: 0, p: 2, gap: 0.5 }}
+            />
+          </Tabs>
+        </Stack>
+        <Box sx={{ mt: 2 }}>
+          {/* <Grid container spacing={2} alignItems="center" sx={{ mb: 2 }}>
+            <Grid item xs>
+              <Select value={category} onChange={(e) => setCategory(e.target.value)} displayEmpty size="small" fullWidth>
+                <MenuItem value="">
+                  <em>Category</em>
+                </MenuItem>
+              </Select>
             </Grid>
-            <Grid>
-              <Button size="large" sx={{ color: 'grey.900' }} color="secondary" endIcon={<ExpandMoreRoundedIcon />} onClick={handleClick}>
-                {rowsPerPage} Rows
-              </Button>
-              <Menu
-                id="menu-user-list-style1"
-                anchorEl={anchorEl}
-                keepMounted
-                open={Boolean(anchorEl)}
-                onClose={handleClose}
-                variant="selectedMenu"
-                anchorOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right'
-                }}
-                transformOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'right'
-                }}
-              >
-                <MenuItem onClick={() => handleChangeRowsPerPage(10)}>10 Rows</MenuItem>
-                <MenuItem onClick={() => handleChangeRowsPerPage(20)}>20 Rows</MenuItem>
-                <MenuItem onClick={() => handleChangeRowsPerPage(30)}>30 Rows</MenuItem>
-              </Menu>
+            <Grid item xs>
+              <Select value={service} onChange={(e) => setService(e.target.value)} displayEmpty size="small" fullWidth>
+                <MenuItem value="">
+                  <em>Service</em>
+                </MenuItem>
+              </Select>
             </Grid>
-          </Grid>
-        </Grid>
-        {/* <AddUser open={openAddDialog} onClose={handleAddDialogClose} user={user} getTasks={getTasks} /> */}
-        <PlanDrawer
-          type="service"
-          moduleId={selectedTask?.service}
-          open={openPlanDrawer}
-          onClose={handleClosePlanDrawer}
-          selectedTask={selectedTask}
-        />
+            <Grid item xs>
+              <Select value={client} onChange={(e) => setClient(e.target.value)} displayEmpty size="small" fullWidth>
+                <MenuItem value="">
+                  <em>Client</em>
+                </MenuItem>
+              </Select>
+            </Grid>
+            <Grid item xs>
+              <Select value={assignee} onChange={(e) => setAssignee(e.target.value)} displayEmpty size="small" fullWidth>
+                <MenuItem value="">
+                  <em>Assignee</em>
+                </MenuItem>
+              </Select>
+            </Grid>
+            <Grid item xs>
+              <Select value={source} onChange={(e) => setSource(e.target.value)} displayEmpty size="small" fullWidth>
+                <MenuItem value="">
+                  <em>Source</em>
+                </MenuItem>
+              </Select>
+            </Grid>
+            <Grid item xs>
+              <Select value={reviewer} onChange={(e) => setReviewer(e.target.value)} displayEmpty size="small" fullWidth>
+                <MenuItem value="">
+                  <em>Reviewer</em>
+                </MenuItem>
+              </Select>
+            </Grid>
+            <Grid item xs={12}>
+              <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap">
+                <FormControlLabel control={<Checkbox checked={statusFilters.pending} onChange={handleStatusChange} name="pending" />} label="Pending" />
+                <FormControlLabel control={<Checkbox checked={statusFilters.inProgress} onChange={handleStatusChange} name="inProgress" />} label="In- Progress" />
+                <FormControlLabel control={<Checkbox checked={statusFilters.sentToReview} onChange={handleStatusChange} name="sentToReview" />} label="Sent to Review" />
+                <FormControlLabel control={<Checkbox checked={statusFilters.underReview} onChange={handleStatusChange} name="underReview" />} label="Under Review" />
+                <FormControlLabel control={<Checkbox checked={statusFilters.requestChanges} onChange={handleStatusChange} name="requestChanges" />} label="Request Changes" />
+                <FormControlLabel control={<Checkbox checked={statusFilters.overDue} onChange={handleStatusChange} name="overDue" />} label="Over Due" />
+                <FormControlLabel control={<Checkbox checked={statusFilters.completed} onChange={handleStatusChange} name="completed" />} label="Completed" />
+              </Stack>
+            </Grid>
+          </Grid> */}
+          {tab === 0 && <ServiceRequests searchQuery={searchQuery} assigned={true} />}
+          {tab === 1 && <TaskTable searchQuery={searchQuery} assigned={true} />}
+          {tab === 2 && (
+            <Box sx={{ p: 3, textAlign: 'center', color: 'grey.600' }}>
+              <Typography variant="h6">Sub Tasks Table (Coming Soon)</Typography>
+            </Box>
+          )}
+        </Box>
       </MainCard>
       <Snackbar
         open={snackbar.open}
