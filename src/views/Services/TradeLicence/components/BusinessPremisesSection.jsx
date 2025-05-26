@@ -67,10 +67,22 @@ const BusinessPremisesSection = () => {
       type: 'text'
     },
     {
+      label: 'Trade Area',
+      name: 'trade_area',
+      type: 'text'
+    },
+    {
+      label: 'Road Type',
+      name: 'road_type',
+      type: 'text'
+    },
+
+    {
       label: 'Address proof',
       name: 'address_proof',
       type: 'file'
     },
+
     {
       label: 'Rental Agreement/NOC',
       name: 'rental_agreement',
@@ -118,6 +130,7 @@ const BusinessPremisesSection = () => {
       name: 'nature_of_possession',
       type: 'text'
     },
+
     {
       label: 'Address proof (Additional)',
       name: 'address_proof_additional',
@@ -138,6 +151,8 @@ const BusinessPremisesSection = () => {
       state: '',
       pincode: '',
       nature_of_possession: '',
+      trade_area: '',
+      road_type: '',
       address_proof: null,
       rental_agreement: null,
       bankStatement: null,
@@ -152,9 +167,11 @@ const BusinessPremisesSection = () => {
       state: Yup.string().required('State is required'),
       pincode: Yup.number().required('Pincode is required'),
       nature_of_possession: Yup.string().required('Nature of possession is required'),
+      trade_area: Yup.string().required('Trade Area is required'),
+      road_type: Yup.string().required('Road Type is required'),
       address_proof: Yup.mixed().required('Address proof is required'),
       rental_agreement: Yup.mixed().required('Rental Agreement/NOC is required'),
-      bankStatement: Yup.mixed().required('Bank Statement/Cancelled Cheque is required'),
+      // bankStatement: Yup.mixed().required('Bank Statement/Cancelled Cheque is required'),
       additional_space: Yup.string().required('Please select if you have additional space'),
       workplace: Yup.string().when('additional_space', {
         is: (val) => val === 'yes',
@@ -163,16 +180,17 @@ const BusinessPremisesSection = () => {
       })
     }),
     onSubmit: async (values) => {
-      let url = businessPremises.id ? `/labourlicense/business-location/${businessPremises.id}/` : `/labourlicense/business-location/`;
+      let url = businessPremises.id ? `/tradelicense/business-location/${businessPremises.id}/` : `/tradelicense/business-location/`;
       let formData = new FormData();
-      formData.append('service_request', 24);
-      formData.append('service_task', 8);
+      formData.append('service_request', 25);
+      formData.append('service_task', 14);
       formData.append(
-        'principal_place_of_business',
+        'address',
         JSON.stringify({
-          line1: values.addressLine1,
-          line2: values.addressLine2,
+          address_line1: values.addressLine1,
+          address_line2: values.addressLine2,
           city: values.city,
+          district: values.district,
           state: values.state,
           pincode: values.pincode
         })
@@ -180,6 +198,8 @@ const BusinessPremisesSection = () => {
       formData.append('nature_of_possession', values.nature_of_possession);
       formData.append('additional_space', values.additional_space);
       formData.append('workplace', values.workplace);
+      formData.append('trade_area', values.trade_area);
+      formData.append('road_type', values.road_type);
       formData.append('status', 'in progress');
 
       if (values.address_proof && typeof values.address_proof !== 'string') {
@@ -227,6 +247,8 @@ const BusinessPremisesSection = () => {
       state: '',
       pincode: '',
       nature_of_possession: '',
+      trade_area: '',
+      road_type: '',
       address_proof_additional: null,
       rental_agreement_additional: null
     },
@@ -241,9 +263,9 @@ const BusinessPremisesSection = () => {
       rental_agreement_additional: Yup.mixed().required('Rental Agreement/NOC is required')
     }),
     onSubmit: async (values) => {
-      let url = values.id ? `/labourlicense/additional-space/${values.id}/` : `/labourlicense/additional-space/`;
+      let url = values.id ? `/tradelicense/additional-space/${values.id}/` : `/tradelicense/additional-space/`;
       let formData = new FormData();
-      formData.append('business_location_proofs', businessPremises.id);
+      formData.append('business_locations', businessPremises.id);
       formData.append(
         'address',
         JSON.stringify({
@@ -256,7 +278,6 @@ const BusinessPremisesSection = () => {
         })
       );
       formData.append('nature_of_possession', values.nature_of_possession);
-
       if (values.address_proof_additional && typeof values.address_proof_additional !== 'string') {
         formData.append('address_proof', values.address_proof_additional);
       }
@@ -277,20 +298,22 @@ const BusinessPremisesSection = () => {
         );
         const getAdditionalPremises = async () => {
           if (!businessPremises?.id) return;
-          const url = `/labourlicense/additional-space/view?business_location_proofs=${businessPremises.id}`;
+          const url = `/tradelicense/additional-space/${businessPremises.id}/`;
           const { res } = await Factory('get', url);
           if (res.status_cd === 0 && res.data) {
             formik2.setValues({
-              addressLine1: res.data[0].address.address_line1 || '',
-              addressLine2: res.data[0].address.address_line2 || '',
-              city: res.data[0].address.city || '',
-              district: res.data[0].address.district || '',
-              state: res.data[0].address.state || '',
-              pincode: res.data[0].address.pincode || '',
-              nature_of_possession: res.data[0].nature_of_possession || '',
-              address_proof_additional: res.data[0].address_proof || null,
-              rental_agreement_additional: res.data[0].rental_agreement || null,
-              id: res.data[0].id
+              addressLine1: res.data.address.address_line1 || '',
+              addressLine2: res.data.address.address_line2 || '',
+              city: res.data.address.city || '',
+              district: res.data.address.district || '',
+              state: res.data.address.state || '',
+              pincode: res.data.address.pincode || '',
+              nature_of_possession: res.data.nature_of_possession || '',
+              trade_area: res.data.trade_area || '',
+              road_type: res.data.road_type || '',
+              address_proof_additional: res.data.address_proof || null,
+              rental_agreement_additional: res.data.rental_agreement || null,
+              id: res.data.id
             });
           }
         };
@@ -310,25 +333,33 @@ const BusinessPremisesSection = () => {
     }
   });
   const getBusinessPremises = async () => {
-    const url = `/labourlicense/business-location/by-request-or-task?service_request_id=24`;
+    const url = `/tradelicense/business-location/by-request-or-task?service_request_id=25`;
     const { res } = await Factory('get', url);
+    console.log(res);
     if (res.status_cd === 0 && res.data) {
       const data = res.data;
       formik.setValues({
-        addressLine1: data.principal_place_of_business?.line1 || '',
-        addressLine2: data.principal_place_of_business?.line2 || '',
-        city: data.principal_place_of_business?.city || '',
-        district: data.principal_place_of_business?.district || '',
-        state: data.principal_place_of_business?.state || '',
-        pincode: data.principal_place_of_business?.pincode || '',
+        addressLine1: data.address?.address_line1 || '',
+        addressLine2: data.address?.address_line2 || '',
+        city: data.address?.city || '',
+        district: data.address?.district || '',
+        state: data.address?.state || '',
+        pincode: data.address?.pincode || '',
         nature_of_possession: data.nature_of_possession || '',
+        trade_area: data.trade_area || '',
+        road_type: data.road_type || '',
+        trade_premises: data.trade_premises || '',
+        trade_description: data.trade_description || '',
         address_proof: data.address_proof || null,
         rental_agreement: data.rental_agreement || null,
         bankStatement: data.bank_statement || null,
         additional_space: data.additional_space || 'no',
         workplace: data.workplace && data.workplace !== 'null' ? data.workplace : ''
       });
-      setBusinessPremises(data);
+      setBusinessPremises({
+        ...data,
+        additional_space: data.additional_space || 'no'
+      });
     }
   };
   const renderField = (field, formikContext) => {
@@ -336,7 +367,7 @@ const BusinessPremisesSection = () => {
 
     switch (field.type) {
       case 'text':
-        return field.name === 'state' || field.name === 'nature_of_possession' ? (
+        return field.name === 'state' || field.name === 'nature_of_possession' || field.name === 'road_type' ? (
           <>
             <Typography color="text.secondary" fontWeight={500} mb={1}>
               {field.label}
@@ -344,7 +375,13 @@ const BusinessPremisesSection = () => {
             <Autocomplete
               fullWidth
               size="small"
-              options={field.name === 'state' ? indian_States_And_UTs : ['Self Owned', 'Rented', 'Leased']}
+              options={
+                field.name === 'state'
+                  ? indian_States_And_UTs
+                  : field.name === 'nature_of_possession'
+                    ? ['Self Owned', 'Rented', 'Leased']
+                    : ['Single lane', 'Double lane', 'More than 2 lanes']
+              }
               value={values[field.name]}
               onChange={(e, value) => setFieldValue(field.name, value)}
               renderInput={(params) => (
@@ -366,6 +403,7 @@ const BusinessPremisesSection = () => {
               fullWidth
               size="small"
               name={field.name}
+              type={field.name === 'pincode' ? 'number' : 'text'}
               value={values[field.name]}
               onChange={handleChange}
               onBlur={handleBlur}
@@ -413,21 +451,22 @@ const BusinessPremisesSection = () => {
     const getAdditionalPremises = async () => {
       if (!businessPremises?.id) return; // Don't fetch if we don't have the main business location ID
 
-      const url = `/labourlicense/additional-space/view?business_location_proofs=${businessPremises.id}`;
+      const url = `/tradelicense/additional-space/${businessPremises.id}/`;
       const { res } = await Factory('get', url);
-      console.log(res);
       if (res.status_cd === 0 && res.data) {
         formik2.setValues({
-          addressLine1: res.data[0].address.address_line1 || '',
-          addressLine2: res.data[0].address.address_line2 || '',
-          city: res.data[0].address.city || '',
-          district: res.data[0].address.district || '',
-          state: res.data[0].address.state || '',
-          pincode: res.data[0].address.pincode || '',
-          nature_of_possession: res.data[0].nature_of_possession || '',
-          address_proof_additional: res.data[0].address_proof || null,
-          rental_agreement_additional: res.data[0].rental_agreement || null,
-          id: res.data[0].id
+          addressLine1: res.data.address.address_line1 || '',
+          addressLine2: res.data.address.address_line2 || '',
+          city: res.data.address.city || '',
+          district: res.data.address.district || '',
+          state: res.data.address.state || '',
+          pincode: res.data.address.pincode || '',
+          nature_of_possession: res.data.nature_of_possession || '',
+          trade_area: res.data.trade_area || '',
+          road_type: res.data.road_type || '',
+          address_proof_additional: res.data.address_proof || null,
+          rental_agreement_additional: res.data.rental_agreement || null,
+          id: res.data.id
         });
       }
     };
@@ -446,6 +485,14 @@ const BusinessPremisesSection = () => {
               Business premises, location & proofs
             </Typography>
           </Grid2>
+          {[
+            { label: 'Trade Premises', name: 'trade_premises', type: 'text' },
+            { label: 'Trade Description', name: 'trade_description', type: 'text' }
+          ].map((field) => (
+            <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4 }}>
+              {renderField(field, formik)}
+            </Grid2>
+          ))}
           <Grid2 size={12}>
             <Typography variant="subtitle1" color="text.secondary" fontWeight={700} mb={0}>
               Principal place of business
@@ -468,8 +515,11 @@ const BusinessPremisesSection = () => {
                   label="Yes"
                   control={
                     <Radio
-                      checked={businessPremises?.additional_space === 'yes'}
-                      onChange={() => setBusinessPremises((prev) => ({ ...prev, additional_space: 'yes' }))}
+                      checked={values.additional_space === 'yes'}
+                      onChange={() => {
+                        setFieldValue('additional_space', 'yes');
+                        setBusinessPremises((prev) => ({ ...prev, additional_space: 'yes' }));
+                      }}
                     />
                   }
                 />
@@ -477,8 +527,11 @@ const BusinessPremisesSection = () => {
                   label="No"
                   control={
                     <Radio
-                      checked={businessPremises?.additional_space === 'no'}
-                      onChange={() => setBusinessPremises((prev) => ({ ...prev, additional_space: 'no' }))}
+                      checked={values.additional_space === 'no'}
+                      onChange={() => {
+                        setFieldValue('additional_space', 'no');
+                        setBusinessPremises((prev) => ({ ...prev, additional_space: 'no' }));
+                      }}
                     />
                   }
                 />
@@ -486,27 +539,6 @@ const BusinessPremisesSection = () => {
             </Box>
           </Grid2>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-            {businessPremises?.additional_space === 'yes' && (
-              <Autocomplete
-                size="small"
-                fullWidth
-                options={['Office', 'Godown', 'Warehouse']}
-                value={values.workplace || ''}
-                onChange={(e, value) => setFieldValue('workplace', value)}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label="Workplace"
-                    size="small"
-                    error={touched.workplace && Boolean(errors.workplace)}
-                    helperText={touched.workplace && errors.workplace}
-                  />
-                )}
-                sx={{ minWidth: 180, ml: 2 }}
-              />
-            )}
-          </Grid2>
           <Grid2 size={12} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
             <Button variant="contained" color="primary" type="submit">
               Save

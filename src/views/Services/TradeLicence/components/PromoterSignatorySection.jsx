@@ -53,9 +53,7 @@ const PromoterSignatorySection = () => {
         })
       )
     }),
-    onSubmit: (values) => {
-      console.log('Submitted data:', values);
-    }
+    onSubmit: (values) => {}
   });
 
   const { values, errors, touched, handleChange, handleBlur, setFieldValue } = formik;
@@ -97,8 +95,8 @@ const PromoterSignatorySection = () => {
       residential_address: Yup.boolean()
     });
     let formData = new FormData();
-    formData.append('service_request', 24);
-    formData.append('service_task', 7);
+    formData.append('service_request', 25);
+    formData.append('service_task', 13);
     formData.append('name', promoter.name);
     if (promoter.aadhar_image && typeof promoter.aadhar_image !== 'string') {
       formData.append('aadhar_image', promoter.aadhar_image);
@@ -115,7 +113,7 @@ const PromoterSignatorySection = () => {
     formData.append('residential_address', promoter.residential_address ? 'yes' : 'no');
     formData.append('status', 'in progress');
 
-    let url = promoter.id ? `/labourlicense/signatory-details/${promoter.id}/` : `/labourlicense/signatory-details/`;
+    let url = promoter.id ? `/tradelicense/signatory-details/${promoter.id}/` : `/tradelicense/signatory-details/`;
     const { res } = await Factory(promoter.id ? 'put' : 'post', url, formData);
 
     if (res.status_cd === 1) {
@@ -152,7 +150,7 @@ const PromoterSignatorySection = () => {
       return;
     }
     // Otherwise, make API call
-    let url = `/labourlicense/signatory-details/${promoter.id}/`;
+    let url = `/tradelicense/signatory-details/${promoter.id}/`;
     const { res } = await Factory('delete', url);
     if (res.status_cd === 0) {
       const updatedPromoters = [...formik.values.promoters];
@@ -173,9 +171,8 @@ const PromoterSignatorySection = () => {
   };
 
   const getSignatoryDetails = async () => {
-    const url = `/labourlicense/signatory-details/by-request?service_request_id=24`;
+    const url = `/tradelicense/signatory-details/by-request-or-task?service_request_id=25`;
     const { res } = await Factory('get', url);
-
     if (res.status_cd === 0) {
       const promoters =
         res.data?.map((item) => ({

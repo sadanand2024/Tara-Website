@@ -65,7 +65,6 @@ export default function TabOne({ businessDetails = {}, postType, handleNext, set
 
   const validationSchema = Yup.object({
     nameOfBusiness: Yup.string().required('Business Name is required'),
-    registrationNumber: Yup.string().required('Registration Number is required'),
     entityType: Yup.string().required('Business Type is required'),
     gst_registered: Yup.string().required('GST Registration status is required'),
     gstin: Yup.string().when('gst_registered', {
@@ -234,23 +233,6 @@ export default function TabOne({ businessDetails = {}, postType, handleNext, set
     }
   }, [businessDetails]);
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setFieldValue('logo', file);
-      formik.setFieldTouched('logo', true, false);
-      // Create preview URL
-      const fileUrl = URL.createObjectURL(file);
-      setPreviewUrl(fileUrl);
-    }
-  };
-
-  const handleDeleteLogo = () => {
-    setFieldValue('logo', null);
-    setPreviewUrl(null);
-    formik.setFieldTouched('logo', true, false);
-  };
-
   if (!businessDetails || !businessDetails.id) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>
@@ -345,9 +327,7 @@ export default function TabOne({ businessDetails = {}, postType, handleNext, set
             <FormControl fullWidth>
               {item.name === 'gst_registered' ? (
                 <Stack spacing={1}>
-                  <FormLabel sx={{ fontWeight: 500 }}>
-                    GST Registered <span style={{ color: 'red' }}>*</span>
-                  </FormLabel>
+                  <FormLabel sx={{ fontWeight: 500 }}>GST Registered</FormLabel>
                   <RadioGroup
                     row
                     name="gst_registered"
@@ -379,7 +359,6 @@ export default function TabOne({ businessDetails = {}, postType, handleNext, set
                 <>
                   <Typography component="label" sx={{ mb: 1 }}>
                     {item.label}
-                    <span style={{ color: 'red' }}>*</span>
                   </Typography>
 
                   <Grid2 container spacing={1} alignItems="center">
@@ -420,10 +399,7 @@ export default function TabOne({ businessDetails = {}, postType, handleNext, set
                 </>
               ) : item.name === 'state' || item.name === 'entityType' ? (
                 <>
-                  <Typography sx={{ mb: 1 }}>
-                    {item.label}
-                    <span style={{ color: 'red' }}>*</span>
-                  </Typography>
+                  <Typography sx={{ mb: 1 }}>{item.label}</Typography>
                   <CustomAutocomplete
                     value={values[item.name] || ''}
                     onChange={(e, newValue) => setFieldValue(item.name, newValue)}
@@ -443,7 +419,6 @@ export default function TabOne({ businessDetails = {}, postType, handleNext, set
                 <>
                   <Typography component="label" sx={{ mb: 1 }}>
                     {item.label}
-                    {item.name !== 'address_line2' && <span style={{ color: 'red' }}>*</span>}
                   </Typography>
 
                   <CustomInput
@@ -494,10 +469,7 @@ export default function TabOne({ businessDetails = {}, postType, handleNext, set
         {busineesprofileFields.bank_details.map((item) => (
           <Grid2 size={{ xs: 12, sm: 6 }} key={item.name}>
             <FormControl fullWidth>
-              <Typography sx={{ mb: 1 }}>
-                {item.label}
-                {item.name !== 'swift_code' && <span style={{ color: 'red' }}>*</span>}
-              </Typography>{' '}
+              <Typography sx={{ mb: 1 }}>{item.label}</Typography>{' '}
               <TextField
                 name={item.name}
                 value={values[item.name]}
