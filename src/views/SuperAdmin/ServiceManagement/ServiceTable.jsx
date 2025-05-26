@@ -22,6 +22,9 @@ import { gridSpacing } from 'store/constant';
 import Factory from 'utils/Factory';
 import { useSelector } from 'store';
 import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded';
+import Typography from '@mui/material/Typography';
+import Stack from '@mui/material/Stack';
+import Link from '@mui/material/Link';
 
 // ==============================|| MANAGE USERS ||============================== //
 
@@ -186,48 +189,85 @@ const ServiceRequests = ({ searchQuery, setUsers, assigned, setSearchQuery }) =>
               return (
                 <TableRow hover key={idx}>
                   <TableCell sx={{ pl: 3 }}>{row.id}</TableCell>
-                  <TableCell sx={{ p: 1.5 }}>{row.service_name}</TableCell>
+                  <TableCell sx={{ p: 1.5 }}>
+                    <Link
+                      href={`/app/task-management/${row.service_name}?service_id=${row.id}`}
+                      sx={{ textDecoration: 'underline', textDecorationColor: 'inherit' }}
+                    >
+                      {row.service_label}
+                    </Link>
+                  </TableCell>
                   <TableCell sx={{ p: 1.5 }}>{row.category}</TableCell>
-                   <TableCell sx={{ p: 1.5 }}>{row.user.full_name || 'Unnamed '}</TableCell>
+                  <TableCell sx={{ p: 1.5 }}>{row.user.full_name || 'Unnamed '}</TableCell>
                   <TableCell sx={{ p: 1.5 }}>
                     {new Date(row.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                   </TableCell>
-                  <TableCell sx={{ p: 1.5 }}>
-                    <Autocomplete
-                      size="small"
-                      options={userOptions}
-                      disabled={assigned}
-                      getOptionLabel={(option) => option.name || option.first_name || option.email || ''}
-                      value={assigneeObj}
-                      onChange={(_, value) => handleARChange(row, value, 'assignee', idx)}
-                      isOptionEqualToValue={(option, value) => option.id === value.id}
-                      renderOption={(props, option) => (
-                        <Box component="li" {...props} display="flex" alignItems="center" key={option.id}>
-                          <Avatar src={option.avatar} sx={{ width: 24, height: 24, mr: 1 }} />
-                          {option.name || option.first_name || option.email}
-                        </Box>
-                      )}
-                      renderInput={(params) => <TextField {...params} placeholder="Select Assignee" />}
-                    />
-                  </TableCell>
-                  <TableCell sx={{ p: 1.5 }}>
-                    <Autocomplete
-                      size="small"
-                      options={userOptions}
-                      disabled={assigned}
-                      getOptionLabel={(option) => option.name || option.first_name || option.email || ''}
-                      value={reviewerObj}
-                      onChange={(_, value) => handleARChange(row, value, 'reviewer', idx)}
-                      isOptionEqualToValue={(option, value) => option.id === value.id}
-                      renderOption={(props, option) => (
-                        <Box component="li" {...props} display="flex" alignItems="center" key={option.id}>
-                          <Avatar src={option.avatar} sx={{ width: 24, height: 24, mr: 1 }} />
-                          {option.name || option.first_name || option.email}
-                        </Box>
-                      )}
-                      renderInput={(params) => <TextField {...params} placeholder="Select Reviewer" />}
-                    />
-                  </TableCell>
+
+                  {!assigned ? (
+                    <>
+                      <TableCell sx={{ p: 1.5 }}>
+                        <Autocomplete
+                          size="small"
+                          options={userOptions}
+                          disabled={assigned}
+                          getOptionLabel={(option) => option.name || option.first_name || option.email || ''}
+                          value={assigneeObj}
+                          onChange={(_, value) => handleARChange(row, value, 'assignee', idx)}
+                          isOptionEqualToValue={(option, value) => option.id === value.id}
+                          renderOption={(props, option) => (
+                            <Box component="li" {...props} display="flex" alignItems="center" key={option.id}>
+                              <Avatar src={option.avatar} sx={{ width: 24, height: 24, mr: 1 }} />
+                              {option.name || option.first_name || option.email}
+                            </Box>
+                          )}
+                          renderInput={(params) => <TextField {...params} placeholder="Select Assignee" />}
+                        />
+                      </TableCell>
+                      <TableCell sx={{ p: 1.5 }}>
+                        <Autocomplete
+                          size="small"
+                          options={userOptions}
+                          disabled={assigned}
+                          getOptionLabel={(option) => option.name || option.first_name || option.email || ''}
+                          value={reviewerObj}
+                          onChange={(_, value) => handleARChange(row, value, 'reviewer', idx)}
+                          isOptionEqualToValue={(option, value) => option.id === value.id}
+                          renderOption={(props, option) => (
+                            <Box component="li" {...props} display="flex" alignItems="center" key={option.id}>
+                              <Avatar src={option.avatar} sx={{ width: 24, height: 24, mr: 1 }} />
+                              {option.name || option.first_name || option.email}
+                            </Box>
+                          )}
+                          renderInput={(params) => <TextField {...params} placeholder="Select Reviewer" />}
+                        />
+                      </TableCell>
+                    </>
+                  ) : (
+                    <>
+                      <TableCell sx={{ p: 1.5 }}>
+                        {row?.assignee === null ? (
+                          <Typography variant="subtitle1">Unassigned</Typography>
+                        ) : (
+                          <Stack direction="row" spacing={1} alignItems="center">
+                            <Typography variant="subtitle1" sx={{ textDecoration: 'underline', textDecorationColor: 'inherit' }}>
+                              {row?.assignee?.full_name || 'Unnamed'}
+                            </Typography>
+                          </Stack>
+                        )}
+                      </TableCell>
+                      <TableCell sx={{ p: 1.5 }}>
+                        {row?.reviewer === null ? (
+                          <Typography variant="subtitle1">Unassigned</Typography>
+                        ) : (
+                          <Stack direction="row" spacing={1} alignItems="center">
+                            <Typography variant="subtitle1" sx={{ textDecoration: 'underline', textDecorationColor: 'inherit' }}>
+                              {row?.reviewer?.full_name || 'Unnamed'}
+                            </Typography>
+                          </Stack>
+                        )}
+                      </TableCell>
+                    </>
+                  )}
                   {!assigned && (
                     <TableCell sx={{ p: 1.5 }}>
                       <Button

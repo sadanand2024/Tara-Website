@@ -97,6 +97,10 @@ const MainRoutes = {
       element: <DashboardBusiness />
     },
     {
+      path: '/app/support-chat',
+      element: <Support />
+    },
+    {
       path: '/apps/user/profile',
       element: <AppUserAccountProfile2 />
     },
@@ -108,26 +112,40 @@ const MainRoutes = {
       path: '/apps/account-settings',
       element: <AppAccountSettings />
     },
+
+    //Services
+
     {
       path: '/app/my-services',
       element: <MyServices />
     },
     {
-      path: '/app/my-services/itr-dashboard',
+      path: '/app/my-services/itr-filing',
       element: <ITRSummary />
     },
     {
-     path: '/app/support-chat',
-      element: <Support />
+      path: '/app/task-management/itr-filing',
+      element: <ITRSummary />
     },
-
+    {
+      path: '/app/task-management/msme-dashboard',
+      element: <MSMEDashboard />
+    },
     {
       path: '/app/my-services/msme-dashboard',
       element: <MSMEDashboard />
     },
     {
+      path: '/app/task-management/trade-license',
+      element: <TradeLicence />
+    },
+    {
       path: '/app/my-services/trade-license',
       element: <TradeLicence />
+    },
+    {
+      path: '/app/task-management/labour-license',
+      element: <LabourLicence />
     },
     {
       path: '/app/my-services/labour-license',
