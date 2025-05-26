@@ -4,7 +4,7 @@ import UploadFileIcon from '@mui/icons-material/UploadFile';
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import CloseIcon from '@mui/icons-material/Close';
-
+import DeleteIcon from '@mui/icons-material/Delete';
 const RenderFileUpload = ({ label, fieldName, file, setFieldValue, touched, errors }) => {
   const isUrl = typeof file === 'string' && (file.startsWith('http://') || file.startsWith('https://'));
   return (
@@ -17,13 +17,13 @@ const RenderFileUpload = ({ label, fieldName, file, setFieldValue, touched, erro
           </Button>
         </label>
       ) : isUrl ? (
-        <Box display="flex" alignItems="center" gap={1}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 1, mt: 1 }}>
           <CloudDownloadIcon sx={{ cursor: 'pointer' }} color="primary" fontSize="large" onClick={() => window.open(file, '_blank')} />
-          <Typography variant="caption" display="block" sx={{ flexGrow: 1 }}>
+          <Typography variant="subtitle1" color="text.secondary" display="block">
             {file.split('/').pop()}
           </Typography>
           <Button size="small" color="error" onClick={() => setFieldValue(fieldName, null)} sx={{ minWidth: 0, p: 0.5 }}>
-            <CloseIcon fontSize="small" />
+            <DeleteIcon fontSize="small" />
           </Button>
         </Box>
       ) : (
