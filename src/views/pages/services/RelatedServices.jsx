@@ -1,176 +1,66 @@
-import ChevronLeft from '@mui/icons-material/ChevronLeft';
-import ChevronRight from '@mui/icons-material/ChevronRight';
-import { Box, Container, Link, Typography } from '@mui/material';
 
-import React, { useRef } from 'react';
+import { Box, Container, Stack, Typography } from '@mui/material';
+import CardMedia from '@mui/material/CardMedia';
+import { IconCircleCheck } from '@tabler/icons-react';
 
+import React from 'react';
+import { Slide } from 'react-awesome-reveal'; // ✅ Animation
+
+import LayerLeft from 'assets/images/landing/customization-left.png'; // Your actual image path
 
 const RelatedServices = ({ related }) => {
   if (!related || related.length === 0) return null;
 
-  const scrollContainerRef = useRef(null);
-
-  const scrollLeft = () => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollBy({ left: -300, behavior: 'smooth' }); // Scroll left by a fixed amount
-    }
-  };
-
-  const scrollRight = () => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollBy({ left: 300, behavior: 'smooth' }); // Scroll right by a fixed amount
-    }
+  const listSX = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '1rem',
+    padding: '12px 0',
+    fontSize: '1rem',
+    color: 'grey.900',
+    svg: { color: 'secondary.main', minWidth: 30 }
   };
 
   return (
-    <Container sx={{ mt:-8 }}>
-      <Typography
-        variant="h2"
-        textAlign="center"
-        fontWeight={700}
-        sx={{
-          fontFamily: 'Manrope, sans-serif',
-          fontWeight: 700,
-          lineHeight: '100%',
-          letterSpacing: '0px',
-          // background: '#000000',
-          fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' },
-          mb:15,
-          color: '#000',
-        }}
+    <Container sx={{ mt: 10 }}>
+      <Stack
+        direction={{ xs: 'column', md: 'row' }}
+        spacing={{ xs: 4, md: 8 }}
+        alignItems="center"
+        justifyContent="space-between"
       >
-        Related Services
-      </Typography>
-
-      <Box sx={{ position: 'relative',mt:{xs:-6,lg:-8} }}>
-        <Box
-          sx={{
-            position: 'absolute',
-            left: 0,
-            top: '50%',
-            transform: 'translateY(-50%)',
-            zIndex: 1,
-            backgroundColor: '#0042D1', // White background for visibility
-            borderRadius: '50%',
-            boxShadow: '0px 2px 5px rgba(0, 0, 0, 0.1)',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: 40,
-            height: 40,
-            color:'#FFFFFF'
-          }}
-          onClick={scrollLeft}
-        >
-          <ChevronLeft />
+        {/* Left: Image */}
+        <Box sx={{ width: { xs: '100%', md: '40%' }, maxWidth: 500 }}>
+          <Stack sx={{ width: '80%', mx: 'auto' }}>
+            <CardMedia component="img" image={LayerLeft} alt="Related Services" />
+          </Stack>
         </Box>
 
-        <Box
-          ref={scrollContainerRef}
-          sx={{
-            display: 'flex',
-            overflowX: 'auto',
-            gap: 3,
-            pb: 2,
-            '&::-webkit-scrollbar': {
-              display: 'none',
-            },
-            msOverflowStyle: 'none', // IE and Edge
-            scrollbarWidth: 'none', // Firefox
-            scrollBehavior: 'smooth', // Smooth scrolling
-          }}
-        >
-          {related.map((service, idx) => (
-            <Box
-              key={idx}
-              sx={{
-                width: 336,
-                height: 242,
-                padding: '32px 36px',
-                gap: 2, // Equivalent to 16px with default MUI spacing
-                backgroundColor: '#fff',
-                borderRadius:2,
-                boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-                flexShrink: 0, // Ensure cards don't shrink
-              }}
-            >
+        {/* Right: Text with Slide-Up Animation */}
+        <Box sx={{ width: { xs: '100%', md: '60%' } }}>
+          <Slide direction="up" triggerOnce>
+            <Stack spacing={3}>
               <Box>
-                <Typography
-                  variant="h6"
-                  fontWeight={600}
-                  mb={1}
-                  sx={{
-                    fontFamily: 'Inter, sans-serif',
-                    fontSize: '22px',
-                    lineHeight: '26px',
-                    letterSpacing: '0px',
-                    // width: 300,
-                    height:50,
-                    textAlign: 'left',
-                  }}
-                >
-                  {service.title}
+                <Typography variant="h1" fontWeight={800} color="text.primary">
+                  Related <span style={{ color: '#1976d2' }}>Services</span>
                 </Typography>
-                <Typography
-                  variant="body2"
-                  color="#001033"
-                  sx={{
-                    fontFamily: 'Inter, sans-serif',
-                    fontWeight: 400,
-                    fontSize: '18px',
-                    lineHeight: '24px',
-                    letterSpacing: '0px',
-                    textAlign: 'left',
-                  }}
-                >
-                  {service.description}
+                <Typography variant="h3" color="text.secondary" mt={2} mb={3}>
+                  Explore other services that may benefit you:
                 </Typography>
               </Box>
-              <Link
-                href={service.link}
-                color="primary.main"
-                underline="none"
-                sx={{
-                  mt: 2,
-                  display: 'flex',
-                  alignItems: 'center',
-                  fontWeight: 600,
-                }}
-              >
-                Know More
-                <Box sx={{ ml: 1, mt: 0.5 }}>→</Box>
-              </Link>
-            </Box>
-          ))}
-        </Box>
 
-        <Box
-          sx={{
-            position: 'absolute',
-            right: 0,
-            top: '50%',
-            transform: 'translateY(-50%)',
-            zIndex: 1,
-            backgroundColor: '#0042D1', // White background for visibility
-            borderRadius: '50%',
-            boxShadow: '0px 2px 5px rgba(0, 0, 0, 0.1)',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: 40,
-            height: 40,
-            color:'#FFFFFF'
-          }}
-          onClick={scrollRight}
-        >
-          <ChevronRight />
+              <Stack spacing={1}>
+                {related.map((item, idx) => (
+                  <Typography key={idx} sx={listSX}>
+                    <IconCircleCheck size={30} />
+                    {item}
+                  </Typography>
+                ))}
+              </Stack>
+            </Stack>
+          </Slide>
         </Box>
-      </Box>
+      </Stack>
     </Container>
   );
 };

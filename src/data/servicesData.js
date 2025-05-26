@@ -109,28 +109,13 @@ const servicesData = {
             answer: 'Yes, revised return filing is available.'
           }
         ],
-"relatedServices": [
-    {
-      "title": "Advance Tax Calculation",
-      "description": "Get accurate advance tax estimates to avoid interest and stay compliant."
-    },
-    {
-      "title": "Capital Gains Advisory",
-      "description": "Expert guidance on tax implications for your capital gains transactions."
-    },
-    {
-      "title": "Notice Handling",
-      "description": "Resolve income tax notices quickly with professional support and responses."
-    },
-    {
-      "title": "TDS Return Filing",
-      "description": "Timely and accurate filing of quarterly TDS returns for all deductors."
-    },
-    {
-      "title": "Net Worth Certificate for Visa",
-      "description": "Certified net worth reports for visa, immigration, or financial purposes."
-    }
-  ],
+        relatedServices: [
+          'Advance Tax Calculation',
+          'Capital Gains Advisory',
+          'Notice Handling',
+          'TDS Return Filing',
+          'Net Worth Certificate for Visa'
+        ],
         stickyFooterCta: {
           text: 'File your income tax return today with expert guidance — accurate, secure, and stress-free.',
           buttons: [
@@ -220,28 +205,13 @@ const servicesData = {
             answer: 'Yes, in many cases that’s part of the solution — and we’ll handle it.'
           }
         ],
-      "relatedServices": [
-    {
-      "title": "Income Tax Return Filing",
-      "description": "File your ITR accurately and on time to claim deductions and stay compliant."
-    },
-    {
-      "title": "ITR Revision / Rectification",
-      "description": "Correct errors in your filed return with expert assistance in revision or rectification."
-    },
-    {
-      "title": "Form 26AS / AIS Reconciliation",
-      "description": "Match your ITR with Form 26AS and AIS to avoid mismatches and tax notices."
-    },
-    {
-      "title": "Advance Tax Planning",
-      "description": "Plan and pay your advance tax smartly to avoid interest and penalties."
-    },
-    {
-      "title": "TDS Filing & Correction",
-      "description": "File TDS returns and fix errors like wrong PAN or challan mismatches efficiently."
-    }
-  ],
+        relatedServices: [
+          'Income Tax Return Filing',
+          'ITR Revision / Rectification',
+          'Form 26AS / AIS Reconciliation',
+          'Advance Tax Planning',
+          'TDS Filing & Correction'
+        ],
         stickyFooterCta: {
           text: 'Received a tax notice? Don’t panic. Let our experts respond accurately and protect your interests.',
           buttons: [

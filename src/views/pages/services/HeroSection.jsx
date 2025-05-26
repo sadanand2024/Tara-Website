@@ -1,11 +1,51 @@
 import { Box, Button, Container, Stack, Typography, useTheme } from '@mui/material';
-import heroPerson from 'assets/images/landing/hero-person.png';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Fade } from 'react-awesome-reveal';
 
-const HeroWithImage = ({ data }) => {
+const Typewriter = ({ text, speed = 80 }) => {
+  const [displayed, setDisplayed] = useState('');
+  const [isTypingDone, setIsTypingDone] = useState(false);
+
+  useEffect(() => {
+    setDisplayed('');
+    setIsTypingDone(false);
+  }, [text]);
+
+  useEffect(() => {
+    if (text && !isTypingDone) {
+      const interval = setInterval(() => {
+        setDisplayed((prev) => {
+          const next = text.slice(0, prev.length + 1);
+          if (next.length === text.length) {
+            clearInterval(interval);
+            setIsTypingDone(true);
+          }
+          return next;
+        });
+      }, speed);
+      return () => clearInterval(interval);
+    }
+  }, [text, isTypingDone, speed]);
+
+  return (
+    <Typography
+      variant="h1"
+      fontWeight={700}
+      sx={{
+        fontSize: { xs: '1.6rem', sm: '2.2rem', md: '3.2rem' },
+        color: 'text.primary',
+        textAlign: 'center',
+        wordBreak: 'break-word'
+      }}
+    >
+      {displayed}
+    </Typography>
+  );
+};
+
+const HeroWithFinalTouch = ({ data }) => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const service_id = searchParams.get('id');
@@ -16,162 +56,114 @@ const HeroWithImage = ({ data }) => {
     <Box
       sx={{
         position: 'relative',
-        py: { xs: 4, sm: 6, md: 8, lg: 10 },
-        mt: { xs:10, sm: 2, md: 4, lg: -5 },
-        borderRadius: { xs: 2, sm: 3, md: 4 },
-        background: 'white',
+        py: { xs: 5, md: 12 },
+        px: { xs: 1, md: 8 },
+        mt: { xs: 1, md: 4 },
+        borderRadius: 4,
+        background:
+          'url("/assets/hero-bg.svg") center/cover no-repeat, linear-gradient(to right,rgb(225, 229, 233) 0%,rgb(218, 221, 225) 100%)',
+        boxShadow: '0px 6px 20px rgba(0,0,0,0.08)',
         overflow: 'hidden'
       }}
     >
-      <Container maxWidth="lg">
-        <Stack
-          direction={{ xs: 'column', md: 'row' }}
-          spacing={{ xs: 3, sm: 4, md: 6, lg: 8 }}
-          alignItems="center"
-          justifyContent="space-between"
-        >
-          <Box sx={{ 
-            flex: 1, 
-            textAlign: { xs: 'center', md: 'left' },
-            width: { xs: '100%', md: '50%' }
-          }}>
-            <Fade cascade damping={0.1} triggerOnce>
-              <Typography
-                variant="h1"
-                sx={{
-                  fontFamily: 'Roboto, sans-serif',
-                  fontWeight: 700,
-                  fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem', lg: '44px' },
-                  lineHeight: { xs: '1.3', sm: '1.4', md: '1.5', lg: '54px' },
-                  letterSpacing: '0%',
-                  color: 'text.primary',
-                  textAlign: { xs: 'center', md: 'left' },
-                  wordBreak: 'break-word',
-                  mb: { xs: 3, sm: 4, md: 6, lg:2 }
-                }}
-              >
-                {data.title}
-              </Typography>
+      {/* Floating Bubbles */}
+      <Box
+        sx={{
+          position: 'absolute',
+          width: { xs: 120, sm: 180, md: 250 },
+          height: { xs: 120, sm: 180, md: 250 },
+          top: { xs: -40, md: -80 },
+          left: { xs: -40, md: -80 },
+          borderRadius: '50%',
+          background: 'linear-gradient(135deg, #ff7e5f, #feb47b)',
+          opacity: 0.1,
+          animation: 'float 6s ease-in-out infinite alternate',
+          zIndex: 1
+        }}
+      />
+      <Box
+        sx={{
+          position: 'absolute',
+          width: { xs: 90, sm: 140, md: 180 },
+          height: { xs: 90, sm: 140, md: 180 },
+          bottom: { xs: -30, md: -60 },
+          right: { xs: -30, md: -60 },
+          borderRadius: '50%',
+          background: 'linear-gradient(135deg, #76b2fe, #b69efe)',
+          opacity: 0.1,
+          animation: 'float 8s ease-in-out infinite alternate-reverse',
+          zIndex: 1
+        }}
+      />
 
-              <Typography
-                variant="h5"
-                color="text.secondary"
-                sx={{
-                  fontFamily: 'Roboto, sans-serif',
-                  fontWeight: 400,
-                  fontSize: { xs: '0.9rem', sm: '1rem', md: '1.2rem', lg: '20px' },
-                  lineHeight: { xs: '1.4', sm: '1.5', md: '1.6', lg: '29px' },
-                  letterSpacing: '0%',
-                  textAlign: { xs: 'center', md: 'left' },
-                  mb: { xs: 4, sm: 6, md: 8, lg: 4 }
-                }}
-              >
-                {data.subtitle}
-              </Typography>
+      <Container maxWidth="md" sx={{ position: 'relative', zIndex: 2, textAlign: 'center' }}>
+        <Fade cascade damping={0.1} triggerOnce>
+          <Typewriter text={data.title} />
 
-              <Stack
-                direction={{ xs: 'column', sm: 'row' }}
-                spacing={{ xs: 2, sm: 3 }}
-                justifyContent={{ xs: 'center', md: 'flex-start' }}
-                alignItems={{ xs: 'stretch', sm: 'center', md: 'flex-start' }}
-                sx={{ width: '100%' }}
-              >
-                {data.ctas.map((cta, idx) => (
-                  <Button
-                    key={idx}
-                    variant={idx === 0 ? 'contained' : 'outlined'}
-                    size="large"
-                    color="primary"
-                    onClick={() => {
-                      if (idx === 0) {
-                        navigate(`/register?id=${service_id}&context=${service_type}&type=service`);
-                      } else if (cta.label === "Talk to Tax Expert") {
-                        navigate(`/book-consultation?id=${service_id}&context=${service_type}&type=service`);
-                      } else {
-                        navigate('/pages/contact-us');
-                      }
-                    }}
-                    sx={{
-                      fontWeight: 500,
-                      px: { xs: 2, sm: 3, md: 4 },
-                      py: { xs: 1, sm: 1.5 },
-                      minWidth: { xs: '100%', sm: 160, md: 180 },
-                      height: { xs: 40, sm: 44, md: 48 },
-                      textAlign: 'center',
-                      transition: 'all 0.3s ease',
-                      '&:hover': {
-                        transform: 'translateY(-2px)'
-                      }
-                    }}
-                  >
-                    {cta.label}
-                  </Button>
-                ))}
-              </Stack>
-            </Fade>
-          </Box>
+          <Typography variant="h5" color="text.secondary" fontWeight={400} mt={2} mb={4} sx={{ fontSize: { xs: '1rem', md: '1.5rem' } }}>
+            {data.subtitle}
+          </Typography>
 
-          <Box
+          <Stack
+            direction={{ xs: 'column', sm: 'row' }}
+            spacing={2}
+            justifyContent="center"
+            alignItems="center"
+            flexWrap="wrap"
             sx={{
-              position: 'relative',
-              width: { xs: '80%', sm: '80%', md: '50%', lg: 420 },
-              height: { xs: 250, sm: 300, md: 350, lg: 400 },
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              mt: { xs: 4, sm: 6, md: 0 }
+              width: { xs: '100%', sm: 'auto' }
             }}
           >
-            <Box
-              sx={{
-                position: 'absolute',
-                width: { xs: '50%', sm: '75%', md: '80%' },
-                height: { xs: '70%', sm: '75%', md: '80%' },
-                borderRadius: '50%',
-                background: theme.palette.primary.dark,
-                zIndex: 1,
-              }}
-            />
-
-            <Box
-              sx={{
-                position: 'absolute',
-                width: '100%',
-                height: '100%',
-                borderRadius: '50%',
-                zIndex: 2,
-                top: { xs: '-5%', sm: '-8%', md: '-10%' },
-                left: { xs: '-5%', sm: '-8%', md: '-10%' },
-                transform: 'rotate(45deg)',
-                opacity: 0.5
-              }}
-            />
-
-            <Box
-              sx={{
-                position: 'relative',
-                width: { xs: '85%', sm: '90%' },
-                height: '100%',
-                borderRadius: '50%',
-                overflow: 'hidden',
-                zIndex: 3,
-              }}
-            >
-              <img
-                src={heroPerson}
-                alt="Person Filing Tax Return"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
+            {data.ctas.map((cta, idx) => (
+              <Button
+                key={idx}
+                variant={idx === 0 ? 'contained' : 'outlined'}
+                size="large"
+                color="primary"
+                fullWidth={true}
+                onClick={() => {
+                  if (idx === 0) {
+                    navigate(`/register?id=${service_id}&context=${service_type}&type=service`);
+                  } else if (cta.label === "Book a Consultation") {
+                    navigate(`/book-consultation?id=${service_id}&context=${service_type}&type=service`);
+                  } else {
+                    navigate('/pages/contact-us');
+                  }
                 }}
-              />
-            </Box>
-          </Box>
-        </Stack>
+                sx={{
+                  borderRadius: 3,
+                  fontWeight: 600,
+                  px: 3,
+                  py: 1.2,
+                  minWidth: { xs: '100%', sm: 160 },
+                  width: { xs: '100%', sm: 'auto' },
+                  textAlign: 'center',
+                  transition: '0.3s ease',
+                  mb: { xs: 1, sm: 0 },
+                  '&:hover': {
+                    transform: 'scale(1.05)',
+                    boxShadow: idx === 0 ? '0px 0px 20px 4px rgba(0,123,255,0.3)' : undefined
+                  }
+                }}
+              >
+                {cta.label}
+              </Button>
+            ))}
+          </Stack>
+        </Fade>
       </Container>
+
+      {/* Animation Styles */}
+      <style>
+        {`
+          @keyframes float {
+            from { transform: translateY(0); }
+            to { transform: translateY(20px); }
+          }
+        `}
+      </style>
     </Box>
   );
 };
 
-export default HeroWithImage;
+export default HeroWithFinalTouch;

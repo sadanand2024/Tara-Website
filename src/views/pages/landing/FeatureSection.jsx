@@ -1,272 +1,128 @@
-import { Box, Button, Grid, Stack, Typography } from '@mui/material';
-import AutomationIcon from 'assets/images/icons/Automation.svg';
-import CommitIcon from 'assets/images/icons/Commit.svg';
-import FinancialIcon from 'assets/images/icons/Financial.svg';
-import image1 from 'assets/images/landing/image1.png';
-import image2 from 'assets/images/landing/image2.png';
-import image3 from 'assets/images/landing/image3.png';
+import PropTypes from 'prop-types';
+// material-ui
+import { useTheme } from '@mui/material/styles';
+import Container from '@mui/material/Container';
+import Grid from '@mui/material/Grid2';
+import Typography from '@mui/material/Typography';
+import Stack from '@mui/material/Stack';
+import CardMedia from '@mui/material/CardMedia';
 
-import React from 'react';
+// project imports
+import FadeInWhenVisible from './Animation';
+import { ThemeMode } from 'config';
+import SubCard from 'ui-component/cards/SubCard';
+import Avatar from 'ui-component/extended/Avatar';
 
-const TaraFinanceSection = () => {
+// assets
+import Offer1 from 'assets/images/landing/offer/offer-1.png';
+import Offer2 from 'assets/images/landing/offer/offer-2.png';
+import Offer3 from 'assets/images/landing/offer/offer-3.png';
+import Offer4 from 'assets/images/landing/offer/offer-4.png';
+import Offer5 from 'assets/images/landing/offer/offer-5.png';
+import Offer6 from 'assets/images/landing/offer/offer-6.png';
+
+function OfferCard({ title, caption, image }) {
+  const theme = useTheme();
+  const AvaterSx = { bgcolor: 'transparent', color: 'secondary.main', width: 56, height: 56 };
+
   return (
-    <Box sx={{ backgroundColor: '#f0f4ff', width: '100%', overflow: 'hidden' }}>
-      <Box
+    <FadeInWhenVisible>
+      <SubCard
         sx={{
-          padding: { xs: '20px 16px', sm: '30px 20px', md: '40px 20px' },
-          textAlign: 'center',
-          maxWidth: '1200px',
-          margin: '0 auto',
+          bgcolor: theme.palette.mode === ThemeMode.DARK ? 'dark.800' : 'grey.100',
+          borderColor: 'divider',
+          '&:hover': { boxShadow: 'none' },
+          height: 1
         }}
       >
-        {/* Title Section */}
-        <Typography
-          variant="h2"
-          sx={{
-            fontFamily: 'Manrope, sans-serif',
-            fontSize: { xs: '1.5rem', sm: '1.75rem', md: '3rem' },
-            fontWeight: 500,
-            textAlign: 'center',
-            color: '#002366',
-            lineHeight: 1.3,
-            mb: { xs: 2, sm: 3,lg:3 }
-          }}
-        >
-          Over 150+ professionals and businesses
-          <br />
-          trust Tara First to manage their finances.
-          <br />
-          Now it's your turn.
-        </Typography>
-        <Typography 
-          variant="h3" 
-          color="#00256B" 
-          fontWeight="400" 
-          
-          mb={4}
-          sx={{
-            fontSize: { xs: '1.25rem', sm: '1.5rem', md: '1.5rem' },
-            
-          }}
-        >
-          Get started with a customized walkthrough
-        </Typography>
+        <Stack spacing={4}>
+          <Avatar variant="rounded" sx={AvaterSx}>
+            <CardMedia component="img" src={image} alt="Beautiful User Interface" />
+          </Avatar>
+          <Stack spacing={2}>
+            <Typography variant="h3" sx={{ fontWeight: 500 }}>
+              {title}
+            </Typography>
+            <Typography variant="body2" sx={{ fontSize: '1rem' }}>
+              {caption}
+            </Typography>
+          </Stack>
+        </Stack>
+      </SubCard>
+    </FadeInWhenVisible>
+  );
+}
 
-        {/* Features Section */}
-        <Grid container spacing={{ xs: 3, sm: 4 }} justifyContent="center" mb={{ xs: 3, sm: 4, }}>
-          <Grid item xs={12} sm={4}>
-            <Box>
-              <Box
-                sx={{
-                  width: { xs: 48, sm: 56, md: 64 },
-                  height: { xs: 48, sm: 56, md: 64 },
-                  borderRadius: '50%',
-                  display: 'inline-flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  mb: { xs:0, sm: 3, md: 10 },
-                  mt:{xs:4}
-                }}
-              >
-                <Box
-                  component="img"
-                  src={FinancialIcon}
-                  alt="Financial Icon"
-                  sx={{
-                    width: '64px',
-                    height: '64px',
-                    mb: { xs:14, sm: 0, md:1 }
-                  }}
-                />
-              </Box>
-              <Typography 
-                variant="body1" 
-                sx={{
-                  fontSize: { xs: '1rem', sm: '1.1rem', md: '1.2rem' },
-                  fontWeight: 500,
-                  mt: { xs: -6, sm: -7, md: -8 },
-                  lineHeight: 1.4
-                }}
-              >
-                Access a complete <br />
-                financial dashboard
-              </Typography>
-            </Box>
-          </Grid>
+// =============================|| LANDING - FEATURE PAGE ||============================= //
 
-          <Grid item xs={12} sm={4}>
-            <Box>
-              <Box
-                sx={{
-                  // backgroundColor: '#fffccf',
-                  width: { xs: 48, sm: 56, md: 64 },
-                  height: { xs: 48, sm: 56, md: 64 },
-                  borderRadius: '50%',
-                  display: 'inline-flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  mb: { xs: 2, sm: 3, md: 10 },
-                  mt:{xs:4}
-                }}
-              >
-                <Box
-                  component="img"
-                  src={AutomationIcon}
-                  alt="Automation Icon"
-                  sx={{
-                    width: '64px',
-                    height: '64px',
-                    mb: { xs:10, sm: 0, md:1 }
-                  }}
-                />
-              </Box>
-              <Typography 
-                variant="body1" 
-                sx={{
-                  fontSize: { xs: '1rem', sm: '1.1rem', md: '1.2rem' },
-                  fontWeight: 500,
-                  mt: { xs: -6, sm: -7, md: -8 },
-                  lineHeight: 1.4
-                }}
-              >
-                Uncover automation <br />
-                opportunities
+export default function FeatureSection() {
+  return (
+    <Container>
+      <Grid container spacing={7.5} sx={{ justifyContent: 'center' }}>
+        <Grid sx={{ textAlign: 'center' }} size={{ xs: 12, md: 6 }}>
+          <Grid container spacing={1.5}>
+            <Grid size={12}>
+              <Typography variant="h2" sx={{ fontSize: { xs: '1.5rem', sm: '2.125rem' } }}>
+                What does TaraFirst offer?
               </Typography>
-            </Box>
-          </Grid>
-
-          <Grid item xs={12} sm={4}>
-            <Box>
-              <Box
-                sx={{
-                  // backgroundColor: '#fffccf',
-                  width: { xs: 48, sm: 56, md: 64 },
-                  height: { xs: 48, sm: 56, md: 64 },
-                  borderRadius: '50%',
-                  display: 'inline-flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  mb: { xs: 2, sm: 3, md: 10 },
-                  mt:{xs:4}
-                }}
-              >
-                <Box
-                  component="img"
-                  src={CommitIcon}
-                  alt="Commit Icon"
-                  sx={{
-                    width: '64px',
-                    height: '64px',
-                    mb: { xs:10, sm: 0, md:1 }
-                  }}
-                />
-              </Box>
-              <Typography 
-                variant="body1" 
-                sx={{
-                  fontSize: { xs: '1rem', sm: '1.1rem', md: '1.2rem' },
-                  fontWeight: 500,
-                  mt: { xs: -6, sm: -7, md: -8 },
-                  lineHeight: 1.4
-                }}
-              >
-                No commitment, no <br />
-                pressure
+            </Grid>
+            <Grid size={12}>
+              <Typography variant="body2" sx={{ fontSize: '1rem' }}>
+                TaraFirst is your one-stop fintech platform — from company incorporation to compliance, invoicing, payroll, and reporting.
+                We simplify complex financial processes so you can focus on growing your business.
               </Typography>
-            </Box>
+            </Grid>
           </Grid>
         </Grid>
-
-        {/* Buttons */}
-        <Stack 
-          direction={{ xs: 'column', sm: 'row' }} 
-          spacing={2} 
-          justifyContent="center"
-          sx={{ mt: { xs: 4, sm: 6, md: 8 } }}
-        >
-          <Button
-            variant="contained"
-            sx={{
-              backgroundColor: '#ffd600',
-              color: '#000',
-              fontWeight: 'bold',
-              fontSize: { xs: '1rem', sm: '1.1rem', md: '1.2rem' },
-              px: { xs: 3, sm: 4, md: 5 },
-              py: { xs: 1, sm: 1.25, md: 1.5 },
-              borderRadius: '10px',
-              minWidth: { xs: '160px', sm: '180px', md: '200px' },
-              width: { xs: '100%', sm: 'auto' }
-            }}
-          >
-            Get a Demo
-          </Button>
-          <Button
-            variant="outlined"
-            sx={{
-              borderColor: '#002aff',
-              color: '#002aff',
-              fontWeight: 'bold',
-              fontSize: { xs: '1rem', sm: '1.1rem', md: '1.2rem' },
-              px: { xs: 3, sm: 4, md: 5 },
-              py: { xs: 1, sm: 1.25, md: 1.5 },
-              borderRadius: '10px',
-              minWidth: { xs: '160px', sm: '180px', md: '200px' },
-              width: { xs: '100%', sm: 'auto' }
-            }}
-          >
-            Explore for free
-          </Button>
-        </Stack>
-
-        {/* Characters */}
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            mt: { xs: 3, sm: 4, md: 6 },
-            flexDirection: { xs: 'column', md: 'row' },
-            alignItems: 'center',
-            gap: { xs: 1, sm: 3, md: 4 },
-            mb:{xs:0,mb:0,lg:0}
-          
-            
-          }}
-        >
-          <Box
-            component="img"
-            src={image1}
-            alt="Left Person"
-            sx={{
-              height: { xs: '250px', sm: '300px', md: '400px' },
-              width: 'auto',
-              objectFit: 'contain'
-            }}
-          />
-          <Box
-            component="img"
-            src={image2}
-            alt="Middle Person"
-            sx={{
-              height: { xs: '250px', sm: '300px', md: '400px' },
-              width: 'auto',
-              objectFit: 'contain'
-            }}
-          />
-          <Box
-            component="img"
-            src={image3}
-            alt="Right Person"
-            sx={{
-              height: { xs: '250px', sm: '300px', md: '400px' },
-              width: 'auto',
-              objectFit: 'contain',
-              mb:{xs:5,lg:0}
-            }}
-          />
-        </Box>
-      </Box>
-    </Box>
+        <Grid size={12}>
+          <Grid container spacing={5} sx={{ justifyContent: 'center', '&> .MuiGrid-root > div': { height: '100%' } }}>
+            <Grid size={{ md: 4, sm: 6 }}>
+              <OfferCard
+                title="Smart Company Incorporation"
+                caption="TaraFirst simplifies your business formation with automated filing, expert validation, and transparent timelines."
+                image={Offer1}
+              />
+            </Grid>
+            <Grid size={{ md: 4, sm: 6 }}>
+              <OfferCard
+                title="End-to-End Compliance"
+                caption="Stay on top of GST, TDS, MCA, and other statutory filings with our intelligent compliance tracker and real-time alerts."
+                image={Offer2}
+              />
+            </Grid>
+            <Grid size={{ md: 4, sm: 6 }}>
+              <OfferCard
+                title="Unified Invoicing & Payments"
+                caption="Generate professional invoices, auto-apply GST, track dues, and integrate with payment gateways — all in one place."
+                image={Offer3}
+              />
+            </Grid>
+            <Grid size={{ md: 4, sm: 6 }}>
+              <OfferCard
+                title="Payroll & Employee Management"
+                caption="Process salaries, handle compliance, and generate payslips effortlessly with our smart payroll engine."
+                image={Offer4}
+              />
+            </Grid>
+            <Grid size={{ md: 4, sm: 6 }}>
+              <OfferCard
+                title="Virtual CFO & Dashboards"
+                caption="Track KPIs, financial health, and burn rate in real-time with actionable dashboards curated by finance experts."
+                image={Offer5}
+              />
+            </Grid>
+            <Grid size={{ md: 4, sm: 6 }}>
+              <OfferCard
+                title="Secure Document Vault"
+                caption="Organize all your financial documents in one secure place with smart search, tagging, and sharing controls."
+                image={Offer6}
+              />
+            </Grid>
+          </Grid>
+        </Grid>
+      </Grid>
+    </Container>
   );
-};
+}
 
-export default TaraFinanceSection;
+OfferCard.propTypes = { title: PropTypes.string, caption: PropTypes.string, image: PropTypes.string };
