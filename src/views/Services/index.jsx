@@ -152,7 +152,7 @@ export default function Services() {
       tasks: '0 Pending',
       docs: '0 uploaded',
       icon: <AssignmentIcon color="primary" sx={{ fontSize: 40 }} />,
-      href: '/app/my-services/itr-dashboard'
+      href: '/app/my-services/itr-filing'
     },
     {
       title: 'MSME Registration - FY: 2024-25 (Business)',
