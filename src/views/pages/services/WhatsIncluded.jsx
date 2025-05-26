@@ -1,146 +1,110 @@
-import AutoGraphIcon from '@mui/icons-material/AutoGraph';
+import CheckIcon from '@mui/icons-material/Check';
+import {
+  Box,
+  Grid,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Paper,
+  Typography,
+} from '@mui/material';
+import Include_image from 'assets/images/landing/Include_image.png';
 import React from 'react';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import CloudDoneIcon from '@mui/icons-material/CloudDone';
-import IntegrationInstructionsIcon from '@mui/icons-material/IntegrationInstructions';
-import SecurityIcon from '@mui/icons-material/Security';
-import SmartToyIcon from '@mui/icons-material/SmartToy';
-import SupportAgentIcon from '@mui/icons-material/SupportAgent';
-import TaskAltIcon from '@mui/icons-material/TaskAlt';
-import { Box, Container, Paper, Stack, Typography } from '@mui/material';
 import { Fade } from 'react-awesome-reveal';
 
 const WhatsIncluded = ({ title = "What's Included", items }) => {
-  const iconList = [
-    { icon: <SecurityIcon />, color: '#d32f2f', gradient: 'linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%)' },
-    { icon: <IntegrationInstructionsIcon />, color: '#1976d2', gradient: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)' },
-    { icon: <SmartToyIcon />, color: '#7b1fa2', gradient: 'linear-gradient(135deg, #7b1fa2 0%, #6a1b9a 100%)' },
-    { icon: <SupportAgentIcon />, color: '#388e3c', gradient: 'linear-gradient(135deg, #388e3c 0%, #2e7d32 100%)' },
-    { icon: <CloudDoneIcon />, color: '#0288d1', gradient: 'linear-gradient(135deg, #0288d1 0%, #0277bd 100%)' },
-    { icon: <AutoGraphIcon />, color: '#fbc02d', gradient: 'linear-gradient(135deg, #fbc02d 0%, #f9a825 100%)' },
-    { icon: <TaskAltIcon />, color: '#512da8', gradient: 'linear-gradient(135deg, #512da8 0%, #4527a0 100%)' },
-    { icon: <CheckCircleIcon />, color: '#ff5722', gradient: 'linear-gradient(135deg, #ff5722 0%, #f4511e 100%)' },
-    { icon: <SupportAgentIcon />, color: '#388e3c', gradient: 'linear-gradient(135deg, #388e3c 0%, #2e7d32 100%)' }
-  ];
-
   return (
-    <Container maxWidth="lg" sx={{ py: { xs: 6, md: 5 } }}>
-      <Fade triggerOnce direction="up">
-        <Typography
-          variant="h2"
-          fontWeight={700}
-          textAlign="center"
+    <Fade triggerOnce direction="up">
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: { xs: '60px', md: '125px' } }}>
+        <Paper
+          elevation={0}
           sx={{
-            fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' },
-            mb: { xs: 4, md: 6 },
-            background: 'linear-gradient(45deg,  #512da8 0%,  #512da8 90%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            textShadow: '0px 2px 4px rgba(0,0,0,0.1)'
+            maxWidth: '1150px',
+            width: '100%',
+            minHeight: { xs: 'auto', md: '505px' },
+            borderRadius: { xs: '12px', md: '12px' },
+            border: '0.5px solid #0023AF',
+            backgroundColor: '#FFFFFF',
+            p: 0,
+            display: 'flex',
+            alignItems: 'stretch',
+            gap: '0',
+            overflow: 'hidden',
           }}
         >
-          {title}
-        </Typography>
+          <Grid container spacing={{ xs: 0, md: 4 }} alignItems="stretch">
+            {/* Left Image */}
+            <Grid item xs={12} md={6} sx={{ p: 0, m: 0 ,}}>
+              <Box
+                component="img"
+                src={Include_image}
+                alt="Service Features"
+                sx={{
+                  width: '100%',
+                  height: { xs: '300px', md: '100%' },
+                  borderRadius: { xs: '12px 12px 0 0', md: '6px 0 0 6px' },
+                  objectFit: 'cover',
+                  margin: 0,
+                  padding: 0,
+                  display: 'block',
+                }}
+              />
+            </Grid>
 
-        <Stack direction="row" spacing={{ xs: 2, md: 3 }} justifyContent="center" alignItems="center" flexWrap="wrap" useFlexGap>
-          {items.map((label, idx) => (
-            <Box
-              key={idx}
-              sx={{
-                width: { xs: '100%', sm: 'calc(50% - 16px)', md: 'calc(33.33% - 24px)' },
-                minWidth: { xs: '100%', sm: '300px', md: '300px' },
-                maxWidth: { xs: '100%', sm: '400px', md: '400px' }
-              }}
-            >
-              <Fade triggerOnce delay={idx * 100}>
-                <Paper
-                  elevation={0}
+            {/* Right Content */}
+            <Grid item xs={12} md={6}>
+              <Box
+                sx={{
+                  p: { xs: 3, sm: 4, md: 4 },
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center',
+                }}
+              >
+                <Typography
+                  gutterBottom
                   sx={{
-                    height: 180,
-                    p: { xs: 2, sm: 2.5 },
-                    borderRadius: 3,
-                    background: 'rgba(255, 255, 255, 0.9)',
-                    backdropFilter: 'blur(10px)',
-                    border: `1px solid ${iconList[idx % iconList.length].color}`,
-                    transition: 'all 0.3s ease',
-                    position: 'relative',
-                    overflow: 'hidden',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    '&:hover': {
-                      transform: 'translateY(-8px)',
-                      boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1)',
-                      '& .icon-container': {
-                        transform: 'scale(1.1)'
-                      },
-                      '& .gradient-overlay': {
-                        opacity: 0.1
-                      }
-                    }
+                    fontFamily: 'Manrope, sans-serif',
+                    fontWeight: 700,
+                    fontSize: { xs: '28px', sm: '32px', md: '38px' },
+                    lineHeight: '120%',
+                    letterSpacing: '0px',
+                    mr: { xs: 0, md: '140px' },
+                    color: '#000000',
+                    mb: { xs: 2, md: 3 },
                   }}
                 >
-                  <Box
-                    className="gradient-overlay"
-                    sx={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      background: iconList[idx % iconList.length].gradient,
-                      opacity: 0.05,
-                      transition: 'opacity 0.3s ease'
-                    }}
-                  />
-                  <Box
-                    className="icon-container"
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      width: 50,
-                      height: 50,
-                      borderRadius: '50%',
-                      background: iconList[idx % iconList.length].gradient,
-                      mb: 2,
-                      transition: 'transform 0.3s ease',
-                      boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
-                    }}
-                  >
-                    {React.cloneElement(iconList[idx % iconList.length].icon, {
-                      sx: {
-                        fontSize: 28,
-                        color: 'white'
-                      }
-                    })}
-                  </Box>
-                  <Typography
-                    variant="body1"
-                    fontWeight={500}
-                    textAlign="center"
-                    sx={{
-                      color: 'text.primary',
-                      fontSize: { xs: '0.9rem', sm: '1rem' },
-                      lineHeight: 1.4,
-                      maxWidth: '90%',
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis'
-                    }}
-                  >
-                    {label}
-                  </Typography>
-                </Paper>
-              </Fade>
-            </Box>
-          ))}
-        </Stack>
-      </Fade>
-    </Container>
+                  {title}
+                </Typography>
+                <List dense sx={{ pl: { xs: 0, md: '24px' } }}>
+                  {items.map((item, index) => (
+                    <ListItem key={index} disableGutters>
+                      <ListItemIcon sx={{ minWidth: { xs: '28px', md: '32px' } }}>
+                        <CheckIcon sx={{ color: '#1d4ed8', fontSize: { xs: '20px', md: '24px' } }} />
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={item}
+                        primaryTypographyProps={{
+                          fontFamily: 'Inter',
+                          fontWeight: 500,
+                          fontSize: { xs: '18px', sm: '20px', md: '22px' },
+                          lineHeight: '140%',
+                          letterSpacing: '0px',
+                          color: '#001033',
+                          margin: '2px',
+                        }}
+                      />
+                    </ListItem>
+                  ))}
+                </List>
+              </Box>
+            </Grid>
+          </Grid>
+        </Paper>
+      </Box>
+    </Fade>
   );
 };
 
