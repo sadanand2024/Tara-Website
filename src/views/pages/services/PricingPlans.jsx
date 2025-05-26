@@ -11,40 +11,22 @@ const PricingPlans = ({ data }) => {
   const service_type = searchParams.get('type');
   if (!data) return null;
 
-  // const gradients = [
-  //   'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-  //   'linear-gradient(135deg, #f6d365 0%, #fda085 100%)',
-  //   'linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%)'
-  // ];
+  const gradients = [
+    'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    'linear-gradient(135deg, #f6d365 0%, #fda085 100%)',
+    'linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%)'
+  ];
 
   return (
     <Fade triggerOnce direction="up">
-      <Container sx={{ 
-        py: { xs: 3, md: 6 },
-        mt:{xs:0,lg:0}
-        // background: 'linear-gradient(270.18deg, rgba(184, 198, 255, 0.5) 0.15%, #FDFDFF 99.85%)'
-      }}>
+      <Container maxWidth="xl" sx={{ py: { xs: 3, md: 6 } }}>
         {/* Section Title */}
-        <Typography 
-          variant="h2" 
-          fontWeight={700} 
-          textAlign="center" 
-          mb={4}
-          sx={{
-            fontFamily: 'Manrope',
-            fontWeight: 700,
-            fontSize: '38px',
-            lineHeight: '100%',
-            letterSpacing: '0px',
-            color: '#000000',
-            
-          }}
-        >
+        <Typography variant="h2" fontWeight={700} textAlign="center" mb={4}>
           {data.title}
         </Typography>
 
         {/* Responsive Plans Grid */}
-        <Grid container spacing={{ xs: 2, md: 5 }} justifyContent="center" sx={{  mt:{xs:0,lg:5}}}>
+        <Grid container spacing={{ xs: 2, md: 3 }} justifyContent="center" sx={{ mt: 3 }}>
           {data.plans?.map((plan, idx) => (
             <Grid item xs={12} sm={6} md={4} lg={3} key={idx}>
               <Card
@@ -53,14 +35,9 @@ const PricingPlans = ({ data }) => {
                   height: '100%',
                   display: 'flex',
                   flexDirection: 'column',
-                  borderRadius: '12px',
+                  borderRadius: 2,
                   transition: 'transform 0.3s ease',
-                  '&:hover': { transform: 'translateY(-5px)' },
-                  paddingTop: '45px',
-                  paddingRight: '16px',
-                  paddingBottom: '2px',
-                  paddingLeft: '16px',
-                  background: '#FFFFFF'
+                  '&:hover': { transform: 'translateY(-5px)' }
                 }}
               >
                 <CardHeader
@@ -68,30 +45,17 @@ const PricingPlans = ({ data }) => {
                   subheader={plan.bestFor}
                   titleTypographyProps={{
                     variant: 'h6',
-                    fontWeight: 800,
-                    color: '#001033',
-                    fontSize: '22px',
-                    lineHeight: '100%',
-                    letterSpacing: '0px',
-                    fontFamily: 'Manrope',
-                    textAlign: 'left',
-                    whiteSpace: 'normal'
+                    fontWeight: 700,
+                    color: 'white',
+                    fontSize: { xs: '0.9rem', sm: '1rem', md: '1.1rem' }
                   }}
                   subheaderTypographyProps={{
-                    fontSize: '16px',
-                    lineHeight: '100%',
-                    letterSpacing: '0px',
-                    fontFamily: 'Inter',
-                    color: '#1F242E',
-                    mt:{xs:0,lg:1.5},
-                    textAlign: 'left',
-                    whiteSpace: 'normal'
+                    color: 'white',
+                    fontSize: { xs: '0.7rem', sm: '0.8rem' }
                   }}
                   sx={{
-                    background: '#FFFFFF',
-                    py: { xs: 1.5, sm: 2 },
-                    mt:{xs:0,lg:-5},
-                    
+                    background: gradients[idx % gradients.length],
+                    py: { xs: 1.5, sm: 2 }
                   }}
                 />
                 <CardContent
@@ -99,32 +63,22 @@ const PricingPlans = ({ data }) => {
                     flexGrow: 1,
                     display: 'flex',
                     flexDirection: 'column',
-                    alignItems: 'flex-start',
-                    py: { xs: 1.5, sm: 2 },
-                    width: '100%',
-                    padding: '0 16px'
+                    alignItems: 'center',
+                    py: { xs: 1.5, sm: 2 }
                   }}
                 >
                   <Typography
                     variant="h5"
-                    fontWeight={600}
+                    fontWeight={700}
                     sx={{
-                      fontSize: '28px',
-                      lineHeight: '100%',
-                      letterSpacing: '0px',
-                      fontFamily: 'Inter',
-                      color: '#001033',
-                      mb: 1.5,
-                      textAlign: 'left',
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'clip'
+                      fontSize: { xs: '1.2rem', sm: '1.4rem', md: '1.6rem' },
+                      mb: 1.5
                     }}
                   >
                     {plan.price}
                   </Typography>
                   {plan.features && (
-                    <Box sx={{ width: '100%', mt: 1.5, flexGrow: 1 }}>
+                    <Box sx={{ width: '100%', mt: 1.5 }}>
                       {plan.features.map((feature, featureIdx) => (
                         <Typography
                           key={featureIdx}
@@ -132,8 +86,7 @@ const PricingPlans = ({ data }) => {
                           color="text.secondary"
                           sx={{
                             mb: 0.5,
-                            fontSize: { xs: '0.7rem', sm: '0.8rem' },
-                            textAlign: 'left'
+                            fontSize: { xs: '0.7rem', sm: '0.8rem' }
                           }}
                         >
                           {feature}
@@ -142,25 +95,15 @@ const PricingPlans = ({ data }) => {
                     </Box>
                   )}
                 </CardContent>
-                <CardActions sx={{ p:0.1, mt: 'auto', justifyContent: 'flex-start', padding: '0 16px 28px 16px' }}>
+                <CardActions sx={{ p: 1.5 }}>
                   <Button
                     fullWidth
                     variant="contained"
+                    color="secondary"
                     size="small"
                     sx={{
-                      width: '200px',
-                      height: '43px',
-                      margin: '0 !important',
-                      borderRadius: '4px',
-                      paddingTop: '12px',
-                      paddingRight: '20px',
-                      paddingBottom: '12px',
-                      paddingLeft: '20px',
-                      bgcolor: '#0042D1',
-                      color: '#FFFFFF',
-                      '&:hover': {
-                        bgcolor: '#0035A8'
-                      }
+                      py: 1,
+                      borderRadius: 1.5
                     }}
                     onClick={(e) => {
                       navigate(`/register?id=${service_id}&context=${service_type}&type=service`);
@@ -175,7 +118,7 @@ const PricingPlans = ({ data }) => {
         </Grid>
 
         {/* Note Section */}
-        {/* {data.note && (
+        {data.note && (
           <Typography
             variant="caption"
             color="text.secondary"
@@ -188,7 +131,7 @@ const PricingPlans = ({ data }) => {
           >
             {data.note}
           </Typography>
-        )} */}
+        )}
       </Container>
     </Fade>
   );

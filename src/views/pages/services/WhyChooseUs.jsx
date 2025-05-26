@@ -1,107 +1,103 @@
-import { Box, Container, Grid, Paper, Typography } from '@mui/material';
-import Icon1 from 'assets/images/icons/WhyShouldUse/icon1.svg';
-import Icon2 from 'assets/images/icons/WhyShouldUse/icon2.svg';
-import Icon3 from 'assets/images/icons/WhyShouldUse/icon3.svg';
-import Icon4 from 'assets/images/icons/WhyShouldUse/icon4.svg';
-import Icon5 from 'assets/images/icons/WhyShouldUse/icon5.svg';
-import Icon6 from 'assets/images/icons/WhyShouldUse/icon6.svg';
-
+import {
+  AccessTime,
+  Assessment,
+  DesignServices,
+  EmojiEvents,
+  Insights,
+  QueryStats,
+  Security,
+  SupportAgent,
+  TrendingUp,
+  VerifiedUser,
+} from '@mui/icons-material';
+import { Box, Typography,Container } from '@mui/material';
 import React from 'react';
 import { Fade } from 'react-awesome-reveal';
 
 const icons = [
-  Icon1,
-  Icon2,
-  Icon3,
-  Icon4,
-  Icon5,
-  Icon6,
+  DesignServices,
+  VerifiedUser,
+  SupportAgent,
+  QueryStats,
+  Assessment,
+  Insights,
+  EmojiEvents,
+  TrendingUp,
+ 
+  Security,
+  AccessTime,
+  
+  Assessment,
 ];
 
 const WhyChooseUs = ({ reasons }) => {
   return (
-    <Container sx={{ py: { xs: 6, md: 8 }, textAlign: 'center',mt:{xs:0,md:0,lg:0} }}>
-      <Typography 
-        variant="h2" 
-        fontWeight={700} 
-        mb={1} 
-        sx={{
-          fontFamily: 'Manrope, sans-serif',
-          fontWeight: 600,
-          fontSize: '38px',
-          lineHeight: '100%',
-          letterSpacing: '0px',
-          color: '#000'
-        }}
-      >
-        Why Choose Us?
+    <Container sx={{mt:5}}>
+    <Box mb={10} px={2}>
+      <Typography variant="h2" fontWeight={700} textAlign="center" mb={1}>
+        Why Choose <Box component="span" color='rgb(33, 172, 223)'>Us</Box>?
+      </Typography>
+      <Typography variant="subtitle1" textAlign="center" color="text.secondary" mb={5}>
+        Get more free slide templates: JustFreeSlide.com
       </Typography>
 
-      <Grid container spacing={4} justifyContent="center">
+      <Box
+        display="flex"
+        flexWrap="wrap"
+        justifyContent="center"
+        gap={4}
+      >
         {reasons.map((reason, idx) => {
-          const IconSrc = icons[idx % icons.length];
+          const Icon = icons[idx % icons.length];
           return (
-            <Grid item xs={12} sm={6} md={4} key={idx} sx={{ mt: { xs: 0, md: 0, lg: 4 } }}>
-              <Fade triggerOnce delay={idx * 100}>
-                <Paper
-                  elevation={1}
+            <Fade key={idx} triggerOnce delay={idx * 100}>
+              <Box
+                sx={{
+                  width: 200,
+                  height: 160,
+                  clipPath:
+                    'polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%)',
+                  backgroundColor: '#fff',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: '0.3s ease',
+                  padding: 2,
+                  '&:hover': {
+                    transform: 'translateY(-6px)',
+                    boxShadow: '0 12px 24px rgba(0,0,0,0.15)',
+                    cursor: 'pointer',
+                  },
+                }}
+              >
+                <Box
                   sx={{
-                    width: { xs: '100%', sm: 374 },
-                    maxWidth: 374,
-                    height: { xs: 'auto', sm: 180 },
-                    minHeight: { xs: 160, sm: 180 },
-                    borderRadius: '12px',
-                    padding: { xs: '24px 16px', sm: '32px 20px' },
-                    gap: '16px',
-                    backgroundColor: '#FFFFFF',
-                    boxShadow: '0px 4px 12px -2px #0042D11A',
+                    textAlign: 'center',
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    justifyContent: 'flex-start',
-                    textAlign: 'center',
-                    transition: '0.3s ease',
-                    margin: { xs: '0 auto', sm: 0 },
-                    '&:hover': {
-                      transform: 'translateY(-4px)',
-                      boxShadow: '0 8px 16px rgba(0,0,0,0.15)',
-                    },
                   }}
                 >
-                  <Box
-                    sx={{
-                      width: 60,
-                      height: 60,
-                      borderRadius: '2',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      mb: { xs: 1.5, sm: 2 },
-                    }}
-                  >
-                    <img src={IconSrc} alt={`Icon ${idx + 1}`} style={{ width: '48px', height: '48px' }} />
-                  </Box>
+                  <Icon sx={{ fontSize: 32, color:'rgb(33, 172, 223)', mb: 1 }} />
                   <Typography
-                    variant="subtitle1"
-                    fontWeight={500}
+                    variant="subtitle2"
+                    fontWeight={600}
                     sx={{
-                      fontFamily: 'Inter, sans-serif',
-                      fontSize: { xs: '17px', sm: '19px' },
-                      fontWeight: 500,
-                      lineHeight: { xs: '24px', sm: '26px' },
-                      letterSpacing: '0px',
-                      color: '#001033',
-                      textAlign: 'center',
+                      wordWrap: 'break-word',
+                      fontSize: '0.9rem',
+                      lineHeight: 1.3,
                     }}
                   >
                     {reason}
                   </Typography>
-                </Paper>
-              </Fade>
-            </Grid>
+                </Box>
+              </Box>
+            </Fade>
           );
         })}
-      </Grid>
+      </Box>
+    </Box>
     </Container>
   );
 };

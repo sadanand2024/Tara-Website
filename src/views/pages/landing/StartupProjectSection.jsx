@@ -1,133 +1,122 @@
-import { Box, Container, Grid, Typography } from '@mui/material';
-import Business from 'assets/images/icons/Business.svg';
-import Certification from 'assets/images/icons/Certification.svg';
-import GstIcon from 'assets/images/icons/Gst.svg';
-import Incometax from 'assets/images/icons/Incometax.svg';
-import Incorporation from 'assets/images/icons/Incorporation.svg';
-import Notice from 'assets/images/icons/Notice.svg';
-import Tds from 'assets/images/icons/Tds.svg';
-import Underline from 'assets/images/icons/Underline.svg';
-import Visa from 'assets/images/icons/Visa.svg';
-import React, { useState } from 'react';
+// material-ui
+import CardMedia from '@mui/material/CardMedia';
+import Container from '@mui/material/Container';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
 
-const services = [
-  { icon: <img src={GstIcon} alt="GST" style={{ width: '2.2rem', height: '2.2rem' }} />, title: 'GST', desc: 'Simplify GST filing and compliance with expert support.' },
-  { icon: <img src={Incometax} alt="Income" style={{ width: '2.2rem', height: '2.2rem' }} />, title: 'Income Tax', desc: 'Accurate income tax filing and advisory made easy.' },
-  { icon: <img src={Incorporation} alt="Incorporation" style={{ width: '2.2rem', height: '2.2rem' }} />, title: 'Incorporation', desc: 'Start your business journey with seamless company registration.' },
-  { icon: <img src={Certification} alt="Certifications" style={{ width: '2.2rem', height: '2.2rem' }} />, title: 'Certifications', desc: 'Get essential business certifications without the hassle.' },
-  { icon: <img src={Business} alt="Business Licenses" style={{ width: '2.2rem', height: '2.2rem' }} />, title: 'Business Licenses', desc: 'Secure the right licenses to operate and grow legally.' },
-  { icon: <img src={Tds} alt="TDS" style={{ width: '2.2rem', height: '2.2rem' }} />, title: 'TDS', desc: 'Effortless TDS filing and compliance management.' },
-  { icon: <img src={Notice} alt="Notice Management" style={{ width: '2.2rem', height: '2.2rem' }} />, title: 'Notice Management', desc: 'Handle legal and tax notices professionally and on time.' },
-  { icon: <img src={Visa} alt="Visa Documentation" style={{ width: '2.2rem', height: '2.2rem' }} />, title: 'Visa Documentation', desc: 'Comprehensive documentation support for student and business visas.' }
-];
+// third party
+import Slider from 'react-slick';
 
-const ServicesSection = () => {
-  const [hoverIndex, setHoverIndex] = useState(null);
+// assets
+import BackgroundImag from 'assets/images/landing/bg-heand.png';
+
+// =============================|| LANDING - STARTUP PROJECT ||============================= //
+
+export default function RtlInfoSection() {
+  const settings = {
+    className: 'center',
+    dots: false,
+    arrows: false,
+    centerPadding: '0',
+    centerMode: true,
+    slidesToShow: 4,
+    slidesToScroll: 1,
+    vertical: true,
+    verticalSwiping: true,
+    focusOnSelect: true,
+    autoplay: true,
+    autoplaySpeed: 2000
+  };
 
   return (
-    <Box sx={{
-      background: '#F8F9FB',
-      py: 6,
-      fontFamily: "'Inter', Arial, sans-serif"
-    }}>
-      <Container maxWidth="lg">
-        <Box sx={{ textAlign: 'center', mb: 6 ,mt: 3}}>
-          <Typography variant="h1" sx={{ m: 0, position: 'relative' }}>
-            <Box component="span" sx={{
-              color: '#FFD600',
-              fontWeight: 500,
-              fontSize: '2.5rem',
-              letterSpacing: '-1px',
-              position: 'relative',
-              display: 'inline-block',
-            }}>
-              All-in-One
-              <Box
-                component="img"
-                src={Underline}
-                alt="Underline"
-                sx={{
-                  position: 'absolute',
-                  left: 0,
-                  bottom: '-6px',
-                  width: '100%',
-                  height: 'auto',
-                }}
-              />
-            </Box>
-            <Box component="span" sx={{
-              color: '#0033CC',
-              fontWeight: 700,
-              fontSize: '2.5rem',
-              ml: 2,
-            }}>Financial & Compliance Services</Box>
-          </Typography>
-          <Typography sx={{
-            color: '#222',
-            fontSize: '1.15rem',
-            mt: 2.25,
-            fontWeight: 700
-          }}>
-            From GST, Income Tax, and Incorporation to TDS, Certifications, and Visa Documentation — manage everything seamlessly with Tara First.
-          </Typography>
-        </Box>
+    <Box
+      className="project-info"
+      sx={{
+        bgcolor: 'dark.900',
+        height: { xs: 150, sm: 200, md: 340, lg: 450, xl: 520 },
+        overflow: 'hidden',
+        position: 'relative'
+      }}
+    >
+      <Container sx={{ position: 'relative', zIndex: 1 }}>
+        <Box sx={{ mt: { xs: 4, md: 6, lg: 12, xl: 15 }, zIndex: 2 }}>
+          <Stack
+            direction="row"
+            spacing={2}
+            sx={{
+              alignItems: 'center',
+              justifyContent: 'flex-start',
 
-        <Grid container spacing={4}>
-          {services.map((service, idx) => {
-            const isHovered = hoverIndex === idx;
-            return (
-              <Grid item xs={12} sm={6} md={3} key={idx}>
-                <Box
-                  onMouseEnter={() => setHoverIndex(idx)}
-                  onMouseLeave={() => setHoverIndex(null)}
-                  sx={{
-                    background: '#fff',
-                    borderRadius: '14px',
-                    boxShadow: isHovered
-                      ? '0 4px 16px rgba(0,51,204,0.10)'
-                      : '0 2px 8px rgba(0,0,0,0.04)',
-                    p: 3,
-                    textAlign: 'left',
-                    height: '220px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    transition: 'all 0.3s ease',
-                    cursor: 'pointer',
-                    transform: isHovered ? 'translateY(-4px)' : 'translateY(0px)'
-                  }}
-                >
-                  <Box sx={{
-                    color: '#0033CC',
-                    fontSize: '2.2rem',
-                    mb: 2.25,
-                    flexShrink: 0
-                  }}>{service.icon}</Box>
-                  <Typography sx={{
-                    color: '#0033CC',
-                    fontWeight: 700,
-                    fontSize: '1.18rem',
-                    mb: 1,
-                    flexShrink: 0
-                  }}>{service.title}</Typography>
-                  <Typography sx={{
-                    color: '#222',
-                    fontSize: '1rem',
-                    fontWeight: 400,
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    display: '-webkit-box',
-                    WebkitLineClamp: 3,
-                    WebkitBoxOrient: 'vertical',
-                    flexGrow: 1
-                  }}>{service.desc}</Typography>
-                </Box>
-              </Grid>
-            );
-          })}
-        </Grid>
+              '& .slick-slide.slick-current': {
+                opacity: 1,
+                '.MuiTypography-root': { color: 'primary.main' }
+              },
+
+              '& .slick-slider': {
+                textAlign: 'left',
+                '.MuiTypography-root': {
+                  fontSize: { xs: '1rem', sm: '1.563rem', md: '2.5rem', xl: '3.125rem' },
+                  cursor: 'pointer'
+                }
+              }
+            }}
+          >
+            <Box
+              sx={{
+                marginTop: { sm: '5%', lg: '4%' },
+                width: { xs: '38%', md: '100%' },
+                paddingLeft: { xs: 2, md: 0, xl: 0 }
+              }}
+            >
+              <Typography
+                variant="h2"
+                sx={{
+                  color: '#fff',
+                  width: { xs: '150px', sm: 'max-content', xl: 'max-content' },
+                  fontSize: { xs: '1rem', sm: '1.563rem', md: '2.5rem', xl: '3.125rem' },
+                  mt: { xs: 2, sm: 3.75, md: 5.5, xl: 7 }
+                }}
+              >
+                Choose Tara First for
+              </Typography>
+            </Box>
+            <Slider {...settings}>
+              <Typography variant="h2" sx={{ color: 'text.hint' }}>
+                GST & Tax
+              </Typography>
+              <Typography variant="h2" sx={{ color: 'text.hint' }}>
+                Smart Bookkeeping
+              </Typography>
+              <Typography variant="h2" sx={{ color: 'text.hint' }}>
+                Automated Payroll
+              </Typography>
+              <Typography variant="h2" sx={{ color: 'text.hint' }}>
+                Compliance
+              </Typography>
+              <Typography variant="h2" sx={{ color: 'text.hint' }}>
+                Company Incorporation
+              </Typography>
+              <Typography variant="h2" sx={{ color: 'text.hint' }}>
+                Advisory Support
+              </Typography>
+            </Slider>
+          </Stack>
+        </Box>
       </Container>
+      <CardMedia
+        component="img"
+        image={BackgroundImag}
+        alt="Berry"
+        sx={{
+          position: 'absolute',
+          bottom: { sm: -40, md: -80 },
+          right: { sm: 30, md: 50, lg: 80 },
+          width: { xl: 240, lg: 220, md: 150, sm: 100, xs: 0 },
+          maxWidth: '100%',
+          filter: 'drop-shadow(0px 0px 50px rgb(33 150 243 / 30%))'
+        }}
+      />
     </Box>
   );
-};
-
-export default ServicesSection;
+}
