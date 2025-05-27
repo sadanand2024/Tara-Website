@@ -12,7 +12,6 @@ import DocumentIcon from 'assets/images/icons/Documenticon.svg';
 import Document_required from 'assets/images/Landing/Document_required.png';
 
 
-
 // const iconMap = [
 //   { icon: <FolderIcon />, color: '#e53935' },        // red
 //   { icon: <AccountBalanceIcon />, color: '#8e24aa' }, // purple
