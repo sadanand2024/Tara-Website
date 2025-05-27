@@ -2,15 +2,12 @@ import { Box, Button, Grid, Stack, Typography } from '@mui/material';
 import AutomationIcon from 'assets/images/icons/Automation.svg';
 import CommitIcon from 'assets/images/icons/Commit.svg';
 import FinancialIcon from 'assets/images/icons/Financial.svg';
-import image1 from 'assets/images/landing/image1.png';
-import image2 from 'assets/images/landing/image2.png';
-import image3 from 'assets/images/landing/image3.png';
 
 import React from 'react';
 
 const TaraFinanceSection = () => {
   return (
-    <Box sx={{ backgroundColor: '#f0f4ff', width: '100%', overflow: 'hidden' }}>
+    <Box sx={{ backgroundColor: '#f0f4ff', width: '100%', overflow: 'hidden',px:10 }}>
       <Box
         sx={{
           padding: { xs: '20px 16px', sm: '30px 20px', md: '40px 20px' },
@@ -188,7 +185,7 @@ const TaraFinanceSection = () => {
             variant="contained"
             sx={{
               backgroundColor: '#ffd600',
-              color: '#000',
+              color: '#002aff',
               fontWeight: 'bold',
               fontSize: { xs: '1rem', sm: '1.1rem', md: '1.2rem' },
               px: { xs: 3, sm: 4, md: 5 },
@@ -219,7 +216,7 @@ const TaraFinanceSection = () => {
         </Stack>
 
         {/* Characters */}
-        <Box
+        {/* <Box
           sx={{
             display: 'flex',
             justifyContent: 'space-between',
@@ -263,7 +260,7 @@ const TaraFinanceSection = () => {
               mb:{xs:5,lg:0}
             }}
           />
-        </Box>
+        </Box> */}
       </Box>
     </Box>
   );

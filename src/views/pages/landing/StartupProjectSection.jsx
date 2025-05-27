@@ -60,13 +60,18 @@ const ServicesSection = () => {
               fontWeight: 700,
               fontSize: '2.5rem',
               ml: 2,
+              
             }}>Financial & Compliance Services</Box>
           </Typography>
           <Typography sx={{
             color: '#222',
-            fontSize: '1.15rem',
-            mt: 2.25,
-            fontWeight: 700
+            fontFamily: 'Inter, sans-serif',
+            fontSize: { xs: '16px', sm: '18px', md: '20px' },
+            lineHeight: '150%',
+            fontWeight: '500',
+            color: 'text.secondary',
+            mt:3,
+           
           }}>
             From GST, Income Tax, and Incorporation to TDS, Certifications, and Visa Documentation — manage everything seamlessly with Tara First.
           </Typography>
@@ -103,7 +108,7 @@ const ServicesSection = () => {
                     flexShrink: 0
                   }}>{service.icon}</Box>
                   <Typography sx={{
-                    color: '#0033CC',
+                    color: '#0039B5',
                     fontWeight: 700,
                     fontSize: '1.18rem',
                     mb: 1,

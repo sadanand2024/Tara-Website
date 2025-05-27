@@ -48,7 +48,7 @@ export default function Landing() {
         <CustomizeSection />
       </Box>
        {/* 2. card section */}
-      <Box sx={{ py: 0, bgcolor: theme.palette.mode === ThemeMode.DARK ? 'dark.dark' : 'background.default',mt:-50 }}>
+      <Box sx={{ py:0, bgcolor: theme.palette.mode === ThemeMode.DARK ? 'dark.dark' : 'background.default',mt:-50 }}>
         <CardSection />
       </Box>
         <Box sx={{ py: 0 }}>
@@ -67,7 +67,7 @@ export default function Landing() {
       {/* <Box sx={{ py: 12.5, bgcolor: theme.palette.mode === ThemeMode.DARK ? 'dark.dark' : 'background.default' }}>
         <PeopleSection />
       </Box> */}
-       <Box sx={{ py:0, bgcolor: theme.palette.mode === ThemeMode.DARK ? 'dark.dark' : 'background.default' }}>
+       <Box sx={{ py:10, bgcolor: theme.palette.mode === ThemeMode.DARK ? 'dark.dark' : 'background.default' }}>
         <FeatureSection />
       </Box>
 

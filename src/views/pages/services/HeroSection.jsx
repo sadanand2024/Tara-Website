@@ -149,12 +149,13 @@ const HeroWithImage = ({ data }) => {
 
             <Box
               sx={{
-                position: 'relative',
-                width: { xs: '85%', sm: '90%' },
+                // position: 'relative',
+                width: { xs: '85%', sm: '90%',lg:399 },
                 height: '100%',
-                borderRadius: '50%',
+                borderRadius: '0%',
                 overflow: 'hidden',
                 zIndex: 3,
+                
               }}
             >
               <img
