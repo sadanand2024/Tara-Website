@@ -10,7 +10,7 @@ import RenderSalaryTemplateTable from '../RenderSalaryTemplateTable';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
 import { TextField } from '@mui/material';
-
+import { FormGroup, FormControlLabel, Radio } from '@mui/material';
 const validationSchema = Yup.object({
   // template_name: Yup.string().required('Template Name is required'),
   annual_ctc: Yup.number().required('Annual CTC is required').positive('Annual CTC must be a positive number')
@@ -41,7 +41,7 @@ function SalaryDetails({ fetchEmployeeData, employeeData, createdEmployeeId, set
       template_name: '',
       description: '',
       annual_ctc: 0,
-
+      tax_regime_opted: 'old',
       earnings: [...initialEarnings],
       gross_salary: { monthly: 0, annually: 0 },
       benefits: [],
@@ -199,7 +199,8 @@ function SalaryDetails({ fetchEmployeeData, employeeData, createdEmployeeId, set
       // console.log(lastSalary);
       setValues((prev) => ({
         ...prev,
-        ...lastSalary
+        ...lastSalary,
+        tax_regime_opted: lastSalary?.tax_regime_opted || 'old'
       }));
     }
   }, [employeeData]);
@@ -224,6 +225,33 @@ function SalaryDetails({ fetchEmployeeData, employeeData, createdEmployeeId, set
           setEnablePreviewButton={setEnablePreviewButton}
           createdEmployeeId={employeeData?.id || createdEmployeeId}
         />
+        <Grid2 size={{ xs: 12, sm: 6, md: 4 }} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <Box display="flex" alignItems="center" gap={2}>
+            <Typography variant="subtitle1" color="grey.800">
+              Tax Regime Opted?
+            </Typography>
+            <FormGroup row>
+              <FormControlLabel
+                label="New"
+                control={
+                  <Radio
+                    checked={values.tax_regime_opted === 'new'}
+                    onChange={() => setValues((prev) => ({ ...prev, tax_regime_opted: 'new' }))}
+                  />
+                }
+              />
+              <FormControlLabel
+                label="Old"
+                control={
+                  <Radio
+                    checked={values.tax_regime_opted === 'old'}
+                    onChange={() => setValues((prev) => ({ ...prev, tax_regime_opted: 'old' }))}
+                  />
+                }
+              />
+            </FormGroup>
+          </Box>
+        </Grid2>
       </Box>
     </Box>
   );

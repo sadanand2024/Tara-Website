@@ -378,12 +378,10 @@ const InvoiceDetails = ({
   };
   const handleRateChange = (index, value) => {
     setSaveButton(false);
-
-    const newRate = Number(value) || 0;
+    const newRate = value;
     const newItemDetails = [...formik.values.item_details];
     newItemDetails[index].rate = newRate;
-
-    formik.setFieldValue('item_details', newItemDetails); // ✅ missing line
+    formik.setFieldValue('item_details', newItemDetails);
     recalculateTotals();
   };
 
@@ -553,49 +551,6 @@ const InvoiceDetails = ({
         </Box>
 
         <Grid2 container spacing={2}>
-          {/* <Grid2 size={{ xs: 6 }}>
-            <Typography gutterBottom>Select Company GSTIN</Typography>
-            <CustomAutocomplete
-              name="gstin"
-              value={values.gstin || ''}
-              onChange={async (event, newgstin) => {
-                setFieldValue('gstin', newgstin || 'NA');
-                if (businessDetailsData?.invoice_format?.find((item) => item.gstin === newgstin && item.include_branch_code === false)) {
-                  getInvoiceFormat(newgstin, 'NA');
-                  setFieldValue('branch', '');
-                } else {
-                  setFieldValue('branch', '');
-                  setFieldValue('invoice_number', '');
-                }
-              }}
-              options={
-                businessDetailsData?.gst_details?.length > 0 ? businessDetailsData.gst_details.map((item) => item.gstin || 'NA') : ['NA']
-              }
-              error={touched.gstin && Boolean(errors.gstin)}
-              helperText={touched.gstin && errors.gstin}
-            />
-          </Grid2>
-          {businessDetailsData?.invoice_format?.find((item) => item.gstin === values.gstin && item.include_branch_code === true) && (
-            <Grid2 size={{ xs: 6 }}>
-              <Typography gutterBottom>Select Branch</Typography>
-              <CustomAutocomplete
-                name="branch"
-                value={values.branch || ''}
-                onChange={async (event, newbranch) => {
-                  setFieldValue('branch', newbranch || 'NA');
-                  if (
-                    businessDetailsData?.invoice_format?.find((item) => item.gstin === values.gstin && item.include_branch_code === true)
-                  ) {
-                    getInvoiceFormat(values.gstin, newbranch);
-                  }
-                }}
-                options={branches?.length > 0 ? branches.map((item) => item.branch_code || 'NA') : ['NA']}
-                error={touched.branch && Boolean(errors.branch)}
-                helperText={touched.branch && errors.branch}
-              />
-            </Grid2>
-          )}
-          <br /> */}
           <InvoiceDetailsForm
             formik={formik}
             invoiceDetailsFields={invoiceDetailsFields}

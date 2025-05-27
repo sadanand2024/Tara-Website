@@ -13,7 +13,8 @@ import {
   Checkbox,
   Stack,
   Tooltip,
-  TextField
+  TextField,
+  Card
 } from '@mui/material';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
@@ -213,7 +214,7 @@ const PromoterSignatorySection = () => {
     getSignatoryDetails();
   }, []);
   return (
-    <Box mt={4}>
+    <Card sx={{ p: 3, mt: 4 }}>
       <Typography variant="h5" fontWeight={700} mb={2}>
         <u>Promoter / Signatory Details</u>
       </Typography>
@@ -389,7 +390,12 @@ const PromoterSignatorySection = () => {
           </TableBody>
         </Table>
       </TableContainer>
-    </Box>
+      <Stack direction="row" spacing={2} sx={{ mt: 3, justifyContent: 'flex-end' }}>
+        <Button variant="contained" color="primary" type="submit">
+          Send for review
+        </Button>
+      </Stack>
+    </Card>
   );
 };
 

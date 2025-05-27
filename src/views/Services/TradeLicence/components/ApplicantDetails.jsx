@@ -59,7 +59,6 @@ const ApplicantDetails = () => {
       name: Yup.string().required('Name is required')
     }),
     onSubmit: async (values) => {
-      console.log(values);
       let formData = new FormData();
       formData.append('service_request', 25);
       formData.append('service_task', 12);
@@ -145,7 +144,6 @@ const ApplicantDetails = () => {
   const getApplicantDetails = async () => {
     let url = `/tradelicense/applicant-details/by-request-or-task?service_request_id=25`;
     const { res } = await Factory('get', url);
-    console.log(res);
     if (res.status_cd === 1) {
       dispatch(
         openSnackbar({

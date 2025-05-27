@@ -335,7 +335,6 @@ const BusinessPremisesSection = () => {
   const getBusinessPremises = async () => {
     const url = `/tradelicense/business-location/by-request-or-task?service_request_id=25`;
     const { res } = await Factory('get', url);
-    console.log(res);
     if (res.status_cd === 0 && res.data) {
       const data = res.data;
       formik.setValues({

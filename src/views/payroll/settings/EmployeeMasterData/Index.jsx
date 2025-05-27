@@ -162,7 +162,7 @@ function EmployeeList() {
                           <TableCell align="center">{employee.department_name || '-'}</TableCell>
                           <TableCell align="center">{employee.designation_name || '-'}</TableCell>
                           <TableCell align="center">{employee.work_email || '-'}</TableCell>
-                          <TableCell align="center">{employee.is_active ? 'Active' : 'Inactive'}</TableCell>
+                          <TableCell align="center">{employee.employee_status ? 'Active' : 'Inactive'}</TableCell>
                           <TableCell align="center">
                             <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
                               <IconButton color="primary" onClick={() => handleEdit(employee)}>
