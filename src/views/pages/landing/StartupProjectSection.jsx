@@ -5,7 +5,7 @@ import GstIcon from 'assets/images/icons/Gst.svg';
 import Incometax from 'assets/images/icons/Incometax.svg';
 import Incorporation from 'assets/images/icons/Incorporation.svg';
 import Notice from 'assets/images/icons/Notice.svg';
-import Tds from 'assets/images/icons/Tds.svg';
+import Tds from 'assets/images/icons/TDS.svg';
 import Underline from 'assets/images/icons/Underline.svg';
 import Visa from 'assets/images/icons/Visa.svg';
 import React, { useState } from 'react';
