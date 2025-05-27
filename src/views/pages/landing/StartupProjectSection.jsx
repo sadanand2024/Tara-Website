@@ -69,7 +69,7 @@ const ServicesSection = () => {
             fontSize: { xs: '16px', sm: '18px', md: '20px' },
             lineHeight: '150%',
             fontWeight: '500',
-            color: 'text.secondary',
+            // color: 'text.secondary',
             mt:3,
            
           }}>
