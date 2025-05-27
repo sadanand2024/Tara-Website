@@ -9,7 +9,7 @@ const SvgSection = () => (
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        padding: { xs: 2, sm: 3, md: 4 },
+        padding: { xs: 2, sm: 3, md: 15 },
         mt: { xs: 35, sm: 20, md: 30 },
         backgroundColor: '#FFFEF3',
       }}

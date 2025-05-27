@@ -343,7 +343,29 @@ const servicesData = {
             answer: 'Yes, for all TDS returns except 26QB (property buyer filing).'
           }
         ],
-        relatedServices: ['Payroll Processing', 'Advance Tax Payment', 'TAN Application', 'Accounting & Bookkeeping', 'Income Tax Filing'],
+        "relatedServices": [
+  {
+    "title": "Payroll Processing",
+    "description": "Efficient payroll management ensuring accurate salary disbursement and statutory compliance."
+  },
+  {
+    "title": "Advance Tax Payment",
+    "description": "Ensure timely advance tax payments to avoid penalties and interest with expert guidance."
+  },
+  {
+    "title": "TAN Application",
+    "description": "Hassle-free assistance for applying and obtaining your TAN for TDS compliance."
+  },
+  {
+    "title": "Accounting & Bookkeeping",
+    "description": "Reliable bookkeeping and accounting services to maintain accurate financial records."
+  },
+  {
+    "title": "Income Tax Filing",
+    "description": "Accurate and timely income tax return filing to maximize compliance and minimize liability."
+  }
+],
+
         stickyFooterCta: {
           text: 'File your TDS Returns on time — avoid penalties and stay compliant!',
           buttons: [
@@ -437,7 +459,28 @@ const servicesData = {
             answer: 'Yes, projections can be adjusted in upcoming quarters.'
           }
         ],
-        relatedServices: ['ITR Filing', 'Capital Gains Computation', 'TDS Return Filing', 'Virtual CFO Services', 'Business Tax Advisory'],
+"relatedServices": [
+  {
+    "title": "ITR Filing",
+    "description": "Seamless and accurate filing of Income Tax Returns to ensure full compliance and refunds."
+  },
+  {
+    "title": "Capital Gains Computation",
+    "description": "Precise calculation of capital gains to optimize tax liability and ensure correct reporting."
+  },
+  {
+    "title": "TDS Return Filing",
+    "description": "Timely and accurate filing of quarterly TDS returns to meet regulatory requirements."
+  },
+  {
+    "title": "Virtual CFO Services",
+    "description": "Strategic financial guidance and oversight tailored for startups and growing businesses."
+  },
+  {
+    "title": "Business Tax Advisory",
+    "description": "Expert tax planning and advisory services to help businesses stay compliant and tax-efficient."
+  }
+],
         stickyFooterCta: {
           text: 'Avoid penalties with expert-calculated advance tax plans — timely, accurate, and fully personalized.',
           buttons: [
@@ -532,13 +575,28 @@ const servicesData = {
             answer: 'Yes, and it’s highly recommended before March 31st!'
           }
         ],
-        relatedServices: [
-          'Income Tax Return Filing',
-          'Advance Tax Calculation',
-          'Capital Gains Tax Filing',
-          'Investment Advisory',
-          'Virtual CFO Services'
-        ],
+       "relatedServices": [
+  {
+    "title": "Income Tax Return Filing",
+    "description": "Accurate and timely filing of income tax returns to ensure compliance and maximize refunds."
+  },
+  {
+    "title": "Advance Tax Calculation",
+    "description": "Get precise advance tax estimates to avoid interest and stay fully compliant with tax laws."
+  },
+  {
+    "title": "Capital Gains Tax Filing",
+    "description": "Expert support in computing and filing taxes on capital gains to ensure accurate reporting."
+  },
+  {
+    "title": "Investment Advisory",
+    "description": "Personalized investment advice to help grow your wealth while optimizing tax savings."
+  },
+  {
+    "title": "Virtual CFO Services",
+    "description": "Professional financial management and strategic guidance tailored for business growth."
+  }
+],
         stickyFooterCta: {
           text: 'Reduce your tax bill legally and smartly — book your personalized tax planning session now.',
           buttons: [
@@ -635,13 +693,28 @@ const servicesData = {
             answer: 'You may be asked to show delayed compliance — we assist with that too.'
           }
         ],
-        relatedServices: [
-          'TDS Return Filing',
-          'Foreign Remittance Compliance',
-          'DTAA Benefit Advisory',
-          'Business Taxation',
-          'Virtual CFO Services'
-        ],
+"relatedServices": [
+  {
+    "title": "TDS Return Filing",
+    "description": "Ensure timely and accurate TDS return filing to maintain compliance with tax regulations."
+  },
+  {
+    "title": "Foreign Remittance Compliance",
+    "description": "Comprehensive assistance in managing foreign remittance regulations and RBI compliance."
+  },
+  {
+    "title": "DTAA Benefit Advisory",
+    "description": "Expert guidance on claiming benefits under the Double Taxation Avoidance Agreement (DTAA)."
+  },
+  {
+    "title": "Business Taxation",
+    "description": "Tailored tax solutions for businesses to ensure compliance and optimize tax liability."
+  },
+  {
+    "title": "Virtual CFO Services",
+    "description": "Strategic financial planning and oversight for businesses through experienced CFO support."
+  }
+],
         stickyFooterCta: {
           text: 'Ensure compliant foreign remittances with fast & accurate 15CA/CB filing by trusted Chartered Accountants.',
           buttons: [
@@ -741,8 +814,28 @@ const servicesData = {
             answer: 'Yes, e-invoicing setup and QR compliance is supported.'
           }
         ],
-        relatedServices: ['GST Return Filing', 'Bookkeeping & Accounting', 'E-Invoicing Automation', 'Virtual CFO', 'Inventory Management'],
-        stickyFooterCta: {
+"relatedServices": [
+  {
+    "title": "GST Return Filing",
+    "description": "Accurate and timely filing of GST returns to ensure full compliance with GST laws."
+  },
+  {
+    "title": "Bookkeeping & Accounting",
+    "description": "Professional bookkeeping and accounting services to keep your financials accurate and up to date."
+  },
+  {
+    "title": "E-Invoicing Automation",
+    "description": "Automate your e-invoicing process for faster billing and seamless GST integration."
+  },
+  {
+    "title": "Virtual CFO",
+    "description": "End-to-end financial strategy and advisory services to help your business scale efficiently."
+  },
+  {
+    "title": "Inventory Management",
+    "description": "Smart inventory tracking solutions to streamline operations and reduce holding costs."
+  }
+],        stickyFooterCta: {
           text: 'Get your invoicing system set up right — accurate, professional, and easy to manage every month.',
           buttons: [
             { label: 'Get Started with Invoicing', icon: 'AssignmentTurnedInOutlined', size: 24 },
@@ -837,13 +930,28 @@ const servicesData = {
             answer: 'Absolutely — we offer bundled packages at discounted pricing.'
           }
         ],
-        relatedServices: [
-          'GST Return Filing',
-          'Payroll Processing',
-          'TDS Return Filing',
-          'Virtual CFO Services',
-          'Statutory Audit Support'
-        ],
+      "relatedServices": [
+  {
+    "title": "GST Return Filing",
+    "description": "Timely and accurate GST return filing to ensure hassle-free tax compliance and avoid penalties."
+  },
+  {
+    "title": "Payroll Processing",
+    "description": "Efficient payroll solutions that ensure accurate salary processing and statutory compliance."
+  },
+  {
+    "title": "TDS Return Filing",
+    "description": "Expert handling of quarterly TDS return filing for smooth compliance with tax regulations."
+  },
+  {
+    "title": "Virtual CFO Services",
+    "description": "Strategic financial oversight and planning support tailored for growing businesses."
+  },
+  {
+    "title": "Statutory Audit Support",
+    "description": "End-to-end assistance in preparing for and managing statutory audits with complete accuracy."
+  }
+],
         stickyFooterCta: {
           text: 'Stay financially compliant and in control — get your books managed by experts today.',
           buttons: [
@@ -940,13 +1048,28 @@ const servicesData = {
             answer: 'Tech, services, D2C, manufacturing, agencies, e-commerce, and more.'
           }
         ],
-        relatedServices: [
-          'Bookkeeping & Accounting',
-          'MIS Reporting & Forecasting',
-          'Financial Projections & Valuation',
-          'Startup India Registration',
-          'Compliance Calendar Setup'
-        ],
+       "relatedServices": [
+  {
+    "title": "Bookkeeping & Accounting",
+    "description": "Maintain accurate and up-to-date financial records with professional bookkeeping and accounting services."
+  },
+  {
+    "title": "MIS Reporting & Forecasting",
+    "description": "Actionable MIS reports and financial forecasts to support informed business decision-making."
+  },
+  {
+    "title": "Financial Projections & Valuation",
+    "description": "Detailed financial modeling and business valuation services for fundraising and strategic planning."
+  },
+  {
+    "title": "Startup India Registration",
+    "description": "Get recognized under the Startup India initiative with complete support for registration and documentation."
+  },
+  {
+    "title": "Compliance Calendar Setup",
+    "description": "Customized compliance calendars to help you track and meet all regulatory deadlines efficiently."
+  }
+],
         stickyFooterCta: {
           text: 'Run your business like the big guys — with a Virtual CFO in your corner.',
           buttons: [
@@ -1041,13 +1164,28 @@ const servicesData = {
             answer: 'Yes. We provide clean backups and reports in your preferred format.'
           }
         ],
-        relatedServices: [
-          'Bookkeeping & Accounting',
-          'GST & TDS Return Filing',
-          'Income Tax Return Filing',
-          'Virtual CFO Services',
-          'Audit Support'
-        ],
+       "relatedServices": [
+  {
+    "title": "Bookkeeping & Accounting",
+    "description": "Accurate bookkeeping and accounting services to ensure clear financial records and compliance."
+  },
+  {
+    "title": "GST & TDS Return Filing",
+    "description": "Comprehensive return filing services for both GST and TDS, ensuring timely and accurate compliance."
+  },
+  {
+    "title": "Income Tax Return Filing",
+    "description": "Expert assistance in filing income tax returns to maximize refunds and ensure legal compliance."
+  },
+  {
+    "title": "Virtual CFO Services",
+    "description": "Strategic financial leadership and support for businesses without the cost of a full-time CFO."
+  },
+  {
+    "title": "Audit Support",
+    "description": "End-to-end support for internal and statutory audits, ensuring transparency and readiness."
+  }
+],
         stickyFooterCta: {
           text: 'Don’t stress over messy books — we’ll clean it all up and give you a fresh start.',
           buttons: [
@@ -1141,8 +1279,28 @@ const servicesData = {
             answer: 'No, we work on your existing software or Excel.'
           }
         ],
-        relatedServices: ['Bookkeeping & Accounting', 'GST Return Filing', 'Invoicing Setup', 'Virtual CFO Services', 'MIS Reporting'],
-        stickyFooterCta: {
+"relatedServices": [
+  {
+    "title": "Bookkeeping & Accounting",
+    "description": "Professional bookkeeping and accounting services to maintain organized and accurate financial records."
+  },
+  {
+    "title": "GST Return Filing",
+    "description": "Ensure timely and accurate GST return filings to stay compliant and avoid penalties."
+  },
+  {
+    "title": "Invoicing Setup",
+    "description": "Streamlined invoicing system setup to help you manage billing efficiently and professionally."
+  },
+  {
+    "title": "Virtual CFO Services",
+    "description": "Strategic financial management and advisory services tailored for startups and growing businesses."
+  },
+  {
+    "title": "MIS Reporting",
+    "description": "Custom MIS reports to give you financial insights for better decision-making and forecasting."
+  }
+],        stickyFooterCta: {
           text: 'Track your stock like a pro — stay compliant, profitable, and inventory-smart every month.',
           buttons: [
             { label: 'Start Inventory Setup', icon: 'AssignmentTurnedInOutlined', size: 24 },
@@ -1234,13 +1392,28 @@ const servicesData = {
             answer: 'We provide commentary + summary insights with every pack.'
           }
         ],
-        relatedServices: [
-          'Bookkeeping & Accounting',
-          'Virtual CFO Services',
-          'Financial Projections',
-          'Tax Planning & Advisory',
-          'Compliance Calendar Setup'
-        ],
+"relatedServices": [
+  {
+    "title": "Bookkeeping & Accounting",
+    "description": "Maintain accurate and up-to-date financial records with expert bookkeeping and accounting services."
+  },
+  {
+    "title": "Virtual CFO Services",
+    "description": "Get strategic financial leadership and insights without the cost of a full-time CFO."
+  },
+  {
+    "title": "Financial Projections",
+    "description": "Create detailed financial forecasts to support budgeting, fundraising, and business planning."
+  },
+  {
+    "title": "Tax Planning & Advisory",
+    "description": "Optimize your tax position with proactive planning and expert advisory for individuals and businesses."
+  },
+  {
+    "title": "Compliance Calendar Setup",
+    "description": "Stay on top of all due dates with a customized compliance calendar tailored to your business needs."
+  }
+],
         stickyFooterCta: {
           text: 'Don’t just maintain books — understand your business. Get smart, visual MIS & analytics tailored to your growth.',
           buttons: [
@@ -1363,14 +1536,32 @@ const servicesData = {
             answer: 'We help you open a bank account, register for GST, and stay compliant.'
           }
         ],
-        relatedServices: [
-          'GST Registration',
-          'Startup India Recognition',
-          'Bookkeeping & Accounting',
-          'Virtual CFO Services',
-          'Payroll Setup',
-          'Trademark Registration'
-        ],
+       "relatedServices": [
+  {
+    "title": "GST Registration",
+    "description": "Complete assistance with GST registration to help your business comply with tax regulations from day one."
+  },
+  {
+    "title": "Startup India Recognition",
+    "description": "Get official recognition under the Startup India program with end-to-end support for application and documentation."
+  },
+  {
+    "title": "Bookkeeping & Accounting",
+    "description": "Accurate bookkeeping and accounting services to keep your financial records organized and compliant."
+  },
+  {
+    "title": "Virtual CFO Services",
+    "description": "Strategic financial guidance and management support to help your business grow efficiently."
+  },
+  {
+    "title": "Payroll Setup",
+    "description": "Efficient payroll system setup ensuring timely salary processing and statutory compliance."
+  },
+  {
+    "title": "Trademark Registration",
+    "description": "Protect your brand identity with professional assistance for trademark registration and legal formalities."
+  }
+],
         stickyFooterCta: {
           text: 'Start your company the right way — MCA-compliant, fast, and expert-led.',
           buttons: [
@@ -1461,13 +1652,28 @@ const servicesData = {
             answer: 'Yes, we assist with updates too.'
           }
         ],
-        relatedServices: [
-          'Company Incorporation',
-          'GST Registration',
-          'Startup India Registration',
-          'IEC (Import Export Code)',
-          'Business Loan Assistance'
-        ],
+"relatedServices": [
+  {
+    "title": "Company Incorporation",
+    "description": "Complete support for registering your company and setting up your business structure efficiently."
+  },
+  {
+    "title": "GST Registration",
+    "description": "Assistance with GST registration to ensure your business meets all tax compliance requirements."
+  },
+  {
+    "title": "Startup India Registration",
+    "description": "Guidance and support to get recognized under the Startup India initiative for growth benefits."
+  },
+  {
+    "title": "IEC (Import Export Code)",
+    "description": "Obtain your Import Export Code with expert help to start international trade smoothly."
+  },
+  {
+    "title": "Business Loan Assistance",
+    "description": "Expert support in securing business loans with the best terms tailored to your needs."
+  }
+],
         stickyFooterCta: {
           text: 'Get officially recognized as an MSME and unlock powerful benefits — fast, easy, and fully online.',
           buttons: [
@@ -1563,13 +1769,28 @@ const servicesData = {
             answer: 'Yes, our Combo plan covers both Startup India Recognition and 80IAC filing support.'
           }
         ],
-        relatedServices: [
-          'Company Incorporation',
-          'Pitch Deck & Investor Docs',
-          '80 IAC & 56(2)(viib) Tax Exemption',
-          'MSME/Udyam Registration',
-          'Trademark & IP Support'
-        ],
+       "relatedServices": [
+  {
+    "title": "Company Incorporation",
+    "description": "Complete assistance in registering your company and establishing a strong business foundation."
+  },
+  {
+    "title": "Pitch Deck & Investor Docs",
+    "description": "Professional preparation of pitch decks and investor documents to help you secure funding."
+  },
+  {
+    "title": "80 IAC & 56(2)(viib) Tax Exemption",
+    "description": "Expert guidance on claiming tax exemptions under Sections 80 IAC and 56(2)(viib) for startups."
+  },
+  {
+    "title": "MSME/Udyam Registration",
+    "description": "Smooth registration under MSME/Udyam to unlock benefits and government schemes for your business."
+  },
+  {
+    "title": "Trademark & IP Support",
+    "description": "Protect your intellectual property with professional trademark registration and IP advisory services."
+  }
+],
         stickyFooterCta: {
           text: 'Get recognized as an official startup and access India’s best benefits for innovation & growth.',
           buttons: [
@@ -1660,13 +1881,28 @@ const servicesData = {
             answer: 'In most metros and major cities — yes. Some towns may require a physical visit.'
           }
         ],
-        relatedServices: [
-          'Shops & Establishment License',
-          'GST Registration',
-          'FSSAI License (for food business)',
-          'Labour License',
-          'MSME / Udyam Registration'
-        ],
+      "relatedServices": [
+  {
+    "title": "Shops & Establishment License",
+    "description": "Get your Shops & Establishment license to ensure legal compliance for your commercial premises."
+  },
+  {
+    "title": "GST Registration",
+    "description": "Professional assistance with GST registration for smooth tax compliance and business operations."
+  },
+  {
+    "title": "FSSAI License (for food business)",
+    "description": "Obtain the mandatory FSSAI license to operate your food business legally and safely."
+  },
+  {
+    "title": "Labour License",
+    "description": "Comprehensive support for obtaining labour licenses, ensuring compliance with labour laws."
+  },
+  {
+    "title": "MSME / Udyam Registration",
+    "description": "Register under MSME/Udyam to avail government benefits and schemes for micro, small, and medium enterprises."
+  }
+],
         stickyFooterCta: {
           text: 'Start your business legally with a trade license — get it done right with our expert support.',
           buttons: [
@@ -1752,13 +1988,28 @@ const servicesData = {
             answer: 'Yes, PAN-based IEC is auto-synced with GST.'
           }
         ],
-        relatedServices: [
-          'MSME/Udyam Registration',
-          'GST Registration',
-          'Startup India Registration',
-          'Export Incentive Claims',
-          'Import Documentation Assistance'
-        ],
+       "relatedServices": [
+  {
+    "title": "MSME/Udyam Registration",
+    "description": "Register your business under MSME/Udyam to access government schemes and financial benefits."
+  },
+  {
+    "title": "GST Registration",
+    "description": "Expert assistance in GST registration to ensure smooth tax compliance for your business."
+  },
+  {
+    "title": "Startup India Registration",
+    "description": "Complete support for registering under the Startup India initiative and unlocking various benefits."
+  },
+  {
+    "title": "Export Incentive Claims",
+    "description": "Get help in claiming export incentives to maximize benefits for your international trade operations."
+  },
+  {
+    "title": "Import Documentation Assistance",
+    "description": "Professional support in managing import documentation to facilitate hassle-free customs clearance."
+  }
+],
         stickyFooterCta: {
           text: 'Expand beyond borders — get your IEC and begin your global business journey today.',
           buttons: [
@@ -1851,13 +2102,28 @@ const servicesData = {
             answer: 'Yes, labour licenses are state-specific.'
           }
         ],
-        relatedServices: [
-          'Trade License',
-          'Shops & Establishment Registration',
-          'EPF & ESI Registration',
-          'GST Registration',
-          'Payroll Processing'
-        ],
+       "relatedServices": [
+  {
+    "title": "Trade License",
+    "description": "Obtain your trade license to legally operate your business and comply with local regulations."
+  },
+  {
+    "title": "Shops & Establishment Registration",
+    "description": "Register your commercial establishment to ensure adherence to labor laws and workplace standards."
+  },
+  {
+    "title": "EPF & ESI Registration",
+    "description": "Complete assistance with Employee Provident Fund (EPF) and Employee State Insurance (ESI) registration for employee welfare compliance."
+  },
+  {
+    "title": "GST Registration",
+    "description": "Expert help with GST registration to ensure your business meets all tax obligations efficiently."
+  },
+  {
+    "title": "Payroll Processing",
+    "description": "Streamlined payroll processing services to ensure timely and accurate salary disbursement and statutory compliance."
+  }
+],
         stickyFooterCta: {
           text: 'Comply with labour laws and run your workforce operations legally — get your labour license filed today.',
           buttons: [
@@ -1958,13 +2224,28 @@ const servicesData = {
             answer: 'Yes — even for NIL income companies.'
           }
         ],
-        relatedServices: [
-          'Auditor Appointment (ADT-1)',
-          'DIR-3 KYC Filing',
-          'Strike-Off or Revival',
-          'Bookkeeping & Accounting',
-          'Virtual CFO + Compliance Calendar'
-        ],
+       "relatedServices": [
+  {
+    "title": "Auditor Appointment (ADT-1)",
+    "description": "Expert assistance with filing ADT-1 for auditor appointment and compliance with regulatory requirements."
+  },
+  {
+    "title": "DIR-3 KYC Filing",
+    "description": "Ensure timely DIR-3 KYC filing for directors to maintain compliance with MCA regulations."
+  },
+  {
+    "title": "Strike-Off or Revival",
+    "description": "Professional support for company strike-off or revival procedures to manage your corporate status effectively."
+  },
+  {
+    "title": "Bookkeeping & Accounting",
+    "description": "Accurate bookkeeping and accounting services to keep your financial records organized and compliant."
+  },
+  {
+    "title": "Virtual CFO + Compliance Calendar",
+    "description": "Comprehensive virtual CFO services combined with a compliance calendar to keep your business on track."
+  }
+],
         stickyFooterCta: {
           text: 'Don’t miss your ROC deadlines — get your AOC-4, MGT-7, or LLP returns filed fast and compliantly.',
           buttons: [
@@ -2060,13 +2341,28 @@ const servicesData = {
             answer: 'You get a ROC acknowledgment, and MCA master data updates.'
           }
         ],
-        relatedServices: [
-          'ROC Annual Filing (AOC-4, MGT-7)',
-          'Auditor Appointment (ADT-1)',
-          'Shareholder Agreement Drafting',
-          'Virtual CFO',
-          'Startup India + Cap Table Setup'
-        ],
+       "relatedServices": [
+  {
+    "title": "ROC Annual Filing (AOC-4, MGT-7)",
+    "description": "Timely and accurate filing of ROC annual returns and financial statements to stay compliant with corporate laws."
+  },
+  {
+    "title": "Auditor Appointment (ADT-1)",
+    "description": "Professional assistance with the auditor appointment process and ADT-1 form filing."
+  },
+  {
+    "title": "Shareholder Agreement Drafting",
+    "description": "Draft clear and legally sound shareholder agreements to protect interests and define business relationships."
+  },
+  {
+    "title": "Virtual CFO",
+    "description": "Strategic financial management and advisory services to drive your business growth efficiently."
+  },
+  {
+    "title": "Startup India + Cap Table Setup",
+    "description": "Comprehensive support for Startup India registration and setting up your company’s capitalization table."
+  }
+],
         stickyFooterCta: {
           text: 'Keep your company’s board and ownership compliant — we’ll handle your director and shareholding changes end to end.',
           buttons: [
@@ -2159,13 +2455,28 @@ const servicesData = {
             answer: 'Yes, full Form DIR-3 KYC with DSC is needed for updated details.'
           }
         ],
-        relatedServices: [
-          'ROC Annual Filings (AOC-4, MGT-7)',
-          'Director Change Filings',
-          'Digital Signature (DSC) Application',
-          'Auditor Appointment (ADT-1)',
-          'Compliance Calendar Subscription'
-        ],
+"relatedServices": [
+  {
+    "title": "ROC Annual Filings (AOC-4, MGT-7)",
+    "description": "Ensure timely filing of annual returns and financial statements with the Registrar of Companies (ROC)."
+  },
+  {
+    "title": "Director Change Filings",
+    "description": "Professional support for filing changes in company directors promptly and accurately."
+  },
+  {
+    "title": "Digital Signature (DSC) Application",
+    "description": "Assistance in obtaining digital signatures required for secure online filing and compliance."
+  },
+  {
+    "title": "Auditor Appointment (ADT-1)",
+    "description": "Expert handling of auditor appointment processes including the filing of ADT-1 forms."
+  },
+  {
+    "title": "Compliance Calendar Subscription",
+    "description": "Stay organized with a customized compliance calendar to track all important filing deadlines and requirements."
+  }
+],
         stickyFooterCta: {
           text: 'Avoid DIN deactivation — get your DIR-3 KYC filed quickly and correctly with our expert support.',
           buttons: [
@@ -2256,13 +2567,28 @@ const servicesData = {
             answer: 'Yes — we can assist with MCA forms (DIR-12, MGT-14, SH-7, etc.).'
           }
         ],
-        relatedServices: [
-          'Change in Director / Shareholder',
-          'ROC Annual Filing',
-          'Auditor Appointment (ADT-1)',
-          'Company Law Advisory',
-          'Virtual CFO + Compliance Tracker'
-        ],
+        "relatedServices": [
+  {
+    "title": "Change in Director / Shareholder",
+    "description": "Seamless processing of changes in directors or shareholders to keep your company records up to date."
+  },
+  {
+    "title": "ROC Annual Filing",
+    "description": "Accurate and timely filing of annual returns and financial statements with the Registrar of Companies."
+  },
+  {
+    "title": "Auditor Appointment (ADT-1)",
+    "description": "Expert assistance with auditor appointment filings to ensure regulatory compliance."
+  },
+  {
+    "title": "Company Law Advisory",
+    "description": "Professional guidance on company law matters to help you navigate legal requirements effectively."
+  },
+  {
+    "title": "Virtual CFO + Compliance Tracker",
+    "description": "Integrated virtual CFO services combined with compliance tracking to keep your business financially and legally on point."
+  }
+],
         stickyFooterCta: {
           text: 'One board resolution done right can protect your entire business — let’s get it legally perfect.',
           buttons: [
@@ -2354,13 +2680,28 @@ const servicesData = {
             answer: 'One revision is included. Additional edits are charged nominally.'
           }
         ],
-        relatedServices: [
-          'Co-Founder & Shareholder Agreement',
-          'ESOP Drafting & Policy',
-          'Virtual CFO + Compliance Calendar',
-          'DIR-3 KYC + ROC Filings',
-          'HR Letters, Contracts & NDAs'
-        ],
+       "relatedServices": [
+  {
+    "title": "Co-Founder & Shareholder Agreement",
+    "description": "Draft clear and comprehensive agreements to define roles and responsibilities among co-founders and shareholders."
+  },
+  {
+    "title": "ESOP Drafting & Policy",
+    "description": "Create effective Employee Stock Option Plans and policies to incentivize and retain your talent."
+  },
+  {
+    "title": "Virtual CFO + Compliance Calendar",
+    "description": "Strategic financial management services combined with a compliance calendar to keep your business on track."
+  },
+  {
+    "title": "DIR-3 KYC + ROC Filings",
+    "description": "Timely filing of DIR-3 KYC and other ROC compliance requirements for directors and companies."
+  },
+  {
+    "title": "HR Letters, Contracts & NDAs",
+    "description": "Professional drafting of HR letters, employment contracts, and non-disclosure agreements tailored to your business."
+  }
+],
         stickyFooterCta: {
           text: 'Protect your business with clear, enforceable agreements — drafted by professionals who understand startups and scale.',
           buttons: [
@@ -2455,13 +2796,28 @@ const servicesData = {
           },
           { question: 'What if I’m an agent working under a developer?', answer: 'You still need individual RERA registration.' }
         ],
-        relatedServices: [
-          'Agreement Drafting (Sale, Allotment, Possession)',
-          'Escrow Account Setup',
-          'Quarterly CA/Engineer Certificates',
-          'GST + TDS on Property Sales',
-          'Virtual CFO for Real Estate'
-        ],
+"relatedServices": [
+  {
+    "title": "Agreement Drafting (Sale, Allotment, Possession)",
+    "description": "Professional drafting of sale, allotment, and possession agreements to ensure clear and enforceable contracts."
+  },
+  {
+    "title": "Escrow Account Setup",
+    "description": "Set up escrow accounts to secure transactions and protect stakeholder interests in property deals."
+  },
+  {
+    "title": "Quarterly CA/Engineer Certificates",
+    "description": "Obtain quarterly certificates from Chartered Accountants and Engineers to comply with regulatory requirements."
+  },
+  {
+    "title": "GST + TDS on Property Sales",
+    "description": "Expert guidance and compliance support for GST and TDS related to property sales and transfers."
+  },
+  {
+    "title": "Virtual CFO for Real Estate",
+    "description": "Specialized virtual CFO services tailored for real estate businesses to manage finances efficiently."
+  }
+],
         stickyFooterCta: {
           text: 'Don’t let RERA delays hurt your business — get registered, stay compliant, and focus on building.',
           buttons: [
@@ -2562,13 +2918,28 @@ const servicesData = {
             answer: 'Absolutely — we include a walkthrough call.'
           }
         ],
-        relatedServices: [
-          'Business Valuation',
-          'Investor Pitch Deck',
-          'Virtual CFO',
-          'Due Diligence Support',
-          'Fundraising Strategy & Advisory'
-        ],
+       "relatedServices": [
+  {
+    "title": "Business Valuation",
+    "description": "Accurate valuation services to help you understand the true worth of your business."
+  },
+  {
+    "title": "Investor Pitch Deck",
+    "description": "Create compelling investor pitch decks to attract funding and communicate your business vision."
+  },
+  {
+    "title": "Virtual CFO",
+    "description": "Strategic financial leadership and advisory services to drive your business growth."
+  },
+  {
+    "title": "Due Diligence Support",
+    "description": "Comprehensive due diligence assistance to ensure smooth transactions and investor confidence."
+  },
+  {
+    "title": "Fundraising Strategy & Advisory",
+    "description": "Expert guidance to develop effective fundraising strategies and secure capital."
+  }
+],
         stickyFooterCta: {
           text: 'Forecast your growth with a financial model that speaks your business language — and your investor’s too.',
           buttons: [
@@ -2665,13 +3036,28 @@ const servicesData = {
             answer: 'Yes — we give you editable formats (PowerPoint or Google Slides).'
           }
         ],
-        relatedServices: [
-          'Financial Modelling',
-          'Business Valuation',
-          'Virtual CFO',
-          'Fundraising Advisory',
-          'Investor Matchmaking (Optional)'
-        ],
+       "relatedServices": [
+  {
+    "title": "Financial Modelling",
+    "description": "Build detailed financial models to forecast your business performance and make informed decisions."
+  },
+  {
+    "title": "Business Valuation",
+    "description": "Precise valuation services to determine the market value of your business for various purposes."
+  },
+  {
+    "title": "Virtual CFO",
+    "description": "Expert virtual CFO services providing strategic financial management and advisory support."
+  },
+  {
+    "title": "Fundraising Advisory",
+    "description": "Guidance and strategies to help you raise capital effectively and meet your funding goals."
+  },
+  {
+    "title": "Investor Matchmaking (Optional)",
+    "description": "Connect with potential investors aligned to your business needs for successful fundraising."
+  }
+],
         stickyFooterCta: {
           text: 'Your story deserves a deck that makes investors lean in — let’s build it together.',
           buttons: [
@@ -2763,13 +3149,28 @@ const servicesData = {
             answer: 'Yes, we include a walkthrough call.'
           }
         ],
-        relatedServices: [
-          'Financial Modelling',
-          'Investor Pitch Deck',
-          'Startup India Registration',
-          'Virtual CFO',
-          'Fundraising Advisory'
-        ],
+       "relatedServices": [
+  {
+    "title": "Financial Modelling",
+    "description": "Develop robust financial models to analyze and project your business’s future performance."
+  },
+  {
+    "title": "Investor Pitch Deck",
+    "description": "Craft persuasive pitch decks that effectively communicate your startup’s vision and attract investors."
+  },
+  {
+    "title": "Startup India Registration",
+    "description": "Simplify your startup registration process and gain access to government benefits under Startup India."
+  },
+  {
+    "title": "Virtual CFO",
+    "description": "Professional virtual CFO services to manage your finances and support strategic growth."
+  },
+  {
+    "title": "Fundraising Advisory",
+    "description": "Receive expert guidance on preparing for fundraising and connecting with the right investors."
+  }
+],
         stickyFooterCta: {
           text: "Whether you're raising funds or planning your next move — know your worth with a professional valuation report.",
           buttons: [
@@ -2865,13 +3266,28 @@ const servicesData = {
             answer: 'Absolutely — we include a walkthrough call.'
           }
         ],
-        relatedServices: [
-          'Business Valuation',
-          'Investor Pitch Deck',
-          'Virtual CFO',
-          'Due Diligence Support',
-          'Fundraising Strategy & Advisory'
-        ],
+       "relatedServices": [
+  {
+    "title": "Business Valuation",
+    "description": "Get precise valuations to understand your business's worth for investment, sale, or growth planning."
+  },
+  {
+    "title": "Investor Pitch Deck",
+    "description": "Design compelling pitch decks to attract investors and clearly communicate your business potential."
+  },
+  {
+    "title": "Virtual CFO",
+    "description": "Access expert virtual CFO services for strategic financial management and advisory."
+  },
+  {
+    "title": "Due Diligence Support",
+    "description": "Comprehensive due diligence assistance to facilitate smooth transactions and build investor confidence."
+  },
+  {
+    "title": "Fundraising Strategy & Advisory",
+    "description": "Receive expert advice on developing effective fundraising strategies and securing capital."
+  }
+],
         stickyFooterCta: {
           text: 'Forecast your growth with a financial model that speaks your business language — and your investor’s too.',
           buttons: [
@@ -2969,13 +3385,28 @@ const servicesData = {
             answer: 'Yes, especially for early-stage or mid-sized companies without internal teams.'
           }
         ],
-        relatedServices: [
-          'Statutory Audit Assistance',
-          'Bookkeeping & Reconciliation',
-          'Fix My Books',
-          'GST + Payroll Compliance Check',
-          'Virtual CFO'
-        ],
+       "relatedServices": [
+  {
+    "title": "Statutory Audit Assistance",
+    "description": "Expert support to streamline your statutory audit process and ensure compliance."
+  },
+  {
+    "title": "Bookkeeping & Reconciliation",
+    "description": "Accurate bookkeeping and bank reconciliation services to keep your financial records up to date."
+  },
+  {
+    "title": "Fix My Books",
+    "description": "Professional help to correct and clean up your accounting records for accurate financial reporting."
+  },
+  {
+    "title": "GST + Payroll Compliance Check",
+    "description": "Comprehensive reviews of your GST filings and payroll compliance to avoid penalties and errors."
+  },
+  {
+    "title": "Virtual CFO",
+    "description": "Strategic virtual CFO services providing financial oversight and advisory for your business."
+  }
+],
         stickyFooterCta: {
           text: 'An internal audit isn’t just a check — it’s a strategic investment in your company’s integrity and growth.',
           buttons: [
@@ -3074,13 +3505,28 @@ const servicesData = {
             answer: 'Yes — we offer advisory for OD, invoice discounting, and fund-based limits.'
           }
         ],
-        relatedServices: [
-          'Virtual CFO Services',
-          'MIS & Analytics',
-          'Invoice Management',
-          'Fundraising Support (OD/Invoice Financing)',
-          'Accounting & Cash Flow Reporting'
-        ],
+       "relatedServices": [
+  {
+    "title": "Virtual CFO Services",
+    "description": "Expert financial leadership to guide your business strategy and optimize financial performance."
+  },
+  {
+    "title": "MIS & Analytics",
+    "description": "Management Information Systems and analytics to provide actionable insights and drive growth."
+  },
+  {
+    "title": "Invoice Management",
+    "description": "Efficient handling of your invoicing process to improve cash flow and reduce delays."
+  },
+  {
+    "title": "Fundraising Support (OD/Invoice Financing)",
+    "description": "Specialized support for overdraft and invoice financing to meet your working capital needs."
+  },
+  {
+    "title": "Accounting & Cash Flow Reporting",
+    "description": "Accurate accounting services combined with detailed cash flow reports to keep your finances on track."
+  }
+],
         stickyFooterCta: {
           text: 'Free up capital stuck in operations — improve your working capital cycle with expert help.',
           buttons: [
@@ -3183,13 +3629,28 @@ const servicesData = {
             answer: 'Absolutely — we provide complete TDS documentation.'
           }
         ],
-        relatedServices: [
-          'EPF & ESI Registration',
-          'PT Registration & Filing',
-          'TDS Return Filing',
-          'Virtual CFO',
-          'HR & Labour Compliance'
-        ],
+        "relatedServices": [
+  {
+    "title": "EPF & ESI Registration",
+    "description": "Complete assistance in registering your business under Employees’ Provident Fund and Employee State Insurance schemes."
+  },
+  {
+    "title": "PT Registration & Filing",
+    "description": "Professional support for Professional Tax registration and timely filing to stay compliant."
+  },
+  {
+    "title": "TDS Return Filing",
+    "description": "Accurate and timely filing of Tax Deducted at Source returns to avoid penalties."
+  },
+  {
+    "title": "Virtual CFO",
+    "description": "Expert virtual CFO services providing financial strategy, planning, and management."
+  },
+  {
+    "title": "HR & Labour Compliance",
+    "description": "Ensure full compliance with labour laws and HR regulations to avoid legal issues."
+  }
+],
         stickyFooterCta: {
           text: 'Make payroll stress-free — accurate salaries, on-time compliance, and happy employees every month.',
           buttons: [
@@ -3285,8 +3746,28 @@ const servicesData = {
             answer: 'Yes — final output can be used directly in Zoho, GreytHR, Tally, etc.'
           }
         ],
-        relatedServices: ['Payroll Processing', 'EPF & ESI Registration', 'Advance Tax Planning', 'Offer Letter Templates', 'Virtual CFO'],
-        stickyFooterCta: {
+"relatedServices": [
+  {
+    "title": "Payroll Processing",
+    "description": "Efficient and accurate payroll management to ensure timely salary disbursement and compliance."
+  },
+  {
+    "title": "EPF & ESI Registration",
+    "description": "Complete assistance with registration under Employees’ Provident Fund and Employee State Insurance schemes."
+  },
+  {
+    "title": "Advance Tax Planning",
+    "description": "Strategic planning to optimize advance tax payments and reduce your tax liability."
+  },
+  {
+    "title": "Offer Letter Templates",
+    "description": "Ready-to-use, compliant offer letter templates to streamline your hiring process."
+  },
+  {
+    "title": "Virtual CFO",
+    "description": "Professional virtual CFO services offering financial oversight and strategic advisory."
+  }
+],        stickyFooterCta: {
           text: 'Pay smart, stay compliant — build salary structures that make everyone happier.',
           buttons: [
             { label: 'Get Salary Structures Now', icon: 'AssignmentTurnedInOutlined', size: 24 },
@@ -3381,13 +3862,28 @@ const servicesData = {
             answer: 'Yes — HR gets a dashboard or email summary report.'
           }
         ],
-        relatedServices: [
-          'Payroll Processing',
-          'Form 16 Generation & TDS Returns',
-          'Tax Planning Advisory',
-          'Advance Tax Calculation',
-          'Financial Wellness Workshops'
-        ],
+       "relatedServices": [
+  {
+    "title": "Payroll Processing",
+    "description": "Efficient management of payroll ensuring accurate salary disbursement and statutory compliance."
+  },
+  {
+    "title": "Form 16 Generation & TDS Returns",
+    "description": "Timely preparation of Form 16 and accurate filing of TDS returns to meet regulatory requirements."
+  },
+  {
+    "title": "Tax Planning Advisory",
+    "description": "Expert advice to optimize your tax liabilities and plan finances effectively."
+  },
+  {
+    "title": "Advance Tax Calculation",
+    "description": "Precise calculation of advance tax to avoid penalties and stay compliant with tax regulations."
+  },
+  {
+    "title": "Financial Wellness Workshops",
+    "description": "Educational workshops designed to improve financial literacy and wellness among employees."
+  }
+],
         stickyFooterCta: {
           text: 'Empower your team with financial peace — offer them expert-backed ITR filing this season.',
           buttons: [
@@ -3472,13 +3968,28 @@ const servicesData = {
           { question: 'Are these filings required even for NIL months?', answer: 'Yes, NIL returns are mandatory too.' },
           { question: 'Can I track submissions?', answer: 'Yes — we provide proof of submission and live status.' }
         ],
-        relatedServices: [
-          'Payroll Processing',
-          'Professional Tax Compliance',
-          'Bonus & Gratuity Advisory',
-          'Virtual CFO',
-          'HR Onboarding Kit & Policy Drafting'
-        ],
+       "relatedServices": [
+  {
+    "title": "Payroll Processing",
+    "description": "Accurate and timely payroll management to ensure compliance and employee satisfaction."
+  },
+  {
+    "title": "Professional Tax Compliance",
+    "description": "Comprehensive support for professional tax registration, filing, and compliance."
+  },
+  {
+    "title": "Bonus & Gratuity Advisory",
+    "description": "Expert guidance on calculating and managing employee bonuses and gratuity benefits."
+  },
+  {
+    "title": "Virtual CFO",
+    "description": "Strategic financial leadership through virtual CFO services tailored to your business needs."
+  },
+  {
+    "title": "HR Onboarding Kit & Policy Drafting",
+    "description": "Customized onboarding kits and HR policy drafting to streamline new employee integration."
+  }
+],
         stickyFooterCta: {
           text: 'Be payroll-compliant and worry-free — let us manage your EPF & ESI from start to finish.',
           buttons: [
@@ -3570,8 +4081,28 @@ const servicesData = {
             answer: 'Yes — we calculate, generate, and assist in challan payment every filing cycle.'
           }
         ],
-        relatedServices: ['Payroll Processing', 'EPF & ESI Filings', 'Labour License & Trade License', 'TDS Return Filing', 'Virtual CFO'],
-        stickyFooterCta: {
+"relatedServices": [
+  {
+    "title": "Payroll Processing",
+    "description": "Efficient and accurate payroll management to ensure timely salary payments and compliance."
+  },
+  {
+    "title": "EPF & ESI Filings",
+    "description": "Timely and compliant filing of Employees’ Provident Fund and Employee State Insurance returns."
+  },
+  {
+    "title": "Labour License & Trade License",
+    "description": "Assistance with obtaining and renewing labour and trade licenses for smooth business operations."
+  },
+  {
+    "title": "TDS Return Filing",
+    "description": "Accurate filing of Tax Deducted at Source returns to avoid penalties and ensure regulatory compliance."
+  },
+  {
+    "title": "Virtual CFO",
+    "description": "Professional virtual CFO services providing strategic financial planning and management."
+  }
+],        stickyFooterCta: {
           text: 'Avoid PT penalties and stay payroll-compliant — let us handle your Professional Tax end-to-end.',
           buttons: [
             { label: 'Register for PT Now', icon: 'AssignmentTurnedInOutlined', size: 24 },
@@ -3676,7 +4207,28 @@ const servicesData = {
             answer: 'Yes — we act as your support arm for employee queries & claims.'
           }
         ],
-        relatedServices: ['Payroll Processing', 'Employee ITR Help', 'ESIC Registration', 'HR Onboarding Kits', 'Virtual CFO Services'],
+"relatedServices": [
+  {
+    "title": "Payroll Processing",
+    "description": "Streamlined payroll management ensuring accurate salary disbursement and compliance."
+  },
+  {
+    "title": "Employee ITR Help",
+    "description": "Support for employees in filing their Income Tax Returns accurately and on time."
+  },
+  {
+    "title": "ESIC Registration",
+    "description": "Assistance with Employee State Insurance Corporation registration and compliance."
+  },
+  {
+    "title": "HR Onboarding Kits",
+    "description": "Comprehensive onboarding kits designed to simplify new employee integration and compliance."
+  },
+  {
+    "title": "Virtual CFO Services",
+    "description": "Expert virtual CFO support to guide your financial strategy and business growth."
+  }
+],
         stickyFooterCta: {
           text: 'Offer benefits your employees actually value — set up group insurance the smart, easy, compliant way.',
           buttons: [
@@ -3778,13 +4330,28 @@ const servicesData = {
             answer: 'Until cancellation — no expiry if compliance is maintained.'
           }
         ],
-        relatedServices: [
-          'GST Return Filing (Monthly/Quarterly)',
-          'LUT Filing',
-          'GST Cancellation/Revocation',
-          'Bookkeeping & Accounting',
-          'GST Notice Handling'
-        ],
+       "relatedServices": [
+  {
+    "title": "GST Return Filing (Monthly/Quarterly)",
+    "description": "Accurate and timely filing of GST returns to ensure compliance and avoid penalties."
+  },
+  {
+    "title": "LUT Filing",
+    "description": "Assistance with filing Letter of Undertaking for seamless export without GST payments."
+  },
+  {
+    "title": "GST Cancellation/Revocation",
+    "description": "Support for GST registration cancellation or revocation processes as per your business needs."
+  },
+  {
+    "title": "Bookkeeping & Accounting",
+    "description": "Comprehensive bookkeeping and accounting services to maintain clear financial records."
+  },
+  {
+    "title": "GST Notice Handling",
+    "description": "Expert assistance in managing and resolving GST notices efficiently and effectively."
+  }
+],
         stickyFooterCta: {
           text: 'Get your GST Number in just a few days with expert CA guidance and full support.',
           buttons: [
@@ -3880,8 +4447,28 @@ const servicesData = {
             answer: 'Yes, we can integrate or accept data from Tally, Zoho, Excel, etc.'
           }
         ],
-        relatedServices: ['GST Registration', 'GST Refund Application', 'GST Notice Handling', 'Bookkeeping & Accounting', 'Virtual CFO'],
-        stickyFooterCta: {
+"relatedServices": [
+  {
+    "title": "GST Registration",
+    "description": "Complete assistance for GST registration ensuring compliance with all regulatory requirements."
+  },
+  {
+    "title": "GST Refund Application",
+    "description": "Support in filing and processing GST refund claims to recover eligible amounts smoothly."
+  },
+  {
+    "title": "GST Notice Handling",
+    "description": "Professional help to respond to and resolve GST notices efficiently and effectively."
+  },
+  {
+    "title": "Bookkeeping & Accounting",
+    "description": "Accurate bookkeeping and accounting services to maintain your financial health."
+  },
+  {
+    "title": "Virtual CFO",
+    "description": "Expert virtual CFO services providing strategic financial management and advisory."
+  }
+],        stickyFooterCta: {
           text: 'Stay compliant and claim your ITC with timely GST filings by our expert CA team.',
           buttons: [
             { label: 'Start Filing Now', icon: 'AssignmentTurnedInOutlined', size: 24 },
@@ -3975,13 +4562,28 @@ const servicesData = {
             answer: 'Yes, with return monitoring, reconciliations, and advisory.'
           }
         ],
-        relatedServices: [
-          'GST Return Filing',
-          'GSTR-2A/2B Reconciliation',
-          'GST Refund Assistance',
-          'Accounting & Compliance Advisory',
-          'Virtual CFO'
-        ],
+        "relatedServices": [
+  {
+    "title": "GST Return Filing",
+    "description": "Accurate and timely filing of GST returns to ensure full compliance and avoid penalties."
+  },
+  {
+    "title": "GSTR-2A/2B Reconciliation",
+    "description": "Expert reconciliation of GSTR-2A and 2B to identify discrepancies and maintain accurate records."
+  },
+  {
+    "title": "GST Refund Assistance",
+    "description": "Professional support for filing and processing GST refund claims efficiently."
+  },
+  {
+    "title": "Accounting & Compliance Advisory",
+    "description": "Comprehensive advisory services to maintain compliance and streamline accounting processes."
+  },
+  {
+    "title": "Virtual CFO",
+    "description": "Strategic financial guidance and management through expert virtual CFO services."
+  }
+],
         stickyFooterCta: {
           text: 'Don’t ignore a GST notice — let our experts handle it and safeguard your GSTIN.',
           buttons: [
@@ -4076,13 +4678,28 @@ const servicesData = {
             answer: 'No. Your old GSTIN will be reactivated after successful revocation.'
           }
         ],
-        relatedServices: [
-          'GST Return Filing',
-          'GST Notice Handling',
-          'GSTR-10 Final Return Filing',
-          'Accounting Support',
-          'Startup Advisory'
-        ],
+       "relatedServices": [
+  {
+    "title": "GST Return Filing",
+    "description": "Timely and accurate filing of GST returns to ensure compliance and avoid penalties."
+  },
+  {
+    "title": "GST Notice Handling",
+    "description": "Professional assistance to resolve GST notices efficiently and effectively."
+  },
+  {
+    "title": "GSTR-10 Final Return Filing",
+    "description": "Expert support in filing GSTR-10 final returns during GST registration cancellation."
+  },
+  {
+    "title": "Accounting Support",
+    "description": "Reliable accounting services to maintain clear and compliant financial records."
+  },
+  {
+    "title": "Startup Advisory",
+    "description": "Guidance and support tailored for startups to navigate regulatory and financial challenges."
+  }
+],
         stickyFooterCta: {
           text: 'Shut it down or bring it back — we’ll handle your GSTIN cancellation or revival with full compliance.',
           buttons: [
@@ -4190,13 +4807,28 @@ const servicesData = {
             answer: 'We help you refile or escalate with additional clarification.'
           }
         ],
-        relatedServices: [
-          'LUT Filing',
-          'GST Return Filing',
-          'Export Documentation Assistance',
-          'Bookkeeping & Accounting',
-          'Virtual CFO Services'
-        ],
+      "relatedServices": [
+  {
+    "title": "LUT Filing",
+    "description": "Assistance with filing Letter of Undertaking for hassle-free GST-free exports."
+  },
+  {
+    "title": "GST Return Filing",
+    "description": "Accurate and timely filing of GST returns to keep your business compliant."
+  },
+  {
+    "title": "Export Documentation Assistance",
+    "description": "Support with preparing and managing all necessary export documents for smooth transactions."
+  },
+  {
+    "title": "Bookkeeping & Accounting",
+    "description": "Comprehensive bookkeeping and accounting services to maintain clear financial records."
+  },
+  {
+    "title": "Virtual CFO Services",
+    "description": "Expert virtual CFO support for strategic financial planning and management."
+  }
+],
         stickyFooterCta: {
           text: 'Let our experts get your GST refund filed the right way — fast, error-free, and fully compliant.',
           buttons: [
@@ -4289,13 +4921,28 @@ const servicesData = {
             answer: 'Only for companies or LLPs. Proprietors can use OTP/EVC.'
           }
         ],
-        relatedServices: [
-          'GST Export Refund Filing',
-          'GST Registration',
-          'GST Return Filing',
-          'Accounting & Bookkeeping',
-          'Virtual CFO Services'
-        ],
+       "relatedServices": [
+  {
+    "title": "GST Export Refund Filing",
+    "description": "Professional assistance in claiming GST refunds on export transactions efficiently."
+  },
+  {
+    "title": "GST Registration",
+    "description": "Complete support for GST registration to ensure your business complies with tax regulations."
+  },
+  {
+    "title": "GST Return Filing",
+    "description": "Timely and accurate GST return filing to keep your business compliant and avoid penalties."
+  },
+  {
+    "title": "Accounting & Bookkeeping",
+    "description": "Reliable accounting and bookkeeping services to maintain your financial records accurately."
+  },
+  {
+    "title": "Virtual CFO Services",
+    "description": "Expert virtual CFO services providing strategic financial management and advisory."
+  }
+],
         stickyFooterCta: {
           text: 'Don’t let taxes block your exports — file your LUT now and export tax-free.',
           buttons: [
@@ -4394,13 +5041,28 @@ const servicesData = {
             answer: 'We’ll still improve your file and coordinate directly.'
           }
         ],
-        relatedServices: [
-          'CMA Data & Financial Projections',
-          'Virtual CFO',
-          'Business Valuation',
-          'Loan Restructuring Advisory',
-          'FHI Score (Financial Health Index)'
-        ],
+       "relatedServices": [
+  {
+    "title": "CMA Data & Financial Projections",
+    "description": "Accurate preparation of CMA data and financial projections for loan applications and business planning."
+  },
+  {
+    "title": "Virtual CFO",
+    "description": "Strategic financial management and advisory through expert virtual CFO services."
+  },
+  {
+    "title": "Business Valuation",
+    "description": "Comprehensive valuation services to determine the true worth of your business."
+  },
+  {
+    "title": "Loan Restructuring Advisory",
+    "description": "Expert guidance to restructure loans and improve your financial flexibility."
+  },
+  {
+    "title": "FHI Score (Financial Health Index)",
+    "description": "Assessment and improvement plans based on your Financial Health Index score."
+  }
+],
         stickyFooterCta: {
           text: 'The right loan can fuel your growth — the wrong one can choke it. Let’s get you the right fit, the right way.',
           buttons: [
@@ -4491,13 +5153,28 @@ const servicesData = {
             answer: 'Yes — we guide where and how to invest after you approve the plan.'
           }
         ],
-        relatedServices: [
-          'Tax Planning Advisory (80C, 80D, etc.)',
-          'Retirement & Goal Planning',
-          'Insurance Advisory',
-          'Virtual CFO Services',
-          'Financial Health Score Analysis (FHI)'
-        ],
+        "relatedServices": [
+  {
+    "title": "Tax Planning Advisory (80C, 80D, etc.)",
+    "description": "Expert guidance to optimize your tax savings using deductions under sections like 80C, 80D, and more."
+  },
+  {
+    "title": "Retirement & Goal Planning",
+    "description": "Personalized planning to secure your retirement and achieve your financial goals with confidence."
+  },
+  {
+    "title": "Insurance Advisory",
+    "description": "Professional advice to choose the right insurance policies for comprehensive financial protection."
+  },
+  {
+    "title": "Virtual CFO Services",
+    "description": "Strategic financial management and planning through expert virtual CFO support."
+  },
+  {
+    "title": "Financial Health Score Analysis (FHI)",
+    "description": "In-depth analysis of your financial health with actionable insights to improve your financial wellbeing."
+  }
+],
         stickyFooterCta: {
           text: 'Don’t follow random trends — invest with confidence through personalized, expert advice.',
           buttons: [
@@ -4597,13 +5274,28 @@ const servicesData = {
             answer: 'No — we also cover cyber, motor, liability, property, travel, and group plans.'
           }
         ],
-        relatedServices: [
-          'Employee Insurance (Group Health/Term)',
-          'Tax Planning & Deductions (80C/80D)',
-          'Virtual CFO',
-          'Financial Health Score (FHI)',
-          'Wealth Advisory & Investments'
-        ],
+      "relatedServices": [
+  {
+    "title": "Employee Insurance (Group Health/Term)",
+    "description": "Comprehensive group health and term insurance plans to safeguard your employees’ wellbeing."
+  },
+  {
+    "title": "Tax Planning & Deductions (80C/80D)",
+    "description": "Optimize your tax benefits with expert advice on deductions under sections 80C and 80D."
+  },
+  {
+    "title": "Virtual CFO",
+    "description": "Professional virtual CFO services for strategic financial management and business growth."
+  },
+  {
+    "title": "Financial Health Score (FHI)",
+    "description": "Evaluate and enhance your financial stability with our detailed Financial Health Index analysis."
+  },
+  {
+    "title": "Wealth Advisory & Investments",
+    "description": "Tailored wealth management and investment strategies to grow and protect your assets."
+  }
+],
         stickyFooterCta: {
           text: 'Don’t buy insurance blindly — protect what matters with expert-backed advice and the best plans for your needs.',
           buttons: [
@@ -4695,8 +5387,28 @@ const servicesData = {
             answer: 'No — we only advise. You can invest on your own or with our recommended platform.'
           }
         ],
-        relatedServices: ['Tax Filing + Advance Tax', 'Investment Advisory', 'Insurance Review', 'FHI Score', 'Virtual CFO'],
-        stickyFooterCta: {
+"relatedServices": [
+  {
+    "title": "Tax Filing & Advance Tax",
+    "description": "Accurate and timely filing of income tax returns along with advance tax calculations."
+  },
+  {
+    "title": "Investment Advisory",
+    "description": "Expert advice to help you make informed investment decisions for long-term growth."
+  },
+  {
+    "title": "Insurance Review",
+    "description": "Comprehensive analysis of your insurance policies to ensure optimal coverage."
+  },
+  {
+    "title": "Financial Health Index (FHI) Score",
+    "description": "Detailed assessment of your financial health to guide better financial planning."
+  },
+  {
+    "title": "Virtual CFO",
+    "description": "Strategic financial management and insights to support your business growth."
+  }
+],        stickyFooterCta: {
           text: 'Save smarter, retire stronger — get your tax + retirement plan built for today and tomorrow.',
           buttons: [
             { label: 'Get My Tax + Retirement Plan', icon: 'AssignmentTurnedInOutlined', size: 24 },
@@ -4791,8 +5503,28 @@ const servicesData = {
             answer: 'Yes — if you opt for our annual or review-based plan.'
           }
         ],
-        relatedServices: ['Investment Advisory', 'Insurance & Risk Management', 'Tax Planning', 'Virtual CFO', 'Estate & Will Planning'],
-        stickyFooterCta: {
+"relatedServices": [
+  {
+    "title": "Investment Advisory",
+    "description": "Personalized investment strategies to help grow and diversify your portfolio."
+  },
+  {
+    "title": "Insurance & Risk Management",
+    "description": "Comprehensive insurance solutions to protect your assets and manage risks effectively."
+  },
+  {
+    "title": "Tax Planning",
+    "description": "Expert tax planning to minimize liabilities and maximize savings throughout the year."
+  },
+  {
+    "title": "Virtual CFO",
+    "description": "Strategic financial oversight and management from experienced virtual CFO professionals."
+  },
+  {
+    "title": "Estate & Will Planning",
+    "description": "Guidance on estate planning and will preparation to secure your legacy and beneficiaries."
+  }
+],        stickyFooterCta: {
           text: 'Wealth isn’t just about returns — it’s about structure, clarity, and legacy. Let’s build yours the right way.',
           buttons: [
             { label: 'Book Wealth Advisory Now', icon: 'AssignmentTurnedInOutlined', size: 24 },
@@ -4886,13 +5618,28 @@ const servicesData = {
             answer: 'No worries — we give you exact next steps to improve.'
           }
         ],
-        relatedServices: [
-          'Tax Planning',
-          'Insurance & Investment Advisory',
-          'Loan & Credit Score Advisory',
-          'Virtual CFO',
-          'Net Worth Certificate'
-        ],
+       "relatedServices": [
+  {
+    "title": "Tax Planning",
+    "description": "Strategic advice to optimize your tax liabilities and maximize savings."
+  },
+  {
+    "title": "Insurance & Investment Advisory",
+    "description": "Tailored insurance and investment solutions to safeguard and grow your wealth."
+  },
+  {
+    "title": "Loan & Credit Score Advisory",
+    "description": "Guidance on loan options and improving your credit score for better financial health."
+  },
+  {
+    "title": "Virtual CFO",
+    "description": "Professional financial management and planning services for your business."
+  },
+  {
+    "title": "Net Worth Certificate",
+    "description": "Certified documentation of your financial standing for visa, loans, or other purposes."
+  }
+],
         stickyFooterCta: {
           text: 'If your body needs a health check, so does your money — know your FHI score and take control.',
           buttons: [

@@ -8,7 +8,7 @@ import Document from 'assets/images/landing/Document.png';
 import invoicing from 'assets/images/landing/invoicing.png';
 import payroll from 'assets/images/landing/payroll.png';
 
-import virtualcfo from 'assets/images/landing/virtualcfo.png';
+import Virtualcfo from 'assets/images/landing/Virtualcfo.png';
 import { useState } from 'react';
 
 // assets
@@ -41,7 +41,7 @@ export default function CustomizeSection() {
       title: 'Virtual CFO',
       description:
         'Get expert financial oversight, strategic insights, and performance tracking — without hiring a full-time CFO.',
-      image: virtualcfo,
+      image: Virtualcfo,
     },
     {
       title: 'Payroll',
@@ -66,7 +66,7 @@ export default function CustomizeSection() {
 
 
         {/* New Card Section */}
-        <Grid size={12} sx={{ mt: { xs: 10 ,md: 10 } ,ml:{xs:12,lg:0}}}>
+        <Grid size={12} sx={{ mt: { xs: 10 ,md: 10 } ,ml:{xs:12,lg:-4}}}>
           <Grid container spacing={{ xs:2, sm: 3, md:10, lg:10}} justifyContent="center">
              {serviceCards.map((card, index) => (
                <Grid key={index} size={{ xs: 12, sm: 6, md:3 }} sx={{ textAlign: 'center' }}
@@ -124,7 +124,7 @@ export default function CustomizeSection() {
                        boxSizing: 'border-box',
                        height: '124px'
                    }}>
-                     <Typography variant="h3" sx={{ mt: 0, mb: 1, color:'#1565c0'}}>
+                     <Typography variant="h3"  textAlign:left sx={{ mt: 0, mb: 1, color:'#1565c0',}}>
                        {card.title}
                      </Typography>
                      <Typography variant="h5" sx={{ mt:0, mb: 2, color: 'text.secondary'}}>
