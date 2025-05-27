@@ -190,12 +190,16 @@ const ServiceRequests = ({ searchQuery, setUsers, assigned, setSearchQuery }) =>
                 <TableRow hover key={idx}>
                   <TableCell sx={{ pl: 3 }}>{row.id}</TableCell>
                   <TableCell sx={{ p: 1.5 }}>
-                    <Link
-                      href={`/app/task-management/${row.service_name}?service_id=${row.id}`}
-                      sx={{ textDecoration: 'underline', textDecorationColor: 'inherit' }}
-                    >
-                      {row.service_label}
-                    </Link>
+                    {assigned ? (
+                      <Link
+                        href={`/app/task-management/${row.service_name}?service_id=${row.id}`}
+                        sx={{ textDecoration: 'underline', textDecorationColor: 'inherit' }}
+                      >
+                        {row.service_label}
+                      </Link>
+                    ) : (
+                      row.service_label
+                    )}
                   </TableCell>
                   <TableCell sx={{ p: 1.5 }}>{row.category}</TableCell>
                   <TableCell sx={{ p: 1.5 }}>{row.user.full_name || 'Unnamed '}</TableCell>

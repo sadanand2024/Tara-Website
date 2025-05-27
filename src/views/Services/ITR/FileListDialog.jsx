@@ -10,40 +10,67 @@ import {
   TableRow,
   TableCell,
   TableBody,
-  IconButton
+  IconButton,
+  TableContainer,
+  Box,
+  Typography,
+  Card
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 
 const FileListDialog = ({ open, onClose, files, onDelete }) => {
   console.log(files);
   return (
-    <Dialog open={open} onClose={onClose}>
-      <DialogTitle>View File</DialogTitle>
-      <DialogContent>
-        <Table size="small">
-          <TableHead>
-            <TableRow>
-              <TableCell>Filename</TableCell>
-              <TableCell>Action</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {files?.map((file, index) => (
-              <TableRow key={index}>
-                <TableCell>{file.name}</TableCell>
-                <TableCell>
-                  <IconButton size="small" color="error" onClick={() => onDelete(index)}>
-                    <DeleteIcon />
-                  </IconButton>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>Close</Button>
-      </DialogActions>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="sm"
+      fullWidth
+      sx={{ p: 0, m: 0, '& .MuiDialog-paper': { p: 0, m: 0 } }}
+      id="file-list-dialog1"
+    >
+      {files?.length === 0 ? (
+        <Box sx={{ p: 0, textAlign: 'center' }}>
+          <Typography>No files to display</Typography>
+        </Box>
+      ) : (
+        <Card sx={{ borderRadius: 2, boxShadow: 1, p: 0 }} id="file-list-dialog2">
+          <TableContainer id="file-list-dialog3" sx={{ p: 0 }}>
+            <Table size="small" sx={{ width: '100%', px: 0, py: 0 }}>
+              <TableHead sx={{ backgroundColor: 'primary.main' }}>
+                <TableRow>
+                  <TableCell sx={{ color: 'white !important' }}>Filename</TableCell>
+                  <TableCell sx={{ color: 'white !important' }} align="right">
+                    Action
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {files?.map((file, index) => (
+                  <TableRow key={index}>
+                    <TableCell>{file.name}</TableCell>
+                    <TableCell align="right">
+                      <IconButton size="small" color="error" onClick={() => onDelete(index)}>
+                        <DeleteIcon />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                <TableRow key={'Close'}>
+                  <TableCell></TableCell>
+                  <TableCell align="right">
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', px: 1, py: 1 }}>
+                      <Button variant="outlined" size="small" onClick={onClose}>
+                        Close
+                      </Button>
+                    </Box>
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Card>
+      )}
     </Dialog>
   );
 };
