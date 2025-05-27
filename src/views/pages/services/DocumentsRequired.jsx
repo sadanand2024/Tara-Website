@@ -9,7 +9,7 @@ import { Box, Grid, ListItem, ListItemIcon, ListItemText, Typography } from '@mu
 // import { IconCircleCheck } from '@tabler/icons-react';
 // import Include_image from 'assets/images/landing/Include_image.png';
 import DocumentIcon from 'assets/images/icons/Documenticon.svg';
-import Document_required from '/src/assets/images/Landing/Document_required.png';
+// import Document_required from '/src/assets/images/Landing/Document_required.png';
 
 
 // const iconMap = [
@@ -157,7 +157,7 @@ const DocumentsRequired = ({ documents }) => {
 
         {/* Right Content - Illustration */}
         <Grid item xs={12} md={6} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <Box
+          {/* <Box
             component="img"
             src={Document_required} // **REPLACE WITH YOUR ACTUAL ILLUSTRATION PATH**
             alt="Documents Illustration"
@@ -168,7 +168,7 @@ const DocumentsRequired = ({ documents }) => {
               borderRadius: '8px',
               objectFit: 'contain',
             }}
-          />
+          /> */}
         </Grid>
       </Grid>
     </Box>
