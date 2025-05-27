@@ -124,6 +124,7 @@ const SalaryIncome = ({ fileDialogOpen, setFileDialogOpen, filesData, setDialogF
     validationSchema: foreignSchema,
     onSubmit: (values) => {
       alert('Saved Foreign/NRI Employment & Salary Details!\n' + JSON.stringify(values, null, 2));
+      console.log('Saved Foreign/NRI Employment & Salary Details!\n', values);
     }
   });
 

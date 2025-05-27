@@ -128,11 +128,11 @@ const MainRoutes = {
       element: <ITRSummary />
     },
     {
-      path: '/app/task-management/msme-dashboard',
+      path: '/app/task-management/msme-registration',
       element: <MSMEDashboard />
     },
     {
-      path: '/app/my-services/msme-dashboard',
+      path: '/app/my-services/msme-registration',
       element: <MSMEDashboard />
     },
     {
