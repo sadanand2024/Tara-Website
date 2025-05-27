@@ -91,7 +91,7 @@ const HowItWorksStepper = ({ steps }) => {
           fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' }, // Adjusted font size
           mb: 6, // Increased bottom margin
           color: '#000', // Black color for title
-          fontSize: '38px',
+          // fontSize: '38px',
           
           fontFamily: 'Manrope, sans-serif', // Specified font family
         }}
