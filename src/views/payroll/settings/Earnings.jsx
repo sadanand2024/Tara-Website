@@ -212,7 +212,6 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
     }
   }, [payrollid]);
   const { values, setValues, handleChange, errors, touched, handleSubmit, handleBlur, resetForm, setFieldValue } = formik;
-  console.log(errors);
 
   return (
     <>
@@ -220,7 +219,7 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
         <></>
       ) : (
         <Box>
-          <Grid2 xs={12}>
+          <Grid2 size={{ xs: 12 }}>
             <Box sx={{ width: '100%', display: 'flex', justifyContent: 'flex-end', mb: 2 }} />
 
             <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 1 }}>
@@ -318,7 +317,7 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
             )}
           </Grid2>
 
-          <Grid2 size={12}>
+          <Grid2 size={{ xs: 12 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
               <Button
                 variant="outlined"
@@ -627,7 +626,6 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
                               }
                             }}
                           />
-                          {console.log(values)}
                           {((values.component_name === 'Basic' ||
                             values.component_name === 'Fixed Allowance' ||
                             values.component_name === 'Conveyance Allowance' ||

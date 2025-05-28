@@ -116,7 +116,7 @@ export default function DepartmentDialog({ open, handleClose, fetchDepartments, 
       <Box component="form" onSubmit={handleSubmit} sx={{ p: 2 }}>
         <Grid2 container spacing={3}>
           {departmentFields.map((field) => (
-            <Grid2 key={field.name} xs={12}>
+            <Grid2 key={field.name} size={{ xs: 12 }}>
               <Typography gutterBottom>{field.label}</Typography>
               <CustomInput
                 fullWidth

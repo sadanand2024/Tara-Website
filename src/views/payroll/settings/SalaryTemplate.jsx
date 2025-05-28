@@ -78,7 +78,6 @@ function SalaryTemplate() {
       const postData = { ...values, payroll: payrollid };
       const url = templateId ? `/payroll/salary-templates/${templateId}` : `/payroll/salary-templates`;
       const method = templateId ? 'put' : 'post';
-
       const { res } = await Factory(method, url, postData);
       if (res.status_cd === 0) {
         dispatch(
@@ -111,7 +110,7 @@ function SalaryTemplate() {
     <MainCard title="Create Salary Template">
       <Box component="form" onSubmit={handleSubmit} sx={{ p: 2 }}>
         <Grid2 container spacing={3}>
-          <Grid2 xs={12} sm={6}>
+          <Grid2 size={{ xs: 12, sm: 4 }}>
             <Typography variant="subtitle1" sx={{ mb: 0.5 }}>
               Template Name <span style={{ color: 'red' }}>*</span>
             </Typography>
@@ -127,7 +126,7 @@ function SalaryTemplate() {
             />
           </Grid2>
 
-          <Grid2 xs={12} sm={6}>
+          <Grid2 size={{ xs: 12, sm: 4 }}>
             <Typography variant="subtitle1" sx={{ mb: 0.5 }}>
               Description <span style={{ color: 'red' }}>*</span>
             </Typography>
@@ -143,7 +142,7 @@ function SalaryTemplate() {
             />
           </Grid2>
 
-          <Grid2 xs={12} sm={6}>
+          <Grid2 size={{ xs: 12, sm: 4 }}>
             <Typography variant="subtitle1" sx={{ mb: 0.5 }}>
               Annual CTC <span style={{ color: 'red' }}>*</span>
             </Typography>

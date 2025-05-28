@@ -165,7 +165,7 @@ function Worklocation() {
             csvTemplateUrl="/payroll/download-template/csv?type=work_location"
           />
           <Grid2 container spacing={{ xs: 2, sm: 3 }}>
-            <Grid2 xs={12}>
+            <Grid2 size={{ xs: 12 }}>
               <WorkLocationDialog
                 open={openDialog}
                 handleClose={handleCloseDialog}

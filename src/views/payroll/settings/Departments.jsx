@@ -137,7 +137,7 @@ function Departments() {
         csvTemplateUrl="/payroll/download-template/csv?type=department"
       />
       <Grid2 container spacing={{ xs: 2, sm: 3 }}>
-        <Grid2 xs={12}>
+        <Grid2 size={{ xs: 12 }}>
           <DepartmentDialog
             open={openDialog}
             handleClose={handleCloseDialog}

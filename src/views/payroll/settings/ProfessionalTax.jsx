@@ -119,7 +119,7 @@ const ProfessionalTax = ({ handleNext, handleBack }) => {
             </TableContainer>
 
             {ptData.length > 0 && (
-              <Grid2 size={12}>
+              <Grid2 size={{ xs: 12 }}>
                 <Stack direction="row" justifyContent="center" sx={{ mt: 2 }}>
                   <Pagination
                     count={Math.ceil(ptData.length / rowsPerPage)}
@@ -131,7 +131,7 @@ const ProfessionalTax = ({ handleNext, handleBack }) => {
                 </Stack>
               </Grid2>
             )}
-            <Grid2 xs={12}>
+            <Grid2 size={{ xs: 12 }}>
               <Box display="flex" justifyContent="space-between" mt={3}>
                 <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigate(-1)}>
                   Back to Dashboard

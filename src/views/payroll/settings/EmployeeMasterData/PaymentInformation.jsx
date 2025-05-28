@@ -120,7 +120,7 @@ function PaymentInformation({ employeeData, createdEmployeeId, onNext, setSubmit
               let value = e.target.value;
 
               // Convert specific fields to uppercase
-              if (field.name === 'ifsc_code' || field.name === 'branch_name') {
+              if (field.name === 'ifsc_code' || field.name === 'branch_name' || field.name === 'bank_name') {
                 value = value.toUpperCase();
               }
 

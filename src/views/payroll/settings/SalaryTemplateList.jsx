@@ -99,7 +99,7 @@ function SalaryTemplateList() {
       }
     >
       <Grid2 container spacing={3}>
-        <Grid2 size={12}>
+        <Grid2 size={{ xs: 12 }}>
           <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 1 }}>
             <Table size="small">
               <TableHead>
@@ -152,7 +152,7 @@ function SalaryTemplateList() {
             />
           </TableContainer>
           {salaryTemplates.length > rowsPerPage && (
-            <Grid2 xs={12}>
+            <Grid2 size={{ xs: 12 }}>
               <Stack direction="row" justifyContent="center" alignItems="center" sx={{ mt: 2, width: '100%' }}>
                 <Pagination
                   count={Math.ceil(salaryTemplates.length / rowsPerPage)}
@@ -165,7 +165,7 @@ function SalaryTemplateList() {
           )}
         </Grid2>
       </Grid2>
-      <Grid2 xs={12}>
+      <Grid2 size={{ xs: 12 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
           <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigate(-1)}>
             Back to Dashboard

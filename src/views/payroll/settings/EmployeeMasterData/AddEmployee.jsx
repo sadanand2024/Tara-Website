@@ -71,6 +71,7 @@ function StepperComponent() {
     const { res } = await Factory('get', url, {});
     setLoading(false);
     if (res?.status_cd === 0) {
+      console.log(res.data);
       setEmployeeData(res.data);
     } else {
       setEmployeeData(null);
@@ -84,7 +85,6 @@ function StepperComponent() {
 
   useEffect(() => {
     const tabValue = searchParams.get('tabValue');
-    console.log(Number(tabValue));
     if (tabValue) setActiveStep(Number(tabValue));
   }, [searchParams]);
 
@@ -96,7 +96,6 @@ function StepperComponent() {
     const from = searchParams.get('from');
     if (from) setFrom(from);
   }, [searchParams]);
-  console.log(from);
   useEffect(() => {
     if (employeeId) fetchEmployeeData(employeeId);
   }, [employeeId]);
