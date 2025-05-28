@@ -30,6 +30,14 @@ import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import FileListDialog from './FileListDialog';
 import { useSnackbar } from 'notistack';
+import GetActionButtons from '../FormHelpers';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import HomeIcon from '@mui/icons-material/Home';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import AgricultureIcon from '@mui/icons-material/Agriculture';
+import Avatar from '@mui/material/Avatar';
 
 const steps = ['Personal Info', 'Income Details', 'Deductions', 'Review & Filing'];
 
@@ -41,7 +49,7 @@ const personalInfoSchema = Yup.object().shape({
     .required('Mobile is required')
     .matches(/^[6-9]\d{9}$/, 'Please enter a valid 10-digit mobile number starting with 6-9'),
   email: Yup.string().email('Invalid email').required('Email is required'),
-  first_name: Yup.string().required('First name is required'),
+  first_name: Yup.string().nullable(),
   middle_name: Yup.string(),
   last_name: Yup.string().required('Last name is required'),
   gender: Yup.string().required('Gender is required'),
@@ -67,6 +75,41 @@ const taxPaidSchema = Yup.object().shape({
   as26File: Yup.mixed().required('26AS is required'),
   aisFile: Yup.mixed().required('AIS is required')
 });
+
+// Add validation schemas for Donations, Investments, Mediclaim
+const donationsSchema = Yup.object().shape({
+  donations: Yup.array().of(
+    Yup.object().shape({
+      name: Yup.string().nullable(),
+      amount: Yup.number().typeError('Amount must be a number').positive('Amount must be positive'),
+      mode: Yup.string(),
+      receipt: Yup.mixed()
+    })
+  )
+});
+
+const investmentsSchema = Yup.object().shape({
+  investments: Yup.array().of(
+    Yup.object().shape({
+      type: Yup.string().nullable(),
+      amount: Yup.number().typeError('Amount must be a number').positive('Amount must be positive'),
+      doc: Yup.mixed()
+    })
+  )
+});
+
+const mediclaimSchema = Yup.object()
+  .shape({
+    selfFamily: Yup.number().typeError('Must be a number').min(0, 'Cannot be negative').notRequired(),
+    selfSenior: Yup.number().typeError('Must be a number').min(0, 'Cannot be negative').notRequired(),
+    parents: Yup.number().typeError('Must be a number').min(0, 'Cannot be negative').notRequired(),
+    parentsSenior: Yup.number().typeError('Must be a number').min(0, 'Cannot be negative').notRequired(),
+    checkup: Yup.number().typeError('Must be a number').min(0, 'Cannot be negative').notRequired(),
+    receipts: Yup.array().notRequired()
+  })
+  .test('at-least-one', 'At least one amount is required', (values) => {
+    return values.selfFamily || values.selfSenior || values.parents || values.parentsSenior || values.checkup;
+  });
 
 export default function ITR() {
   const [searchParams] = useSearchParams();
@@ -102,11 +145,12 @@ export default function ITR() {
     reviewer: null
   });
   const [taxPaidDetails, setTaxPaidDetails] = useState({
+    id: null,
     as26File: null,
     aisFile: null,
     challans: []
   });
-  const [challans, setChallans] = React.useState([]);
+  const [incomeDetails, setIncomeDetails] = React.useState([]);
   const [donations, setDonations] = React.useState([{ name: '', amount: '', mode: '', receipt: null }]);
   const [eduLoan, setEduLoan] = React.useState({ amount: '', educationOf: '', borrower: '', approved: 'no' });
   const [savings, setSavings] = React.useState({ savings: '', fdrd: '' });
@@ -138,6 +182,25 @@ export default function ITR() {
   const investmentTypes = ['PPF', 'NSC', 'ELSS', 'Life Insurance', 'Tuition Fees', 'Others'];
   const [fileDialogOpen, setFileDialogOpen] = useState(false);
   const [dialogFilesData, setDialogFilesData] = useState([]);
+  const [otherDeductions, setOtherDeductions] = useState({
+    eduLoanAmount: '',
+    eduLoanEducationOf: '',
+    eduLoanBorrower: '',
+    eduLoanApproved: 'no',
+    savingsInterest: '',
+    fdInterest: '',
+    disabilityNature: '',
+    disabilitySeverity: '',
+    disabilityAmount: '',
+    disabilityCert: null,
+    rentHraPaid: 'no',
+    rentHraAmount: '',
+    firstHomeIsFirst: 'no',
+    firstHomeInterest: '',
+    firstHomeDate: '',
+    politicalDonated: 'no',
+    politicalAmount: ''
+  });
 
   const personalInfoFormikRef = useRef();
   const taxPaidFormikRef = useRef();
@@ -154,29 +217,65 @@ export default function ITR() {
 
   // Map for accordion titles and types
   const incomeAccordionMap = {
-    salary: { label: 'Salary Income', type: 'salary' },
-    house: { label: 'House Property Income', type: 'house' },
-    capital: { label: 'Capital Gains Income', type: 'capital' },
-    business: { label: 'Business/Professional Income', type: 'business' },
-    other: { label: 'Other Income', type: 'other' },
-    agriculture: { label: 'Agriculture Income', type: 'agriculture' }
+    salary: {
+      label: 'Salary Income',
+      type: 'salary',
+      icon: (
+        <Avatar sx={{ bgcolor: '#1976d2', width: 32, height: 32, mr: 1 }}>
+          <AttachMoneyIcon />
+        </Avatar>
+      )
+    },
+    house: {
+      label: 'House Property Income',
+      type: 'house',
+      icon: (
+        <Avatar sx={{ bgcolor: '#43a047', width: 32, height: 32, mr: 1 }}>
+          <HomeIcon />
+        </Avatar>
+      )
+    },
+    capital: {
+      label: 'Capital Gains Income',
+      type: 'capital',
+      icon: (
+        <Avatar sx={{ bgcolor: '#fbc02d', width: 32, height: 32, mr: 1 }}>
+          <TrendingUpIcon />
+        </Avatar>
+      )
+    },
+    business: {
+      label: 'Business/Professional Income',
+      type: 'business',
+      icon: (
+        <Avatar sx={{ bgcolor: '#8e24aa', width: 32, height: 32, mr: 1 }}>
+          <BusinessCenterIcon />
+        </Avatar>
+      )
+    },
+    salary: { label: 'Salary Income', type: 'salary', icon: <AttachMoneyIcon sx={{ mr: 1 }} /> },
+    house: { label: 'House Property Income', type: 'house', icon: <HomeIcon sx={{ mr: 1 }} /> },
+    capital: { label: 'Capital Gains Income', type: 'capital', icon: <TrendingUpIcon sx={{ mr: 1 }} /> },
+    business: { label: 'Business/Professional Income', type: 'business', icon: <BusinessCenterIcon sx={{ mr: 1 }} /> },
+    other: { label: 'Other Income', type: 'other', icon: <AccountBalanceWalletIcon sx={{ mr: 1 }} /> },
+    agriculture: { label: 'Agriculture Income', type: 'agriculture', icon: <AgricultureIcon sx={{ mr: 1 }} /> }
   };
 
   const { enqueueSnackbar } = useSnackbar();
 
-  const getServiceTasks = async (id) => {
-    // const response = await Factory('get', `/servicetasks/service-task/${id}/`);
-    const response = await Factory('get', `/income_tax_returns/service-requests-itr/${id}/full-data/`);
-    if (response.res.status_cd === 0) {
-      setTasks(response.res.data.tasks_data);
-      setPersonalInfo(response.res.data.tasks_data['Personal Information'].data);
-      setTaxPaidDetails({
-        as26File: response.res.data['Tax Paid Details'].data?.form26as_files?.[0] || null,
-        aisFile: response.res.data['Tax Paid Details'].data?.ais_files?.[0] || null,
-        challans: response.res.data['Tax Paid Details'].data?.advance_tax_files || []
-      });
-    }
-  };
+  // const getServiceTasks = async (id) => {
+  //   // const response = await Factory('get', `/servicetasks/service-task/${id}/`);
+  //   const response = await Factory('get', `/income_tax_returns/service-requests-itr/${id}/full-data/`);
+  //   if (response.res.status_cd === 0) {
+  //     setTasks(response.res.data.tasks_data);
+  //     setPersonalInfo(response.res.data.tasks_data['Personal Information'].data);
+  //     setTaxPaidDetails({
+  //       as26File: response.res.data.tasks_data['Tax Paid Details'].data?.documents?.['26AS'].files?.[0].url || null,
+  //       aisFile: response.res.data.tasks_data['Tax Paid Details'].data?.documents?.['AIS'].files?.[0].url || null,
+  //       challans: response.res.data.tasks_data['Tax Paid Details'].data?.documents?.['AdvanceTax'].files || []
+  //     });
+  //   }
+  // };
 
   const getStep1Data = async (step) => {
     const response = await Factory(
@@ -186,10 +285,19 @@ export default function ITR() {
     if (response.res.status_cd === 0) {
       setTasks(response.res.data.tasks_data);
       setPersonalInfo(response.res.data.tasks_data['Personal Information'].data);
+      console.log(response.res.data.tasks_data['Tax Paid Details'].data.id);
+
       setTaxPaidDetails({
-        as26File: response.res.data['Tax Paid Details'].data?.form26as_files?.[0] || null,
-        aisFile: response.res.data['Tax Paid Details'].data?.ais_files?.[0] || null,
-        challans: response.res.data['Tax Paid Details'].data?.advance_tax_files || []
+        id: response.res.data.tasks_data['Tax Paid Details'].data?.id || null,
+        as26File:
+          response.res.data.tasks_data['Tax Paid Details'].data?.documents?.['26AS'].files?.length > 0
+            ? response.res.data.tasks_data['Tax Paid Details'].data?.documents?.['26AS'].files[0].url
+            : null,
+        aisFile:
+          response.res.data.tasks_data['Tax Paid Details'].data?.documents?.['AIS'].files?.length > 0
+            ? response.res.data.tasks_data['Tax Paid Details'].data?.documents?.['AIS'].files[0].url
+            : null,
+        challans: response.res.data.tasks_data['Tax Paid Details'].data?.documents?.['AdvanceTax'].files || []
       });
     }
   };
@@ -200,7 +308,9 @@ export default function ITR() {
       `/income_tax_returns/service-request-section-data?service_request_id=${service_id}&section=income_details`
     );
     if (response.res.status_cd === 0) {
-      console.log(response.res);
+      setIncomeDetails(response.res.data.tasks_data);
+    } else {
+      setIncomeDetails([]);
     }
   };
 
@@ -300,7 +410,6 @@ export default function ITR() {
                       type = 'post';
                     }
                     const formData = new FormData();
-                    formData.append('status', 'in progress');
                     Object.entries(values).forEach(([key, value]) => {
                       if (key === 'pan' || key === 'aadhar') {
                         if (value instanceof File) {
@@ -311,15 +420,15 @@ export default function ITR() {
                         formData.append(key, value ?? '');
                       }
                     });
+                    formData.append('status', 'in progress');
                     if (type === 'put') formData.append('id', personalInfo.id);
-                    const res = await Factory(type, url, formData, {});
+
                     if (res.res.status_cd === 0) {
                       enqueueSnackbar('Personal Information saved successfully!', {
                         variant: 'success',
                         anchorOrigin: { vertical: 'top', horizontal: 'right' }
                       });
-                      console.log(res);
-                      console.log(res.res.data);
+                      setPersonalInfo(res.res.data);
                     } else {
                       enqueueSnackbar('Error saving personal info.', {
                         variant: 'error',
@@ -530,33 +639,13 @@ export default function ITR() {
                         <Button type="submit" variant="contained" color="primary">
                           Save Personal Info
                         </Button>
-                        <Button
-                          type="button"
-                          variant="contained"
-                          color="primary"
-                          onClick={() => changeStatus('personal_info', 'in progress')}
-                          mr={1}
-                        >
-                          Send for Review
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="contained"
-                          color="primary"
-                          onClick={() => changeStatus('personal_info', 'completed')}
-                          mr={1}
-                        >
-                          Approve
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="contained"
-                          color="primary"
-                          onClick={() => changeStatus('personal_info', 'revoked')}
-                          mr={1}
-                        >
-                          Re Work
-                        </Button>
+                        <GetActionButtons
+                          data={personalInfo}
+                          status={personalInfo.status}
+                          urlEndpoint="personal-information"
+                          taskId={personalInfo.id}
+                          setData={setPersonalInfo}
+                        />
                       </Box>
                     </Form>
                   )}
@@ -569,8 +658,8 @@ export default function ITR() {
                   initialValues={taxPaidDetails}
                   enableReinitialize
                   onSubmit={async (values) => {
-                    setTaxPaidDetails(values);
                     const formData = new FormData();
+                    setTaxPaidDetails(values);
                     Object.entries(values).forEach(([key, value]) => {
                       if (key === 'challans' && Array.isArray(value)) {
                         value.forEach((file, idx) => {
@@ -583,6 +672,7 @@ export default function ITR() {
                       }
                     });
                     console.log('Form Data:', Object.fromEntries(formData));
+                    console.log(taxPaidDetails);
                     // try {
                     //   const res = await Factory('post', '/itr/tax-paid', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
                     //   if (res.res.status_cd === 0) {
@@ -656,7 +746,7 @@ export default function ITR() {
                               hidden
                               multiple={true}
                               onChange={(e) => {
-                                if (e.target.files[0]) setFieldValue('challans', [...values.challans, e.target.files[0]]);
+                                if (e.target.files[0]) setFieldValue('challans', [...values.challans, ...e.target.files]);
                               }}
                             />
                             <Button size="small" variant="contained" onClick={() => document.getElementById('challanInputNew').click()}>
@@ -679,33 +769,12 @@ export default function ITR() {
                         <Button type="submit" variant="contained" color="primary">
                           Save Tax Paid Details
                         </Button>
-                        <Button
-                          type="button"
-                          variant="contained"
-                          color="primary"
-                          onClick={() => changeStatus('tax_paid_details', 'in progress')}
-                          mr={1}
-                        >
-                          Send for Review
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="contained"
-                          color="primary"
-                          onClick={() => changeStatus('tax_paid_details', 'completed')}
-                          mr={1}
-                        >
-                          Approve
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="contained"
-                          color="primary"
-                          onClick={() => changeStatus('tax_paid_details', 'revoked')}
-                          mr={1}
-                        >
-                          Re Work
-                        </Button>
+                        <GetActionButtons
+                          data={taxPaidDetails}
+                          status={taxPaidDetails.status}
+                          urlEndpoint="taxPaid"
+                          taskId={taxPaidDetails.id}
+                        />
                       </Box>
                     </Form>
                   )}
@@ -726,10 +795,18 @@ export default function ITR() {
               {selectedIncomeSections.map((section) => (
                 <Accordion key={section}>
                   <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                    <Typography>{incomeAccordionMap[section].label}</Typography>
+                    <Box display="flex" alignItems="center">
+                      {incomeAccordionMap[section].icon}
+                      <Typography variant="h4" sx={{ fontWeight: 300 }}>
+                        {incomeAccordionMap[section].label}
+                      </Typography>
+                    </Box>
                   </AccordionSummary>
                   <AccordionDetails>
                     <IncomeDetails
+                      service_id={service_id}
+                      data={incomeDetails}
+                      setData={setIncomeDetails}
                       type={incomeAccordionMap[section].type}
                       fileDialogOpen={fileDialogOpen}
                       setFileDialogOpen={setFileDialogOpen}
@@ -753,6 +830,618 @@ export default function ITR() {
           {/* Deductions Step */}
           {step === 2 && (
             <Box>
+              {/* Section 80G - Donations */}
+              <Card sx={{ mb: 3, p: { xs: 2, sm: 3 } }}>
+                <Typography variant="h5" mb={2} sx={{ textDecoration: 'underline' }}>
+                  Section 80G - Deduction for Donations made
+                </Typography>
+                <Formik
+                  initialValues={{ donations }}
+                  enableReinitialize
+                  validationSchema={donationsSchema}
+                  onSubmit={(values) => {
+                    const formData = new FormData();
+                    values.donations.forEach((donation, idx) => {
+                      formData.append(`donations[${idx}][name]`, donation.name || '');
+                      formData.append(`donations[${idx}][amount]`, donation.amount || '');
+                      formData.append(`donations[${idx}][mode]`, donation.mode || '');
+                      if (donation.receipt) {
+                        formData.append(`donations[${idx}][receipt]`, donation.receipt);
+                      }
+                    });
+                    for (let pair of formData.entries()) {
+                      console.log(pair[0] + ':', pair[1]);
+                    }
+                  }}
+                >
+                  {({ values, setFieldValue, errors }) => (
+                    <Form>
+                      {values.donations.map((row, idx) => (
+                        <Paper key={idx} sx={{ p: 2, mb: 2, borderRadius: 2, bgcolor: '#f8fafc' }}>
+                          <Grid2 container spacing={2} alignItems="center">
+                            <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                              <TextField
+                                size="small"
+                                fullWidth
+                                label="Name of Donee"
+                                value={row.name}
+                                onChange={(e) => {
+                                  const newArr = [...values.donations];
+                                  newArr[idx].name = e.target.value;
+                                  setFieldValue('donations', newArr);
+                                }}
+                                error={Boolean(errors.donations?.[idx]?.name)}
+                                helperText={errors.donations?.[idx]?.name}
+                              />
+                            </Grid2>
+                            <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+                              <TextField
+                                size="small"
+                                fullWidth
+                                label="Amount"
+                                value={row.amount}
+                                onChange={(e) => {
+                                  const newArr = [...values.donations];
+                                  newArr[idx].amount = e.target.value;
+                                  setFieldValue('donations', newArr);
+                                }}
+                                error={Boolean(errors.donations?.[idx]?.amount)}
+                                helperText={errors.donations?.[idx]?.amount}
+                              />
+                            </Grid2>
+                            <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+                              <Autocomplete
+                                size="small"
+                                fullWidth
+                                options={donationModes}
+                                value={row.mode}
+                                onChange={(_, v) => {
+                                  const newArr = [...values.donations];
+                                  newArr[idx].mode = v;
+                                  setFieldValue('donations', newArr);
+                                }}
+                                renderInput={(params) => <TextField {...params} label="Mode" />}
+                              />
+                            </Grid2>
+                            <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                              <Button size="small" variant="contained" component="label">
+                                Upload
+                                <input
+                                  type="file"
+                                  hidden
+                                  onChange={(e) => {
+                                    const newArr = [...values.donations];
+                                    newArr[idx].receipt = e.target.files[0];
+                                    setFieldValue('donations', newArr);
+                                  }}
+                                />
+                              </Button>
+                            </Grid2>
+                            <Grid2 size={{ xs: 12, sm: 6, md: 1 }} display="flex" justifyContent="flex-end">
+                              <Button
+                                size="small"
+                                variant="contained"
+                                color="primary"
+                                onClick={() => {
+                                  const formData = new FormData();
+                                  formData.append('name', row.name || '');
+                                  formData.append('amount', row.amount || '');
+                                  formData.append('mode', row.mode || '');
+                                  if (row.receipt) {
+                                    formData.append('receipt', row.receipt);
+                                  }
+                                  for (let pair of formData.entries()) {
+                                    console.log(pair[0] + ':', pair[1]);
+                                  }
+                                }}
+                              >
+                                Save
+                              </Button>
+                            </Grid2>
+                            {values.donations.length > 1 && (
+                              <Grid2 size={{ xs: 12, sm: 6, md: 1 }} display="flex" justifyContent="flex-end">
+                                <IconButton
+                                  size="small"
+                                  color="error"
+                                  onClick={() => {
+                                    const newArr = values.donations.filter((_, i) => i !== idx);
+                                    setFieldValue('donations', newArr);
+                                  }}
+                                >
+                                  <DeleteIcon />
+                                </IconButton>
+                              </Grid2>
+                            )}
+                          </Grid2>
+                        </Paper>
+                      ))}
+                      <Box display="flex" justifyContent="flex-end" gap={2}>
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          onClick={() =>
+                            setFieldValue('donations', [...values.donations, { name: '', amount: '', mode: '', receipt: null }])
+                          }
+                        >
+                          Add Row
+                        </Button>
+                      </Box>
+                    </Form>
+                  )}
+                </Formik>
+              </Card>
+
+              {/* Section 80E, 80TTA/80TTB, 80U, and Other Deductions Combined */}
+              <Card sx={{ mb: 3, p: { xs: 2, sm: 3 } }}>
+                <Formik
+                  initialValues={otherDeductions}
+                  enableReinitialize
+                  onSubmit={async (values) => {
+                    setOtherDeductions(values);
+                    // TODO: Save logic for all combined deductions here
+                  }}
+                >
+                  {({ values, setFieldValue }) => (
+                    <Form>
+                      {/* Section 80E - Interest on Education Loan */}
+                      <Typography variant="h5" mt={0} mb={2} sx={{ textDecoration: 'underline' }}>
+                        Section 80E - Interest on Education Loan
+                      </Typography>
+                      <Grid2 container spacing={2} alignItems="center" mb={2}>
+                        <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+                          <TextField
+                            size="small"
+                            fullWidth
+                            label="Amount"
+                            name="eduLoanAmount"
+                            value={values.eduLoanAmount}
+                            onChange={(e) => setFieldValue('eduLoanAmount', e.target.value)}
+                          />
+                        </Grid2>
+                        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                          <Autocomplete
+                            size="small"
+                            fullWidth
+                            options={educationOfOptions}
+                            value={values.eduLoanEducationOf}
+                            onChange={(_, v) => setFieldValue('eduLoanEducationOf', v)}
+                            renderInput={(params) => <TextField {...params} label="Education of" />}
+                          />
+                        </Grid2>
+                        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                          <TextField
+                            size="small"
+                            fullWidth
+                            label="Borrower Name"
+                            name="eduLoanBorrower"
+                            value={values.eduLoanBorrower}
+                            onChange={(e) => setFieldValue('eduLoanBorrower', e.target.value)}
+                          />
+                        </Grid2>
+                        <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+                          <Typography>Is it an approved Bank/NBFC?</Typography>
+                          <RadioGroup row value={values.eduLoanApproved} onChange={(_, v) => setFieldValue('eduLoanApproved', v)}>
+                            <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
+                            <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
+                          </RadioGroup>
+                        </Grid2>
+                      </Grid2>
+
+                      {/* Section 80TTA/80TTB - Interest on Savings */}
+                      <Typography variant="h5" mt={0} mb={2} sx={{ textDecoration: 'underline' }}>
+                        Section 80TTA/80TTB - Interest on Savings
+                      </Typography>
+                      <Grid2 container spacing={2} alignItems="center" mb={2}>
+                        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                          <TextField
+                            size="small"
+                            fullWidth
+                            label="Total savings interest"
+                            name="savingsInterest"
+                            value={values.savingsInterest}
+                            onChange={(e) => setFieldValue('savingsInterest', e.target.value)}
+                          />
+                        </Grid2>
+                        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                          <TextField
+                            size="small"
+                            fullWidth
+                            label="Total FD/RD interest (above 60 yrs)"
+                            name="fdInterest"
+                            value={values.fdInterest}
+                            onChange={(e) => setFieldValue('fdInterest', e.target.value)}
+                          />
+                        </Grid2>
+                      </Grid2>
+
+                      {/* Section 80U - Person with Disability */}
+                      <Typography variant="h5" mt={0} mb={2} sx={{ textDecoration: 'underline' }}>
+                        Section 80U - Person with Disability
+                      </Typography>
+                      <Grid2 container spacing={2} alignItems="center" mb={2}>
+                        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                          <Autocomplete
+                            size="small"
+                            fullWidth
+                            options={disabilityNature}
+                            value={values.disabilityNature}
+                            onChange={(_, v) => setFieldValue('disabilityNature', v)}
+                            renderInput={(params) => <TextField {...params} label="Nature of Disability" />}
+                          />
+                        </Grid2>
+                        <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+                          <Autocomplete
+                            size="small"
+                            fullWidth
+                            options={disabilitySeverity}
+                            value={values.disabilitySeverity}
+                            onChange={(_, v) => setFieldValue('disabilitySeverity', v)}
+                            renderInput={(params) => <TextField {...params} label="Severity" />}
+                          />
+                        </Grid2>
+                        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                          <TextField
+                            size="small"
+                            fullWidth
+                            label="Deduction Amount"
+                            name="disabilityAmount"
+                            value={values.disabilityAmount}
+                            onChange={(e) => setFieldValue('disabilityAmount', e.target.value)}
+                          />
+                        </Grid2>
+                        <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+                          <Button size="small" variant="contained" component="label">
+                            Upload Certificate
+                            <input type="file" hidden onChange={(e) => setFieldValue('disabilityCert', e.target.files[0])} />
+                          </Button>
+                        </Grid2>
+                      </Grid2>
+
+                      {/* Other Deductions */}
+                      <Typography variant="h5" mt={0} mb={2} sx={{ textDecoration: 'underline' }}>
+                        Other deductions
+                      </Typography>
+                      {/* Did you pay Rent without receiving HRA? */}
+                      <Grid2 container alignItems="center" spacing={2} mb={3}>
+                        <Grid2 size={{ xs: 12, sm: 4 }}>
+                          <Typography>Did you pay Rent without receiving HRA?</Typography>
+                          <RadioGroup row value={values.rentHraPaid} onChange={(_, v) => setFieldValue('rentHraPaid', v)}>
+                            <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
+                            <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
+                          </RadioGroup>
+                        </Grid2>
+                        <Grid2 size={{ xs: 12, sm: 8 }}>
+                          {values.rentHraPaid === 'yes' && (
+                            <Box display="flex" alignItems="center" gap={2} mt={1}>
+                              <Typography>Amount</Typography>
+                              <TextField
+                                size="small"
+                                value={values.rentHraAmount}
+                                onChange={(e) => setFieldValue('rentHraAmount', e.target.value)}
+                                sx={{ maxWidth: 200 }}
+                              />
+                            </Box>
+                          )}
+                        </Grid2>
+                      </Grid2>
+                      {/* Are you a first time homebuyer? */}
+                      <Grid2 container alignItems="center" spacing={2} mb={3}>
+                        <Grid2 size={{ xs: 12, sm: 3 }}>
+                          <Typography>Are you a first time homebuyer?</Typography>
+                          <RadioGroup row value={values.firstHomeIsFirst} onChange={(_, v) => setFieldValue('firstHomeIsFirst', v)}>
+                            <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
+                            <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
+                          </RadioGroup>
+                        </Grid2>
+                        {values.firstHomeIsFirst === 'yes' && (
+                          <>
+                            <Grid2 size={{ xs: 12, sm: 4.5 }}>
+                              <Box display="flex" alignItems="center" gap={2} mt={1}>
+                                <Typography>Amount of interest paid</Typography>
+                                <TextField
+                                  size="small"
+                                  value={values.firstHomeInterest}
+                                  onChange={(e) => setFieldValue('firstHomeInterest', e.target.value)}
+                                  sx={{ maxWidth: 200 }}
+                                />
+                              </Box>
+                            </Grid2>
+                            <Grid2 size={{ xs: 12, sm: 4.5 }}>
+                              <Box display="flex" alignItems="center" gap={2} mt={1}>
+                                <Typography>Date of Loan Sanctioned</Typography>
+                                <TextField
+                                  size="small"
+                                  type="date"
+                                  value={values.firstHomeDate}
+                                  onChange={(e) => setFieldValue('firstHomeDate', e.target.value)}
+                                  InputLabelProps={{ shrink: true }}
+                                  sx={{ maxWidth: 200 }}
+                                />
+                              </Box>
+                            </Grid2>
+                          </>
+                        )}
+                      </Grid2>
+                      {/* Donations made to political/party (80GGC)? */}
+                      <Grid2 container alignItems="center" spacing={2} mb={3}>
+                        <Grid2 size={{ xs: 12, sm: 4 }}>
+                          <Typography>Donations made to political/rural i&d org?</Typography>
+                          <RadioGroup row value={values.politicalDonated} onChange={(_, v) => setFieldValue('politicalDonated', v)}>
+                            <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
+                            <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
+                          </RadioGroup>
+                        </Grid2>
+                        <Grid2 size={{ xs: 12, sm: 8 }}>
+                          {values.politicalDonated === 'yes' && (
+                            <Box display="flex" alignItems="center" gap={2} mt={1}>
+                              <Typography>Amount</Typography>
+                              <TextField
+                                size="small"
+                                value={values.politicalAmount}
+                                onChange={(e) => setFieldValue('politicalAmount', e.target.value)}
+                                sx={{ maxWidth: 200 }}
+                              />
+                            </Box>
+                          )}
+                        </Grid2>
+                      </Grid2>
+                      <Box display="flex" justifyContent="flex-end">
+                        <Button size="small" variant="contained" color="primary" type="submit">
+                          Save All Deductions
+                        </Button>
+                      </Box>
+                    </Form>
+                  )}
+                </Formik>
+              </Card>
+
+              {/* Section 80C - Claim deductions for investments made */}
+              <Card sx={{ mb: 3, p: { xs: 2, sm: 3 } }}>
+                <Typography variant="h5" mt={0} mb={2} sx={{ textDecoration: 'underline' }}>
+                  Section 80C - Claim deductions for investments made
+                </Typography>
+                <Formik
+                  initialValues={{ investments }}
+                  enableReinitialize
+                  validationSchema={investmentsSchema}
+                  onSubmit={(values) => {
+                    const formData = new FormData();
+                    values.investments.forEach((investment, idx) => {
+                      formData.append(`investments[${idx}][type]`, investment.type || '');
+                      formData.append(`investments[${idx}][amount]`, investment.amount || '');
+                      if (investment.doc) {
+                        formData.append(`investments[${idx}][doc]`, investment.doc);
+                      }
+                    });
+                    for (let pair of formData.entries()) {
+                      console.log(pair[0] + ':', pair[1]);
+                    }
+                  }}
+                >
+                  {({ values, setFieldValue, errors }) => (
+                    <Form>
+                      {values.investments.map((row, idx) => (
+                        <Paper key={idx} sx={{ p: 2, mb: 2, borderRadius: 2, bgcolor: '#f8fafc' }}>
+                          <Grid2 container spacing={2} alignItems="center">
+                            <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+                              <Autocomplete
+                                size="small"
+                                fullWidth
+                                options={investmentTypes}
+                                value={row.type}
+                                onChange={(_, v) => {
+                                  const newArr = [...values.investments];
+                                  newArr[idx].type = v;
+                                  setFieldValue('investments', newArr);
+                                }}
+                                renderInput={(params) => (
+                                  <TextField
+                                    {...params}
+                                    label="Investment/Payment"
+                                    error={Boolean(errors.investments?.[idx]?.type)}
+                                    helperText={errors.investments?.[idx]?.type}
+                                  />
+                                )}
+                              />
+                            </Grid2>
+                            <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                              <TextField
+                                size="small"
+                                fullWidth
+                                label="Amount"
+                                value={row.amount}
+                                onChange={(e) => {
+                                  const newArr = [...values.investments];
+                                  newArr[idx].amount = e.target.value;
+                                  setFieldValue('investments', newArr);
+                                }}
+                                error={Boolean(errors.investments?.[idx]?.amount)}
+                                helperText={errors.investments?.[idx]?.amount}
+                              />
+                            </Grid2>
+                            <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                              <Button size="small" variant="contained" component="label">
+                                Upload
+                                <input
+                                  type="file"
+                                  hidden
+                                  onChange={(e) => {
+                                    const newArr = [...values.investments];
+                                    newArr[idx].doc = e.target.files[0];
+                                    setFieldValue('investments', newArr);
+                                  }}
+                                />
+                              </Button>
+                            </Grid2>
+                            {values.investments.length > 1 && (
+                              <Grid2 size={{ xs: 12, sm: 6, md: 2 }} display="flex" justifyContent="flex-end">
+                                <IconButton
+                                  size="small"
+                                  color="error"
+                                  onClick={() => {
+                                    const newArr = values.investments.filter((_, i) => i !== idx);
+                                    setFieldValue('investments', newArr);
+                                  }}
+                                >
+                                  <DeleteIcon />
+                                </IconButton>
+                              </Grid2>
+                            )}
+                          </Grid2>
+                        </Paper>
+                      ))}
+                      <Box display="flex" justifyContent="flex-end" gap={2}>
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          onClick={() => setFieldValue('investments', [...values.investments, { type: '', amount: '', doc: null }])}
+                        >
+                          Add Row
+                        </Button>
+                        <Button size="small" variant="contained" color="primary" type="submit">
+                          Save Investments
+                        </Button>
+                      </Box>
+                    </Form>
+                  )}
+                </Formik>
+              </Card>
+
+              {/* Section 80D - Claim deduction for medical insurance paid */}
+              <Card sx={{ mb: 3, p: { xs: 2, sm: 3 } }}>
+                <Typography variant="h5" mt={0} mb={2} sx={{ textDecoration: 'underline' }}>
+                  Section 80D - Claim deduction for medical insurance paid
+                </Typography>
+                <Formik
+                  initialValues={mediclaim}
+                  enableReinitialize
+                  validationSchema={mediclaimSchema}
+                  onSubmit={(values) => {
+                    const formData = new FormData();
+                    formData.append('selfFamily', values.selfFamily || '');
+                    formData.append('selfSenior', values.selfSenior || '');
+                    formData.append('parents', values.parents || '');
+                    formData.append('parentsSenior', values.parentsSenior || '');
+                    formData.append('checkup', values.checkup || '');
+                    if (Array.isArray(values.receipts)) {
+                      values.receipts.forEach((file, idx) => {
+                        if (file) formData.append(`receipts[${idx}]`, file);
+                      });
+                    }
+                    for (let pair of formData.entries()) {
+                      console.log(pair[0] + ':', pair[1]);
+                    }
+                  }}
+                >
+                  {({ values, setFieldValue, errors }) => (
+                    <Form>
+                      <Grid2 container spacing={2} alignItems="center" mb={2}>
+                        <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+                          <Typography>Self & Family (Non-senior citizen)</Typography>
+                        </Grid2>
+                        <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+                          <TextField
+                            size="small"
+                            fullWidth
+                            label="Amount"
+                            value={values.selfFamily}
+                            onChange={(e) => setFieldValue('selfFamily', e.target.value)}
+                            error={Boolean(errors.selfFamily)}
+                            helperText={errors.selfFamily}
+                          />
+                        </Grid2>
+                        <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+                          <Typography>Self (Senior Citizen)</Typography>
+                        </Grid2>
+                        <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+                          <TextField
+                            size="small"
+                            fullWidth
+                            label="Amount"
+                            value={values.selfSenior}
+                            onChange={(e) => setFieldValue('selfSenior', e.target.value)}
+                            error={Boolean(errors.selfSenior)}
+                            helperText={errors.selfSenior}
+                          />
+                        </Grid2>
+                        <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+                          <Typography>Parents (Non-senior)</Typography>
+                        </Grid2>
+                        <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+                          <TextField
+                            size="small"
+                            fullWidth
+                            label="Amount"
+                            value={values.parents}
+                            onChange={(e) => setFieldValue('parents', e.target.value)}
+                            error={Boolean(errors.parents)}
+                            helperText={errors.parents}
+                          />
+                        </Grid2>
+                        <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+                          <Typography>Parents (Senior)</Typography>
+                        </Grid2>
+                        <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+                          <TextField
+                            size="small"
+                            fullWidth
+                            label="Amount"
+                            value={values.parentsSenior}
+                            onChange={(e) => setFieldValue('parentsSenior', e.target.value)}
+                            error={Boolean(errors.parentsSenior)}
+                            helperText={errors.parentsSenior}
+                          />
+                        </Grid2>
+                        <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+                          <Typography>Preventive Health Checkup</Typography>
+                        </Grid2>
+                        <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+                          <TextField
+                            size="small"
+                            fullWidth
+                            label="Amount"
+                            value={values.checkup}
+                            onChange={(e) => setFieldValue('checkup', e.target.value)}
+                            error={Boolean(errors.checkup)}
+                            helperText={errors.checkup}
+                          />
+                        </Grid2>
+                        <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+                          <Typography>Upload premium receipts</Typography>
+                        </Grid2>
+                        <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+                          <Stack direction="row" spacing={1} justifyContent="flex-end">
+                            <Button size="small" variant="contained" component="label">
+                              Upload
+                              <input
+                                type="file"
+                                hidden
+                                onChange={(e) => setFieldValue('receipts', [...(values.receipts || []), e.target.files[0]])}
+                              />
+                            </Button>
+                            <Button
+                              size="small"
+                              variant="outlined"
+                              onClick={() => {
+                                setFileDialogOpen(true);
+                                setDialogFilesData(values.receipts);
+                              }}
+                            >
+                              View
+                            </Button>
+                          </Stack>
+                        </Grid2>
+                      </Grid2>
+                      <Box display="flex" justifyContent="flex-end">
+                        <Button size="small" variant="contained" color="primary" type="submit">
+                          Save Mediclaim
+                        </Button>
+                      </Box>
+                    </Form>
+                  )}
+                </Formik>
+              </Card>
+
               <Box display="flex" justifyContent="space-between" mt={2} gap={2}>
                 <Button variant="outlined" color="primary" onClick={() => setStep(step - 1)}>
                   Back
@@ -761,263 +1450,6 @@ export default function ITR() {
                   Continue
                 </Button>
               </Box>
-              {/* Section 80G - Donations */}
-              <Typography variant="h6" mb={2} sx={{ textDecoration: 'underline' }}>
-                Section 80G - Donations
-              </Typography>
-              {donations.map((row, idx) => (
-                <Paper key={idx} sx={{ p: 2, mb: 2, borderRadius: 2, bgcolor: '#f8fafc' }}>
-                  <Grid2 container spacing={2} alignItems="center">
-                    <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                      <TextField size="small" fullWidth label="Name of Donee" />
-                    </Grid2>
-                    <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                      <TextField size="small" fullWidth label="Amount" />
-                    </Grid2>
-                    <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                      <Autocomplete
-                        size="small"
-                        fullWidth
-                        options={donationModes}
-                        renderInput={(params) => <TextField {...params} label="Mode" />}
-                      />
-                    </Grid2>
-                    <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                      <Button size="small" variant="contained" component="label">
-                        Upload
-                        <input type="file" hidden />
-                      </Button>
-                    </Grid2>
-                    {donations.length > 1 && (
-                      <Grid2 size={{ xs: 12, sm: 6, md: 2 }} display="flex" justifyContent="flex-end">
-                        <IconButton size="small" color="error" onClick={() => setDonations(donations.filter((_, i) => i !== idx))}>
-                          <DeleteIcon />
-                        </IconButton>
-                      </Grid2>
-                    )}
-                  </Grid2>
-                </Paper>
-              ))}
-              <Box display="flex" justifyContent="flex-end">
-                <Button
-                  size="small"
-                  variant="outlined"
-                  onClick={() => setDonations([...donations, { name: '', amount: '', mode: '', receipt: null }])}
-                >
-                  Add Row
-                </Button>
-              </Box>
-
-              {/* Section 80E - Interest on Education Loan */}
-              <Typography variant="h5" mt={0} mb={2} sx={{ textDecoration: 'underline' }}>
-                Section 80E - Interest on Education Loan
-              </Typography>
-              <Grid2 container spacing={2} alignItems="center" mb={2}>
-                <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                  <TextField size="small" fullWidth label="Amount" />
-                </Grid2>
-                <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                  <Autocomplete
-                    size="small"
-                    fullWidth
-                    options={educationOfOptions}
-                    renderInput={(params) => <TextField {...params} label="Education of" />}
-                  />
-                </Grid2>
-                <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                  <TextField size="small" fullWidth label="Borrower Name" />
-                </Grid2>
-                <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                  <Typography>Is it an approved Bank/NBFC?</Typography>
-                  <RadioGroup row value={eduLoan.approved}>
-                    <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
-                    <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
-                  </RadioGroup>
-                </Grid2>
-              </Grid2>
-
-              {/* Section 80TTA/80TTB - Interest on Savings */}
-              <Typography variant="h5" mt={0} mb={2} sx={{ textDecoration: 'underline' }}>
-                Section 80TTA/80TTB - Interest on Savings
-              </Typography>
-              <Grid2 container spacing={2} alignItems="center" mb={2}>
-                <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                  <TextField size="small" fullWidth label="Total savings interest" />
-                </Grid2>
-                <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                  <TextField size="small" fullWidth label="Total FD/RD interest (above 60 yrs)" />
-                </Grid2>
-              </Grid2>
-
-              {/* Section 80U - Person with Disability */}
-              <Typography variant="h5" mt={0} mb={2} sx={{ textDecoration: 'underline' }}>
-                Section 80U - Person with Disability
-              </Typography>
-              <Grid2 container spacing={2} alignItems="center" mb={2}>
-                <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                  <Autocomplete
-                    size="small"
-                    fullWidth
-                    options={disabilityNature}
-                    renderInput={(params) => <TextField {...params} label="Nature of Disability" />}
-                  />
-                </Grid2>
-                <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                  <Autocomplete
-                    size="small"
-                    fullWidth
-                    options={disabilitySeverity}
-                    renderInput={(params) => <TextField {...params} label="Severity" />}
-                  />
-                </Grid2>
-                <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                  <TextField size="small" fullWidth label="Deduction Amount" />
-                </Grid2>
-                <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                  <Button size="small" variant="contained" component="label">
-                    Upload Certificate
-                    <input type="file" hidden />
-                  </Button>
-                </Grid2>
-              </Grid2>
-
-              {/* Other Deductions */}
-              <Typography variant="h5" mt={0} mb={2} sx={{ textDecoration: 'underline' }}>
-                Other Deductions
-              </Typography>
-              <Grid2 container spacing={2} alignItems="center" mb={2}>
-                <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                  <Typography>Did you pay Rent without receiving HRA?</Typography>
-                  <RadioGroup row value={rentHra.paid}>
-                    <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
-                    <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
-                  </RadioGroup>
-                </Grid2>
-                <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                  <TextField size="small" fullWidth label="Amount" />
-                </Grid2>
-                <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                  <Typography>Are you a first time homebuyer?</Typography>
-                  <RadioGroup row value={firstHome.isFirst}>
-                    <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
-                    <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
-                  </RadioGroup>
-                </Grid2>
-                <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                  <TextField size="small" fullWidth label="Amount of interest paid" />
-                </Grid2>
-                <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                  <TextField size="small" fullWidth label="Date of loan sanctioned" type="date" InputLabelProps={{ shrink: true }} />
-                </Grid2>
-                <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                  <Typography>Donation made to political/party (80GGC)?</Typography>
-                  <RadioGroup row value={political.donated}>
-                    <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
-                    <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
-                  </RadioGroup>
-                </Grid2>
-                <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                  <TextField size="small" fullWidth label="Amount" />
-                </Grid2>
-              </Grid2>
-
-              {/* Section 80C - Claim deductions for investments made */}
-              <Typography variant="h5" mt={0} mb={2} sx={{ textDecoration: 'underline' }}>
-                Section 80C - Claim deductions for investments made
-              </Typography>
-              {investments.map((row, idx) => (
-                <Paper key={idx} sx={{ p: 2, mb: 2, borderRadius: 2, bgcolor: '#f8fafc' }}>
-                  <Grid2 container spacing={2} alignItems="center">
-                    <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                      <Autocomplete
-                        size="small"
-                        fullWidth
-                        options={investmentTypes}
-                        renderInput={(params) => <TextField {...params} label="Investment/Payment" />}
-                      />
-                    </Grid2>
-                    <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                      <TextField size="small" fullWidth label="Amount" />
-                    </Grid2>
-                    <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                      <Button size="small" variant="contained" component="label">
-                        Upload
-                        <input type="file" hidden />
-                      </Button>
-                    </Grid2>
-                    {investments.length > 1 && (
-                      <Grid2 size={{ xs: 12, sm: 6, md: 2 }} display="flex" justifyContent="flex-end">
-                        <IconButton size="small" color="error" onClick={() => setInvestments(investments.filter((_, i) => i !== idx))}>
-                          <DeleteIcon />
-                        </IconButton>
-                      </Grid2>
-                    )}
-                  </Grid2>
-                </Paper>
-              ))}
-              <Box display="flex" justifyContent="flex-end">
-                <Button
-                  size="small"
-                  variant="outlined"
-                  onClick={() => setInvestments([...investments, { type: '', amount: '', doc: null }])}
-                >
-                  Add Row
-                </Button>
-              </Box>
-
-              {/* Section 80D - Claim deduction for medical insurance paid */}
-              <Typography variant="h5" mt={0} mb={2} sx={{ textDecoration: 'underline' }}>
-                Section 80D - Claim deduction for medical insurance paid
-              </Typography>
-              <Grid2 container spacing={2} alignItems="center" mb={2}>
-                <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                  <Typography>Self & Family (Non-senior citizen)</Typography>
-                </Grid2>
-                <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                  <TextField size="small" fullWidth label="Amount" />
-                </Grid2>
-                <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                  <Typography>Self (Senior Citizen)</Typography>
-                </Grid2>
-                <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                  <TextField size="small" fullWidth label="Amount" />
-                </Grid2>
-                <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                  <Typography>Parents (Non-senior)</Typography>
-                </Grid2>
-                <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                  <TextField size="small" fullWidth label="Amount" />
-                </Grid2>
-                <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                  <Typography>Parents (Senior)</Typography>
-                </Grid2>
-                <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                  <TextField size="small" fullWidth label="Amount" />
-                </Grid2>
-                <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                  <Typography>Preventive Health Checkup</Typography>
-                </Grid2>
-                <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                  <TextField size="small" fullWidth label="Amount" />
-                </Grid2>
-                <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                  <Typography>Upload premium receipts</Typography>
-                </Grid2>
-                <Grid2 size={{ xs: 12, sm: 6, md: 8 }}>
-                  <Stack direction="row" spacing={1} alignItems="center">
-                    <Button size="small" variant="contained" component="label">
-                      Upload
-                      <input type="file" hidden />
-                    </Button>
-                    <Button size="small" variant="outlined">
-                      View
-                    </Button>
-                    <Button size="small" variant="outlined">
-                      Add
-                    </Button>
-                  </Stack>
-                </Grid2>
-              </Grid2>
             </Box>
           )}
 

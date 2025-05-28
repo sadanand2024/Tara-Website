@@ -24,6 +24,7 @@ import Factory from 'utils/Factory';
 import { useSelector } from 'store';
 import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded';
 import Stack from '@mui/material/Stack';
+import Link from '@mui/material/Link';
 
 // ==============================|| MANAGE USERS ||============================== //
 
@@ -165,7 +166,18 @@ const ServiceRequests = ({ searchQuery, setUsers, assigned, setSearchQuery }) =>
               return (
                 <TableRow hover key={idx}>
                   <TableCell sx={{ pl: 3 }}>{row.id}</TableCell>
-                  <TableCell sx={{ p: 1.5 }}>{row.service_label}</TableCell>
+                  <TableCell sx={{ p: 1.5 }}>
+                    {assigned ? (
+                      <Link
+                        href={`/app/task-management/${row.service_name}?service_id=${row.id}`}
+                        sx={{ textDecoration: 'underline', textDecorationColor: 'inherit' }}
+                      >
+                        {row.service_label}
+                      </Link>
+                    ) : (
+                      row.service_label
+                    )}
+                  </TableCell>
                   <TableCell sx={{ p: 1.5 }}>{row.category}</TableCell>
                   <TableCell sx={{ p: 1.5 }}>{row.user.full_name || 'Unnamed '}</TableCell>
                   <TableCell sx={{ p: 1.5 }}>

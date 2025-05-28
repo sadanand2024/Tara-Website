@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -23,8 +23,9 @@ import {
 import { useFormik, FieldArray, FormikProvider } from 'formik';
 import * as Yup from 'yup';
 import DeleteIcon from '@mui/icons-material/Delete';
-import FileListDialog from './FileListDialog';
-
+import { useSnackbar } from 'notistack';
+import GetActionButtons from '../FormHelpers';
+import Factory from '../../../utils/Factory';
 const docTypes = [
   { key: 'form16', label: 'Form 16' },
   { key: 'payslip', label: 'Payslip' },
@@ -177,13 +178,14 @@ const SalaryIncome = ({ fileDialogOpen, setFileDialogOpen, filesData, setDialogF
                           View
                         </Button>
                         <Button size="small" variant="contained" component="label" sx={{ mb: 0.5 }}>
-                          {doc.key === 'payslip' ? 'Upload' : docsFormik.values.docs[doc.key]?.length ? '+Add more' : 'Upload'}
+                          {doc.key === 'payslip' ? 'Upload' : docsFormik.values.docs[doc.key]?.length ? 'Add more' : 'Upload'}
                           <input
                             type="file"
                             hidden
+                            multiple={true}
                             onChange={(e) => {
                               if (e.target.files[0]) {
-                                docsFormik.setFieldValue(`docs.${doc.key}`, [...docsFormik.values.docs[doc.key], e.target.files[0]]);
+                                docsFormik.setFieldValue(`docs.${doc.key}`, [...docsFormik.values.docs[doc.key], ...e.target.files]);
                               }
                             }}
                           />
@@ -212,11 +214,10 @@ const SalaryIncome = ({ fileDialogOpen, setFileDialogOpen, filesData, setDialogF
         </Table>
         <Box display="flex" justifyContent="flex-end" mt={2}>
           <Button type="submit" variant="contained" color="primary">
-            Save
+            Save Documents
           </Button>
         </Box>
       </form>
-
       {/* Section 2: Details of any other income you wish to share */}
       <FormikProvider value={otherIncomeFormik}>
         <form onSubmit={otherIncomeFormik.handleSubmit} autoComplete="off">
@@ -328,7 +329,7 @@ const SalaryIncome = ({ fileDialogOpen, setFileDialogOpen, filesData, setDialogF
           />
           <Box display="flex" justifyContent="flex-end" mt={2}>
             <Button type="submit" variant="contained" color="primary">
-              Save
+              Save Other Income
             </Button>
           </Box>
         </form>
@@ -510,7 +511,7 @@ const SalaryIncome = ({ fileDialogOpen, setFileDialogOpen, filesData, setDialogF
         </Box>
         <Box display="flex" justifyContent="flex-end" mt={2}>
           <Button type="submit" variant="contained" color="primary">
-            Save
+            Save Foreign Income
           </Button>
         </Box>
       </form>
@@ -519,196 +520,465 @@ const SalaryIncome = ({ fileDialogOpen, setFileDialogOpen, filesData, setDialogF
 };
 
 const HousePropertyIncome = () => {
+  const { enqueueSnackbar } = useSnackbar();
   const [numProperties, setNumProperties] = React.useState(1);
-  const properties = Array.from({ length: numProperties });
+  const [properties, setProperties] = React.useState([
+    {
+      type_of_property: '',
+      property_address: {
+        address_line1: '',
+        address_line2: '',
+        state: '',
+        pincode: ''
+      },
+      owned_property: '',
+      ownership_percentage: '',
+      country: '',
+      is_it_property_let_out: '',
+      annual_rent_received: '',
+      rent_received: '',
+      pay_municipal_tax: '',
+      municipal_tax_paid: '',
+      municipal_tax_receipt: null,
+      home_loan_on_property: '',
+      interest_during_financial_year: '',
+      principal_during_financial_year: '',
+      upload_loan_interest_certificate: null,
+      loan_statement: null
+    }
+  ]);
+
+  // Add/Remove property handlers
+  const handleAddProperty = () => {
+    setNumProperties(numProperties + 1);
+    setProperties([
+      ...properties,
+      {
+        type_of_property: '',
+        property_address: {
+          address_line1: '',
+          address_line2: '',
+          state: '',
+          pincode: ''
+        },
+        owned_property: '',
+        ownership_percentage: '',
+        country: '',
+        is_it_property_let_out: '',
+        annual_rent_received: '',
+        rent_received: '',
+        pay_municipal_tax: '',
+        municipal_tax_paid: '',
+        municipal_tax_receipt: null,
+        home_loan_on_property: '',
+        interest_during_financial_year: '',
+        principal_during_financial_year: '',
+        upload_loan_interest_certificate: null,
+        loan_statement: null
+      }
+    ]);
+  };
+  const handleRemoveProperty = () => {
+    if (numProperties > 1) {
+      setNumProperties(numProperties - 1);
+      setProperties(properties.slice(0, -1));
+    }
+  };
+  // Handle field change
+  const handleChange = (idx, field, value) => {
+    const updated = [...properties];
+    if (field.startsWith('property_address.')) {
+      const addrField = field.split('.')[1];
+      updated[idx].property_address = {
+        ...updated[idx].property_address,
+        [addrField]: value
+      };
+    } else {
+      updated[idx][field] = value;
+    }
+    setProperties(updated);
+  };
+  const handleFileChange = (idx, field, file) => {
+    const updated = [...properties];
+    updated[idx][field] = file;
+    setProperties(updated);
+  };
+  // Form submit
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (properties.length === 0) {
+      if (enqueueSnackbar)
+        enqueueSnackbar('At least one property is required.', { anchorOrigin: { vertical: 'top', horizontal: 'right' }, variant: 'error' });
+      else alert('At least one property is required.');
+      return;
+    }
+    const formData = new FormData();
+    properties.forEach((property, idx) => {
+      Object.entries(property).forEach(([key, value]) => {
+        if (key === 'property_address') {
+          formData.append(`properties[${idx}][${key}]`, JSON.stringify(value));
+        } else if (value instanceof File) {
+          formData.append(`properties[${idx}][${key}]`, value);
+        } else {
+          formData.append(`properties[${idx}][${key}]`, value ?? '');
+        }
+      });
+    });
+    if (enqueueSnackbar)
+      enqueueSnackbar('House Property Income saved!', { anchorOrigin: { vertical: 'top', horizontal: 'right' }, variant: 'success' });
+    else alert('House Property Income saved!');
+    console.log('House Property Income:', properties);
+    // To POST: await Factory('post', '/your-endpoint', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+  };
+
+  // Add this async function to post a single property
+  const postProperty = async (property, idx) => {
+    const formData = new FormData();
+    Object.entries(property).forEach(([key, value]) => {
+      if (key === 'property_address') {
+        formData.append(key, JSON.stringify(value));
+      } else if (value instanceof File) {
+        formData.append(key, value);
+      } else {
+        formData.append(key, value ?? '');
+      }
+    });
+    // try {
+    //   const res = await Factory('post', '/income_tax_returns/house-property/', formData, {});
+    //   if (res.res.status_cd === 0) {
+    //     if (enqueueSnackbar)
+    //       enqueueSnackbar(`Property ${idx + 1} saved!`, { variant: 'success', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
+    //   } else {
+    //     if (enqueueSnackbar)
+    //       enqueueSnackbar(`Error saving property ${idx + 1}`, { variant: 'error', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
+    //   }
+    // } catch (err) {
+    //   if (enqueueSnackbar)
+    //     enqueueSnackbar(`Error saving property ${idx + 1}`, { variant: 'error', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
+    // }
+  };
+
   return (
-    <Box>
-      <Box display="flex" alignItems="center" mb={2} gap={2}>
-        <Typography>No. of House Properties</Typography>
-        <Button size="small" variant="outlined" onClick={() => setNumProperties(Math.max(1, numProperties - 1))}>
-          -
-        </Button>
-        <Typography>{numProperties}</Typography>
-        <Button size="small" variant="outlined" onClick={() => setNumProperties(numProperties + 1)}>
-          +
-        </Button>
-      </Box>
-      {properties.map((_, idx) => (
-        <Paper key={idx} sx={{ p: 3, mb: 4, borderRadius: 2, bgcolor: '#f8fafc' }}>
-          <Typography variant="subtitle1" fontWeight={700} mb={2}>
-            Property {idx + 1}
+    <form onSubmit={handleSubmit}>
+      <Box>
+        <Box display="flex" justifyContent="space-between" mb={2}>
+          <Typography variant="subtitle1" fontWeight={700}>
+            Enter House Property Details
           </Typography>
-          {/* Property Overview */}
-          <Typography fontWeight={600} mb={1}>
-            Property Overview
-          </Typography>
-          <Grid2 container spacing={2} alignItems="center" mb={2}>
-            <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-              <Typography>Type of Property</Typography>
-            </Grid2>
-            <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-              <Autocomplete
-                size="small"
-                fullWidth
-                options={['Self-occupied', 'Let-out', 'Vacant', 'Foreign', 'Deemed let-out']}
-                renderInput={(params) => <TextField {...params} placeholder="Select type" />}
-              />
-            </Grid2>
-            <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-              <Typography>Property Address</Typography>
-            </Grid2>
-            <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-              <Grid2 container spacing={1}>
-                <Grid2 size={4}>
-                  <TextField size="small" fullWidth placeholder="Line 1" />
-                </Grid2>
-                <Grid2 size={4}>
-                  <TextField size="small" fullWidth placeholder="Line 2" />
-                </Grid2>
-                <Grid2 size={4}>
-                  <TextField size="small" fullWidth placeholder="Line 3" />
+          <Button size="small" variant="outlined" onClick={handleAddProperty} sx={{ ml: 2 }}>
+            Add Property
+          </Button>
+        </Box>
+        {properties.map((property, idx) => (
+          <Paper key={idx} sx={{ p: 3, mb: 2, borderRadius: 2, bgcolor: '#f8fafc' }}>
+            <Typography variant="h4" sx={{ textDecoration: 'underline' }} mb={2}>
+              Property {idx + 1}
+            </Typography>
+            {/* Property Overview */}
+            <Typography fontWeight={600} mb={1}>
+              Property Overview
+            </Typography>
+            <Grid2 container spacing={2} alignItems="center" mb={2}>
+              <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                <Typography>Type of Property</Typography>
+              </Grid2>
+              <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                <Autocomplete
+                  size="small"
+                  fullWidth
+                  options={['Self-occupied', 'Let-out', 'Vacant', 'Foreign', 'Deemed let-out']}
+                  value={property.type_of_property || ''}
+                  onChange={(_, v) => handleChange(idx, 'type_of_property', v || '')}
+                  renderInput={(params) => <TextField {...params} placeholder="Select type" />}
+                />
+              </Grid2>
+              <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                <Typography>Country (if Foreign)</Typography>
+              </Grid2>
+              <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                <Autocomplete
+                  size="small"
+                  fullWidth
+                  options={['India', 'Other']}
+                  value={property.country || ''}
+                  onChange={(_, v) => handleChange(idx, 'country', v || '')}
+                  renderInput={(params) => <TextField {...params} placeholder="Select country" />}
+                />
+              </Grid2>{' '}
+              <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                <Typography>Property Address</Typography>
+              </Grid2>
+              <Grid2 size={{ xs: 12, sm: 6, md: 9 }}>
+                <Grid2 container spacing={1}>
+                  <Grid2 size={3}>
+                    <TextField
+                      size="small"
+                      fullWidth
+                      placeholder="Line 1"
+                      label="Line 1"
+                      value={property.property_address?.address_line1 || ''}
+                      onChange={(e) => handleChange(idx, 'property_address.address_line1', e.target.value)}
+                    />
+                  </Grid2>
+                  <Grid2 size={3}>
+                    <TextField
+                      size="small"
+                      fullWidth
+                      placeholder="Line 2"
+                      label="Line 2"
+                      value={property.property_address?.address_line2 || ''}
+                      onChange={(e) => handleChange(idx, 'property_address.address_line2', e.target.value)}
+                    />
+                  </Grid2>
+                  <Grid2 size={3}>
+                    <TextField
+                      size="small"
+                      fullWidth
+                      placeholder="State"
+                      label="State"
+                      value={property.property_address?.state || ''}
+                      onChange={(e) => handleChange(idx, 'property_address.state', e.target.value)}
+                    />
+                  </Grid2>
+                  <Grid2 size={3}>
+                    <TextField
+                      size="small"
+                      fullWidth
+                      placeholder="Pincode"
+                      label="Pincode"
+                      value={property.property_address?.pincode || ''}
+                      onChange={(e) => handleChange(idx, 'property_address.pincode', e.target.value)}
+                    />
+                  </Grid2>
                 </Grid2>
               </Grid2>
+              <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                <Typography>Is it Co-owned Property?</Typography>
+              </Grid2>
+              <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                <RadioGroup row value={property.owned_property || ''} onChange={(_, v) => handleChange(idx, 'owned_property', v)}>
+                  <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
+                  <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
+                </RadioGroup>
+              </Grid2>
+              <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                <Typography>Ownership Percentage</Typography>
+              </Grid2>
+              <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                <TextField
+                  size="small"
+                  fullWidth
+                  placeholder="%"
+                  value={property.ownership_percentage || ''}
+                  onChange={(e) => handleChange(idx, 'ownership_percentage', e.target.value)}
+                />
+              </Grid2>
             </Grid2>
-            <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-              <Typography>Is it Co-owned Property?</Typography>
+            {/* Income Details */}
+            <Typography fontWeight={600} mb={1}>
+              Income Details
+            </Typography>
+            <Grid2 container spacing={2} alignItems="center" mb={2}>
+              <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                <Typography>Is this property let-out?</Typography>
+              </Grid2>
+              <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                <RadioGroup
+                  row
+                  value={property.is_it_property_let_out || ''}
+                  onChange={(_, v) => handleChange(idx, 'is_it_property_let_out', v)}
+                >
+                  <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
+                  <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
+                </RadioGroup>
+              </Grid2>
+              <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                <Typography>Annual Rent Received</Typography>
+              </Grid2>
+              <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                <TextField
+                  size="small"
+                  fullWidth
+                  placeholder="Amount"
+                  value={property.annual_rent_received || ''}
+                  onChange={(e) => handleChange(idx, 'annual_rent_received', e.target.value)}
+                />
+              </Grid2>
+              <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                <Typography>Rent Received In</Typography>
+              </Grid2>
+              <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                <Autocomplete
+                  size="small"
+                  fullWidth
+                  options={['Bank', 'Cash']}
+                  value={property.rent_received || ''}
+                  onChange={(_, v) => handleChange(idx, 'rent_received', v || '')}
+                  renderInput={(params) => <TextField {...params} placeholder="Select mode" />}
+                />
+              </Grid2>
+              <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                <Typography>Did you pay municipal taxes?</Typography>
+              </Grid2>
+              <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                <RadioGroup row value={property.pay_municipal_tax || ''} onChange={(_, v) => handleChange(idx, 'pay_municipal_tax', v)}>
+                  <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
+                  <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
+                </RadioGroup>
+              </Grid2>
+              <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                <Typography>Municipal tax paid</Typography>
+              </Grid2>
+              <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                <TextField
+                  size="small"
+                  fullWidth
+                  placeholder="Amount"
+                  value={property.municipal_tax_paid || ''}
+                  onChange={(e) => handleChange(idx, 'municipal_tax_paid', e.target.value)}
+                />
+              </Grid2>
+              <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                <Typography>Municipal tax receipt</Typography>
+              </Grid2>
+              <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                <Button size="small" variant="contained" component="label">
+                  Upload
+                  <input type="file" hidden onChange={(e) => handleFileChange(idx, 'municipal_tax_receipt', e.target.files[0])} />
+                </Button>
+                {property.municipal_tax_receipt && (
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    onClick={() => window.open(URL.createObjectURL(property.municipal_tax_receipt), '_blank')}
+                    sx={{ ml: 1 }}
+                  >
+                    View
+                  </Button>
+                )}
+              </Grid2>
             </Grid2>
-            <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-              <RadioGroup row>
-                <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
-                <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
-              </RadioGroup>
+            {/* Loan Details */}
+            <Typography fontWeight={600} mb={1}>
+              Loan Details
+            </Typography>
+            <Grid2 container spacing={2} alignItems="center">
+              <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                <Typography>Home loan on this property?</Typography>
+              </Grid2>
+              <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                <RadioGroup
+                  row
+                  value={property.home_loan_on_property || ''}
+                  onChange={(_, v) => handleChange(idx, 'home_loan_on_property', v)}
+                >
+                  <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
+                  <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
+                </RadioGroup>
+              </Grid2>
+              <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                <Typography>Interest paid during the FY</Typography>
+              </Grid2>
+              <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                <TextField
+                  size="small"
+                  fullWidth
+                  placeholder="Amount"
+                  value={property.interest_during_financial_year || ''}
+                  onChange={(e) => handleChange(idx, 'interest_during_financial_year', e.target.value)}
+                />
+              </Grid2>
+              <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                <Typography>Principal paid during the FY</Typography>
+              </Grid2>
+              <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                <TextField
+                  size="small"
+                  fullWidth
+                  placeholder="Amount"
+                  value={property.principal_during_financial_year || ''}
+                  onChange={(e) => handleChange(idx, 'principal_during_financial_year', e.target.value)}
+                />
+              </Grid2>
+              <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                <Typography>Upload loan interest certificate</Typography>
+              </Grid2>
+              <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                <Button size="small" variant="contained" component="label">
+                  Upload
+                  <input
+                    type="file"
+                    hidden
+                    onChange={(e) => handleFileChange(idx, 'upload_loan_interest_certificate', e.target.files[0])}
+                  />
+                </Button>
+                {property.upload_loan_interest_certificate && (
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    onClick={() => window.open(URL.createObjectURL(property.upload_loan_interest_certificate), '_blank')}
+                    sx={{ ml: 1 }}
+                  >
+                    View
+                  </Button>
+                )}
+              </Grid2>
+              <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                <Typography>Loan statement</Typography>
+              </Grid2>
+              <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                <Button size="small" variant="contained" component="label">
+                  Upload
+                  <input type="file" hidden onChange={(e) => handleFileChange(idx, 'loan_statement', e.target.files[0])} />
+                </Button>
+                {property.loan_statement && (
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    onClick={() => window.open(URL.createObjectURL(property.loan_statement), '_blank')}
+                    sx={{ ml: 1 }}
+                  >
+                    View
+                  </Button>
+                )}
+              </Grid2>
             </Grid2>
-            <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-              <Typography>Ownership %</Typography>
-            </Grid2>
-            <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-              <TextField size="small" fullWidth placeholder="%" />
-            </Grid2>
-            <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-              <Typography>Country (if Foreign)</Typography>
-            </Grid2>
-            <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-              <Autocomplete
+            <Box display="flex" justifyContent="flex-end" mt={2}>
+              <Button
                 size="small"
-                fullWidth
-                options={['India', 'Other']}
-                renderInput={(params) => <TextField {...params} placeholder="Select country" />}
-              />
-            </Grid2>
-          </Grid2>
-          {/* Income Details */}
-          <Typography fontWeight={600} mb={1}>
-            Income Details
-          </Typography>
-          <Grid2 container spacing={2} alignItems="center" mb={2}>
-            <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-              <Typography>Is this property let-out?</Typography>
-            </Grid2>
-            <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-              <RadioGroup row>
-                <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
-                <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
-              </RadioGroup>
-            </Grid2>
-            <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-              <Typography>Annual Rent Received</Typography>
-            </Grid2>
-            <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-              <TextField size="small" fullWidth placeholder="Amount" />
-            </Grid2>
-            <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-              <Typography>Rent Received In</Typography>
-            </Grid2>
-            <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-              <Autocomplete
-                size="small"
-                fullWidth
-                options={['Bank', 'Cash']}
-                renderInput={(params) => <TextField {...params} placeholder="Select mode" />}
-              />
-            </Grid2>
-            <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-              <Typography>Did you pay municipal taxes?</Typography>
-            </Grid2>
-            <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-              <RadioGroup row>
-                <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
-                <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
-              </RadioGroup>
-            </Grid2>
-            <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-              <Typography>Municipal tax paid</Typography>
-            </Grid2>
-            <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-              <TextField size="small" fullWidth placeholder="Amount" />
-            </Grid2>
-            <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-              <Typography>Municipal tax receipt</Typography>
-            </Grid2>
-            <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-              <Button size="small" variant="contained" component="label">
-                Upload
-                <input type="file" hidden />
+                variant="contained"
+                color="primary"
+                onClick={async () => {
+                  await postProperty(properties[idx], idx);
+                  console.log('Saved property:', properties[idx]);
+                }}
+              >
+                Save Property
               </Button>
-            </Grid2>
-          </Grid2>
-          {/* Loan Details */}
-          <Typography fontWeight={600} mb={1}>
-            Loan Details
-          </Typography>
-          <Grid2 container spacing={2} alignItems="center">
-            <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-              <Typography>Home loan on this property?</Typography>
-            </Grid2>
-            <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-              <RadioGroup row>
-                <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
-                <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
-              </RadioGroup>
-            </Grid2>
-            <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-              <Typography>Interest paid during the FY</Typography>
-            </Grid2>
-            <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-              <TextField size="small" fullWidth placeholder="Amount" />
-            </Grid2>
-            <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-              <Typography>Principal paid during the FY</Typography>
-            </Grid2>
-            <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-              <TextField size="small" fullWidth placeholder="Amount" />
-            </Grid2>
-            <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-              <Typography>Upload loan interest certificate</Typography>
-            </Grid2>
-            <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-              <Button size="small" variant="contained" component="label">
-                Upload
-                <input type="file" hidden />
-              </Button>
-            </Grid2>
-            <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-              <Typography>Loan statement</Typography>
-            </Grid2>
-            <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-              <Button size="small" variant="contained" component="label">
-                Upload
-                <input type="file" hidden />
-              </Button>
-            </Grid2>
-          </Grid2>
-        </Paper>
-      ))}
-      <Button size="small" variant="outlined" onClick={() => setNumProperties(numProperties + 1)}>
-        Add Property
-      </Button>
-      {numProperties > 1 && (
-        <Button size="small" color="error" variant="outlined" onClick={() => setNumProperties(numProperties - 1)} sx={{ ml: 2 }}>
-          Remove Property
-        </Button>
-      )}
-    </Box>
+
+              {numProperties > 1 && (
+                <Button size="small" color="error" variant="outlined" onClick={handleRemoveProperty} sx={{ ml: 2 }}>
+                  Remove Property
+                </Button>
+              )}
+            </Box>
+          </Paper>
+        ))}
+
+        <Box display="flex" justifyContent="flex-end" mt={1}>
+          {/* <Button type="submit" variant="contained" color="primary">
+            Save House Property Income
+          </Button> */}
+          <GetActionButtons
+            data={properties}
+            status={properties.status}
+            urlEndpoint="personal-information"
+            taskId={properties.id}
+            setData={setProperties}
+          />
+        </Box>
+      </Box>
+    </form>
   );
 };
 
@@ -933,7 +1203,7 @@ const CapitalGainsIncome = () => {
                 <TableRow>
                   <TableCell sx={{ bgcolor: 'primary.main', color: 'white !important' }}>Asset Details</TableCell>
                   <TableCell sx={{ bgcolor: 'primary.main', color: 'white !important' }}>Purchase Date</TableCell>
-                  <TableCell sx={{ bgcolor: 'primary.main', color: 'white !important' }}>Exit</TableCell>
+                  <TableCell sx={{ bgcolor: 'primary.main', color: 'white !important' }}>Purchase Value</TableCell>
                   <TableCell sx={{ bgcolor: 'primary.main', color: 'white !important' }}>Sale Date</TableCell>
                   <TableCell sx={{ bgcolor: 'primary.main', color: 'white !important' }}>Sale Value</TableCell>
                   <TableCell sx={{ bgcolor: 'primary.main', color: 'white !important' }}>Doc</TableCell>
@@ -950,7 +1220,7 @@ const CapitalGainsIncome = () => {
                       <TextField size="small" type="date" fullWidth InputLabelProps={{ shrink: true }} placeholder="Purchase Date" />
                     </TableCell>
                     <TableCell>
-                      <TextField size="small" fullWidth placeholder="Exit" />
+                      <TextField size="small" fullWidth placeholder="Purchase Value" />
                     </TableCell>
                     <TableCell>
                       <TextField size="small" type="date" fullWidth InputLabelProps={{ shrink: true }} placeholder="Sale Date" />
@@ -1393,31 +1663,55 @@ const countryOptions = ['India', 'USA', 'UK', 'Other'];
 const currencyOptions = ['INR', 'USD', 'GBP', 'EUR', 'Other'];
 const winningsSources = ['Lottery', 'Game Show', 'Gambling', 'Others'];
 
-const OtherIncome = () => {
-  const [interestApplicable, setInterestApplicable] = React.useState('yes');
+const OtherIncome = ({ fileDialogOpen, setFileDialogOpen, filesData, setDialogFilesData, service_id }) => {
+  const [interestApplicable, setInterestApplicable] = React.useState('Not Applicable');
   const [interestRows, setInterestRows] = React.useState([{ type: '', earned: '', bank: '' }]);
-  const [dividendApplicable, setDividendApplicable] = React.useState('yes');
+  const [dividendApplicable, setDividendApplicable] = React.useState('Not Applicable');
   const [dividendRows, setDividendRows] = React.useState([{ from: '', received: '' }]);
-  const [giftApplicable, setGiftApplicable] = React.useState('yes');
+  const [giftApplicable, setGiftApplicable] = React.useState('Not Applicable');
   const [giftRows, setGiftRows] = React.useState([{ amount: '', from: '', relation: '', date: '', marriage: 'no' }]);
-  const [familyApplicable, setFamilyApplicable] = React.useState('yes');
+  const [familyApplicable, setFamilyApplicable] = React.useState('Not Applicable');
   const [familyRows, setFamilyRows] = React.useState([{ amount: '', source: '' }]);
-  const [foreignApplicable, setForeignApplicable] = React.useState('yes');
+  const [foreignApplicable, setForeignApplicable] = React.useState('Not Applicable');
   const [foreignRows, setForeignRows] = React.useState([{ type: '', country: '', currency: '', amount: '', taxPaid: 'no' }]);
-  const [winningsApplicable, setWinningsApplicable] = React.useState('yes');
+  const [winningsApplicable, setWinningsApplicable] = React.useState('Not Applicable');
   const [winningsRows, setWinningsRows] = React.useState([{ source: '', amount: '' }]);
+
+  const getOtherIncome = async () => {
+    const res = await Factory(
+      'get',
+      `/income_tax_returns/service-request-section-data?service_request_id=${service_id}&section=other_income`
+    );
+    console.log(res);
+  };
+
+  const postIncomeApplicability = async (v, urlEndPoint, key) => {
+    console.log({ service_request: service_id, service_task: 24, [key]: v });
+    // const res = Factory('post', `/income_tax_returns/${urlEndPoint}/upsert/`, {});
+  };
+
+  useEffect(() => {
+    getOtherIncome();
+  }, []);
 
   return (
     <Box>
       {/* Interest Income Section */}
-      <Stack direction="row" spacing={2} alignItems="center" mb={interestApplicable === 'yes' ? 0 : 2}>
+      <Stack direction="row" spacing={2} alignItems="center" mb={interestApplicable === 'Applicable' ? 0 : 2}>
         <Typography>Interest Income: </Typography>
-        <RadioGroup row value={interestApplicable} onChange={(_, v) => setInterestApplicable(v)}>
-          <FormControlLabel value="yes" control={<Radio size="small" />} label="Applicable" />
-          <FormControlLabel value="no" control={<Radio size="small" />} label="Not Applicable" />
+        <RadioGroup
+          row
+          value={interestApplicable}
+          onChange={(_, v) => {
+            setInterestApplicable(v);
+            postIncomeApplicability(v, 'interest-income');
+          }}
+        >
+          <FormControlLabel value="Applicable" control={<Radio size="small" />} label="Applicable" />
+          <FormControlLabel value="Not Applicable" control={<Radio size="small" />} label="Not Applicable" />
         </RadioGroup>
       </Stack>
-      {interestApplicable === 'yes' && (
+      {interestApplicable === 'Applicable' && (
         <>
           {interestRows.map((row, idx) => (
             <Paper key={idx} sx={{ p: 2, mb: 2, borderRadius: 2, bgcolor: '#f8fafc' }}>
@@ -1468,14 +1762,21 @@ const OtherIncome = () => {
         </>
       )}
       {/* Dividend Income Section */}
-      <Stack direction="row" spacing={2} alignItems="center" mb={dividendApplicable === 'yes' ? 0 : 2}>
+      <Stack direction="row" spacing={2} alignItems="center" mb={dividendApplicable === 'Applicable' ? 0 : 2}>
         <Typography>Dividend Income: </Typography>
-        <RadioGroup row value={dividendApplicable} onChange={(_, v) => setDividendApplicable(v)}>
-          <FormControlLabel value="yes" control={<Radio size="small" />} label="Applicable" />
-          <FormControlLabel value="no" control={<Radio size="small" />} label="Not Applicable" />
+        <RadioGroup
+          row
+          value={dividendApplicable}
+          onChange={(_, v) => {
+            setDividendApplicable(v);
+            postIncomeApplicability(v, 'dividend-income');
+          }}
+        >
+          <FormControlLabel value="Applicable" control={<Radio size="small" />} label="Applicable" />
+          <FormControlLabel value="Not Applicable" control={<Radio size="small" />} label="Not Applicable" />
         </RadioGroup>
       </Stack>
-      {dividendApplicable === 'yes' && (
+      {dividendApplicable === 'Applicable' && (
         <>
           {dividendRows.map((row, idx) => (
             <Paper key={idx} sx={{ p: 2, mb: 2, borderRadius: 2, bgcolor: '#f8fafc' }}>
@@ -1518,14 +1819,21 @@ const OtherIncome = () => {
         </>
       )}
       {/* Gift Income Section */}
-      <Stack direction="row" spacing={2} alignItems="center" mb={giftApplicable === 'yes' ? 0 : 2}>
+      <Stack direction="row" spacing={2} alignItems="center" mb={giftApplicable === 'Applicable' ? 0 : 2}>
         <Typography>Gift Income: </Typography>
-        <RadioGroup row value={giftApplicable} onChange={(_, v) => setGiftApplicable(v)}>
-          <FormControlLabel value="yes" control={<Radio size="small" />} label="Applicable" />
-          <FormControlLabel value="no" control={<Radio size="small" />} label="Not Applicable" />
+        <RadioGroup
+          row
+          value={giftApplicable}
+          onChange={(_, v) => {
+            setGiftApplicable(v);
+            postIncomeApplicability(v, 'gift-income');
+          }}
+        >
+          <FormControlLabel value="Applicable" control={<Radio size="small" />} label="Applicable" />
+          <FormControlLabel value="Not Applicable" control={<Radio size="small" />} label="Not Applicable" />
         </RadioGroup>
       </Stack>
-      {giftApplicable === 'yes' && (
+      {giftApplicable === 'Applicable' && (
         <>
           {giftRows.map((row, idx) => (
             <Paper key={idx} sx={{ p: 2, mb: 2, borderRadius: 2, bgcolor: '#f8fafc' }}>
@@ -1576,14 +1884,21 @@ const OtherIncome = () => {
         </>
       )}
       {/* Family Pension Income Section */}
-      <Stack direction="row" spacing={2} alignItems="center" mb={familyApplicable === 'yes' ? 0 : 2}>
+      <Stack direction="row" spacing={2} alignItems="center" mb={familyApplicable === 'Applicable' ? 0 : 2}>
         <Typography>Family Pension Income: </Typography>
-        <RadioGroup row value={familyApplicable} onChange={(_, v) => setFamilyApplicable(v)}>
-          <FormControlLabel value="yes" control={<Radio size="small" />} label="Applicable" />
-          <FormControlLabel value="no" control={<Radio size="small" />} label="Not Applicable" />
+        <RadioGroup
+          row
+          value={familyApplicable}
+          onChange={(_, v) => {
+            setFamilyApplicable(v);
+            postIncomeApplicability(v, 'family-pension-income');
+          }}
+        >
+          <FormControlLabel value="Applicable" control={<Radio size="small" />} label="Applicable" />
+          <FormControlLabel value="Not Applicable" control={<Radio size="small" />} label="Not Applicable" />
         </RadioGroup>
       </Stack>
-      {familyApplicable === 'yes' && (
+      {familyApplicable === 'Applicable' && (
         <>
           {familyRows.map((row, idx) => (
             <Paper key={idx} sx={{ p: 2, mb: 2, borderRadius: 2, bgcolor: '#f8fafc' }}>
@@ -1617,14 +1932,21 @@ const OtherIncome = () => {
         </>
       )}
       {/* Foreign Income Section */}
-      <Stack direction="row" spacing={2} alignItems="center" mb={foreignApplicable === 'yes' ? 0 : 2}>
+      <Stack direction="row" spacing={2} alignItems="center" mb={foreignApplicable === 'Applicable' ? 0 : 2}>
         <Typography>Foreign Income: </Typography>
-        <RadioGroup row value={foreignApplicable} onChange={(_, v) => setForeignApplicable(v)}>
-          <FormControlLabel value="yes" control={<Radio size="small" />} label="Applicable" />
-          <FormControlLabel value="no" control={<Radio size="small" />} label="Not Applicable" />
+        <RadioGroup
+          row
+          value={foreignApplicable}
+          onChange={(_, v) => {
+            setForeignApplicable(v);
+            postIncomeApplicability(v, 'foreign-income');
+          }}
+        >
+          <FormControlLabel value="Applicable" control={<Radio size="small" />} label="Applicable" />
+          <FormControlLabel value="Not Applicable" control={<Radio size="small" />} label="Not Applicable" />
         </RadioGroup>
       </Stack>
-      {foreignApplicable === 'yes' && (
+      {foreignApplicable === 'Applicable' && (
         <>
           {foreignRows.map((row, idx) => (
             <Paper key={idx} sx={{ p: 2, mb: 2, borderRadius: 2, bgcolor: '#f8fafc' }}>
@@ -1703,14 +2025,21 @@ const OtherIncome = () => {
         </>
       )}
       {/* Winnings/Lottery Income Section */}
-      <Stack direction="row" spacing={2} alignItems="center" mb={winningsApplicable === 'yes' ? 0 : 2}>
+      <Stack direction="row" spacing={2} alignItems="center" mb={winningsApplicable === 'Applicable' ? 0 : 2}>
         <Typography>Winnings/Lottery Income: </Typography>
-        <RadioGroup row value={winningsApplicable} onChange={(_, v) => setWinningsApplicable(v)}>
-          <FormControlLabel value="yes" control={<Radio size="small" />} label="Applicable" />
-          <FormControlLabel value="no" control={<Radio size="small" />} label="Not Applicable" />
+        <RadioGroup
+          row
+          value={winningsApplicable}
+          onChange={(_, v) => {
+            setWinningsApplicable(v);
+            postIncomeApplicability(v, 'winning-income');
+          }}
+        >
+          <FormControlLabel value="Applicable" control={<Radio size="small" />} label="Applicable" />
+          <FormControlLabel value="Not Applicable" control={<Radio size="small" />} label="Not Applicable" />
         </RadioGroup>
       </Stack>
-      {winningsApplicable === 'yes' && (
+      {winningsApplicable === 'Applicable' && (
         <>
           {winningsRows.map((row, idx) => (
             <Paper key={idx} sx={{ p: 2, mb: 2, borderRadius: 2, bgcolor: '#f8fafc' }}>
@@ -1761,8 +2090,26 @@ const OtherIncome = () => {
   );
 };
 
-const AgricultureIncome = () => {
-  const [hasAgriIncome, setHasAgriIncome] = React.useState('no');
+const AgricultureIncome = ({ service_id }) => {
+  const [hasAgriIncome, setHasAgriIncome] = React.useState('Applicable');
+  const getAgricultureIncome = async () => {
+    const res = await Factory(
+      'get',
+      `/income_tax_returns/service-request-section-data?service_request_id=${service_id}&section=agriculture`
+    );
+    console.log(res);
+  };
+
+  const postIncomeApplicability = async (v, key) => {
+    console.log({ service_request: service_id, service_task: 24, agriculture_income: v });
+    // const res = Factory('post', `/income_tax_returns/${key}/upsert/`, {
+
+    // });
+  };
+  useEffect(() => {
+    // getAgricultureIncome();
+  }, []);
+
   return (
     <Box>
       <Typography variant="h6" mb={2} sx={{ textDecoration: 'underline' }}>
@@ -1770,12 +2117,19 @@ const AgricultureIncome = () => {
       </Typography>
       <Stack direction="row" spacing={2} alignItems="center" mb={2}>
         <Typography>Do you have agricultural income during F.Y.?</Typography>
-        <RadioGroup row value={hasAgriIncome} onChange={(_, v) => setHasAgriIncome(v)}>
-          <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
-          <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
+        <RadioGroup
+          row
+          value={hasAgriIncome}
+          onChange={(_, v) => {
+            postIncomeApplicability(v);
+            setHasAgriIncome(v);
+          }}
+        >
+          <FormControlLabel value="Applicable" control={<Radio size="small" />} label="Yes" />
+          <FormControlLabel value="Not Applicable" control={<Radio size="small" />} label="No" />
         </RadioGroup>
       </Stack>
-      {hasAgriIncome === 'yes' && (
+      {hasAgriIncome === 'Applicable' && (
         <Stack direction="row" spacing={2} alignItems="center" mb={2}>
           <Typography>If yes, enter net agricultural income earned</Typography>
           <TextField size="small" fullWidth sx={{ maxWidth: 200 }} label="Agricultural Income" />
@@ -1790,7 +2144,7 @@ const AgricultureIncome = () => {
   );
 };
 
-const IncomeDetails = ({ type, fileDialogOpen, setFileDialogOpen, dialogFilesData, setDialogFilesData }) => {
+const IncomeDetails = ({ type, fileDialogOpen, setFileDialogOpen, dialogFilesData, setDialogFilesData, service_id }) => {
   switch (type) {
     case 'salary':
       return (
@@ -1799,18 +2153,47 @@ const IncomeDetails = ({ type, fileDialogOpen, setFileDialogOpen, dialogFilesDat
           setFileDialogOpen={setFileDialogOpen}
           filesData={dialogFilesData}
           setDialogFilesData={setDialogFilesData}
+          service_id={service_id}
         />
       );
     case 'house':
-      return <HousePropertyIncome fileDialogOpen={fileDialogOpen} setFileDialogOpen={setFileDialogOpen} filesData={dialogFilesData} />;
+      return (
+        <HousePropertyIncome
+          fileDialogOpen={fileDialogOpen}
+          setFileDialogOpen={setFileDialogOpen}
+          filesData={dialogFilesData}
+          service_id={service_id}
+        />
+      );
     case 'capital':
-      return <CapitalGainsIncome fileDialogOpen={fileDialogOpen} setFileDialogOpen={setFileDialogOpen} filesData={dialogFilesData} />;
+      return (
+        <CapitalGainsIncome
+          fileDialogOpen={fileDialogOpen}
+          setFileDialogOpen={setFileDialogOpen}
+          filesData={dialogFilesData}
+          service_id={service_id}
+        />
+      );
     case 'business':
-      return <BusinessIncome fileDialogOpen={fileDialogOpen} setFileDialogOpen={setFileDialogOpen} filesData={dialogFilesData} />;
+      return (
+        <BusinessIncome
+          fileDialogOpen={fileDialogOpen}
+          setFileDialogOpen={setFileDialogOpen}
+          filesData={dialogFilesData}
+          service_id={service_id}
+        />
+      );
     case 'other':
-      return <OtherIncome fileDialogOpen={fileDialogOpen} setFileDialogOpen={setFileDialogOpen} filesData={dialogFilesData} />;
+      return (
+        <OtherIncome
+          fileDialogOpen={fileDialogOpen}
+          setFileDialogOpen={setFileDialogOpen}
+          filesData={dialogFilesData}
+          service_id={service_id}
+        />
+      );
     case 'agriculture':
-      return <AgricultureIncome fileDialogOpen={fileDialogOpen} setFileDialogOpen={setFileDialogOpen} filesData={dialogFilesData} />;
+      return <AgricultureIncome service_id={service_id} />;
   }
 };
 

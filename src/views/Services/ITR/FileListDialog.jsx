@@ -30,7 +30,7 @@ const FileListDialog = ({ open, onClose, files, onDelete }) => {
       id="file-list-dialog1"
     >
       {files?.length === 0 ? (
-        <Box sx={{ p: 0, textAlign: 'center' }}>
+        <Box sx={{ p: 10, textAlign: 'center' }}>
           <Typography>No files to display</Typography>
         </Box>
       ) : (
@@ -39,8 +39,8 @@ const FileListDialog = ({ open, onClose, files, onDelete }) => {
             <Table size="small" sx={{ width: '100%', px: 0, py: 0 }}>
               <TableHead sx={{ backgroundColor: 'primary.main' }}>
                 <TableRow>
-                  <TableCell sx={{ color: 'white !important' }}>Filename</TableCell>
-                  <TableCell sx={{ color: 'white !important' }} align="right">
+                  <TableCell sx={{ color: 'white !important', px: 2, py: 1.5 }}>Filename</TableCell>
+                  <TableCell sx={{ color: 'white !important', px: 2, py: 1.5 }} align="right">
                     Action
                   </TableCell>
                 </TableRow>
@@ -59,7 +59,7 @@ const FileListDialog = ({ open, onClose, files, onDelete }) => {
                 <TableRow key={'Close'}>
                   <TableCell></TableCell>
                   <TableCell align="right">
-                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', px: 1, py: 1 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', px: 0.5, py: 0.5 }}>
                       <Button variant="outlined" size="small" onClick={onClose}>
                         Close
                       </Button>
