@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Typography, TextField, Grid2, Autocomplete, Button } from '@mui/material';
+import { Box, Typography, TextField, Grid2, Autocomplete, Button, Card, Stack } from '@mui/material';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { useDispatch } from 'react-redux';
@@ -225,7 +225,7 @@ const BusinessIdentityStructureSection = () => {
   }, []);
 
   return (
-    <Box>
+    <Card sx={{ p: 3 }}>
       <Typography variant="h5" fontWeight={700} mb={2}>
         <span style={{ textDecoration: 'underline' }}>Business Identity & Structure</span>
       </Typography>
@@ -240,13 +240,16 @@ const BusinessIdentityStructureSection = () => {
             </Grid2>
           ))}
         </Grid2>
-        <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
+        <Stack direction="row" spacing={2} sx={{ mt: 3, justifyContent: 'flex-end' }}>
           <Button variant="contained" color="primary" type="submit">
             Save
           </Button>
-        </Box>
+          <Button variant="contained" color="primary" type="submit">
+            Send for review
+          </Button>
+        </Stack>
       </form>
-    </Box>
+    </Card>
   );
 };
 

@@ -5,61 +5,66 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
 import { useDispatch } from 'react-redux';
+import { Autocomplete, TextField } from '@mui/material';
 import { openSnackbar } from 'store/slices/snackbar';
 import Factory from 'utils/Factory';
+import BusinessRegistrationDocumenst from './BusinessRegistrationDocumenst';
 const StepTwo = () => {
   const dispatch = useDispatch();
+
+  const licenseOptions = [
+    { label: 'Yes', value: 'yes' },
+    { label: 'No', value: 'no' }
+  ];
+
   const formik = useFormik({
     initialValues: {
       id: '',
-      certificate_of_incorporation: null,
-      authorization_letter: null,
-      local_language_name_board_photo_business: null,
-      memorandum_of_articles: null
+      apply_new_license: null,
+      trade_license_number: null,
+      trade_license_file: null
     },
-    validationSchema: Yup.object({
-      certificate_of_incorporation: Yup.mixed().required('Incorporation certificate is required'),
-      authorization_letter: Yup.mixed().required('Authorisation letter is required'),
-      local_language_name_board_photo_business: Yup.mixed().required('Name board photo is required'),
-      memorandum_of_articles: Yup.mixed().required('MOA is required')
+    validationSchema: Yup.object().shape({
+      apply_new_license: Yup.object().nullable().required('Required'),
+      trade_license_number: Yup.string().when('apply_new_license', {
+        is: (val) => val?.value === 'no',
+        then: (schema) => schema.required('TIN Number is required'),
+        otherwise: (schema) => schema.notRequired()
+      }),
+      trade_license_file: Yup.mixed().when('apply_new_license', {
+        is: (val) => val?.value === 'no',
+        then: (schema) => schema.required('Trade license file is required'),
+        otherwise: (schema) => schema.notRequired()
+      })
     }),
     onSubmit: async (values) => {
       console.log(values);
-      let url = values.id ? `/labourlicense/registration-documents/${values.id}/` : `/labourlicense/registration-documents/`;
+      let url = values.id ? `/tradelicense/trade-license-exist/${values.id}/` : `/tradelicense/trade-license-exist/`;
       const formData = new FormData();
-      formData.append('service_request', 24);
-      formData.append('service_task', 9);
-
-      if (values.certificate_of_incorporation && typeof values.certificate_of_incorporation !== 'string') {
-        formData.append('certificate_of_incorporation', values.certificate_of_incorporation);
+      formData.append('service_request', 25);
+      formData.append('service_task', 5);
+      formData.append('apply_new_license', values.apply_new_license?.value);
+      formData.append('trade_license_number', values.trade_license_number);
+      if (values.trade_license_file && typeof values.trade_license_file !== 'string') {
+        formData.append('trade_license_file', values.trade_license_file);
       }
-      if (values.authorization_letter && typeof values.authorization_letter !== 'string') {
-        formData.append('authorization_letter', values.authorization_letter);
-      }
-      if (values.local_language_name_board_photo_business && typeof values.local_language_name_board_photo_business !== 'string') {
-        formData.append('local_language_name_board_photo_business', values.local_language_name_board_photo_business);
-      }
-      if (values.memorandum_of_articles && typeof values.memorandum_of_articles !== 'string') {
-        formData.append('memorandum_of_articles', values.memorandum_of_articles);
-      }
-      formData.append('status', 'in progress');
       const { res } = await Factory(values.id ? 'put' : 'post', url, formData);
       if (res.status_cd === 0) {
         dispatch(
           openSnackbar({
             open: true,
-            message: values.id ? 'Documents updated successfully' : 'Documents saved successfully',
+            message: values.id ? 'Declaration updated successfully' : 'Declaration saved successfully',
             variant: 'alert',
             alert: { color: 'success' },
             close: false
           })
         );
-        getRegistrationDocuments();
+        getTradeLicenseDeclaration();
       } else {
         dispatch(
           openSnackbar({
             open: true,
-            message: 'Documents not saved',
+            message: 'Declaration not saved',
             variant: 'alert',
             alert: { color: 'error' },
             close: false
@@ -68,90 +73,97 @@ const StepTwo = () => {
       }
     }
   });
-  const getRegistrationDocuments = async () => {
-    const url = `/labourlicense/registration-documents/by-request-or-task?service_request_id=24`;
+
+  // Fetch and set values for both forms
+  const getTradeLicenseDeclaration = async () => {
+    const url = `/tradelicense/trade-license-exist/by-request-or-task?service_request_id=25`;
     const { res } = await Factory('get', url);
     if (res.status_cd === 0) {
-      formik.setValues(res.data);
+      // Format the response data to match form structure
+      const formattedData = {
+        id: res.data.id || '',
+        apply_new_license: licenseOptions.find((option) => option.value === res.data.apply_new_license),
+        trade_license_number: res.data.trade_license_number,
+        trade_license_file: res.data.trade_license_file
+      };
+      setValues(formattedData);
     }
   };
   useEffect(() => {
-    getRegistrationDocuments();
+    getTradeLicenseDeclaration();
   }, []);
+  const { values, setValues, setFieldValue, handleChange, errors, touched, handleSubmit, handleBlur } = formik;
   return (
-    <form autoComplete="off">
-      {/* Task 2: Business Registration Documents */}
-      <Box mb={3}>
-        <Typography variant="h4" mb={1}>
-          Business Registration Documents
-        </Typography>
-        <Grid2 container spacing={2} alignItems="center">
-          {/* 1. Incorporation certificate / Partnership deed */}
-          <Grid2 size={{ sm: 6, md: 6 }}>
-            <Typography>Incorporation certificate / Partnership deed</Typography>
+    <>
+      <form autoComplete="off" onSubmit={handleSubmit}>
+        <Box mb={3}>
+          <Typography variant="h4" mb={1}>
+            Trade licence Declaration
+          </Typography>
+          <Grid2 container spacing={2} alignItems="center">
+            <Grid2 size={{ sm: 3, md: 3, xs: 12 }}>
+              <Typography>Apply for a new Trade Licence</Typography>
+            </Grid2>
+            <Grid2 size={{ sm: 3, md: 3, xs: 12 }}>
+              <Autocomplete
+                value={values.apply_new_license}
+                size="small"
+                onChange={(event, value) => {
+                  setFieldValue('apply_new_license', value);
+                  if (value?.value === 'yes') {
+                    setFieldValue('trade_license_number', '');
+                    setFieldValue('trade_license_file', null);
+                  }
+                }}
+                options={licenseOptions}
+                getOptionLabel={(option) => option?.label || ''}
+                isOptionEqualToValue={(option, value) => option.value === value.value}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    error={Boolean(touched.apply_new_license && errors.apply_new_license)}
+                    helperText={touched.apply_new_license && errors.apply_new_license}
+                  />
+                )}
+              />
+            </Grid2>
+            <Grid2 size={{ sm: 6, md: 6, xs: 12 }}></Grid2>
+
+            {values.apply_new_license?.value === 'no' && (
+              <>
+                <Grid2 size={{ sm: 3, md: 3, xs: 12 }}>
+                  <Typography style={{ whiteSpace: 'nowrap' }}>Enter TIN Number</Typography>
+                </Grid2>
+                <Grid2 size={{ sm: 3, md: 3, xs: 12 }}>
+                  <TextField
+                    value={values.trade_license_number}
+                    onChange={(event) => setFieldValue('trade_license_number', event.target.value)}
+                    size="small"
+                    fullWidth
+                    error={Boolean(touched.trade_license_number && errors.trade_license_number)}
+                    helperText={touched.trade_license_number && errors.trade_license_number}
+                  />
+                </Grid2>
+                <Grid2 size={{ sm: 3, md: 3, xs: 12 }}>
+                  <RenderFileUpload
+                    label="Trade license file"
+                    fieldName="trade_license_file"
+                    file={values.trade_license_file}
+                    setFieldValue={setFieldValue}
+                  />
+                </Grid2>
+              </>
+            )}
           </Grid2>
-          <Grid2 size={{ sm: 6, md: 6 }}>
-            <RenderFileUpload
-              label="Incorporation certificate / Partnership deed"
-              fieldName="certificate_of_incorporation"
-              file={formik.values.certificate_of_incorporation}
-              setFieldValue={formik.setFieldValue}
-              touched={formik.touched.certificate_of_incorporation}
-              errors={formik.errors.certificate_of_incorporation}
-            />
-          </Grid2>
-          {/* 2. Letter of Authorisation / Board resolution */}
-          <Grid2 size={{ sm: 6, md: 6 }}>
-            <Typography>Letter of Authorisation / Board resolution</Typography>
-          </Grid2>
-          <Grid2 size={{ sm: 6, md: 6 }}>
-            <RenderFileUpload
-              label="Letter of Authorisation / Board resolution"
-              fieldName="authorization_letter"
-              file={formik.values.authorization_letter}
-              setFieldValue={formik.setFieldValue}
-              touched={formik.touched.authorization_letter}
-              errors={formik.errors.authorization_letter}
-            />
-          </Grid2>
-          {/* 3. Local language name board photo of business */}
-          <Grid2 size={{ sm: 6, md: 6 }}>
-            <Typography>Local language name board photo of business</Typography>
-          </Grid2>
-          <Grid2 size={{ sm: 6, md: 6 }}>
-            <RenderFileUpload
-              label="Local language name board photo of business"
-              fieldName="local_language_name_board_photo_business"
-              file={formik.values.local_language_name_board_photo_business}
-              setFieldValue={formik.setFieldValue}
-              touched={formik.touched.local_language_name_board_photo_business}
-              errors={formik.errors.local_language_name_board_photo_business}
-            />
-          </Grid2>
-          {/* 4. Memorandum of Articles (MOA) */}
-          <Grid2 size={{ sm: 6, md: 6 }}>
-            <Typography>
-              Memorandum of Articles (MOA) <span style={{ fontSize: 12, color: '#888' }}>(in case of companies)</span>
-            </Typography>
-          </Grid2>
-          <Grid2 size={{ sm: 6, md: 6 }}>
-            <RenderFileUpload
-              label="Memorandum of Articles (MOA)"
-              fieldName="memorandum_of_articles"
-              file={formik.values.memorandum_of_articles}
-              setFieldValue={formik.setFieldValue}
-              touched={formik.touched.memorandum_of_articles}
-              errors={formik.errors.memorandum_of_articles}
-            />
-          </Grid2>
-        </Grid2>
-      </Box>
-      <Box display="flex" justifyContent="flex-end" mt={4}>
-        <Button size="medium" variant="contained" startIcon={<IconSave />} color="primary" onClick={formik.handleSubmit}>
-          Save & Continue
-        </Button>
-      </Box>
-    </form>
+        </Box>
+        <Box display="flex" justifyContent="flex-end" mt={2}>
+          <Button size="medium" variant="contained" color="primary" type="submit">
+            Save
+          </Button>
+        </Box>
+      </form>
+      <BusinessRegistrationDocumenst />
+    </>
   );
 };
 

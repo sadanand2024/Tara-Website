@@ -6,9 +6,11 @@ import {
   Grid2,
   Select,
   MenuItem,
+  Card,
   Autocomplete,
   Button,
   Radio,
+  Stack,
   FormGroup,
   FormControlLabel
 } from '@mui/material';
@@ -170,8 +172,9 @@ const BusinessPremisesSection = () => {
       formData.append(
         'principal_place_of_business',
         JSON.stringify({
-          line1: values.addressLine1,
-          line2: values.addressLine2,
+          address_line1: values.addressLine1,
+          address_line2: values.addressLine2,
+          district: values.district,
           city: values.city,
           state: values.state,
           pincode: values.pincode
@@ -315,8 +318,8 @@ const BusinessPremisesSection = () => {
     if (res.status_cd === 0 && res.data) {
       const data = res.data;
       formik.setValues({
-        addressLine1: data.principal_place_of_business?.line1 || '',
-        addressLine2: data.principal_place_of_business?.line2 || '',
+        addressLine1: data.principal_place_of_business?.address_line1 || '',
+        addressLine2: data.principal_place_of_business?.address_line2 || '',
         city: data.principal_place_of_business?.city || '',
         district: data.principal_place_of_business?.district || '',
         state: data.principal_place_of_business?.state || '',
@@ -328,7 +331,10 @@ const BusinessPremisesSection = () => {
         additional_space: data.additional_space || 'no',
         workplace: data.workplace && data.workplace !== 'null' ? data.workplace : ''
       });
-      setBusinessPremises(data);
+      setBusinessPremises({
+        ...data,
+        additional_space: data.additional_space || 'no'
+      });
     }
   };
   const renderField = (field, formikContext) => {
@@ -415,7 +421,6 @@ const BusinessPremisesSection = () => {
 
       const url = `/labourlicense/additional-space/view?business_location_proofs=${businessPremises.id}`;
       const { res } = await Factory('get', url);
-      console.log(res);
       if (res.status_cd === 0 && res.data) {
         formik2.setValues({
           addressLine1: res.data[0].address.address_line1 || '',
@@ -441,101 +446,105 @@ const BusinessPremisesSection = () => {
     <Box mt={4}>
       <form onSubmit={handleSubmit}>
         <Grid2 container spacing={2}>
+          {/* First Card: Principal place of business */}
           <Grid2 size={12}>
-            <Typography variant="h4" fontWeight={700} mb={0}>
-              Business premises, location & proofs
-            </Typography>
-          </Grid2>
-          <Grid2 size={12}>
-            <Typography variant="subtitle1" color="text.secondary" fontWeight={700} mb={0}>
-              Principal place of business
-            </Typography>
-          </Grid2>
-          {mainFields.map((field) => (
-            <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4 }}>
-              {renderField(field, formik)}
-            </Grid2>
-          ))}
-
-          <Grid2 size={12}>
-            <br />
-          </Grid2>
-          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-            <Box display="flex" alignItems="center" gap={2}>
-              <Typography>Additional place of business?</Typography>
-              <FormGroup row>
-                <FormControlLabel
-                  label="Yes"
-                  control={
-                    <Radio
-                      checked={businessPremises?.additional_space === 'yes'}
-                      onChange={() => setBusinessPremises((prev) => ({ ...prev, additional_space: 'yes' }))}
-                    />
-                  }
-                />
-                <FormControlLabel
-                  label="No"
-                  control={
-                    <Radio
-                      checked={businessPremises?.additional_space === 'no'}
-                      onChange={() => setBusinessPremises((prev) => ({ ...prev, additional_space: 'no' }))}
-                    />
-                  }
-                />
-              </FormGroup>
-            </Box>
-          </Grid2>
-
-          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-            {businessPremises?.additional_space === 'yes' && (
-              <Autocomplete
-                size="small"
-                fullWidth
-                options={['Office', 'Godown', 'Warehouse']}
-                value={values.workplace || ''}
-                onChange={(e, value) => setFieldValue('workplace', value)}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label="Workplace"
-                    size="small"
-                    error={touched.workplace && Boolean(errors.workplace)}
-                    helperText={touched.workplace && errors.workplace}
+            <Card sx={{ p: 3 }}>
+              <Typography variant="h4" fontWeight={700} mb={0}>
+                Business premises, location & proofs
+              </Typography>
+              <Typography variant="subtitle1" color="text.secondary" fontWeight={700} mb={0}>
+                Principal place of business
+              </Typography>
+              <Grid2 container spacing={2}>
+                {mainFields.map((field) => (
+                  <Grid2 key={field.name} xs={12} sm={6} md={4}>
+                    {renderField(field, formik)}
+                  </Grid2>
+                ))}
+              </Grid2>
+              <Box display="flex" alignItems="center" gap={2} mt={2}>
+                <Typography>Additional place of business?</Typography>
+                <FormGroup row>
+                  <FormControlLabel
+                    label="Yes"
+                    control={
+                      <Radio
+                        checked={businessPremises?.additional_space === 'yes'}
+                        onChange={() => setBusinessPremises((prev) => ({ ...prev, additional_space: 'yes' }))}
+                      />
+                    }
                   />
-                )}
-                sx={{ minWidth: 180, ml: 2 }}
-              />
-            )}
+                  <FormControlLabel
+                    label="No"
+                    control={
+                      <Radio
+                        checked={businessPremises?.additional_space === 'no'}
+                        onChange={() => setBusinessPremises((prev) => ({ ...prev, additional_space: 'no' }))}
+                      />
+                    }
+                  />
+                </FormGroup>
+              </Box>
+              {businessPremises?.additional_space === 'yes' && (
+                <Autocomplete
+                  size="small"
+                  fullWidth
+                  options={['Office', 'Godown', 'Warehouse']}
+                  value={values.workplace || ''}
+                  onChange={(e, value) => setFieldValue('workplace', value)}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Workplace"
+                      size="small"
+                      error={touched.workplace && Boolean(errors.workplace)}
+                      helperText={touched.workplace && errors.workplace}
+                    />
+                  )}
+                  sx={{ minWidth: 180, ml: 2 }}
+                />
+              )}
+              <Stack direction="row" spacing={2} sx={{ mt: 3, justifyContent: 'flex-end' }}>
+                <Button variant="contained" color="primary" type="submit">
+                  Save
+                </Button>
+                <Button variant="contained" color="primary" type="submit">
+                  Send for review
+                </Button>
+              </Stack>
+            </Card>
           </Grid2>
-          <Grid2 size={12} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <Button variant="contained" color="primary" type="submit">
-              Save
-            </Button>
-          </Grid2>
-        </Grid2>
-        {businessPremises?.additional_space === 'yes' && (
-          <Grid2 size={12}>
-            <Grid2 container spacing={2}>
-              <Grid2 size={12}>
+
+          {/* Second Card: Additional place of business */}
+          {businessPremises?.additional_space === 'yes' && (
+            <Grid2 size={12} mt={2}>
+              <Card sx={{ p: 3 }}>
                 <Typography variant="h4" fontWeight={700} mb={0}>
                   Additional place of business
                 </Typography>
-              </Grid2>
-              {additionalFields.map((field) =>
-                field.name !== 'bankStatement' ? (
-                  <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4 }}>
-                    {renderField(field, formik2)}
-                  </Grid2>
-                ) : null
-              )}
-              <Grid2 size={12} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-                <Button variant="contained" color="primary" onClick={handleSubmit2}>
-                  Save
-                </Button>
-              </Grid2>
+                <Grid2 container spacing={2}>
+                  {additionalFields.map((field) =>
+                    field.name !== 'bankStatement' ? (
+                      <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4 }}>
+                        {renderField(field, formik2)}
+                      </Grid2>
+                    ) : null
+                  )}
+                </Grid2>
+                <Grid2 size={12} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                  <Stack direction="row" spacing={2} sx={{ mt: 3, justifyContent: 'flex-end' }}>
+                    <Button variant="contained" color="primary" onClick={handleSubmit2}>
+                      Save
+                    </Button>
+                    <Button variant="contained" color="primary" onClick={handleSubmit2}>
+                      Send for review
+                    </Button>
+                  </Stack>
+                </Grid2>
+              </Card>
             </Grid2>
-          </Grid2>
-        )}
+          )}
+        </Grid2>
       </form>
     </Box>
   );
