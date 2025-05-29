@@ -299,7 +299,13 @@ const PayrollDashboard = () => {
         </Grid2>
 
         <Grid2 size={{ xs: 12 }}>
-          <PayrollStatusSummary payrollId={businessDetails?.payroll_id} financialYear={financialYear} />
+          <PayrollStatusSummary
+            payrollId={businessDetails?.payroll_id}
+            financialYear={financialYear}
+            monthWiseData={monthWiseData}
+            selectedMonth={selectedMonth}
+            businessDetails={businessDetails}
+          />
         </Grid2>
         <Grid2 size={{ xs: 12 }}>
           {/* <PayrollComplianceSummary payrollId={businessDetails?.payroll_id} financialYear={financialYear} /> */}

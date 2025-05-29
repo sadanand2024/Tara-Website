@@ -93,7 +93,7 @@ const DetailedPayroll = ({ payrollId, month }) => {
 
   const viewPayslip = async (employee_id, month, financial_year) => {
     try {
-      const tokens = JSON.parse(localStorage.getItem('auth-user'));
+      const tokens = JSON.parse(localStorage.getItem('user'));
       const response = await axios.get(
         `${baseURL}/payroll/employee-monthly-salary-template?employee_id=${employee_id}&month=${month}&financial_year=${financial_year}&year=${new Date().getFullYear()}`,
         {
@@ -176,7 +176,7 @@ const DetailedPayroll = ({ payrollId, month }) => {
                       <Typography
                         variant="body2"
                         sx={{ cursor: 'pointer', color: 'primary.main', textDecoration: 'underline' }}
-                        onClick={() => viewPayslip(item.employee_id, item.month, item.financial_year)}
+                        onClick={() => viewPayslip(item.id, item.month, item.financial_year)}
                       >
                         View / Download
                       </Typography>

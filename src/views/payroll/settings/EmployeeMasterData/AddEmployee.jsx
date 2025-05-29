@@ -21,6 +21,8 @@ function StepperComponent() {
   const [loading, setLoading] = useState(false);
   const [createdEmployeeId, setCreatedEmployeeId] = useState(null);
   const [from, setFrom] = useState(null);
+  const [enablePreviewButton, setEnablePreviewButton] = useState(false);
+
   const steps = ['Basic Details', 'Salary Details', 'Personal Details', 'Payment Information'];
 
   const formRefs = useRef({});
@@ -55,7 +57,14 @@ function StepperComponent() {
       case 0:
         return <BasicDetails {...commonProps} setCreatedEmployeeId={setCreatedEmployeeId} />;
       case 1:
-        return <SalaryDetails {...commonProps} from={from} />;
+        return (
+          <SalaryDetails
+            {...commonProps}
+            from={from}
+            setEnablePreviewButton={setEnablePreviewButton}
+            enablePreviewButton={enablePreviewButton}
+          />
+        );
       case 2:
         return <PersonalDetails {...commonProps} />;
       case 3:
@@ -71,7 +80,6 @@ function StepperComponent() {
     const { res } = await Factory('get', url, {});
     setLoading(false);
     if (res?.status_cd === 0) {
-      console.log(res.data);
       setEmployeeData(res.data);
     } else {
       setEmployeeData(null);
@@ -136,7 +144,7 @@ function StepperComponent() {
                   </Button>
                 </Stack>
 
-                <Button variant="contained" color="primary" onClick={handleNext}>
+                <Button variant="contained" color="primary" onClick={handleNext} disabled={activeStep === 1 && enablePreviewButton}>
                   Save & Continue
                 </Button>
               </Stack>
