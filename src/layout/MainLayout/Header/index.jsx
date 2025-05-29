@@ -202,7 +202,7 @@ const Header = ({ hamburgerDisplay = 'block' }) => {
         >
           {/* <LogoSection /> */}
           <Link to="/dashboard/business">
-            <CardMedia component="img" src={Tarafirstlogo_png} alt="Tarafirst Logo" sx={{ width: 150 }} />
+            <CardMedia component="img" src={Tarafirstlogo_png} alt="Tara First Logo" sx={{ width: 150 }} />
           </Link>
         </Box>
         {!isHorizontal && (
@@ -257,6 +257,7 @@ const Header = ({ hamburgerDisplay = 'block' }) => {
       </Box>
 
       {/* business selector */}
+      
       <Box sx={{ display: { xs: 'block', sm: 'block' }, mx: 2, width: 300 }}>
         <Autocomplete
           value={selectedOption}

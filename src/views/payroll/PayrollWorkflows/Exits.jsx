@@ -7,6 +7,7 @@ import RenderDialog from './RenderDialog';
 
 export default function Exits({ employeeMasterData, from, openDialog, fields, setOpenDialog }) {
   const headerData = [
+    'Employee ID',
     'Employee Name',
     'Department',
     'Designations',
@@ -18,6 +19,7 @@ export default function Exits({ employeeMasterData, from, openDialog, fields, se
     'F & F'
   ];
   const body_keys = [
+    'id',
     'employee_name',
     'department',
     'designation',

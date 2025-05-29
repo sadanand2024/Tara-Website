@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { useSnackbar } from 'notistack';
@@ -8,7 +8,7 @@ import {
   FormControl,
   FormControlLabel,
   FormHelperText,
-  Grid,
+  Grid2,
   InputLabel,
   MenuItem,
   Select,
@@ -17,12 +17,18 @@ import {
   Typography,
   RadioGroup,
   Radio,
-  CircularProgress
+  CircularProgress,
+  Avatar
 } from '@mui/material';
+import { useDispatch } from 'store';
+import { openSnackbar } from 'store/slices/snackbar';
 import { industries } from 'utils/industries';
 import { entity_choices } from 'utils/Entity-types';
 import { __IndianStates } from 'utils/indianStates';
 import Factory from 'utils/Factory';
+import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
+import IconButton from '@mui/material/IconButton';
 
 // Add a mapping for entity types
 const entityTypeMapping = {
@@ -72,15 +78,31 @@ const validationSchema = Yup.object({
     is: 'yes',
     then: () => Yup.string().required('MSME number is required'),
     otherwise: () => Yup.string().nullable()
+  }),
+  is_multiple_branches: Yup.string().oneOf(['yes', 'no']).required(),
+  branches: Yup.array().when('is_multiple_branches', {
+    is: 'yes',
+    then: () =>
+      Yup.array().of(
+        Yup.object({
+          branch_name: Yup.string().required('Branch name is required'),
+          branch_code: Yup.string().required('Branch code is required')
+        })
+      ),
+    otherwise: () => Yup.array().nullable()
   })
 });
 
 const BusinessProfile = ({ user, tabChange, tabval }) => {
+  const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const [logoFile, setLogoFile] = useState(null);
+  const [logoposttype, setLogoposttype] = useState('post');
+  const [logoUrlDetails, setLogoUrlDetails] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-
+  const [branches, setBranches] = useState([]);
+  const [isMultipleBranches, setIsMultipleBranches] = useState('no');
   const formik = useFormik({
     initialValues: {
       nameOfBusiness: '',
@@ -110,10 +132,15 @@ const BusinessProfile = ({ user, tabChange, tabval }) => {
         const response = await Factory('put', `/user_management/businesses/${user.active_context.business_id}/`, values, {});
 
         if (response.res.status_cd === 0) {
-          enqueueSnackbar('Business profile updated successfully', {
-            variant: 'success',
-            anchorOrigin: { vertical: 'top', horizontal: 'right' }
-          });
+          dispatch(
+            openSnackbar({
+              open: true,
+              message: JSON.stringify(response.res.data || error),
+              variant: 'alert',
+              alert: { color: 'success' },
+              close: false
+            })
+          );
           tabChange('e', 1 + tabval);
         } else {
           enqueueSnackbar(response.res.message || 'Failed to update business profile', {
@@ -128,35 +155,126 @@ const BusinessProfile = ({ user, tabChange, tabval }) => {
         }
       } catch (error) {
         console.error('Error updating business profile:', error);
-        enqueueSnackbar('Failed to update business profile', {
-          variant: 'error',
-          anchorOrigin: { vertical: 'top', horizontal: 'right' },
-          ContentProps: {
-            sx: {
-              color: 'white'
-            }
-          }
-        });
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: JSON.stringify(error),
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
       } finally {
         setIsSubmitting(false);
       }
     }
   });
 
-  const handleLogoChange = (event) => {
+  const fileInputRef = useRef(null);
+
+  const handleLogoChange = async (event) => {
     const file = event.target.files[0];
     if (file) {
       setLogoFile(file);
+
+      console.log(logoposttype);
+      let url = logoposttype === 'put' ? `/user_management/business-logo/${logoUrlDetails.id}/` : '/user_management/business-logo/';
+      let formData = new FormData();
+      formData.append('logo', file);
+      logoposttype === 'post' && formData.append('business', user.active_context.business_id);
+      let { res, error } = await Factory(logoposttype, url, formData);
+      console.log(res);
+      if (res.status_cd === 0) {
+        setLogoUrlDetails(res.data);
+        setLogoposttype('put');
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'Logo updated successfully',
+            variant: 'alert',
+            alert: { color: 'success' },
+            close: false
+          })
+        );
+      } else {
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: JSON.stringify(error),
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
+      }
     }
   };
 
+  const handleAddBranch = () => {
+    const newBranches = [...branches, { branch_name: '', branch_code: '' }];
+    setBranches(newBranches);
+  };
+
+  const handleRemoveBranch = async (index) => {
+    // If the branch doesn't have an ID, it means it hasn't been saved yet
+    if (!branches[index].id) {
+      const newBranches = [...branches];
+      newBranches.splice(index, 1);
+      setBranches(newBranches);
+      return;
+    }
+
+    // If the branch has an ID, proceed with API deletion
+    let url = `/user_management/branches/${branches[index].id}/`;
+    let response = await Factory('delete', url, {});
+    if (response.res.status_cd === 0) {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Branch deleted successfully',
+          variant: 'alert',
+          alert: { color: 'success' },
+          close: false
+        })
+      );
+      const branchesResponse = await Factory('get', `/user_management/branches/${user.active_context.business_id}/`, {}, {});
+      if (branchesResponse.res.status_cd === 0) {
+        if (branchesResponse.res.data.length > 0) {
+          setIsMultipleBranches('yes');
+          setBranches(branchesResponse.res.data);
+        } else {
+          setIsMultipleBranches('no');
+          setBranches([]);
+        }
+      }
+    } else {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Failed to delete branch',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
+    }
+  };
+
+  const handleBranchChange = (index, field, value) => {
+    const newBranches = [...branches];
+    newBranches[index] = { ...newBranches[index], [field]: value };
+    setBranches(newBranches);
+  };
+
+  // Single useEffect for all data fetching
   useEffect(() => {
-    const getBusinessProfile = async () => {
+    const fetchAllData = async () => {
       try {
         setIsLoading(true);
-        const response = await Factory('get', `/user_management/businesses/${user.active_context.business_id}/`, {}, {});
-        if (response.res.status_cd === 0) {
-          const profileData = response.res.data;
+        // Fetch business profile
+        const profileResponse = await Factory('get', `/user_management/businesses/${user.active_context.business_id}/`, {}, {});
+        if (profileResponse.res.status_cd === 0) {
+          const profileData = profileResponse.res.data;
           formik.setValues({
             nameOfBusiness: profileData.nameOfBusiness || '',
             business_nature: profileData.business_nature || '',
@@ -179,9 +297,30 @@ const BusinessProfile = ({ user, tabChange, tabval }) => {
             trade_name: profileData.trade_name || ''
           });
         }
+
+        // Fetch branches
+        const branchesResponse = await Factory('get', `/user_management/branches/${user.active_context.business_id}/`, {}, {});
+        if (branchesResponse.res.status_cd === 0) {
+          if (branchesResponse.res.data.length > 0) {
+            setIsMultipleBranches('yes');
+            setBranches(branchesResponse.res.data);
+          } else {
+            setIsMultipleBranches('no');
+            setBranches([]);
+          }
+        }
+        // Fetch logo
+        const logoResponse = await Factory('get', `/user_management/business-logo/${user.active_context.business_id}/`, {}, {});
+        if (logoResponse.res.status_cd === 0) {
+          setLogoUrlDetails(logoResponse.res.data);
+          setLogoposttype('put');
+        } else {
+          setLogoUrlDetails(null);
+          setLogoposttype('post');
+        }
       } catch (error) {
-        console.error('Error fetching business profile:', error);
-        enqueueSnackbar('Failed to load business profile', {
+        console.error('Error fetching data:', error);
+        enqueueSnackbar('Failed to load data', {
           variant: 'error',
           anchorOrigin: { vertical: 'top', horizontal: 'right' },
           ContentProps: {
@@ -194,8 +333,47 @@ const BusinessProfile = ({ user, tabChange, tabval }) => {
         setIsLoading(false);
       }
     };
-    getBusinessProfile();
-  }, []);
+
+    fetchAllData();
+  }, [user.active_context.business_id]);
+
+  const handleSaveBranch = async (index) => {
+    let branchesdata = branches[index];
+    let data = {
+      branch_name: branchesdata.branch_name,
+      branch_code: branchesdata.branch_code,
+      business: user.active_context.business_id
+    };
+
+    try {
+      let response;
+      if (branchesdata.id) {
+        // If branch has an ID, use PUT to update existing branch
+        response = await Factory('put', `/user_management/branches/${branchesdata.id}/`, data);
+      } else {
+        // If no ID, use POST to create new branch
+        response = await Factory('post', '/user_management/branches/', data);
+      }
+
+      if (response.res.status_cd === 0) {
+        enqueueSnackbar('Branch saved successfully', {
+          variant: 'success',
+          anchorOrigin: { vertical: 'top', horizontal: 'right' }
+        });
+        // Refresh branches after saving
+        const branchesResponse = await Factory('get', `/user_management/branches/${user.active_context.business_id}/`, {}, {});
+        if (branchesResponse.res.status_cd === 0) {
+          setBranches(branchesResponse.res.data || []);
+        }
+      }
+    } catch (error) {
+      console.error('Error saving branch:', error);
+      enqueueSnackbar('Failed to save branch', {
+        variant: 'error',
+        anchorOrigin: { vertical: 'top', horizontal: 'right' }
+      });
+    }
+  };
 
   if (isLoading) {
     return (
@@ -207,16 +385,55 @@ const BusinessProfile = ({ user, tabChange, tabval }) => {
 
   return (
     <Box component="form" onSubmit={formik.handleSubmit}>
-      <Grid container spacing={2}>
+      <Grid2 container spacing={2}>
         {/* Business Name Header */}
-        <Grid item xs={12}>
+        <Grid2 size={{ xs: 12 }}>
           <Typography variant="h4" color="text.primary" gutterBottom>
             Business Profile
           </Typography>
-        </Grid>
+        </Grid2>
+        <Grid2 size={{ xs: 12, md: 6 }} sx={{ mt: 2, mb: 2 }}>
+          <Grid2 container spacing={2} direction="column" alignItems="center">
+            <Grid2>
+              <input
+                accept="image/*"
+                style={{ display: 'none' }}
+                id="profile-image-upload"
+                type="file"
+                onChange={handleLogoChange}
+                ref={fileInputRef}
+              />
+              <Avatar
+                alt="Profile"
+                src={logoUrlDetails?.logo || (logoFile ? URL.createObjectURL(logoFile) : '')}
+                sx={{
+                  width: 100,
+                  height: 100,
+                  boxShadow: 3,
+                  border: '2px solid #fff',
+                  background: '#fff'
+                }}
+                imgProps={{
+                  style: {
+                    objectFit: 'contain',
+                    width: '100%',
+                    height: '100%'
+                  }
+                }}
+              />
+            </Grid2>
 
+            <Grid2>
+              <label htmlFor="profile-image-upload">
+                <Button variant="contained" size="small" component="span">
+                  Upload / Change Logo
+                </Button>
+              </label>
+            </Grid2>
+          </Grid2>
+        </Grid2>
         {/* First Row: Business Name, Business PAN, and Logo */}
-        <Grid item xs={12} sm={6}>
+        <Grid2 size={{ xs: 12, sm: 6 }}>
           <TextField
             fullWidth
             size="small"
@@ -228,9 +445,9 @@ const BusinessProfile = ({ user, tabChange, tabval }) => {
             error={formik.touched.nameOfBusiness && Boolean(formik.errors.nameOfBusiness)}
             helperText={formik.touched.nameOfBusiness && formik.errors.nameOfBusiness}
           />
-        </Grid>
+        </Grid2>
 
-        <Grid item xs={12} sm={6}>
+        <Grid2 size={{ xs: 12, sm: 6 }}>
           <TextField
             fullWidth
             size="small"
@@ -242,25 +459,9 @@ const BusinessProfile = ({ user, tabChange, tabval }) => {
             error={formik.touched.pan && Boolean(formik.errors.pan)}
             helperText={formik.touched.pan && formik.errors.pan}
           />
-        </Grid>
+        </Grid2>
 
-        {/* <Grid item xs={12} sm={4}> */}
-          {/* <Box sx={{ mb: 2 }}>
-            <input accept="image/*" style={{ display: 'none' }} id="logo-upload" type="file" onChange={handleLogoChange} />
-            <label htmlFor="logo-upload">
-              <Button variant="outlined" component="span" size="small">
-                Upload Logo
-              </Button>
-            </label>
-            {logoFile && (
-              <Typography variant="caption" sx={{ ml: 1 }}>
-                {logoFile.name}
-              </Typography>
-            )}
-          </Box> */}
-        {/* </Grid> */}
-
-        <Grid item xs={12} sm={6}>
+        <Grid2 size={{ xs: 12, sm: 6 }}>
           <FormControl fullWidth size="small" error={formik.touched.business_nature && Boolean(formik.errors.business_nature)}>
             <InputLabel>Industry</InputLabel>
             <Select
@@ -280,9 +481,9 @@ const BusinessProfile = ({ user, tabChange, tabval }) => {
               <FormHelperText>{formik.errors.business_nature}</FormHelperText>
             )}
           </FormControl>
-        </Grid>
+        </Grid2>
 
-        <Grid item xs={12} sm={6}>
+        <Grid2 size={{ xs: 12, sm: 6 }}>
           <FormControl fullWidth size="small" error={formik.touched.entityType && Boolean(formik.errors.entityType)}>
             <InputLabel>Entity Type</InputLabel>
             <Select id="entityType" name="entityType" value={formik.values.entityType} label="Entity Type" onChange={formik.handleChange}>
@@ -294,9 +495,9 @@ const BusinessProfile = ({ user, tabChange, tabval }) => {
             </Select>
             {formik.touched.entityType && formik.errors.entityType && <FormHelperText>{formik.errors.entityType}</FormHelperText>}
           </FormControl>
-        </Grid>
+        </Grid2>
 
-        <Grid item xs={12} sm={6}>
+        <Grid2 size={{ xs: 12, sm: 6 }}>
           <TextField
             fullWidth
             size="small"
@@ -308,9 +509,9 @@ const BusinessProfile = ({ user, tabChange, tabval }) => {
             error={formik.touched.registrationNumber && Boolean(formik.errors.registrationNumber)}
             helperText={formik.touched.registrationNumber && formik.errors.registrationNumber}
           />
-        </Grid>
+        </Grid2>
 
-        <Grid item xs={12} sm={6}>
+        <Grid2 size={{ xs: 12, sm: 6 }}>
           <TextField
             fullWidth
             size="small"
@@ -326,16 +527,16 @@ const BusinessProfile = ({ user, tabChange, tabval }) => {
               shrink: true
             }}
           />
-        </Grid>
+        </Grid2>
 
         {/* Primary Contact */}
-        <Grid item xs={12}>
+        <Grid2 size={{ xs: 12 }}>
           <Typography variant="h5" color="text.primary" gutterBottom sx={{ mt: 2 }}>
             Primary Contact
           </Typography>
-        </Grid>
+        </Grid2>
 
-        <Grid item xs={12} sm={6} md={6}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 6 }}>
           <TextField
             fullWidth
             size="small"
@@ -347,9 +548,9 @@ const BusinessProfile = ({ user, tabChange, tabval }) => {
             error={formik.touched.email && Boolean(formik.errors.email)}
             helperText={formik.touched.email && formik.errors.email}
           />
-        </Grid>
+        </Grid2>
 
-        <Grid item xs={12} sm={6} md={6}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 6 }}>
           <TextField
             fullWidth
             size="small"
@@ -361,9 +562,9 @@ const BusinessProfile = ({ user, tabChange, tabval }) => {
             error={formik.touched.mobile_number && Boolean(formik.errors.mobile_number)}
             helperText={formik.touched.mobile_number && formik.errors.mobile_number}
           />
-        </Grid>
+        </Grid2>
 
-        <Grid item xs={12} sm={6}>
+        <Grid2 size={{ xs: 12, sm: 6 }}>
           <TextField
             fullWidth
             size="small"
@@ -375,9 +576,9 @@ const BusinessProfile = ({ user, tabChange, tabval }) => {
             error={formik.touched.headOffice?.address_line1 && Boolean(formik.errors.headOffice?.address_line1)}
             helperText={formik.touched.headOffice?.address_line1 && formik.errors.headOffice?.address_line1}
           />
-        </Grid>
+        </Grid2>
 
-        <Grid item xs={12} sm={6}>
+        <Grid2 size={{ xs: 12, sm: 6 }}>
           <TextField
             fullWidth
             size="small"
@@ -389,9 +590,9 @@ const BusinessProfile = ({ user, tabChange, tabval }) => {
             error={formik.touched.headOffice?.address_line2 && Boolean(formik.errors.headOffice?.address_line2)}
             helperText={formik.touched.headOffice?.address_line2 && formik.errors.headOffice?.address_line2}
           />
-        </Grid>
+        </Grid2>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
           <TextField
             fullWidth
             size="small"
@@ -403,9 +604,9 @@ const BusinessProfile = ({ user, tabChange, tabval }) => {
             error={formik.touched.headOffice?.city && Boolean(formik.errors.headOffice?.city)}
             helperText={formik.touched.headOffice?.city && formik.errors.headOffice?.city}
           />
-        </Grid>
+        </Grid2>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
           <FormControl fullWidth size="small" error={formik.touched.headOffice?.state && Boolean(formik.errors.headOffice?.state)}>
             <InputLabel>State</InputLabel>
             <Select
@@ -425,9 +626,9 @@ const BusinessProfile = ({ user, tabChange, tabval }) => {
               <FormHelperText>{formik.errors.headOffice?.state}</FormHelperText>
             )}
           </FormControl>
-        </Grid>
+        </Grid2>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
           <TextField
             fullWidth
             size="small"
@@ -439,14 +640,14 @@ const BusinessProfile = ({ user, tabChange, tabval }) => {
             error={formik.touched.headOffice?.pincode && Boolean(formik.errors.headOffice?.pincode)}
             helperText={formik.touched.headOffice?.pincode && formik.errors.headOffice?.pincode}
           />
-        </Grid>
+        </Grid2>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
           <TextField fullWidth size="small" id="country" name="country" label="Country" value="India" disabled />
-        </Grid>
+        </Grid2>
 
         {/* MSME Section */}
-        <Grid item xs={12}>
+        <Grid2 size={{ xs: 12 }}>
           <FormControl component="fieldset">
             <Typography variant="subtitle1" gutterBottom>
               Is your business MSME Registered?
@@ -456,11 +657,11 @@ const BusinessProfile = ({ user, tabChange, tabval }) => {
               <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
             </RadioGroup>
           </FormControl>
-        </Grid>
+        </Grid2>
 
         {formik.values.is_msme_registered === 'yes' && (
           <>
-            <Grid item xs={12} sm={6}>
+            <Grid2 size={{ xs: 12, sm: 6 }}>
               <FormControl
                 fullWidth
                 size="small"
@@ -482,9 +683,9 @@ const BusinessProfile = ({ user, tabChange, tabval }) => {
                   <FormHelperText>{formik.errors.msme_registration_type}</FormHelperText>
                 )}
               </FormControl>
-            </Grid>
+            </Grid2>
 
-            <Grid item xs={12} sm={6}>
+            <Grid2 size={{ xs: 12, sm: 6 }}>
               <TextField
                 fullWidth
                 size="small"
@@ -496,22 +697,78 @@ const BusinessProfile = ({ user, tabChange, tabval }) => {
                 error={formik.touched.msme_registration_number && Boolean(formik.errors.msme_registration_number)}
                 helperText={formik.touched.msme_registration_number && formik.errors.msme_registration_number}
               />
-            </Grid>
+            </Grid2>
           </>
         )}
 
-        <Grid item xs={12}>
+        <Grid2 size={{ xs: 12 }}>
           <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
             * For MSME registered businesses, please include your MSME registration number in the address.
           </Typography>
-        </Grid>
+        </Grid2>
         {/* Submit Button */}
-        <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <Grid2 size={{ xs: 12 }} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
           <Button type="submit" variant="contained" color="primary" size="medium" disabled={isSubmitting}>
             {isSubmitting ? 'Saving...' : 'Save & Continue'}
           </Button>
-        </Grid>
-      </Grid>
+        </Grid2>
+        {/* multiple branches */}
+        <Grid2 size={{ xs: 12 }}>
+          <FormControl component="fieldset">
+            <Typography variant="subtitle1" gutterBottom>
+              Do you have multiple branches?
+            </Typography>
+            <RadioGroup row name="is_multiple_branches" value={isMultipleBranches} onChange={(e) => setIsMultipleBranches(e.target.value)}>
+              <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
+              <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
+            </RadioGroup>
+          </FormControl>
+        </Grid2>
+
+        <Grid2 size={{ xs: 12 }}>
+          {isMultipleBranches === 'yes' && (
+            <>
+              {branches.map((branch, index) => (
+                <Grid2 container spacing={2} key={index} sx={{ mt: 1, mb: 4 }}>
+                  <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      label="Branch Name"
+                      value={branch.branch_name}
+                      onChange={(e) => handleBranchChange(index, 'branch_name', e.target.value)}
+                    />
+                  </Grid2>
+                  <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      label="Branch Code"
+                      value={branch.branch_code}
+                      onChange={(e) => handleBranchChange(index, 'branch_code', e.target.value)}
+                    />
+                  </Grid2>
+                  <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                    <Button type="button" variant="outlined" color="primary" onClick={() => handleSaveBranch(index)} size="small">
+                      Save Branch
+                    </Button>
+                  </Grid2>
+                  <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                    <Button type="button" variant="outlined" color="error" onClick={() => handleRemoveBranch(index)} size="small">
+                      Remove Branch
+                    </Button>
+                  </Grid2>
+                </Grid2>
+              ))}
+              <Grid2 size={{ xs: 12, md: 12, sm: 12 }} sx={{ mt: 2 }}>
+                <Button variant="outlined" color="primary" onClick={handleAddBranch} startIcon={<AddIcon />} size="small">
+                  Add Branch
+                </Button>
+              </Grid2>
+            </>
+          )}
+        </Grid2>
+      </Grid2>
     </Box>
   );
 };

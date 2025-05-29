@@ -27,7 +27,7 @@ const BerryDialog = ({
       PaperProps={{
         sx: {
           borderRadius: 3,
-          px: { xs: 2, md: 3 },
+          // px: { xs: 2, md: 3 },
           py: 2
         }
       }}
@@ -70,12 +70,12 @@ const BerryDialog = ({
       )}
 
       {/* Content */}
-      <DialogContent dividers sx={{ pt: 2 }}>
+      <DialogContent dividers sx={{ pt: 0 }}>
         {children}
       </DialogContent>
 
       {/* Footer */}
-      {footer && <DialogActions sx={{ pt: 2 }}>{footer}</DialogActions>}
+      {footer && <DialogActions sx={{ pb: 2, pt: 2, pl: 3, pr: 3 }}>{footer}</DialogActions>}
     </Dialog>
   );
 };

@@ -9,18 +9,30 @@ import { useSearchParams } from 'react-router-dom';
 import RenderSalaryTemplateTable from '../RenderSalaryTemplateTable';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
+import { TextField } from '@mui/material';
+import { FormGroup, FormControlLabel, Radio } from '@mui/material';
+import SalaryTemplate from './SalaryTemplate';
 const validationSchema = Yup.object({
   // template_name: Yup.string().required('Template Name is required'),
   annual_ctc: Yup.number().required('Annual CTC is required').positive('Annual CTC must be a positive number')
 });
 const initialEarnings = [{ component_name: 'Basic', calculation_type: 'Fixed', monthly: 0, annually: 0, calculation: 0 }];
 
-function SalaryDetails({ employeeData, createdEmployeeId }) {
+function SalaryDetails({
+  fetchEmployeeData,
+  employeeData,
+  createdEmployeeId,
+  setSubmitRef,
+  onNext,
+  from,
+  setEnablePreviewButton,
+  enablePreviewButton
+}) {
+  // console.log(employeeData);
   const [open, setOpen] = useState(false);
   const [payrollid, setPayrollId] = useState(null);
   const [salary_teamplates_data, setSalary_teamplates_data] = useState([]);
   const [searchParams] = useSearchParams();
-  const [enablePreviewButton, setEnablePreviewButton] = useState(false);
   const dispatch = useDispatch();
 
   const fields = [
@@ -37,18 +49,31 @@ function SalaryDetails({ employeeData, createdEmployeeId }) {
     initialValues: {
       template_name: '',
       description: '',
-      annual_ctc: '',
+      annual_ctc: 0,
+      tax_regime_opted: 'old',
       earnings: [...initialEarnings],
-      gross_salary: { monthly: '', annually: '' },
+      gross_salary: { monthly: 0, annually: 0 },
       benefits: [],
-      total_ctc: { monthly: '', annually: '' },
+      total_ctc: { monthly: 0, annually: 0 },
       deductions: [],
-      net_salary: { monthly: '', annually: '' }
+      net_salary: { monthly: 0, annually: 0 }
     },
     validationSchema,
 
     onSubmit: async (values) => {
       let postData = { ...values };
+      if (values.errorMessage) {
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: values.errorMessage,
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
+        return;
+      }
 
       if (employeeData?.id) {
         postData.employee = employeeData.id;
@@ -66,7 +91,10 @@ function SalaryDetails({ employeeData, createdEmployeeId }) {
           url = `/payroll/employee-salary/${lastSalaryRecord.id}`;
         }
       }
-
+      if (from === 'Salary Revisions') {
+        method = 'post';
+        url = '/payroll/employee-salary';
+      }
       const { res } = await Factory(method, url, postData);
 
       if (res?.status_cd === 1) {
@@ -89,6 +117,9 @@ function SalaryDetails({ employeeData, createdEmployeeId }) {
             close: false
           })
         );
+        onNext();
+        const employeeId = employeeData?.id || createdEmployeeId;
+        await fetchEmployeeData(employeeId);
       }
     }
   });
@@ -97,7 +128,7 @@ function SalaryDetails({ employeeData, createdEmployeeId }) {
       <Grid2 key={field.name} size={{ xs: 12, sm: 6 }}>
         {field.name === 'salary_template' ? (
           <>
-            {employeeData?.employee_salary?.length === 0 && (
+            {salary_teamplates_data?.length !== 0 && (
               <>
                 <Typography variant="subtitle2" sx={{ color: 'grey.800', mb: 0.5 }}>
                   {field.label}
@@ -126,14 +157,22 @@ function SalaryDetails({ employeeData, createdEmployeeId }) {
             <Typography variant="subtitle2" sx={{ color: 'grey.800', mb: 0.5 }}>
               {field.label}
             </Typography>
-            <CustomInput
-              value={values[field.name]}
+            <TextField
               fullWidth
-              inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+              name="annual_ctc"
+              size="small"
+              value={values.annual_ctc}
               onChange={(e) => {
                 const { name, value } = e.target;
-                setFieldValue(field.name, value);
+                const numericValue = value === '' ? '' : Number(value);
+                setFieldValue(name, numericValue);
+
+                if (name === 'annual_ctc') {
+                  setEnablePreviewButton(true);
+                  setFieldValue('errorMessage', ''); // ✅ clear previous error
+                }
               }}
+              inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
             />
           </>
         )}
@@ -156,16 +195,32 @@ function SalaryDetails({ employeeData, createdEmployeeId }) {
     if (payrollid !== null) fetch_salary_templates();
   }, [payrollid]);
   const { values, setValues, handleChange, errors, touched, handleSubmit, handleBlur, resetForm, setFieldValue } = formik;
+  // useEffect(() => {
+  //   // Recalculate earnings whenever annual_ctc changes
+  //   setValues((prev) => ({
+  //     ...prev,
+  //     earnings: [...prev.earnings]
+  //   }));
+  // }, [values.annual_ctc]);
 
   useEffect(() => {
-    if (employeeData?.employee_salary?.length > 0) {
-      let lastSalary = employeeData.employee_salary[employeeData?.employee_salary?.length - 1];
+    console.log(employeeData?.employee_salary);
+
+    if (employeeData?.employee_salary) {
+      let lastSalary = employeeData.employee_salary;
+      console.log(lastSalary);
       setValues((prev) => ({
         ...prev,
-        ...lastSalary
+        ...employeeData?.employee_salary,
+        tax_regime_opted: lastSalary?.tax_regime_opted || 'old'
       }));
     }
   }, [employeeData]);
+  useEffect(() => {
+    if (setSubmitRef) {
+      setSubmitRef(formik.submitForm);
+    }
+  }, [setSubmitRef, formik.submitForm]);
   return (
     <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -173,19 +228,51 @@ function SalaryDetails({ employeeData, createdEmployeeId }) {
           {renderFields(fields)}
         </Grid2>
 
-        <RenderSalaryTemplateTable
+        {/* <RenderSalaryTemplateTable
+          source="salarydetails"
           values={values}
           setValues={setValues}
           setFieldValue={setFieldValue}
           enablePreviewButton={enablePreviewButton}
           setEnablePreviewButton={setEnablePreviewButton}
+          createdEmployeeId={employeeData?.id || createdEmployeeId}
+        /> */}
+        <SalaryTemplate
+          source="salarydetails"
+          values={values}
+          setValues={setValues}
+          setFieldValue={setFieldValue}
+          enablePreviewButton={enablePreviewButton}
+          setEnablePreviewButton={setEnablePreviewButton}
+          createdEmployeeId={employeeData?.id || createdEmployeeId}
         />
-
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
-          <Button variant="contained" color="primary" type="submit">
-            Save Template
-          </Button>
-        </Box>
+        <Grid2 size={{ xs: 12, sm: 6, md: 4 }} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <Box display="flex" alignItems="center" gap={2}>
+            <Typography variant="subtitle1" color="grey.800">
+              Tax Regime Opted?
+            </Typography>
+            <FormGroup row>
+              <FormControlLabel
+                label="New"
+                control={
+                  <Radio
+                    checked={values.tax_regime_opted === 'new'}
+                    onChange={() => setValues((prev) => ({ ...prev, tax_regime_opted: 'new' }))}
+                  />
+                }
+              />
+              <FormControlLabel
+                label="Old"
+                control={
+                  <Radio
+                    checked={values.tax_regime_opted === 'old'}
+                    onChange={() => setValues((prev) => ({ ...prev, tax_regime_opted: 'old' }))}
+                  />
+                }
+              />
+            </FormGroup>
+          </Box>
+        </Grid2>
       </Box>
     </Box>
   );

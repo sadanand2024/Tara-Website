@@ -65,12 +65,8 @@ export default function FooterSection() {
                   <Typography component={RouterLink} to="/" aria-label="theme-logo">
                     <CardMedia component="img" src={taralogoWhite} alt="defaultLayout" sx={{ width: 200 }} />
                   </Typography>
-                  {/* 
-                  <Typography variant="h2" color={textColor} sx={{ fontWeight: 500 }}>
-                    Tarafirst
-                  </Typography> */}
                   <Typography variant="body2" color={textColor}>
-                    Tarafirst is a unified fintech platform for managing personal and business finances. From company registration to GST,
+                    Tara First is a unified fintech platform for managing personal and business finances. From company registration to GST,
                     payroll, and more — we combine smart software with expert support to simplify your financial journey.
                   </Typography>
                 </Stack>
@@ -87,7 +83,7 @@ export default function FooterSection() {
                         <Stack direction="row" spacing={1} alignItems="center">
                           <LocationOnIcon color="primary" />
                           <Typography variant="body2" color={textColor}>
-                            Tarafirst Technologies Pvt. Ltd.
+                            Tara First Technologies Pvt. Ltd.
                           </Typography>
                         </Stack>
                         <Typography variant="body2" color={textColor} sx={{ pl: 4 }}>

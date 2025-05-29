@@ -4,7 +4,7 @@ import { lazy } from 'react';
 import MainLayout from 'layout/MainLayout';
 import Loadable from 'ui-component/Loadable';
 import AuthGuard from 'utils/route-guard/AuthGuard';
-
+// import RoleGuard from 'utils/route-guard/roleguard';
 // payroll module
 const PayrollDashboard = Loadable(lazy(() => import('views/payroll'))); // ✅ works because index.jsx exists
 
@@ -32,14 +32,14 @@ const Settings = Loadable(lazy(() => import('views/invoicing/InvoiceSettings')))
 const PaymentHistory = Loadable(lazy(() => import('views/invoicing/PaymentHistory')));
 const RecordPayment = Loadable(lazy(() => import('views/invoicing/RecordPayment')));
 const EditInvoice = Loadable(lazy(() => import('views/invoicing/InvoicingComponent')));
+const Support = Loadable(lazy(() => import('views/application/Support')));
 
 // dashboard routing
 const Dashboard = Loadable(lazy(() => import('views/dashboard')));
 const DashboardDefault = Loadable(lazy(() => import('views/dashboard/Default')));
+const DashboardSuperAdmin = Loadable(lazy(() => import('views/dashboard/SuperAdmin')));
 const DashboardPersonal = Loadable(lazy(() => import('views/dashboard/Personal')));
 const DashboardBusiness = Loadable(lazy(() => import('views/dashboard/Business')));
-const MyServices = Loadable(lazy(() => import('views/Services')));
-const ITRSummary = Loadable(lazy(() => import('views/Services/ITR')));
 const ManageUsers = Loadable(lazy(() => import('views/ManageUsers')));
 const ManageSubscriptions = Loadable(lazy(() => import('views/ManageSubscriptions')));
 const ManageModulesAndServices = Loadable(lazy(() => import('views/ManageSubscriptions/ModulesAndServices')));
@@ -49,19 +49,40 @@ const AppBusinessSettings = Loadable(lazy(() => import('views/application/Busine
 const AppAccountSettings = Loadable(lazy(() => import('views/application/users/Account')));
 const ManagePlans = Loadable(lazy(() => import('views/ManageSubscriptions/ManagePlans')));
 const ManageTasks = Loadable(lazy(() => import('views/application/ManageTasks')));
+const DocumentWallet = Loadable(lazy(() => import('views/application/Document-Wallet')));
+const ContactUsInfo = Loadable(lazy(() => import('views/ContactUsInfo')));
+const ConsultationInfo = Loadable(lazy(() => import('views/ConsultationInfo')));
+
+// Service Dashboards
+const MyServices = Loadable(lazy(() => import('views/Services')));
+const ITRSummary = Loadable(lazy(() => import('views/Services/ITR')));
+const MSMEDashboard = Loadable(lazy(() => import('views/Services/MSME')));
+const TradeLicence = Loadable(lazy(() => import('views/Services/TradeLicence')));
+const LabourLicence = Loadable(lazy(() => import('views/Services/LabourLicence')));
+
+//Admin Panel
+const UserManagement = Loadable(lazy(() => import('views/SuperAdmin/UserManagement')));
+const NewRequests = Loadable(lazy(() => import('views/SuperAdmin/ServiceManagement/NewRequests')));
+const TaskManagement = Loadable(lazy(() => import('views/SuperAdmin/ServiceManagement/TaskManagement')));
 // ==============================|| MAIN ROUTING ||============================== //
 
 const MainRoutes = {
   path: '/',
   element: (
     <AuthGuard>
+      {/* <RoleGuard> */}
       <MainLayout />
+      {/* </RoleGuard> */}
     </AuthGuard>
   ),
   children: [
     {
       path: '/dashboard',
       element: <Dashboard />
+    },
+    {
+      path: '/dashboard/super-admin',
+      element: <DashboardSuperAdmin />
     },
     {
       path: '/dashboard/default',
@@ -76,6 +97,10 @@ const MainRoutes = {
       element: <DashboardBusiness />
     },
     {
+      path: '/app/support-chat',
+      element: <Support />
+    },
+    {
       path: '/apps/user/profile',
       element: <AppUserAccountProfile2 />
     },
@@ -87,17 +112,61 @@ const MainRoutes = {
       path: '/apps/account-settings',
       element: <AppAccountSettings />
     },
+
+    //Services
+
     {
       path: '/app/my-services',
       element: <MyServices />
     },
     {
-      path: '/app/my-services/itr-dashboard',
+      path: '/app/my-services/itr-filing',
       element: <ITRSummary />
+    },
+    {
+      path: '/app/task-management/itr-filing',
+      element: <ITRSummary />
+    },
+    {
+      path: '/app/task-management/msme-registration',
+      element: <MSMEDashboard />
+    },
+    {
+      path: '/app/my-services/msme-registration',
+      element: <MSMEDashboard />
+    },
+    {
+      path: '/app/task-management/trade-license',
+      element: <TradeLicence />
+    },
+    {
+      path: '/app/my-services/trade-license',
+      element: <TradeLicence />
+    },
+    {
+      path: '/app/task-management/labour-license',
+      element: <LabourLicence />
+    },
+    {
+      path: '/app/my-services/labour-license',
+      element: <LabourLicence />
     },
     {
       path: '/app/users',
       element: <ManageUsers />
+    },
+    //Admin Panel
+    {
+      path: '/app/user-management',
+      element: <UserManagement />
+    },
+    {
+      path: '/app/new-requests',
+      element: <NewRequests />
+    },
+    {
+      path: '/app/task-management',
+      element: <TaskManagement />
     },
     {
       path: '/app/manage-tasks',
@@ -114,6 +183,18 @@ const MainRoutes = {
     {
       path: '/app/subscriptions/modules-and-services/plans',
       element: <ManagePlans />
+    },
+    {
+      path: '/app/document-wallet',
+      element: <DocumentWallet />
+    },
+    {
+      path: '/app/contact-us',
+      element: <ContactUsInfo />
+    },
+    {
+      path: '/app/consultation',
+      element: <ConsultationInfo />
     },
     {
       path: '/app/payroll',

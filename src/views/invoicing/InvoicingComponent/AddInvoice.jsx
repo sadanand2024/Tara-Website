@@ -12,7 +12,8 @@ import CustomInput from 'utils/CustomInput';
 import CustomAutocomplete from 'utils/CustomAutocomplete';
 import { IconPlus } from '@tabler/icons-react';
 import { IconTrash } from '@tabler/icons-react';
-import { BASE_URL } from '../../../../constants';
+let baseURL = import.meta.env.VITE_APP_BASE_URL;
+
 import InvoiceDetailsForm from './InvoiceDetailsForm';
 import BillingShippingForm from './BillingShippingForm';
 import ItemDetailsAndNotes from './ItemDetailsAndNotes';
@@ -25,7 +26,7 @@ import BulkItems from './BulkItems';
 // import { useSnackbar } from '@/components/CustomSnackbar';
 import MainCard from '../../../ui-component/cards/MainCard';
 
-const AddItem = ({
+const InvoiceDetails = ({
   type,
   invoice_number_format,
   getInvoiceFormat,
@@ -34,30 +35,32 @@ const AddItem = ({
   customers,
   open,
   onClose,
-  itemsList
+  itemsList,
+  getGoodsAndServicesData,
+  branches,
+  setInvoiceNumberFormat
 }) => {
-  const [addInvoiceData] = useState({
-    invoice_data: [
-      { name: 'customer', label: 'Customer Name' },
-      { name: 'customer_gstin', label: 'Customer GSTIN' },
-      { name: 'customer_pan', label: 'Customer PAN' },
-      { name: 'place_of_supply', label: 'Place of Supply' },
-      { name: 'invoice_number', label: 'Invoice Number' },
-      { name: 'invoice_date', label: 'Invoice Date' },
-      { name: 'terms', label: 'Terms' },
-      // { name: 'financial_year', label: 'Financial Year' },
-      { name: 'due_date', label: 'Due Date' },
-      { name: 'order_number', label: 'Order Number' },
-      { name: 'sales_person', label: 'Sales Person' }
-    ]
-  });
+  const invoiceDetailsFields = [
+    { name: 'gstin', label: 'GSTIN' },
+    { name: 'branch_code', label: 'Branch' },
+    { name: 'customer', label: 'Customer Name' },
+    { name: 'customer_gstin', label: 'Customer GSTIN' },
+    { name: 'customer_pan', label: 'Customer PAN' },
+    { name: 'place_of_supply', label: 'Place of Supply' },
+    { name: 'invoice_number', label: 'Invoice Number' },
+    { name: 'invoice_date', label: 'Invoice Date' },
+    { name: 'terms', label: 'Terms' },
+    // { name: 'financial_year', label: 'Financial Year' },
+    { name: 'due_date', label: 'Due Date' },
+    { name: 'order_number', label: 'Order Number' },
+    { name: 'sales_person', label: 'Sales Person' }
+  ];
+
   // const { showSnackbar } = useSnackbar();
   const navigate = useNavigate();
 
   const [saveButton, setSaveButton] = useState(true);
-  const [selectedgstin, setSelectedgstin] = useState('');
   const [bulkItemsDialogue, setBulkItemsDialogue] = useState(false); // State for Apply Tax checkbox
-  // const [invoice_number_format, set_Invoice_number_format] = useState('');
   const dispatch = useDispatch();
   const gstRates = [0, 5, 12, 18, 28]; // Example GST rates
 
@@ -103,6 +106,11 @@ const AddItem = ({
   };
   const validationSchema = Yup.object({
     gstin: Yup.string().required('GSTIN is required'),
+    branch_code: Yup.string().when('gstin', {
+      is: (gstin) => businessDetailsData?.invoice_format?.find((item) => item.gstin === gstin && item.include_branch_code === true),
+      then: (schema) => schema.required('Branch is required when branch code is enabled for this GSTIN'),
+      otherwise: (schema) => schema.notRequired()
+    }),
     customer: Yup.string().required('Customer name is required'),
     customer_gstin: Yup.string().required('Customer GSTIN is required'),
     customer_pan: Yup.string().required('Customer PAN is required'),
@@ -117,6 +125,7 @@ const AddItem = ({
   const formik = useFormik({
     initialValues: {
       gstin: '',
+      branch_code: '',
       customer: '',
       place_of_supply: '',
       invoice_number: '',
@@ -176,8 +185,9 @@ const AddItem = ({
       const postData = { ...values };
       postData.invoicing_profile = businessDetailsData?.id;
       postData.financial_year = financialYear;
-      let selcted_gstin_format_version = businessDetailsData.invoice_format.find((item) => item.gstin === postData.gstin);
-      postData.format_version = Number(selcted_gstin_format_version.invoice_format.format_version);
+      let selcted_gstin_format_version = businessDetailsData.invoice_format.find((item) => item.gstin === postData.gstin || 'NA');
+      console.log(businessDetailsData.invoice_format);
+      postData.format_version = Number(selcted_gstin_format_version.format_version);
       if (postData.not_applicablefor_shipping === true) {
         postData.shipping_address = {};
       }
@@ -196,10 +206,9 @@ const AddItem = ({
     }
   });
   const downloadInvoice = async (id) => {
-    console.log(BASE_URL);
     try {
       const tokens = JSON.parse(localStorage.getItem('user'));
-      const response = await axios.get(`${BASE_URL}/invoicing/create-pdf/${id}`, {
+      const response = await axios.get(`${baseURL}/invoicing/create-pdf/${id}`, {
         responseType: 'arraybuffer',
         headers: {
           Authorization: `Bearer ${tokens.access_token}`
@@ -306,11 +315,6 @@ const AddItem = ({
       item.total_amount = amountAfterDiscount + taxAmount;
 
       // Update CGST, SGST, IGST amounts based on place of supply logic
-      console.log('States comparison:', {
-        place_of_supply: values.place_of_supply,
-        billing_state: values.billing_address.state,
-        shipping_state: values.shipping_address.state
-      });
 
       // Normalize state values for comparison
       const normalizeState = (state) => (state ? state.toString().trim().toLowerCase() : '');
@@ -323,14 +327,6 @@ const AddItem = ({
       const effectiveShippingState = shippingState === 'NA' || shippingState === '' ? billingState : normalizeState(shippingState);
 
       const isIntraState = placeOfSupply === billingState && placeOfSupply === effectiveShippingState;
-
-      console.log('Normalized States:', {
-        placeOfSupply,
-        billingState,
-        shippingState,
-        effectiveShippingState,
-        isIntraState
-      });
 
       if (isIntraState) {
         // If place of supply and both addresses are in same state, CGST and SGST
@@ -382,12 +378,10 @@ const AddItem = ({
   };
   const handleRateChange = (index, value) => {
     setSaveButton(false);
-
-    const newRate = Number(value) || 0;
+    const newRate = value;
     const newItemDetails = [...formik.values.item_details];
     newItemDetails[index].rate = newRate;
-
-    formik.setFieldValue('item_details', newItemDetails); // ✅ missing line
+    formik.setFieldValue('item_details', newItemDetails);
     recalculateTotals();
   };
 
@@ -518,56 +512,53 @@ const AddItem = ({
   }, [selectedInvoice]);
 
   const { values, setValues, errors, touched, handleSubmit, handleBlur, setFieldValue, resetForm } = formik;
-  useEffect(() => {
-    setSelectedgstin(businessDetailsData.gstin);
-  }, [businessDetailsData]);
+
+  // const generateInvoiceNumber = async (newgstin, branch_code) => {
+  //   const url = `/invoicing/invoicing-profiles/${businessDetailsData.id}/update/`;
+  //   let formdata = new FormData();
+  //   formdata.append('gstin', newgstin || 'NA');
+  //   formdata.append('branch_code', branch_code || 'NA');
+  //   const { res } = await Factory('put', url, formdata);
+  //   console.log(res);
+
+  //   if (res.status_cd === 0) {
+  //     getInvoiceFormat();
+  //   } else {
+  //     dispatch(openSnackbar({ message: JSON.stringify(res.data.data), variant: 'error' }));
+  //   }
+  // };
+
   return (
     <MainCard>
       <Stack direction="row" sx={{ alignItems: 'end', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap' }}></Stack>
       <form
         onSubmit={(e) => {
           e.preventDefault();
+
+          // Check if branch_code is required but not selected
+          const selectedGstinFormat = businessDetailsData?.invoice_format?.find((item) => item.gstin === values.gstin);
+          if (selectedGstinFormat?.include_branch_code && !values.branch_code) {
+            dispatch(openSnackbar({ message: 'Please select a branch code', variant: 'error' }));
+            return;
+          }
+
           formik.setFieldValue('invoice_status', 'Pending Approval');
-          formik.handleSubmit(); // Calls Formik's submission logic
+          formik.handleSubmit();
         }}
       >
-        <Box sx={{ mb: 1 }}>
-          <Typography variant="h6">Invoice Details</Typography>
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="h4">Invoice Details</Typography>
         </Box>
 
         <Grid2 container spacing={2}>
-          <Grid2 size={{ xs: 6 }}>
-            <Typography gutterBottom>Select Company GSTIN</Typography>
-            <CustomAutocomplete
-              name="gstin"
-              value={values.gstin || ''}
-              onChange={async (event, newgstin) => {
-                setSelectedgstin(newgstin || 'NA');
-                setFieldValue('gstin', newgstin || 'NA');
-                const url = `/invoicing/invoicing-profiles/${businessDetailsData.id}/update/`;
-                let formdata = new FormData();
-                formdata.append('gstin', newgstin || 'NA');
-                const { res } = await Factory('put', url, formdata);
-                if (res.status_cd === 0) {
-                  getInvoiceFormat();
-                } else {
-                  dispatch(openSnackbar({ message: JSON.stringify(res.data.data), variant: 'error' }));
-                }
-              }}
-              options={
-                businessDetailsData?.gst_details?.length > 0 ? businessDetailsData.gst_details.map((item) => item.gstin || 'NA') : ['NA']
-              }
-              error={touched.gstin && Boolean(errors.gstin)}
-              helperText={touched.gstin && errors.gstin}
-            />
-          </Grid2>
-          <br />
           <InvoiceDetailsForm
             formik={formik}
-            invoiceData={addInvoiceData.invoice_data}
+            invoiceDetailsFields={invoiceDetailsFields}
             businessDetailsData={businessDetailsData}
             customers={customers}
             getInvoiceFormat={getInvoiceFormat}
+            branches={branches}
+            setInvoiceNumberFormat={setInvoiceNumberFormat}
           />
         </Grid2>
         <Divider sx={{ mb: 4, mt: 4 }} />
@@ -601,6 +592,8 @@ const AddItem = ({
             gstRates={gstRates}
             handleNoteChange={handleNoteChange}
             totalDiscount={formik.values.total_discount || 0}
+            businessDetailsData={businessDetailsData}
+            get_Goods_and_Services_Data={getGoodsAndServicesData}
           />
         </Grid2>
 
@@ -635,4 +628,4 @@ const AddItem = ({
   );
 };
 
-export default AddItem;
+export default InvoiceDetails;

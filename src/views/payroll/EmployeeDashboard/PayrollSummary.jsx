@@ -14,7 +14,8 @@ import {
   CircularProgress
 } from '@mui/material';
 import MainCard from '../../../ui-component/cards/MainCard';
-import { BASE_URL } from '../../../../constants';
+let baseURL = import.meta.env.VITE_APP_BASE_URL;
+
 import axios from 'axios';
 import Factory from 'utils/Factory';
 import EmptyDataPlaceholder from 'ui-component/extended/EmptyDataPlaceholder';
@@ -53,7 +54,7 @@ const PayrollSummary = ({ payrollId, month, financialYear }) => {
     try {
       const tokens = JSON.parse(localStorage.getItem('user'));
       const response = await axios.get(
-        `${BASE_URL}/payroll/employee-monthly-salary-template?employee_id=${employee_id}&month=${month}&financial_year=${financial_year}&year=${new Date().getFullYear()}`,
+        `${baseURL}/payroll/employee-monthly-salary-template?employee_id=${employee_id}&month=${month}&financial_year=${financial_year}&year=${new Date().getFullYear()}`,
         {
           responseType: 'arraybuffer',
           headers: {
@@ -78,10 +79,48 @@ const PayrollSummary = ({ payrollId, month, financialYear }) => {
         );
       }
     } catch (error) {
+      console.error('Payslip download error:', error);
+
+      let errorMessage = 'Failed to download payslip. ';
+
+      if (error.response) {
+        try {
+          // Try to parse the error response if it's in JSON format
+          const errorData = JSON.parse(new TextDecoder().decode(error.response.data));
+          if (errorData.error) {
+            errorMessage = errorData.error;
+          } else {
+            errorMessage += errorData.error || 'An unexpected error occurred.';
+          }
+        } catch (e) {
+          // If parsing fails, use the status code based messages
+          switch (error.response.status) {
+            case 500:
+              errorMessage += 'Server error occurred. Please try again later.';
+              break;
+            case 404:
+              errorMessage += 'Payslip not found.';
+              break;
+            case 401:
+              errorMessage += 'Your session has expired. Please login again.';
+              break;
+            case 403:
+              errorMessage += 'You do not have permission to view this payslip.';
+              break;
+            default:
+              errorMessage += 'An unexpected error occurred.';
+          }
+        }
+      } else if (error.request) {
+        errorMessage += 'No response from server. Please check your internet connection.';
+      } else {
+        errorMessage += error.message || 'An unexpected error occurred.';
+      }
+
       dispatch(
         openSnackbar({
           open: true,
-          message: 'Error fetching payslip PDF.',
+          message: errorMessage,
           variant: 'alert',
           alert: { color: 'error' },
           close: false

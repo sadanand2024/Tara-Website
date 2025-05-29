@@ -42,7 +42,7 @@ export default function AuthLogin() {
     <>
       <FormControl fullWidth sx={{ ...theme.typography.customInput }}>
         <InputLabel htmlFor="outlined-adornment-email-login">Email Address</InputLabel>
-        <OutlinedInput id="outlined-adornment-email-login" type="email" value="info@codedthemes.com" name="email" inputProps={{}} />
+        <OutlinedInput id="outlined-adornment-email-login" type="email" value="info@tarafirst.com" name="email" inputProps={{}} />
       </FormControl>
 
       <FormControl fullWidth sx={{ ...theme.typography.customInput }}>

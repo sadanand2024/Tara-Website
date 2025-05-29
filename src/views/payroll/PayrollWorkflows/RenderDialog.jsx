@@ -1,7 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { Button, Box, Stack, Typography, FormControl, FormLabel, FormControlLabel, FormGroup, Checkbox, TextField } from '@mui/material';
+import {
+  Button,
+  Box,
+  Stack,
+  Typography,
+  FormControl,
+  FormLabel,
+  FormControlLabel,
+  FormGroup,
+  Checkbox,
+  TextField,
+  InputLabel,
+  Select,
+  MenuItem
+} from '@mui/material';
 import Grid2 from '@mui/material/Grid2'; // Import Grid2 from MUI system
 import CustomInput from 'utils/CustomInput';
 import Factory from 'utils/Factory';
@@ -14,17 +28,19 @@ import { months } from 'utils/MonthsList';
 import { generateFinancialYears } from 'utils/FinancialYearsList';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
+import { useNavigate } from 'react-router-dom';
 export default function RenderDialog({ from, openDialog, fields, setOpenDialog, setLoading, employeeMasterData, selectedRecord, getData }) {
   const [searchParams] = useSearchParams();
   const [payrollid, setPayrollId] = useState(null); // Payroll ID fetched from URL
   const financialYearOptions = generateFinancialYears();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   // Update payroll ID from search params
   useEffect(() => {
     const id = searchParams.get('payrollid');
     if (id) {
-      setPayrollId(id);
+      setPayrollId(Number(id));
     }
   }, [searchParams]);
 
@@ -190,6 +206,7 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
         let url = selectedRecord?.id ? `/payroll/employee-exit/${selectedRecord?.id}` : `/payroll/employee-exit`;
         let method = selectedRecord?.id ? 'put' : 'Post';
         let postData = { ...values };
+        postData.payroll = payrollid;
         const { res, error } = await Factory(method, url, postData);
         setLoading(false);
         if (res.status_cd === 0) {
@@ -220,10 +237,23 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
         setLoading(true);
         let url = selectedRecord?.id ? `/payroll/employee-attendance/${selectedRecord?.id}` : `/payroll/employee-attendance`;
         let method = selectedRecord?.id ? 'put' : 'Post';
-        const monthNumber = months.indexOf(values.month) + 1;
 
-        let postData = { ...values, month: monthNumber };
+        const monthNumber = values.month;
 
+        let postData = {
+          ...values,
+          month: monthNumber,
+          total_days_of_month: Number(values.total_days_of_month),
+          holidays: Number(values.holidays),
+          week_offs: Number(values.week_offs),
+          present_days: Number(values.present_days),
+          balance_days: Number(values.balance_days),
+          casual_leaves: Number(values.casual_leaves),
+          sick_leaves: Number(values.sick_leaves),
+          earned_leaves: Number(values.earned_leaves),
+          loss_of_pay: Number(values.loss_of_pay)
+        };
+        postData.payroll = payrollid;
         const { res, error } = await Factory(method, url, postData);
         setLoading(false);
         if (res.status_cd === 0) {
@@ -255,7 +285,12 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
         setLoading(true);
         let url = selectedRecord?.id ? `/payroll/advance-loans/${selectedRecord?.id}` : `/payroll/advance-loans`;
         let method = selectedRecord?.id ? 'put' : 'Post';
-        let postData = { ...values };
+        let postData = {
+          ...values,
+          amount: Number(values.amount),
+          no_of_months: Number(values.no_of_months)
+        };
+        postData.payroll = payrollid;
         const { res, error } = await Factory(method, url, postData);
         setLoading(false);
         if (res.status_cd === 0) {
@@ -286,7 +321,11 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
         setLoading(true);
         let url = selectedRecord?.id ? `/payroll/bonus-incentives/${selectedRecord?.id}` : `/payroll/bonus-incentives`;
         let method = selectedRecord?.id ? 'put' : 'Post';
-        let postData = { ...values };
+        let postData = {
+          ...values,
+          amount: Number(values.amount)
+        };
+        postData.payroll = payrollid;
         const { res, error } = await Factory(method, url, postData);
         setLoading(false);
         if (res.status_cd === 0) {
@@ -315,11 +354,10 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
       }
     }
   });
-
   const renderFields = (fields) => {
     return fields.map((field) => (
       <Grid2 key={field.name} size={{ xs: 12, sm: 6 }}>
-        <div style={{ paddingBottom: '8px' }}>
+        <div style={{ paddingBottom: '5px' }}>
           <Typography variant="body2">{field.label}</Typography>
         </div>
         {field.name === 'employee' ? (
@@ -329,9 +367,15 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
               setFieldValue(field.name, newValue?.id || '');
               setFieldValue('department', newValue.department_name);
               setFieldValue('designation', newValue.designation_name);
+              if (from === 'Salary Revisions') {
+                // setFieldValue('current_ctc', newValue.current_ctc);
+                // setFieldValue('revised_ctc', newValue.current_ctc);
+              }
             }}
             options={employeeMasterData || []}
             getOptionLabel={(option) => `${option.first_name || ''} ${option.middle_name || ''} ${option.last_name || ''}`.trim()}
+            getOptionKey={(option) => option.id}
+            isOptionEqualToValue={(option, value) => option.id === value.id}
             sx={{ width: '100%' }}
             onBlur={handleBlur}
             error={touched[field.name] && Boolean(errors[field.name])}
@@ -383,6 +427,7 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
             sx={{ width: '100%' }}
             error={touched[field.name] && Boolean(errors[field.name])}
             helperText={touched[field.name] && errors[field.name]}
+            disabled={from === 'Attendance' && field.name === 'month'}
           />
         ) : field.name === 'doe' || field.name === 'start_month' ? (
           <CustomDatePicker
@@ -410,7 +455,7 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
             onChange={(e, newValue) => {
               setFieldValue(field.name, newValue);
             }}
-            sx={{ minWidth: 200, maxWidth: 200 }}
+            // sx={{ minWidth: 200, maxWidth: 200 }}
             renderInput={(params) => (
               <TextField
                 {...params}
@@ -420,13 +465,25 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
               />
             )}
           />
+        ) : field.name === 'reset_leave_balance_type' ? (
+          <CustomAutocomplete
+            value={values.reset_leave_balance_type || ''}
+            name="reset_leave_balance_type"
+            options={['Monthly', 'Yearly']}
+            onChange={(e, newValue) => setFieldValue('reset_leave_balance_type', newValue)}
+            onBlur={handleBlur}
+            error={touched.reset_leave_balance_type && Boolean(errors.reset_leave_balance_type)}
+            helperText={touched.reset_leave_balance_type && errors.reset_leave_balance_type}
+            sx={{ minWidth: 200, maxWidth: 200 }}
+            placeholder="Select"
+          />
         ) : (
           <CustomInput
             fullWidth
             name={field.name}
             value={values[field.name]}
             multiline={field.name === 'notes'}
-            minRows={field.name === 'notes' && 4}
+            minRows={field.name === 'notes' ? 4 : undefined}
             onChange={handleChange}
             onBlur={handleBlur}
             error={touched[field.name] && Boolean(errors[field.name])}
@@ -447,11 +504,16 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
     ));
   };
   const { values, setValues, handleChange, errors, touched, handleSubmit, handleBlur, resetForm, setFieldValue } = formik;
-
+  console.log(values);
   useEffect(() => {
     if (selectedRecord !== null) {
+      // Convert month name to numeric value if it exists
+      const updatedRecord = { ...selectedRecord };
+      if (selectedRecord.month && typeof selectedRecord.month === 'string') {
+        updatedRecord.month = months.indexOf(selectedRecord.month) + 1;
+      }
       setValues(() => ({
-        ...selectedRecord
+        ...updatedRecord
       }));
     }
   }, [selectedRecord]);
@@ -459,7 +521,19 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
     <Modal
       open={openDialog}
       maxWidth={'md'}
-      header={{ title: 'Add', subheader: '' }}
+      title={
+        from === 'Exits'
+          ? 'Employee Exit'
+          : from === 'Attendance'
+            ? 'Employee Attendance'
+            : from === 'Loans & Advances'
+              ? 'Advance Loans'
+              : from === 'Bonus & Incentives'
+                ? 'Bonus & Incentives'
+                : from === 'Salary Revisions'
+                  ? 'Salary Revisions'
+                  : ''
+      }
       showClose={true}
       handleClose={() => {
         setOpenDialog(false);
@@ -483,8 +557,8 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
         </Stack>
       }
     >
-      <Box component="form" onSubmit={handleSubmit} sx={{ padding: 2 }}>
-        <Grid2 container spacing={3}>
+      <Box component="form" onSubmit={handleSubmit}>
+        <Grid2 container spacing={2}>
           {/* Render dynamic fields for department */}
           {renderFields(fields)}
         </Grid2>
@@ -567,6 +641,33 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
             size="small"
             inputFormat="YYYY-MM-DD" // Display in YYYY-MM-DD format
           />
+        )}
+        {from === 'Salary Revisions' && (
+          <Grid2 container spacing={3} sx={{ mt: 2 }}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => {
+                if (values.employee !== '' && values.employee !== null) {
+                  navigate(
+                    `/payroll/settings/add-employee?employee_id=${values.employee}&payrollid=${payrollid}&from=${'Salary Revisions'}&tabValue=${Number(1)}`
+                  );
+                } else {
+                  dispatch(
+                    openSnackbar({
+                      open: true,
+                      message: 'Please select an employee',
+                      variant: 'alert',
+                      alert: { color: 'error' },
+                      close: false
+                    })
+                  );
+                }
+              }}
+            >
+              Edit Pay Structure
+            </Button>
+          </Grid2>
         )}
       </Box>
     </Modal>

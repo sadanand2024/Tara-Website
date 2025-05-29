@@ -25,7 +25,10 @@ import Factory from 'utils/Factory';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
 import EmptyDataPlaceholder from 'ui-component/extended/EmptyDataPlaceholder';
-
+import DeleteDialog from '../../../ui-component/extended/DeleteDialog'; // adjust path accordingly
+import { IconButton, Tooltip } from '@mui/material'; // Add these if not already
+import { Edit, Delete } from '@mui/icons-material';
+import BulkUploadDialog from 'ui-component/extended/BulkUploadDialog';
 function Worklocation() {
   const [openDialog, setOpenDialog] = useState(false);
   const [workLocations, setWorkLocations] = useState([]);
@@ -34,6 +37,7 @@ function Worklocation() {
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [openBulkDialog, setOpenBulkDialog] = useState(false);
 
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -44,6 +48,21 @@ function Worklocation() {
   const handlePageChange = (event, value) => setCurrentPage(value);
   const handleOpenDialog = () => setOpenDialog(true);
   const handleCloseDialog = () => setOpenDialog(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [selectedRow, setSelectedRow] = useState(null);
+
+  const handleOpenDeleteDialog = (row) => {
+    setSelectedRow(row);
+    setOpenDeleteDialog(true);
+  };
+
+  const handleConfirmDelete = () => {
+    handleDelete(selectedRow);
+    setOpenDeleteDialog(false);
+  };
+  const closeBulkDialog = () => {
+    setOpenBulkDialog(false);
+  };
 
   useEffect(() => {
     const id = searchParams.get('payrollid');
@@ -118,20 +137,35 @@ function Worklocation() {
         <MainCard
           title="Work Location Details"
           secondary={
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={() => {
-                setPostType('post');
-                handleOpenDialog();
-              }}
-            >
-              Add Work Location
-            </Button>
+            <Stack direction="row" spacing={2}>
+              <Button variant="outlined" color="secondary" onClick={() => setOpenBulkDialog(true)}>
+                Bulk Upload
+              </Button>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => {
+                  setPostType('post');
+                  handleOpenDialog();
+                }}
+              >
+                Add Work Location
+              </Button>
+            </Stack>
           }
         >
+          <BulkUploadDialog
+            open={openBulkDialog}
+            handleClose={closeBulkDialog}
+            getData={fetchWorkLocations}
+            payrollid={payrollid}
+            type="Work Locations"
+            bulkUploadUrl="/payroll/work-locations/bulk-upload/"
+            xlsxTemplateUrl="/payroll/download-template/xlsx?type=work_location"
+            csvTemplateUrl="/payroll/download-template/csv?type=work_location"
+          />
           <Grid2 container spacing={{ xs: 2, sm: 3 }}>
-            <Grid2 xs={12}>
+            <Grid2 size={{ xs: 12 }}>
               <WorkLocationDialog
                 open={openDialog}
                 handleClose={handleCloseDialog}
@@ -151,7 +185,7 @@ function Worklocation() {
                 overflowX: 'auto'
               }}
             >
-              <Table>
+              <Table size="small">
                 <TableHead>
                   <TableRow sx={{ bgcolor: 'grey.100' }}>
                     {['S No', 'Name', 'Address', 'State', 'No of Employees', 'Actions'].map((header, idx) => (
@@ -196,19 +230,14 @@ function Worklocation() {
                         <TableCell align="center">{location.employees || 0}</TableCell>
                         <TableCell align="center">
                           {index !== 0 && (
-                            <ActionCell
-                              row={location}
-                              onEdit={() => handleEdit(location)}
-                              onDelete={() => handleDelete(location)}
-                              open={openDialog}
-                              onClose={handleCloseDialog}
-                              deleteDialogData={{
-                                title: 'Delete Record',
-                                heading: 'Are you sure you want to delete this Record?',
-                                description: `This action will remove ${location.location_name} from the list.`,
-                                successMessage: 'Record has been deleted.'
-                              }}
-                            />
+                            <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
+                              <IconButton color="primary" onClick={() => handleEdit(location)}>
+                                <Edit />
+                              </IconButton>
+                              <IconButton color="error" onClick={() => handleOpenDeleteDialog(location)}>
+                                <Delete />
+                              </IconButton>
+                            </Box>
                           )}
                         </TableCell>
                       </TableRow>
@@ -216,6 +245,16 @@ function Worklocation() {
                   )}
                 </TableBody>
               </Table>
+              <DeleteDialog
+                open={openDeleteDialog}
+                onClose={() => setOpenDeleteDialog(false)}
+                onConfirm={handleConfirmDelete}
+                dialogData={{
+                  title: 'Delete Record',
+                  heading: 'Are you sure?',
+                  description: 'This action will permanently delete the record.'
+                }}
+              />
             </TableContainer>
             {workLocations.length > 0 && (
               <Grid2 size={12}>

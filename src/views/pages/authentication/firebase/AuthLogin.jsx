@@ -106,9 +106,9 @@ export default function FirebaseLogin({ loginProp }, { ...others }) {
       </Grid>
       <Formik
         initialValues={{
-          email: 'info@codedthemes.com',
-          password: '123456',
-          submit: null
+          // email: 'info@codedthemes.com',
+          // password: '123456',
+          // submit: null
         }}
         validationSchema={Yup.object().shape({
           email: Yup.string().email('Must be a valid email').max(255).required('Email is required'),

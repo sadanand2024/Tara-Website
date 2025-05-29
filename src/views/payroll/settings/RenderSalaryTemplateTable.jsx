@@ -17,19 +17,31 @@ import {
 import { IconTrash } from '@tabler/icons-react';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { useSearchParams } from 'react-router-dom';
+import { useDispatch } from 'store';
+import { openSnackbar } from 'store/slices/snackbar';
 
 import CustomInput from 'utils/CustomInput';
 import CustomAutocomplete from 'utils/CustomAutocomplete';
 import Factory from 'utils/Factory';
 
-export default function RenderSalaryTemplateTable({ values, setFieldValue, setValues, enablePreviewButton, setEnablePreviewButton }) {
+export default function RenderSalaryTemplateTable({
+  source,
+  values,
+  setFieldValue,
+  setValues,
+  enablePreviewButton,
+  setEnablePreviewButton,
+  createdEmployeeId
+}) {
   const [searchParams] = useSearchParams();
   const payrollId = searchParams.get('payrollid');
   const template_id = searchParams.get('template_id');
+  const employee_id = searchParams.get('employee_id');
   const [earningsData, setEarningsData] = useState([]);
   const [fixedAllowance, setFixedAllowance] = useState({ monthly: 0, annually: 0 });
   const [loading, setLoading] = useState(false);
   const [viewPreview, setViewPreview] = useState(false);
+  const dispatch = useDispatch();
 
   const get_individual_componnet_data = async (id) => {
     setLoading(true);
@@ -44,7 +56,6 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
     const url = `/payroll/earnings?payroll_id=${id}`;
     const { res } = await Factory('get', url, {});
     setLoading(false);
-    console.log(res.data);
 
     if (res?.status_cd === 0) {
       setEarningsData(res.data); // 🔁 Always update dropdown options
@@ -178,7 +189,8 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
 
       // 4. Add Fixed Allowance
       const totalWithoutFA = recalculated.reduce((sum, e) => sum + parseFloat(e.annually || 0), 0);
-      const faAnnual = annualCtc - totalWithoutFA;
+      const benefitsTotal = data.benefits?.reduce((sum, b) => (b.annually !== 'NA' ? sum + parseFloat(b.annually || 0) : sum), 0) || 0;
+      const faAnnual = annualCtc - totalWithoutFA - benefitsTotal;
       const faMonthly = faAnnual / 12;
 
       const fixedAllowance = {
@@ -186,26 +198,12 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
         calculation_type: 'Fixed',
         calculation: 0,
         monthly: Math.round(faMonthly * 100) / 100,
-        annually: Math.round(faAnnual * 100)
+        annually: Math.round(faAnnual * 100) / 100
       };
 
       const finalEarnings = [...recalculated, fixedAllowance];
 
       // 5. Apply all values to Formik
-      setValues({
-        template_name: data.template_name || '',
-        description: data.description || '',
-        annual_ctc: data.annual_ctc || '',
-        earnings: finalEarnings,
-        gross_salary: data.gross_salary || { monthly: 0, annually: 0 },
-        benefits: data.benefits || [],
-        total_ctc: data.total_ctc || { monthly: 0, annually: 0 },
-        deductions: data.deductions || [],
-        net_salary: data.net_salary || { monthly: 0, annually: 0 },
-        errorMessage: ''
-      });
-
-      // 6. Apply all values to Formik
       setValues({
         template_name: data.template_name || '',
         description: data.description || '',
@@ -304,7 +302,9 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
       .filter((e) => e.component_name !== 'Fixed Allowance')
       .reduce((sum, e) => sum + parseFloat(e.annually || 0), 0);
 
-    const faAnnual = annualCtc - totalWithoutFA;
+    const benefitsTotal = values.benefits?.reduce((sum, b) => (b.annually !== 'NA' ? sum + parseFloat(b.annually || 0) : sum), 0) || 0;
+
+    const faAnnual = annualCtc - totalWithoutFA - benefitsTotal;
     const faMonthly = faAnnual / 12;
 
     const faIndex = finalEarnings.findIndex((e) => e.component_name === 'Fixed Allowance');
@@ -312,11 +312,12 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
       finalEarnings[faIndex] = {
         ...finalEarnings[faIndex],
         monthly: Math.round(faMonthly * 100) / 100,
-        annually: Math.round(faAnnual * 100)
+        annually: Math.round(faAnnual * 100) / 100
       };
     }
 
     setFieldValue('earnings', finalEarnings);
+    setFieldValue('errorMessage', ''); // ✅ clear previous error
     setEnablePreviewButton(true);
   };
 
@@ -330,12 +331,16 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
     };
     const updated = [...values.earnings, newComponent];
     setFieldValue('earnings', updated);
+
+    setFieldValue('errorMessage', ''); // ✅ clear previous error
     setEnablePreviewButton(true);
   };
 
   const handleDeleteEarning = (index) => {
     const updated = values.earnings.filter((_, i) => i !== index);
     setFieldValue('earnings', updated);
+
+    setFieldValue('errorMessage', ''); // ✅ clear previous error
     setEnablePreviewButton(true);
   };
 
@@ -367,17 +372,26 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
       .filter((e) => e.component_name !== 'Fixed Allowance')
       .reduce((sum, e) => sum + parseFloat(e.annually || 0), 0);
 
-    const fixedAnnual = annualCtc - totalWithoutFA;
-    const fixedMonthly = fixedAnnual / 12;
+    const benefitsTotal = values.benefits?.reduce((sum, b) => (b.annually !== 'NA' ? sum + parseFloat(b.annually || 0) : sum), 0) || 0;
 
-    if (fixedAnnual <= 0) {
-      setFieldValue(
-        'errorMessage',
-        'The system calculated Fixed Allowance cannot be less than zero. Check and enter valid salary details.'
+    const faAnnual = annualCtc - totalWithoutFA - benefitsTotal;
+    const faMonthly = faAnnual / 12;
+    if (faAnnual <= 0) {
+      const error = 'The system calculated Fixed Allowance cannot be less than zero. Check and enter valid salary details.';
+      setFieldValue('errorMessage', error);
+
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: error,
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
       );
+
       return;
     }
-
     const finalPayload = {
       ...values,
       payroll: payrollId,
@@ -387,8 +401,8 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
           component_name: 'Fixed Allowance',
           calculation_type: 'Fixed',
           calculation: 0,
-          monthly: fixedMonthly,
-          annually: fixedAnnual
+          monthly: Math.round(faMonthly * 100) / 100,
+          annually: Math.round(faAnnual * 100) / 100
         }
       ]
     };
@@ -402,10 +416,12 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
           annually: parseFloat(fixed.annually)
         });
       }
-
+      console.log(res.data);
       const filtered = {
         ...res.data,
-        earnings: res.data.earnings.filter((e) => e.component_name !== 'Fixed Allowance')
+        // earnings: res.data.earnings.filter((e) => e.component_name !== 'Fixed Allowance')
+        earnings: res.data.earnings,
+        tax_regime_opted: values.tax_regime_opted
       };
 
       setValues(filtered);
@@ -418,7 +434,6 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
     const url = `/payroll/earnings?payroll_id=${payrollId}`;
     const { res } = await Factory('get', url, {});
     if (res?.status_cd !== 0) return;
-    console.log(res.data);
     const basicComponent = res.data.find((item) => item.component_name === 'Basic');
     if (!basicComponent) return;
 
@@ -455,20 +470,32 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
       earnings: hasBlank ? [newBasic] : [newBasic, ...prev.earnings.filter((e) => e.component_name !== 'Basic')]
     }));
   };
+  // useEffect(() => {
+  //   const annualCtc = parseFloat(values.annual_ctc || 0);
+  //   const earningsTotal = values.earnings.reduce(
+  //     (sum, e) => (e.component_name !== 'Fixed Allowance' ? sum + parseFloat(e.annually || 0) : sum),
+  //     0
+  //   );
+  //   const benefitsTotal = values.benefits?.reduce((sum, b) => (b.annually !== 'NA' ? sum + parseFloat(b.annually || 0) : sum), 0) || 0;
+  //   console.log(benefitsTotal);
+  //   console.log(earningsTotal);
+  //   const annualFixed = annualCtc - earningsTotal - benefitsTotal;
+  //   console.log('annualFixed', annualFixed);
+  //   setFixedAllowance({
+  //     monthly: Math.round((annualFixed / 12) * 100) / 100,
+  //     annually: Math.round(annualFixed * 100) / 100
+  //   });
+  // }, [values.earnings, values.annual_ctc]);
 
   useEffect(() => {
-    const annualCtc = parseFloat(values.annual_ctc || 0);
-    const earningsTotal = values.earnings.reduce(
-      (sum, e) => (e.component_name !== 'Fixed Allowance' ? sum + parseFloat(e.annually || 0) : sum),
-      0
-    );
-    const annualFixed = annualCtc - earningsTotal;
-
-    setFixedAllowance({
-      monthly: Math.round((annualFixed / 12) * 100) / 100,
-      annually: Math.round(annualFixed * 100) / 100
-    });
-  }, [values.earnings, values.annual_ctc]);
+    let fa = values.earnings.find((e) => e.component_name === 'Fixed Allowance');
+    if (fa) {
+      setFixedAllowance({
+        monthly: fa.monthly,
+        annually: fa.annually
+      });
+    }
+  }, [values.earnings]);
   useEffect(() => {
     const annualCtc = parseFloat(values.annual_ctc || 0);
 
@@ -496,7 +523,9 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
       .filter((e) => e.component_name !== 'Fixed Allowance')
       .reduce((sum, e) => sum + parseFloat(e.annually || 0), 0);
 
-    const faAnnual = annualCtc - totalWithoutFA;
+    const benefitsTotal = values.benefits?.reduce((sum, b) => (b.annually !== 'NA' ? sum + parseFloat(b.annually || 0) : sum), 0) || 0;
+
+    const faAnnual = annualCtc - totalWithoutFA - benefitsTotal;
     const faMonthly = faAnnual / 12;
 
     const faIndex = finalEarnings.findIndex((e) => e.component_name === 'Fixed Allowance');
@@ -504,23 +533,66 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
       finalEarnings[faIndex] = {
         ...finalEarnings[faIndex],
         monthly: Math.round(faMonthly * 100) / 100,
-        annually: Math.round(faAnnual * 100)
+        annually: Math.round(faAnnual * 100) / 100
       };
     }
 
     setFieldValue('earnings', finalEarnings);
+    setFieldValue('errorMessage', ''); // ✅ clear previous error
+    setEnablePreviewButton(true);
   }, [values.annual_ctc]);
+  ////////////////
   useEffect(() => {
     if (!payrollId) return;
 
-    getEarnings_Details(payrollId); // dropdown always
+    // Always fetch earnings dropdown
+    getEarnings_Details(payrollId);
 
-    if (!template_id) {
-      setBasicFromMaster(payrollId); // for new template
-    } else {
-      fetch_individual_salary_templates(template_id); // existing
+    const timeout = setTimeout(() => {
+      const hasCreatedEmployeeId = !!createdEmployeeId;
+      const hasValuesId = !!values?.id;
+
+      if (!template_id) {
+        // New template
+        if (hasCreatedEmployeeId && !hasValuesId) {
+          setBasicFromMaster(payrollId); // ✅ Only call in this case
+        } else if (!hasCreatedEmployeeId && !hasValuesId) {
+          setBasicFromMaster(payrollId); // ✅ Also call if neither exists yet
+        }
+        // ❌ Do not call if both exist
+      } else {
+        // Existing template
+        fetch_individual_salary_templates(template_id);
+
+        if (hasCreatedEmployeeId && !hasValuesId) {
+          setBasicFromMaster(payrollId); // ✅ Only call here too
+        }
+      }
+    }, 200); // Wait 200ms to ensure async values are set
+
+    return () => clearTimeout(timeout); // Cleanup on unmount
+  }, [payrollId, template_id, createdEmployeeId, values?.id]);
+
+  // useEffect(() => {
+  //   if (!payrollId) return;
+
+  //   getEarnings_Details(payrollId); // dropdown always
+
+  //   if (!template_id) {
+  //     setBasicFromMaster(payrollId); // for new template
+  //   } else {
+  //     fetch_individual_salary_templates(template_id); // existing
+  //   }
+  // }, [payrollId, template_id]);
+  //////////////////
+  useEffect(() => {
+    const hasBenefits = values.benefits?.length > 0;
+    const hasDeductions = values.deductions?.length > 0;
+    if (hasBenefits || hasDeductions) {
+      setViewPreview(true);
     }
-  }, [payrollId, template_id]);
+  }, [values.benefits, values.deductions]);
+  // console.log(values.earnings);
   return (
     <TableContainer
       component={Paper}
@@ -597,7 +669,11 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
                         minWidth: '130px' // Keeps consistent spacing
                       }}
                     >
-                      {earning.calculation_type || '—'}
+                      {earning.component_name === 'Basic' && earning.calculation_type === 'Flat Amount'
+                        ? 'Flat Amount of CTC'
+                        : earning.component_name === 'Basic' && earning.calculation_type === 'Percentage of Basic'
+                          ? 'Percentage of CTC'
+                          : earning.calculation_type || '—'}
                     </Typography>
                   </Stack>
                 </TableCell>
@@ -605,9 +681,11 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
                 <TableCell>{earning.monthly.toFixed(2)}</TableCell>
                 <TableCell>{earning.annually.toFixed(2)}</TableCell>
                 <TableCell>
-                  <Button color="error" onClick={() => handleDeleteEarning(index)}>
-                    <IconTrash size={16} />
-                  </Button>
+                  {index !== 0 && (
+                    <Button color="error" onClick={() => handleDeleteEarning(index)}>
+                      <IconTrash size={16} />
+                    </Button>
+                  )}
                 </TableCell>
               </TableRow>
             ))}
@@ -617,7 +695,9 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
             </TableCell>
           </TableRow>
           <TableRow>
-            <TableCell>Fixed Allowance</TableCell>
+            <TableCell>
+              <Typography variant="h5">Fixed Allowance (Monthly CTC - Sum of all other components - Benefits)</Typography>
+            </TableCell>
             <TableCell>Remaining Balance</TableCell>
             <TableCell>
               <Typography sx={{ color: fixedAllowance.monthly < 0 ? 'error.main' : 'inherit' }}>
@@ -630,6 +710,7 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
               </Typography>
             </TableCell>
           </TableRow>
+
           <TableRow sx={{ backgroundColor: '#ede7f6', borderRadius: 2 }}>
             <TableCell sx={{ padding: 2 }}>
               <Stack direction="row" alignItems="center" spacing={1}>
@@ -656,10 +737,14 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
             </TableCell>
             <TableCell sx={{ padding: 2 }}></TableCell>
             <TableCell>
-              <Typography variant="h5">{values.gross_salary?.monthly?.toFixed(2) || '-'}</Typography>
+              <Typography variant="h5">
+                {typeof values.gross_salary?.monthly === 'number' ? values.gross_salary.monthly.toFixed(2) : '-'}
+              </Typography>
             </TableCell>
             <TableCell>
-              <Typography variant="h5">{values.gross_salary?.annually?.toFixed(2) || '-'}</Typography>
+              <Typography variant="h5">
+                {typeof values.gross_salary?.annually === 'number' ? values.gross_salary.annually.toFixed(2) : '-'}
+              </Typography>
             </TableCell>
             <TableCell></TableCell>
           </TableRow>

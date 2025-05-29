@@ -7,8 +7,9 @@ import RenderDialog from './RenderDialog';
 import { months } from 'utils/MonthsList';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
-export default function Attendance({ employeeMasterData, from, openDialog, fields, setOpenDialog, attendanceData, getAttandanceDataRef }) {
+export default function Attendance({ attendanceData, fetchAttendance, employeeMasterData, from, openDialog, fields, setOpenDialog }) {
   const headerData = [
+    'Employee ID',
     'Employee Name',
     'LOP',
     // 'Absent',
@@ -22,6 +23,7 @@ export default function Attendance({ employeeMasterData, from, openDialog, field
   ];
 
   const body_keys = [
+    'id',
     'employee_name',
     'loss_of_pay',
     'earned_leaves',
@@ -33,7 +35,6 @@ export default function Attendance({ employeeMasterData, from, openDialog, field
   ];
   const [payrollid, setPayrollId] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [data, setData] = useState([]);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [month, setMonth] = useState(null);
   const dispatch = useDispatch();
@@ -57,26 +58,12 @@ export default function Attendance({ employeeMasterData, from, openDialog, field
     if (financialYear) setFinancialYear(financialYear);
   }, [searchParams]);
 
-  const getAttandanceData = async () => {
-    if (!payrollid || !financialYear || !month) return;
-    setLoading(true);
-    const url = `/payroll/employee_attendance_filtered?payroll_id=${payrollid}&financial_year=${financialYear}&month=${month}`;
-    const { res, error } = await Factory('get', url, {});
-    setLoading(false);
-    if (res.status_cd === 0) {
-      setData(res.data || []);
-    } else {
-      dispatch(
-        openSnackbar({
-          open: true,
-          message: JSON.stringify(res.data.message),
-          variant: 'alert',
-          alert: { color: 'error' },
-          close: false
-        })
-      );
+  useEffect(() => {
+    if (payrollid && financialYear && month) {
+      fetchAttendance(); // Use parent-controlled fetch function
     }
-  };
+  }, [payrollid, financialYear, month]);
+
   const handleEdit = async (item) => {
     let url = `/payroll/employee-attendance/${item.id}`;
     const { res } = await Factory('get', url, {});
@@ -104,7 +91,7 @@ export default function Attendance({ employeeMasterData, from, openDialog, field
     }
   };
   const handleDelete = async (item) => {
-    let url = `/payroll/employee-exit/${item.id}`;
+    let url = `/payroll/employee-attendance/${item.id}`;
     const { res } = await Factory('delete', url, {});
     if (res.status_cd === 1) {
       dispatch(
@@ -126,31 +113,20 @@ export default function Attendance({ employeeMasterData, from, openDialog, field
           close: false
         })
       );
-      getAttandanceData();
+      fetchAttendance();
     }
   };
-  useEffect(() => {
-    if (payrollid && financialYear && month) {
-      getAttandanceData();
-    }
-  }, [payrollid, financialYear, month]);
-
-  useEffect(() => {
-    if (getAttandanceDataRef) {
-      getAttandanceDataRef.current = getAttandanceData;
-    }
-  }, [getAttandanceDataRef]);
 
   return (
     <>
       <RenderTable
         headerData={headerData}
-        tableData={data}
         handleEdit={handleEdit}
         handleDelete={handleDelete}
         body_keys={body_keys}
         selectedRecord={selectedRecord}
         setSelectedRecord={setSelectedRecord}
+        tableData={attendanceData}
       />
       <RenderDialog
         from={from}
@@ -158,10 +134,9 @@ export default function Attendance({ employeeMasterData, from, openDialog, field
         setOpenDialog={setOpenDialog}
         fields={fields}
         selectedRecord={selectedRecord}
-        setData={setData}
         setLoading={setLoading}
         employeeMasterData={employeeMasterData}
-        getAttandanceData={getAttandanceData}
+        getData={fetchAttendance}
       />
     </>
   );

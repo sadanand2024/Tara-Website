@@ -7,8 +7,19 @@ import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
 
 function NewJoiners() {
-  const headerData = ['Employee', 'Department', 'Designations', 'Joining', 'Total Days', 'Paid Days', 'Actual Gross', 'Actual CTC'];
+  const headerData = [
+    'Employee ID',
+    'Employee',
+    'Department',
+    'Designations',
+    'Joining',
+    'Total Days',
+    'Paid Days',
+    'Actual Gross',
+    'Actual CTC'
+  ];
   const body_keys = [
+    'id',
     'employee_name',
     'department_name',
     'designation_name',

@@ -1,23 +1,20 @@
 // material-ui
-import Button from '@mui/material/Button';
+import Box from '@mui/material/Box';
 import CardMedia from '@mui/material/CardMedia';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid2';
-import Link from '@mui/material/Link';
-import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import Box from '@mui/material/Box';
+import Document from 'assets/images/landing/Document.png';
+import invoicing from 'assets/images/landing/invoicing.png';
+import payroll from 'assets/images/landing/payroll.png';
+
+import Virtualcfo from 'assets/images/landing/Virtualcfo.png';
+import { useState } from 'react';
 
 // assets
-import { IconCircleCheck } from '@tabler/icons-react';
-import DownloadIcon from '@mui/icons-material/Download';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
-import SpeedIcon from '@mui/icons-material/Speed';
-import GppGoodIcon from '@mui/icons-material/GppGood';
 
-import LayerLeft from 'assets/images/landing/customization-left.png';
-import LayerRight from 'assets/images/landing/customization-right.png';
+
+// Placeholder imports for new card images (replace with actual paths)
 
 // ==============================|| LANDING - CUSTOMIZE ||============================== //
 
@@ -30,172 +27,131 @@ export default function CustomizeSection() {
     color: 'grey.900',
     svg: { color: 'secondary.main', minWidth: 20 }
   };
-  const benefitCards = [
+
+  const [hoveredCard, setHoveredCard] = useState(null);
+
+  const serviceCards = [
     {
-      title: 'Optimized Tax Efficiency',
+      title: 'Invoicing',
       description:
-        'Leverage built-in intelligence to reduce tax liabilities across GST, TDS, and Income Tax. Our clients maximize deductions and stay audit-ready year-round.',
-      icon: <AccountBalanceWalletIcon sx={{ color: '#ff9800', fontSize: 40 }} />,
-      bgColor: '#fff7e6'
+        'Generate, customize, and manage invoices seamlessly. Get paid faster with professional invoice solutions.',
+      image: invoicing,
     },
     {
-      title: 'Faster Financial Workflows',
+      title: 'Virtual CFO',
       description:
-        'From invoicing to payroll to filings — automate repetitive tasks and execute processes in a fraction of the time, freeing your team to focus on growth.',
-      icon: <SpeedIcon sx={{ color: '#43a047', fontSize: 40 }} />,
-      bgColor: '#eaffea'
+        'Get expert financial oversight, strategic insights, and performance tracking — without hiring a full-time CFO.',
+      image: Virtualcfo,
     },
     {
-      title: 'Proactive Compliance Engine',
+      title: 'Payroll',
       description:
-        'Stay ahead of deadlines with intelligent alerts, real-time rule updates, and end-to-end compliance workflows — built by financial experts for Indian regulations.',
-      icon: <GppGoodIcon sx={{ color: '#e91e63', fontSize: 40 }} />,
-      bgColor: '#ffeaf3'
-    }
+        'Simplify salary calculations, deductions, and payslip generation for your team in just a few clicks.',
+      image: payroll,
+    },
+    {
+      title: 'Document Wallet',
+      description:
+        'Securely store, manage, and access all your business documents anytime, anywhere — all in one place.',
+      image: Document,
+    },
   ];
 
   return (
-    <Container sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-      <Grid container spacing={{ xs: 1.5, sm: 2.5, md: 3, lg: 5 }} sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
-        <Grid sx={{ img: { width: '100%' } }} size={{ xs: 12, md: 6 }}>
-          <Stack sx={{ width: '75%', mb: 5, mx: 'auto' }}>
-            <CardMedia component="img" image={LayerLeft} alt="Layer" />
-          </Stack>
-        </Grid>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <Grid container spacing={2.5}>
-            <Grid size={12}>
-              <Typography
-                variant="h2"
-                sx={{
-                  fontWeight: 800,
-                  fontSize: { xs: '2.2rem', md: '3rem' },
-                  color: '#26334D'
-                }}
-              >
-                Redefining Financial Simplicity with Tara First
-              </Typography>
-              <Typography
-                variant="subtitle2"
-                sx={{
-                  color: 'text.primary',
-                  fontSize: '1.15rem',
-                  zIndex: '99',
-                  width: { xs: '100%', sm: '100%', md: 'calc(100% - 20%)' },
-                  mt: 2
-                }}
-              >
-                Tara First empowers individuals and businesses to take control of their finances through a unified fintech platform that
-                combines expert support, modern tools, and automated compliance — making finance stress-free and streamlined.
-              </Typography>
-              <Typography
-                variant="subtitle2"
-                sx={{
-                  color: 'text.primary',
-                  fontSize: '1.1rem',
-                  zIndex: '99',
-                  width: { xs: '100%', sm: '100%', md: 'calc(100% - 20%)' },
-                  mt: 2
-                }}
-              >
-                All your financial essentials. One powerful dashboard.
-              </Typography>
-            </Grid>
-            <Grid size={12}>
-              <Typography sx={listSX}>
-                <IconCircleCheck size={20} />
-                <b>All-in-One Dashboard</b>{' '}
-              </Typography>
-              <Typography sx={listSX}>
-                <IconCircleCheck size={20} />
-                <b>Smart Automation + Expert Advice</b>{' '}
-              </Typography>
-              <Typography sx={listSX}>
-                <IconCircleCheck size={20} />
-                <b>Security & Compliance First</b>{' '}
-              </Typography>
-              <Typography sx={listSX}>
-                <IconCircleCheck size={20} />
-                <b>Built for Businesses & Individuals</b>{' '}
-              </Typography>
-              <Button
-                sx={{
-                  boxShadow: 'none',
-                  background: '#673ab7',
-                  my: 4,
-                  color: '#fff',
-                  fontWeight: 600,
-                  fontSize: '1.1rem',
-                  px: 4,
-                  py: 1.5
-                }}
-                variant="contained"
-                component={Link}
-                href="#success-stories"
-                size="small"
-              >
-                See Tara First in Action
-              </Button>
-            </Grid>
-          </Grid>
-        </Grid>
+    <Container sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center',mt:-25 }}>
+      <Grid container spacing={{ xs: 1.5, sm: 2.5, md: 3, lg: 5 }} sx={{ justifyContent: 'center', alignItems: 'center' }}>
 
-        <Grid size={12} sx={{ mt: { xs: 6, md: 10 } }}>
-          <Grid container spacing={4} alignItems="flex-start" justifyContent="center">
-            <Grid item xs={12} md={6}>
-              <Typography
-                variant="h2"
-                sx={{
-                  fontWeight: 800,
-                  fontSize: { xs: '2.2rem', md: '3rem' },
-                  color: '#26334D'
-                }}
-              >
-                All our products at Tara First are designed to deliver
-              </Typography>
-            </Grid>
-          </Grid>
 
-          <Grid container spacing={4} sx={{ mt: { xs: 6, md: 10 } }} justifyContent="center">
-            {benefitCards.map((card, index) => (
-              <Grid key={index} item xs={12} md={4} sx={{ textAlign: 'center' }}>
-                <Box
-                  sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    p: 3,
-                    borderRadius: 3,
-                    bgcolor: '#f8fafc',
-                    boxShadow: 1,
-                    height: '100%'
-                  }}
-                >
-                  <Box
-                    sx={{
-                      bgcolor: card.bgColor,
-                      borderRadius: '50%',
-                      p: 2,
-                      mb: 2,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      boxShadow: 1
-                    }}
-                  >
-                    {card.icon}
-                  </Box>
-                  <Typography variant="h4" sx={{ mb: 1, color: '#26334D' }}>
-                    {card.title}
-                  </Typography>
-                  <Typography variant="h5" sx={{ color: 'text.secondary', maxWidth: 300 }}>
-                    {card.description}
-                  </Typography>
-                </Box>
-              </Grid>
-            ))}
-          </Grid>
-        </Grid>
+        {/* Section title */}
+
+
+        {/* New Card Section */}
+        <Grid size={12} sx={{ mt: { xs: 10 ,md: 10 } ,ml:{xs:12,lg:-4}}}>
+          <Grid container spacing={{ xs:2, sm: 3, md:10, lg:10}} justifyContent="center">
+             {serviceCards.map((card, index) => (
+               <Grid key={index} size={{ xs: 12, sm: 6, md:3 }} sx={{ textAlign: 'center' }}
+                 onMouseEnter={() => setHoveredCard(index)}
+                 onMouseLeave={() => setHoveredCard(null)}
+               >
+                 <Box
+                   sx={{
+                     display: 'flex',
+                     flexDirection: 'column',
+                     alignItems: 'center',
+                     p: 0,
+                     borderRadius: '8px',
+                     bgcolor: '#fff',
+                     boxShadow: 1,
+                     width: '280px',
+                     height: '413px',
+                     transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
+                     position: 'relative',
+                     border: '1px solid #e0e0e0',
+                     overflow: 'hidden',
+                     '&:hover': {
+                       transform: 'translateY(-10px)',
+                       boxShadow: 4,
+                     },
+                   }}>
+                   <CardMedia
+                     component="img"
+                     image={card.image}
+                     alt={card.title}
+                     sx={{
+                      width: '280px',
+                      height: '289px',
+                      objectFit: 'cover',
+                      display: 'block',
+                      borderTopLeftRadius: '8px',
+                      borderTopRightRadius: '8px'
+                     }}
+                   />
+                   <Box sx={{
+                       transition: 'transform 0.3s ease-in-out',
+                       transform: hoveredCard === index ? 'translateY(-70px)' : 'translateY(0)',
+                       bgcolor: '#fff',
+                       padding: '20px',
+                       position: 'absolute',
+                       bottom: 0,
+                       left: 0,
+                       right: 0,
+                       zIndex: 1,
+                       width: '100%',
+                       display: 'flex',
+                       flexDirection: 'column',
+                       alignItems: 'center',
+                       borderRadius: '0 0 8px 8px',
+                       boxSizing: 'border-box',
+                       height: '124px'
+                   }}>
+                     <Typography variant="h3"  textAlign:left sx={{ mt: 0, mb: 1, color:'#1565c0',}}>
+                       {card.title}
+                     </Typography>
+                     <Typography variant="h5" sx={{ mt:0, mb: 2, color: 'text.secondary'}}>
+                       {card.description}
+                     </Typography>
+                     <Typography
+                       variant="h5"
+                       sx={{
+                         mt: 0,
+                         color: '#1565c0',
+                         fontWeight: 500,
+                         cursor: 'pointer',
+                         '&:hover': {
+                           textDecoration: 'underline',
+                         },
+                       }}
+                     >
+                       Sign Up &rarr;
+                     </Typography>
+                   </Box>
+                 </Box>
+               </Grid>
+             ))}
+           </Grid>
+         </Grid>
+
+
       </Grid>
     </Container>
   );

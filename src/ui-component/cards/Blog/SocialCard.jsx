@@ -20,15 +20,15 @@ import LinkedInIcon from '@mui/icons-material/LinkedIn';
 // social data
 const socialData = [
   {
-    url: 'https://www.facebook.com/codedthemes/',
+    url: 'https://www.facebook.com/tarafirst/',
     icon: <FacebookIcon color="primary" />
   },
   {
-    url: 'https://x.com/codedthemes',
+    url: 'https://x.com/tarafirst',
     icon: <TwitterIcon color="primary" />
   },
   {
-    url: 'https://in.linkedin.com/company/codedthemes',
+    url: 'https://in.linkedin.com/company/tarafirst',
     icon: <LinkedInIcon color="primary" />
   }
 ];

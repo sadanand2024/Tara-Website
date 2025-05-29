@@ -1,30 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import {
-  Button,
-  Box,
-  Stack,
-  Typography,
-  FormControlLabel,
-  Checkbox,
-  TextField,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel
-} from '@mui/material';
-import Grid2 from '@mui/material/Grid2'; // Import Grid2 from MUI system
+import { Button, Box, Stack, Typography, FormControlLabel, Checkbox, TextField, Grid2 } from '@mui/material';
 import CustomInput from 'utils/CustomInput';
 import CustomAutocomplete from 'utils/CustomAutocomplete';
 import Factory from 'utils/Factory';
 import { useSearchParams } from 'react-router-dom';
 import Modal from 'ui-component/extended/Modal';
-
+import { useDispatch } from 'store';
+import { openSnackbar } from 'store/slices/snackbar';
 export default function LeaveManagementDialog({ open, handleClose, selectedRecord, type, setType, fetchLeaveManagementData }) {
   const [searchParams] = useSearchParams();
   const [payrollid, setPayrollId] = useState(null); // Payroll ID fetched from URL
-
+  const dispatch = useDispatch();
   // Update payroll ID from search params
   useEffect(() => {
     const id = searchParams.get('payrollid');
@@ -41,16 +29,42 @@ export default function LeaveManagementDialog({ open, handleClose, selectedRecor
   ];
 
   // Formik validation schema
-  const validationSchema = Yup.object({
+  const validationSchema = Yup.object().shape({
     name_of_leave: Yup.string().required('Name of Leave is required'),
     code: Yup.string().required('Code is required'),
     leave_type: Yup.string().required('Type is required'),
-    number_of_leaves: Yup.string().required('Number of leave days is required')
+    number_of_leaves: Yup.number()
+      .typeError('Number of leaves must be a number')
+      .positive('Number of leaves must be positive')
+      .required('Number of leave days is required'),
+    employee_leave_period: Yup.string().required('Leave period is required'),
+    reset_leave_balance_type: Yup.string().when('reset_leave_balance', {
+      is: true,
+      then: () => Yup.string().required('Reset leave balance type is required')
+    }),
+    max_carry_forward_days: Yup.number()
+      .transform((value, originalValue) => (originalValue === '' ? undefined : value))
+      .typeError('Max carry forward days must be a number')
+      .positive('Max carry forward days must be positive')
+      .when('carry_forward_unused_leaves', {
+        is: true,
+        then: (schema) => schema.required('Max carry forward days is required'),
+        otherwise: (schema) => schema.notRequired()
+      }),
+    encashment_days: Yup.number()
+      .transform((value, originalValue) => (originalValue === '' ? undefined : value))
+      .typeError('Encashment days must be a number')
+      .positive('Encashment days must be positive')
+      .when('encash_remaining_leaves', {
+        is: true,
+        then: (schema) => schema.required('Encashment days is required'),
+        otherwise: (schema) => schema.notRequired()
+      })
   });
 
   const formik = useFormik({
     initialValues: {
-      name_of_leave: ' ',
+      name_of_leave: '',
       code: '',
       leave_type: '',
       employee_leave_period: 'Monthly',
@@ -58,25 +72,49 @@ export default function LeaveManagementDialog({ open, handleClose, selectedRecor
       pro_rate_leave_balance_of_new_joinees_based_on_doj: false,
       carry_forward_unused_leaves: false,
       reset_leave_balance: false,
-      reset_leave_balance_type: null,
-      max_carry_forward_days: null,
+      reset_leave_balance_type: '',
+      max_carry_forward_days: '',
       encash_remaining_leaves: false,
-      encashment_days: null
+      encashment_days: ''
     },
     validationSchema,
+    validateOnChange: true,
+    validateOnBlur: true,
     onSubmit: async (values) => {
-      const postData = { ...values, payroll: Number(payrollid) };
+      const postData = {
+        ...values,
+        payroll: Number(payrollid),
+        number_of_leaves: Number(values.number_of_leaves),
+        max_carry_forward_days: values.max_carry_forward_days ? Number(values.max_carry_forward_days) : null,
+        encashment_days: values.encashment_days ? Number(values.encashment_days) : null
+      };
       const url = type === 'edit' ? `/payroll/leave-management/${selectedRecord?.id}` : '/payroll/leave-management';
       let postType = type === 'edit' ? 'put' : 'post';
 
       const { res, error } = await Factory(postType, url, postData);
       if (res?.status_cd === 0) {
-        // showSnackbar(postType === 'post' ? 'Data Saved Successfully' : 'Data Updated Successfully', 'success');
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: postType === 'post' ? 'Data Saved Successfully' : 'Data Updated Successfully',
+            variant: 'alert',
+            alert: { color: 'success' },
+            close: false
+          })
+        );
         handleClose();
         resetForm();
         fetchLeaveManagementData();
       } else {
-        // showSnackbar(JSON.stringify(res?.data?.data || error), 'error');
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: JSON.stringify(res?.data?.data || error),
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
       }
     }
   });
@@ -118,6 +156,7 @@ export default function LeaveManagementDialog({ open, handleClose, selectedRecor
     ));
   };
   const { values, setValues, errors, touched, handleSubmit, handleBlur, setFieldValue, resetForm } = formik;
+  console.log(errors);
   return (
     <Modal
       open={open}
@@ -154,25 +193,32 @@ export default function LeaveManagementDialog({ open, handleClose, selectedRecor
         </Grid2>
         <Box sx={{ mt: 2 }}>
           <Typography sx={{ mb: 2 }}>How many leaves do employees get ?</Typography>
-
-          <FormControl sx={{ minWidth: 120 }} size="small">
-            <InputLabel id="demo-select-small-label">Select</InputLabel>
-            <Select
-              value={values.employee_leave_period || ''}
-              label="Selct"
-              onChange={(e) => setFieldValue('employee_leave_period', e.target.value)}
-            >
-              <MenuItem value={'Monthly'}>Monthly</MenuItem>
-              <MenuItem value={'Yearly'}>Yearly</MenuItem>
-            </Select>
-          </FormControl>
-          <TextField
-            sx={{ ml: 2 }}
-            value={values.number_of_leaves}
-            onChange={(e) => setFieldValue('number_of_leaves', e.target.value)}
-            error={touched.number_of_leaves && Boolean(errors.number_of_leaves)}
-            helperText={touched.number_of_leaves && errors.number_of_leaves}
-          />
+          <Grid2 container spacing={2} alignItems="center">
+            <Grid2 size={{ xs: 6 }}>
+              <CustomAutocomplete
+                value={values.employee_leave_period || ''}
+                name="employee_leave_period"
+                options={['Monthly', 'Yearly']}
+                onChange={(e, newValue) => setFieldValue('employee_leave_period', newValue)}
+                onBlur={handleBlur}
+                error={touched.employee_leave_period && Boolean(errors.employee_leave_period)}
+                helperText={touched.employee_leave_period && errors.employee_leave_period}
+                sx={{ minWidth: 250, maxWidth: 250 }}
+                placeholder="Select"
+              />
+            </Grid2>
+            <Grid2 xs={6}>
+              <TextField
+                fullWidth
+                size="small"
+                value={values.number_of_leaves}
+                onChange={(e) => setFieldValue('number_of_leaves', e.target.value)}
+                onBlur={handleBlur}
+                error={touched.number_of_leaves && Boolean(errors.number_of_leaves)}
+                helperText={touched.number_of_leaves && errors.number_of_leaves}
+              />
+            </Grid2>
+          </Grid2>
         </Box>
         <Box sx={{ mt: 2 }}>
           <FormControlLabel
@@ -210,17 +256,17 @@ export default function LeaveManagementDialog({ open, handleClose, selectedRecor
                 />
               }
             />
-            <FormControl sx={{ m: 1, minWidth: 120, mt: 0 }} size="small">
-              <InputLabel id="demo-select-small-label">Select</InputLabel>
-              <Select
-                value={values.reset_leave_balance_type || ''}
-                label="Selct"
-                onChange={(e) => setFieldValue('reset_leave_balance_type', e.target.value)}
-              >
-                <MenuItem value={'Monthly'}>Monthly</MenuItem>
-                <MenuItem value={'Yearly'}>Yearly</MenuItem>
-              </Select>
-            </FormControl>
+            <CustomAutocomplete
+              value={values.reset_leave_balance_type || ''}
+              name="reset_leave_balance_type"
+              options={['Monthly', 'Yearly']}
+              onChange={(e, newValue) => setFieldValue('reset_leave_balance_type', newValue)}
+              onBlur={handleBlur}
+              error={touched.reset_leave_balance_type && Boolean(errors.reset_leave_balance_type)}
+              helperText={touched.reset_leave_balance_type && errors.reset_leave_balance_type}
+              sx={{ minWidth: 200, maxWidth: 200, ml: 1 }}
+              placeholder="Select"
+            />
           </Box>
           {values.reset_leave_balance && (
             <Box sx={{ ml: 2 }}>
@@ -237,10 +283,13 @@ export default function LeaveManagementDialog({ open, handleClose, selectedRecor
                 }
               />
               <TextField
-                value={values.max_carry_forward_days}
+                value={
+                  values.max_carry_forward_days === undefined || values.max_carry_forward_days === null ? '' : values.max_carry_forward_days
+                }
                 onChange={(e) => setFieldValue('max_carry_forward_days', e.target.value)}
-                error={touched.max_carry_forward_days && Boolean(errors.max_carry_forward_days)}
-                helperText={touched.max_carry_forward_days && errors.max_carry_forward_days}
+                onBlur={handleBlur}
+                error={values.carry_forward_unused_leaves && touched.max_carry_forward_days && Boolean(errors.max_carry_forward_days)}
+                helperText={values.carry_forward_unused_leaves && touched.max_carry_forward_days && errors.max_carry_forward_days}
               />
               <Box sx={{ mt: 2 }}>
                 <FormControlLabel
@@ -256,10 +305,11 @@ export default function LeaveManagementDialog({ open, handleClose, selectedRecor
                   }
                 />
                 <TextField
-                  value={values.encashment_days}
+                  value={values.encashment_days === undefined || values.encashment_days === null ? '' : values.encashment_days}
                   onChange={(e) => setFieldValue('encashment_days', e.target.value)}
-                  error={touched.encashment_days && Boolean(errors.encashment_days)}
-                  helperText={touched.encashment_days && errors.encashment_days}
+                  onBlur={handleBlur}
+                  error={values.encash_remaining_leaves && touched.encashment_days && Boolean(errors.encashment_days)}
+                  helperText={values.encash_remaining_leaves && touched.encashment_days && errors.encashment_days}
                 />
               </Box>
             </Box>

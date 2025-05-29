@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import { IconPlus } from '@tabler/icons-react';
 import { useSearchParams } from 'react-router-dom';
-
+import DeleteDialog from 'ui-component/extended/DeleteDialog';
 import MainCard from 'ui-component/cards/MainCard';
 import CustomAutocomplete from 'utils/CustomAutocomplete';
 import ActionCell from 'ui-component/extended/ActionCell';
@@ -24,7 +24,9 @@ import LeaveManagementDialog from './LeaveManagementDialog';
 import Factory from 'utils/Factory';
 import { openSnackbar } from 'store/slices/snackbar';
 import { useDispatch } from 'store';
-const ROWS_PER_PAGE = 5;
+import { IconButton } from '@mui/material';
+import { Edit, Delete } from '@mui/icons-material';
+import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
 
 function LeaveManagement() {
   const [leaveType, setLeaveType] = useState('Paid');
@@ -38,7 +40,16 @@ function LeaveManagement() {
   const [postType, setPostType] = useState('');
   const [searchParams] = useSearchParams();
   const dispatch = useDispatch();
-
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [selectedRow, setSelectedRow] = useState(null);
+  const handleOpenDeleteDialog = (designation) => {
+    setSelectedRow(designation);
+    setOpenDeleteDialog(true);
+  };
+  const handleConfirmDelete = () => {
+    handleDelete(selectedRow);
+    setOpenDeleteDialog(false);
+  };
   useEffect(() => {
     const id = searchParams.get('payrollid');
     if (id) setPayrollId(id);
@@ -85,7 +96,7 @@ function LeaveManagement() {
     setDialogOpen(true);
   };
 
-  const paginatedData = filteredData.slice((page - 1) * ROWS_PER_PAGE, page * ROWS_PER_PAGE);
+  const paginatedData = filteredData.slice((page - 1) * rowsPerPage, page * rowsPerPage);
 
   return (
     <MainCard
@@ -113,10 +124,10 @@ function LeaveManagement() {
           </Stack>
         ) : (
           <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 1 }}>
-            <Table>
+            <Table size="small">
               <TableHead>
                 <TableRow sx={{ bgcolor: 'grey.100' }}>
-                  {['Leave Name', 'Code', 'Type', 'Period', 'No of Leaves', 'Actions'].map((head, idx) => (
+                  {['S.No', 'Leave Name', 'Code', 'Type', 'Period', 'No of Leaves', 'Actions'].map((head, idx) => (
                     <TableCell key={idx} align="center" sx={{ fontWeight: 'bold' }}>
                       {head}
                     </TableCell>
@@ -131,39 +142,45 @@ function LeaveManagement() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  paginatedData.map((item) => (
+                  paginatedData.map((item, index) => (
                     <TableRow key={item.id}>
+                      <TableCell align="center">{index + 1}</TableCell>
                       <TableCell align="center">{item.name_of_leave}</TableCell>
                       <TableCell align="center">{item.code}</TableCell>
                       <TableCell align="center">{item.leave_type}</TableCell>
                       <TableCell align="center">{item.employee_leave_period}</TableCell>
                       <TableCell align="center">{item.number_of_leaves}</TableCell>
                       <TableCell align="center">
-                        <ActionCell
-                          row={item}
-                          onEdit={() => openDialog('edit', item)}
-                          onDelete={() => handleDelete(item)}
-                          open={dialogOpen}
-                          onClose={() => setDialogOpen(false)}
-                          deleteDialogData={{
-                            title: 'Delete Leave',
-                            heading: 'Are you sure you want to delete this Leave?',
-                            description: `This action will remove ${item.name_of_leave}.`,
-                            successMessage: 'Leave deleted successfully'
-                          }}
-                        />
+                        <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
+                          <IconButton color="primary" onClick={() => openDialog('edit', item)}>
+                            <Edit />
+                          </IconButton>
+                          <IconButton color="error" onClick={() => handleOpenDeleteDialog(item)}>
+                            <Delete />
+                          </IconButton>
+                        </Box>
                       </TableCell>
                     </TableRow>
                   ))
                 )}
               </TableBody>
             </Table>
+            <DeleteDialog
+              open={openDeleteDialog}
+              onClose={() => setOpenDeleteDialog(false)}
+              onConfirm={handleConfirmDelete}
+              dialogData={{
+                title: 'Delete Record',
+                heading: 'Are you sure you want to delete this Record?',
+                description: 'This action will permanently delete the record.'
+              }}
+            />
           </TableContainer>
         )}
         {filteredData.length > 0 && (
           <Stack direction="row" justifyContent="center" py={2}>
             <Pagination
-              count={Math.ceil(filteredData.length / ROWS_PER_PAGE)}
+              count={Math.ceil(filteredData.length / rowsPerPage)}
               page={page}
               onChange={(_, val) => setPage(val)}
               shape="rounded"

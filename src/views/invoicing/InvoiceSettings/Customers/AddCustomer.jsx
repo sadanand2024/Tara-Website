@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { Button, Grid, Stack, Typography, Box, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio } from '@mui/material';
+import { Button, Grid2, Stack, Typography, Box, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio } from '@mui/material';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
 import Modal from 'ui-component/extended/Modal';
@@ -10,6 +10,8 @@ import CustomAutocomplete from 'utils/CustomAutocomplete';
 import Factory from 'utils/Factory';
 import { indian_States_And_UTs } from 'utils/indian_States_And_UT';
 import { CountriesList } from 'utils/CountriesList';
+import { businessTypesArray } from 'utils/businessTypesArray';
+import { entity_choices } from 'utils/Entity-types';
 
 const gstTypes = [
   'Registered Business - Regular',
@@ -29,6 +31,7 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
   const formik = useFormik({
     initialValues: {
       name: '',
+      entity_type: '',
       pan_number: '',
       gst_registered: 'No',
       gstin: 'NA',
@@ -40,10 +43,11 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
       postal_code: '',
       email: '',
       mobile_number: '',
-      opening_balance: ''
+      opening_balance: 0
     },
     validationSchema: Yup.object({
       name: Yup.string().required('Customer Name is required'),
+      entity_type: Yup.string().required('Entity Type is required'),
       pan_number: Yup.string()
         .matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN format')
         .required('PAN is required'),
@@ -125,6 +129,7 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
     if (type === 'edit' && selectedCustomer) {
       setValues({
         name: selectedCustomer.name || '',
+        entity_type: selectedCustomer.entity_type || '',
         pan_number: selectedCustomer.pan_number || '',
         gst_registered: selectedCustomer.gst_registered || 'No',
         gstin: selectedCustomer.gstin || '',
@@ -136,7 +141,7 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
         postal_code: selectedCustomer.postal_code || '',
         email: selectedCustomer.email || '',
         mobile_number: selectedCustomer.mobile_number || '',
-        opening_balance: selectedCustomer.opening_balance || ''
+        opening_balance: selectedCustomer.opening_balance || 0
       });
     }
   }, [type, selectedCustomer]);
@@ -144,9 +149,10 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
   const fields = [
     { name: 'name', label: 'Customer Name' },
     { name: 'pan_number', label: 'PAN' },
+    { name: 'entity_type', label: 'Entity Type' },
     { name: 'gst_registered', label: 'GST Registered' },
-    { name: 'gstin', label: 'GSTIN' },
-    { name: 'gst_type', label: 'GST Type' },
+    { name: 'gst_type', label: 'GST Type' }, // Show if gst_registered is true
+    { name: 'gstin', label: 'GSTIN' }, // Show if gst_registered is true
     { name: 'address_line1', label: 'Address Line 1' },
     { name: 'address_line2', label: 'Address Line 2' },
     { name: 'country', label: 'Country' },
@@ -166,7 +172,7 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
         resetForm(); // Optional
         handleClose(); // <- this closes the modal
       }}
-      header={{ title: type === 'edit' ? 'Update Customer' : 'Add New Customer' }}
+      title={type === 'edit' ? 'Update Customer' : 'Add New Customer'}
       footer={
         <Stack direction="row" spacing={2} justifyContent="space-between" sx={{ width: '100%' }}>
           <Button
@@ -187,9 +193,9 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
       }
     >
       <Box component="form" onSubmit={handleSubmit} sx={{ p: 2 }}>
-        <Grid container spacing={2}>
+        <Grid2 container spacing={2}>
           {fields.map((field) => (
-            <Grid item xs={12} sm={6} key={field.name}>
+            <Grid2 size={{ xs: 12, sm: 6 }} key={field.name}>
               {field.name === 'gst_registered' ? (
                 <FormControl fullWidth>
                   <FormLabel>{field.label}</FormLabel>
@@ -213,7 +219,7 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
                     <FormControlLabel value="No" control={<Radio />} label="No" />
                   </RadioGroup>
                 </FormControl>
-              ) : field.name === 'gst_type' || field.name === 'state' || field.name === 'country' ? (
+              ) : field.name === 'gst_type' || field.name === 'state' || field.name === 'country' || field.name === 'entity_type' ? (
                 <>
                   <Typography sx={{ mb: 1 }}>
                     {field.label} <span style={{ color: 'red' }}>*</span>
@@ -222,7 +228,17 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
                     name={field.name}
                     value={values[field.name]}
                     onChange={(e, val) => setFieldValue(field.name, val)}
-                    options={field.name === 'gst_type' ? gstTypes : field.name === 'state' ? indian_States_And_UTs : CountriesList}
+                    options={
+                      field.name === 'gst_type'
+                        ? gstTypes
+                        : field.name === 'state'
+                          ? indian_States_And_UTs
+                          : field.name === 'entity_type'
+                            ? values.pan_number && values.pan_number.length >= 4
+                              ? businessTypesArray[values.pan_number[3]] || entity_choices
+                              : entity_choices
+                            : CountriesList
+                    }
                     error={touched[field.name] && Boolean(errors[field.name])}
                     helperText={touched[field.name] && errors[field.name]}
                   />
@@ -248,9 +264,9 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
                   />
                 </>
               )}
-            </Grid>
+            </Grid2>
           ))}
-        </Grid>
+        </Grid2>
       </Box>
     </Modal>
   );

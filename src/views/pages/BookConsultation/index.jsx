@@ -1,26 +1,27 @@
-import React, { useState } from 'react';
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import Card from '@mui/material/Card';
-import Button from '@mui/material/Button';
-import IconButton from '@mui/material/IconButton';
-import TextField from '@mui/material/TextField';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
-import PublicIcon from '@mui/icons-material/Public';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import { useTheme } from '@mui/material/styles';
-import useMediaQuery from '@mui/material/useMediaQuery';
+import PublicIcon from '@mui/icons-material/Public';
 import { Link } from '@mui/material';
-
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Card from '@mui/material/Card';
+import IconButton from '@mui/material/IconButton';
+import { useTheme } from '@mui/material/styles';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import axios from 'axios';
+import { useSnackbar } from 'notistack';
+import { useState } from 'react';
 // Common styles
 const styles = {
   pageWrapper: {
-    minHeight: '100vh',
+    minHeight: '80vh',
     display: 'flex',
     justifyContent: 'center',
-    alignItems: 'center',
+    // alignItems: 'center',
     py: 4,
     px: { xs: 2, sm: 4 },
     mt: { xs: 4, sm: 0 }
@@ -68,14 +69,14 @@ const styles = {
   timeSlotsWrapper: {
     minWidth: { xs: '100%', sm: 260 },
     flex: { xs: '0 0 auto', sm: 1 },
-    pt: { xs: 3, sm: 5 },
+    pt: { sm: 0, md: 5 },
     px: { xs: 3, sm: 0 },
     pr: { sm: 4 },
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    height: { xs: '100%', sm: 'auto' }
+    height: { xs: 'auto', sm: 'auto' }
   },
   timeSlotsList: {
     display: 'flex',
@@ -157,6 +158,7 @@ function generateTimeSlots(date) {
 const daysInMonth = (month, year) => new Date(year, month + 1, 0).getDate();
 
 const BookConsultationPage = () => {
+  const { enqueueSnackbar } = useSnackbar();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const today = new Date();
@@ -173,6 +175,14 @@ const BookConsultationPage = () => {
   const days = daysInMonth(month, year);
   const selectedDateObj = new Date(year, month, selectedDate);
   const timeSlots = generateTimeSlots(selectedDateObj);
+
+  const handleReset = () => {
+    setStep('calendar');
+    setSelectedDate(today.getDate());
+    setSelectedTime('');
+    setForm({ name: '', email: '', mobile_number: '', notes: '' });
+    setErrors({});
+  };
 
   // Calendar navigation
   const handlePrevMonth = () => {
@@ -232,6 +242,9 @@ const BookConsultationPage = () => {
     if (!form.email.trim()) newErrors.email = 'Email is required.';
     else if (!/^\S+@\S+\.\S+$/.test(form.email)) newErrors.email = 'Enter a valid email address.';
     if (!form.mobile_number.trim() || form.mobile_number.length !== 10) newErrors.mobile_number = 'Mobile Number is required.';
+    // Notes validation
+    if (!form.notes || form.notes.length < 30) newErrors.notes = 'Please enter at least 30 characters.';
+    else if (form.notes.length > 200) newErrors.notes = 'Maximum 200 characters allowed.';
     return newErrors;
   };
 
@@ -249,19 +262,35 @@ const BookConsultationPage = () => {
     const formattedDate = selectedDateObj.toISOString().split('T')[0];
 
     let data = {
-      date: formattedDate,
-      firstName: form.name,
-      email: form.email,
-      message: form.notes,
-      time: selectedTime,
-      phone: form.mobile_number,
       name: form.name,
-      mobile_number: form.mobile_number
+      email: form.email,
+      mobile_number: form.mobile_number,
+      message: form.notes,
+      date: formattedDate,
+      time: selectedTime
     };
 
     if (Object.keys(newErrors).length === 0) {
-      // Submit form or show success
       console.log('Submitting data:', data);
+      const apiUrl = `${import.meta.env.VITE_APP_BASE_URL}/user_management/consultation`;
+      axios
+        .post(apiUrl, data)
+        .then((response) => {
+          console.log(response);
+          enqueueSnackbar('Consultation booked successfully!', {
+            variant: 'success',
+            anchorOrigin: { vertical: 'top', horizontal: 'right' },
+            autoHideDuration: 3000
+          });
+          handleReset();
+        })
+        .catch((error) => {
+          enqueueSnackbar('Error booking consultation!', {
+            variant: 'error',
+            anchorOrigin: { vertical: 'top', horizontal: 'right' },
+            autoHideDuration: 3000
+          });
+        });
     }
   };
 
@@ -443,7 +472,7 @@ const BookConsultationPage = () => {
           </Box>
           {/* Calendar Days */}
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1, px: 0.5 }}>
-            {['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'].map((d) => (
+            {['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'].map((d) => (
               <Typography
                 key={d}
                 variant="caption"
@@ -460,31 +489,38 @@ const BookConsultationPage = () => {
             ))}
           </Box>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 2, px: 0.5 }}>
-            {[...Array(days)].map((_, i) => {
-              const day = i + 1;
-              const isSelected = day === selectedDate;
-              const disabled = isPastDate(day);
-              return (
-                <Button
-                  key={day}
-                  variant={isSelected ? 'contained' : disabled ? 'text' : 'outlined'}
-                  color={isSelected ? 'primary' : 'inherit'}
-                  disabled={disabled}
-                  sx={{
-                    ...styles.calendarButton,
-                    bgcolor: isSelected ? theme.palette.primary.main : 'none',
-                    color: isSelected ? '#fff' : disabled ? theme.palette.text.secondary : theme.palette.text.secondary,
-                    border: isSelected ? `1.5px solid ${theme.palette.primary.main}` : 'none',
-                    boxShadow: isSelected ? 2 : 0,
-                    cursor: disabled ? 'not-allowed' : 'pointer',
-                    opacity: disabled ? 0.5 : 1
-                  }}
-                  onClick={() => !disabled && setSelectedDate(day)}
-                >
-                  {day}
-                </Button>
-              );
-            })}
+            {(() => {
+              const firstDayOfMonth = new Date(year, month, 1).getDay();
+              const paddingDays = Array(firstDayOfMonth).fill(null);
+              const monthDays = [...Array(days)].map((_, i) => i + 1);
+              return [...paddingDays, ...monthDays].map((day, i) => {
+                if (day === null) {
+                  return <Box key={`padding-${i}`} sx={{ width: { xs: 32, sm: 36 }, height: 36 }} />;
+                }
+                const isSelected = day === selectedDate;
+                const disabled = isPastDate(day);
+                return (
+                  <Button
+                    key={day}
+                    variant={isSelected ? 'contained' : disabled ? 'text' : 'outlined'}
+                    color={isSelected ? 'primary' : 'inherit'}
+                    disabled={disabled}
+                    sx={{
+                      ...styles.calendarButton,
+                      bgcolor: isSelected ? theme.palette.primary.main : 'none',
+                      color: isSelected ? '#fff' : disabled ? theme.palette.text.secondary : theme.palette.text.secondary,
+                      border: isSelected ? `1.5px solid ${theme.palette.primary.main}` : 'none',
+                      boxShadow: isSelected ? 2 : 0,
+                      cursor: disabled ? 'not-allowed' : 'pointer',
+                      opacity: disabled ? 0.5 : 1
+                    }}
+                    onClick={() => !disabled && setSelectedDate(day)}
+                  >
+                    {day}
+                  </Button>
+                );
+              });
+            })()}
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2, mt: 1 }}>
             <Typography variant="body2" sx={{ color: theme.palette.text.secondary, fontWeight: 500, fontSize: { xs: 13, sm: 15 } }}>
@@ -640,13 +676,26 @@ const BookConsultationPage = () => {
           <Typography variant="subtitle1" sx={{ textAlign: 'left', mb: 0.5, color: theme.palette.text.primary }}>
             Please share anything that will help prepare for our meeting.
           </Typography>
+
           <TextField
             fullWidth
             multiline
             minRows={{ xs: 2, sm: 3 }}
             sx={styles.textField}
             value={form.notes}
-            onChange={handleFormChange('notes')}
+            onChange={(e) => {
+              if (e.target.value.length <= 200) {
+                handleFormChange('notes')(e);
+              }
+            }}
+            error={!!errors.notes}
+            helperText={
+              errors.notes
+                ? errors.notes
+                : `${form.notes.length}/200 characters` +
+                  (form.notes.length > 0 && form.notes.length < 30 ? ' (minimum 30 characters)' : '')
+            }
+            inputProps={{ maxLength: 200 }}
           />
           <Typography variant="caption" sx={{ color: theme.palette.text.secondary, mb: 2, display: 'block' }}>
             By proceeding, you confirm that you have read and agree to{' '}
@@ -682,12 +731,32 @@ const BookConsultationPage = () => {
   );
 
   return (
-    <Box sx={{ ...styles.pageWrapper, bgcolor: theme.palette.background.default }}>
-      <Card sx={styles.card}>
-        {renderLeftPanel()}
-        {step === 'calendar' ? renderCalendarView() : renderDetailsForm()}
-      </Card>
-    </Box>
+    <>
+      <Box
+        sx={{
+          mx: 'auto',
+          mt: { xs: 10, md: 8 },
+          mb: 0,
+          display: 'flex',
+          flexDirection: { xs: 'column', md: 'row' },
+          alignItems: { md: 'center' },
+          boxShadow: 0
+        }}
+      >
+        <Box sx={{ flex: 1 }}>
+          <Typography variant="h1" color="primary.main" gutterBottom>
+            Book a Consultation
+          </Typography>
+          <Typography color="text.secondary">Let’s Talk – Book Your Consultation Now! </Typography>
+        </Box>
+      </Box>
+      <Box sx={{ ...styles.pageWrapper, bgcolor: theme.palette.background.default }}>
+        <Card sx={styles.card}>
+          {renderLeftPanel()}
+          {step === 'calendar' ? renderCalendarView() : renderDetailsForm()}
+        </Card>
+      </Box>
+    </>
   );
 };
 

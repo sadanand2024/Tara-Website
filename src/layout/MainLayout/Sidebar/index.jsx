@@ -108,7 +108,7 @@ function Sidebar() {
         >
           {/* {downMD && logo} */}
           <Link to="/dashboard/business">
-            <CardMedia component="img" src={Tarafirstlogo_png} alt="Tarafirst Logo" sx={{ width: 150 }} />
+            <CardMedia component="img" src={Tarafirstlogo_png} alt="Tara First Logo" sx={{ width: 150 }} />
           </Link>
           {drawer}
         </Drawer>

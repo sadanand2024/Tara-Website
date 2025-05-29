@@ -7,6 +7,7 @@ import RenderDialog from './RenderDialog';
 
 export default function LoansAndAdvances({ employeeMasterData, from, openDialog, fields, setOpenDialog }) {
   const headerData = [
+    'Employee ID',
     'Employee Name',
     'Department',
     'Designation',
@@ -18,6 +19,7 @@ export default function LoansAndAdvances({ employeeMasterData, from, openDialog,
     'Current Deduction'
   ];
   const body_keys = [
+    'id',
     'employee_name',
     'department',
     'designation',

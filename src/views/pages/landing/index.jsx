@@ -11,6 +11,7 @@ import FeatureSection from './FeatureSection';
 import FooterSection from './FooterSection';
 import HeaderSection from './HeaderSection';
 import PreBuildDashBoard from './PreBuildDashBoard';
+
 import StartupProjectSection from './StartupProjectSection';
 //import IncludeSection from './IncludeSection';
 //import RtlInfoSection from './RtlInfoSection';
@@ -30,34 +31,35 @@ export default function Landing() {
         sx={{
           overflowX: 'hidden',
           overflowY: 'clip',
-          background:
-            theme.palette.mode === ThemeMode.DARK
-              ? theme.palette.background.default
-              : `linear-gradient(360deg, ${theme.palette.grey[100]} 1.09%, ${theme.palette.background.paper} 100%)`
+          background: 'linear-gradient(to left, #9DB0FF 0%, #F0F3FF 50%, #FFFFFF 100%)',
         }}
       >
         <AppBar />
-
+        <Box sx={{ py: 12.5, bgcolor: theme.palette.mode === ThemeMode.DARK ? 'background.default' : 'transparent' }}>
         <HeaderSection />
+        </Box>
       </Box>
 
       {/* 2. card section */}
-      <Box sx={{ py: 12.5, bgcolor: theme.palette.mode === ThemeMode.DARK ? 'dark.dark' : 'background.default' }}>
-        <CardSection />
-      </Box>
+      
 
       {/* 4. Developer Experience section */}
-      <Box sx={{ py: 12.5, bgcolor: theme.palette.mode === ThemeMode.DARK ? 'background.default' : 'grey.100' }}>
+      <Box sx={{ py: 12.5, bgcolor: theme.palette.mode === ThemeMode.DARK ?  background: 'linear-gradient(to left, #9DB0FF 0%, #F0F3FF 50%, #FFFFFF 100%)',mt:-20 }}>
         <CustomizeSection />
+      </Box>
+       {/* 2. card section */}
+      <Box sx={{ py:0, bgcolor: theme.palette.mode === ThemeMode.DARK ? 'dark.dark' : 'background.default',mt:-50 }}>
+        <CardSection />
+      </Box>
+        <Box sx={{ py: 0 }}>
+        <StartupProjectSection />
       </Box>
 
       {/* 3. about section */}
-      <Box sx={{ py: 12.5, bgcolor: theme.palette.mode === ThemeMode.DARK ? 'dark.dark' : 'background.default' }}>
-        <FeatureSection />
-      </Box>
+     
 
       {/* 4. Apps */}
-      <Box sx={{ py: 12.5, bgcolor: theme.palette.mode === ThemeMode.DARK ? 'background.default' : 'grey.100' }}>
+      <Box sx={{ py:0.01, bgcolor: theme.palette.mode === ThemeMode.DARK ? 'background.default' : 'white',mt:-2}}>
         <PreBuildDashBoard />
       </Box>
 
@@ -65,14 +67,14 @@ export default function Landing() {
       {/* <Box sx={{ py: 12.5, bgcolor: theme.palette.mode === ThemeMode.DARK ? 'dark.dark' : 'background.default' }}>
         <PeopleSection />
       </Box> */}
-
-      {/* 6. startup section */}
-      <Box sx={{ py: 0 }}>
-        <StartupProjectSection />
+       <Box sx={{ py:10, bgcolor: theme.palette.mode === ThemeMode.DARK ? 'dark.dark' : 'background.default' }}>
+        <FeatureSection />
       </Box>
 
-      {/* multi-language section */}
+      {/* 6. startup section */}
+     
 
+      {/* multi-language section */}
       {/*  <Box sx={{ py: 0 }}>
               <RtlInfoSection />
           </Box> */}
@@ -88,7 +90,7 @@ export default function Landing() {
           </Box>
           */}
       {/* footer section */}
-      <Box sx={{ py: 12.5, bgcolor: theme.palette.mode === ThemeMode.DARK ? 'background.default' : 'dark.900', pb: 0 }}>
+      <Box sx={{ py: 12.5, bgcolor: theme.palette.mode === ThemeMode.DARK ? 'background.default' : 'dark.900', pb: 0 ,textAlign: 'left',mt:-11}}>
         <FooterSection />
       </Box>
       <Customization />

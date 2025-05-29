@@ -8,9 +8,9 @@ import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
 
 export default function BonusAndIncentives({ employeeMasterData, from, openDialog, fields, setOpenDialog }) {
-  const headerData = ['Employee Name', 'Department', 'Designation', 'Type', 'Amount', 'Month', 'Financial Year'];
+  const headerData = ['Employee ID', 'Employee Name', 'Department', 'Designation', 'Type', 'Amount', 'Month', 'Financial Year'];
 
-  const body_keys = ['employee', 'department', 'designation', 'bonus_type', 'amount', 'month', 'financial_year'];
+  const body_keys = ['id', 'employee_name', 'department', 'designation', 'bonus_type', 'amount', 'month', 'financial_year'];
   const [payrollid, setPayrollId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]);
@@ -40,7 +40,7 @@ export default function BonusAndIncentives({ employeeMasterData, from, openDialo
 
   const getData = async () => {
     setLoading(true);
-    const year = financialYear.split('-')[1];
+    const year = financialYear.split('-')[0];
     const url = `/payroll/bonus-incentives/by-payroll-month?payroll_id=${payrollid}&month=${month}&year=${year}`;
     const { res, error } = await Factory('get', url, {});
     setLoading(false);

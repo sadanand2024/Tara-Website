@@ -55,7 +55,7 @@ export default function AwsCognitoLogin({ loginProp }, { ...others }) {
   return (
     <Formik
       initialValues={{
-        email: 'info@codedthemes.com',
+        email: 'info@tarafirst.com',
         password: '123456',
         submit: null
       }}

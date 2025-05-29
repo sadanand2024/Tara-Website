@@ -5,11 +5,25 @@ import AddCustomer from './AddCustomer';
 import ActionCell from '../../../../ui-component/extended/ActionCell';
 import EmptyDataPlaceholder from 'ui-component/extended/EmptyDataPlaceholder';
 import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
+import DeleteDialog from 'ui-component/extended/DeleteDialog'; // adjust path accordingly
+import { IconButton, Tooltip } from '@mui/material'; // Add these if not already
+import { Edit, Delete } from '@mui/icons-material';
 const CustomerList = ({ type, open, handleOpen, handleClose, setType, businessDetailsData, getCustomersData, customersListData }) => {
   const [customers, setCustomers] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [selectedRow, setSelectedRow] = useState(null);
 
+  const handleOpenDeleteDialog = (row) => {
+    setSelectedRow(row);
+    setOpenDeleteDialog(true);
+  };
+
+  const handleConfirmDelete = () => {
+    handleDelete(selectedRow);
+    setOpenDeleteDialog(false);
+  };
   const handlePageChange = (event, value) => {
     setCurrentPage(value);
   };
@@ -37,7 +51,7 @@ const CustomerList = ({ type, open, handleOpen, handleClose, setType, businessDe
   return (
     <>
       <TableContainer component={Paper} sx={{ mt: 2, borderRadius: 2, boxShadow: 1 }}>
-        <Table sx={{ minWidth: 750 }}>
+        <Table sx={{ minWidth: 750 }} size="small">
           <TableHead>
             <TableRow sx={{ bgcolor: 'grey.100' }}>
               <TableCell>Name</TableCell>
@@ -74,25 +88,30 @@ const CustomerList = ({ type, open, handleOpen, handleClose, setType, businessDe
                   <TableCell>{customer.mobile_number}</TableCell>
                   <TableCell>{customer.opening_balance}</TableCell>
                   <TableCell align="center">
-                    <ActionCell
-                      row={customer}
-                      onEdit={() => handleEdit(customer)}
-                      onDelete={() => handleDelete(customer)}
-                      open={open}
-                      onClose={handleClose}
-                      deleteDialogData={{
-                        title: 'Delete Customer',
-                        heading: 'Are you sure you want to delete this customer?',
-                        description: `This action will remove ${customer.name} from the list.`,
-                        successMessage: 'Customer has been deleted.'
-                      }}
-                    />
+                    <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
+                      <IconButton color="primary" onClick={() => handleEdit(customer)}>
+                        <Edit />
+                      </IconButton>
+                      <IconButton color="error" onClick={() => handleOpenDeleteDialog(customer)}>
+                        <Delete />
+                      </IconButton>
+                    </Box>
                   </TableCell>
                 </TableRow>
               ))
             )}
           </TableBody>
         </Table>
+        <DeleteDialog
+          open={openDeleteDialog}
+          onClose={() => setOpenDeleteDialog(false)}
+          onConfirm={handleConfirmDelete}
+          dialogData={{
+            title: 'Delete Record',
+            heading: 'Are you sure?',
+            description: 'This action will permanently delete the record.'
+          }}
+        />
       </TableContainer>
 
       {customers.length > 0 && (

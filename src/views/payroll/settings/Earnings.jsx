@@ -30,12 +30,25 @@ import ActionCell from 'ui-component/extended/ActionCell';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
+import BlockIcon from '@mui/icons-material/Block';
+import { IconButton } from '@mui/material';
+import { Edit, Delete } from '@mui/icons-material';
+import DeleteDialog from 'ui-component/extended/DeleteDialog';
+import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
 const validationSchema = Yup.object({
   component_name: Yup.string().required('Name is required'),
   component_type: Yup.string().required('Type is required'),
-  calculation_type: Yup.object().shape({
-    type: Yup.string().required('Calculation type is required'),
-    value: Yup.number().required('Value is required').min(0.01, 'Value must be greater than 0').typeError('Please enter a valid number')
+  calculation_type: Yup.object().when('component_name', {
+    is: (val) => val !== 'Commission' && val !== 'Bonus',
+    then: (schema) =>
+      schema.shape({
+        type: Yup.string().required('Calculation type is required'),
+        value: Yup.number()
+          .required('Value is required')
+          .min(0, 'Value must be greater than or equal to 0')
+          .typeError('Please enter a valid number')
+      }),
+    otherwise: (schema) => schema.nullable()
   })
 });
 
@@ -46,12 +59,20 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
   const [payrollid, setPayrollId] = useState(null);
   const [searchParams] = useSearchParams();
   const [currentPage, setCurrentPage] = useState(1);
-  const rowsPerPage = 8;
-  const dispatch = useDispatch();
-  const handlePageChange = (event, value) => {
-    setCurrentPage(value);
+  const [hovered, setHovered] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [selectedRow, setSelectedRow] = useState(null);
+  const handleOpenDeleteDialog = (designation) => {
+    setSelectedRow(designation);
+    setOpenDeleteDialog(true);
+  };
+  const handleConfirmDelete = () => {
+    handleDelete(selectedRow);
+    setOpenDeleteDialog(false);
   };
   const paginatedData = earningsData.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+
+  const dispatch = useDispatch();
   useEffect(() => {
     const id = searchParams.get('payrollid');
     if (id) {
@@ -166,7 +187,6 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
       }
     }
   });
-
   const getEarnings_Details = async (id) => {
     setLoading(true);
     const url = `/payroll/earnings?payroll_id=${id}`;
@@ -199,15 +219,23 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
         <></>
       ) : (
         <Box>
-          <Grid2 xs={12}>
+          <Grid2 size={{ xs: 12 }}>
             <Box sx={{ width: '100%', display: 'flex', justifyContent: 'flex-end', mb: 2 }} />
 
             <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 1 }}>
-              <Table>
+              <Table size="small">
                 <TableHead>
                   <TableRow sx={{ bgcolor: 'grey.100' }}>
                     {['Component Name', 'Calculation', 'Consider for EPF', 'Consider for ESI', 'Status', 'Actions'].map((head, idx) => (
-                      <TableCell key={idx} align="center" sx={{ fontWeight: 'bold', whiteSpace: 'nowrap', fontSize: '0.9rem' }}>
+                      <TableCell
+                        key={idx}
+                        sx={{
+                          fontWeight: 'bold',
+                          whiteSpace: 'nowrap',
+                          fontSize: '0.9rem',
+                          textAlign: idx === 5 ? 'center' : 'left'
+                        }}
+                      >
                         {head}
                       </TableCell>
                     ))}
@@ -235,7 +263,7 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
                         }}
                       >
                         <TableCell
-                          align="center"
+                          align="left"
                           sx={{ cursor: 'pointer', color: 'primary.main', textDecoration: 'underline' }}
                           onClick={() => {
                             setPostType('put');
@@ -245,31 +273,36 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
                           {item.component_name}
                         </TableCell>
 
-                        <TableCell align="center">{item.calculation}</TableCell>
-                        <TableCell align="center">{item.consider_for_epf ? 'Yes' : 'No'}</TableCell>
-                        <TableCell align="center">{item.consider_for_esi ? 'Yes' : 'No'}</TableCell>
-                        <TableCell align="center">{item.is_active ? 'Active' : 'Inactive'}</TableCell>
+                        <TableCell align="left">{item.calculation}</TableCell>
+                        <TableCell align="left">{item.consider_for_epf ? 'Yes' : 'No'}</TableCell>
+                        <TableCell align="left">{item.consider_for_esi ? 'Yes' : 'No'}</TableCell>
+                        <TableCell align="left">{item.is_active ? 'Active' : 'Inactive'}</TableCell>
 
-                        <TableCell align="center">
-                          <ActionCell
-                            row={item}
-                            onEdit={() => handleEdit(item)}
-                            onDelete={() => handleDelete(item)}
-                            open={open}
-                            onClose={handleClose}
-                            deleteDialogData={{
-                              title: 'Delete Record',
-                              heading: 'Are you sure you want to delete this record?',
-                              description: `This action will remove ${item.component_name} from the list.`,
-                              successMessage: 'Record has been deleted.'
-                            }}
-                          />
+                        <TableCell align="left">
+                          <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
+                            <IconButton color="primary" onClick={() => handleEdit(item)}>
+                              <Edit />
+                            </IconButton>
+                            <IconButton color="error" onClick={() => handleOpenDeleteDialog(item)}>
+                              <Delete />
+                            </IconButton>
+                          </Box>
                         </TableCell>
                       </TableRow>
                     ))
                   )}
                 </TableBody>
               </Table>
+              <DeleteDialog
+                open={openDeleteDialog}
+                onClose={() => setOpenDeleteDialog(false)}
+                onConfirm={handleConfirmDelete}
+                dialogData={{
+                  title: 'Delete Record',
+                  heading: 'Are you sure you want to delete this Record?',
+                  description: 'This action will permanently delete the record.'
+                }}
+              />
             </TableContainer>
 
             {earningsData.length > rowsPerPage && (
@@ -284,7 +317,7 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
             )}
           </Grid2>
 
-          <Grid2 size={12}>
+          <Grid2 size={{ xs: 12 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
               <Button
                 variant="outlined"
@@ -348,7 +381,7 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
                           }
                         />
                       </Grid2>
-                      {values.component_name !== 'Commission' && (
+                      {values.component_name !== 'Commission' && values.component_name !== 'Bonus' && (
                         <Grid2>
                           <Typography variant="subtitle1">Calculation Type:</Typography>
                           <FormGroup row sx={{ mt: 1 }}>
@@ -394,10 +427,17 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
                                       values.calculation_type.type === 'Percentage of Basic'
                                     }
                                     onChange={(e) => {
-                                      setFieldValue('calculation_type', {
-                                        type: 'Percentage of Basic',
-                                        value: 0
-                                      });
+                                      if (values.component_name === 'Basic') {
+                                        setFieldValue('calculation_type', {
+                                          type: 'Percentage of CTC',
+                                          value: 0
+                                        });
+                                      } else {
+                                        setFieldValue('calculation_type', {
+                                          type: 'Percentage of Basic',
+                                          value: 0
+                                        });
+                                      }
                                     }}
                                   />
                                 }
@@ -493,7 +533,6 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
                                   values.component_name === 'Conveyance Allowance' ||
                                   values.component_name === 'Children Education Allowance' ||
                                   values.component_name === 'Transport Allowance' ||
-                                  values.component_name === 'Commission' ||
                                   values.component_name === 'Travelling Allowance' ||
                                   values.component_name === 'Overtime Allowance'
                                 }
@@ -569,11 +608,14 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
                                 onChange={(e) => {
                                   let val = e.target.checked;
                                   setFieldValue('includes_epf_contribution', val);
+                                  setFieldValue('always_consider_epf_inclusion', val);
+                                  setFieldValue('pf_wage_less_than_15k', val);
                                 }}
                                 disabled={
                                   values.component_name === 'Basic' ||
                                   values.component_name === 'HRA' ||
-                                  values.component_name === 'Overtime Allowance'
+                                  values.component_name === 'Overtime Allowance' ||
+                                  values.component_name === 'Bonus'
                                 }
                               />
                             }
@@ -584,35 +626,45 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
                               }
                             }}
                           />
-                          {(values.component_name === 'Basic' ||
+                          {((values.component_name === 'Basic' ||
                             values.component_name === 'Fixed Allowance' ||
                             values.component_name === 'Conveyance Allowance' ||
                             values.component_name == 'Commission' ||
                             values.component_name === 'Children Education Allowance' ||
                             values.component_name === 'Transport Allowance' ||
                             values.component_name === 'Travelling Allowance') &&
-                            values.includes_epf_contribution === true && (
+                            values.includes_epf_contribution === true) ||
+                            (values.includes_epf_contribution === true && (
                               <Box sx={{ ml: 3 }}>
                                 <FormControlLabel
+                                  onMouseEnter={() => setHovered(true)}
+                                  onMouseLeave={() => setHovered(false)}
                                   control={
-                                    <Checkbox
-                                      checked={values.always_consider_epf_inclusion}
-                                      onChange={(e) => setFieldValue('always_consider_epf_inclusion', e.target.checked)}
-                                      disabled={
-                                        values.component_name === 'Basic' ||
-                                        values.component_name === 'Fixed Allowance' ||
-                                        values.component_name === 'Commission' ||
-                                        values.component_name === 'Travelling Allowance'
-                                      }
-                                    />
+                                    <Box sx={{ position: 'relative', display: 'inline-block' }}>
+                                      <Checkbox
+                                        checked={values.always_consider_epf_inclusion}
+                                        onChange={(e) => setFieldValue('always_consider_epf_inclusion', e.target.checked)}
+                                        disabled={values.component_name === 'Conveyance Allowance'}
+                                      />
+                                      {hovered && values.component_name === 'Conveyance Allowance' && (
+                                        <BlockIcon
+                                          color="error"
+                                          fontSize="small"
+                                          sx={{
+                                            position: 'absolute',
+                                            top: '50%',
+                                            left: '50%',
+                                            transform: 'translate(-50%, -50%)',
+                                            pointerEvents: 'none',
+                                            opacity: 0.9
+                                          }}
+                                        />
+                                      )}
+                                    </Box>
                                   }
                                   label="Always"
-                                  sx={{
-                                    '& .MuiFormControlLabel-label': {
-                                      color: 'black !important'
-                                    }
-                                  }}
                                 />
+
                                 <FormControlLabel
                                   control={
                                     <Checkbox
@@ -629,7 +681,7 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
                                   }}
                                 />
                               </Box>
-                            )}
+                            ))}
 
                           <FormControlLabel
                             control={
@@ -665,7 +717,9 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
                                   values.component_name === 'Bonus' ||
                                   values.component_name === 'Commission' ||
                                   values.component_name === 'Travelling Allowance' ||
-                                  values.component_name === 'Overtime Allowance'
+                                  values.component_name === 'Overtime Allowance' ||
+                                  values.component_name === 'Children Education Allowance' ||
+                                  values.component_name === 'Transport Allowance'
                                 }
                               />
                             }

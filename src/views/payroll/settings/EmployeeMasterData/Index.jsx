@@ -17,13 +17,16 @@ import {
 } from '@mui/material';
 import MainCard from 'ui-component/cards/MainCard';
 import ActionCell from 'ui-component/extended/ActionCell';
-
+import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
 import Factory from 'utils/Factory';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import EmptyDataPlaceholder from 'ui-component/extended/EmptyDataPlaceholder';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
+import { IconButton } from '@mui/material';
+import { Edit, Delete } from '@mui/icons-material';
+import DeleteDialog from 'ui-component/extended/DeleteDialog';
 function EmployeeList() {
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -31,8 +34,16 @@ function EmployeeList() {
   const [openDialog, setOpenDialog] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const dispatch = useDispatch();
-
-  const rowsPerPage = 8;
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [selectedRow, setSelectedRow] = useState(null);
+  const handleOpenDeleteDialog = (designation) => {
+    setSelectedRow(designation);
+    setOpenDeleteDialog(true);
+  };
+  const handleConfirmDelete = () => {
+    handleDelete(selectedRow);
+    setOpenDeleteDialog(false);
+  };
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -53,13 +64,14 @@ function EmployeeList() {
     const url = `/payroll/employees?payroll_id=${payrollId}`;
     const { res } = await Factory('get', url, {});
     setLoading(false);
+    console.log(res);
     if (res?.status_cd === 0) {
       setEmployees(res?.data || []);
     } else {
       dispatch(
         openSnackbar({
           open: true,
-          message: JSON.stringify(res?.data?.data || error),
+          message: JSON.stringify(res?.data?.data || 'something went wrong please try again later'),
           variant: 'alert',
           alert: { color: 'error' },
           close: false
@@ -69,7 +81,7 @@ function EmployeeList() {
     }
   };
 
-  const deleteEmployee = async (item) => {
+  const handleDelete = async (item) => {
     setLoading(true);
     const url = `/payroll/employees/${item.id}`;
     const { res } = await Factory('delete', url, {});
@@ -121,63 +133,79 @@ function EmployeeList() {
           }
         >
           <Grid2 container spacing={2}>
-            <TableContainer component={Paper}>
-              <Table>
-                <TableHead>
-                  <TableRow sx={{ bgcolor: 'grey.100' }}>
-                    {['Employee ID', 'Employee Name', 'Department', 'Designation', 'Email', 'Status', 'Actions'].map((header, idx) => (
-                      <TableCell key={idx} sx={{ whiteSpace: 'nowrap', fontWeight: 'bold', textAlign: 'center' }}>
-                        {header}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {paginatedEmployees.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={7} align="center" sx={{ height: 300 }}>
-                        <EmptyDataPlaceholder title="No Data Found" subtitle="Start Adding data." />
-                      </TableCell>
+            <Grid2 size={{ xs: 12 }}>
+              <TableContainer component={Paper}>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow sx={{ bgcolor: 'grey.100' }}>
+                      {['S.No', 'Employee ID', 'Employee Name', 'Department', 'Designation', 'Email', 'Status', 'Actions'].map(
+                        (header, idx) => (
+                          <TableCell key={idx} sx={{ whiteSpace: 'nowrap', fontWeight: 'bold', textAlign: 'center' }}>
+                            {header}
+                          </TableCell>
+                        )
+                      )}
                     </TableRow>
-                  ) : (
-                    paginatedEmployees.map((employee) => (
-                      <TableRow key={employee.id} hover sx={{ '&:nth-of-type(odd)': { backgroundColor: 'grey.50' } }}>
-                        <TableCell align="center">{employee.associate_id}</TableCell>
-                        <TableCell align="center">{`${employee.first_name || ''} ${employee.last_name || ''}`}</TableCell>
-                        <TableCell align="center">{employee.department_name || '-'}</TableCell>
-                        <TableCell align="center">{employee.designation_name || '-'}</TableCell>
-                        <TableCell align="center">{employee.work_email || '-'}</TableCell>
-                        <TableCell align="center">{employee.is_active ? 'Active' : 'Inactive'}</TableCell>
-                        <TableCell align="center">
-                          <ActionCell
-                            row={employee}
-                            onEdit={() => handleEdit(employee)}
-                            open={openDialog}
-                            deleteDialogData={{
-                              title: 'Delete Employee',
-                              heading: 'Are you sure you want to delete this employee?',
-                              description: `This will remove ${employee.first_name} ${employee.last_name} from the list.`,
-                              successMessage: 'Employee deleted successfully'
-                            }}
-                            // Deletion not implemented yet
-                            onDelete={() => deleteEmployee(employee)}
-                            onClose={() => setOpenDialog(false)}
-                          />
+                  </TableHead>
+                  <TableBody>
+                    {paginatedEmployees.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={7} align="center" sx={{ height: 300 }}>
+                          <EmptyDataPlaceholder title="No Data Found" subtitle="Start Adding data." />
                         </TableCell>
                       </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
+                    ) : (
+                      paginatedEmployees.map((employee, index) => (
+                        <TableRow key={employee.id} hover sx={{ '&:nth-of-type(odd)': { backgroundColor: 'grey.50' } }}>
+                          <TableCell align="center">{(currentPage - 1) * rowsPerPage + index + 1}</TableCell>
+                          <TableCell align="center">{employee.associate_id}</TableCell>
+                          <TableCell align="center">{`${employee.first_name || ''} ${employee.last_name || ''}`}</TableCell>
+                          <TableCell align="center">{employee.department_name || '-'}</TableCell>
+                          <TableCell align="center">{employee.designation_name || '-'}</TableCell>
+                          <TableCell align="center">{employee.work_email || '-'}</TableCell>
+                          <TableCell align="center">{employee.employee_status ? 'Active' : 'Inactive'}</TableCell>
+                          <TableCell align="center">
+                            <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
+                              <IconButton color="primary" onClick={() => handleEdit(employee)}>
+                                <Edit />
+                              </IconButton>
+                              <IconButton color="error" onClick={() => handleOpenDeleteDialog(employee)}>
+                                <Delete />
+                              </IconButton>
+                            </Box>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+                <DeleteDialog
+                  open={openDeleteDialog}
+                  onClose={() => setOpenDeleteDialog(false)}
+                  onConfirm={handleConfirmDelete}
+                  dialogData={{
+                    title: 'Delete Record',
+                    heading: 'Are you sure you want to delete this Record?',
+                    description: 'This action will permanently delete the record.'
+                  }}
+                />
+              </TableContainer>
 
-            {employees.length > rowsPerPage && (
-              <Stack direction="row" justifyContent="center" sx={{ py: 2 }}>
-                <Pagination count={Math.ceil(employees.length / rowsPerPage)} page={currentPage} onChange={handlePageChange} />
-              </Stack>
-            )}
+              {employees.length > 0 && (
+                <Grid2 size={{ xs: 12 }}>
+                  <Stack direction="row" justifyContent="center" alignItems="center" sx={{ mt: 2, width: '100%' }}>
+                    <Pagination
+                      count={Math.ceil(employees.length / rowsPerPage)}
+                      page={currentPage}
+                      onChange={(e, value) => setCurrentPage(value)}
+                      color="primary"
+                    />
+                  </Stack>
+                </Grid2>
+              )}
+            </Grid2>
 
-            <Grid2 xs={12}>
+            <Grid2 size={{ xs: 12 }}>
               <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between' }}>
                 <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigate(-1)}>
                   Back to Dashboard

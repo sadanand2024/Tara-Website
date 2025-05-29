@@ -56,10 +56,15 @@ const StickyFooterCTA = ({ data }) => {
                   variant={idx === 0 ? 'contained' : 'outlined'}
                   fullWidth
                   size="size"
-                  onClick={() => idx === 0 
-                    ? navigate(`/register?id=${service_id}&context=${service_type}&type=service`)
-                    : navigate(`/book-consultation?id=${service_id}&context=${service_type}&type=service`)
-                  }
+                  onClick={() => {
+                    if (idx === 0) {
+                      navigate(`/register?id=${service_id}&context=${service_type}&type=service`);
+                    } else if (btn.label === "Book a Consultation") {
+                      navigate(`/book-consultation?id=${service_id}&context=${service_type}&type=service`);
+                    } else {
+                      navigate('/pages/contact-us');
+                    }
+                  }}
                   sx={{
                     borderRadius: 2,
                     px: 3,

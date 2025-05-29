@@ -81,7 +81,7 @@ export default function AppBar({ ...others }) {
           {/* Left: Logo */}
           <Box>
             <RouterLink to="/">
-              <CardMedia component="img" src={Tarafirstlogo_png} alt="Tarafirst Logo" sx={{ width: 200 }} />
+              <CardMedia component="img" src={Tarafirstlogo_png} alt="Tara First Logo" sx={{ width: 200 }} />
             </RouterLink>
           </Box>
 

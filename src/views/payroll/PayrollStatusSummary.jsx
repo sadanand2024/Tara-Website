@@ -11,13 +11,15 @@ import {
   CircularProgress,
   Typography
 } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import Factory from 'utils/Factory';
 import MainCard from '../../ui-component/cards/MainCard';
 
 const MONTHS = ['April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December', 'January', 'February', 'March'];
 const TABLE_HEADERS = ['CTC', 'Status', 'Action'];
 
-export default function PayrollStatusSummary({ payrollId, financialYear }) {
+export default function PayrollStatusSummary({ payrollId, financialYear, monthWiseData, selectedMonth, businessDetails }) {
+  const navigate = useNavigate();
   const [financialYearSummary, setFinancial_year_summary] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -102,7 +104,13 @@ export default function PayrollStatusSummary({ payrollId, financialYear }) {
                                       color: '#1976d2', // Primary color
                                       fontWeight: 500
                                     }}
-                                    // onClick={() => handleView(data)}
+                                    onClick={() => {
+                                      if (businessDetails?.payroll_id) {
+                                        navigate(
+                                          `/payroll/employee-dashboard?payrollid=${businessDetails?.payroll_id}&month=${selectedMonth}&financialYear=${financialYear}&monthwisedata=${encodeURIComponent(JSON.stringify(monthWiseData))}&tabvalue=1`
+                                        );
+                                      }
+                                    }}
                                   >
                                     View
                                   </span>

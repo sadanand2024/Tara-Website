@@ -16,6 +16,14 @@ import OtherDeductions from './OtherDeductions';
 import Factory from 'utils/Factory';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
+import CoPresentOutlined from '@mui/icons-material/CoPresentOutlined';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import LogoutIcon from '@mui/icons-material/Logout';
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
+import React from 'react';
 // TabPanel Component
 const TabPanel = ({ children, value, index }) => (
   <div role="tabpanel" hidden={value !== index} id={`tabpanel-${index}`} aria-labelledby={`tab-${index}`}>
@@ -29,15 +37,19 @@ TabPanel.propTypes = {
   index: PropTypes.number.isRequired
 };
 
-// Custom Hook for Payroll Data
-// Move this outside the main component
-const usePayrollData = (payrollId, month, financialYear) => {
+const PayrollWorkflows = ({ type }) => {
+  const [activeTab, setActiveTab] = useState(0);
+  const [openDialog, setOpenDialog] = useState(false);
+  const theme = useTheme();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [employeeMasterData, setEmployeeMasterData] = useState([]);
   const [attendanceData, setAttendanceData] = useState([]);
   const dispatch = useDispatch();
-
-  // ✅ Define this function before useEffect
+  const payrollId = searchParams.get('payrollid');
+  const month = searchParams.get('month');
+  const financialYear = searchParams.get('financial_year');
   const fetchEmployeeMasterData = async () => {
     setLoading(true);
     const url = `/payroll/employees?payroll_id=${payrollId}&month=${month}&financial_year=${financialYear}`;
@@ -50,6 +62,26 @@ const usePayrollData = (payrollId, month, financialYear) => {
     }
   };
 
+  const getAttandanceData = async () => {
+    if (!payrollId || !financialYear || !month) return;
+    setLoading(true);
+    const url = `/payroll/employee_attendance_filtered?payroll_id=${payrollId}&financial_year=${financialYear}&month=${month}`;
+    const { res } = await Factory('get', url, {});
+    setLoading(false);
+    if (res.status_cd === 0) {
+      setAttendanceData(res.data || []);
+    } else {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res.data.message),
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
+    }
+  };
   const generateAttandance = async () => {
     if (!month) return;
     setLoading(true);
@@ -57,7 +89,17 @@ const usePayrollData = (payrollId, month, financialYear) => {
     const { res } = await Factory('post', url, {});
     setLoading(false);
     if (res?.status_cd === 0) {
-      setAttendanceData(res.data || []);
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: res.message,
+          variant: 'alert',
+          alert: { color: 'success' },
+          close: false
+        })
+      );
+      // ✅ Immediately fetch updated attendance
+      getAttandanceData();
     } else {
       dispatch(
         openSnackbar({
@@ -68,47 +110,6 @@ const usePayrollData = (payrollId, month, financialYear) => {
           close: false
         })
       );
-    }
-    return res;
-  };
-
-  useEffect(() => {
-    if (payrollId) {
-      fetchEmployeeMasterData();
-    }
-  }, [payrollId]);
-
-  return {
-    loading,
-    employeeMasterData,
-    attendanceData,
-    generateAttandance
-  };
-};
-
-// Main Component
-const PayrollWorkflows = ({ type }) => {
-  const [activeTab, setActiveTab] = useState(0);
-  const [openDialog, setOpenDialog] = useState(false);
-  const theme = useTheme();
-  const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
-
-  const payrollId = searchParams.get('payrollid');
-  const month = searchParams.get('month');
-  const financialYear = searchParams.get('financial_year');
-  const {
-    loading,
-    employeeMasterData,
-    attendanceData,
-    generateAttandance: originalGenerateAttandance
-  } = usePayrollData(payrollId, month, financialYear);
-  const getAttandanceDataRef = useRef(null);
-
-  const generateAttandance = async () => {
-    const res = await originalGenerateAttandance();
-    if (res?.status_cd === 0 && getAttandanceDataRef.current) {
-      getAttandanceDataRef.current();
     }
   };
 
@@ -206,6 +207,21 @@ const PayrollWorkflows = ({ type }) => {
     const tabValue = searchParams.get('tabValue');
     if (tabValue) setActiveTab(Number(tabValue));
   }, [searchParams]);
+  useEffect(() => {
+    if (payrollId) {
+      fetchEmployeeMasterData();
+    }
+  }, [payrollId]);
+
+  const tabIcons = [
+    PersonAddIcon, // New Joiners
+    LogoutIcon, // Exits
+    CoPresentOutlined, // Attendance
+    AccountBalanceWalletIcon, // Loans & Advances
+    EmojiEventsIcon, // Bonus & Incentives
+    TrendingUpIcon, // Salary Revisions
+    RemoveCircleOutlineIcon // Other Deductions
+  ];
 
   return (
     <MainCard
@@ -241,8 +257,8 @@ const PayrollWorkflows = ({ type }) => {
               key={`tab-${index}`}
               label={
                 <Stack direction="row" sx={{ alignItems: 'center' }}>
-                  <Avatar variant="rounded" sx={{ mr: 1, bgcolor: 'grey.300', width: 32, height: 30 }}>
-                    <IconBolt color={theme.palette.text.primary} />
+                  <Avatar variant="rounded" sx={{ mr: 1, bgcolor: 'primary.light', width: 36, height: 36 }}>
+                    {tabIcons[index] && React.createElement(tabIcons[index], { color: theme.palette.text.primary })}
                   </Avatar>
                   <Typography variant="subtitle1">{tab.label}</Typography>
                 </Stack>
@@ -262,9 +278,8 @@ const PayrollWorkflows = ({ type }) => {
               fields={tab.fields}
               loading={loading}
               employeeMasterData={employeeMasterData}
+              fetchAttendance={tab.label === 'Attendance' ? getAttandanceData : undefined}
               attendanceData={tab.label === 'Attendance' ? attendanceData : undefined}
-              generateAttandance={tab.label === 'Attendance' ? generateAttandance : undefined}
-              getAttandanceDataRef={tab.label === 'Attendance' ? getAttandanceDataRef : undefined}
             />
           </TabPanel>
         ))}

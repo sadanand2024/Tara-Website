@@ -40,7 +40,7 @@ const icons = {
 
 const dashboard = {
   id: 'dashboard',
-  // title: 'Home',
+  title: 'Home',
   type: 'group',
   children: [
     {
@@ -92,7 +92,7 @@ const dashboard = {
       id: 'document-wallet',
       title: 'document-wallet',
       type: 'item',
-      url: '/app/documents',
+      url: '/app/document-wallet',
       icon: icons.IconFolder,
       breadcrumbs: false,
       caption: ''
@@ -160,15 +160,15 @@ const dashboard = {
       breadcrumbs: false,
       caption: ''
     },
-    {
-      id: 'investments',
-      title: 'investments',
-      type: 'item',
-      url: '/app/investments',
-      icon: icons.IconPigMoney,
-      breadcrumbs: false,
-      caption: ''
-    },
+    // {
+    //   id: 'investments',
+    //   title: 'investments',
+    //   type: 'item',
+    //   url: '/app/investments',
+    //   icon: icons.IconPigMoney,
+    //   breadcrumbs: false,
+    //   caption: ''
+    // },
     {
       id: 'support&chat',
       title: 'support&chat',
@@ -185,12 +185,12 @@ const dashboard = {
 const moduleToMenuId = {
   invoice: 'invoicing',
   payroll: 'payroll',
-  documents: 'document-wallet',
+  // documents: 'document-wallet',
   'income-tax': 'income-tax',
   tds: 'tds',
   insurance: 'insurance',
   loan: 'loan',
-  investments: 'investments',
+  // investments: 'investments',
   'support&chat': 'support&chat'
   // add more mappings as needed
 };

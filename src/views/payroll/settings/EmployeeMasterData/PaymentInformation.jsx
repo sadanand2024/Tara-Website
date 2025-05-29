@@ -8,7 +8,7 @@ import CustomInput from 'utils/CustomInput';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
 import { useNavigate } from 'react-router-dom';
-function PaymentInformation({ employeeData, createdEmployeeId }) {
+function PaymentInformation({ employeeData, createdEmployeeId, onNext, setSubmitRef }) {
   const [payrollid, setPayrollId] = useState(null);
   const [employeeId, setEmployeeId] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -75,7 +75,6 @@ function PaymentInformation({ employeeData, createdEmployeeId }) {
         method === 'post' ? `/payroll/employee-bank-details` : `/payroll/employee-bank-details/${employeeData?.employee_bank_details?.id}`;
 
       const { res } = await Factory(method, url, postData);
-
       if (res.status_cd === 0) {
         dispatch(
           openSnackbar({
@@ -88,13 +87,15 @@ function PaymentInformation({ employeeData, createdEmployeeId }) {
         );
         navigate(-1);
       } else {
-        openSnackbar({
-          open: true,
-          message: JSON.stringify(res.data.data),
-          variant: 'alert',
-          alert: { color: 'error' },
-          close: false
-        });
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: JSON.stringify(res.data.data.errors),
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
       }
 
       setLoading(false);
@@ -118,8 +119,19 @@ function PaymentInformation({ employeeData, createdEmployeeId }) {
             onChange={(e) => {
               let value = e.target.value;
 
-              if (field.name === 'ifsc_code' || field.name === 'branch_name') {
+              // Convert specific fields to uppercase
+              if (field.name === 'ifsc_code' || field.name === 'branch_name' || field.name === 'bank_name') {
                 value = value.toUpperCase();
+              }
+
+              // Allow only digits for account_number
+              if (field.name === 'account_number') {
+                value = value.replace(/\D/g, ''); // Remove non-digits
+              }
+
+              // Allow only alphabets and spaces for names
+              if (field.name === 'account_holder_name' || field.name === 'bank_name' || field.name === 'branch_name') {
+                value = value.replace(/[^a-zA-Z\s]/g, ''); // Allow letters and spaces only
               }
 
               setFieldValue(fieldName, value);
@@ -141,7 +153,11 @@ function PaymentInformation({ employeeData, createdEmployeeId }) {
       }));
     }
   }, [employeeData]);
-
+  useEffect(() => {
+    if (setSubmitRef) {
+      setSubmitRef(formik.submitForm);
+    }
+  }, [setSubmitRef, formik.submitForm]);
   return (
     <Box sx={{ mt: 2 }}>
       <FormikProvider value={formik}>
@@ -149,12 +165,6 @@ function PaymentInformation({ employeeData, createdEmployeeId }) {
           <Grid2 container spacing={2}>
             {renderFields(employeeFields)}
           </Grid2>
-
-          <Box sx={{ mt: 2, textAlign: 'center' }}>
-            <Button variant="contained" color="primary" type="submit">
-              Save
-            </Button>
-          </Box>
         </form>
       </FormikProvider>
     </Box>

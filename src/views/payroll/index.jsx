@@ -44,7 +44,6 @@ const PayrollDashboard = () => {
     const url = `/payroll/detail_employee_payroll_salary?payroll_id=${payrollId}&month=${monthNumber}&financial_year=${financialYear}`;
     const { res, error } = await Factory('get', url, {});
     setLoading(false);
-    console.log(res);
     // if (res?.status_cd === 0) {
     //   setMonthWiseData(res.data);
     // } else {
@@ -64,6 +63,7 @@ const PayrollDashboard = () => {
     setLoading(true);
     const url = `/payroll/payroll-summary-view?payroll_id=${businessDetails?.payroll_id}&month=${monthNumber}&financial_year=${financialYear}`;
     const { res, error } = await Factory('get', url, {});
+    console.log(res);
     setLoading(false);
     if (res?.status_cd === 0) {
       setMonthWiseData(res.data);
@@ -102,7 +102,6 @@ const PayrollDashboard = () => {
     setLoading(true);
     const url = `/payroll/calculate-employee-monthly-salary?payroll_id=${payrollId}&month=${selectedMonth}&financial_year=${financialYear}`;
     const { res } = await Factory('get', url, {});
-
     if (res?.status_cd === 0) {
       if (res.data?.message === 'Salary processing will be initiated between the 26th and 30th of the month.') {
         dispatch(
@@ -118,6 +117,7 @@ const PayrollDashboard = () => {
       } else {
         // setMonthWiseData(res.data);
         // detail_employee_payroll_salary(selectedMonth);
+        get_payrollMonthData(selectedMonth);
       }
     } else {
       dispatch(
@@ -139,13 +139,13 @@ const PayrollDashboard = () => {
 
     if (res?.status_cd === 0) {
       if (res.data.payroll_setup === false) {
-        // router.push(`/payrollsetup`);
         navigate('/app/payroll/settings');
-
         setLoading(false);
       } else {
         setBusinessDetails(res?.data);
-        calculate_employee_monthly_salary_status(res?.data?.payroll_id);
+        if (financialYear) {
+          calculate_employee_monthly_salary_status(res?.data?.payroll_id);
+        }
         setLoading(false);
       }
     } else {
@@ -186,6 +186,12 @@ const PayrollDashboard = () => {
     };
     setFinancialYear(getCurrentFinancialYear());
   }, []);
+
+  useEffect(() => {
+    if (financialYear && businessDetails?.payroll_id) {
+      calculate_employee_monthly_salary_status(businessDetails.payroll_id);
+    }
+  }, [financialYear, businessDetails?.payroll_id]);
 
   return loading ? (
     <Stack alignItems="center" sx={{ mt: 4 }}>
@@ -293,7 +299,13 @@ const PayrollDashboard = () => {
         </Grid2>
 
         <Grid2 size={{ xs: 12 }}>
-          <PayrollStatusSummary payrollId={businessDetails?.payroll_id} financialYear={financialYear} />
+          <PayrollStatusSummary
+            payrollId={businessDetails?.payroll_id}
+            financialYear={financialYear}
+            monthWiseData={monthWiseData}
+            selectedMonth={selectedMonth}
+            businessDetails={businessDetails}
+          />
         </Grid2>
         <Grid2 size={{ xs: 12 }}>
           {/* <PayrollComplianceSummary payrollId={businessDetails?.payroll_id} financialYear={financialYear} /> */}

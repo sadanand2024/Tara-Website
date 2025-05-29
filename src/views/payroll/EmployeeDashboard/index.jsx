@@ -7,7 +7,7 @@ import MonthWiseDashboard from './MonthWiseDashboard';
 import PayrollSummary from './PayrollSummary';
 import DetailedPayroll from './DetailedPayroll';
 import Grid2 from '@mui/material/Grid2';
-import { Box, Typography, Paper, Divider, alpha, Tabs, Tab, CircularProgress, Alert } from '@mui/material';
+import { Box, Typography, Paper, Divider, alpha, Tabs, Tab, CircularProgress, Alert, Button, Stack } from '@mui/material';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import EventNoteIcon from '@mui/icons-material/EventNote';
@@ -20,6 +20,7 @@ import PayrollMonthwise from '../PayrollMonthwise';
 import ComplianceSummary from './ComplianceSummary';
 import PayrollSummaryGrid from '../PayrollSummaryGrid';
 import { ServicesData } from '../data';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 const PRODUCTS_DATA = [
   { title: 'New Joiners', href: '/payroll-workflows', icon: <PersonAddIcon />, color: '#4CAF50' },
   { title: 'Exits', href: '/payroll-workflows', icon: <ExitToAppIcon />, color: '#F44336' },
@@ -53,6 +54,11 @@ export default function Index() {
 
   const handleTabChange = (_event, newTabIndex) => setActiveTab(newTabIndex);
 
+  useEffect(() => {
+    const tabValue = searchParams.get('tabvalue');
+    console.log(tabValue);
+    if (tabValue) setActiveTab(Number(tabValue));
+  }, [searchParams]);
   // Accessibility props for tabs
   const a11yProps = (index) => ({
     value: index,
@@ -227,6 +233,11 @@ export default function Index() {
               ))}
             </Grid2>
           </Grid2>
+          <Stack direction="row" sx={{ gap: 2 }}>
+            <Button startIcon={<ArrowBackIcon />} variant="outlined" color="primary" onClick={() => navigate(-1)}>
+              Back to Payroll Dashboard
+            </Button>
+          </Stack>
           <Grid2 size={12}>
             <Box sx={{ width: '100%', display: 'flex', justifyContent: 'space-between', mb: 0 }}>
               <Tabs value={activeTab} onChange={handleTabChange} aria-label="Statutory Components Tabs">

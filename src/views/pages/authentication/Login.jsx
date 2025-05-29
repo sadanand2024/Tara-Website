@@ -61,9 +61,7 @@ export default function Login() {
               <AuthCardWrapper>
                 <Grid container spacing={2} sx={{ alignItems: 'center', justifyContent: 'center' }}>
                   <Grid sx={{ mb: 3 }}>
-                    <Link to="#" aria-label="logo">
-                      <TarapngLogo />
-                    </Link>
+                    <TarapngLogo />
                   </Grid>
                   <Grid size={12}>
                     <Grid container direction={{ xs: 'column-reverse', md: 'row' }} sx={{ alignItems: 'center', justifyContent: 'center' }}>

@@ -6,7 +6,6 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import PhoneIcon from '@mui/icons-material/Phone';
 import Box from '@mui/material/Box';
 import CardMedia from '@mui/material/CardMedia';
-import Chip from '@mui/material/Chip';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid2';
 import IconButton from '@mui/material/IconButton';
@@ -17,17 +16,14 @@ import Typography from '@mui/material/Typography';
 // project imports
 import taralogoWhite from 'assets/images/taralogoWhite.png'; // Tarafirstlogo_png
 import { ThemeMode } from 'config';
-import { frameworks } from './FrameworkSection';
 // assets
-import { IconBrandDiscord } from '@tabler/icons-react';
 
+import FacebookIcon from '@mui/icons-material/Facebook';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import InstagramIcon from '@mui/icons-material/Instagram';
 import PublicIcon from '@mui/icons-material/Public';
-import SportsBasketballIcon from '@mui/icons-material/SportsBasketball';
 import XIcon from '@mui/icons-material/X';
 import YouTubeIcon from '@mui/icons-material/YouTube';
-import FacebookIcon from '@mui/icons-material/Facebook';
 // Link - custom style
 const FooterLink = styled(Link)(({ theme }) => ({
   color: theme.palette.mode === ThemeMode.DARK ? theme.palette.text.secondary : theme.palette.text.hint,
@@ -54,14 +50,10 @@ export default function FooterSection() {
               <Grid size={{ xs: 12, md: 4 }}>
                 <Stack spacing={{ xs: 2, md: 5 }}>
                   <Typography component={RouterLink} to="/" aria-label="theme-logo">
-                    <CardMedia component="img" src={taralogoWhite} alt="defaultLayout" sx={{ width: 200 }} />
+                    <CardMedia component="img" src={taralogoWhite} alt="defaultLayout" sx={{ width: 200,ml:-3.5 }} />
                   </Typography>
-                  {/* 
-                  <Typography variant="h2" color={textColor} sx={{ fontWeight: 500 }}>
-                    Tarafirst
-                  </Typography> */}
                   <Typography variant="body2" color={textColor}>
-                    Tarafirst is a unified fintech platform for managing personal and business finances. From company registration to GST,
+                    Tara First is a unified fintech platform for managing personal and business finances. From company registration to GST,
                     payroll, and more — we combine smart software with expert support to simplify your financial journey.
                   </Typography>
                 </Stack>
@@ -78,7 +70,7 @@ export default function FooterSection() {
                         <Stack direction="row" spacing={1} alignItems="center">
                           <LocationOnIcon color="primary" />
                           <Typography variant="body2" color={textColor}>
-                            Tarafirst Technologies Pvt. Ltd.
+                            Tara First Technologies Pvt. Ltd.
                           </Typography>
                         </Stack>
                         <Typography variant="body2" color={textColor} sx={{ pl: 4 }}>
@@ -112,14 +104,12 @@ export default function FooterSection() {
                         <FooterLink to={'/pages/contact-us'} component={RouterLink} underline="none">
                           Contact Us
                         </FooterLink>
-                        <FooterLink href="https://links.codedthemes.com/HTIBc" target="_blank" underline="none">
+                        {/* <FooterLink href="#" underline="none">
                           Blog
-                        </FooterLink>
-                        <FooterLink target="_blank" underline="none">
-                          Documentation
-                        </FooterLink>
-                        <FooterLink href="https://codedthemes.gitbook.io/berry/support/changelog" target="_blank" underline="none">
-                          Change Log
+                        </FooterLink> */}
+                        <FooterLink underline="none">Terms & Conditions</FooterLink>
+                        <FooterLink href="#" underline="none">
+                         Privacy Policy
                         </FooterLink>
                         <FooterLink to={'/book-consultation'} component={RouterLink} underline="none">
                           Support
@@ -133,13 +123,7 @@ export default function FooterSection() {
                         Follow Us On
                       </Typography>
                       <Stack direction="row" alignItems="center" spacing={{ xs: 2, sm: 1.5, md: 2 }}>
-                        <IconButton
-                          size="small"
-                          aria-label="codedTheme Github"
-                          component={Link}
-                          href="https://github.com/codedthemes"
-                          target="_blank"
-                        >
+                        <IconButton size="small" aria-label="TaraFirst Github" component={Link} href="#">
                           <GitHubIcon
                             sx={{
                               color: 'text.secondary',
@@ -147,13 +131,7 @@ export default function FooterSection() {
                             }}
                           />
                         </IconButton>
-                        <IconButton
-                          size="small"
-                          aria-label="codedTheme Instagram"
-                          component={Link}
-                          href="https://www.instagram.com/codedthemes"
-                          target="_blank"
-                        >
+                        <IconButton size="small" aria-label="TaraFirst Instagram" component={Link} href="#">
                           <InstagramIcon
                             sx={{
                               color: 'text.secondary',
@@ -162,13 +140,7 @@ export default function FooterSection() {
                           />
                         </IconButton>
 
-                        <IconButton
-                          size="small"
-                          aria-label="codedTheme Youtube"
-                          component={Link}
-                          href="https://www.youtube.com/channel/UCiZG__BaRkT1OuZl5ifzO6A"
-                          target="_blank"
-                        >
+                        <IconButton size="small" aria-label="TaraFirst Youtube" component={Link} href="#">
                           <YouTubeIcon
                             sx={{
                               color: 'text.secondary',
@@ -176,13 +148,7 @@ export default function FooterSection() {
                             }}
                           />
                         </IconButton>
-                        <IconButton
-                          size="small"
-                          aria-label="Berry Blog"
-                          component={Link}
-                          href="https://links.codedthemes.com/HTIBc"
-                          target="_blank"
-                        >
+                        <IconButton size="small" aria-label="TaraFirst Blog" component={Link} href="#">
                           <PublicIcon
                             sx={{
                               color: 'text.secondary',
@@ -190,13 +156,7 @@ export default function FooterSection() {
                             }}
                           />
                         </IconButton>
-                        <IconButton
-                          size="small"
-                          aria-label="codedTheme Twitter"
-                          component={Link}
-                          href="https://x.com/codedthemes"
-                          target="_blank"
-                        >
+                        <IconButton size="small" aria-label="TaraFirst Twitter" component={Link} href="#">
                           <XIcon
                             sx={{
                               color: 'text.secondary',
@@ -204,13 +164,7 @@ export default function FooterSection() {
                             }}
                           />
                         </IconButton>
-                        <IconButton
-                          size="small"
-                          aria-label="codedTheme Facebook"
-                          component={Link}
-                          href="https://www.facebook.com/codedthemes"
-                          target="_blank"
-                        >
+                        <IconButton size="small" aria-label="TaraFirst Facebook" component={Link} href="#">
                           <FacebookIcon
                             sx={{
                               color: 'text.secondary',
@@ -237,7 +191,7 @@ export default function FooterSection() {
           >
             <Typography color="text.secondary">
               © Berry is managed by{' '}
-              <Link href="https://codedthemes.com/" target="_blank" underline="hover">
+              <Link href="https://codedthemes.com/"  underline="hover">
                 CodedThemes
               </Link>
             </Typography>
@@ -247,7 +201,7 @@ export default function FooterSection() {
                 aria-label="codedTheme Github"
                 component={Link}
                 href="https://github.com/codedthemes"
-                target="_blank"
+                
               >
                 <GitHubIcon
                   sx={{
@@ -261,7 +215,7 @@ export default function FooterSection() {
                 aria-label="codedTheme Instagram"
                 component={Link}
                 href="https://www.instagram.com/codedthemes"
-                target="_blank"
+                
               >
                 <InstagramIcon
                   sx={{
@@ -275,7 +229,7 @@ export default function FooterSection() {
                 aria-label="codedTheme Discord"
                 component={Link}
                 href="https://discord.com/invite/p2E2WhCb6s"
-                target="_blank"
+                
                 sx={{
                   color: 'text.secondary',
                   '&:hover': { color: 'info.main' }
@@ -288,7 +242,7 @@ export default function FooterSection() {
                 aria-label="codedTheme Youtube"
                 component={Link}
                 href="https://www.youtube.com/channel/UCiZG__BaRkT1OuZl5ifzO6A"
-                target="_blank"
+                
               >
                 <YouTubeIcon
                   sx={{
@@ -297,7 +251,7 @@ export default function FooterSection() {
                   }}
                 />
               </IconButton>
-              <IconButton size="small" aria-label="Berry Blog" component={Link} href="https://links.codedthemes.com/HTIBc" target="_blank">
+              <IconButton size="small" aria-label="Berry Blog" component={Link} href="https://links.codedthemes.com/HTIBc" >
                 <PublicIcon
                   sx={{
                     color: 'text.secondary',
@@ -305,7 +259,7 @@ export default function FooterSection() {
                   }}
                 />
               </IconButton>
-              <IconButton size="small" aria-label="codedTheme Twitter" component={Link} href="https://x.com/codedthemes" target="_blank">
+              <IconButton size="small" aria-label="codedTheme Twitter" component={Link} href="https://x.com/codedthemes" >
                 <XIcon
                   sx={{
                     color: 'text.secondary',
@@ -318,7 +272,7 @@ export default function FooterSection() {
                 aria-label="codedTheme Dribble"
                 component={Link}
                 href="https://dribbble.com/codedthemes"
-                target="_blank"
+                
               >
                 <SportsBasketballIcon
                   sx={{

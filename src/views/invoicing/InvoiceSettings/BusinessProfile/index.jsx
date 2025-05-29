@@ -2,25 +2,43 @@ import React, { useEffect, useState } from 'react';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
-import { FormControl, TextField, Radio, RadioGroup, FormControlLabel, FormLabel, Grid2, Box } from '@mui/material';
+import {
+  FormControl,
+  TextField,
+  Radio,
+  RadioGroup,
+  FormControlLabel,
+  FormLabel,
+  Grid2,
+  Box,
+  CircularProgress,
+  Divider,
+  Avatar
+} from '@mui/material';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import CustomInput from 'utils/CustomInput';
 import { indian_States_And_UTs } from 'utils/indian_States_And_UT';
 import CustomAutocomplete from 'utils/CustomAutocomplete';
 import Factory from 'utils/Factory';
-// import { useSnackbar } from '@/components/CustomSnackbar';
 import { IconPlus } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
 import { entity_choices } from 'utils/Entity-types';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
+import { businessTypesArray } from 'utils/businessTypesArray';
+import CustomUpload from 'utils/CustomUpload';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 export default function TabOne({ businessDetails = {}, postType, handleNext, setBusinessDetails }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
+  const [logoUrlDetails, setLogoUrlDetails] = useState(null);
+  const [logoFile, setLogoFile] = useState(null);
+  const [logoposttype, setLogoposttype] = useState('post');
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [fileInputRef, setFileInputRef] = useState(null);
   const [busineesprofileFields] = useState({
     basic_details: [
       { name: 'nameOfBusiness', label: 'Business Name' },
@@ -44,12 +62,9 @@ export default function TabOne({ businessDetails = {}, postType, handleNext, set
       { name: 'swift_code', label: 'Swift Code' }
     ]
   });
-  // const { showSnackbar } = useSnackbar();
 
-  // Formik validation schema
   const validationSchema = Yup.object({
     nameOfBusiness: Yup.string().required('Business Name is required'),
-    registrationNumber: Yup.string().required('Registration Number is required'),
     entityType: Yup.string().required('Business Type is required'),
     gst_registered: Yup.string().required('GST Registration status is required'),
     gstin: Yup.string().when('gst_registered', {
@@ -95,6 +110,8 @@ export default function TabOne({ businessDetails = {}, postType, handleNext, set
     //     /^[A-Za-z]{4}[A-Za-z]{2}[A-Za-z0-9]{2}([A-Za-z0-9]{3})?$/,
     //     'SWIFT Code must be 8 or 11 characters: 4 letters, 2 letters, 2 alphanumeric, and optionally 3 alphanumeric'
     //   )
+    // branch: Yup.string().required('Branch is required'),
+    // branch_code: Yup.string().required('Branch Code is required')
   });
 
   const formik = useFormik({
@@ -115,7 +132,9 @@ export default function TabOne({ businessDetails = {}, postType, handleNext, set
       bank_name: '',
       account_number: '',
       ifsc_code: '',
-      swift_code: ''
+      swift_code: '',
+      branch: '',
+      branch_code: ''
     },
     validationSchema,
     onSubmit: async (values) => {
@@ -173,13 +192,15 @@ export default function TabOne({ businessDetails = {}, postType, handleNext, set
         nameOfBusiness: businessDetails.nameOfBusiness || '',
         registrationNumber: businessDetails.registrationNumber || '',
         entityType: businessDetails.entityType || '',
-        gst_registered: Array.isArray(businessDetails?.gst_details) && businessDetails.gst_details.length > 0 ? 'Yes' : 'No',
-        gstin:
-          businessDetails?.gst_details?.length !== 0 && businessDetails.gstin === 'NA'
-            ? ''
-            : businessDetails?.gst_details?.length === 0
-              ? 'NA'
-              : businessDetails.gstin,
+        // gst_registered: Array.isArray(businessDetails?.gst_details) && businessDetails.gst_details.length > 0 ? 'Yes' : 'No',
+        gst_registered: businessDetails.gst_registered === true ? 'Yes' : 'No',
+        // gstin:
+        //   businessDetails?.gst_details?.length !== 0 && businessDetails.gstin === 'NA'
+        //     ? ''
+        //     : businessDetails?.gst_details?.length === 0
+        //       ? 'NA'
+        //       : businessDetails.gstin,
+        gstin: businessDetails.gstin || 'NA',
         state: businessDetails?.headOffice?.state || businessDetails?.state || '',
         email: businessDetails.email || '',
         pincode: businessDetails?.headOffice?.pincode || businessDetails?.pincode || '',
@@ -195,7 +216,67 @@ export default function TabOne({ businessDetails = {}, postType, handleNext, set
     }
   }, [businessDetails]);
 
-  if (!businessDetails || !businessDetails.id) return <Typography>Loading business details...</Typography>;
+  const getLogoDetails = async () => {
+    const logoResponse = await Factory('get', `/user_management/business-logo/${businessDetails.id}/`, {}, {});
+    if (logoResponse.res.status_cd === 0) {
+      setLogoUrlDetails(logoResponse.res.data);
+      setLogoposttype('put');
+    } else {
+      setLogoUrlDetails(null);
+      setLogoposttype('post');
+    }
+  };
+
+  useEffect(() => {
+    if (businessDetails && businessDetails.id) {
+      getLogoDetails();
+    }
+  }, [businessDetails]);
+
+  if (!businessDetails || !businessDetails.id) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+  const handleLogoChange = async (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setLogoFile(file);
+
+      let url = logoposttype === 'put' ? `/user_management/business-logo/${logoUrlDetails.id}/` : '/user_management/business-logo/';
+      let formData = new FormData();
+      formData.append('logo', file);
+      logoposttype === 'post' && formData.append('business', businessDetails.id);
+      let { res, error } = await Factory(logoposttype, url, formData);
+      console.log(res);
+      if (res.status_cd === 0) {
+        setLogoUrlDetails(res.data);
+        setLogoposttype('put');
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'Logo updated successfully',
+            variant: 'alert',
+            alert: { color: 'success' },
+            close: false
+          })
+        );
+      } else {
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: JSON.stringify(error),
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
+      }
+    }
+  };
+
   return (
     <>
       <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 2 }}>
@@ -203,14 +284,50 @@ export default function TabOne({ businessDetails = {}, postType, handleNext, set
       </Typography>
 
       <Grid2 container spacing={2}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+          <input
+            accept="image/*"
+            style={{ display: 'none' }}
+            id="profile-image-upload"
+            type="file"
+            onChange={handleLogoChange}
+            ref={fileInputRef}
+          />
+
+          <Box display="flex" alignItems="center" gap={10}>
+            <Avatar
+              alt="Profile"
+              src={logoUrlDetails?.logo || (logoFile ? URL.createObjectURL(logoFile) : '')}
+              sx={{
+                width: 100,
+                height: 100,
+                boxShadow: 3,
+                border: '2px solid #fff',
+                background: '#fff'
+              }}
+              imgProps={{
+                style: {
+                  objectFit: 'contain',
+                  width: '100%',
+                  height: '100%'
+                }
+              }}
+            />
+
+            <label htmlFor="profile-image-upload">
+              <Button variant="contained" size="small" component="span">
+                Upload / Change Logo
+              </Button>
+            </label>
+          </Box>
+        </Grid2>
+
         {busineesprofileFields.basic_details.map((item, index) => (
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }} key={item.name}>
             <FormControl fullWidth>
               {item.name === 'gst_registered' ? (
                 <Stack spacing={1}>
-                  <FormLabel sx={{ fontWeight: 500 }}>
-                    GST Registered <span style={{ color: 'red' }}>*</span>
-                  </FormLabel>
+                  <FormLabel sx={{ fontWeight: 500 }}>GST Registered</FormLabel>
                   <RadioGroup
                     row
                     name="gst_registered"
@@ -242,7 +359,6 @@ export default function TabOne({ businessDetails = {}, postType, handleNext, set
                 <>
                   <Typography component="label" sx={{ mb: 1 }}>
                     {item.label}
-                    <span style={{ color: 'red' }}>*</span>
                   </Typography>
 
                   <Grid2 container spacing={1} alignItems="center">
@@ -283,17 +399,16 @@ export default function TabOne({ businessDetails = {}, postType, handleNext, set
                 </>
               ) : item.name === 'state' || item.name === 'entityType' ? (
                 <>
-                  <Typography sx={{ mb: 1 }}>
-                    {item.label}
-                    <span style={{ color: 'red' }}>*</span>
-                  </Typography>
+                  <Typography sx={{ mb: 1 }}>{item.label}</Typography>
                   <CustomAutocomplete
                     value={values[item.name] || ''}
                     onChange={(e, newValue) => setFieldValue(item.name, newValue)}
                     options={
                       item.name === 'entityType'
-                        ? entity_choices // Use entity choices if the field is entityType
-                        : indian_States_And_UTs // Use indian_States_And_UTs for state field
+                        ? values.pan && values.pan.length >= 4
+                          ? businessTypesArray[values.pan[3]] || entity_choices
+                          : entity_choices
+                        : indian_States_And_UTs
                     }
                     error={touched[item.name] && Boolean(errors[item.name])}
                     helperText={touched[item.name] && errors[item.name]}
@@ -304,7 +419,6 @@ export default function TabOne({ businessDetails = {}, postType, handleNext, set
                 <>
                   <Typography component="label" sx={{ mb: 1 }}>
                     {item.label}
-                    {item.name !== 'address_line2' && <span style={{ color: 'red' }}>*</span>}
                   </Typography>
 
                   <CustomInput
@@ -317,6 +431,14 @@ export default function TabOne({ businessDetails = {}, postType, handleNext, set
                         // Check if the PAN length is greater than 10
                         if (upperValue.length <= 10) {
                           setFieldValue(item.name, upperValue);
+                          // If we have 4 characters, check the 4th letter to set business type
+                          if (upperValue.length >= 4) {
+                            const fourthLetter = upperValue[3];
+                            const businessTypes = businessTypesArray[fourthLetter];
+                            if (businessTypes && businessTypes.length > 0) {
+                              setFieldValue('entityType', businessTypes[0]); // Set the first business type as default
+                            }
+                          }
                         } else {
                           // Optionally handle the error or set the value to an empty string
                           setFieldValue(item.name, upperValue.substring(0, 10)); // Limit to 10 characters
@@ -337,6 +459,8 @@ export default function TabOne({ businessDetails = {}, postType, handleNext, set
         ))}
       </Grid2>
 
+      <Divider />
+
       <Typography variant="h4" sx={{ fontWeight: 'bold', pt: 3, mb: 2 }}>
         Bank Details
       </Typography>
@@ -345,13 +469,11 @@ export default function TabOne({ businessDetails = {}, postType, handleNext, set
         {busineesprofileFields.bank_details.map((item) => (
           <Grid2 size={{ xs: 12, sm: 6 }} key={item.name}>
             <FormControl fullWidth>
-              <Typography sx={{ mb: 1 }}>
-                {item.label}
-                {item.name !== 'swift_code' && <span style={{ color: 'red' }}>*</span>}
-              </Typography>{' '}
+              <Typography sx={{ mb: 1 }}>{item.label}</Typography>{' '}
               <TextField
                 name={item.name}
                 value={values[item.name]}
+                size="small"
                 onChange={(e) => {
                   if (item.name === 'pan' || item.name === 'ifsc_code' || item.name === 'bank_name') {
                     setFieldValue(item.name, e.target.value.toUpperCase());

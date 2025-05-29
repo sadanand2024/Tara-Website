@@ -1,22 +1,27 @@
+import image5 from 'assets/images/documentImages/image5.png';
+import image6 from 'assets/images/documentImages/image6.png';
 import image1 from 'assets/images/payrollimages/image1.png';
 import image2 from 'assets/images/payrollimages/image2.png';
 import image3 from 'assets/images/payrollimages/image3.png';
 import image4 from 'assets/images/payrollimages/image4.png';
 
+import {
+  IconBriefcase,
+  IconBuildingFactory,
+  IconBuildingStore,
+  IconChartLine,
+  IconCreditCard,
+  IconRocket,
+  IconShieldCheck,
+  IconShoppingCart,
+  IconTools,
+  IconUser,
+  IconUsers
+} from '@tabler/icons-react';
 import invoiceimage1 from 'assets/images/invoiceImages/image1.png';
 import invoiceimage2 from 'assets/images/invoiceImages/image2.png';
 import invoiceimage3 from 'assets/images/invoiceImages/image3.png';
-import {
-  IconUsers,
-  IconBuildingStore,
-  IconBriefcase,
-  IconBuildingFactory,
-  IconUser,
-  IconRocket,
-  IconShoppingCart,
-  IconTools
-} from '@tabler/icons-react';
-import { IconCreditCard, IconChartLine, IconShieldCheck } from '@tabler/icons-react';
+
 
 const productsData = {
   payroll: {
@@ -580,53 +585,208 @@ const productsData = {
       }
     ]
   },
-  documentVault: {
-    id: 'document-vault',
-    name: 'Document Vault',
-    description: 'Securely store and access all your financial documents.',
-    icon: 'Folder',
-    color: '#FFA94D',
-    path: '/products/document-vault',
-    sections: [
+ 'document-vault': {
+  id: 'document-vault',
+  name: 'Document Vault',
+  title: 'Your Secure Financial Document Hub',
+  description: 'Securely store, access, and share all your financial documents from one central location.',
+  icon: 'IconFolder',
+  color: '#FFA94D',
+  path: '/products/document-vault',
+  images: {
+      light: [image5,image6],
+      dark: [image5,image6]
+    },
+  sections: [
+    { id: 'hero', type: 'hero', order: 1 },
+    { id: 'features', type: 'features', order: 2 },
+    { id: 'how-it-works', type: 'howItWorks', order: 3 },
+    { id: 'why-choose-us', type: 'whyChooseUs', order: 4 },
+    { id: 'pricing', type: 'pricing', order: 5 },
+    { id: 'faqs', type: 'faqs', order: 6 },
+    { id: 'cta', type: 'cta', order: 7 }
+  ],
+ features: [
+  {
+    title: 'Secure Storage',
+    description: 'Bank-grade encryption ensures your documents are protected from unauthorized access at all times',
+    icon: 'IconLock'
+  },
+  {
+    title: 'Easy Access',
+    description: 'Find and retrieve documents instantly with powerful search, filters, and tags',
+    icon: 'IconSearch'
+  },
+  {
+    title: 'Secure Sharing',
+    description: 'Easily share documents with team members or third parties using permission-based access controls',
+    icon: 'IconShare'
+  },
+  {
+    title: 'Version Control',
+    description: 'Automatically track changes and maintain a full version history of all documents',
+    icon: 'IconHistory'
+  },
+  {
+    title: 'Auto Backup',
+    description: 'All files are automatically backed up to prevent data loss and ensure reliability',
+    icon: 'IconCloudUpload'
+  },
+  {
+    title: 'Access Logs',
+    description: 'Detailed activity logs help monitor who accessed or modified documents and when',
+    icon: 'IconClipboardList'
+  }
+],
+
+  howItWorks: [
+    { title: 'Upload Documents', description: 'Easily upload your financial documents in one place.' },
+    { title: 'Organize Folders', description: 'Group documents by type, year, or category.' },
+    { title: 'Access Anywhere', description: 'Login and access your data securely anytime, anywhere.' },
+    { title: 'Share Securely', description: 'Generate links or permissions for secure sharing.' }
+  ],
+  whyChooseUs: [
+    { title: 'Top-Notch Security', description: 'Your documents are protected with industry-standard encryption.' },
+    { title: 'Accessible 24/7', description: 'Access your vault anytime from any device.' },
+    { title: 'Smart Tagging', description: 'Auto-tag and categorize your documents for faster search.' }
+  ],
+  faqs: [
+    {
+      question: 'Is my data encrypted?',
+      answer: 'Yes, all your documents are encrypted both in transit and at rest.'
+    },
+    {
+      question: 'Can I recover deleted files?',
+      answer: 'Yes, deleted files can be recovered within 30 days from trash.'
+    }
+  ],
+  targetAudience: [
       {
-        id: 'first-section',
-        component: 'FirstSection',
-        order: 1
+        title: 'Document Vault Users',
+        description: 'Simple and efficient invoicing and payment tools for independent professionals',
+        icon: IconUser
       },
       {
-        id: 'key-features',
-        component: 'KeyFeaturesSection',
-        order: 2
+        title: 'Legal Professionals',
+        description: 'Secure repository for storing contracts, agreements, and compliance records',
+        icon: IconRocket
       },
       {
-        id: 'target-audience',
-        component: 'TargetAudienceSection',
-        order: 3
+        title: 'HR & Admin Teams',
+       description: 'Manage employee records, contracts, and HR documents securely in one place',
+        icon: IconShoppingCart
+      },
+      {
+        title: 'Business Owners',
+       description: 'All business-critical documents—licenses, agreements, invoices—securely stored and easily accessible',
+        icon: IconTools
+      },
+      {
+       title: 'Document Vault Users',
+       description: 'Secure cloud-based storage for businesses to manage and access important documents anytime, anywhere',
+        icon: IconBuildingFactory
       }
     ],
-    features: [
+    plans: [
       {
-        title: 'Secure Storage',
-        description: 'Bank-level encrypted document storage',
-        icon: 'Security'
+        title: 'Essentials',
+        icon: IconCreditCard,
+        description: 'For individuals and small businesses',
+        price: '199',
+        permission: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
+        details: {
+          Pricing: '199',
+          'Invoices Limit': '100',
+          'No of Users': '1',
+          GSTINs: '1',
+          Branches: '1',
+          'Invoice Format': 'Basic (Pre-defined)',
+          'Payment Status Tracker': 'No',
+          'Inventory & Items Master': 'No',
+          'Customer Master': 'No',
+          'Import from Excel': 'No',
+          'Download in PDF': 'Yes',
+          'Email/Whatsapp Invoices': 'No',
+          'Reports & Filters': 'No',
+          'Branding (Custom color/theme)': 'No',
+          Support: 'Email',
+          'Extra User': 'INR 50/Month',
+          'Extra GSTIN': 'INR 100/Month',
+          'Custom Template Setup': 'INR 499 one time'
+        }
       },
       {
-        title: 'Easy Access',
-        description: 'Quick search and retrieval',
-        icon: 'Search'
+        title: 'Pro Edge',
+        icon: IconChartLine,
+        description: 'For growing businesses',
+        price: '499',
+        permission: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+        details: {
+          'Payroll Setup Wizard': 'Full Access',
+          'Employees Limit': '50',
+          Locations: '3',
+          'Salary Templates': 'Multiple',
+          'Salary Components': 'Unlimited',
+          'Pay Schedule': 'Monthly / Fortnightly',
+          'Departments & Designations': 'Yes',
+          'Leave Management': 'Multiple Heads + Accruals',
+          'Payslip Download': 'Yes',
+          Attendance: 'Excel Upload',
+          'Compliance Config': 'PF / ESI / PT / TDS',
+          'No of Users': '2',
+          'Email Payslips': 'Yes',
+          'Custom Payslip Format': 'No',
+          'Extra Employee (per 10)': 'INR 150/month',
+          'Payslip via WhatsApp': '₹0.75/message',
+          'Additional Admin Users': '₹99/month/user',
+          'Salary Structuring Assistance': '₹499 one-time',
+          'Form 16 Auto Generator (Beta)': '₹499/month',
+          'PF/ESI/PT Filings (Service)': '₹499/month'
+        }
       },
       {
-        title: 'Sharing',
-        description: 'Secure document sharing',
-        icon: 'Share'
-      },
-      {
-        title: 'Version Control',
-        description: 'Track document versions and changes',
-        icon: 'History'
+        title: 'Ultimate Control',
+        icon: IconShieldCheck,
+        description: 'For large enterprises',
+        price: '899',
+        permission: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+        details: {
+          'Payroll Setup Wizard': 'Full Access',
+          'Employees Limit': '100',
+          Locations: 'Unlimited',
+          'Salary Templates': 'Multiple',
+          'Salary Components': 'Unlimited',
+          'Pay Schedule': 'Custom',
+          'Departments & Designations': 'Yes',
+          'Leave Management': 'Rule-Based (Custom Policies)',
+          'Payslip Download': 'Yes',
+          Attendance: 'Excel + Manual',
+          'Compliance Config': 'PF / ESI / PT / TDS + Summary View',
+          'No of Users': 'Unlimited',
+          'Email Payslips': 'Yes',
+          'Custom Payslip Format': 'Yes',
+          'Extra Employee (per 10)': 'INR 150/month',
+          'Payslip via WhatsApp': '₹0.75/message',
+          'Additional Admin Users': '₹99/month/user',
+          'Salary Structuring Assistance': '₹499 one-time',
+          'Form 16 Auto Generator (Beta)': '₹499/month',
+          'PF/ESI/PT Filings (Service)': '₹499/month'
+        }
       }
-    ]
-  }
+    ],
+  planList: [
+    'Storage Limit',
+    'Folder Organization',
+    'Secure Sharing',
+    'Version History',
+    'Trash Recovery',
+    'Support',
+    'Extra Storage',
+    'Access Logs',
+    'Priority Access'
+  ]
+}
+
 };
 
 export default productsData;

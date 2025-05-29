@@ -10,6 +10,8 @@ import AutorenewIcon from '@mui/icons-material/Autorenew';
 import { useDispatch as useReduxDispatch } from 'react-redux';
 import { storeUser } from 'store/slices/account';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import CheckCircleTwoToneIcon from '@mui/icons-material/CheckCircleTwoTone';
+import PlanDrawer from './PlanDrawer';
 
 // material-ui
 import {
@@ -18,7 +20,7 @@ import {
   Card,
   CardContent,
   Divider,
-  Grid,
+  Grid2,
   Stack,
   Table,
   TableBody,
@@ -243,6 +245,8 @@ const ManageSubscriptions = () => {
   const isTablet = useMediaQuery(theme.breakpoints.down('md'));
   const [paymentHistory, setPaymentHistory] = useState([]);
   const [moduleSubscriptions, setModuleSubscriptions] = useState([]);
+  const [openPlanDrawer, setOpenPlanDrawer] = useState(false);
+  const [selectedServiceRequest, setSelectedServiceRequest] = useState(null);
   const [servicesPurchased, setServicesPurchased] = useState([]);
   const navigate = useNavigate();
   const user = useSelector((state) => state).accountReducer.user;
@@ -277,6 +281,11 @@ const ManageSubscriptions = () => {
     };
     getServicesPurchased();
   }, [user.active_context]);
+
+  const handleOpenPlanDrawer = (service_request) => {
+    setSelectedServiceRequest(service_request);
+    setOpenPlanDrawer(true);
+  };
 
   return (
     <Stack spacing={{ xs: 2, sm: 3, md: 4 }}>
@@ -372,9 +381,9 @@ const ManageSubscriptions = () => {
           Active Subscriptions
         </Typography>
         {moduleSubscriptions && moduleSubscriptions.length > 0 ? (
-          <Grid container spacing={{ xs: 2, sm: 3 }}>
+          <Grid2 container spacing={{ xs: 2, sm: 3 }}>
             {moduleSubscriptions.map((subscription) => (
-              <Grid item xs={12} md={6} lg={4} xl={3} key={subscription.id}>
+              <Grid2 size={{ xs: 12, md: 6, lg: 4, xl: 4 }} key={subscription.id}>
                 <SubscriptionCard
                   // id: item.id,
                   // module_id: item.module.id,
@@ -395,9 +404,9 @@ const ManageSubscriptions = () => {
                   autoRenew={subscription.auto_renew}
                   description={subscription.plan_description}
                 />
-              </Grid>
+              </Grid2>
             ))}
-          </Grid>
+          </Grid2>
         ) : (
           <EmptySubscriptions />
         )}
@@ -473,7 +482,7 @@ const ManageSubscriptions = () => {
                       }
                     }}
                   >
-                    <TableCell sx={{ pl: 3 }}>{(page - 1) * rowsPerPage + index + 1}</TableCell>
+                    <TableCell sx={{ pl: 3 }}>{index + 1}</TableCell>
                     <TableCell>{task.id}</TableCell>
                     <TableCell>{task.service_name.charAt(0).toUpperCase() + task.service_name.slice(1)}</TableCell>
                     <TableCell>{task.plan_name.charAt(0).toUpperCase() + task.plan_name.slice(1)}</TableCell>
@@ -487,7 +496,7 @@ const ManageSubscriptions = () => {
                           sx={{ fontWeight: 500 }}
                         />
                       ) : (
-                        <Button variant="outlined" color="primary" size="small" onClick={() => onOpenPlans(task)}>
+                        <Button variant="outlined" color="primary" size="small" onClick={() => handleOpenPlanDrawer(task)}>
                           Complete Payment
                         </Button>
                       )}
@@ -633,6 +642,16 @@ const ManageSubscriptions = () => {
           </Table>
         </TableContainer>
       </Box>
+      <PlanDrawer
+        type="service"
+        moduleId={selectedServiceRequest?.service}
+        open={openPlanDrawer}
+        onClose={() => {
+          setSelectedServiceRequest(null);
+          setOpenPlanDrawer(false);
+        }}
+        selectedTask={selectedServiceRequest}
+      />
     </Stack>
   );
 };

@@ -16,46 +16,65 @@ const HowItWorksStepper = ({ steps }) => {
 
   const CustomConnector = styled(StepConnector)(() => ({
     [`&.${stepConnectorClasses.alternativeLabel}`]: {
-      top: 22
+      top: 22,
+      left: 'calc(-50% + 34px)',
+      right: 'calc(50% + 42px)',
     },
     [`& .${stepConnectorClasses.line}`]: {
-      height: 3,
-      border: 0,
+      height: 2,
+      border: '2px solid #99B9FF',
+      backgroundColor: 'transparent',
       borderRadius: 1,
-      backgroundImage: `linear-gradient(95deg, ${theme.palette.secondary.main} 0%, #8a2387 100%)`,
       display: 'flex',
       alignItems: 'center',
+      marginTop: '15px',
       justifyContent: 'flex-end',
+      // width: '113px', // Remove fixed width to allow dynamic stretching
+      // transform: 'rotate(0.33deg)', // Keep or remove rotation as needed, removing for now as it might interfere
+      // Add arrow styling
       '&::after': {
         content: '""',
         width: 0,
         height: 0,
-        borderTop: '8px solid transparent',
-        borderBottom: '8px solid transparent',
-        borderLeft: '12px solid',
-        borderLeftColor: theme.palette.secondary.main,
-        marginLeft: 'auto'
+        borderTop: '6px solid transparent',
+        borderBottom: '6px solid transparent',
+        borderLeft: '10px solid',
+        borderLeftColor: '#99B9FF',
+        marginLeft: 'auto',
+        marginRight: '-10px',
+        marginTop: '1px',
       }
     }
   }));
 
   const CustomStepIconRoot = styled('div')(() => ({
-    backgroundImage: `linear-gradient(136deg, ${theme.palette.secondary.main} 0%, #8a2387 100%)`,
+    backgroundColor: '#0042D1',
     color: '#fff',
-    width: 50,
-    height: 50,
+    width: 71,
+    height: 71,
     display: 'flex',
     borderRadius: '50%',
     justifyContent: 'center',
     alignItems: 'center',
-    boxShadow: '0 4px 10px rgba(0,0,0,.25)'
+    boxShadow: 'none',
+    border: '1px solid #0042D1'
   }));
 
   function CustomStepIcon(props) {
     const { icon } = props;
     return (
       <CustomStepIconRoot>
-        <Typography variant="h6" sx={{ color: '#fff', fontWeight: 700 }}>
+        <Typography 
+          variant="h6" 
+          sx={{
+            color: '#fff', 
+            fontWeight: 500,
+            fontSize: '30px', // Updated font size
+            lineHeight: '100%', // Updated line height
+            letterSpacing: '0px', // Updated letter spacing
+            fontFamily: 'Manrope, sans-serif', // Updated font family
+          }}
+        >
           {icon}
         </Typography>
       </CustomStepIconRoot>
@@ -63,14 +82,18 @@ const HowItWorksStepper = ({ steps }) => {
   }
 
   return (
-    <Container>
+    <Container sx={{ py: { xs: 6, md: 8 }, textAlign: 'center' }}>
       <Typography
-        variant="h4"
+        variant="h2" // Changed to h2 for title
         textAlign="center"
         fontWeight={700}
         sx={{
-          fontSize: { xs: '1.8rem', sm: '2.4rem', md: '2.8rem' },
-          mb: 2
+          fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' }, // Adjusted font size
+          mb: 6, // Increased bottom margin
+          color: '#000', // Black color for title
+          // fontSize: '38px',
+          
+          fontFamily: 'Manrope, sans-serif', // Specified font family
         }}
       >
         How It Works
@@ -82,20 +105,37 @@ const HowItWorksStepper = ({ steps }) => {
         activeStep={steps.length}
         sx={{
           mt: 4,
-          px: { xs: 1, sm: 2 },
-          backgroundColor: 'rgba(255, 255, 255, 0.8)',
-          borderRadius: 2,
+          px: { xs: 0, sm: 0 }, // Keep horizontal padding removed as intended
+          backgroundColor: 'transparent',
+          borderRadius: 0,
           overflowX: { xs: 'auto', md: 'unset' },
           '& .MuiStepLabel-label': {
-            typography: { xs: 'body2', sm: 'subtitle1' }
-          }
+            typography: { xs: 'body2', sm: 'subtitle1' },
+            mt: 2,
+          },
+          '& .MuiStepConnector-root': {
+          },
+          '& .MuiStep-root': {
+          },
         }}
       >
         {steps.map((step, idx) => (
           <Step key={idx}>
             <StepLabel StepIconComponent={CustomStepIcon}>
-              <Box sx={{ textAlign: 'center', maxWidth: { xs: 160, sm: 220 }, mx: 'auto' }}>
-                <Typography variant="h5" color="text.secondary">
+              <Box sx={{ textAlign: 'center', maxWidth: { xs: 120, sm: 150 }, mx: 'auto' }}> {/* Adjusted max width */}
+                <Typography
+                  variant="body2"
+                  color="text.primary"
+                  sx={{
+                    fontFamily: 'Inter, sans-serif',
+                    fontWeight: 700,
+                    fontSize: '14px',
+                    lineHeight: '20px',
+                    letterSpacing: '0px',
+                    textAlign: 'center',
+                    // background: '#0D141C',
+                  }}
+                >
                   {step}
                 </Typography>
               </Box>
