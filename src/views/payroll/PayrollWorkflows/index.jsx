@@ -24,6 +24,7 @@ import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import React from 'react';
+import Tds from './Tds';
 // TabPanel Component
 const TabPanel = ({ children, value, index }) => (
   <div role="tabpanel" hidden={value !== index} id={`tabpanel-${index}`} aria-labelledby={`tab-${index}`}>
@@ -185,7 +186,20 @@ const PayrollWorkflows = ({ type }) => {
           { name: 'revised_ctc', label: '	Revised CTC' }
         ]
       },
-      { label: 'Other Deductions', component: OtherDeductions, fields: [] }
+      {
+        label: 'Tds',
+        component: Tds,
+        fields: [
+          { name: 'employee', label: 'Employee Name' },
+          { name: 'pan', label: 'Pan' },
+          { name: 'regime', label: 'Regime' },
+          { name: 'annual_est', label: 'Annual Est' },
+          { name: 'annual_tax_libility', label: 'Annual Tax Libility' },
+          { name: 'tds_month', label: 'TDS(Month)' },
+          { name: 'tds_ytd', label: 'TDS YTD' }
+        ]
+      }
+      // { label: 'Other Deductions', component: OtherDeductions, fields: [] }
     ],
     []
   );

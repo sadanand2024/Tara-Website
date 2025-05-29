@@ -44,6 +44,7 @@ export default function RenderSalaryTemplateTable({
   const dispatch = useDispatch();
 
   const get_individual_componnet_data = async (id) => {
+    console.log('abc');
     setLoading(true);
     const url = `/payroll/earnings/${id}`;
     const { res } = await Factory('get', url, {});

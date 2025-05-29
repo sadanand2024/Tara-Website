@@ -5,40 +5,59 @@ import Factory from 'utils/Factory';
 import { useSearchParams } from 'react-router-dom';
 import RenderDialog from './RenderDialog';
 
-export default function SalaryRevisions({ employeeMasterData, from, openDialog, fields, setOpenDialog }) {
-  const headerData = ['Employee ID', 'Employee Name', 'Department', 'Designation', 'Current CTC', 'Last Revision', 'Revised CTC'];
-  const body_keys = ['id', 'employee_name', 'department', 'designation', 'current_ctc', 'created_on', 'revised_ctc'];
+export default function Tds({ employeeMasterData, from, openDialog, fields, setOpenDialog }) {
+  const headerData = [
+    'Employee ID',
+    'Employee Name',
+    'Pan',
+    'Regime',
+    'Annual Est',
+
+    // 'Annual Tax Libility',
+    'TDS Month',
+    'TDS YTD'
+  ];
+
+  const body_keys = [
+    'id',
+    'employee_name',
+    'pan',
+    'regime',
+    'annual_tds',
+    // 'annual_tax_libility',
+    'tds',
+    'tds_ytd'
+  ];
   const [payrollid, setPayrollId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [month, setMonth] = useState(null);
   const [financialYear, setFinancialYear] = useState(null);
-
   const [searchParams] = useSearchParams();
-  useEffect(() => {
-    let monthNumber = searchParams.get('month');
-    if (monthNumber) {
-      setMonth(monthNumber);
-    }
-  }, [searchParams]);
-  useEffect(() => {
-    const financial_year = searchParams.get('financial_year');
-    if (financial_year) {
-      setFinancialYear(financial_year);
-    }
-  }, [searchParams]);
+
   useEffect(() => {
     const id = searchParams.get('payrollid');
     if (id) {
       setPayrollId(id);
     }
   }, [searchParams]);
+  useEffect(() => {
+    const month = searchParams.get('month');
+    if (month) {
+      setMonth(month);
+    }
+  }, [searchParams]);
+  useEffect(() => {
+    const financialYear = searchParams.get('financial_year');
+    if (financialYear) {
+      setFinancialYear(financialYear);
+    }
+  }, [searchParams]);
 
   const getData = async () => {
     setLoading(true);
-    const year = financialYear.split('-')[1];
-    const url = `/payroll/employee-salaries?payroll_id=${payrollid}&month=${month}&year=${year}`;
+    const url = `/payroll/employee-tds?payroll_id=${payrollid}&month=${month}&financial_year=${financialYear}`;
     const { res, error } = await Factory('get', url, {});
     setLoading(false);
     if (res.status_cd === 0) {
@@ -48,7 +67,7 @@ export default function SalaryRevisions({ employeeMasterData, from, openDialog, 
     }
   };
   const handleEdit = async (item) => {
-    let url = `/payroll/bonus-incentives/${item.id}`;
+    let url = `/payroll/employee-tds/${item.id}`;
     const { res } = await Factory('get', url, {});
     if (res.status_cd === 1) {
       // showSnackbar(JSON.stringify(res.data), 'error');
@@ -58,10 +77,10 @@ export default function SalaryRevisions({ employeeMasterData, from, openDialog, 
     }
   };
   const handleDelete = async (item) => {
-    let url = `/payroll/bonus-incentives/${item.id}`;
+    let url = `/payroll/employee-tds/${item.id}`;
     const { res } = await Factory('delete', url, {});
     if (res.status_cd === 1) {
-      // showSnackbar(JSON.stringify(res.data), 'error');
+      showSnackbar(JSON.stringify(res.data), 'error');
     } else {
       // showSnackbar('Record Deleted Successfully', 'success');
       getData();
@@ -75,7 +94,6 @@ export default function SalaryRevisions({ employeeMasterData, from, openDialog, 
   return (
     <>
       <RenderTable
-        from={from}
         headerData={headerData}
         tableData={data}
         handleEdit={handleEdit}
