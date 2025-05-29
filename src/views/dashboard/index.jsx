@@ -47,6 +47,11 @@ export default function Dashboard() {
       data.user_role = response.res.data.user_role;
       localStorage.setItem('user', JSON.stringify(data));
       reduxDispatch(storeUser(data));
+      if (response.res.data.active_context.context_type === 'business') {
+        navigate('/dashboard/business');
+      } else {
+        navigate('/dashboard/personal');
+      }
     }
   };
 
@@ -75,12 +80,13 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    console.log(user);
-    if (user.user.is_super_admin) navigate('/dashboard/super-admin');
-    // navigate('/dashboard/business');
-    else if (user.all_contexts.length === 0) setAccDialog(true);
-    else if (user.active_context.context_type === 'business') navigate('/dashboard/business');
-    else navigate('/dashboard/personal');
+    setTimeout(() => {
+      if (user.user.is_super_admin) navigate('/dashboard/super-admin');
+      // navigate('/dashboard/business');
+      else if (user.all_contexts.length === 0) setAccDialog(true);
+      else if (user.active_context?.context_type === 'business') navigate('/dashboard/business');
+      else navigate('/dashboard/personal');
+    }, 1000);
   }, [user]);
 
   return (
