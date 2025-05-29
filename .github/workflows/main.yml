@@ -28,7 +28,7 @@ jobs:
         with:
           args: --delete
         env:
-          AWS_S3_BUCKET: dev.tarafirst.com
+          AWS_S3_BUCKET: prod.tarafirst.com
           AWS_ACCESS_KEY_ID: ${{ secrets.DEPLOY_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.DEPLOY_SECRET_ACCESS_KEY }}
           AWS_REGION: ap-south-1
