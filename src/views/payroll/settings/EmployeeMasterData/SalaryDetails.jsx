@@ -11,19 +11,28 @@ import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
 import { TextField } from '@mui/material';
 import { FormGroup, FormControlLabel, Radio } from '@mui/material';
+import SalaryTemplate from './SalaryTemplate';
 const validationSchema = Yup.object({
   // template_name: Yup.string().required('Template Name is required'),
   annual_ctc: Yup.number().required('Annual CTC is required').positive('Annual CTC must be a positive number')
 });
 const initialEarnings = [{ component_name: 'Basic', calculation_type: 'Fixed', monthly: 0, annually: 0, calculation: 0 }];
 
-function SalaryDetails({ fetchEmployeeData, employeeData, createdEmployeeId, setSubmitRef, onNext, from }) {
+function SalaryDetails({
+  fetchEmployeeData,
+  employeeData,
+  createdEmployeeId,
+  setSubmitRef,
+  onNext,
+  from,
+  setEnablePreviewButton,
+  enablePreviewButton
+}) {
   // console.log(employeeData);
   const [open, setOpen] = useState(false);
   const [payrollid, setPayrollId] = useState(null);
   const [salary_teamplates_data, setSalary_teamplates_data] = useState([]);
   const [searchParams] = useSearchParams();
-  const [enablePreviewButton, setEnablePreviewButton] = useState(false);
   const dispatch = useDispatch();
 
   const fields = [
@@ -195,12 +204,14 @@ function SalaryDetails({ fetchEmployeeData, employeeData, createdEmployeeId, set
   // }, [values.annual_ctc]);
 
   useEffect(() => {
-    if (employeeData?.employee_salary?.length > 0) {
-      let lastSalary = employeeData.employee_salary[employeeData?.employee_salary?.length - 1];
-      // console.log(lastSalary);
+    console.log(employeeData?.employee_salary);
+
+    if (employeeData?.employee_salary) {
+      let lastSalary = employeeData.employee_salary;
+      console.log(lastSalary);
       setValues((prev) => ({
         ...prev,
-        ...lastSalary,
+        ...employeeData?.employee_salary,
         tax_regime_opted: lastSalary?.tax_regime_opted || 'old'
       }));
     }
@@ -217,7 +228,16 @@ function SalaryDetails({ fetchEmployeeData, employeeData, createdEmployeeId, set
           {renderFields(fields)}
         </Grid2>
 
-        <RenderSalaryTemplateTable
+        {/* <RenderSalaryTemplateTable
+          source="salarydetails"
+          values={values}
+          setValues={setValues}
+          setFieldValue={setFieldValue}
+          enablePreviewButton={enablePreviewButton}
+          setEnablePreviewButton={setEnablePreviewButton}
+          createdEmployeeId={employeeData?.id || createdEmployeeId}
+        /> */}
+        <SalaryTemplate
           source="salarydetails"
           values={values}
           setValues={setValues}

@@ -54,6 +54,11 @@ export default function Index() {
 
   const handleTabChange = (_event, newTabIndex) => setActiveTab(newTabIndex);
 
+  useEffect(() => {
+    const tabValue = searchParams.get('tabvalue');
+    console.log(tabValue);
+    if (tabValue) setActiveTab(Number(tabValue));
+  }, [searchParams]);
   // Accessibility props for tabs
   const a11yProps = (index) => ({
     value: index,

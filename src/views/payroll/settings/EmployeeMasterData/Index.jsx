@@ -64,13 +64,14 @@ function EmployeeList() {
     const url = `/payroll/employees?payroll_id=${payrollId}`;
     const { res } = await Factory('get', url, {});
     setLoading(false);
+    console.log(res);
     if (res?.status_cd === 0) {
       setEmployees(res?.data || []);
     } else {
       dispatch(
         openSnackbar({
           open: true,
-          message: JSON.stringify(res?.data?.data || error),
+          message: JSON.stringify(res?.data?.data || 'something went wrong please try again later'),
           variant: 'alert',
           alert: { color: 'error' },
           close: false
