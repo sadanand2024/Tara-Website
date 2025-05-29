@@ -36,7 +36,6 @@ export default function RenderSalaryTemplateTable({
   const [searchParams] = useSearchParams();
   const payrollId = searchParams.get('payrollid');
   const template_id = searchParams.get('template_id');
-  const employee_id = searchParams.get('employee_id');
   const [earningsData, setEarningsData] = useState([]);
   const [fixedAllowance, setFixedAllowance] = useState({ monthly: 0, annually: 0 });
   const [loading, setLoading] = useState(false);
@@ -410,6 +409,7 @@ export default function RenderSalaryTemplateTable({
 
     const { res } = await Factory('post', '/payroll/calculate-payroll', finalPayload);
     if (res?.status_cd === 0) {
+      // Update Fixed Allowance from server response
       const fixed = res.data.earnings.find((e) => e.component_name === 'Fixed Allowance');
       if (fixed) {
         setFixedAllowance({
@@ -417,15 +417,17 @@ export default function RenderSalaryTemplateTable({
           annually: parseFloat(fixed.annually)
         });
       }
-      console.log(res.data);
-      const filtered = {
-        ...res.data,
-        // earnings: res.data.earnings.filter((e) => e.component_name !== 'Fixed Allowance')
-        earnings: res.data.earnings,
-        tax_regime_opted: values.tax_regime_opted
-      };
 
-      setValues(filtered);
+      // Update only preview-related values
+      setValues((prev) => ({
+        ...prev,
+        gross_salary: res.data.gross_salary,
+        total_ctc: res.data.total_ctc,
+        net_salary: res.data.net_salary,
+        benefits: res.data.benefits,
+        deductions: res.data.deductions
+      }));
+
       setEnablePreviewButton(false);
       setViewPreview(true);
     }

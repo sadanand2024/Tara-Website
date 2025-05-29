@@ -84,8 +84,8 @@ function SalaryDetails({
       let method = 'post';
       let url = '/payroll/employee-salary';
 
-      if (employeeData?.employee_salary?.length > 0) {
-        const lastSalaryRecord = employeeData.employee_salary[employeeData.employee_salary.length - 1];
+      if (employeeData?.employee_salary) {
+        const lastSalaryRecord = employeeData.employee_salary;
         if (lastSalaryRecord?.id) {
           method = 'put';
           url = `/payroll/employee-salary/${lastSalaryRecord.id}`;

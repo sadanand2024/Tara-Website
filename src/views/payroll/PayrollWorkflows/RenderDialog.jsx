@@ -98,6 +98,16 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
           created_on: '',
           revised_ctc: ''
         };
+      case 'Tds':
+        return {
+          employee: '',
+          pan: '',
+          regime: '',
+          annual_tds: '',
+          annual_tax_libility: '',
+          tds: '',
+          tds_ytd: ''
+        };
       default:
         return {
           employee: '',
@@ -177,6 +187,16 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
           current_ctc: Yup.string().required('Current CTC is required'),
           created_on: Yup.string().required('Created on is required'),
           revised_ctc: Yup.string().required('Revised CTC is required')
+        });
+      case 'Tds':
+        return Yup.object({
+          employee: Yup.string().required('Employee is required'),
+          pan: Yup.string().required('PAN is required'),
+          regime: Yup.string().required('Regime is required'),
+          annual_tds: Yup.string().required('Annual Estimate is required'),
+          annual_tax_libility: Yup.string().required('Annual tax liability is required'),
+          tds: Yup.string().required('TDS (Month) is required'),
+          tds_ytd: Yup.string().required('TDS YTD is required')
         });
 
       // Add more validation cases for different scenarios (e.g., Transfers)
@@ -352,6 +372,40 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
           );
         }
       }
+      if (from === 'Tds') {
+        setLoading(true);
+        let url = selectedRecord?.id ? `/payroll/tds/${selectedRecord?.id}` : `/payroll/tds`;
+        let method = selectedRecord?.id ? 'put' : 'Post';
+        let postData = {
+          ...values
+        };
+        postData.payroll = payrollid;
+        // const { res, error } = await Factory(method, url, postData);
+        // setLoading(false);
+        // if (res.status_cd === 0) {
+        //   dispatch(
+        //     openSnackbar({
+        //       open: true,
+        //       message: 'Data Saved Successfully',
+        //       variant: 'alert',
+        //       alert: { color: 'success' },
+        //       close: false
+        //     })
+        //   );
+        //   getData();
+        //   setOpenDialog(false);
+        // } else {
+        //   dispatch(
+        //     openSnackbar({
+        //       open: true,
+        //       message: JSON.stringify(res.data.data),
+        //       variant: 'alert',
+        //       alert: { color: 'error' },
+        //       close: false
+        //     })
+        //   );
+        // }
+      }
     }
   });
   const renderFields = (fields) => {
@@ -381,7 +435,7 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
             error={touched[field.name] && Boolean(errors[field.name])}
             helperText={touched[field.name] && errors[field.name]}
             size="small"
-            disabled={from === 'Attendance' && field.name === 'employee'}
+            disabled={(from === 'Attendance' && field.name === 'employee') || (from === 'Tds' && field.name === 'employee')}
           />
         ) : field.name === 'loan_type' || field.name === 'bonus_type' || field.name === 'month' ? (
           <CustomAutocomplete
@@ -504,7 +558,6 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
     ));
   };
   const { values, setValues, handleChange, errors, touched, handleSubmit, handleBlur, resetForm, setFieldValue } = formik;
-  console.log(values);
   useEffect(() => {
     if (selectedRecord !== null) {
       // Convert month name to numeric value if it exists
@@ -517,6 +570,7 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
       }));
     }
   }, [selectedRecord]);
+  console.log(values);
   return (
     <Modal
       open={openDialog}
@@ -532,7 +586,9 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
                 ? 'Bonus & Incentives'
                 : from === 'Salary Revisions'
                   ? 'Salary Revisions'
-                  : ''
+                  : from === 'Tds'
+                    ? 'TDS'
+                    : ''
       }
       showClose={true}
       handleClose={() => {
