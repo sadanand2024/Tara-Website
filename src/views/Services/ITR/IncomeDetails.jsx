@@ -38,13 +38,13 @@ const foreignDocTypes = [
   { key: 'taxPaidAbroad', label: 'Tax Paid Certificate Abroad' }
 ];
 
-const SalaryIncome = ({ fileDialogOpen, setFileDialogOpen, filesData, setDialogFilesData }) => {
+const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDialogFilesData, service_id }) => {
+  const { enqueueSnackbar } = useSnackbar();
+  const salary_income = data.find((item) => item.category_name === 'Salary Income');
+  const other_income = data.find((item) => item.category_name === 'Other Income');
+  const nri_employee_salary = data.find((item) => item.category_name === 'NRI Employee Salary');
   // Validation schemas
   const docsSchema = Yup.object({
-    docs: Yup.object({
-      form16: Yup.array().min(1, 'Required'),
-      bank: Yup.array().min(1, 'Required')
-    }),
     notes: Yup.object({
       form16: Yup.string(),
       payslip: Yup.string(),
@@ -54,40 +54,44 @@ const SalaryIncome = ({ fileDialogOpen, setFileDialogOpen, filesData, setDialogF
   const otherIncomeSchema = Yup.object({
     otherIncome: Yup.array().of(
       Yup.object({
-        details: Yup.string().required('Required'),
-        amount: Yup.string().required('Required'),
-        document: Yup.mixed(),
+        details: Yup.string(),
+        amount: Yup.string(),
+        file: Yup.mixed(),
         notes: Yup.string()
       })
     )
   });
   const foreignSchema = Yup.object({
-    foreignDocs: Yup.object({
-      foreignSalarySlip: Yup.array().min(1, 'Required'),
-      foreignBankStmt: Yup.array().min(1, 'Required'),
-      taxPaidAbroad: Yup.array().min(1, 'Required')
-    }),
-    periodFrom: Yup.string().required('Required'),
-    periodTo: Yup.string().required('Required'),
-    country: Yup.string().required('Required'),
-    salaryReceivedIn: Yup.array().min(1, 'Select at least one')
+    periodFrom: Yup.string(),
+    periodTo: Yup.string(),
+    country: Yup.string()
   });
 
   // Initial values
   const docsInitial = {
     docs: {
-      form16: [],
-      payslip: [],
-      bank: []
+      form16: salary_income.data.length > 0 ? salary_income.data[0].documents.FORM_16 : [],
+      payslip: salary_income.data.length > 0 ? salary_income.data[0].documents.PAYSLIP : [],
+      bank: salary_income.data.length > 0 ? salary_income.data[0].documents.BANK_STATEMENT : []
     },
     notes: {
-      form16: '',
-      payslip: '',
-      bank: ''
+      form16: salary_income.data.length > 0 ? salary_income.data[0].form_16_notes : '',
+      payslip: salary_income.data.length > 0 ? salary_income.data[0].payslip_notes : '',
+      bank: salary_income.data.length > 0 ? salary_income.data[0].bank_statement_notes : ''
     }
   };
   const otherIncomeInitial = {
-    otherIncome: [{ details: '', amount: '', document: null, notes: '' }]
+    otherIncome:
+      other_income.data.length > 0
+        ? other_income.data
+        : [
+            {
+              amount: '',
+              details: '',
+              file: [],
+              notes: ''
+            }
+          ]
   };
   const foreignInitial = {
     foreignDocs: {
@@ -104,16 +108,60 @@ const SalaryIncome = ({ fileDialogOpen, setFileDialogOpen, filesData, setDialogF
   // Section 1: Upload Required Documents
   const docsFormik = useFormik({
     initialValues: docsInitial,
-    validationSchema: docsSchema,
-    onSubmit: (values) => {
-      console.log('Saved Upload Required Documents!', values);
+    // validationSchema: docsSchema,
+    onSubmit: async (values) => {
+      let type = salary_income.data.length > 0 ? 'put' : 'post';
+      let url =
+        salary_income.data.length > 0
+          ? `/income_tax_returns/salary-income/${salary_income.data[0].id}/`
+          : '/income_tax_returns/salary-income/';
+      let formData = new FormData();
+      formData.append('service_request', service_id);
+      formData.append('service_task', salary_income.task_id);
+      if (values.docs.bank && Array.isArray(values.docs.bank)) {
+        values.docs.bank.forEach((bank) => {
+          if (bank instanceof File) {
+            formData.append('bank_statement_files', bank);
+          }
+        });
+      }
+      if (values.docs.form16 && Array.isArray(values.docs.form16)) {
+        values.docs.form16.forEach((form16) => {
+          if (form16 instanceof File) {
+            formData.append('form16_files', form16);
+          }
+        });
+      }
+      if (values.docs.payslip && Array.isArray(values.docs.payslip)) {
+        values.docs.payslip.forEach((payslip) => {
+          if (payslip instanceof File) {
+            formData.append('payslip_files', payslip);
+          }
+        });
+      }
+      formData.append('bank_statement_notes', values.notes.bank);
+      formData.append('form_16_notes', values.notes.form16);
+      formData.append('payslip_notes', values.notes.payslip);
+      formData.append('status', 'in progress');
+      const res = await Factory(type, url, formData, {});
+      if (res.res.status_cd === 0) {
+        enqueueSnackbar('Documents saved successfully!', {
+          variant: 'success',
+          anchorOrigin: { vertical: 'top', horizontal: 'right' }
+        });
+      } else {
+        enqueueSnackbar('Error saving documents!', {
+          variant: 'error',
+          anchorOrigin: { vertical: 'top', horizontal: 'right' }
+        });
+      }
     }
   });
 
   // Section 2: Details of any other income you wish to share
   const otherIncomeFormik = useFormik({
     initialValues: otherIncomeInitial,
-    validationSchema: otherIncomeSchema,
+    // validationSchema: otherIncomeSchema,
     onSubmit: (values) => {
       console.log('Saved Other Income!\n' + JSON.stringify(values, null, 2));
     }
@@ -122,10 +170,52 @@ const SalaryIncome = ({ fileDialogOpen, setFileDialogOpen, filesData, setDialogF
   // Section 3: Foreign/NRI Employment & Salary Details
   const foreignFormik = useFormik({
     initialValues: foreignInitial,
-    validationSchema: foreignSchema,
-    onSubmit: (values) => {
-      alert('Saved Foreign/NRI Employment & Salary Details!\n' + JSON.stringify(values, null, 2));
+    // validationSchema: foreignSchema,
+    onSubmit: async (values) => {
       console.log('Saved Foreign/NRI Employment & Salary Details!\n', values);
+      let url = '/income_tax_returns/nri-salary-details/upsert/';
+      let formData = new FormData();
+      formData.append('service_request', service_id);
+      formData.append('service_task', nri_employee_salary.task_id);
+      formData.append('status', 'in progress');
+      formData.append('period_from', values.periodFrom);
+      formData.append('period_to', values.periodTo);
+      formData.append('country', values.country);
+      formData.append('salary_received_in', values.salaryReceivedIn);
+      if (values.foreignDocs.foreignBankStmt && Array.isArray(values.foreignDocs.foreignBankStmt)) {
+        values.foreignDocs.foreignBankStmt.forEach((bank) => {
+          if (bank instanceof File) {
+            formData.append('bank_statement_files', bank);
+          }
+        });
+      }
+      if (values.foreignDocs.taxPaidAbroad && Array.isArray(values.foreignDocs.taxPaidAbroad)) {
+        values.foreignDocs.taxPaidAbroad.forEach((tax) => {
+          if (tax instanceof File) {
+            formData.append('tax_paid_certificate_board_files', tax);
+          }
+        });
+      }
+      if (values.foreignDocs.foreignSalarySlip && Array.isArray(values.foreignDocs.foreignSalarySlip)) {
+        values.foreignDocs.foreignSalarySlip.forEach((salary) => {
+          if (salary instanceof File) {
+            formData.append('salary_slip_files', salary);
+          }
+        });
+      }
+
+      const res = await Factory('post', url, formData, {});
+      if (res.res.status_cd === 0) {
+        enqueueSnackbar('Foreign/NRI Employment & Salary Details saved successfully!', {
+          variant: 'success',
+          anchorOrigin: { vertical: 'top', horizontal: 'right' }
+        });
+      } else {
+        enqueueSnackbar('Error saving Foreign/NRI Employment & Salary Details!', {
+          variant: 'error',
+          anchorOrigin: { vertical: 'top', horizontal: 'right' }
+        });
+      }
     }
   });
 
@@ -136,82 +226,72 @@ const SalaryIncome = ({ fileDialogOpen, setFileDialogOpen, filesData, setDialogF
         <Typography variant="h5" mb={2} sx={{ textDecoration: 'underline' }}>
           Upload Required Documents
         </Typography>
-        <Table size="small">
-          <TableHead>
-            <TableRow>
-              <TableCell>Document Type</TableCell>
-              <TableCell>Uploads</TableCell>
-              <TableCell align="center">Actions</TableCell>
-              <TableCell>Notes</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody sx={{ alignItems: 'flex-start' }}>
-            {docTypes.map((doc) => {
-              const error = docsFormik.touched.docs?.[doc.key] && docsFormik.errors.docs?.[doc.key];
-              return (
-                <TableRow key={doc.key} sx={{ height: 80, verticalAlign: 'top' }}>
-                  <TableCell>{doc.label}</TableCell>
-                  <TableCell>
-                    <Box display="flex" flexDirection="column">
-                      <Typography variant="body2" sx={{ minHeight: 24 }}>
-                        {docsFormik.values.docs[doc.key]?.length || 0} file(s)
-                      </Typography>
-                      <Box sx={{ minHeight: 20, height: 20 }}>
-                        <Typography variant="caption" color="error.main">
-                          {error ? error : '\u00A0'}
+        <Box sx={{ p: 0, boxShadow: '0px 0px 10px 0px rgba(66, 66, 66, 0.1)', borderRadius: 2 }}>
+          <Table size="small">
+            <TableHead>
+              <TableRow>
+                <TableCell>Document Type</TableCell>
+                <TableCell>Uploads</TableCell>
+                <TableCell align="center">Actions</TableCell>
+                <TableCell>Notes</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody sx={{ alignItems: 'flex-start' }}>
+              {docTypes.map((doc) => {
+                return (
+                  <TableRow key={doc.key} sx={{ height: 50, verticalAlign: 'center' }}>
+                    <TableCell>{doc.label}</TableCell>
+                    <TableCell>
+                      <Box display="flex" flexDirection="column">
+                        <Typography variant="body2" sx={{ minHeight: 24 }}>
+                          {docsFormik.values.docs[doc.key]?.count || 0} file(s)
                         </Typography>
                       </Box>
-                    </Box>
-                  </TableCell>
-                  <TableCell>
-                    <Box display="flex" flexDirection="column" alignItems="center">
-                      <Stack direction="row" spacing={1.5}>
-                        <Button
-                          size="small"
-                          variant="outlined"
-                          sx={{ mr: 1, mb: 0.5 }}
-                          onClick={() => {
-                            setFileDialogOpen(true);
-                            setDialogFilesData(docsFormik.values.docs[doc.key]);
-                          }}
-                        >
-                          View
-                        </Button>
-                        <Button size="small" variant="contained" component="label" sx={{ mb: 0.5 }}>
-                          {doc.key === 'payslip' ? 'Upload' : docsFormik.values.docs[doc.key]?.length ? 'Add more' : 'Upload'}
-                          <input
-                            type="file"
-                            hidden
-                            multiple={true}
-                            onChange={(e) => {
-                              if (e.target.files[0]) {
-                                docsFormik.setFieldValue(`docs.${doc.key}`, [...docsFormik.values.docs[doc.key], ...e.target.files]);
-                              }
+                    </TableCell>
+                    <TableCell>
+                      <Box display="flex" flexDirection="column" alignItems="center">
+                        <Stack direction="row" spacing={1.5}>
+                          <Button size="small" variant="contained" component="label" sx={{ mb: 0.5 }}>
+                            {docsFormik.values.docs[doc.key]?.length > 0 ? 'Add more' : 'Upload'}
+                            <input
+                              type="file"
+                              hidden
+                              multiple={true}
+                              onChange={(e) => {
+                                if (e.target.files[0]) {
+                                  docsFormik.setFieldValue(`docs.${doc.key}`, [...docsFormik.values.docs[doc.key], ...e.target.files]);
+                                }
+                              }}
+                            />
+                          </Button>
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            sx={{ mr: 1, mb: 0.5 }}
+                            onClick={() => {
+                              setFileDialogOpen(true);
+                              setDialogFilesData(docsFormik.values.docs[doc.key].files);
                             }}
-                          />
-                        </Button>
-                      </Stack>
-                      <Box sx={{ minHeight: 20, height: 20 }}>
-                        <Typography variant="caption" color="error.main">
-                          {error ? error : '\u00A0'}
-                        </Typography>
+                          >
+                            View
+                          </Button>
+                        </Stack>
                       </Box>
-                    </Box>
-                  </TableCell>
-                  <TableCell>
-                    <TextField
-                      size="small"
-                      value={docsFormik.values.notes[doc.key]}
-                      onChange={(e) => docsFormik.setFieldValue(`notes.${doc.key}`, e.target.value)}
-                      placeholder="Add note"
-                      helperText={'\u00A0'}
-                    />
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
+                    </TableCell>
+                    <TableCell>
+                      <TextField
+                        size="small"
+                        value={docsFormik.values.notes[doc.key]}
+                        onChange={(e) => docsFormik.setFieldValue(`notes.${doc.key}`, e.target.value)}
+                        placeholder="Add note"
+                      />
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </Box>
         <Box display="flex" justifyContent="flex-end" mt={2}>
           <Button type="submit" variant="contained" color="primary">
             Save Documents
@@ -228,102 +308,131 @@ const SalaryIncome = ({ fileDialogOpen, setFileDialogOpen, filesData, setDialogF
             name="otherIncome"
             render={(arrayHelpers) => (
               <>
-                {otherIncomeFormik.values.otherIncome.map((row, idx) => (
-                  <Grid2 container spacing={1} alignItems="center" key={idx} mb={1}>
-                    <Grid2 size={{ xs: 12, sm: 3 }}>
-                      <TextField
-                        size="small"
-                        fullWidth
-                        placeholder="Details"
-                        value={row.details}
-                        onChange={(e) => otherIncomeFormik.setFieldValue(`otherIncome[${idx}].details`, e.target.value)}
-                        error={Boolean(
-                          otherIncomeFormik.touched.otherIncome?.[idx]?.details && otherIncomeFormik.errors.otherIncome?.[idx]?.details
-                        )}
-                        helperText={
-                          otherIncomeFormik.touched.otherIncome?.[idx]?.details && otherIncomeFormik.errors.otherIncome?.[idx]?.details
-                            ? otherIncomeFormik.errors.otherIncome[idx].details
-                            : '\u00A0'
-                        }
-                      />
-                    </Grid2>
-                    <Grid2 size={{ xs: 12, sm: 2 }}>
-                      <TextField
-                        size="small"
-                        fullWidth
-                        placeholder="Amount"
-                        value={row.amount}
-                        onChange={(e) => otherIncomeFormik.setFieldValue(`otherIncome[${idx}].amount`, e.target.value)}
-                        error={Boolean(
-                          otherIncomeFormik.touched.otherIncome?.[idx]?.amount && otherIncomeFormik.errors.otherIncome?.[idx]?.amount
-                        )}
-                        helperText={
-                          otherIncomeFormik.touched.otherIncome?.[idx]?.amount && otherIncomeFormik.errors.otherIncome?.[idx]?.amount
-                            ? otherIncomeFormik.errors.otherIncome[idx].amount
-                            : '\u00A0'
-                        }
-                      />
-                    </Grid2>
-                    <Grid2 size={{ xs: 12, sm: 3 }}>
-                      <Box display="flex" flexDirection="column">
-                        <Box>
-                          <Button size="small" variant="contained" component="label" sx={{ mr: 1 }}>
-                            Upload
-                            <input
-                              type="file"
-                              hidden
-                              onChange={(e) => {
-                                if (e.target.files[0]) {
-                                  otherIncomeFormik.setFieldValue(`otherIncome[${idx}].document`, e.target.files[0]);
-                                }
-                              }}
-                            />
-                          </Button>
-                          {row.document && (
-                            <Button
+                <Box sx={{ p: 0, boxShadow: '0px 0px 10px 0px rgba(66, 66, 66, 0.1)', borderRadius: 2 }}>
+                  <Table size="small">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Details</TableCell>
+                        <TableCell>Amount</TableCell>
+                        <TableCell>Notes</TableCell>
+                        <TableCell>Document</TableCell>
+                        <TableCell>Actions</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {console.log(otherIncomeFormik.values.otherIncome)}
+                      {otherIncomeFormik.values.otherIncome.map((row, idx) => (
+                        <TableRow key={idx}>
+                          <TableCell>
+                            <TextField
                               size="small"
-                              variant="outlined"
-                              onClick={() => window.open(URL.createObjectURL(row.document), '_blank')}
-                            >
-                              View
+                              fullWidth
+                              placeholder="Details"
+                              value={row.details}
+                              onChange={(e) => otherIncomeFormik.setFieldValue(`otherIncome[${idx}].details`, e.target.value)}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <TextField
+                              size="small"
+                              fullWidth
+                              placeholder="Amount"
+                              type="number"
+                              value={row.amount}
+                              onChange={(e) => otherIncomeFormik.setFieldValue(`otherIncome[${idx}].amount`, e.target.value)}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <TextField
+                              size="small"
+                              fullWidth
+                              placeholder="Notes"
+                              value={row.notes}
+                              onChange={(e) => otherIncomeFormik.setFieldValue(`otherIncome[${idx}].notes`, e.target.value)}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Button size="small" variant="contained" component="label" sx={{ mr: 1 }}>
+                              Upload
+                              <input
+                                type="file"
+                                hidden
+                                multiple={false}
+                                onChange={(e) => {
+                                  if (e.target.files[0]) {
+                                    otherIncomeFormik.setFieldValue(`otherIncome[${idx}].file`, e.target.files[0]);
+                                  }
+                                }}
+                              />
                             </Button>
-                          )}
-                        </Box>
-                        <Box minHeight={20}>
-                          <Typography variant="caption" color="error.main">
-                            {otherIncomeFormik.touched.otherIncome?.[idx]?.document && otherIncomeFormik.errors.otherIncome?.[idx]?.document
-                              ? otherIncomeFormik.errors.otherIncome[idx].document
-                              : '\u00A0'}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </Grid2>
-                    <Grid2 size={{ xs: 12, sm: 3 }}>
-                      <TextField
-                        size="small"
-                        fullWidth
-                        placeholder="Notes"
-                        value={row.notes}
-                        onChange={(e) => otherIncomeFormik.setFieldValue(`otherIncome[${idx}].notes`, e.target.value)}
-                        helperText={'\u00A0'}
-                      />
-                    </Grid2>
-                    <Grid2 size={{ xs: 12, sm: 1 }}>
-                      {otherIncomeFormik.values.otherIncome.length > 1 && (
-                        <Button size="small" color="error" onClick={() => arrayHelpers.remove(idx)}>
-                          <DeleteIcon />
-                        </Button>
-                      )}
-                    </Grid2>
-                  </Grid2>
-                ))}
-                <Button
-                  size="small"
-                  variant="outlined"
-                  onClick={() => arrayHelpers.push({ details: '', amount: '', document: null, notes: '' })}
-                >
-                  Add row
-                </Button>
+                            {row.file && (
+                              <Button
+                                size="small"
+                                variant="outlined"
+                                onClick={() => {
+                                  setFileDialogOpen(true);
+                                  setDialogFilesData([{ url: row.file }]);
+                                }}
+                              >
+                                View
+                              </Button>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <Stack direction="row" spacing={1}>
+                              <Button
+                                size="small"
+                                color="primary"
+                                variant="contained"
+                                onClick={async () => {
+                                  const row = otherIncomeFormik.values.otherIncome[idx];
+                                  const formData = new FormData();
+                                  formData.append('service_request', service_id);
+                                  formData.append('service_task', other_income.task_id);
+                                  formData.append('status', 'in progress');
+                                  formData.append('details', row.details || '');
+                                  formData.append('amount', row.amount || '');
+                                  formData.append('notes', row.notes || '');
+                                  formData.append('file', row.file);
+                                  let type = 'post';
+                                  let url = '/income_tax_returns/other-income-details/';
+                                  if (row.id) {
+                                    type = 'put';
+                                    url = `/income_tax_returns/other-income-details/${row.id}/`;
+                                  }
+                                  const res = await Factory(type, url, formData, {});
+                                  if (res.res.status_cd === 0) {
+                                    enqueueSnackbar('Other income saved successfully!', {
+                                      variant: 'success',
+                                      anchorOrigin: { vertical: 'top', horizontal: 'right' }
+                                    });
+                                  }
+                                  // Here you can call your API with formData
+                                }}
+                              >
+                                Save
+                              </Button>
+                              {otherIncomeFormik.values.otherIncome.length > 1 && (
+                                <Button size="small" color="error" onClick={() => arrayHelpers.remove(idx)}>
+                                  <DeleteIcon />
+                                </Button>
+                              )}
+                            </Stack>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </Box>
+                <Box display="flex" justifyContent="flex-end" mt={2}>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    onClick={() => arrayHelpers.push({ details: '', amount: '', document: null, notes: '' })}
+                  >
+                    Add row
+                  </Button>
+                </Box>
               </>
             )}
           />
@@ -340,175 +449,158 @@ const SalaryIncome = ({ fileDialogOpen, setFileDialogOpen, filesData, setDialogF
         <Typography variant="h5" mt={5} mb={2} sx={{ textDecoration: 'underline' }}>
           Foreign/NRI Employment & Salary Details
         </Typography>
-        <Table size="small">
-          <TableHead>
-            <TableRow>
-              <TableCell>Document Type</TableCell>
-              <TableCell>Uploads</TableCell>
-              <TableCell align="center">Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody sx={{ alignItems: 'flex-start' }}>
-            {foreignDocTypes.map((doc) => {
-              const error = foreignFormik.touched.foreignDocs?.[doc.key] && foreignFormik.errors.foreignDocs?.[doc.key];
-              return (
-                <TableRow key={doc.key} sx={{ height: 80, verticalAlign: 'top' }}>
-                  <TableCell>{doc.label}</TableCell>
-                  <TableCell>
-                    <Box display="flex" flexDirection="column">
-                      <Typography variant="body2" sx={{ minHeight: 24 }}>
-                        {foreignFormik.values.foreignDocs[doc.key]?.length || 0} file(s)
-                      </Typography>
-                      <Box sx={{ minHeight: 20, height: 20 }}>
-                        <Typography variant="caption" color="error.main">
-                          {error ? error : '\u00A0'}
+        <Box sx={{ p: 0, boxShadow: '0px 0px 10px 0px rgba(66, 66, 66, 0.1)', borderRadius: 2 }}>
+          <Table size="small">
+            <TableHead>
+              <TableRow>
+                <TableCell>Document Type</TableCell>
+                <TableCell>Uploads</TableCell>
+                <TableCell align="center">Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody sx={{ alignItems: 'flex-start' }}>
+              {foreignDocTypes.map((doc) => {
+                return (
+                  <TableRow key={doc.key} sx={{ height: 50, verticalAlign: 'center' }}>
+                    <TableCell>{doc.label}</TableCell>
+                    <TableCell>
+                      <Box display="flex" flexDirection="column">
+                        <Typography variant="body2" sx={{ minHeight: 24 }}>
+                          {foreignFormik.values.foreignDocs[doc.key]?.length || 0} file(s)
                         </Typography>
                       </Box>
-                    </Box>
-                  </TableCell>
-                  <TableCell>
-                    <Box display="flex" flexDirection="column" alignItems="center">
-                      <Box>
-                        <Button
-                          size="small"
-                          variant="outlined"
-                          sx={{ mr: 1, mb: 0.5 }}
-                          onClick={() => {
-                            setFileDialogOpen(true);
-                            setDialogFilesData(foreignFormik.values.foreignDocs[doc.key]);
-                          }}
-                        >
-                          View
-                        </Button>
-                        <Button size="small" variant="contained" component="label" sx={{ mb: 0.5 }}>
-                          {foreignFormik.values.foreignDocs[doc.key]?.length ? '+Add more' : 'Upload'}
-                          <input
-                            type="file"
-                            hidden
-                            multiple={true}
-                            onChange={(e) => {
-                              if (e.target.files[0]) {
-                                foreignFormik.setFieldValue(`foreignDocs.${doc.key}`, [
-                                  ...foreignFormik.values.foreignDocs[doc.key],
-                                  ...Array.from(e.target.files)
-                                ]);
-                              }
+                    </TableCell>
+                    <TableCell>
+                      <Box display="flex" flexDirection="column" alignItems="center">
+                        <Box>
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            sx={{ mr: 1, mb: 0.5 }}
+                            onClick={() => {
+                              setFileDialogOpen(true);
+                              setDialogFilesData(foreignFormik.values.foreignDocs[doc.key]);
                             }}
-                          />
-                        </Button>
+                          >
+                            View
+                          </Button>
+                          <Button size="small" variant="contained" component="label" sx={{ mb: 0.5 }}>
+                            {foreignFormik.values.foreignDocs[doc.key]?.length ? 'Add more' : 'Upload'}
+                            <input
+                              type="file"
+                              hidden
+                              multiple={true}
+                              onChange={(e) => {
+                                if (e.target.files[0]) {
+                                  foreignFormik.setFieldValue(`foreignDocs.${doc.key}`, [
+                                    ...foreignFormik.values.foreignDocs[doc.key],
+                                    ...Array.from(e.target.files)
+                                  ]);
+                                }
+                              }}
+                            />
+                          </Button>
+                        </Box>
                       </Box>
-                      <Box sx={{ minHeight: 20, height: 20 }}>
-                        <Typography variant="caption" color="error.main">
-                          {error ? error : '\u00A0'}
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-        <Grid2 container spacing={2} alignItems="center" mt={2}>
-          {/* Period of Employment */}
-          <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-            <Typography>Period of Employment</Typography>
-          </Grid2>
-          <Grid2 size={{ xs: 6, sm: 3, md: 2 }}>
-            <TextField
-              size="small"
-              type="date"
-              fullWidth
-              value={foreignFormik.values.periodFrom}
-              onChange={(e) => foreignFormik.setFieldValue('periodFrom', e.target.value)}
-              InputLabelProps={{ shrink: true }}
-              error={Boolean(foreignFormik.touched.periodFrom && foreignFormik.errors.periodFrom)}
-              helperText={foreignFormik.touched.periodFrom && foreignFormik.errors.periodFrom ? foreignFormik.errors.periodFrom : '\u00A0'}
-            />
-          </Grid2>
-          <Grid2 size={{ xs: 6, sm: 3, md: 2 }}>
-            <TextField
-              size="small"
-              type="date"
-              fullWidth
-              value={foreignFormik.values.periodTo}
-              onChange={(e) => foreignFormik.setFieldValue('periodTo', e.target.value)}
-              InputLabelProps={{ shrink: true }}
-              error={Boolean(foreignFormik.touched.periodTo && foreignFormik.errors.periodTo)}
-              helperText={foreignFormik.touched.periodTo && foreignFormik.errors.periodTo ? foreignFormik.errors.periodTo : '\u00A0'}
-            />
-          </Grid2>
-          {/* Country of Employment */}
-          <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-            <Typography>Country of Employment</Typography>
-          </Grid2>
-          <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-            <TextField
-              size="small"
-              fullWidth
-              value={foreignFormik.values.country}
-              onChange={(e) => foreignFormik.setFieldValue('country', e.target.value)}
-              error={Boolean(foreignFormik.touched.country && foreignFormik.errors.country)}
-              helperText={foreignFormik.touched.country && foreignFormik.errors.country ? foreignFormik.errors.country : '\u00A0'}
-            />
-          </Grid2>
-        </Grid2>
-        {/* Salary Received In */}
-        <Box mt={2} mb={2}>
-          <Typography mb={1}>Salary Received In</Typography>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={foreignFormik.values.salaryReceivedIn.includes('indian')}
-                onChange={(e) => {
-                  const checked = e.target.checked;
-                  let arr = [...foreignFormik.values.salaryReceivedIn];
-                  if (checked) arr.push('indian');
-                  else arr = arr.filter((v) => v !== 'indian');
-                  foreignFormik.setFieldValue('salaryReceivedIn', arr);
-                }}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+          <Box sx={{ p: 2 }}>
+            <Grid2 container spacing={2} alignItems="center" mt={2}>
+              {/* Period of Employment */}
+              <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+                <Typography>Period of Employment</Typography>
+              </Grid2>
+              <Grid2 size={{ xs: 6, sm: 3, md: 2 }}>
+                <TextField
+                  size="small"
+                  type="date"
+                  label="From"
+                  fullWidth
+                  value={foreignFormik.values.periodFrom}
+                  onChange={(e) => foreignFormik.setFieldValue('periodFrom', e.target.value)}
+                  InputLabelProps={{ shrink: true }}
+                />
+              </Grid2>
+              <Grid2 size={{ xs: 6, sm: 3, md: 2 }}>
+                <TextField
+                  size="small"
+                  type="date"
+                  label="To"
+                  fullWidth
+                  value={foreignFormik.values.periodTo}
+                  onChange={(e) => foreignFormik.setFieldValue('periodTo', e.target.value)}
+                  InputLabelProps={{ shrink: true }}
+                />
+              </Grid2>
+              {/* Country of Employment */}
+              <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+                <Typography>Country of Employment</Typography>
+              </Grid2>
+              <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                <TextField
+                  size="small"
+                  fullWidth
+                  value={foreignFormik.values.country}
+                  onChange={(e) => foreignFormik.setFieldValue('country', e.target.value)}
+                />
+              </Grid2>
+            </Grid2>
+            {/* Salary Received In */}
+            <Box mt={2} mb={2}>
+              <Typography mb={1}>Salary Received In</Typography>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={foreignFormik.values.salaryReceivedIn.includes('indian')}
+                    onChange={(e) => {
+                      const checked = e.target.checked;
+                      let arr = [...foreignFormik.values.salaryReceivedIn];
+                      if (checked) arr.push('indian');
+                      else arr = arr.filter((v) => v !== 'indian');
+                      foreignFormik.setFieldValue('salaryReceivedIn', arr);
+                    }}
+                  />
+                }
+                label="Indian Bank"
               />
-            }
-            label="Indian Bank"
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={foreignFormik.values.salaryReceivedIn.includes('foreign')}
-                onChange={(e) => {
-                  const checked = e.target.checked;
-                  let arr = [...foreignFormik.values.salaryReceivedIn];
-                  if (checked) arr.push('foreign');
-                  else arr = arr.filter((v) => v !== 'foreign');
-                  foreignFormik.setFieldValue('salaryReceivedIn', arr);
-                }}
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={foreignFormik.values.salaryReceivedIn.includes('foreign')}
+                    onChange={(e) => {
+                      const checked = e.target.checked;
+                      let arr = [...foreignFormik.values.salaryReceivedIn];
+                      if (checked) arr.push('foreign');
+                      else arr = arr.filter((v) => v !== 'foreign');
+                      foreignFormik.setFieldValue('salaryReceivedIn', arr);
+                    }}
+                  />
+                }
+                label="Foreign Bank"
               />
-            }
-            label="Foreign Bank"
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={foreignFormik.values.salaryReceivedIn.includes('both')}
-                onChange={(e) => {
-                  const checked = e.target.checked;
-                  let arr = [...foreignFormik.values.salaryReceivedIn];
-                  if (checked) arr.push('both');
-                  else arr = arr.filter((v) => v !== 'both');
-                  foreignFormik.setFieldValue('salaryReceivedIn', arr);
-                }}
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={foreignFormik.values.salaryReceivedIn.includes('both')}
+                    onChange={(e) => {
+                      const checked = e.target.checked;
+                      let arr = [...foreignFormik.values.salaryReceivedIn];
+                      if (checked) arr.push('both');
+                      else arr = arr.filter((v) => v !== 'both');
+                      foreignFormik.setFieldValue('salaryReceivedIn', arr);
+                    }}
+                  />
+                }
+                label="Both"
               />
-            }
-            label="Both"
-          />
-          <Box minHeight={20}>
-            <Typography variant="caption" color="error.main">
-              {foreignFormik.touched.salaryReceivedIn && foreignFormik.errors.salaryReceivedIn
-                ? foreignFormik.errors.salaryReceivedIn
-                : '\u00A0'}
-            </Typography>
+            </Box>
           </Box>
         </Box>
+
         <Box display="flex" justifyContent="flex-end" mt={2}>
           <Button type="submit" variant="contained" color="primary">
             Save Foreign Income
@@ -519,34 +611,35 @@ const SalaryIncome = ({ fileDialogOpen, setFileDialogOpen, filesData, setDialogF
   );
 };
 
-const HousePropertyIncome = () => {
+const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDialogFilesData, service_id }) => {
+  console.log(data, service_id);
+  data = data[0];
   const { enqueueSnackbar } = useSnackbar();
   const [numProperties, setNumProperties] = React.useState(1);
-  const [properties, setProperties] = React.useState([
-    {
-      type_of_property: '',
-      property_address: {
-        address_line1: '',
-        address_line2: '',
-        state: '',
-        pincode: ''
-      },
-      owned_property: '',
-      ownership_percentage: '',
-      country: '',
-      is_it_property_let_out: '',
-      annual_rent_received: '',
-      rent_received: '',
-      pay_municipal_tax: '',
-      municipal_tax_paid: '',
-      municipal_tax_receipt: null,
-      home_loan_on_property: '',
-      interest_during_financial_year: '',
-      principal_during_financial_year: '',
-      upload_loan_interest_certificate: null,
-      loan_statement: null
-    }
-  ]);
+  const initialProperties = {
+    type_of_property: '',
+    property_address: {
+      address_line1: '',
+      address_line2: '',
+      state: '',
+      pincode: ''
+    },
+    owned_property: '',
+    ownership_percentage: '',
+    country: '',
+    is_it_property_let_out: '',
+    annual_rent_received: '',
+    rent_received: '',
+    pay_municipal_tax: '',
+    municipal_tax_paid: '',
+    municipal_tax_receipt: null,
+    home_loan_on_property: '',
+    interest_during_financial_year: '',
+    principal_during_financial_year: '',
+    upload_loan_interest_certificate: null,
+    loan_statement: null
+  };
+  const [properties, setProperties] = React.useState(data.data);
 
   // Add/Remove property handlers
   const handleAddProperty = () => {
@@ -634,28 +727,39 @@ const HousePropertyIncome = () => {
   // Add this async function to post a single property
   const postProperty = async (property, idx) => {
     const formData = new FormData();
+    formData.append('service_request', service_id);
+    formData.append('service_task', data.task_id);
+    formData.append('status', 'in progress');
+
     Object.entries(property).forEach(([key, value]) => {
       if (key === 'property_address') {
         formData.append(key, JSON.stringify(value));
       } else if (value instanceof File) {
         formData.append(key, value);
+      } else if (key === 'municipal_tax_receipt' || key === 'loan_statement' || key === 'upload_loan_interest_certificate') {
+        if (!value?.startsWith('http')) {
+          formData.append(key, value.toString());
+        }
       } else {
         formData.append(key, value ?? '');
       }
     });
-    // try {
-    //   const res = await Factory('post', '/income_tax_returns/house-property/', formData, {});
-    //   if (res.res.status_cd === 0) {
-    //     if (enqueueSnackbar)
-    //       enqueueSnackbar(`Property ${idx + 1} saved!`, { variant: 'success', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
-    //   } else {
-    //     if (enqueueSnackbar)
-    //       enqueueSnackbar(`Error saving property ${idx + 1}`, { variant: 'error', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
-    //   }
-    // } catch (err) {
-    //   if (enqueueSnackbar)
-    //     enqueueSnackbar(`Error saving property ${idx + 1}`, { variant: 'error', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
-    // }
+    for (let pair of formData.entries()) {
+      console.log(pair[0] + ': ' + pair[1]);
+    }
+    try {
+      const res = await Factory('post', '/income_tax_returns/house-property-details/upsert/', formData, {});
+      if (res.res.status_cd === 0) {
+        if (enqueueSnackbar)
+          enqueueSnackbar(`Property ${idx + 1} saved!`, { variant: 'success', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
+      } else {
+        if (enqueueSnackbar)
+          enqueueSnackbar(`Error saving property ${idx + 1}`, { variant: 'error', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
+      }
+    } catch (err) {
+      if (enqueueSnackbar)
+        enqueueSnackbar(`Error saving property ${idx + 1}`, { variant: 'error', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
+    }
   };
 
   return (
@@ -665,9 +769,6 @@ const HousePropertyIncome = () => {
           <Typography variant="subtitle1" fontWeight={700}>
             Enter House Property Details
           </Typography>
-          <Button size="small" variant="outlined" onClick={handleAddProperty} sx={{ ml: 2 }}>
-            Add Property
-          </Button>
         </Box>
         {properties.map((property, idx) => (
           <Paper key={idx} sx={{ p: 3, mb: 2, borderRadius: 2, bgcolor: '#f8fafc' }}>
@@ -768,6 +869,7 @@ const HousePropertyIncome = () => {
                 <TextField
                   size="small"
                   fullWidth
+                  type="number"
                   placeholder="%"
                   value={property.ownership_percentage || ''}
                   onChange={(e) => handleChange(idx, 'ownership_percentage', e.target.value)}
@@ -799,6 +901,7 @@ const HousePropertyIncome = () => {
                 <TextField
                   size="small"
                   fullWidth
+                  type="number"
                   placeholder="Amount"
                   value={property.annual_rent_received || ''}
                   onChange={(e) => handleChange(idx, 'annual_rent_received', e.target.value)}
@@ -833,6 +936,7 @@ const HousePropertyIncome = () => {
                 <TextField
                   size="small"
                   fullWidth
+                  type="number"
                   placeholder="Amount"
                   value={property.municipal_tax_paid || ''}
                   onChange={(e) => handleChange(idx, 'municipal_tax_paid', e.target.value)}
@@ -883,6 +987,7 @@ const HousePropertyIncome = () => {
                 <TextField
                   size="small"
                   fullWidth
+                  type="number"
                   placeholder="Amount"
                   value={property.interest_during_financial_year || ''}
                   onChange={(e) => handleChange(idx, 'interest_during_financial_year', e.target.value)}
@@ -895,6 +1000,7 @@ const HousePropertyIncome = () => {
                 <TextField
                   size="small"
                   fullWidth
+                  type="number"
                   placeholder="Amount"
                   value={property.principal_during_financial_year || ''}
                   onChange={(e) => handleChange(idx, 'principal_during_financial_year', e.target.value)}
@@ -985,7 +1091,23 @@ const HousePropertyIncome = () => {
 const CapitalGainsIncome = () => {
   const [selectedTypes, setSelectedTypes] = React.useState([]);
   const [numProperties, setNumProperties] = React.useState(1);
-  const [showReinvest, setShowReinvest] = React.useState(Array(numProperties).fill(false));
+  const [properties, setProperties] = React.useState([
+    {
+      property_type: '',
+      purchase_date: '',
+      purchase_cost: '',
+      sale_date: '',
+      sale_value: '',
+      purchase_doc: null,
+      sale_doc: null,
+      reinvestment: false,
+      invest_in: '',
+      invest_amount: '',
+      invest_date: '',
+      invest_doc: null
+    }
+  ]);
+  const [showReinvest, setShowReinvest] = React.useState([false]);
   const [numOtherGains, setNumOtherGains] = React.useState(1);
   const propertyTypes = ['Land', 'Plot', 'Building'];
   const gainTypes = ['Equity shares', 'Mutual funds', 'Property/Land', 'Foreign equity', 'Others'];
@@ -1007,24 +1129,7 @@ const CapitalGainsIncome = () => {
         <Typography variant="subtitle1" fontWeight={700} mb={2}>
           Capital Gain from Property / Land
         </Typography>
-        <Box display="flex" alignItems="center" mb={2} gap={2}>
-          <Typography>No. of Properties Sold</Typography>
-          <Button size="small" variant="outlined" onClick={() => setNumProperties(Math.max(1, numProperties - 1))}>
-            -
-          </Button>
-          <Typography>{numProperties}</Typography>
-          <Button
-            size="small"
-            variant="outlined"
-            onClick={() => {
-              setNumProperties(numProperties + 1);
-              setShowReinvest([...showReinvest, false]);
-            }}
-          >
-            +
-          </Button>
-        </Box>
-        {Array.from({ length: numProperties }).map((_, idx) => (
+        {properties.map((property, idx) => (
           <Paper key={idx} sx={{ p: 2, mb: 3, border: '1px solid #e0e0e0', bgcolor: '#fff' }}>
             <Typography fontWeight={600} mb={1}>
               Capital gain details for property {idx + 1}
@@ -1038,6 +1143,12 @@ const CapitalGainsIncome = () => {
                   size="small"
                   fullWidth
                   options={propertyTypes}
+                  value={property.property_type}
+                  onChange={(_, v) => {
+                    const updated = [...properties];
+                    updated[idx].property_type = v;
+                    setProperties(updated);
+                  }}
                   renderInput={(params) => <TextField {...params} placeholder="Select type" />}
                 />
               </Grid2>
@@ -1045,25 +1156,69 @@ const CapitalGainsIncome = () => {
                 <Typography>Date of Purchase</Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <TextField size="small" type="date" fullWidth InputLabelProps={{ shrink: true }} />
+                <TextField
+                  size="small"
+                  type="date"
+                  fullWidth
+                  InputLabelProps={{ shrink: true }}
+                  value={property.purchase_date}
+                  onChange={(e) => {
+                    const updated = [...properties];
+                    updated[idx].purchase_date = e.target.value;
+                    setProperties(updated);
+                  }}
+                />
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <Typography>Purchase Cost</Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <TextField size="small" fullWidth placeholder="Amount" />
+                <TextField
+                  size="small"
+                  fullWidth
+                  placeholder="Amount"
+                  type="number"
+                  value={property.purchase_cost}
+                  onChange={(e) => {
+                    const updated = [...properties];
+                    updated[idx].purchase_cost = e.target.value;
+                    setProperties(updated);
+                  }}
+                />
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <Typography>Date of Sale</Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <TextField size="small" type="date" fullWidth InputLabelProps={{ shrink: true }} />
+                <TextField
+                  size="small"
+                  type="date"
+                  fullWidth
+                  InputLabelProps={{ shrink: true }}
+                  value={property.sale_date}
+                  onChange={(e) => {
+                    const updated = [...properties];
+                    updated[idx].sale_date = e.target.value;
+                    setProperties(updated);
+                  }}
+                />
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <Typography>Sale Value</Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <TextField size="small" fullWidth placeholder="Amount" />
+                <TextField
+                  size="small"
+                  fullWidth
+                  placeholder="Amount"
+                  type="number"
+                  value={property.sale_value}
+                  onChange={(e) => {
+                    const updated = [...properties];
+                    updated[idx].sale_value = e.target.value;
+                    setProperties(updated);
+                  }}
+                />
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <Typography>Upload purchase doc</Typography>
@@ -1071,7 +1226,15 @@ const CapitalGainsIncome = () => {
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <Button size="small" variant="contained" component="label">
                   Upload
-                  <input type="file" hidden />
+                  <input
+                    type="file"
+                    hidden
+                    onChange={(e) => {
+                      const updated = [...properties];
+                      updated[idx].purchase_doc = e.target.files[0];
+                      setProperties(updated);
+                    }}
+                  />
                 </Button>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
@@ -1080,7 +1243,15 @@ const CapitalGainsIncome = () => {
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <Button size="small" variant="contained" component="label">
                   Upload
-                  <input type="file" hidden />
+                  <input
+                    type="file"
+                    hidden
+                    onChange={(e) => {
+                      const updated = [...properties];
+                      updated[idx].sale_doc = e.target.files[0];
+                      setProperties(updated);
+                    }}
+                  />
                 </Button>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
@@ -1122,19 +1293,55 @@ const CapitalGainsIncome = () => {
                           size="small"
                           fullWidth
                           options={investOptions}
+                          value={property.invest_in}
+                          onChange={(_, v) => {
+                            const updated = [...properties];
+                            updated[idx].invest_in = v;
+                            setProperties(updated);
+                          }}
                           renderInput={(params) => <TextField {...params} placeholder="Select" />}
                         />
                       </TableCell>
                       <TableCell>
-                        <TextField size="small" fullWidth placeholder="Amount" />
+                        <TextField
+                          size="small"
+                          fullWidth
+                          placeholder="Amount"
+                          type="number"
+                          value={property.invest_amount}
+                          onChange={(e) => {
+                            const updated = [...properties];
+                            updated[idx].invest_amount = e.target.value;
+                            setProperties(updated);
+                          }}
+                        />
                       </TableCell>
                       <TableCell>
-                        <TextField size="small" type="date" fullWidth InputLabelProps={{ shrink: true }} />
+                        <TextField
+                          size="small"
+                          type="date"
+                          fullWidth
+                          InputLabelProps={{ shrink: true }}
+                          value={property.invest_date}
+                          onChange={(e) => {
+                            const updated = [...properties];
+                            updated[idx].invest_date = e.target.value;
+                            setProperties(updated);
+                          }}
+                        />
                       </TableCell>
                       <TableCell>
                         <Button size="small" variant="contained" component="label">
                           Upload
-                          <input type="file" hidden />
+                          <input
+                            type="file"
+                            hidden
+                            onChange={(e) => {
+                              const updated = [...properties];
+                              updated[idx].invest_doc = e.target.files[0];
+                              setProperties(updated);
+                            }}
+                          />
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -1142,11 +1349,75 @@ const CapitalGainsIncome = () => {
                 </Table>
               </Box>
             )}
+            <Box display="flex" justifyContent="flex-end" mt={2} gap={2}>
+              <Button
+                size="small"
+                variant="contained"
+                color="primary"
+                onClick={() => {
+                  // Save logic for this property only
+                  const propertyToSave = properties[idx];
+                  const formData = new FormData();
+                  Object.entries(propertyToSave).forEach(([key, value]) => {
+                    if (value instanceof File) {
+                      formData.append(key, value);
+                    } else {
+                      formData.append(key, value ?? '');
+                    }
+                  });
+                  for (let pair of formData.entries()) {
+                    console.log(pair[0] + ':', pair[1]);
+                  }
+                  // Here you can call your API with formData
+                }}
+              >
+                Save
+              </Button>
+              {properties.length > 1 && (
+                <Button
+                  size="small"
+                  variant="outlined"
+                  color="error"
+                  onClick={() => {
+                    setProperties(properties.filter((_, i) => i !== idx));
+                    setShowReinvest(showReinvest.filter((_, i) => i !== idx));
+                  }}
+                >
+                  Remove
+                </Button>
+              )}
+            </Box>
           </Paper>
         ))}
-      </Paper>
-      {/* Capital Gain from Equity/Mutual Fund */}
-      <Paper sx={{ p: 3, mb: 4, borderRadius: 2, bgcolor: '#f8fafc' }}>
+        <Box display="flex" justifyContent="flex-end" mt={2}>
+          <Button
+            size="small"
+            variant="outlined"
+            onClick={() => {
+              setProperties([
+                ...properties,
+                {
+                  property_type: '',
+                  purchase_date: '',
+                  purchase_cost: '',
+                  sale_date: '',
+                  sale_value: '',
+                  purchase_doc: null,
+                  sale_doc: null,
+                  reinvestment: false,
+                  invest_in: '',
+                  invest_amount: '',
+                  invest_date: '',
+                  invest_doc: null
+                }
+              ]);
+              setShowReinvest([...showReinvest, false]);
+            }}
+          >
+            Add Property Sold
+          </Button>
+        </Box>
+        {/* Capital Gain from Equity/Mutual Fund */}
         <Typography variant="subtitle1" fontWeight={700} mb={2}>
           Capital Gain from Equity / Mutual Fund
         </Typography>
@@ -1691,7 +1962,7 @@ const OtherIncome = ({ fileDialogOpen, setFileDialogOpen, filesData, setDialogFi
   };
 
   useEffect(() => {
-    getOtherIncome();
+    // getOtherIncome();
   }, []);
 
   return (
@@ -2144,11 +2415,12 @@ const AgricultureIncome = ({ service_id }) => {
   );
 };
 
-const IncomeDetails = ({ type, fileDialogOpen, setFileDialogOpen, dialogFilesData, setDialogFilesData, service_id }) => {
+const IncomeDetails = ({ data, type, fileDialogOpen, setFileDialogOpen, dialogFilesData, setDialogFilesData, service_id }) => {
   switch (type) {
     case 'salary':
       return (
         <SalaryIncome
+          data={data.salary_income}
           fileDialogOpen={fileDialogOpen}
           setFileDialogOpen={setFileDialogOpen}
           filesData={dialogFilesData}
@@ -2159,15 +2431,18 @@ const IncomeDetails = ({ type, fileDialogOpen, setFileDialogOpen, dialogFilesDat
     case 'house':
       return (
         <HousePropertyIncome
+          data={data.house_property_income}
           fileDialogOpen={fileDialogOpen}
           setFileDialogOpen={setFileDialogOpen}
           filesData={dialogFilesData}
+          setDialogFilesData={setDialogFilesData}
           service_id={service_id}
         />
       );
     case 'capital':
       return (
         <CapitalGainsIncome
+          data={data.capital_gains}
           fileDialogOpen={fileDialogOpen}
           setFileDialogOpen={setFileDialogOpen}
           filesData={dialogFilesData}
@@ -2177,6 +2452,7 @@ const IncomeDetails = ({ type, fileDialogOpen, setFileDialogOpen, dialogFilesDat
     case 'business':
       return (
         <BusinessIncome
+          data={data.business_income}
           fileDialogOpen={fileDialogOpen}
           setFileDialogOpen={setFileDialogOpen}
           filesData={dialogFilesData}
@@ -2186,6 +2462,7 @@ const IncomeDetails = ({ type, fileDialogOpen, setFileDialogOpen, dialogFilesDat
     case 'other':
       return (
         <OtherIncome
+          data={data.other_income}
           fileDialogOpen={fileDialogOpen}
           setFileDialogOpen={setFileDialogOpen}
           filesData={dialogFilesData}
@@ -2193,7 +2470,7 @@ const IncomeDetails = ({ type, fileDialogOpen, setFileDialogOpen, dialogFilesDat
         />
       );
     case 'agriculture':
-      return <AgricultureIncome service_id={service_id} />;
+      return <AgricultureIncome data={data.agriculture_income} service_id={service_id} />;
   }
 };
 

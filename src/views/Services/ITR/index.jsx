@@ -41,11 +41,17 @@ import Avatar from '@mui/material/Avatar';
 
 const steps = ['Personal Info', 'Income Details', 'Deductions', 'Review & Filing'];
 
+const getFileName = (file) => {
+  if (typeof file === 'string' && file.startsWith('http')) {
+    return file.split('/').pop();
+  }
+  return file.name;
+};
 // Add validation schemas
 const personalInfoSchema = Yup.object().shape({
   pan: Yup.mixed().required('PAN is required'),
   aadhar: Yup.mixed().required('Aadhaar is required'),
-  mobile: Yup.string()
+  mobile_number: Yup.string()
     .required('Mobile is required')
     .matches(/^[6-9]\d{9}$/, 'Please enter a valid 10-digit mobile number starting with 6-9'),
   email: Yup.string().email('Invalid email').required('Email is required'),
@@ -120,7 +126,7 @@ export default function ITR() {
     id: null,
     pan: null,
     aadhar: null,
-    mobile: '',
+    mobile_number: '',
     email: '',
     first_name: '',
     middle_name: '',
@@ -146,6 +152,7 @@ export default function ITR() {
   });
   const [taxPaidDetails, setTaxPaidDetails] = useState({
     id: null,
+    task_id: null,
     as26File: null,
     aisFile: null,
     challans: []
@@ -217,65 +224,63 @@ export default function ITR() {
 
   // Map for accordion titles and types
   const incomeAccordionMap = {
-    salary: {
+    salary_income: {
       label: 'Salary Income',
       type: 'salary',
       icon: (
-        <Avatar sx={{ bgcolor: '#1976d2', width: 32, height: 32, mr: 1 }}>
+        <Avatar sx={{ bgcolor: '#f1f1f1', width: 32, height: 32, mr: 1 }}>
           <AttachMoneyIcon />
         </Avatar>
       )
     },
-    house: {
+    house_property_income: {
       label: 'House Property Income',
       type: 'house',
       icon: (
-        <Avatar sx={{ bgcolor: '#43a047', width: 32, height: 32, mr: 1 }}>
+        <Avatar sx={{ bgcolor: '#f1f1f1', width: 32, height: 32, mr: 1 }}>
           <HomeIcon />
         </Avatar>
       )
     },
-    capital: {
+    capital_gains: {
       label: 'Capital Gains Income',
       type: 'capital',
       icon: (
-        <Avatar sx={{ bgcolor: '#fbc02d', width: 32, height: 32, mr: 1 }}>
+        <Avatar sx={{ bgcolor: '#f1f1f1', width: 32, height: 32, mr: 1 }}>
           <TrendingUpIcon />
         </Avatar>
       )
     },
-    business: {
+    business_income: {
       label: 'Business/Professional Income',
       type: 'business',
       icon: (
-        <Avatar sx={{ bgcolor: '#8e24aa', width: 32, height: 32, mr: 1 }}>
+        <Avatar sx={{ bgcolor: '#f1f1f1', width: 32, height: 32, mr: 1 }}>
           <BusinessCenterIcon />
         </Avatar>
       )
     },
-    salary: { label: 'Salary Income', type: 'salary', icon: <AttachMoneyIcon sx={{ mr: 1 }} /> },
-    house: { label: 'House Property Income', type: 'house', icon: <HomeIcon sx={{ mr: 1 }} /> },
-    capital: { label: 'Capital Gains Income', type: 'capital', icon: <TrendingUpIcon sx={{ mr: 1 }} /> },
-    business: { label: 'Business/Professional Income', type: 'business', icon: <BusinessCenterIcon sx={{ mr: 1 }} /> },
-    other: { label: 'Other Income', type: 'other', icon: <AccountBalanceWalletIcon sx={{ mr: 1 }} /> },
-    agriculture: { label: 'Agriculture Income', type: 'agriculture', icon: <AgricultureIcon sx={{ mr: 1 }} /> }
+    other_income: {
+      label: 'Other Income',
+      type: 'other',
+      icon: (
+        <Avatar sx={{ bgcolor: '#f1f1f1', width: 32, height: 32, mr: 1 }}>
+          <AccountBalanceWalletIcon />
+        </Avatar>
+      )
+    },
+    agriculture_income: {
+      label: 'Agriculture Income',
+      type: 'agriculture',
+      icon: (
+        <Avatar sx={{ bgcolor: '#f1f1f1', width: 32, height: 32, mr: 1 }}>
+          <AgricultureIcon />
+        </Avatar>
+      )
+    }
   };
 
   const { enqueueSnackbar } = useSnackbar();
-
-  // const getServiceTasks = async (id) => {
-  //   // const response = await Factory('get', `/servicetasks/service-task/${id}/`);
-  //   const response = await Factory('get', `/income_tax_returns/service-requests-itr/${id}/full-data/`);
-  //   if (response.res.status_cd === 0) {
-  //     setTasks(response.res.data.tasks_data);
-  //     setPersonalInfo(response.res.data.tasks_data['Personal Information'].data);
-  //     setTaxPaidDetails({
-  //       as26File: response.res.data.tasks_data['Tax Paid Details'].data?.documents?.['26AS'].files?.[0].url || null,
-  //       aisFile: response.res.data.tasks_data['Tax Paid Details'].data?.documents?.['AIS'].files?.[0].url || null,
-  //       challans: response.res.data.tasks_data['Tax Paid Details'].data?.documents?.['AdvanceTax'].files || []
-  //     });
-  //   }
-  // };
 
   const getStep1Data = async (step) => {
     const response = await Factory(
@@ -285,18 +290,21 @@ export default function ITR() {
     if (response.res.status_cd === 0) {
       setTasks(response.res.data.tasks_data);
       setPersonalInfo(response.res.data.tasks_data['Personal Information'].data);
-      console.log(response.res.data.tasks_data['Tax Paid Details'].data.id);
-
       setTaxPaidDetails({
+        task_id: response.res.data.tasks_data['Tax Paid Details'].task_id || null,
         id: response.res.data.tasks_data['Tax Paid Details'].data?.id || null,
-        as26File:
-          response.res.data.tasks_data['Tax Paid Details'].data?.documents?.['26AS'].files?.length > 0
-            ? response.res.data.tasks_data['Tax Paid Details'].data?.documents?.['26AS'].files[0].url
-            : null,
-        aisFile:
-          response.res.data.tasks_data['Tax Paid Details'].data?.documents?.['AIS'].files?.length > 0
-            ? response.res.data.tasks_data['Tax Paid Details'].data?.documents?.['AIS'].files[0].url
-            : null,
+        as26File: {
+          name:
+            response.res.data.tasks_data['Tax Paid Details'].data?.documents?.['26AS'].files?.length > 0
+              ? response.res.data.tasks_data['Tax Paid Details'].data?.documents?.['26AS'].files[0].url
+              : null
+        },
+        aisFile: {
+          name:
+            response.res.data.tasks_data['Tax Paid Details'].data?.documents?.['AIS'].files?.length > 0
+              ? response.res.data.tasks_data['Tax Paid Details'].data?.documents?.['AIS'].files[0].url
+              : null
+        },
         challans: response.res.data.tasks_data['Tax Paid Details'].data?.documents?.['AdvanceTax'].files || []
       });
     }
@@ -314,17 +322,8 @@ export default function ITR() {
     }
   };
 
-  const changeStatus = async (step, status) => {
-    // if (step === 'personal_info') {
-    // const response = await Factory('post', `/income_tax_returns/service-requests-itr/${service_id}/send-for-review/${step}/`);
-    // if (response.res.status_cd === 0) {
-    //   enqueueSnackbar('ITR sent for review successfully!', { variant: 'success' });
-    // }
-  };
-
   // useEffect(() => {
   //   if (service_id) {
-
   //     getServiceTasks(service_id);
   //     // fetchITRDetails();
   //   }
@@ -422,7 +421,7 @@ export default function ITR() {
                     });
                     formData.append('status', 'in progress');
                     if (type === 'put') formData.append('id', personalInfo.id);
-
+                    const res = await Factory(type, url, formData, {});
                     if (res.res.status_cd === 0) {
                       enqueueSnackbar('Personal Information saved successfully!', {
                         variant: 'success',
@@ -458,7 +457,7 @@ export default function ITR() {
                           <TextField
                             size="small"
                             fullWidth
-                            value={values.pan ? values.pan.name || values.pan : ''}
+                            value={values.pan ? getFileName(values.pan) : ''}
                             placeholder="Upload PAN"
                             InputProps={{ readOnly: true }}
                             onClick={() => document.getElementById('panFileInput').click()}
@@ -483,7 +482,7 @@ export default function ITR() {
                           <TextField
                             size="small"
                             fullWidth
-                            value={values.aadhar ? values.aadhar.name || values.aadhar : ''}
+                            value={values.aadhar ? getFileName(values.aadhar) : ''}
                             placeholder="Upload Aadhaar"
                             InputProps={{ readOnly: true }}
                             onClick={() => document.getElementById('aadhaarFileInput').click()}
@@ -509,10 +508,10 @@ export default function ITR() {
                             as={TextField}
                             size="small"
                             fullWidth
-                            name="mobile"
-                            value={values.mobile || ''}
-                            error={Boolean(touched.mobile && errors.mobile)}
-                            helperText={<ErrorMessage name="mobile" />}
+                            name="mobile_number"
+                            value={values.mobile_number || ''}
+                            error={Boolean(touched.mobile_number && errors.mobile_number)}
+                            helperText={<ErrorMessage name="mobile_number" />}
                           />
                         </Grid2>
                         {/* Email Id */}
@@ -617,7 +616,8 @@ export default function ITR() {
                           {incomeSectionOptions.map((option) => {
                             // Map to correct backend field names
                             let fieldName = option.value + '_income';
-                            if (option.value === 'capital') fieldName = 'capital_income';
+                            if (option.value === 'house') fieldName = 'house_property_income';
+                            if (option.value === 'capital') fieldName = 'capital_gains';
                             if (option.value === 'nri') fieldName = 'non_resident_indian';
                             return (
                               <Grid2 size={{ xs: 6, sm: 4, md: 3 }} key={option.value}>
@@ -660,38 +660,41 @@ export default function ITR() {
                   onSubmit={async (values) => {
                     const formData = new FormData();
                     setTaxPaidDetails(values);
-                    Object.entries(values).forEach(([key, value]) => {
-                      if (key === 'challans' && Array.isArray(value)) {
-                        value.forEach((file, idx) => {
-                          if (file) formData.append(`challans[${idx}]`, file);
+                    formData.append('service_request', service_id);
+                    formData.append('service_task', taxPaidDetails.task_id);
+                    formData.append('status', 'in progress');
+                    if (values.as26File && values.as26File instanceof File) {
+                      formData.append('form26as_files', values.as26File);
+                    }
+                    if (values.aisFile && values.aisFile instanceof File) {
+                      formData.append('ais_files', values.aisFile);
+                    }
+                    if (values.challans && Array.isArray(values.challans)) {
+                      values.challans.forEach((challan) => {
+                        if (challan instanceof File) {
+                          formData.append('advance_tax_files', challan);
+                        }
+                      });
+                    }
+                    try {
+                      const res = await Factory('post', '/income_tax_returns/tax-paid-details/create-or-update/', formData, {});
+                      if (res.res.status_cd === 0) {
+                        enqueueSnackbar('Tax paid details saved successfully!', {
+                          variant: 'success',
+                          anchorOrigin: { vertical: 'top', horizontal: 'right' }
                         });
-                      } else if (value instanceof File) {
-                        formData.append(key, value);
                       } else {
-                        formData.append(key, value ?? '');
+                        enqueueSnackbar('Error saving tax paid details.', {
+                          variant: 'error',
+                          anchorOrigin: { vertical: 'top', horizontal: 'right' }
+                        });
                       }
-                    });
-                    console.log('Form Data:', Object.fromEntries(formData));
-                    console.log(taxPaidDetails);
-                    // try {
-                    //   const res = await Factory('post', '/itr/tax-paid', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
-                    //   if (res.res.status_cd === 0) {
-                    //     enqueueSnackbar('Tax paid details saved successfully!', {
-                    //       variant: 'success',
-                    //       anchorOrigin: { vertical: 'top', horizontal: 'right' }
-                    //     });
-                    //   } else {
-                    //     enqueueSnackbar('Error saving tax paid details.', {
-                    //       variant: 'error',
-                    //       anchorOrigin: { vertical: 'top', horizontal: 'right' }
-                    //     });
-                    //   }
-                    // } catch (err) {
-                    //   enqueueSnackbar('Error saving tax paid details.', {
-                    //     variant: 'error',
-                    //     anchorOrigin: { vertical: 'top', horizontal: 'right' }
-                    //   });
-                    // }
+                    } catch (err) {
+                      enqueueSnackbar('Error saving tax paid details.', {
+                        variant: 'error',
+                        anchorOrigin: { vertical: 'top', horizontal: 'right' }
+                      });
+                    }
                   }}
                 >
                   {({ setFieldValue, values, errors, touched }) => (
@@ -704,11 +707,12 @@ export default function ITR() {
                         <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
                           <Typography>Upload 26AS</Typography>
                         </Grid2>
+                        {console.log(values.as26File)}
                         <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
                           <TextField
                             size="small"
                             fullWidth
-                            value={values.as26File ? values.as26File.name : ''}
+                            value={values.as26File ? getFileName(values.as26File) : ''}
                             placeholder="Upload 26AS"
                             InputProps={{ readOnly: true }}
                             onClick={() => document.getElementById('as26FileInput').click()}
@@ -725,7 +729,7 @@ export default function ITR() {
                           <TextField
                             size="small"
                             fullWidth
-                            value={values.aisFile ? values.aisFile.name : ''}
+                            value={values.aisFile ? getFileName(values.aisFile) : ''}
                             placeholder="Upload AIS"
                             InputProps={{ readOnly: true }}
                             onClick={() => document.getElementById('aisFileInput').click()}
@@ -773,7 +777,7 @@ export default function ITR() {
                           data={taxPaidDetails}
                           status={taxPaidDetails.status}
                           urlEndpoint="taxPaid"
-                          taskId={taxPaidDetails.id}
+                          taskId={taxPaidDetails.task_id}
                         />
                       </Box>
                     </Form>
@@ -792,7 +796,7 @@ export default function ITR() {
           {/* Step 2: Income Details Accordions */}
           {step === 1 && (
             <Box>
-              {selectedIncomeSections.map((section) => (
+              {Object.keys(incomeDetails).map((section) => (
                 <Accordion key={section}>
                   <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                     <Box display="flex" alignItems="center">
@@ -802,17 +806,19 @@ export default function ITR() {
                       </Typography>
                     </Box>
                   </AccordionSummary>
-                  <AccordionDetails>
-                    <IncomeDetails
-                      service_id={service_id}
-                      data={incomeDetails}
-                      setData={setIncomeDetails}
-                      type={incomeAccordionMap[section].type}
-                      fileDialogOpen={fileDialogOpen}
-                      setFileDialogOpen={setFileDialogOpen}
-                      dialogFilesData={dialogFilesData}
-                      setDialogFilesData={setDialogFilesData}
-                    />
+                  <AccordionDetails sx={{ p: 0 }}>
+                    <Box sx={{ p: 2, borderTop: '1px solid #e0e0e0'}}>
+                      <IncomeDetails
+                        service_id={service_id}
+                        data={incomeDetails}
+                        setData={setIncomeDetails}
+                        type={incomeAccordionMap[section].type}
+                        fileDialogOpen={fileDialogOpen}
+                        setFileDialogOpen={setFileDialogOpen}
+                        dialogFilesData={dialogFilesData}
+                        setDialogFilesData={setDialogFilesData}
+                      />
+                    </Box>
                   </AccordionDetails>
                 </Accordion>
               ))}

@@ -19,7 +19,14 @@ import {
 import DeleteIcon from '@mui/icons-material/Delete';
 
 const FileListDialog = ({ open, onClose, files, onDelete }) => {
-  console.log(files);
+  const getFileName = (file) => {
+    if (file.url instanceof File) {
+      return file.url.name;
+    } else if (file.url) {
+      return file.url.split('/').pop();
+    }
+    return file.name;
+  };
   return (
     <Dialog
       open={open}
@@ -48,7 +55,7 @@ const FileListDialog = ({ open, onClose, files, onDelete }) => {
               <TableBody>
                 {files?.map((file, index) => (
                   <TableRow key={index}>
-                    <TableCell>{file.name}</TableCell>
+                    <TableCell>{getFileName(file)}</TableCell>
                     <TableCell align="right">
                       <IconButton size="small" color="error" onClick={() => onDelete(index)}>
                         <DeleteIcon />
