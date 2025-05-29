@@ -203,7 +203,7 @@ const getDashboardMenu = (user, subscriptions = []) => {
     if (!user || !user.user_role) return true;
     // Example: restrict 'manage-team' to admin roles
     if (item.id === 'manage-team' && user.user_role.role_type !== 'owner') return false;
-    if (item.id === 'manage-team' && user.active_context.context_type !== 'business') return false;
+    if (item.id === 'manage-team' && user.active_context?.context_type !== 'business') return false;
     // Add more role-based restrictions here
     return true;
   };

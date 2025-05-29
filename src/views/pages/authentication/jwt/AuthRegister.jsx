@@ -114,7 +114,7 @@ export default function JWTRegister({ ...others }) {
             dispatch(
               openSnackbar({
                 open: true,
-                message: response.message || 'Your registration has been successfully completed.',
+                message: 'Your registration has been successfully completed.',
                 variant: 'alert',
                 alert: { color: 'success' },
                 close: false
