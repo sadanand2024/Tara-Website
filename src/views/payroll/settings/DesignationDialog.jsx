@@ -103,7 +103,7 @@ export default function DesignationDialog({ open, handleClose, fetchDesignations
     >
       <Box component="form" onSubmit={handleSubmit} sx={{ p: 2 }}>
         {designationFields.map((field) => (
-          <Grid2 key={field.name} xs={12}>
+          <Grid2 key={field.name} size={{ xs: 12 }}>
             <Typography gutterBottom>
               {field.label} <span style={{ color: 'red' }}>*</span>
             </Typography>

@@ -67,12 +67,18 @@ const BusinessIdentityStructureSection = () => {
   const formik = useFormik({
     initialValues: {
       id: '',
+      service_type: '',
       classification_of_establishment: '',
       category_of_establishment: '',
       legalNameOfBusiness: '',
       nature_of_business: '',
       business_pan: '',
-      date_of_commencement: ''
+      date_of_commencement: '',
+      status: '',
+      service_request: '',
+      service_task: '',
+      assignee: '',
+      reviewer: ''
     },
     validationSchema: Yup.object({
       classification_of_establishment: Yup.string().required('Classification of Establishment is required'),
@@ -194,15 +200,19 @@ const BusinessIdentityStructureSection = () => {
     if (res.status_cd === 0) {
       // Map API response to form fields
       const responseData = {
-        // Business Identity & Structure
+        id: res.data.id || '',
+        service_type: res.data.service_type || '',
         classification_of_establishment: res.data.classification_of_establishment || '',
         category_of_establishment: res.data.category_of_establishment || '',
         legalNameOfBusiness: res.data.legal_name_of_business || '',
-        typeOfBusiness: res.data.type_of_business || '',
         nature_of_business: res.data.nature_of_business || '',
         business_pan: res.data.business_pan || '',
         date_of_commencement: res.data.date_of_commencement || '',
-        id: res.data.id || ''
+        status: res.data.status || '',
+        service_request: res.data.service_request || '',
+        service_task: res.data.service_task || '',
+        assignee: res.data.assignee || '',
+        reviewer: res.data.reviewer || ''
       };
       setValues(responseData);
       setBusinessIdentityposttype('put');
@@ -243,9 +253,6 @@ const BusinessIdentityStructureSection = () => {
         <Stack direction="row" spacing={2} sx={{ mt: 3, justifyContent: 'flex-end' }}>
           <Button variant="contained" color="primary" type="submit">
             Save
-          </Button>
-          <Button variant="contained" color="primary" type="submit">
-            Send for review
           </Button>
         </Stack>
       </form>

@@ -230,7 +230,7 @@ export default function Index() {
           </Grid2>
           <Stack direction="row" sx={{ gap: 2 }}>
             <Button startIcon={<ArrowBackIcon />} variant="outlined" color="primary" onClick={() => navigate(-1)}>
-              Back to Payroll Settings
+              Back to Payroll Dashboard
             </Button>
           </Stack>
           <Grid2 size={12}>

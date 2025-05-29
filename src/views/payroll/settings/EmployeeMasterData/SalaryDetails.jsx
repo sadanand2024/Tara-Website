@@ -151,6 +151,7 @@ function SalaryDetails({ fetchEmployeeData, employeeData, createdEmployeeId, set
             <TextField
               fullWidth
               name="annual_ctc"
+              size="small"
               value={values.annual_ctc}
               onChange={(e) => {
                 const { name, value } = e.target;

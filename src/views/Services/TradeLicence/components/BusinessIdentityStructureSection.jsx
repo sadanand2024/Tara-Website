@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Typography, TextField, Grid2, Autocomplete, Button } from '@mui/material';
+import { Box, Typography, TextField, Grid2, Autocomplete, Button, Card, Stack } from '@mui/material';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { useDispatch } from 'react-redux';
@@ -206,26 +206,28 @@ const BusinessIdentityStructureSection = () => {
   }, []);
   return (
     <Box>
-      <Typography variant="h5" fontWeight={700} mb={2}>
-        <span style={{ textDecoration: 'underline' }}>Business Identity & Structure</span>
-      </Typography>
-      <form onSubmit={handleSubmit}>
-        <Grid2 container spacing={2}>
-          {fields.map((field) => (
-            <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4 }}>
-              <Typography color="text.secondary" fontWeight={500} mb={1}>
-                {field.label}
-              </Typography>
-              {renderField(field)}
-            </Grid2>
-          ))}
-        </Grid2>
-        <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
-          <Button variant="contained" color="primary" type="submit">
-            Save
-          </Button>
-        </Box>
-      </form>
+      <Card sx={{ p: 3 }}>
+        <Typography variant="h5" fontWeight={700} mb={2}>
+          <span style={{ textDecoration: 'underline' }}>Business Identity & Structure</span>
+        </Typography>
+        <form onSubmit={handleSubmit}>
+          <Grid2 container spacing={2}>
+            {fields.map((field) => (
+              <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4 }}>
+                <Typography color="text.secondary" fontWeight={500} mb={1}>
+                  {field.label}
+                </Typography>
+                {renderField(field)}
+              </Grid2>
+            ))}
+          </Grid2>
+          <Stack direction="row" spacing={2} sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
+            <Button variant="contained" color="primary" type="submit">
+              Save
+            </Button>
+          </Stack>
+        </form>
+      </Card>
       <ApplicantDetails />
     </Box>
   );

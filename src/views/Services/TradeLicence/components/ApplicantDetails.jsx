@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { Box, Typography, TextField, Grid2, Button, FormControlLabel, Checkbox } from '@mui/material';
+import { Typography, TextField, Grid2, Button, FormControlLabel, Checkbox, Card, Stack } from '@mui/material';
 import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
 import Factory from 'utils/Factory';
 import { useDispatch } from 'react-redux';
@@ -49,11 +49,20 @@ const ApplicantDetails = () => {
     initialValues: {
       name: '',
       designation: '',
+      mobile_number: '',
+      email: '',
       aadhaar_image: '',
       pan_image: '',
       passport_photo: '',
       address: '',
-      residential_address: 'no'
+      residential_address: 'no',
+      id: '',
+      status: '',
+      service_type: '',
+      service_request: '',
+      assignee: '',
+      reviewer: '',
+      service_task: ''
     },
     validationSchema: Yup.object({
       name: Yup.string().required('Name is required')
@@ -152,7 +161,7 @@ const ApplicantDetails = () => {
         })
       );
     } else {
-      formik.setValues({
+      setValues({
         ...res.data,
         aadhaar_image: res.data.aadhaar_image ? res.data.aadhaar_image : '',
         pan_image: res.data.pan_image ? res.data.pan_image : '',
@@ -163,9 +172,9 @@ const ApplicantDetails = () => {
   useEffect(() => {
     getApplicantDetails();
   }, []);
-  const { values, handleChange, handleBlur, setFieldValue, touched, errors, handleSubmit } = formik;
+  const { values, handleChange, handleBlur, setFieldValue, touched, errors, handleSubmit, setValues } = formik;
   return (
-    <Box>
+    <Card sx={{ p: 3, mt: 3 }}>
       <Typography variant="h5" fontWeight={700} mb={2}>
         <span style={{ textDecoration: 'underline' }}>Applicant Details</span>
       </Typography>
@@ -205,13 +214,13 @@ const ApplicantDetails = () => {
             )}
           </Grid2>
         </Grid2>
-        <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
+        <Stack direction="row" spacing={2} sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
           <Button variant="contained" color="primary" type="submit">
             Save
           </Button>
-        </Box>
+        </Stack>
       </form>
-    </Box>
+    </Card>
   );
 };
 

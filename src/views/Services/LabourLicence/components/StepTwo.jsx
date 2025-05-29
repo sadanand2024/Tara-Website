@@ -151,9 +151,6 @@ const StepTwo = () => {
           <Button size="medium" variant="contained" color="primary" onClick={formik.handleSubmit}>
             Save & Continue
           </Button>
-          <Button size="medium" variant="contained" color="primary" onClick={formik.handleSubmit}>
-            Send for review
-          </Button>
         </Stack>
       </form>
     </Card>

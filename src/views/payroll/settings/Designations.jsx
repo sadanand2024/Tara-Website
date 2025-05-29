@@ -119,7 +119,7 @@ function Designations() {
         csvTemplateUrl="/payroll/download-template/csv?type=designation"
       />
       <Grid2 container spacing={3}>
-        <Grid2 xs={12}>
+        <Grid2 size={{ xs: 12 }}>
           <DesignationDialog
             open={openDialog}
             handleClose={handleCloseDialog}
@@ -196,7 +196,7 @@ function Designations() {
         {/* Pagination */}
 
         {designations.length > 0 && (
-          <Grid2 size={12}>
+          <Grid2 size={{ xs: 12 }}>
             <Stack direction="row" justifyContent="center" sx={{ mt: 2 }}>
               <Pagination
                 count={Math.ceil(designations.length / rowsPerPage)}

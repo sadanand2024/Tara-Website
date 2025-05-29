@@ -211,7 +211,7 @@ const PayrollSetup = () => {
       </Box>
 
       <Grid2 container spacing={{ xs: 2, sm: 3 }}>
-        <Grid2 size={12}>
+        <Grid2 size={{ xs: 12 }}>
           <MainCard
             sx={{
               maxWidth: 800,
@@ -325,24 +325,24 @@ const StepItem = React.memo(({ step, index, onClick, onMarkStatutoryComplete, ma
               color: '#4CAF50',
               fontWeight: 500,
               border: '1px solid #4CAF50',
-              pr: 0.5
+              pr: 0.5,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 0.5
             }}
-            endIcon={
-              <IconButton
-                size="small"
-                sx={{
-                  color: '#4CAF50',
-                  p: 0.5,
-                  '&:hover': {
-                    backgroundColor: 'rgba(76, 175, 80, 0.1)'
-                  }
-                }}
-              >
-                <ArrowForwardIcon fontSize="small" />
-              </IconButton>
-            }
           >
             Completed
+            <Box
+              component="span"
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                color: '#4CAF50',
+                ml: 0.5
+              }}
+            >
+              <ArrowForwardIcon fontSize="small" />
+            </Box>
           </Button>
         </Stack>
       ) : (

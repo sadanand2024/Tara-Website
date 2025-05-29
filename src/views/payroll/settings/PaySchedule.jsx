@@ -186,7 +186,6 @@ function PaySchedule() {
       get_paySchedule_Details(payrollId);
     }
   }, [payrollId]);
-  console.log(errors);
   return (
     <MainCard
       title="Pay Schedule"

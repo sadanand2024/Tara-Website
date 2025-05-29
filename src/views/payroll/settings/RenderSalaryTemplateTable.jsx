@@ -33,8 +33,6 @@ export default function RenderSalaryTemplateTable({
   setEnablePreviewButton,
   createdEmployeeId
 }) {
-  // console.log(values);
-  // console.log(createdEmployeeId);
   const [searchParams] = useSearchParams();
   const payrollId = searchParams.get('payrollid');
   const template_id = searchParams.get('template_id');
@@ -199,7 +197,7 @@ export default function RenderSalaryTemplateTable({
         calculation_type: 'Fixed',
         calculation: 0,
         monthly: Math.round(faMonthly * 100) / 100,
-        annually: Math.round(faAnnual * 100)
+        annually: Math.round(faAnnual * 100) / 100
       };
 
       const finalEarnings = [...recalculated, fixedAllowance];
@@ -233,10 +231,10 @@ export default function RenderSalaryTemplateTable({
       });
 
       // 7. Update Fixed Allowance UI state
-      setFixedAllowance({
-        monthly: fixedAllowance.monthly,
-        annually: fixedAllowance.annually
-      });
+      // setFixedAllowance({
+      //   monthly: fixedAllowance.monthly,
+      //   annually: fixedAllowance.annually
+      // });
 
       // 8. Enable preview button always
       // setEnablePreviewButton(true);
@@ -325,7 +323,7 @@ export default function RenderSalaryTemplateTable({
       finalEarnings[faIndex] = {
         ...finalEarnings[faIndex],
         monthly: Math.round(faMonthly * 100) / 100,
-        annually: Math.round(faAnnual * 100)
+        annually: Math.round(faAnnual * 100) / 100
       };
     }
 
@@ -358,6 +356,7 @@ export default function RenderSalaryTemplateTable({
   };
 
   const fetch_preview = async () => {
+    console.log('anand');
     const annualCtc = parseFloat(values.annual_ctc || 0);
 
     // Step 1: Recalculate all rows with latest data
@@ -412,8 +411,8 @@ export default function RenderSalaryTemplateTable({
           component_name: 'Fixed Allowance',
           calculation_type: 'Fixed',
           calculation: 0,
-          monthly: fixedMonthly,
-          annually: fixedAnnual
+          monthly: Math.round(fixedMonthly * 100) / 100,
+          annually: Math.round(fixedAnnual * 100) / 100
         }
       ]
     };
@@ -422,6 +421,7 @@ export default function RenderSalaryTemplateTable({
     if (res?.status_cd === 0) {
       const fixed = res.data.earnings.find((e) => e.component_name === 'Fixed Allowance');
       if (fixed) {
+        console.log(1);
         setFixedAllowance({
           monthly: parseFloat(fixed.monthly),
           annually: parseFloat(fixed.annually)
@@ -430,7 +430,8 @@ export default function RenderSalaryTemplateTable({
 
       const filtered = {
         ...res.data,
-        earnings: res.data.earnings.filter((e) => e.component_name !== 'Fixed Allowance')
+        // earnings: res.data.earnings.filter((e) => e.component_name !== 'Fixed Allowance')
+        earnings: res.data.earnings
       };
 
       setValues(filtered);
@@ -486,8 +487,11 @@ export default function RenderSalaryTemplateTable({
       (sum, e) => (e.component_name !== 'Fixed Allowance' ? sum + parseFloat(e.annually || 0) : sum),
       0
     );
-    const annualFixed = annualCtc - earningsTotal;
-
+    const benefitsTotal = values.benefits?.reduce((sum, b) => (b.annually !== 'NA' ? sum + parseFloat(b.annually || 0) : sum), 0) || 0;
+    console.log(benefitsTotal);
+    console.log(earningsTotal);
+    const annualFixed = annualCtc - earningsTotal - benefitsTotal;
+    console.log('annualFixed', annualFixed);
     setFixedAllowance({
       monthly: Math.round((annualFixed / 12) * 100) / 100,
       annually: Math.round(annualFixed * 100) / 100
@@ -528,7 +532,7 @@ export default function RenderSalaryTemplateTable({
       finalEarnings[faIndex] = {
         ...finalEarnings[faIndex],
         monthly: Math.round(faMonthly * 100) / 100,
-        annually: Math.round(faAnnual * 100)
+        annually: Math.round(faAnnual * 100) / 100
       };
     }
 
@@ -587,7 +591,6 @@ export default function RenderSalaryTemplateTable({
       setViewPreview(true);
     }
   }, [values.benefits, values.deductions]);
-
   return (
     <TableContainer
       component={Paper}
@@ -691,7 +694,7 @@ export default function RenderSalaryTemplateTable({
           </TableRow>
           <TableRow>
             <TableCell>
-              <Typography variant="h5">Fixed Allowance (Monthly CTC - Sum of all other components)</Typography>
+              <Typography variant="h5">Fixed Allowance (Monthly CTC - Sum of all other components - Benefits)</Typography>
             </TableCell>
             <TableCell>Remaining Balance</TableCell>
             <TableCell>

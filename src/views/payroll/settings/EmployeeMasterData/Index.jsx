@@ -132,7 +132,7 @@ function EmployeeList() {
           }
         >
           <Grid2 container spacing={2}>
-            <Grid2 size={12}>
+            <Grid2 size={{ xs: 12 }}>
               <TableContainer component={Paper}>
                 <Table size="small">
                   <TableHead>
@@ -191,7 +191,7 @@ function EmployeeList() {
               </TableContainer>
 
               {employees.length > 0 && (
-                <Grid2 size={12}>
+                <Grid2 size={{ xs: 12 }}>
                   <Stack direction="row" justifyContent="center" alignItems="center" sx={{ mt: 2, width: '100%' }}>
                     <Pagination
                       count={Math.ceil(employees.length / rowsPerPage)}
@@ -204,7 +204,7 @@ function EmployeeList() {
               )}
             </Grid2>
 
-            <Grid2 xs={12}>
+            <Grid2 size={{ xs: 12 }}>
               <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between' }}>
                 <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigate(-1)}>
                   Back to Dashboard
