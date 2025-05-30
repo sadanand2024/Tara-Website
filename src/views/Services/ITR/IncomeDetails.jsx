@@ -95,14 +95,14 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
   };
   const foreignInitial = {
     foreignDocs: {
-      foreignSalarySlip: [],
-      foreignBankStmt: [],
-      taxPaidAbroad: []
+      foreignSalarySlip: nri_employee_salary.data[0].foreigner_documents.salary_slip_files.files,
+      foreignBankStmt: nri_employee_salary.data[0].foreigner_documents.bank_statement_files.files,
+      taxPaidAbroad: nri_employee_salary.data[0].foreigner_documents.tax_paid_certificate_board_files.files
     },
-    periodFrom: '',
-    periodTo: '',
-    country: '',
-    salaryReceivedIn: []
+    periodFrom: nri_employee_salary.data[0].employment_history[0].from_date,
+    periodTo: nri_employee_salary.data[0].employment_history[0].to_date,
+    country: nri_employee_salary.data[0].employment_history[0].country,
+    salaryReceivedIn: nri_employee_salary.data[0].employment_history[0].salary_received
   };
 
   // Section 1: Upload Required Documents
@@ -174,14 +174,14 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
     onSubmit: async (values) => {
       console.log('Saved Foreign/NRI Employment & Salary Details!\n', values);
       let url = '/income_tax_returns/nri-salary-details/upsert/';
+      let employment_history = [
+        { from_date: values.periodFrom, to_date: values.periodTo, country: values.country, salary_received: values.salaryReceivedIn }
+      ];
       let formData = new FormData();
       formData.append('service_request', service_id);
       formData.append('service_task', nri_employee_salary.task_id);
       formData.append('status', 'in progress');
-      formData.append('period_from', values.periodFrom);
-      formData.append('period_to', values.periodTo);
-      formData.append('country', values.country);
-      formData.append('salary_received_in', values.salaryReceivedIn);
+      formData.append('employment_history', JSON.stringify(employment_history));
       if (values.foreignDocs.foreignBankStmt && Array.isArray(values.foreignDocs.foreignBankStmt)) {
         values.foreignDocs.foreignBankStmt.forEach((bank) => {
           if (bank instanceof File) {
@@ -204,6 +204,9 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
         });
       }
 
+      formData.forEach((value, key) => {
+        console.log(key, value);
+      });
       const res = await Factory('post', url, formData, {});
       if (res.res.status_cd === 0) {
         enqueueSnackbar('Foreign/NRI Employment & Salary Details saved successfully!', {
@@ -250,7 +253,7 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
                     </TableCell>
                     <TableCell>
                       <Box display="flex" flexDirection="column" alignItems="center">
-                        <Stack direction="row" spacing={1.5}>
+                        <Stack direction="row" spacing={1}>
                           <Button size="small" variant="contained" component="label" sx={{ mb: 0.5 }}>
                             {docsFormik.values.docs[doc.key]?.length > 0 ? 'Add more' : 'Upload'}
                             <input
@@ -315,12 +318,11 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
                         <TableCell>Details</TableCell>
                         <TableCell>Amount</TableCell>
                         <TableCell>Notes</TableCell>
-                        <TableCell>Document</TableCell>
-                        <TableCell>Actions</TableCell>
+                        <TableCell align="center">Document</TableCell>
+                        <TableCell align="center">Actions</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {console.log(otherIncomeFormik.values.otherIncome)}
                       {otherIncomeFormik.values.otherIncome.map((row, idx) => (
                         <TableRow key={idx}>
                           <TableCell>
@@ -379,7 +381,7 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
                             )}
                           </TableCell>
                           <TableCell>
-                            <Stack direction="row" spacing={1}>
+                            <Stack direction="row" spacing={0}>
                               <Button
                                 size="small"
                                 color="primary"
@@ -436,11 +438,11 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
               </>
             )}
           />
-          <Box display="flex" justifyContent="flex-end" mt={2}>
+          {/* <Box display="flex" justifyContent="flex-end" mt={2}>
             <Button type="submit" variant="contained" color="primary">
               Save Other Income
             </Button>
-          </Box>
+          </Box> */}
         </form>
       </FormikProvider>
 
@@ -612,7 +614,6 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
 };
 
 const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDialogFilesData, service_id }) => {
-  console.log(data, service_id);
   data = data[0];
   const { enqueueSnackbar } = useSnackbar();
   const [numProperties, setNumProperties] = React.useState(1);
@@ -737,7 +738,8 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
       } else if (value instanceof File) {
         formData.append(key, value);
       } else if (key === 'municipal_tax_receipt' || key === 'loan_statement' || key === 'upload_loan_interest_certificate') {
-        if (!value?.startsWith('http')) {
+        if (value && !value?.startsWith('http')) {
+          console.log(key, value);
           formData.append(key, value.toString());
         }
       } else {
@@ -954,7 +956,13 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
                   <Button
                     size="small"
                     variant="outlined"
-                    onClick={() => window.open(URL.createObjectURL(property.municipal_tax_receipt), '_blank')}
+                    onClick={() => {
+                      if (typeof property.municipal_tax_receipt === 'string') {
+                        window.open(property.municipal_tax_receipt, '_blank');
+                      } else {
+                        window.open(URL.createObjectURL(property.municipal_tax_receipt), '_blank');
+                      }
+                    }}
                     sx={{ ml: 1 }}
                   >
                     View
@@ -1022,7 +1030,13 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
                   <Button
                     size="small"
                     variant="outlined"
-                    onClick={() => window.open(URL.createObjectURL(property.upload_loan_interest_certificate), '_blank')}
+                    onClick={() => {
+                      if (typeof property.upload_loan_interest_certificate === 'string') {
+                        window.open(property.upload_loan_interest_certificate, '_blank');
+                      } else {
+                        window.open(URL.createObjectURL(property.upload_loan_interest_certificate), '_blank');
+                      }
+                    }}
                     sx={{ ml: 1 }}
                   >
                     View
@@ -1037,11 +1051,18 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
                   Upload
                   <input type="file" hidden onChange={(e) => handleFileChange(idx, 'loan_statement', e.target.files[0])} />
                 </Button>
+
                 {property.loan_statement && (
                   <Button
                     size="small"
                     variant="outlined"
-                    onClick={() => window.open(URL.createObjectURL(property.loan_statement), '_blank')}
+                    onClick={() => {
+                      if (typeof property.loan_statement === 'string') {
+                        window.open(property.loan_statement, '_blank');
+                      } else {
+                        window.open(URL.createObjectURL(property.loan_statement), '_blank');
+                      }
+                    }}
                     sx={{ ml: 1 }}
                   >
                     View
@@ -1930,40 +1951,454 @@ const relationOptions = ['Relative', 'Non-relative'];
 
 const pensionSources = ['Government', 'Private'];
 const foreignIncomeTypes = ['Dividend', 'Interest', 'Others'];
-const countryOptions = ['India', 'USA', 'UK', 'Other'];
+const countryOptions = [
+  'Afghanistan',
+  'Albania',
+  'Algeria',
+  'Andorra',
+  'Angola',
+  'Antigua and Barbuda',
+  'Argentina',
+  'Armenia',
+  'Australia',
+  'Austria',
+  'Azerbaijan',
+  'Bahamas',
+  'Bahrain',
+  'Bangladesh',
+  'Barbados',
+  'Belarus',
+  'Belgium',
+  'Belize',
+  'Benin',
+  'Bhutan',
+  'Bolivia',
+  'Bosnia and Herzegovina',
+  'Botswana',
+  'Brazil',
+  'Brunei',
+  'Bulgaria',
+  'Burkina Faso',
+  'Burundi',
+  'Cabo Verde',
+  'Cambodia',
+  'Cameroon',
+  'Canada',
+  'Central African Republic',
+  'Chad',
+  'Chile',
+  'China',
+  'Colombia',
+  'Comoros',
+  'Congo',
+  'Costa Rica',
+  'Croatia',
+  'Cuba',
+  'Cyprus',
+  'Czech Republic',
+  'Denmark',
+  'Djibouti',
+  'Dominica',
+  'Dominican Republic',
+  'Ecuador',
+  'Egypt',
+  'El Salvador',
+  'Equatorial Guinea',
+  'Eritrea',
+  'Estonia',
+  'Eswatini',
+  'Ethiopia',
+  'Fiji',
+  'Finland',
+  'France',
+  'Gabon',
+  'Gambia',
+  'Georgia',
+  'Germany',
+  'Ghana',
+  'Greece',
+  'Grenada',
+  'Guatemala',
+  'Guinea',
+  'Guinea-Bissau',
+  'Guyana',
+  'Haiti',
+  'Honduras',
+  'Hungary',
+  'Iceland',
+  'India',
+  'Indonesia',
+  'Iran',
+  'Iraq',
+  'Ireland',
+  'Israel',
+  'Italy',
+  'Jamaica',
+  'Japan',
+  'Jordan',
+  'Kazakhstan',
+  'Kenya',
+  'Kiribati',
+  'Korea, North',
+  'Korea, South',
+  'Kosovo',
+  'Kuwait',
+  'Kyrgyzstan',
+  'Laos',
+  'Latvia',
+  'Lebanon',
+  'Lesotho',
+  'Liberia',
+  'Libya',
+  'Liechtenstein',
+  'Lithuania',
+  'Luxembourg',
+  'Madagascar',
+  'Malawi',
+  'Malaysia',
+  'Maldives',
+  'Mali',
+  'Malta',
+  'Marshall Islands',
+  'Mauritania',
+  'Mauritius',
+  'Mexico',
+  'Micronesia',
+  'Moldova',
+  'Monaco',
+  'Mongolia',
+  'Montenegro',
+  'Morocco',
+  'Mozambique',
+  'Myanmar',
+  'Namibia',
+  'Nauru',
+  'Nepal',
+  'Netherlands',
+  'New Zealand',
+  'Nicaragua',
+  'Niger',
+  'Nigeria',
+  'North Macedonia',
+  'Norway',
+  'Oman',
+  'Pakistan',
+  'Palau',
+  'Palestine',
+  'Panama',
+  'Papua New Guinea',
+  'Paraguay',
+  'Peru',
+  'Philippines',
+  'Poland',
+  'Portugal',
+  'Qatar',
+  'Romania',
+  'Russia',
+  'Rwanda',
+  'Saint Kitts and Nevis',
+  'Saint Lucia',
+  'Saint Vincent and the Grenadines',
+  'Samoa',
+  'San Marino',
+  'Sao Tome and Principe',
+  'Saudi Arabia',
+  'Senegal',
+  'Serbia',
+  'Seychelles',
+  'Sierra Leone',
+  'Singapore',
+  'Slovakia',
+  'Slovenia',
+  'Solomon Islands',
+  'Somalia',
+  'South Africa',
+  'South Sudan',
+  'Spain',
+  'Sri Lanka',
+  'Sudan',
+  'Suriname',
+  'Sweden',
+  'Switzerland',
+  'Syria',
+  'Taiwan',
+  'Tajikistan',
+  'Tanzania',
+  'Thailand',
+  'Timor-Leste',
+  'Togo',
+  'Tonga',
+  'Trinidad and Tobago',
+  'Tunisia',
+  'Turkey',
+  'Turkmenistan',
+  'Tuvalu',
+  'Uganda',
+  'Ukraine',
+  'United Arab Emirates',
+  'United Kingdom',
+  'United States',
+  'Uruguay',
+  'Uzbekistan',
+  'Vanuatu',
+  'Vatican City',
+  'Venezuela',
+  'Vietnam',
+  'Yemen',
+  'Zambia',
+  'Zimbabwe'
+];
 const currencyOptions = ['INR', 'USD', 'GBP', 'EUR', 'Other'];
-const winningsSources = ['Lottery', 'Game Show', 'Gambling', 'Others'];
+const winningsSources = ['Lottery', 'Game Show', 'Others'];
 
-const OtherIncome = ({ fileDialogOpen, setFileDialogOpen, filesData, setDialogFilesData, service_id }) => {
+const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDialogFilesData, service_id }) => {
+  const enqueueSnackbar = useSnackbar();
+  const [interest_income, setInterestIncome] = React.useState(data.find((item) => item.category_name === 'Interest Income'));
+  const [dividend_income, setDividendIncome] = React.useState(data.find((item) => item.category_name === 'Dividend Income'));
+  const [gift_income, setGiftIncome] = React.useState(data.find((item) => item.category_name === 'Gift Income'));
+  const [family_income, setFamilyIncome] = React.useState(data.find((item) => item.category_name === 'Family Pension Income'));
+  const [foreign_income, setForeignIncome] = React.useState(data.find((item) => item.category_name === 'Foreign Income'));
+  const [winning_income, setWinningIncome] = React.useState(data.find((item) => item.category_name === 'Winning Income'));
+
   const [interestApplicable, setInterestApplicable] = React.useState('Not Applicable');
-  const [interestRows, setInterestRows] = React.useState([{ type: '', earned: '', bank: '' }]);
+  const [interestRows, setInterestRows] = React.useState([{ interest_type: '', interest_earned: '', bank_name: '', file: '' }]);
   const [dividendApplicable, setDividendApplicable] = React.useState('Not Applicable');
-  const [dividendRows, setDividendRows] = React.useState([{ from: '', received: '' }]);
+  const [dividendRows, setDividendRows] = React.useState([{ received_from: '', dividend_received: '', file: '' }]);
   const [giftApplicable, setGiftApplicable] = React.useState('Not Applicable');
-  const [giftRows, setGiftRows] = React.useState([{ amount: '', from: '', relation: '', date: '', marriage: 'no' }]);
+  const [giftRows, setGiftRows] = React.useState([
+    { amount: '', received_from: '', relation: '', date_received: '', was_it_marriage_related: 'no', file: '' }
+  ]);
   const [familyApplicable, setFamilyApplicable] = React.useState('Not Applicable');
-  const [familyRows, setFamilyRows] = React.useState([{ amount: '', source: '' }]);
+  const [familyRows, setFamilyRows] = React.useState([{ amount: '', source: '', file: '' }]);
   const [foreignApplicable, setForeignApplicable] = React.useState('Not Applicable');
-  const [foreignRows, setForeignRows] = React.useState([{ type: '', country: '', currency: '', amount: '', taxPaid: 'no' }]);
+  const [foreignRows, setForeignRows] = React.useState([
+    { type_of_income: '', country: '', currency: '', amount: '', tax_paid_abroad: 'no', form67_file: '' }
+  ]);
   const [winningsApplicable, setWinningsApplicable] = React.useState('Not Applicable');
-  const [winningsRows, setWinningsRows] = React.useState([{ source: '', amount: '' }]);
-
-  const getOtherIncome = async () => {
-    const res = await Factory(
-      'get',
-      `/income_tax_returns/service-request-section-data?service_request_id=${service_id}&section=other_income`
-    );
-    console.log(res);
-  };
-
-  const postIncomeApplicability = async (v, urlEndPoint, key) => {
-    console.log({ service_request: service_id, service_task: 24, [key]: v });
-    // const res = Factory('post', `/income_tax_returns/${urlEndPoint}/upsert/`, {});
-  };
+  const [winningsRows, setWinningsRows] = React.useState([{ source: '', amount: '', file: '' }]);
 
   useEffect(() => {
-    // getOtherIncome();
-  }, []);
+    if (interest_income.data.length > 0) {
+      setInterestApplicable(interest_income.data[0].interest_income);
+      if (interest_income.data[0].documents.length > 0) {
+        setInterestRows(interest_income.data[0].documents);
+      }
+    }
+  }, [interest_income]);
+
+  useEffect(() => {
+    if (dividend_income.data.length > 0) {
+      setDividendApplicable(dividend_income.data[0].dividend_income);
+      if (dividend_income.data[0].documents.length > 0) {
+        setDividendRows(dividend_income.data[0].documents);
+      }
+    }
+  }, [dividend_income]);
+
+  useEffect(() => {
+    if (gift_income.data.length > 0) {
+      setGiftApplicable(gift_income.data[0].gift_income);
+      if (gift_income.data[0].gift_income_details.length > 0) {
+        setGiftRows(
+          gift_income.data[0].documents.map((row) => ({
+            ...row,
+            received_from: row.received_from || '',
+            date_received: row.date_received || '',
+            was_it_marriage_related: row.was_it_marriage_related || 'no'
+          }))
+        );
+      }
+    }
+  }, [gift_income]);
+
+  useEffect(() => {
+    if (family_income.data.length > 0) {
+      setFamilyApplicable(family_income.data[0].family_pension_income);
+      if (family_income.data[0].family_pension_income_docs.length > 0) {
+        setFamilyRows(family_income.data[0].documents);
+      }
+    }
+  }, [family_income]);
+
+  useEffect(() => {
+    if (foreign_income.data.length > 0) {
+      setForeignApplicable(foreign_income.data[0].foreign_income);
+      if (foreign_income.data[0].foreign_income_docs.length > 0) {
+        setForeignRows(
+          foreign_income.data[0].documents.map((row) => ({
+            ...row,
+            type_of_income: row.type_of_income || '',
+            tax_paid_abroad: row.tax_paid_abroad || 'no',
+            form67_file: row.form67_file || ''
+          }))
+        );
+      }
+    }
+  }, [foreign_income]);
+
+  useEffect(() => {
+    if (winning_income.data.length > 0) {
+      setWinningsApplicable(winning_income.data[0].winning_income);
+      if (winning_income.data[0].winnings_income_docs.length > 0) {
+        setWinningsRows(winning_income.data[0].documents);
+      }
+    }
+  }, [winning_income]);
+
+  const postIncomeApplicability = async (v, urlEndPoint, key, task_id) => {
+    const res = await Factory('post', `/income_tax_returns/${urlEndPoint}/upsert/`, {
+      service_request: parseInt(service_id),
+      service_task: parseInt(task_id),
+      [key]: v,
+      status: 'in progress'
+    });
+    if (res.res.status_cd === 0) {
+      if (key === 'interest_income') {
+        let __interest_income = interest_income;
+        __interest_income.data[0] = res.res.data;
+        setInterestIncome(__interest_income);
+      } else if (key === 'dividend_income') {
+        let __dividend_income = dividend_income;
+        __dividend_income.data[0] = res.res.data;
+        setDividendIncome(__dividend_income);
+      } else if (key === 'gift_income') {
+        let __gift_income = gift_income;
+        __gift_income.data[0] = res.res.data;
+        setGiftIncome(__gift_income);
+      } else if (key === 'family_pension_income') {
+        let __family_income = family_income;
+        __family_income.data[0] = res.res.data;
+        setFamilyIncome(__family_income);
+      } else if (key === 'foreign_income') {
+        let __foreign_income = foreign_income;
+        __foreign_income.data[0] = res.res.data;
+        setForeignIncome(__foreign_income);
+      } else if (key === 'winning_income') {
+        let __winning_income = winning_income;
+        __winning_income.data[0] = res.res.data;
+        setWinningIncome(__winning_income);
+      }
+      return true;
+    }
+  };
+
+  // Save functions for each section
+  const saveInterestRow = async (row, idx) => {
+    let type = row.id ? 'put' : 'post';
+    let url = row.id ? `/income_tax_returns/interest-income-doc/${row.id}/update/` : `/income_tax_returns/interest-income-doc/add/`;
+    let formData = new FormData();
+    formData.append('interest_type', row.interest_type);
+    formData.append('interest_earned', row.interest_earned);
+    formData.append('bank_name', row.bank_name);
+    if (row.file instanceof File) {
+      formData.append('file', row.file);
+    }
+    formData.append('interest_income', interest_income.data[0].id);
+    const res = await Factory(type, url, formData);
+    if (res.res.status_cd === 0) {
+      enqueueSnackbar('Saved successfully', { anchorOrigin: { vertical: 'top', horizontal: 'right' } }, { variant: 'success' });
+    } else {
+      enqueueSnackbar('Error saving ', { anchorOrigin: { vertical: 'top', horizontal: 'right' } }, { variant: 'error' });
+    }
+  };
+
+  const saveDividendRow = async (row, idx) => {
+    let type = row.id ? 'put' : 'post';
+    let url = row.id
+      ? `/income_tax_returns/dividend-income-document/${row.id}/update/`
+      : `/income_tax_returns/dividend-income-document/add/`;
+    let formData = new FormData();
+    formData.append('received_from', row.received_from);
+    formData.append('dividend_received', row.dividend_received);
+    if (row.file instanceof File) {
+      formData.append('file', row.file);
+    }
+    formData.append('dividend_income', dividend_income.data[0].id);
+    const res = await Factory(type, url, formData);
+    if (res.res.status_cd === 0) {
+      enqueueSnackbar('Saved successfully', { anchorOrigin: { vertical: 'top', horizontal: 'right' } }, { variant: 'success' });
+    } else {
+      enqueueSnackbar('Error saving', { anchorOrigin: { vertical: 'top', horizontal: 'right' } }, { variant: 'error' });
+    }
+  };
+
+  const saveGiftRow = async (row, idx) => {
+    let type = row.id ? 'put' : 'post';
+    let url = row.id ? `/income_tax_returns/gift-income-document/${row.id}/update/` : `/income_tax_returns/interest-income-doc/add/`;
+    let formData = new FormData();
+    formData.append('amount', row.amount);
+    formData.append('received_from', row.received_from);
+    formData.append('relation', row.relation);
+    formData.append('date_received', row.date_received);
+    formData.append('was_it_marriage_related', row.was_it_marriage_related);
+    if (row.file instanceof File) {
+      formData.append('file', row.file);
+    }
+    formData.append('gift_income', gift_income.data[0].id);
+    const res = await Factory(type, url, formData);
+    if (res.res.status_cd === 0) {
+      enqueueSnackbar('Saved successfully', { anchorOrigin: { vertical: 'top', horizontal: 'right' } }, { variant: 'success' });
+    } else {
+      enqueueSnackbar('Error saving', { anchorOrigin: { vertical: 'top', horizontal: 'right' } }, { variant: 'error' });
+    }
+  };
+
+  const saveFamilyRow = async (row, idx) => {
+    let type = row.id ? 'put' : 'post';
+    let url = row.id
+      ? `/income_tax_returns/family-pension-income-documents/${row.id}/`
+      : `/income_tax_returns/family-pension-income-documents/`;
+    let formData = {};
+    formData.amount = row.amount;
+    formData.source = row.source;
+    formData.append('family_pension_income', family_income.data[0].id);
+
+    const res = await Factory(type, url, formData);
+    if (res.res.status_cd === 0) {
+      enqueueSnackbar('Saved successfully', { anchorOrigin: { vertical: 'top', horizontal: 'right' } }, { variant: 'success' });
+    } else {
+      enqueueSnackbar('Error saving', { anchorOrigin: { vertical: 'top', horizontal: 'right' } }, { variant: 'error' });
+    }
+  };
+
+  const saveForeignRow = async (row, idx) => {
+    let type = row.id ? 'put' : 'post';
+    let url = row.id ? `/income_tax_returns/foreign-income-info/${row.id}/update/` : `/income_tax_returns/foreign-income-info/add/`;
+    let formData = new FormData();
+    formData.append('type_of_income', row.type_of_income);
+    formData.append('country', row.country);
+    formData.append('currency', row.currency);
+    formData.append('amount', row.amount);
+    formData.append('tax_paid_abroad', row.tax_paid_abroad);
+    if (row.form67_file instanceof File) {
+      formData.append('form67_file', row.form67_file);
+    }
+    formData.append('foreign_income', foreign_income.data[0].id);
+    const res = await Factory(type, url, formData);
+    if (res.res.status_cd === 0) {
+      enqueueSnackbar('Saved successfully', { anchorOrigin: { vertical: 'top', horizontal: 'right' } }, { variant: 'success' });
+    } else {
+      enqueueSnackbar('Error saving', { anchorOrigin: { vertical: 'top', horizontal: 'right' } }, { variant: 'error' });
+    }
+  };
+
+  const saveWinningsRow = async (row, idx) => {
+    let type = row.id ? 'put' : 'post';
+    let url = row.id ? `/income_tax_returns/winning-income-docs/${row.id}/update/` : `/income_tax_returns/winning-income-docs/add/`;
+    let formData = new FormData();
+    formData.append('source', row.source);
+    formData.append('amount', row.amount);
+    if (row.file instanceof File) {
+      formData.append('file', row.file);
+    }
+    formData.append('winning_income', winning_income.data[0].id);
+    const res = await Factory(type, url, formData);
+    if (res.res.status_cd === 0) {
+      enqueueSnackbar('Saved successfully', { anchorOrigin: { vertical: 'top', horizontal: 'right' } }, { variant: 'success' });
+    } else {
+      enqueueSnackbar('Error saving', { anchorOrigin: { vertical: 'top', horizontal: 'right' } }, { variant: 'error' });
+    }
+  };
 
   return (
     <Box>
@@ -1974,8 +2409,8 @@ const OtherIncome = ({ fileDialogOpen, setFileDialogOpen, filesData, setDialogFi
           row
           value={interestApplicable}
           onChange={(_, v) => {
-            setInterestApplicable(v);
-            postIncomeApplicability(v, 'interest-income');
+            let res = postIncomeApplicability(v, 'interest-income', 'interest_income', interest_income.task_id);
+            if (res) setInterestApplicable(v);
           }}
         >
           <FormControlLabel value="Applicable" control={<Radio size="small" />} label="Applicable" />
@@ -1984,49 +2419,112 @@ const OtherIncome = ({ fileDialogOpen, setFileDialogOpen, filesData, setDialogFi
       </Stack>
       {interestApplicable === 'Applicable' && (
         <>
-          {interestRows.map((row, idx) => (
-            <Paper key={idx} sx={{ p: 2, mb: 2, borderRadius: 2, bgcolor: '#f8fafc' }}>
-              <Grid2 container spacing={2} alignItems="center">
-                <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                  <Autocomplete
-                    size="small"
-                    fullWidth
-                    options={interestTypes}
-                    renderInput={(params) => <TextField {...params} label="Interest Type" />}
-                  />
-                </Grid2>
-                <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                  <TextField size="small" fullWidth label="Interest Earned" />
-                </Grid2>
-                <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                  <TextField size="small" fullWidth label="Bank Name" />
-                </Grid2>
-                <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                  <Stack direction="row" spacing={1} alignItems="center">
-                    <Button size="small" variant="contained" component="label">
-                      Upload
-                      <input type="file" hidden />
-                    </Button>
-                    <Button size="small" variant="outlined">
-                      View
-                    </Button>
-                    <Button size="small" variant="outlined">
-                      Add
-                    </Button>
-                  </Stack>
-                </Grid2>
-                {interestRows.length > 1 && (
-                  <Grid2 size={{ xs: 12, sm: 6, md: 2 }} display="flex" justifyContent="flex-end">
-                    <IconButton size="small" color="error" onClick={() => setInterestRows(interestRows.filter((_, i) => i !== idx))}>
-                      <DeleteIcon />
-                    </IconButton>
-                  </Grid2>
-                )}
-              </Grid2>
-            </Paper>
-          ))}
+          <Box sx={{ p: 0, boxShadow: '0px 0px 10px 0px rgba(66, 66, 66, 0.1)', borderRadius: 2, mb: 1 }}>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Interest Type</TableCell>
+                  <TableCell>Interest Earned</TableCell>
+                  <TableCell>Bank Name</TableCell>
+                  <TableCell align="center">Document</TableCell>
+                  <TableCell align="center">Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {interestRows.map((row, idx) => (
+                  <TableRow key={idx}>
+                    <TableCell>
+                      <Autocomplete
+                        size="small"
+                        fullWidth
+                        options={interestTypes}
+                        value={row.interest_type}
+                        onChange={(_, v) => {
+                          const updated = [...interestRows];
+                          updated[idx].interest_type = v;
+                          setInterestRows(updated);
+                        }}
+                        renderInput={(params) => <TextField {...params} placeholder="Interest Type" />}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <TextField
+                        size="small"
+                        fullWidth
+                        placeholder="Interest Earned"
+                        value={row.interest_earned}
+                        onChange={(e) => {
+                          const updated = [...interestRows];
+                          updated[idx].interest_earned = e.target.value;
+                          setInterestRows(updated);
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <TextField
+                        size="small"
+                        fullWidth
+                        placeholder="Bank Name"
+                        value={row.bank_name}
+                        onChange={(e) => {
+                          const updated = [...interestRows];
+                          updated[idx].bank_name = e.target.value;
+                          setInterestRows(updated);
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell align="center">
+                      <Button size="small" variant="contained" component="label">
+                        Upload
+                        <input
+                          type="file"
+                          hidden
+                          onChange={(e) => {
+                            if (e.target.files[0]) {
+                              const updated = [...interestRows];
+                              updated[idx].file = e.target.files[0];
+                              setInterestRows(updated);
+                            }
+                          }}
+                        />
+                      </Button>
+                      {row.file && (
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          sx={{ ml: 1 }}
+                          onClick={() => {
+                            setFileDialogOpen(true);
+                            setDialogFilesData([row.file]);
+                          }}
+                        >
+                          View
+                        </Button>
+                      )}
+                    </TableCell>
+                    <TableCell align="center">
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        <Button size="small" variant="contained" onClick={() => saveInterestRow(row, idx)}>
+                          Save
+                        </Button>
+                        {interestRows.length > 1 && (
+                          <IconButton size="small" color="error" onClick={() => setInterestRows(interestRows.filter((_, i) => i !== idx))}>
+                            <DeleteIcon />
+                          </IconButton>
+                        )}
+                      </Stack>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Box>
           <Box display="flex" justifyContent="flex-end">
-            <Button size="small" variant="outlined" onClick={() => setInterestRows([...interestRows, { type: '', earned: '', bank: '' }])}>
+            <Button
+              size="small"
+              variant="outlined"
+              onClick={() => setInterestRows([...interestRows, { interest_type: '', interest_earned: '', bank_name: '' }])}
+            >
               Add Row
             </Button>
           </Box>
@@ -2040,7 +2538,7 @@ const OtherIncome = ({ fileDialogOpen, setFileDialogOpen, filesData, setDialogFi
           value={dividendApplicable}
           onChange={(_, v) => {
             setDividendApplicable(v);
-            postIncomeApplicability(v, 'dividend-income');
+            postIncomeApplicability(v, 'dividend-income', 'dividend_income', dividend_income.task_id);
           }}
         >
           <FormControlLabel value="Applicable" control={<Radio size="small" />} label="Applicable" />
@@ -2049,39 +2547,91 @@ const OtherIncome = ({ fileDialogOpen, setFileDialogOpen, filesData, setDialogFi
       </Stack>
       {dividendApplicable === 'Applicable' && (
         <>
-          {dividendRows.map((row, idx) => (
-            <Paper key={idx} sx={{ p: 2, mb: 2, borderRadius: 2, bgcolor: '#f8fafc' }}>
-              <Grid2 container spacing={2} alignItems="center">
-                <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                  <TextField size="small" fullWidth label="Received From" />
-                </Grid2>
-                <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                  <TextField size="small" fullWidth label="Dividend Received" />
-                </Grid2>
-                <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                  <Stack direction="row" spacing={1} alignItems="center">
-                    <Button size="small" variant="contained" component="label">
-                      Upload
-                      <input type="file" hidden />
-                    </Button>
-                    <Button size="small" variant="outlined">
-                      View
-                    </Button>
-                    <Button size="small" variant="outlined">
-                      Add
-                    </Button>
-                  </Stack>
-                </Grid2>
-                {dividendRows.length > 1 && (
-                  <Grid2 size={{ xs: 12, sm: 6, md: 2 }} display="flex" justifyContent="flex-end">
-                    <IconButton size="small" color="error" onClick={() => setDividendRows(dividendRows.filter((_, i) => i !== idx))}>
-                      <DeleteIcon />
-                    </IconButton>
-                  </Grid2>
-                )}
-              </Grid2>
-            </Paper>
-          ))}
+          <Box sx={{ p: 0, boxShadow: '0px 0px 10px 0px rgba(66, 66, 66, 0.1)', borderRadius: 2, mb: 1 }}>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Received From</TableCell>
+                  <TableCell>Dividend Received</TableCell>
+                  <TableCell align="center">Document</TableCell>
+                  <TableCell align="center">Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {dividendRows.map((row, idx) => (
+                  <TableRow key={idx}>
+                    <TableCell>
+                      <TextField
+                        size="small"
+                        fullWidth
+                        placeholder="Received From"
+                        value={row.from}
+                        onChange={(e) => {
+                          const updated = [...dividendRows];
+                          updated[idx].from = e.target.value;
+                          setDividendRows(updated);
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <TextField
+                        size="small"
+                        fullWidth
+                        placeholder="Dividend Received"
+                        value={row.received}
+                        onChange={(e) => {
+                          const updated = [...dividendRows];
+                          updated[idx].received = e.target.value;
+                          setDividendRows(updated);
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell align="center">
+                      <Button size="small" variant="contained" component="label">
+                        Upload
+                        <input
+                          type="file"
+                          hidden
+                          onChange={(e) => {
+                            if (e.target.files[0]) {
+                              const updated = [...dividendRows];
+                              updated[idx].file = e.target.files[0];
+                              setDividendRows(updated);
+                            }
+                          }}
+                        />
+                      </Button>
+                      {row.file && (
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          sx={{ ml: 1 }}
+                          onClick={() => {
+                            setFileDialogOpen(true);
+                            setDialogFilesData([{ url: row.file instanceof File ? URL.createObjectURL(row.file) : row.file }]);
+                          }}
+                        >
+                          View
+                        </Button>
+                      )}
+                    </TableCell>
+                    <TableCell align="center">
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        <Button size="small" variant="contained" onClick={() => saveDividendRow(row, idx)}>
+                          Save
+                        </Button>
+                        {dividendRows.length > 1 && (
+                          <IconButton size="small" color="error" onClick={() => setDividendRows(dividendRows.filter((_, i) => i !== idx))}>
+                            <DeleteIcon />
+                          </IconButton>
+                        )}
+                      </Stack>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Box>
           <Box display="flex" justifyContent="flex-end">
             <Button size="small" variant="outlined" onClick={() => setDividendRows([...dividendRows, { from: '', received: '' }])}>
               Add Row
@@ -2097,7 +2647,7 @@ const OtherIncome = ({ fileDialogOpen, setFileDialogOpen, filesData, setDialogFi
           value={giftApplicable}
           onChange={(_, v) => {
             setGiftApplicable(v);
-            postIncomeApplicability(v, 'gift-income');
+            postIncomeApplicability(v, 'gift-income', 'gift_income', gift_income.task_id);
           }}
         >
           <FormControlLabel value="Applicable" control={<Radio size="small" />} label="Applicable" />
@@ -2106,48 +2656,155 @@ const OtherIncome = ({ fileDialogOpen, setFileDialogOpen, filesData, setDialogFi
       </Stack>
       {giftApplicable === 'Applicable' && (
         <>
-          {giftRows.map((row, idx) => (
-            <Paper key={idx} sx={{ p: 2, mb: 2, borderRadius: 2, bgcolor: '#f8fafc' }}>
-              <Grid2 container spacing={2} alignItems="center">
-                <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                  <TextField size="small" fullWidth label="Amount" />
-                </Grid2>
-                <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                  <TextField size="small" fullWidth label="Received From" />
-                </Grid2>
-                <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                  <Autocomplete
-                    size="small"
-                    fullWidth
-                    options={relationOptions}
-                    renderInput={(params) => <TextField {...params} label="Relation" />}
-                  />
-                </Grid2>
-                <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                  <TextField size="small" fullWidth label="Date Received" type="date" InputLabelProps={{ shrink: true }} />
-                </Grid2>
-                <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                  <Typography>was it on Marriage?</Typography>
-                  <RadioGroup row value={row.marriage}>
-                    <FormControlLabel value="yes" control={<Radio size="small" checked={row.marriage === 'yes'} />} label="Yes" />
-                    <FormControlLabel value="no" control={<Radio size="small" checked={row.marriage === 'no'} />} label="No" />
-                  </RadioGroup>
-                </Grid2>
-                {giftRows.length > 1 && (
-                  <Grid2 size={{ xs: 12, sm: 6, md: 2 }} display="flex" justifyContent="flex-end">
-                    <IconButton size="small" color="error" onClick={() => setGiftRows(giftRows.filter((_, i) => i !== idx))}>
-                      <DeleteIcon />
-                    </IconButton>
-                  </Grid2>
-                )}
-              </Grid2>
-            </Paper>
-          ))}
+          <Box sx={{ p: 0, boxShadow: '0px 0px 10px 0px rgba(66, 66, 66, 0.1)', borderRadius: 2, mb: 1 }}>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Amount</TableCell>
+                  <TableCell>Received From</TableCell>
+                  <TableCell>Relation</TableCell>
+                  <TableCell>Date Received</TableCell>
+                  <TableCell>Marriage?</TableCell>
+                  <TableCell align="center">Document</TableCell>
+                  <TableCell align="center">Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {giftRows.map((row, idx) => (
+                  <TableRow key={idx}>
+                    <TableCell>
+                      <TextField
+                        size="small"
+                        fullWidth
+                        placeholder="Amount"
+                        value={row.amount}
+                        onChange={(e) => {
+                          const updated = [...giftRows];
+                          updated[idx].amount = e.target.value;
+                          setGiftRows(updated);
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <TextField
+                        size="small"
+                        fullWidth
+                        placeholder="Received From"
+                        value={row.received_from}
+                        onChange={(e) => {
+                          const updated = [...giftRows];
+                          updated[idx].received_from = e.target.value;
+                          setGiftRows(updated);
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Autocomplete
+                        size="small"
+                        fullWidth
+                        options={relationOptions}
+                        value={row.relation}
+                        onChange={(_, v) => {
+                          const updated = [...giftRows];
+                          updated[idx].relation = v;
+                          setGiftRows(updated);
+                        }}
+                        renderInput={(params) => <TextField {...params} placeholder="Relation" />}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <TextField
+                        size="small"
+                        fullWidth
+                        placeholder="Date Received"
+                        type="date"
+                        InputLabelProps={{ shrink: true }}
+                        value={row.date_received}
+                        onChange={(e) => {
+                          const updated = [...giftRows];
+                          updated[idx].date_received = e.target.value;
+                          setGiftRows(updated);
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <RadioGroup
+                        row
+                        value={row.was_it_marriage_related}
+                        onChange={(_, v) => {
+                          const updated = [...giftRows];
+                          updated[idx].was_it_marriage_related = v;
+                          setGiftRows(updated);
+                        }}
+                      >
+                        <FormControlLabel
+                          value="yes"
+                          control={<Radio size="small" checked={row.was_it_marriage_related === 'yes'} />}
+                          label="Yes"
+                        />
+                        <FormControlLabel
+                          value="no"
+                          control={<Radio size="small" checked={row.was_it_marriage_related === 'no'} />}
+                          label="No"
+                        />
+                      </RadioGroup>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Button size="small" variant="contained" component="label">
+                        Upload
+                        <input
+                          type="file"
+                          hidden
+                          onChange={(e) => {
+                            if (e.target.files[0]) {
+                              const updated = [...giftRows];
+                              updated[idx].file = e.target.files[0];
+                              setGiftRows(updated);
+                            }
+                          }}
+                        />
+                      </Button>
+                      {row.file && (
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          sx={{ ml: 1 }}
+                          onClick={() => {
+                            setFileDialogOpen(true);
+                            setDialogFilesData([{ url: row.file instanceof File ? URL.createObjectURL(row.file) : row.file }]);
+                          }}
+                        >
+                          View
+                        </Button>
+                      )}
+                    </TableCell>
+                    <TableCell align="center">
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        <Button size="small" variant="contained" onClick={() => saveGiftRow(row, idx)}>
+                          Save
+                        </Button>
+                        {giftRows.length > 1 && (
+                          <IconButton size="small" color="error" onClick={() => setGiftRows(giftRows.filter((_, i) => i !== idx))}>
+                            <DeleteIcon />
+                          </IconButton>
+                        )}
+                      </Stack>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Box>
           <Box display="flex" justifyContent="flex-end">
             <Button
               size="small"
               variant="outlined"
-              onClick={() => setGiftRows([...giftRows, { amount: '', from: '', relation: '', date: '', marriage: 'no' }])}
+              onClick={() =>
+                setGiftRows([
+                  ...giftRows,
+                  { amount: '', received_from: '', relation: '', date_received: '', was_it_marriage_related: 'no' }
+                ])
+              }
             >
               Add Row
             </Button>
@@ -2162,7 +2819,7 @@ const OtherIncome = ({ fileDialogOpen, setFileDialogOpen, filesData, setDialogFi
           value={familyApplicable}
           onChange={(_, v) => {
             setFamilyApplicable(v);
-            postIncomeApplicability(v, 'family-pension-income');
+            postIncomeApplicability(v, 'family-pension-income', 'family_pension_income', family_income.task_id);
           }}
         >
           <FormControlLabel value="Applicable" control={<Radio size="small" />} label="Applicable" />
@@ -2171,30 +2828,92 @@ const OtherIncome = ({ fileDialogOpen, setFileDialogOpen, filesData, setDialogFi
       </Stack>
       {familyApplicable === 'Applicable' && (
         <>
-          {familyRows.map((row, idx) => (
-            <Paper key={idx} sx={{ p: 2, mb: 2, borderRadius: 2, bgcolor: '#f8fafc' }}>
-              <Grid2 container spacing={2} alignItems="center">
-                <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                  <TextField size="small" fullWidth label="Amount Received" />
-                </Grid2>
-                <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                  <Autocomplete
-                    size="small"
-                    fullWidth
-                    options={pensionSources}
-                    renderInput={(params) => <TextField {...params} label="Source" />}
-                  />
-                </Grid2>
-                {familyRows.length > 1 && (
-                  <Grid2 size={{ xs: 12, sm: 6, md: 2 }} display="flex" justifyContent="flex-end">
-                    <IconButton size="small" color="error" onClick={() => setFamilyRows(familyRows.filter((_, i) => i !== idx))}>
-                      <DeleteIcon />
-                    </IconButton>
-                  </Grid2>
-                )}
-              </Grid2>
-            </Paper>
-          ))}
+          <Box sx={{ p: 0, boxShadow: '0px 0px 10px 0px rgba(66, 66, 66, 0.1)', borderRadius: 2, mb: 1 }}>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Amount Received</TableCell>
+                  <TableCell>Source</TableCell>
+                  <TableCell align="center">Document</TableCell>
+                  <TableCell align="center">Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {familyRows.map((row, idx) => (
+                  <TableRow key={idx}>
+                    <TableCell>
+                      <TextField
+                        size="small"
+                        fullWidth
+                        placeholder="Amount Received"
+                        value={row.amount}
+                        onChange={(e) => {
+                          const updated = [...familyRows];
+                          updated[idx].amount = e.target.value;
+                          setFamilyRows(updated);
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Autocomplete
+                        size="small"
+                        fullWidth
+                        options={pensionSources}
+                        value={row.source}
+                        onChange={(_, v) => {
+                          const updated = [...familyRows];
+                          updated[idx].source = v;
+                          setFamilyRows(updated);
+                        }}
+                        renderInput={(params) => <TextField {...params} placeholder="Source" />}
+                      />
+                    </TableCell>
+                    <TableCell align="center">
+                      <Button size="small" variant="contained" component="label">
+                        Upload
+                        <input
+                          type="file"
+                          hidden
+                          onChange={(e) => {
+                            if (e.target.files[0]) {
+                              const updated = [...familyRows];
+                              updated[idx].file = e.target.files[0];
+                              setFamilyRows(updated);
+                            }
+                          }}
+                        />
+                      </Button>
+                      {row.file && (
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          sx={{ ml: 1 }}
+                          onClick={() => {
+                            setFileDialogOpen(true);
+                            setDialogFilesData([{ url: row.file instanceof File ? URL.createObjectURL(row.file) : row.file }]);
+                          }}
+                        >
+                          View
+                        </Button>
+                      )}
+                    </TableCell>
+                    <TableCell align="center">
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        <Button size="small" variant="contained" onClick={() => saveFamilyRow(row, idx)}>
+                          Save
+                        </Button>
+                        {familyRows.length > 1 && (
+                          <IconButton size="small" color="error" onClick={() => setFamilyRows(familyRows.filter((_, i) => i !== idx))}>
+                            <DeleteIcon />
+                          </IconButton>
+                        )}
+                      </Stack>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Box>
           <Box display="flex" justifyContent="flex-end">
             <Button size="small" variant="outlined" onClick={() => setFamilyRows([...familyRows, { amount: '', source: '' }])}>
               Add Row
@@ -2210,7 +2929,7 @@ const OtherIncome = ({ fileDialogOpen, setFileDialogOpen, filesData, setDialogFi
           value={foreignApplicable}
           onChange={(_, v) => {
             setForeignApplicable(v);
-            postIncomeApplicability(v, 'foreign-income');
+            postIncomeApplicability(v, 'foreign-income', 'foreign_income', foreign_income.task_id);
           }}
         >
           <FormControlLabel value="Applicable" control={<Radio size="small" />} label="Applicable" />
@@ -2219,76 +2938,163 @@ const OtherIncome = ({ fileDialogOpen, setFileDialogOpen, filesData, setDialogFi
       </Stack>
       {foreignApplicable === 'Applicable' && (
         <>
-          {foreignRows.map((row, idx) => (
-            <Paper key={idx} sx={{ p: 2, mb: 2, borderRadius: 2, bgcolor: '#f8fafc' }}>
-              <Grid2 container spacing={2} alignItems="center">
-                <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                  <Autocomplete
-                    size="small"
-                    fullWidth
-                    options={foreignIncomeTypes}
-                    renderInput={(params) => <TextField {...params} label="Type of Income" />}
-                  />
-                </Grid2>
-                <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                  <Autocomplete
-                    size="small"
-                    fullWidth
-                    options={countryOptions}
-                    renderInput={(params) => <TextField {...params} label="Country" />}
-                  />
-                </Grid2>
-                <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                  <Autocomplete
-                    size="small"
-                    fullWidth
-                    options={currencyOptions}
-                    renderInput={(params) => <TextField {...params} label="Currency" />}
-                  />
-                </Grid2>
-                <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                  <TextField size="small" fullWidth label="Amount" />
-                </Grid2>
-                <Grid2 size={{ xs: 12, sm: 4 }}>
-                  <Stack direction="row" spacing={1} alignItems="center">
-                    <Typography>Tax Paid Abroad?</Typography>
-                    <RadioGroup row value={row.taxPaid}>
-                      <FormControlLabel value="yes" control={<Radio size="small" checked={row.taxPaid === 'yes'} />} label="Yes" />
-                      <FormControlLabel value="no" control={<Radio size="small" checked={row.taxPaid === 'no'} />} label="No" />
-                    </RadioGroup>
-                  </Stack>
-                </Grid2>
-                {row.taxPaid === 'yes' && (
-                  <Grid2 size={{ xs: 12, sm: 8 }}>
-                    <Stack direction="row" spacing={1} alignItems="center">
+          <Box sx={{ p: 0, boxShadow: '0px 0px 10px 0px rgba(66, 66, 66, 0.1)', borderRadius: 2, mb: 1 }}>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={{ p: 0.5, py: 1, width: '13%' }}>Type of Income</TableCell>
+                  <TableCell sx={{ p: 0.5, py: 1, width: '20%' }}>Country</TableCell>
+                  <TableCell sx={{ p: 0.5, py: 1, width: '13%' }}>Currency</TableCell>
+                  <TableCell sx={{ p: 0.5, py: 1, width: '20%' }}>Amount</TableCell>
+                  <TableCell sx={{ p: 0.5, py: 1, width: '15%' }}>Tax Paid Abroad?</TableCell>
+                  <TableCell sx={{ p: 0.5, py: 1, width: '20%' }} align="center">
+                    Document
+                  </TableCell>
+                  <TableCell sx={{ p: 0.5, py: 1, py: 1, width: '20%' }} align="center">
+                    Actions
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {foreignRows.map((row, idx) => (
+                  <TableRow key={idx}>
+                    <TableCell sx={{ p: 0.5, py: 1 }}>
+                      <Autocomplete
+                        size="small"
+                        fullWidth
+                        options={foreignIncomeTypes}
+                        value={row.type_of_income}
+                        onChange={(_, v) => {
+                          const updated = [...foreignRows];
+                          updated[idx].type_of_income = v;
+                          setForeignRows(updated);
+                        }}
+                        renderInput={(params) => <TextField {...params} placeholder="Type of Income" />}
+                      />
+                    </TableCell>
+                    <TableCell sx={{ p: 0.5, py: 1 }}>
+                      <Autocomplete
+                        size="small"
+                        fullWidth
+                        options={countryOptions}
+                        value={row.country}
+                        onChange={(_, v) => {
+                          const updated = [...foreignRows];
+                          updated[idx].country = v;
+                          setForeignRows(updated);
+                        }}
+                        renderInput={(params) => <TextField {...params} placeholder="Country" />}
+                      />
+                    </TableCell>
+                    <TableCell sx={{ p: 0.5, py: 1 }}>
+                      <Autocomplete
+                        size="small"
+                        fullWidth
+                        options={currencyOptions}
+                        value={row.currency}
+                        onChange={(_, v) => {
+                          const updated = [...foreignRows];
+                          updated[idx].currency = v;
+                          setForeignRows(updated);
+                        }}
+                        renderInput={(params) => <TextField {...params} placeholder="Currency" />}
+                      />
+                    </TableCell>
+                    <TableCell sx={{ p: 0.5, py: 1 }}>
+                      <TextField
+                        size="small"
+                        fullWidth
+                        placeholder="Amount"
+                        value={row.amount}
+                        onChange={(e) => {
+                          const updated = [...foreignRows];
+                          updated[idx].amount = e.target.value;
+                          setForeignRows(updated);
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell sx={{ p: 0.5, py: 1 }}>
+                      <RadioGroup
+                        row
+                        value={row.tax_paid_abroad}
+                        onChange={(_, v) => {
+                          const updated = [...foreignRows];
+                          updated[idx].tax_paid_abroad = v;
+                          setForeignRows(updated);
+                        }}
+                      >
+                        <FormControlLabel
+                          value="yes"
+                          sx={{ m: 0 }}
+                          control={<Radio sx={{ m: 0, px: 0.5 }} size="small" checked={row.tax_paid_abroad === 'yes'} />}
+                          label="Yes"
+                        />
+                        <FormControlLabel
+                          value="no"
+                          sx={{ m: 0 }}
+                          control={<Radio sx={{ m: 0, px: 0.5 }} size="small" checked={row.tax_paid_abroad === 'no'} />}
+                          label="No"
+                        />
+                      </RadioGroup>
+                    </TableCell>
+                    <TableCell align="center" sx={{ p: 0.5, py: 1 }}>
                       <Button size="small" variant="contained" component="label">
                         Upload
-                        <input type="file" hidden />
+                        <input
+                          type="file"
+                          hidden
+                          onChange={(e) => {
+                            if (e.target.files[0]) {
+                              const updated = [...foreignRows];
+                              updated[idx].form67_file = e.target.files[0];
+                              setForeignRows(updated);
+                            }
+                          }}
+                        />
                       </Button>
-                      <Button size="small" variant="outlined">
-                        View
-                      </Button>
-                      <Button size="small" variant="outlined">
-                        Add
-                      </Button>
-                    </Stack>
-                  </Grid2>
-                )}
-                {foreignRows.length > 1 && (
-                  <Grid2 size={{ xs: 12, sm: 6, md: 2 }} display="flex" justifyContent="flex-end">
-                    <IconButton size="small" color="error" onClick={() => setForeignRows(foreignRows.filter((_, i) => i !== idx))}>
-                      <DeleteIcon />
-                    </IconButton>
-                  </Grid2>
-                )}
-              </Grid2>
-            </Paper>
-          ))}
+                      {row.form67_file && (
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          sx={{ ml: 1 }}
+                          onClick={() => {
+                            setFileDialogOpen(true);
+                            setDialogFilesData([
+                              { url: row.form67_file instanceof File ? URL.createObjectURL(row.form67_file) : row.form67_file }
+                            ]);
+                          }}
+                        >
+                          View
+                        </Button>
+                      )}
+                    </TableCell>
+                    <TableCell align="center" sx={{ p: 0.5, py: 1 }}>
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        <Button size="small" variant="contained" onClick={() => saveForeignRow(row, idx)}>
+                          Save
+                        </Button>
+                        {foreignRows.length > 1 && (
+                          <IconButton size="small" color="error" onClick={() => setForeignRows(foreignRows.filter((_, i) => i !== idx))}>
+                            <DeleteIcon />
+                          </IconButton>
+                        )}
+                      </Stack>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Box>
           <Box display="flex" justifyContent="flex-end">
             <Button
               size="small"
               variant="outlined"
-              onClick={() => setForeignRows([...foreignRows, { type: '', country: '', currency: '', amount: '', taxPaid: 'no' }])}
+              onClick={() =>
+                setForeignRows([
+                  ...foreignRows,
+                  { type_of_income: '', country: '', currency: '', amount: '', tax_paid_abroad: 'no', form67_file: '' }
+                ])
+              }
             >
               Add Row
             </Button>
@@ -2303,7 +3109,7 @@ const OtherIncome = ({ fileDialogOpen, setFileDialogOpen, filesData, setDialogFi
           value={winningsApplicable}
           onChange={(_, v) => {
             setWinningsApplicable(v);
-            postIncomeApplicability(v, 'winning-income');
+            postIncomeApplicability(v, 'winning-income', 'winning_income', winning_income.task_id);
           }}
         >
           <FormControlLabel value="Applicable" control={<Radio size="small" />} label="Applicable" />
@@ -2312,44 +3118,92 @@ const OtherIncome = ({ fileDialogOpen, setFileDialogOpen, filesData, setDialogFi
       </Stack>
       {winningsApplicable === 'Applicable' && (
         <>
-          {winningsRows.map((row, idx) => (
-            <Paper key={idx} sx={{ p: 2, mb: 2, borderRadius: 2, bgcolor: '#f8fafc' }}>
-              <Grid2 container spacing={2} alignItems="center">
-                <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                  <Autocomplete
-                    size="small"
-                    fullWidth
-                    options={winningsSources}
-                    renderInput={(params) => <TextField {...params} label="Source of Income" />}
-                  />
-                </Grid2>
-                <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                  <TextField size="small" fullWidth label="Amount" />
-                </Grid2>
-                <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                  <Stack direction="row" spacing={1} alignItems="center">
-                    <Button size="small" variant="contained" component="label">
-                      Upload
-                      <input type="file" hidden />
-                    </Button>
-                    <Button size="small" variant="outlined">
-                      View
-                    </Button>
-                    <Button size="small" variant="outlined">
-                      Add
-                    </Button>
-                  </Stack>
-                </Grid2>
-                {winningsRows.length > 1 && (
-                  <Grid2 size={{ xs: 12, sm: 6, md: 2 }} display="flex" justifyContent="flex-end">
-                    <IconButton size="small" color="error" onClick={() => setWinningsRows(winningsRows.filter((_, i) => i !== idx))}>
-                      <DeleteIcon />
-                    </IconButton>
-                  </Grid2>
-                )}
-              </Grid2>
-            </Paper>
-          ))}
+          <Box sx={{ p: 0, boxShadow: '0px 0px 10px 0px rgba(66, 66, 66, 0.1)', borderRadius: 2, mb: 1 }}>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Source of Income</TableCell>
+                  <TableCell>Amount</TableCell>
+                  <TableCell align="center">Document</TableCell>
+                  <TableCell align="center">Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {winningsRows.map((row, idx) => (
+                  <TableRow key={idx}>
+                    <TableCell>
+                      <Autocomplete
+                        size="small"
+                        fullWidth
+                        options={winningsSources}
+                        value={row.source}
+                        onChange={(_, v) => {
+                          const updated = [...winningsRows];
+                          updated[idx].source = v;
+                          setWinningsRows(updated);
+                        }}
+                        renderInput={(params) => <TextField {...params} placeholder="Source of Income" />}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <TextField
+                        size="small"
+                        fullWidth
+                        placeholder="Amount"
+                        value={row.amount}
+                        onChange={(e) => {
+                          const updated = [...winningsRows];
+                          updated[idx].amount = e.target.value;
+                          setWinningsRows(updated);
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell align="center">
+                      <Button size="small" variant="contained" component="label">
+                        Upload
+                        <input
+                          type="file"
+                          hidden
+                          onChange={(e) => {
+                            if (e.target.files[0]) {
+                              const updated = [...winningsRows];
+                              updated[idx].file = e.target.files[0];
+                              setWinningsRows(updated);
+                            }
+                          }}
+                        />
+                      </Button>
+                      {row.file && (
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          sx={{ ml: 1 }}
+                          onClick={() => {
+                            setFileDialogOpen(true);
+                            setDialogFilesData([{ url: row.file instanceof File ? URL.createObjectURL(row.file) : row.file }]);
+                          }}
+                        >
+                          View
+                        </Button>
+                      )}
+                    </TableCell>
+                    <TableCell align="center">
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        <Button size="small" variant="contained" onClick={() => saveWinningsRow(row, idx)}>
+                          Save
+                        </Button>
+                        {winningsRows.length > 1 && (
+                          <IconButton size="small" color="error" onClick={() => setWinningsRows(winningsRows.filter((_, i) => i !== idx))}>
+                            <DeleteIcon />
+                          </IconButton>
+                        )}
+                      </Stack>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Box>
           <Box display="flex" justifyContent="flex-end">
             <Button size="small" variant="outlined" onClick={() => setWinningsRows([...winningsRows, { source: '', amount: '' }])}>
               Add Row
@@ -2361,25 +3215,22 @@ const OtherIncome = ({ fileDialogOpen, setFileDialogOpen, filesData, setDialogFi
   );
 };
 
-const AgricultureIncome = ({ service_id }) => {
+const AgricultureIncome = ({ data, service_id }) => {
+  data = data[0];
   const [hasAgriIncome, setHasAgriIncome] = React.useState('Applicable');
-  const getAgricultureIncome = async () => {
-    const res = await Factory(
-      'get',
-      `/income_tax_returns/service-request-section-data?service_request_id=${service_id}&section=agriculture`
-    );
+
+  const postIncomeApplicability = async (v) => {
+    const res = await Factory('post', `/income_tax_returns/agriculture-income/upsert/`, {
+      service_request: parseInt(service_id),
+      service_task: parseInt(data.task_id),
+      agriculture: v,
+      status: 'in progress'
+    });
     console.log(res);
+    if (res.res.status_cd === 0) {
+      return true;
+    }
   };
-
-  const postIncomeApplicability = async (v, key) => {
-    console.log({ service_request: service_id, service_task: 24, agriculture_income: v });
-    // const res = Factory('post', `/income_tax_returns/${key}/upsert/`, {
-
-    // });
-  };
-  useEffect(() => {
-    // getAgricultureIncome();
-  }, []);
 
   return (
     <Box>
@@ -2466,6 +3317,7 @@ const IncomeDetails = ({ data, type, fileDialogOpen, setFileDialogOpen, dialogFi
           fileDialogOpen={fileDialogOpen}
           setFileDialogOpen={setFileDialogOpen}
           filesData={dialogFilesData}
+          setDialogFilesData={setDialogFilesData}
           service_id={service_id}
         />
       );
