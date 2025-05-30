@@ -504,11 +504,9 @@ export default function RenderSalaryTemplateTable({
 
     if (!annualCtc || isNaN(annualCtc)) return;
 
-    const earningsClone = [...values.earnings].sort((a, b) => {
-      if (a.component_name === 'Basic') return -1;
-      if (b.component_name === 'Basic') return 1;
-      return 0;
-    });
+    const basic = values.earnings.find((e) => e.component_name === 'Basic');
+    const others = values.earnings.filter((e) => e.component_name !== 'Basic');
+    const earningsClone = basic ? [basic, ...others] : [...values.earnings];
 
     let basicAnnual = 0;
     const withBasic = earningsClone.map((e) => {

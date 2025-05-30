@@ -23,16 +23,18 @@ import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
 
 const TABLE_HEADERS = [
-  'Employee',
-  'Gross',
+  'Employee ID',
+  'Employee Name',
+  'Department',
+  'Designation',
   'Paid Days',
+  'CTC',
+  'Actual Gross',
   'Earned Gross',
-  'Benefits',
-  'Deductions',
-  'Taxes',
-  'Recovery',
-  'Reimbursement',
-  'Net Pay'
+  'Total Earnings',
+  'Total Deductions',
+  'Net Pay',
+  'Status'
 ];
 
 const PayrollSummary = ({ payrollId, month, financialYear }) => {
@@ -181,17 +183,19 @@ const PayrollSummary = ({ payrollId, month, financialYear }) => {
                 </TableRow>
               ) : (
                 paginatedData.map((item, index) => (
-                  <TableRow key={item.employee_id || index}>
+                  <TableRow key={item.id || index}>
+                    <TableCell>{item.associate_id || '-'}</TableCell>
                     <TableCell>{item.employee_name || '-'}</TableCell>
-                    <TableCell>{item.gross_salary || '-'}</TableCell>
+                    <TableCell>{item.department || '-'}</TableCell>
+                    <TableCell>{item.designation || '-'}</TableCell>
                     <TableCell>{item.paid_days || '-'}</TableCell>
+                    <TableCell>{item.ctc || '-'}</TableCell>
+                    <TableCell>{item.actual_gross || '-'}</TableCell>
+                    <TableCell>{item.gross_salary || '-'}</TableCell>
                     <TableCell>{item.earned_salary || '-'}</TableCell>
-                    <TableCell>{item.benefits_total || '-'}</TableCell>
-                    <TableCell>{item.deductions?.['Employee Deductions'] ?? '-'}</TableCell>
-                    <TableCell>{item.deductions?.['Taxes'] ?? '-'}</TableCell>
-                    <TableCell>{item.recovery || '-'}</TableCell>
-                    <TableCell>{item.reimbursement || '-'}</TableCell>
+                    <TableCell>{item.deductions?.['Total'] || '-'}</TableCell>
                     <TableCell>{item.net_salary || '-'}</TableCell>
+                    <TableCell>{item.status || '-'}</TableCell>
                     <TableCell>
                       <Typography
                         variant="body2"

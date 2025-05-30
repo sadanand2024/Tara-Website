@@ -58,7 +58,6 @@ const RenderTable = ({
   const handlePageChange = (_, value) => {
     setCurrentPage(value);
   };
-
   const safeTableData = Array.isArray(tableData) ? tableData : [];
   const paginatedData = safeTableData.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
   return (
@@ -109,9 +108,11 @@ const RenderTable = ({
                           <IconButton color="primary" onClick={() => handleEdit(row)}>
                             <Edit />
                           </IconButton>
-                          <IconButton color="error" onClick={() => handleOpenDeleteDialog(row)}>
-                            <Delete />
-                          </IconButton>
+                          {from !== 'Tds' ? (
+                            <IconButton color="error" onClick={() => handleOpenDeleteDialog(row)}>
+                              <Delete />
+                            </IconButton>
+                          ) : null}
                         </Box>
                       )}
                     </TableCell>

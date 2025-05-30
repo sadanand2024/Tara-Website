@@ -67,9 +67,9 @@ const PersonalDetails = ({ fetchEmployeeData, employeeData, createdEmployeeId, s
       .required()
       .matches(/^\d{12}$/, 'Must be 12 digits'),
     age: Yup.number().required().positive().integer(),
-    alternate_contact_number: Yup.string()
-      .required()
-      .matches(/^\d{10}$/, 'Must be 10 digits'),
+    // alternate_contact_number: Yup.string()
+    //   .required()
+    //   .matches(/^\d{10}$/, 'Must be 10 digits'),
     marital_status: Yup.string().required('Required'),
     blood_group: Yup.string().required('Required'),
     address: Yup.object().shape({

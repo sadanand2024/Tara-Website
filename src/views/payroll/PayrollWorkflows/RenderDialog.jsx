@@ -104,7 +104,7 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
           pan: '',
           regime: '',
           annual_tds: '',
-          annual_tax_libility: '',
+          // annual_tax_libility: '',
           tds: '',
           tds_ytd: ''
         };
@@ -194,7 +194,7 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
           pan: Yup.string().required('PAN is required'),
           regime: Yup.string().required('Regime is required'),
           annual_tds: Yup.string().required('Annual Estimate is required'),
-          annual_tax_libility: Yup.string().required('Annual tax liability is required'),
+          // annual_tax_libility: Yup.string().required('Annual tax liability is required'),
           tds: Yup.string().required('TDS (Month) is required'),
           tds_ytd: Yup.string().required('TDS YTD is required')
         });
@@ -374,37 +374,37 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
       }
       if (from === 'Tds') {
         setLoading(true);
-        let url = selectedRecord?.id ? `/payroll/tds/${selectedRecord?.id}` : `/payroll/tds`;
+        let url = selectedRecord?.id ? `/payroll/employee-tds/${selectedRecord?.id}` : `/payroll/employee-tds`;
         let method = selectedRecord?.id ? 'put' : 'Post';
         let postData = {
           ...values
         };
         postData.payroll = payrollid;
-        // const { res, error } = await Factory(method, url, postData);
-        // setLoading(false);
-        // if (res.status_cd === 0) {
-        //   dispatch(
-        //     openSnackbar({
-        //       open: true,
-        //       message: 'Data Saved Successfully',
-        //       variant: 'alert',
-        //       alert: { color: 'success' },
-        //       close: false
-        //     })
-        //   );
-        //   getData();
-        //   setOpenDialog(false);
-        // } else {
-        //   dispatch(
-        //     openSnackbar({
-        //       open: true,
-        //       message: JSON.stringify(res.data.data),
-        //       variant: 'alert',
-        //       alert: { color: 'error' },
-        //       close: false
-        //     })
-        //   );
-        // }
+        const { res, error } = await Factory(method, url, postData);
+        setLoading(false);
+        if (res.status_cd === 0) {
+          dispatch(
+            openSnackbar({
+              open: true,
+              message: 'Data Saved Successfully',
+              variant: 'alert',
+              alert: { color: 'success' },
+              close: false
+            })
+          );
+          getData();
+          setOpenDialog(false);
+        } else {
+          dispatch(
+            openSnackbar({
+              open: true,
+              message: JSON.stringify(res.data.data),
+              variant: 'alert',
+              alert: { color: 'error' },
+              close: false
+            })
+          );
+        }
       }
     }
   });
@@ -550,7 +550,9 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
               field.name === 'total_days_of_month' ||
               field.name === 'holidays' ||
               field.name === 'present_days' ||
-              field.name === 'week_offs'
+              field.name === 'week_offs' ||
+              field.name === 'pan' ||
+              field.name === 'regime'
             }
           />
         )}
@@ -570,7 +572,7 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
       }));
     }
   }, [selectedRecord]);
-  console.log(values);
+  // console.log(values);
   return (
     <Modal
       open={openDialog}

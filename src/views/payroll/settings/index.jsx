@@ -7,7 +7,7 @@ import { useSelector } from 'react-redux';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 const PAYROLL_STEPS = [
   { nameKey: 'Business profile', path: '/payroll/settings/organization-details', dataKey: 'organisation_details' },
   { nameKey: 'Set up Work Location', path: '/payroll/settings/work-location', dataKey: 'work_locations' },
@@ -273,7 +273,13 @@ const PayrollSetup = () => {
             </Stack>
           </MainCard>
         </Grid2>
+        <Grid2 size={{ xs: 12 }}></Grid2>
       </Grid2>
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+        <Button startIcon={<ArrowBackIcon />} variant="contained" onClick={() => navigate('/app/payroll')}>
+          Back to payroll dashboard
+        </Button>
+      </Box>
     </Box>
   );
 };

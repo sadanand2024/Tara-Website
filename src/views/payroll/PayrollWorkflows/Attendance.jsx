@@ -23,7 +23,7 @@ export default function Attendance({ attendanceData, fetchAttendance, employeeMa
   ];
 
   const body_keys = [
-    'id',
+    'associate_id',
     'employee_name',
     'loss_of_pay',
     'earned_leaves',
@@ -127,6 +127,9 @@ export default function Attendance({ attendanceData, fetchAttendance, employeeMa
         selectedRecord={selectedRecord}
         setSelectedRecord={setSelectedRecord}
         tableData={attendanceData}
+        loading={loading}
+        from={from}
+        setLoading={setLoading}
       />
       <RenderDialog
         from={from}
