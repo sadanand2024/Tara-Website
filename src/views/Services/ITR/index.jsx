@@ -707,7 +707,6 @@ export default function ITR() {
                         <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
                           <Typography>Upload 26AS</Typography>
                         </Grid2>
-                        {console.log(values.as26File)}
                         <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
                           <TextField
                             size="small"

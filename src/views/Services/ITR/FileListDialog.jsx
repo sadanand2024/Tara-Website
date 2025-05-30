@@ -19,6 +19,7 @@ import {
 import DeleteIcon from '@mui/icons-material/Delete';
 
 const FileListDialog = ({ open, onClose, files, onDelete }) => {
+  console.log(files);
   const getFileName = (file) => {
     if (file.url instanceof File) {
       return file.url.name;
