@@ -11,15 +11,14 @@ export default function Tds({ employeeMasterData, from, openDialog, fields, setO
     'Employee Name',
     'Pan',
     'Regime',
-    'Annual Est',
-
+    'Annual Est Income',
     // 'Annual Tax Libility',
     'TDS Month',
     'TDS YTD'
   ];
 
   const body_keys = [
-    'id',
+    'associate_id',
     'employee_name',
     'pan',
     'regime',
@@ -28,6 +27,7 @@ export default function Tds({ employeeMasterData, from, openDialog, fields, setO
     'tds',
     'tds_ytd'
   ];
+
   const [payrollid, setPayrollId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]);
@@ -76,16 +76,7 @@ export default function Tds({ employeeMasterData, from, openDialog, fields, setO
       setOpenDialog(true);
     }
   };
-  const handleDelete = async (item) => {
-    let url = `/payroll/employee-tds/${item.id}`;
-    const { res } = await Factory('delete', url, {});
-    if (res.status_cd === 1) {
-      showSnackbar(JSON.stringify(res.data), 'error');
-    } else {
-      // showSnackbar('Record Deleted Successfully', 'success');
-      getData();
-    }
-  };
+
   useEffect(() => {
     if (payrollid) {
       getData();
@@ -97,10 +88,13 @@ export default function Tds({ employeeMasterData, from, openDialog, fields, setO
         headerData={headerData}
         tableData={data}
         handleEdit={handleEdit}
-        handleDelete={handleDelete}
+        // handleDelete={handleDelete}
         body_keys={body_keys}
         selectedRecord={selectedRecord}
         setSelectedRecord={setSelectedRecord}
+        from={from}
+        loading={loading}
+        setLoading={setLoading}
       />
       <RenderDialog
         from={from}

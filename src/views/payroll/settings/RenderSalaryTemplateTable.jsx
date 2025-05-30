@@ -24,19 +24,10 @@ import CustomInput from 'utils/CustomInput';
 import CustomAutocomplete from 'utils/CustomAutocomplete';
 import Factory from 'utils/Factory';
 
-export default function RenderSalaryTemplateTable({
-  source,
-  values,
-  setFieldValue,
-  setValues,
-  enablePreviewButton,
-  setEnablePreviewButton,
-  createdEmployeeId
-}) {
+export default function RenderSalaryTemplateTable({ values, setFieldValue, setValues, enablePreviewButton, setEnablePreviewButton }) {
   const [searchParams] = useSearchParams();
   const payrollId = searchParams.get('payrollid');
   const template_id = searchParams.get('template_id');
-  const employee_id = searchParams.get('employee_id');
   const [earningsData, setEarningsData] = useState([]);
   const [fixedAllowance, setFixedAllowance] = useState({ monthly: 0, annually: 0 });
   const [loading, setLoading] = useState(false);
@@ -44,7 +35,6 @@ export default function RenderSalaryTemplateTable({
   const dispatch = useDispatch();
 
   const get_individual_componnet_data = async (id) => {
-    console.log('abc');
     setLoading(true);
     const url = `/payroll/earnings/${id}`;
     const { res } = await Factory('get', url, {});
@@ -152,7 +142,6 @@ export default function RenderSalaryTemplateTable({
     if (annualAmount && monthlyAmount === 0) {
       monthlyAmount = annualAmount / 12;
     }
-
     return {
       monthly: Math.round(monthlyAmount * 100) / 100,
       annually: Math.round(annualAmount * 100) / 100
@@ -410,6 +399,7 @@ export default function RenderSalaryTemplateTable({
 
     const { res } = await Factory('post', '/payroll/calculate-payroll', finalPayload);
     if (res?.status_cd === 0) {
+      // Update Fixed Allowance from server response
       const fixed = res.data.earnings.find((e) => e.component_name === 'Fixed Allowance');
       if (fixed) {
         setFixedAllowance({
@@ -417,15 +407,17 @@ export default function RenderSalaryTemplateTable({
           annually: parseFloat(fixed.annually)
         });
       }
-      console.log(res.data);
-      const filtered = {
-        ...res.data,
-        // earnings: res.data.earnings.filter((e) => e.component_name !== 'Fixed Allowance')
-        earnings: res.data.earnings,
-        tax_regime_opted: values.tax_regime_opted
-      };
 
-      setValues(filtered);
+      // Update only preview-related values
+      setValues((prev) => ({
+        ...prev,
+        gross_salary: res.data.gross_salary,
+        total_ctc: res.data.total_ctc,
+        net_salary: res.data.net_salary,
+        benefits: res.data.benefits,
+        deductions: res.data.deductions
+      }));
+
       setEnablePreviewButton(false);
       setViewPreview(true);
     }
@@ -440,7 +432,6 @@ export default function RenderSalaryTemplateTable({
 
     const selectedItem = await get_individual_componnet_data(basicComponent.id);
     if (!selectedItem) return;
-
     const calcType = selectedItem.calculation_type?.type || 'Percentage of CTC';
     const calcValue = parseFloat(selectedItem.calculation_type?.value || 0);
 
@@ -463,30 +454,12 @@ export default function RenderSalaryTemplateTable({
       monthly: Math.round(monthly * 100) / 100,
       annually: Math.round(annually * 100)
     };
-
     const hasBlank = values.earnings.length === 1 && !values.earnings[0].component_name;
-
     setValues((prev) => ({
       ...prev,
       earnings: hasBlank ? [newBasic] : [newBasic, ...prev.earnings.filter((e) => e.component_name !== 'Basic')]
     }));
   };
-  // useEffect(() => {
-  //   const annualCtc = parseFloat(values.annual_ctc || 0);
-  //   const earningsTotal = values.earnings.reduce(
-  //     (sum, e) => (e.component_name !== 'Fixed Allowance' ? sum + parseFloat(e.annually || 0) : sum),
-  //     0
-  //   );
-  //   const benefitsTotal = values.benefits?.reduce((sum, b) => (b.annually !== 'NA' ? sum + parseFloat(b.annually || 0) : sum), 0) || 0;
-  //   console.log(benefitsTotal);
-  //   console.log(earningsTotal);
-  //   const annualFixed = annualCtc - earningsTotal - benefitsTotal;
-  //   console.log('annualFixed', annualFixed);
-  //   setFixedAllowance({
-  //     monthly: Math.round((annualFixed / 12) * 100) / 100,
-  //     annually: Math.round(annualFixed * 100) / 100
-  //   });
-  // }, [values.earnings, values.annual_ctc]);
 
   useEffect(() => {
     let fa = values.earnings.find((e) => e.component_name === 'Fixed Allowance');
@@ -502,11 +475,9 @@ export default function RenderSalaryTemplateTable({
 
     if (!annualCtc || isNaN(annualCtc)) return;
 
-    const earningsClone = [...values.earnings].sort((a, b) => {
-      if (a.component_name === 'Basic') return -1;
-      if (b.component_name === 'Basic') return 1;
-      return 0;
-    });
+    const basic = values.earnings.find((e) => e.component_name === 'Basic');
+    const others = values.earnings.filter((e) => e.component_name !== 'Basic');
+    const earningsClone = basic ? [basic, ...others] : [...values.earnings];
 
     let basicAnnual = 0;
     const withBasic = earningsClone.map((e) => {
@@ -542,49 +513,18 @@ export default function RenderSalaryTemplateTable({
     setFieldValue('errorMessage', ''); // ✅ clear previous error
     setEnablePreviewButton(true);
   }, [values.annual_ctc]);
-  ////////////////
+
   useEffect(() => {
     if (!payrollId) return;
 
-    // Always fetch earnings dropdown
-    getEarnings_Details(payrollId);
+    getEarnings_Details(payrollId); // dropdown always
 
-    const timeout = setTimeout(() => {
-      const hasCreatedEmployeeId = !!createdEmployeeId;
-      const hasValuesId = !!values?.id;
-
-      if (!template_id) {
-        // New template
-        if (hasCreatedEmployeeId && !hasValuesId) {
-          setBasicFromMaster(payrollId); // ✅ Only call in this case
-        } else if (!hasCreatedEmployeeId && !hasValuesId) {
-          setBasicFromMaster(payrollId); // ✅ Also call if neither exists yet
-        }
-        // ❌ Do not call if both exist
-      } else {
-        // Existing template
-        fetch_individual_salary_templates(template_id);
-
-        if (hasCreatedEmployeeId && !hasValuesId) {
-          setBasicFromMaster(payrollId); // ✅ Only call here too
-        }
-      }
-    }, 200); // Wait 200ms to ensure async values are set
-
-    return () => clearTimeout(timeout); // Cleanup on unmount
-  }, [payrollId, template_id, createdEmployeeId, values?.id]);
-
-  // useEffect(() => {
-  //   if (!payrollId) return;
-
-  //   getEarnings_Details(payrollId); // dropdown always
-
-  //   if (!template_id) {
-  //     setBasicFromMaster(payrollId); // for new template
-  //   } else {
-  //     fetch_individual_salary_templates(template_id); // existing
-  //   }
-  // }, [payrollId, template_id]);
+    if (!template_id) {
+      setBasicFromMaster(payrollId); // for new template
+    } else {
+      fetch_individual_salary_templates(template_id); // existing
+    }
+  }, [payrollId, template_id]);
   //////////////////
   useEffect(() => {
     const hasBenefits = values.benefits?.length > 0;
@@ -593,7 +533,6 @@ export default function RenderSalaryTemplateTable({
       setViewPreview(true);
     }
   }, [values.benefits, values.deductions]);
-  // console.log(values.earnings);
   return (
     <TableContainer
       component={Paper}

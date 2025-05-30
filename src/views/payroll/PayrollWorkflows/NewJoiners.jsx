@@ -19,7 +19,7 @@ function NewJoiners() {
     'Actual CTC'
   ];
   const body_keys = [
-    'id',
+    'associate_id',
     'employee_name',
     'department_name',
     'designation_name',

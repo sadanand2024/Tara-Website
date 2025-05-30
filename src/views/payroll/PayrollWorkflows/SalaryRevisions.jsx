@@ -7,7 +7,7 @@ import RenderDialog from './RenderDialog';
 
 export default function SalaryRevisions({ employeeMasterData, from, openDialog, fields, setOpenDialog }) {
   const headerData = ['Employee ID', 'Employee Name', 'Department', 'Designation', 'Current CTC', 'Last Revision', 'Revised CTC'];
-  const body_keys = ['id', 'employee_name', 'department', 'designation', 'current_ctc', 'created_on', 'revised_ctc'];
+  const body_keys = ['associate_id', 'employee_name', 'department', 'designation', 'current_ctc', 'created_on', 'revised_ctc'];
   const [payrollid, setPayrollId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]);
@@ -83,6 +83,8 @@ export default function SalaryRevisions({ employeeMasterData, from, openDialog, 
         body_keys={body_keys}
         selectedRecord={selectedRecord}
         setSelectedRecord={setSelectedRecord}
+        loading={loading}
+        setLoading={setLoading}
       />
       <RenderDialog
         from={from}

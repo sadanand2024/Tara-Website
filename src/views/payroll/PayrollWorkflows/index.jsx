@@ -193,9 +193,9 @@ const PayrollWorkflows = ({ type }) => {
           { name: 'employee', label: 'Employee Name' },
           { name: 'pan', label: 'Pan' },
           { name: 'regime', label: 'Regime' },
-          { name: 'annual_est', label: 'Annual Est' },
-          { name: 'annual_tax_libility', label: 'Annual Tax Libility' },
-          { name: 'tds_month', label: 'TDS(Month)' },
+          { name: 'annual_tds', label: 'Annual Est' },
+          // { name: 'annual_tax_libility', label: 'Annual Tax Libility' },
+          { name: 'tds', label: 'TDS(Month)' },
           { name: 'tds_ytd', label: 'TDS YTD' }
         ]
       }

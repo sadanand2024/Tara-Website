@@ -10,7 +10,7 @@ import { openSnackbar } from 'store/slices/snackbar';
 export default function BonusAndIncentives({ employeeMasterData, from, openDialog, fields, setOpenDialog }) {
   const headerData = ['Employee ID', 'Employee Name', 'Department', 'Designation', 'Type', 'Amount', 'Month', 'Financial Year'];
 
-  const body_keys = ['id', 'employee_name', 'department', 'designation', 'bonus_type', 'amount', 'month', 'financial_year'];
+  const body_keys = ['associate_id', 'employee_name', 'department', 'designation', 'bonus_type', 'amount', 'month', 'financial_year'];
   const [payrollid, setPayrollId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]);
@@ -118,6 +118,9 @@ export default function BonusAndIncentives({ employeeMasterData, from, openDialo
         body_keys={body_keys}
         selectedRecord={selectedRecord}
         setSelectedRecord={setSelectedRecord}
+        loading={loading}
+        from={from}
+        setLoading={setLoading}
       />
       <RenderDialog
         from={from}

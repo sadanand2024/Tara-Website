@@ -19,7 +19,7 @@ export default function LoansAndAdvances({ employeeMasterData, from, openDialog,
     'Current Deduction'
   ];
   const body_keys = [
-    'id',
+    'associate_id',
     'employee_name',
     'department',
     'designation',
@@ -90,6 +90,9 @@ export default function LoansAndAdvances({ employeeMasterData, from, openDialog,
         body_keys={body_keys}
         selectedRecord={selectedRecord}
         setSelectedRecord={setSelectedRecord}
+        loading={loading}
+        from={from}
+        setLoading={setLoading}
       />
       <RenderDialog
         from={from}

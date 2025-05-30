@@ -146,7 +146,7 @@ const DetailedPayroll = ({ payrollId, month }) => {
               ) : (
                 paginatedData.map((item, index) => (
                   <TableRow key={item.employee_id || index}>
-                    <TableCell>{item.employee}</TableCell>
+                    <TableCell>{item.associate_id}</TableCell>
                     <TableCell>{item.employee_name}</TableCell>
                     <TableCell>{item.department}</TableCell>
                     <TableCell>{item.designation}</TableCell>
