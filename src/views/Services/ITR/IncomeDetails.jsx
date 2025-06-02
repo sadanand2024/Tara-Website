@@ -1134,8 +1134,8 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
       purchase_doc: null,
       sale_doc: null,
       reinvestment_made: 'no',
-      reinvestment: {
-        invest_in: '',
+      reinvestment_details: {
+        invested_in: '',
         invest_amount: '',
         invest_date: '',
         reinvestment_details_docs: null
@@ -1308,10 +1308,9 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                   <input
                     type="file"
                     hidden
-                    multiple
                     onChange={(e) => {
                       const updated = [...properties];
-                      updated[idx].purchase_doc = e.target.files;
+                      updated[idx].purchase_doc = e.target.files[0];
                       setProperties(updated);
                     }}
                   />
@@ -1338,10 +1337,9 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                   <input
                     type="file"
                     hidden
-                    multiple
                     onChange={(e) => {
                       const updated = [...properties];
-                      updated[idx].sale_doc = e.target.files;
+                      updated[idx].sale_doc = e.target.files[0];
                       setProperties(updated);
                     }}
                   />
@@ -1399,11 +1397,11 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                           size="small"
                           fullWidth
                           options={investOptions}
-                          value={property?.invest_in}
+                          value={property?.reinvestment_details?.invested_in}
                           onChange={(_, v) => {
                             const updated = [...properties];
-                            console.log(updated);
-                            updated[idx].reinvestment.invest_in = v;
+                            console.log(updated[idx]);
+                            updated[idx].reinvestment_details.invested_in = v;
                             setProperties(updated);
                           }}
                           renderInput={(params) => <TextField {...params} placeholder="Select" />}
@@ -1415,10 +1413,10 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                           fullWidth
                           placeholder="Amount"
                           type="number"
-                          value={property?.invest_amount}
+                          value={property?.reinvestment_details?.invest_amount}
                           onChange={(e) => {
                             const updated = [...properties];
-                            updated[idx].reinvestment.invest_amount = e.target.value;
+                            updated[idx].reinvestment_details.invest_amount = e.target.value;
                             setProperties(updated);
                           }}
                         />
@@ -1429,10 +1427,10 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                           type="date"
                           fullWidth
                           InputLabelProps={{ shrink: true }}
-                          value={property.reinvestment?.invest_date}
+                          value={property?.reinvestment_details?.invest_date}
                           onChange={(e) => {
                             const updated = [...properties];
-                            updated[idx].reinvestment.invest_date = e.target.value;
+                            updated[idx].reinvestment_details.invest_date = e.target.value;
                             setProperties(updated);
                           }}
                         />
@@ -1443,22 +1441,21 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                           <input
                             type="file"
                             hidden
-                            multiple
                             onChange={(e) => {
                               const updated = [...properties];
-                              updated[idx].reinvestment.reinvestment_details_docs = e.target.files;
+                              updated[idx].reinvestment_details.reinvestment_details_docs = e.target.files[0];
                               setProperties(updated);
                             }}
                           />
                         </Button>
-                        {properties[idx].reinvestment?.reinvestment_details_docs && (
+                        {properties[idx].reinvestment_details?.reinvestment_details_docs && (
                           <Button
                             size="small"
                             variant="outlined"
                             sx={{ ml: 1 }}
                             onClick={() => {
                               setFileDialogOpen(true);
-                              setDialogFilesData([...properties[idx].reinvestment?.reinvestment_details_docs]);
+                              setDialogFilesData([...properties[idx].reinvestment_details?.reinvestment_details_docs]);
                             }}
                           >
                             View
@@ -1481,7 +1478,7 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                   formData.append('service_request', service_id);
                   formData.append('service_task', cg_property_land.task_id);
                   formData.append('status', 'in progress');
-                  formData.append('reinvestment_details', JSON.stringify(properties[idx].reinvestment));
+                  formData.append('reinvestment_details', JSON.stringify(properties[idx].reinvestment_details));
                   formData.append('gains_applicable', selectedTypes);
 
                   Object.entries(propertyToSave).forEach(([key, value]) => {
@@ -1541,11 +1538,13 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                   sale_value: '',
                   purchase_doc: null,
                   sale_doc: null,
-                  reinvestment: 'no',
-                  invest_in: '',
-                  invest_amount: '',
-                  invest_date: '',
-                  reinvestment_details_docs: null
+                  reinvestment_made: 'no',
+                  reinvestment_details: {
+                    invested_in: '',
+                    invest_amount: '',
+                    invest_date: '',
+                    reinvestment_details_docs: null
+                  }
                 }
               ]);
             }}
