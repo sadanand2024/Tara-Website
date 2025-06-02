@@ -9,6 +9,8 @@ import Tds from 'assets/images/icons/TDS.svg';
 import Underline from 'assets/images/icons/Underline.svg';
 import Visa from 'assets/images/icons/Visa.svg';
 import React, { useState } from 'react';
+import { Link as RouterLink } from 'react-router-dom';
+
 
 const services = [
   { icon: <img src={GstIcon} alt="GST" style={{ width: '2.2rem', height: '2.2rem' }} />, title: 'GST', desc: 'Simplify GST filing and compliance with expert support.' },
@@ -28,6 +30,7 @@ const ServicesSection = () => {
     <Box sx={{
       background: '#F8F9FB',
       py: 6,
+
       fontFamily: "'Inter', Arial, sans-serif"
     }}>
       <Container maxWidth="lg">
@@ -35,11 +38,15 @@ const ServicesSection = () => {
           <Typography variant="h1" sx={{ m: 0, position: 'relative' }}>
             <Box component="span" sx={{
               color: '#FFD600',
-              fontWeight: 500,
-              fontSize: '2.5rem',
+              fontWeight: 700,
+              fontSize: '36px',
+              fontFamily: 'Inter',
               letterSpacing: '-1px',
               position: 'relative',
               display: 'inline-block',
+              lineHeight: '53px',
+             
+              height:'53px',
             }}>
               All-in-One
               <Box
@@ -58,22 +65,25 @@ const ServicesSection = () => {
             <Box component="span" sx={{
               color: '#0033CC',
               fontWeight: 700,
-              fontSize: '2.5rem',
+              fontSize: '36px',
               ml: 2,
+               fontFamily: 'Inter',
               
             }}>Financial & Compliance Services</Box>
           </Typography>
           <Typography sx={{
             color: '#222',
             fontFamily: 'Inter, sans-serif',
-            fontSize: { xs: '16px', sm: '18px', md: '20px' },
-            lineHeight: '150%',
+            fontSize: { xs: '16px', sm: '18px', md: '18px' },
+            lineHeight: '28px',
             fontWeight: '500',
+           
             // color: 'text.secondary',
-            mt:3,
+            mt:2,
            
           }}>
-            From GST, Income Tax, and Incorporation to TDS, Certifications, and Visa Documentation — manage everything seamlessly with Tara First.
+            From Gst, Income Tax, and Incorporation to TDS, Certifications, and Visa 
+            <br/>Documentation — manage everything seamlessly with Tara First.
           </Typography>
         </Box>
 
@@ -82,6 +92,7 @@ const ServicesSection = () => {
             const isHovered = hoverIndex === idx;
             return (
               <Grid item xs={12} sm={6} md={3} key={idx}>
+                <RouterLink to="/register" style={{ textDecoration: 'none' }}>  
                 <Box
                   onMouseEnter={() => setHoverIndex(idx)}
                   onMouseLeave={() => setHoverIndex(null)}
@@ -95,6 +106,7 @@ const ServicesSection = () => {
                     textAlign: 'left',
                     height: '220px',
                     display: 'flex',
+                    
                     flexDirection: 'column',
                     transition: 'all 0.3s ease',
                     cursor: 'pointer',
@@ -104,28 +116,32 @@ const ServicesSection = () => {
                   <Box sx={{
                     color: '#0033CC',
                     fontSize: '2.2rem',
-                    mb: 2.25,
+                    mb:0.5,
                     flexShrink: 0
                   }}>{service.icon}</Box>
                   <Typography sx={{
                     color: '#0039B5',
-                    fontWeight: 700,
-                    fontSize: '1.18rem',
-                    mb: 1,
+                    fontWeight: 600,
+                    fontSize: '20px',
+                    lineHeight: '53px',
+                     whiteSpace: 'nowrap',
+                  
                     flexShrink: 0
                   }}>{service.title}</Typography>
                   <Typography sx={{
-                    color: '#222',
-                    fontSize: '1rem',
-                    fontWeight: 400,
+                    color: '#364152',
+                    fontSize: '16px',
+                    fontWeight: 500,
                     overflow: 'hidden',
+                    lineHeight: '24px',
                     textOverflow: 'ellipsis',
                     display: '-webkit-box',
-                    WebkitLineClamp: 3,
+                    WebkitLineClamp: 2,
                     WebkitBoxOrient: 'vertical',
                     flexGrow: 1
                   }}>{service.desc}</Typography>
                 </Box>
+                </RouterLink>
               </Grid>
             );
           })}

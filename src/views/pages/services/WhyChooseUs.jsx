@@ -1,4 +1,5 @@
-import { Box, Container, Grid, Paper, Typography } from '@mui/material';
+import { Box, Container, Paper, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import Icon1 from 'assets/images/icons/WhyShouldUse/icon1.svg';
 import Icon2 from 'assets/images/icons/WhyShouldUse/icon2.svg';
 import Icon3 from 'assets/images/icons/WhyShouldUse/icon3.svg';
@@ -41,7 +42,7 @@ const WhyChooseUs = ({ reasons }) => {
         {reasons.map((reason, idx) => {
           const IconSrc = icons[idx % icons.length];
           return (
-            <Grid item xs={12} sm={6} md={4} key={idx} sx={{ mt: { xs: 0, md: 0, lg: 4 } }}>
+            <Grid size={{xs:12,sm:6,md:4}} key={idx} sx={{ mt: { xs: 0, md: 0, lg: 4 } }}>
               <Fade triggerOnce delay={idx * 100}>
                 <Paper
                   elevation={1}

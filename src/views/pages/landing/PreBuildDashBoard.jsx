@@ -2,21 +2,29 @@ import { Box, Button, Grid, Typography } from '@mui/material';
 // import balance from 'assets/images/landing/balance.png';
 import balance from 'assets/images/icons/balance.svg';
 import React from 'react';
+import { Link as RouterLink } from 'react-router-dom';
+
+
 
 const DemoSection = () => {
   return (
     <Box
       sx={{
+        display: { xs: 'none', sm: 'block' }, 
         backgroundColor:'rgb(247, 243, 224)',
         borderRadius: '50px',
         padding: '30px 20px',
         textAlign: 'center',
         fontFamily: 'Inter, sans-serif',
         color: '#002366',
-        maxWidth: '1100px',
+        maxWidth: '1240px',
         margin: '40px auto',
         position: 'relative',
         overflow: 'visible',
+        mt: { xs: 0, sm: 0, md: 0, lg:5 },
+        py: { xs: 4, sm: 6, md: 8, lg: -40 },
+        
+         
         
       }}
     >
@@ -26,8 +34,8 @@ const DemoSection = () => {
       variant="h1"
      gutterBottom
      sx={{
-    fontFamily: 'Manrope, sans-serif',
-    fontSize: '30px',
+    fontFamily: 'Inter',
+    fontSize: '36px',
     lineHeight: '53px',
     lineWidth: '200%',
     fontWeight: 500,
@@ -41,12 +49,14 @@ const DemoSection = () => {
 
       {/* Button */}
       <Button
+       component={RouterLink}
+      to="/book-consultation"
         variant="contained"
         sx={{
           backgroundColor: '#FFD41C',
-          borderRadius: '8px',
+          borderRadius: '10px',
           padding: '12px 28px',
-          fontSize: '1rem',
+          fontSize: '18px',
           fontWeight: 500,
 
           color: '#00266B',
@@ -69,7 +79,7 @@ const DemoSection = () => {
           src={balance}
           alt="Demo Illustration"
           sx={{
-            width: '800px',
+            width: '900px',
             height: '280px',
             objectFit: 'contain',
             position: 'relative',

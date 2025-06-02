@@ -122,7 +122,7 @@ const HowItWorksStepper = ({ steps }) => {
         {steps.map((step, idx) => (
           <Step key={idx}>
             <StepLabel StepIconComponent={CustomStepIcon}>
-              <Box sx={{ textAlign: 'center', maxWidth: { xs: 120, sm: 150 }, mx: 'auto' }}> {/* Adjusted max width */}
+              <Box sx={{ textAlign: 'center', maxWidth: { xs: 60, sm: 150 }, mx: 'auto' }}> {/* Adjusted max width */}
                 <Typography
                   variant="body2"
                   color="text.primary"
