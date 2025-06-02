@@ -95,14 +95,28 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
   };
   const foreignInitial = {
     foreignDocs: {
-      foreignSalarySlip: nri_employee_salary.data[0].foreigner_documents.salary_slip_files.files,
-      foreignBankStmt: nri_employee_salary.data[0].foreigner_documents.bank_statement_files.files,
-      taxPaidAbroad: nri_employee_salary.data[0].foreigner_documents.tax_paid_certificate_board_files.files
+      foreignSalarySlip: nri_employee_salary.data.length > 0 ? nri_employee_salary.data[0].foreigner_documents.salary_slip_files.files : [],
+      foreignBankStmt:
+        nri_employee_salary.data.length > 0 ? nri_employee_salary.data[0].foreigner_documents.bank_statement_files.files : [],
+      taxPaidAbroad:
+        nri_employee_salary.data.length > 0 ? nri_employee_salary.data[0].foreigner_documents.tax_paid_certificate_board_files.files : []
     },
-    periodFrom: nri_employee_salary.data[0].employment_history[0].from_date,
-    periodTo: nri_employee_salary.data[0].employment_history[0].to_date,
-    country: nri_employee_salary.data[0].employment_history[0].country,
-    salaryReceivedIn: nri_employee_salary.data[0].employment_history[0].salary_received
+    periodFrom:
+      nri_employee_salary.data.length > 0 && nri_employee_salary.data[0].employment_history.length > 0
+        ? nri_employee_salary.data[0].employment_history[0].from_date
+        : '',
+    periodTo:
+      nri_employee_salary.data.length > 0 && nri_employee_salary.data[0].employment_history.length > 0
+        ? nri_employee_salary.data[0].employment_history[0].to_date
+        : '',
+    country:
+      nri_employee_salary.data.length > 0 && nri_employee_salary.data[0].employment_history.length > 0
+        ? nri_employee_salary.data[0].employment_history[0].country
+        : '',
+    salaryReceivedIn:
+      nri_employee_salary.data.length > 0 && nri_employee_salary.data[0].employment_history.length > 0
+        ? nri_employee_salary.data[0].employment_history[0].salary_received
+        : ''
   };
 
   // Section 1: Upload Required Documents
@@ -1109,31 +1123,50 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
   );
 };
 
-const CapitalGainsIncome = () => {
-  const [selectedTypes, setSelectedTypes] = React.useState([]);
-  const [numProperties, setNumProperties] = React.useState(1);
-  const [properties, setProperties] = React.useState([
+const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDialogFilesData, service_id }) => {
+  const initialState = [
     {
       property_type: '',
-      purchase_date: '',
+      date_of_purchase: '',
       purchase_cost: '',
-      sale_date: '',
+      date_of_sale: '',
       sale_value: '',
       purchase_doc: null,
       sale_doc: null,
-      reinvestment: false,
-      invest_in: '',
-      invest_amount: '',
-      invest_date: '',
-      invest_doc: null
+      reinvestment_made: 'no',
+      reinvestment: {
+        invest_in: '',
+        invest_amount: '',
+        invest_date: '',
+        reinvestment_details_docs: null
+      }
     }
-  ]);
-  const [showReinvest, setShowReinvest] = React.useState([false]);
+  ];
+  let [cg_property_land, setCgPropertyLand] = React.useState(
+    data.find((item) => item.category_name === 'Capital Gains Applicable Details') || null
+  );
+  let [cg_equity_mutual, setCgEquityMutual] = React.useState(
+    data.find((item) => item.category_name === 'Capital Gain Equity Mutual Fund') || null
+  );
+  let [cg_other_sources, setCgOtherSources] = React.useState(
+    data.find((item) => item.category_name === 'Capital Gain from Other Sources') || null
+  );
+  const [selectedTypes, setSelectedTypes] = React.useState([]);
+  const [properties, setProperties] = React.useState(initialState);
   const [numOtherGains, setNumOtherGains] = React.useState(1);
-  const propertyTypes = ['Land', 'Plot', 'Building'];
+  const enqueueSnackbar = useSnackbar();
+  const propertyTypes = ['land', 'plot', 'building'];
   const gainTypes = ['Equity shares', 'Mutual funds', 'Property/Land', 'Foreign equity', 'Others'];
   const eqMfTypes = ['Equity shares', 'Mutual funds (equity)', 'Mutual funds (debt/hybrid)'];
   const investOptions = ['Bonds', 'Property', 'Other'];
+
+  useEffect(() => {
+    if (cg_property_land) {
+      setSelectedTypes(cg_property_land.data.gains_applicable);
+      if (cg_property_land.data.capital_gains_property_details.length > 0)
+        setProperties(cg_property_land.data.capital_gains_property_details);
+    }
+  }, [cg_property_land]);
   return (
     <Box>
       {/* Capital Gains Type Selection */}
@@ -1141,7 +1174,31 @@ const CapitalGainsIncome = () => {
         <Typography mb={1}>Select the type of Capital Gains applicable:</Typography>
         <Box display="flex" flexWrap="wrap" gap={2}>
           {gainTypes.map((type) => (
-            <FormControlLabel key={type} control={<Checkbox />} label={type} />
+            <FormControlLabel
+              key={type}
+              control={<Checkbox />}
+              onChange={async (e) => {
+                const isChecked = e.target.checked;
+                let __selectedTypes = isChecked ? [...selectedTypes, type] : selectedTypes.filter((t) => t !== type);
+                setSelectedTypes(__selectedTypes);
+                const response = await Factory('post', `/income_tax_returns/capital-gains/upsert/`, {
+                  service_request: parseInt(service_id),
+                  service_task: cg_property_land.task_id,
+                  status: 'in progress',
+                  gains_applicable: __selectedTypes
+                });
+                if (response.res.status_cd === 0) {
+                  setSelectedTypes(response.res.data.gains_applicable);
+                  if (response.res.data.capital_gains_property_details.length > 0) {
+                    setsetCgPropertyLand(response.res.data);
+                    setProperties(response.res.data.capital_gains_property_details);
+                  } else {
+                    setProperties(initialState);
+                  }
+                }
+              }}
+              label={type}
+            />
           ))}
         </Box>
       </Box>
@@ -1164,6 +1221,7 @@ const CapitalGainsIncome = () => {
                   size="small"
                   fullWidth
                   options={propertyTypes}
+                  getOptionLabel={(option) => option.charAt(0).toUpperCase() + option.slice(1)}
                   value={property.property_type}
                   onChange={(_, v) => {
                     const updated = [...properties];
@@ -1182,10 +1240,10 @@ const CapitalGainsIncome = () => {
                   type="date"
                   fullWidth
                   InputLabelProps={{ shrink: true }}
-                  value={property.purchase_date}
+                  value={property.date_of_purchase}
                   onChange={(e) => {
                     const updated = [...properties];
-                    updated[idx].purchase_date = e.target.value;
+                    updated[idx].date_of_purchase = e.target.value;
                     setProperties(updated);
                   }}
                 />
@@ -1216,10 +1274,10 @@ const CapitalGainsIncome = () => {
                   type="date"
                   fullWidth
                   InputLabelProps={{ shrink: true }}
-                  value={property.sale_date}
+                  value={property.date_of_sale}
                   onChange={(e) => {
                     const updated = [...properties];
-                    updated[idx].sale_date = e.target.value;
+                    updated[idx].date_of_sale = e.target.value;
                     setProperties(updated);
                   }}
                 />
@@ -1245,18 +1303,31 @@ const CapitalGainsIncome = () => {
                 <Typography>Upload purchase doc</Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <Button size="small" variant="contained" component="label">
+                <Button size="small" variant="contained" component="label" sx={{ mr: 1 }}>
                   Upload
                   <input
                     type="file"
                     hidden
+                    multiple
                     onChange={(e) => {
                       const updated = [...properties];
-                      updated[idx].purchase_doc = e.target.files[0];
+                      updated[idx].purchase_doc = e.target.files;
                       setProperties(updated);
                     }}
                   />
                 </Button>
+                {properties[idx].purchase_doc && (
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    onClick={() => {
+                      setFileDialogOpen(true);
+                      setDialogFilesData([...properties[idx].purchase_doc]);
+                    }}
+                  >
+                    View
+                  </Button>
+                )}
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <Typography>Upload sale doc</Typography>
@@ -1267,13 +1338,27 @@ const CapitalGainsIncome = () => {
                   <input
                     type="file"
                     hidden
+                    multiple
                     onChange={(e) => {
                       const updated = [...properties];
-                      updated[idx].sale_doc = e.target.files[0];
+                      updated[idx].sale_doc = e.target.files;
                       setProperties(updated);
                     }}
                   />
                 </Button>
+                {properties[idx].sale_doc && (
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    onClick={() => {
+                      setFileDialogOpen(true);
+                      setDialogFilesData([...properties[idx].sale_doc]);
+                    }}
+                    sx={{ ml: 1 }}
+                  >
+                    View
+                  </Button>
+                )}
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <Typography>Reinvestment made</Typography>
@@ -1281,11 +1366,11 @@ const CapitalGainsIncome = () => {
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <RadioGroup
                   row
-                  value={showReinvest[idx] ? 'yes' : 'no'}
+                  value={properties[idx].reinvestment_made}
                   onChange={(_, v) => {
-                    const arr = [...showReinvest];
-                    arr[idx] = v === 'yes';
-                    setShowReinvest(arr);
+                    const arr = [...properties];
+                    arr[idx].reinvestment_made = v;
+                    setProperties(arr);
                   }}
                 >
                   <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
@@ -1293,7 +1378,7 @@ const CapitalGainsIncome = () => {
                 </RadioGroup>
               </Grid2>
             </Grid2>
-            {showReinvest[idx] && (
+            {properties[idx].reinvestment_made === 'yes' && (
               <Box mt={2} mb={2}>
                 <Typography fontWeight={500} mb={1}>
                   Reinvestment Details
@@ -1314,10 +1399,11 @@ const CapitalGainsIncome = () => {
                           size="small"
                           fullWidth
                           options={investOptions}
-                          value={property.invest_in}
+                          value={property?.invest_in}
                           onChange={(_, v) => {
                             const updated = [...properties];
-                            updated[idx].invest_in = v;
+                            console.log(updated);
+                            updated[idx].reinvestment.invest_in = v;
                             setProperties(updated);
                           }}
                           renderInput={(params) => <TextField {...params} placeholder="Select" />}
@@ -1329,10 +1415,10 @@ const CapitalGainsIncome = () => {
                           fullWidth
                           placeholder="Amount"
                           type="number"
-                          value={property.invest_amount}
+                          value={property?.invest_amount}
                           onChange={(e) => {
                             const updated = [...properties];
-                            updated[idx].invest_amount = e.target.value;
+                            updated[idx].reinvestment.invest_amount = e.target.value;
                             setProperties(updated);
                           }}
                         />
@@ -1343,10 +1429,10 @@ const CapitalGainsIncome = () => {
                           type="date"
                           fullWidth
                           InputLabelProps={{ shrink: true }}
-                          value={property.invest_date}
+                          value={property.reinvestment?.invest_date}
                           onChange={(e) => {
                             const updated = [...properties];
-                            updated[idx].invest_date = e.target.value;
+                            updated[idx].reinvestment.invest_date = e.target.value;
                             setProperties(updated);
                           }}
                         />
@@ -1357,13 +1443,27 @@ const CapitalGainsIncome = () => {
                           <input
                             type="file"
                             hidden
+                            multiple
                             onChange={(e) => {
                               const updated = [...properties];
-                              updated[idx].invest_doc = e.target.files[0];
+                              updated[idx].reinvestment.reinvestment_details_docs = e.target.files;
                               setProperties(updated);
                             }}
                           />
                         </Button>
+                        {properties[idx].reinvestment?.reinvestment_details_docs && (
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            sx={{ ml: 1 }}
+                            onClick={() => {
+                              setFileDialogOpen(true);
+                              setDialogFilesData([...properties[idx].reinvestment?.reinvestment_details_docs]);
+                            }}
+                          >
+                            View
+                          </Button>
+                        )}
                       </TableCell>
                     </TableRow>
                   </TableBody>
@@ -1375,21 +1475,38 @@ const CapitalGainsIncome = () => {
                 size="small"
                 variant="contained"
                 color="primary"
-                onClick={() => {
-                  // Save logic for this property only
+                onClick={async () => {
                   const propertyToSave = properties[idx];
                   const formData = new FormData();
+                  formData.append('service_request', service_id);
+                  formData.append('service_task', cg_property_land.task_id);
+                  formData.append('status', 'in progress');
+                  formData.append('reinvestment_details', JSON.stringify(properties[idx].reinvestment));
+                  formData.append('gains_applicable', selectedTypes);
+
                   Object.entries(propertyToSave).forEach(([key, value]) => {
-                    if (value instanceof File) {
-                      formData.append(key, value);
-                    } else {
-                      formData.append(key, value ?? '');
+                    if (key === 'purchase_doc' || key === 'sale_doc' || (key === 'reinvestment_details_docs' && value)) {
+                      Array.from(value).forEach((file) => {
+                        if (file instanceof File) {
+                          formData.append(key, file);
+                        }
+                      });
                     }
                   });
-                  for (let pair of formData.entries()) {
-                    console.log(pair[0] + ':', pair[1]);
+                  let type = properties[idx].id ? 'put' : 'post';
+                  let url = properties[idx].id
+                    ? `/income_tax_returns/capital-gains/update-property/${properties[idx].id}/`
+                    : `/income_tax_returns/capital-gains/create-or-update/`;
+                  const response = await Factory(type, url, formData);
+                  console.log(response);
+                  if (response.res.status_cd === 0) {
+                    enqueueSnackbar('Property saved successfully', {
+                      anchorOrigin: { vertical: 'top', horizontal: 'right' },
+                      variant: 'success'
+                    });
+                  } else {
+                    enqueueSnackbar('Error saving property', { anchorOrigin: { vertical: 'top', horizontal: 'right' }, variant: 'error' });
                   }
-                  // Here you can call your API with formData
                 }}
               >
                 Save
@@ -1401,7 +1518,6 @@ const CapitalGainsIncome = () => {
                   color="error"
                   onClick={() => {
                     setProperties(properties.filter((_, i) => i !== idx));
-                    setShowReinvest(showReinvest.filter((_, i) => i !== idx));
                   }}
                 >
                   Remove
@@ -1419,20 +1535,19 @@ const CapitalGainsIncome = () => {
                 ...properties,
                 {
                   property_type: '',
-                  purchase_date: '',
+                  date_of_purchase: '',
                   purchase_cost: '',
-                  sale_date: '',
+                  date_of_sale: '',
                   sale_value: '',
                   purchase_doc: null,
                   sale_doc: null,
-                  reinvestment: false,
+                  reinvestment: 'no',
                   invest_in: '',
                   invest_amount: '',
                   invest_date: '',
-                  invest_doc: null
+                  reinvestment_details_docs: null
                 }
               ]);
-              setShowReinvest([...showReinvest, false]);
             }}
           >
             Add Property Sold
@@ -1550,76 +1665,175 @@ const CapitalGainsIncome = () => {
 const sectionPresumptiveData = {
   '44AD': {
     nature: 'Small businesses (Individuals, HUFs, Firms - not LLPs)',
-    presumptiveRate: '6% (digital payments) or 8% of turnover',
-    presumptiveIncome: 'Slab rates as per individual / firm'
+    presumptive_rate: '6% (digital payments) or 8% of turnover',
+    presumptive_income: 'Slab rates as per individual / firm'
   },
   '44ADA': {
     nature: 'Professionals (e.g., CA, Doctors, Lawyers, Architects)',
-    presumptiveRate: '50% of gross receipts',
-    presumptiveIncome: 'Slab rates as per individual'
+    presumptive_rate: '50% of gross receipts',
+    presumptive_income: 'Slab rates as per individual'
   },
   '44AE': {
     nature: 'Goods transport businesses',
-    presumptiveRate: 'Fixed amount per vehicle/month',
-    presumptiveIncome: 'Slab rates after presumptive income computed'
+    presumptive_rate: 'Fixed amount per vehicle/month',
+    presumptive_income: 'Slab rates after presumptive income computed'
   },
   '44BB': {
     nature: 'Non-resident in oil services',
-    presumptiveRate: '10% of gross receipts (deemed profit)',
-    presumptiveIncome: 'Flat 10% of gross receipts'
+    presumptive_rate: '10% of gross receipts (deemed profit)',
+    presumptive_income: 'Flat 10% of gross receipts'
   },
   '44BBB': {
     nature: 'Foreign co. in turnkey power projects',
-    presumptiveRate: '10% + surcharge + cess',
-    presumptiveIncome: '10% of gross receipts'
+    presumptive_rate: '10% + surcharge + cess',
+    presumptive_income: '10% of gross receipts'
   }
 };
 
 const sectionTypes = ['44AD', '44ADA', '44AE', '44BB', '44BBB'];
 
-const BusinessIncome = () => {
-  const [numBusinesses, setNumBusinesses] = React.useState(1);
-  const [presumptive, setPresumptive] = React.useState(Array(numBusinesses).fill('no'));
-  const [bookMaintained, setBookMaintained] = React.useState(Array(numBusinesses).fill('no'));
-  const [gstRegistered, setGstRegistered] = React.useState(Array(numBusinesses).fill('no'));
-  const [selectedSection, setSelectedSection] = React.useState(Array(numBusinesses).fill(''));
+function transformBusinessApiResponse(apiObj) {
+  return {
+    id: apiObj.id,
+    business_name: apiObj.business_name || '',
+    business_type: apiObj.business_type || '',
+    opting_for_presumptive_taxation: apiObj.opting_for_presumptive_taxation || 'no',
+    gst_registered: apiObj.gst_registered || 'no',
+    status: apiObj.status || '',
+    service_request: apiObj.service_request,
+    service_task: apiObj.service_task,
+    assignee: apiObj.assignee,
+    reviewer: apiObj.reviewer,
+    // Opting data
+    section: apiObj.opting_data?.section || '',
+    nature: apiObj.opting_data?.nature || '',
+    presumptive_rate: apiObj.opting_data?.presumptive_rate || '',
+    presumptive_income: apiObj.opting_data?.presumptive_income || '',
+    grossturnover_or_receipts: apiObj.opting_data?.grossturnover_or_receipts || '',
+    digital_receipts: apiObj.opting_data?.digital_receipts || '',
+    // Documents (use first file or array as needed)
+    as26File: apiObj.documents?.['26AS']?.files?.[0]?.url || null,
+    aisFile: apiObj.documents?.['AIS']?.files?.[0]?.url || null,
+    gstReturnsFile: apiObj.documents?.['GST Returns']?.files?.[0]?.url || null,
+    bankStatementFile: apiObj.documents?.['Bank Statements']?.files?.[0]?.url || null,
+    otherDocsFile: apiObj.documents?.['Other']?.files?.[0]?.url || null
+    // Add more fields as needed
+  };
+}
+
+const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesData, setDialogFilesData, service_id }) => {
+  data = data[0];
+  const { enqueueSnackbar } = useSnackbar();
+  const [selectedSection, setSelectedSection] = React.useState([]);
+  const [businessRows, setBusinessRows] = React.useState([]);
   const businessTypes = ['Trading', 'Manufacturing', 'Profession', 'Other'];
+
+  useEffect(() => {
+    if (data.data.length > 0) {
+      setBusinessRows(data.data.map(transformBusinessApiResponse));
+    } else {
+      setBusinessRows([
+        {
+          business_name: '',
+          business_type: '',
+          grossturnover_or_receipts: '',
+          digital_receipts: '',
+          netProfit: '',
+          section: '',
+          nature: '',
+          presumptive_rate: '',
+          presumptive_income: '',
+          bankStatementFile: null,
+          as26File: null,
+          aisFile: null,
+          plFile: null,
+          bsFile: null,
+          gstReturnsFile: null,
+          otherDocsFile: null,
+          opting_for_presumptive_taxation: 'no',
+          bookMaintained: 'no',
+          gst_registered: 'no'
+        }
+      ]);
+    }
+  }, [data]);
+
+  const saveBusinessRow = async (idx) => {
+    const businessData = {
+      ...businessRows[idx],
+      opting_for_presumptive_taxation: businessRows[idx]?.opting_for_presumptive_taxation || 'no',
+      bookMaintained: businessRows[idx]?.bookMaintained || 'no',
+      gst_registered: businessRows[idx]?.gst_registered || 'no',
+      selectedSection: selectedSection[idx]
+    };
+    let opting_data = {
+      digital_receipts: businessData.digital_receipts,
+      grossturnover_or_receipts: businessData.grossturnover_or_receipts,
+      nature: businessData.nature,
+      presumptive_income: businessData.presumptive_income,
+      presumptive_rate: businessData.presumptive_rate,
+      section: businessData.section
+    };
+    console.log(opting_data);
+    const formData = new FormData();
+    formData.append('service_request', service_id);
+    formData.append('service_task', data.task_id);
+    formData.append('status', 'in progress');
+    formData.append('opting_data', JSON.stringify(opting_data));
+    Object.entries(businessData).forEach(([key, value]) => {
+      if (
+        key !== 'digital_receipts' &&
+        key !== 'grossturnover_or_receipts' &&
+        key !== 'nature' &&
+        key !== 'presumptive_income' &&
+        key !== 'presumptive_rate' &&
+        key !== 'section'
+      ) {
+        if (
+          key === 'bankStatementFile' ||
+          key === 'as26File' ||
+          key === 'aisFile' ||
+          key === 'plFile' ||
+          key === 'bsFile' ||
+          key === 'gstReturnsFile' ||
+          key === 'otherDocsFile'
+        ) {
+          if (value && value.length > 0) {
+            Array.from(value).forEach((file) => {
+              if (file instanceof File) {
+                formData.append(key, file);
+              }
+            });
+          }
+        } else {
+          if (value) {
+            formData.append(key, value);
+          }
+        }
+      }
+    });
+    let type = businessData.id ? 'put' : 'post';
+    let url = '/income_tax_returns/business-professional-income/';
+    const res = await Factory(type, url, formData);
+    console.log(res);
+    if (res.res.status_cd === 0) {
+      enqueueSnackbar('Business/Profession Income saved successfully!', {
+        variant: 'success',
+        anchorOrigin: { vertical: 'top', horizontal: 'right' }
+      });
+    } else {
+      enqueueSnackbar('Business/Profession Income save failed', {
+        variant: 'error',
+        anchorOrigin: { vertical: 'top', horizontal: 'right' }
+      });
+    }
+  };
 
   return (
     <Box>
-      <Box display="flex" alignItems="center" mb={2} gap={2}>
-        <Typography>No. of Businesses/Professions</Typography>
-        <Button
-          size="small"
-          variant="outlined"
-          onClick={() => {
-            setNumBusinesses(Math.max(1, numBusinesses - 1));
-            setPresumptive(presumptive.slice(0, -1));
-            setBookMaintained(bookMaintained.slice(0, -1));
-            setGstRegistered(gstRegistered.slice(0, -1));
-            setSelectedSection(selectedSection.slice(0, -1));
-          }}
-        >
-          -
-        </Button>
-        <Typography>{numBusinesses}</Typography>
-        <Button
-          size="small"
-          variant="outlined"
-          onClick={() => {
-            setNumBusinesses(numBusinesses + 1);
-            setPresumptive([...presumptive, 'no']);
-            setBookMaintained([...bookMaintained, 'no']);
-            setGstRegistered([...gstRegistered, 'no']);
-            setSelectedSection([...selectedSection, '']);
-          }}
-        >
-          +
-        </Button>
-      </Box>
-      {Array.from({ length: numBusinesses }).map((_, idx) => {
+      {Array.from({ length: businessRows.length }).map((_, idx) => {
         const section = selectedSection[idx];
-        const sectionData = sectionPresumptiveData[section] || { nature: '', presumptiveRate: '', presumptiveIncome: '' };
+        const sectionData = sectionPresumptiveData[section] || { nature: '', presumptive_rate: '', presumptive_income: '' };
         return (
           <Paper key={idx} sx={{ p: 3, mb: 4, borderRadius: 2, bgcolor: '#f8fafc' }}>
             <Typography variant="subtitle1" fontWeight={700} mb={2}>
@@ -1630,7 +1844,17 @@ const BusinessIncome = () => {
                 <Typography>Business Name</Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <TextField size="small" fullWidth placeholder="Enter name" />
+                <TextField
+                  size="small"
+                  fullWidth
+                  placeholder="Enter business name"
+                  value={businessRows[idx]?.business_name || ''}
+                  onChange={(e) => {
+                    const updated = [...businessRows];
+                    updated[idx].business_name = e.target.value;
+                    setBusinessRows(updated);
+                  }}
+                />
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <Typography>Business Type</Typography>
@@ -1640,6 +1864,12 @@ const BusinessIncome = () => {
                   size="small"
                   fullWidth
                   options={businessTypes}
+                  value={businessRows[idx]?.business_type || ''}
+                  onChange={(_, v) => {
+                    const updated = [...businessRows];
+                    updated[idx].business_type = v || '';
+                    setBusinessRows(updated);
+                  }}
                   renderInput={(params) => <TextField {...params} placeholder="Select type" />}
                 />
               </Grid2>
@@ -1649,11 +1879,11 @@ const BusinessIncome = () => {
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <RadioGroup
                   row
-                  value={presumptive[idx]}
+                  value={businessRows[idx]?.opting_for_presumptive_taxation || 'no'}
                   onChange={(_, v) => {
-                    const arr = [...presumptive];
-                    arr[idx] = v;
-                    setPresumptive(arr);
+                    const updated = [...businessRows];
+                    updated[idx].opting_for_presumptive_taxation = v;
+                    setBusinessRows(updated);
                   }}
                 >
                   <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
@@ -1662,7 +1892,7 @@ const BusinessIncome = () => {
               </Grid2>
             </Grid2>
             {/* If Presumptive = Yes, show left-side fields (4-12) */}
-            {presumptive[idx] === 'yes' && (
+            {businessRows[idx]?.opting_for_presumptive_taxation === 'yes' && (
               <Box mb={2}>
                 <Grid2 container spacing={2} alignItems="center">
                   <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
@@ -1673,8 +1903,14 @@ const BusinessIncome = () => {
                       size="small"
                       fullWidth
                       options={sectionTypes}
-                      value={section}
+                      value={businessRows[idx]?.section || ''}
                       onChange={(_, v) => {
+                        const updated = [...businessRows];
+                        updated[idx].section = v || '';
+                        updated[idx].presumptive_rate = sectionPresumptiveData[v]?.presumptive_rate || '';
+                        updated[idx].presumptive_income = sectionPresumptiveData[v]?.presumptive_income || '';
+                        updated[idx].nature = sectionPresumptiveData[v]?.nature || '';
+                        setBusinessRows(updated);
                         const arr = [...selectedSection];
                         arr[idx] = v || '';
                         setSelectedSection(arr);
@@ -1686,7 +1922,18 @@ const BusinessIncome = () => {
                     <Typography>Nature</Typography>
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                    <TextField size="small" fullWidth value={sectionData.nature} placeholder="Nature" InputProps={{ readOnly: true }} />
+                    <TextField
+                      size="small"
+                      fullWidth
+                      value={businessRows[idx]?.nature || sectionData.nature}
+                      placeholder="Nature"
+                      InputProps={{ readOnly: true }}
+                      onChange={(e) => {
+                        const updated = [...businessRows];
+                        updated[idx].nature = e.target.value;
+                        setBusinessRows(updated);
+                      }}
+                    />
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
                     <Typography>Presumptive Rate</Typography>
@@ -1695,9 +1942,14 @@ const BusinessIncome = () => {
                     <TextField
                       size="small"
                       fullWidth
-                      value={sectionData.presumptiveRate}
+                      value={businessRows[idx]?.presumptive_rate || sectionData.presumptive_rate}
                       placeholder="Presumptive Rate"
                       InputProps={{ readOnly: true }}
+                      onChange={(e) => {
+                        const updated = [...businessRows];
+                        updated[idx].presumptive_rate = e.target.value;
+                        setBusinessRows(updated);
+                      }}
                     />
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
@@ -1707,8 +1959,13 @@ const BusinessIncome = () => {
                     <TextField
                       size="small"
                       fullWidth
-                      value={sectionData.presumptiveIncome}
+                      value={businessRows[idx]?.presumptive_income || sectionData.presumptive_income}
                       placeholder="Presumptive Income"
+                      onChange={(e) => {
+                        const updated = [...businessRows];
+                        updated[idx].presumptive_income = e.target.value;
+                        setBusinessRows(updated);
+                      }}
                       InputProps={{ readOnly: true }}
                     />
                   </Grid2>
@@ -1716,13 +1973,33 @@ const BusinessIncome = () => {
                     <Typography>Grossturnover/receipts</Typography>
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                    <TextField size="small" fullWidth placeholder="Gross turnover/receipts" />
+                    <TextField
+                      size="small"
+                      fullWidth
+                      placeholder="Gross turnover/receipts"
+                      value={businessRows[idx]?.grossturnover_or_receipts || ''}
+                      onChange={(e) => {
+                        const updated = [...businessRows];
+                        updated[idx].grossturnover_or_receipts = e.target.value;
+                        setBusinessRows(updated);
+                      }}
+                    />
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
                     <Typography>Digital % Receipts</Typography>
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                    <TextField size="small" fullWidth placeholder="Digital % Receipts" />
+                    <TextField
+                      size="small"
+                      fullWidth
+                      placeholder="Digital % Receipts"
+                      value={businessRows[idx]?.digital_receipts || ''}
+                      onChange={(e) => {
+                        const updated = [...businessRows];
+                        updated[idx].digital_receipts = e.target.value;
+                        setBusinessRows(updated);
+                      }}
+                    />
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                     <Typography>Upload Bank Statements</Typography>
@@ -1731,12 +2008,35 @@ const BusinessIncome = () => {
                     <Stack direction="row" spacing={1}>
                       <Button size="small" variant="contained" component="label">
                         Upload
-                        <input type="file" hidden multiple />
+                        <input
+                          type="file"
+                          hidden
+                          multiple
+                          onChange={(e) => {
+                            if (e.target.files) {
+                              const updatedBank = [...businessRows];
+                              updatedBank[idx].bankStatementFile = e.target.files;
+                              setBusinessRows(updatedBank);
+                            }
+                          }}
+                        />
                       </Button>
-                      <Typography variant="body2">0 uploads</Typography>
-                      <Button size="small" variant="outlined">
-                        Upload
-                      </Button>
+                      {businessRows[idx]?.bankStatementFile && (
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          sx={{ ml: 1 }}
+                          onClick={() => {
+                            setFileDialogOpen(true);
+                            let file = businessRows[idx].bankStatementFile?.startsWith('http')
+                              ? [{ url: businessRows[idx].bankStatementFile }]
+                              : [...businessRows[idx].bankStatementFile];
+                            setDialogFilesData(file);
+                          }}
+                        >
+                          View
+                        </Button>
+                      )}
                     </Stack>
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
@@ -1745,8 +2045,35 @@ const BusinessIncome = () => {
                   <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                     <Button size="small" variant="contained" component="label">
                       Upload
-                      <input type="file" hidden />
+                      <input
+                        type="file"
+                        hidden
+                        multiple
+                        onChange={(e) => {
+                          if (e.target.files) {
+                            const updated = [...businessRows];
+                            updated[idx].as26File = e.target.files;
+                            setBusinessRows(updated);
+                          }
+                        }}
+                      />
                     </Button>
+                    {businessRows[idx]?.as26File && (
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        sx={{ ml: 1 }}
+                        onClick={() => {
+                          setFileDialogOpen(true);
+                          let file = businessRows[idx].as26File?.startsWith('http')
+                            ? [{ url: businessRows[idx].as26File }]
+                            : [...businessRows[idx].as26File];
+                          setDialogFilesData(file);
+                        }}
+                      >
+                        View
+                      </Button>
+                    )}
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                     <Typography>Upload AIS</Typography>
@@ -1754,73 +2081,126 @@ const BusinessIncome = () => {
                   <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                     <Button size="small" variant="contained" component="label">
                       Upload
-                      <input type="file" hidden />
+                      <input
+                        type="file"
+                        hidden
+                        multiple
+                        onChange={(e) => {
+                          if (e.target.files) {
+                            const updatedAIS = [...businessRows];
+                            updatedAIS[idx].aisFile = e.target.files;
+                            setBusinessRows(updatedAIS);
+                          }
+                        }}
+                      />
                     </Button>
+                    {businessRows[idx]?.aisFile && (
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        sx={{ ml: 1 }}
+                        onClick={() => {
+                          setFileDialogOpen(true);
+                          let file = businessRows[idx].aisFile?.startsWith('http')
+                            ? [{ url: businessRows[idx].aisFile }]
+                            : [...businessRows[idx].aisFile];
+                          setDialogFilesData(file);
+                        }}
+                      >
+                        View
+                      </Button>
+                    )}
                   </Grid2>
-                  <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                    <Typography>GST Registered?</Typography>
-                  </Grid2>
-                  <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                    <RadioGroup
-                      row
-                      value={gstRegistered[idx]}
-                      onChange={(_, v) => {
-                        const arr = [...gstRegistered];
-                        arr[idx] = v;
-                        setGstRegistered(arr);
-                      }}
-                    >
-                      <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
-                      <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
-                    </RadioGroup>
-                  </Grid2>
-                  {/* If GST Registered = Yes */}
-                  {gstRegistered[idx] === 'yes' && (
-                    <>
-                      <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                        <Typography>GST Returns</Typography>
-                      </Grid2>
-                      <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                        <Button size="small" variant="contained" component="label">
-                          Upload
-                          <input type="file" hidden />
-                        </Button>
-                      </Grid2>
-                    </>
-                  )}
                   <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                     <Typography>Any other relevant docs</Typography>
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                     <Button size="small" variant="contained" component="label">
                       Upload
-                      <input type="file" hidden />
+                      <input
+                        type="file"
+                        hidden
+                        multiple
+                        onChange={(e) => {
+                          if (e.target.files) {
+                            const updatedOtherDocs = [...businessRows];
+                            updatedOtherDocs[idx].otherDocsFile = e.target.files;
+                            setBusinessRows(updatedOtherDocs);
+                          }
+                        }}
+                      />
                     </Button>
+                    {businessRows[idx]?.otherDocsFile && (
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        sx={{ ml: 1 }}
+                        onClick={() => {
+                          setFileDialogOpen(true);
+                          let file = businessRows[idx].otherDocsFile?.startsWith('http')
+                            ? [{ url: businessRows[idx].otherDocsFile }]
+                            : [...businessRows[idx].otherDocsFile];
+                          setDialogFilesData(file);
+                        }}
+                      >
+                        View
+                      </Button>
+                    )}
                   </Grid2>
                 </Grid2>
               </Box>
             )}
             {/* If Presumptive = No, show right-side fields */}
-            {presumptive[idx] === 'no' && (
+            {businessRows[idx]?.opting_for_presumptive_taxation === 'no' && (
               <Box mb={2}>
                 <Grid2 container spacing={2} alignItems="center">
                   <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                     <Typography>Gross Turnover</Typography>
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                    <TextField size="small" fullWidth placeholder="Gross Turnover" />
+                    <TextField
+                      size="small"
+                      fullWidth
+                      placeholder="Gross Turnover"
+                      value={businessRows[idx]?.grossturnover_or_receipts || ''}
+                      onChange={(e) => {
+                        const updated = [...businessRows];
+                        updated[idx].grossturnover_or_receipts = e.target.value;
+                        setBusinessRows(updated);
+                      }}
+                    />
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                     <Typography>Digital % Receipts</Typography>
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                    <TextField size="small" fullWidth placeholder="Digital % Receipts" />
+                    <TextField
+                      size="small"
+                      fullWidth
+                      placeholder="Digital % Receipts"
+                      value={businessRows[idx]?.digital_receipts || ''}
+                      onChange={(e) => {
+                        const updated = [...businessRows];
+                        updated[idx].digital_receipts = e.target.value;
+                        setBusinessRows(updated);
+                      }}
+                    />
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                     <Typography>Net Profit</Typography>
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                    <TextField size="small" fullWidth placeholder="Net Profit" />
+                    <TextField
+                      size="small"
+                      fullWidth
+                      placeholder="Net Profit"
+                      value={businessRows[idx]?.netProfit || ''}
+                      onChange={(e) => {
+                        const updated = [...businessRows];
+                        updated[idx].netProfit = e.target.value;
+                        setBusinessRows(updated);
+                      }}
+                    />
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                     <Typography>Upload Bank Statement</Typography>
@@ -1829,51 +2209,128 @@ const BusinessIncome = () => {
                     <Stack direction="row" spacing={1}>
                       <Button size="small" variant="contained" component="label">
                         Upload
-                        <input type="file" hidden multiple />
+                        <input
+                          type="file"
+                          hidden
+                          multiple
+                          onChange={(e) => {
+                            if (e.target.files) {
+                              const updatedBank = [...businessRows];
+                              updatedBank[idx].bankStatementFile = e.target.files;
+                              setBusinessRows(updatedBank);
+                            }
+                          }}
+                        />
                       </Button>
-                      <Typography variant="body2">0 uploads</Typography>
-                      <Button size="small" variant="outlined">
-                        Upload
-                      </Button>
+                      {businessRows[idx]?.bankStatementFile && (
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          sx={{ ml: 1 }}
+                          onClick={() => {
+                            setFileDialogOpen(true);
+                            let file = businessRows[idx].bankStatementFile?.startsWith('http')
+                              ? [{ url: businessRows[idx].bankStatementFile }]
+                              : [...businessRows[idx].bankStatementFile];
+                            setDialogFilesData(file);
+                          }}
+                        >
+                          View
+                        </Button>
+                      )}
                     </Stack>
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                    <Typography>Book Maintained?</Typography>
+                    <Typography>Books Maintained?</Typography>
                   </Grid2>
-                  <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                  <Grid2 size={{ xs: 12, sm: 6, md: 9 }}>
                     <RadioGroup
                       row
-                      value={bookMaintained[idx]}
+                      value={businessRows[idx]?.bookMaintained || 'no'}
                       onChange={(_, v) => {
-                        const arr = [...bookMaintained];
-                        arr[idx] = v;
-                        setBookMaintained(arr);
+                        const updated = [...businessRows];
+                        updated[idx].bookMaintained = v;
+                        setBusinessRows(updated);
                       }}
                     >
                       <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
                       <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
                     </RadioGroup>
                   </Grid2>
-                  {/* If Book Maintained = Yes */}
-                  {bookMaintained[idx] === 'yes' && (
+                  {/* If Books Maintained = Yes */}
+                  {businessRows[idx]?.bookMaintained === 'yes' && (
                     <>
                       <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                        <Typography>Upload P&L</Typography>
+                        <Typography>Profit & Loss</Typography>
                       </Grid2>
                       <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                         <Button size="small" variant="contained" component="label">
                           Upload
-                          <input type="file" hidden />
+                          <input
+                            type="file"
+                            hidden
+                            multiple
+                            onChange={(e) => {
+                              if (e.target.files) {
+                                const updated = [...businessRows];
+                                updated[idx].plFile = e.target.files;
+                                setBusinessRows(updated);
+                              }
+                            }}
+                          />
                         </Button>
+                        {businessRows[idx]?.plFile && (
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            sx={{ ml: 1 }}
+                            onClick={() => {
+                              setFileDialogOpen(true);
+                              let file = businessRows[idx].plFile?.startsWith('http')
+                                ? [{ url: businessRows[idx].plFile }]
+                                : [...businessRows[idx].plFile];
+                              setDialogFilesData(file);
+                            }}
+                          >
+                            View
+                          </Button>
+                        )}
                       </Grid2>
                       <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                        <Typography>Upload C/S</Typography>
+                        <Typography>Balance Sheet</Typography>
                       </Grid2>
                       <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                         <Button size="small" variant="contained" component="label">
                           Upload
-                          <input type="file" hidden />
+                          <input
+                            type="file"
+                            hidden
+                            multiple
+                            onChange={(e) => {
+                              if (e.target.files) {
+                                const updated = [...businessRows];
+                                updated[idx].bsFile = e.target.files;
+                                setBusinessRows(updated);
+                              }
+                            }}
+                          />
                         </Button>
+                        {businessRows[idx]?.bsFile && (
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            sx={{ ml: 1 }}
+                            onClick={() => {
+                              setFileDialogOpen(true);
+                              let file = businessRows[idx].bsFile?.startsWith('http')
+                                ? [{ url: businessRows[idx].bsFile }]
+                                : [...businessRows[idx].bsFile];
+                              setDialogFilesData(file);
+                            }}
+                          >
+                            View
+                          </Button>
+                        )}
                       </Grid2>
                     </>
                   )}
@@ -1883,11 +2340,11 @@ const BusinessIncome = () => {
                   <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                     <RadioGroup
                       row
-                      value={gstRegistered[idx]}
+                      value={businessRows[idx]?.gst_registered || 'no'}
                       onChange={(_, v) => {
-                        const arr = [...gstRegistered];
-                        arr[idx] = v;
-                        setGstRegistered(arr);
+                        const updated = [...businessRows];
+                        updated[idx].gst_registered = v;
+                        setBusinessRows(updated);
                       }}
                     >
                       <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
@@ -1895,7 +2352,7 @@ const BusinessIncome = () => {
                     </RadioGroup>
                   </Grid2>
                   {/* If GST Registered = Yes */}
-                  {gstRegistered[idx] === 'yes' && (
+                  {businessRows[idx]?.gst_registered === 'yes' && (
                     <>
                       <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                         <Typography>GST Returns</Typography>
@@ -1903,8 +2360,35 @@ const BusinessIncome = () => {
                       <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                         <Button size="small" variant="contained" component="label">
                           Upload
-                          <input type="file" hidden />
+                          <input
+                            type="file"
+                            hidden
+                            multiple
+                            onChange={(e) => {
+                              if (e.target.files) {
+                                const updated = [...businessRows];
+                                updated[idx].gstReturnsFile = e.target.files;
+                                setBusinessRows(updated);
+                              }
+                            }}
+                          />
                         </Button>
+                        {businessRows[idx]?.gstReturnsFile && (
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            sx={{ ml: 1 }}
+                            onClick={() => {
+                              setFileDialogOpen(true);
+                              let file = businessRows[idx].gstReturnsFile?.startsWith('http')
+                                ? [{ url: businessRows[idx].gstReturnsFile }]
+                                : [...businessRows[idx].gstReturnsFile];
+                              setDialogFilesData(file);
+                            }}
+                          >
+                            View
+                          </Button>
+                        )}
                       </Grid2>
                     </>
                   )}
@@ -1914,8 +2398,35 @@ const BusinessIncome = () => {
                   <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                     <Button size="small" variant="contained" component="label">
                       Upload
-                      <input type="file" hidden />
+                      <input
+                        type="file"
+                        hidden
+                        multiple
+                        onChange={(e) => {
+                          if (e.target.files) {
+                            const updated = [...businessRows];
+                            updated[idx].as26File = e.target.files;
+                            setBusinessRows(updated);
+                          }
+                        }}
+                      />
                     </Button>
+                    {businessRows[idx]?.as26File && (
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        sx={{ ml: 1 }}
+                        onClick={() => {
+                          setFileDialogOpen(true);
+                          let file = businessRows[idx].as26File?.startsWith('http')
+                            ? [{ url: businessRows[idx].as26File }]
+                            : [...businessRows[idx].as26File];
+                          setDialogFilesData(file);
+                        }}
+                      >
+                        View
+                      </Button>
+                    )}
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                     <Typography>Upload AIS</Typography>
@@ -1923,8 +2434,35 @@ const BusinessIncome = () => {
                   <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                     <Button size="small" variant="contained" component="label">
                       Upload
-                      <input type="file" hidden />
+                      <input
+                        type="file"
+                        hidden
+                        multiple
+                        onChange={(e) => {
+                          if (e.target.files) {
+                            const updated = [...businessRows];
+                            updated[idx].aisFile = e.target.files;
+                            setBusinessRows(updated);
+                          }
+                        }}
+                      />
                     </Button>
+                    {businessRows[idx]?.aisFile && (
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        sx={{ ml: 1 }}
+                        onClick={() => {
+                          setFileDialogOpen(true);
+                          let file = businessRows[idx].aisFile?.startsWith('http')
+                            ? [{ url: businessRows[idx].aisFile }]
+                            : [...businessRows[idx].aisFile];
+                          setDialogFilesData(file);
+                        }}
+                      >
+                        View
+                      </Button>
+                    )}
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                     <Typography>Any other relevant docs</Typography>
@@ -1932,15 +2470,102 @@ const BusinessIncome = () => {
                   <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                     <Button size="small" variant="contained" component="label">
                       Upload
-                      <input type="file" hidden />
+                      <input
+                        type="file"
+                        hidden
+                        multiple
+                        onChange={(e) => {
+                          if (e.target.files) {
+                            const updated = [...businessRows];
+                            updated[idx].otherDocsFile = e.target.files;
+                            setBusinessRows(updated);
+                          }
+                        }}
+                      />
                     </Button>
+                    {businessRows[idx]?.otherDocsFile && (
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        sx={{ ml: 1 }}
+                        onClick={() => {
+                          setFileDialogOpen(true);
+                          let file = businessRows[idx].otherDocsFile?.startsWith('http')
+                            ? [{ url: businessRows[idx].otherDocsFile }]
+                            : [...businessRows[idx].otherDocsFile];
+                          setDialogFilesData(file);
+                        }}
+                      >
+                        View
+                      </Button>
+                    )}
                   </Grid2>
                 </Grid2>
               </Box>
             )}
+            <Box display="flex" justifyContent="flex-end" mt={2} gap={2}>
+              <Button
+                size="small"
+                variant="contained"
+                color="primary"
+                onClick={() => {
+                  saveBusinessRow(idx);
+                }}
+              >
+                Save
+              </Button>
+              {businessRows.length > 1 && (
+                <Button
+                  size="small"
+                  color="error"
+                  variant="outlined"
+                  onClick={() => {
+                    setBusinessRows(businessRows.filter((_, i) => i !== idx));
+                    setSelectedSection(selectedSection.filter((_, i) => i !== idx));
+                  }}
+                >
+                  Remove
+                </Button>
+              )}
+            </Box>
           </Paper>
         );
       })}
+      <Box display="flex" justifyContent="flex-end" mt={2}>
+        <Button
+          size="small"
+          variant="outlined"
+          onClick={() => {
+            setBusinessRows([
+              ...businessRows,
+              {
+                business_name: '',
+                business_type: '',
+                grossturnover_or_receipts: '',
+                digital_receipts: '',
+                netProfit: '',
+                section: '',
+                nature: '',
+                presumptive_rate: '',
+                presumptive_income: '',
+                bankStatementFile: null,
+                as26File: null,
+                aisFile: null,
+                plFile: null,
+                bsFile: null,
+                gstReturnsFile: null,
+                otherDocsFile: null,
+                opting_for_presumptive_taxation: 'no',
+                bookMaintained: 'no',
+                gst_registered: 'no'
+              }
+            ]);
+            setSelectedSection([...selectedSection, '']);
+          }}
+        >
+          Add Business/Profession
+        </Button>
+      </Box>
     </Box>
   );
 };
@@ -3297,6 +3922,7 @@ const IncomeDetails = ({ data, type, fileDialogOpen, setFileDialogOpen, dialogFi
           fileDialogOpen={fileDialogOpen}
           setFileDialogOpen={setFileDialogOpen}
           filesData={dialogFilesData}
+          setDialogFilesData={setDialogFilesData}
           service_id={service_id}
         />
       );
@@ -3306,6 +3932,7 @@ const IncomeDetails = ({ data, type, fileDialogOpen, setFileDialogOpen, dialogFi
           data={data.business_income}
           fileDialogOpen={fileDialogOpen}
           setFileDialogOpen={setFileDialogOpen}
+          setDialogFilesData={setDialogFilesData}
           filesData={dialogFilesData}
           service_id={service_id}
         />
