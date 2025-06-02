@@ -83,19 +83,19 @@ export default function PayrollStatusSummary({ payrollId, financialYear, monthWi
                         if (header === 'CTC') {
                           return (
                             <TableCell key={month} align="center">
-                              {data.ctc || '-'}
+                              {data.ctc || 'NA'}
                             </TableCell>
                           );
                         } else if (header === 'Status') {
                           return (
                             <TableCell key={month} align="center">
-                              {data.status || '-'}
+                              {data.status || 'NA'}
                             </TableCell>
                           );
                         } else if (header === 'Action') {
                           return (
                             <TableCell key={month} align="center">
-                              {data.action && data.action !== '-' ? (
+                              {data.action && data.action === 'view' ? (
                                 <Stack direction="row" spacing={1} justifyContent="center">
                                   <span
                                     style={{
@@ -116,7 +116,7 @@ export default function PayrollStatusSummary({ payrollId, financialYear, monthWi
                                   </span>
                                 </Stack>
                               ) : (
-                                '-'
+                                'NA'
                               )}
                             </TableCell>
                           );

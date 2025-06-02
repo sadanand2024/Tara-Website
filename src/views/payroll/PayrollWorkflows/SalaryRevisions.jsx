@@ -4,10 +4,12 @@ import {} from '@mui/material';
 import Factory from 'utils/Factory';
 import { useSearchParams } from 'react-router-dom';
 import RenderDialog from './RenderDialog';
-
+import { useDispatch } from 'store';
+import { openSnackbar } from 'store/slices/snackbar';
 export default function SalaryRevisions({ employeeMasterData, from, openDialog, fields, setOpenDialog }) {
-  const headerData = ['Employee ID', 'Employee Name', 'Department', 'Designation', 'Current CTC', 'Last Revision', 'Revised CTC'];
-  const body_keys = ['associate_id', 'employee_name', 'department', 'designation', 'current_ctc', 'created_on', 'revised_ctc'];
+  const dispatch = useDispatch();
+  const headerData = ['Employee ID', 'Employee Name', 'Department', 'Designation', 'Previous CTC', 'Last Revision', 'Revised CTC'];
+  const body_keys = ['associate_id', 'employee_name', 'department', 'designation', 'previous_ctc', 'updated_on', 'current_ctc'];
   const [payrollid, setPayrollId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]);
@@ -37,21 +39,38 @@ export default function SalaryRevisions({ employeeMasterData, from, openDialog, 
 
   const getData = async () => {
     setLoading(true);
-    const year = financialYear.split('-')[1];
-    const url = `/payroll/employee-salaries?payroll_id=${payrollid}&month=${month}&year=${year}`;
+    const year = financialYear.split('-')[0];
+    const url = `/payroll/salary-revision?payroll_id=${payrollid}&month=${month}&year=${year}`;
     const { res, error } = await Factory('get', url, {});
     setLoading(false);
+    console.log(res);
     if (res.status_cd === 0) {
       setData(res.data || []);
     } else {
-      // showSnackbar(JSON.stringify(res.data.data), 'error');
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res?.data?.message),
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     }
   };
   const handleEdit = async (item) => {
     let url = `/payroll/bonus-incentives/${item.id}`;
     const { res } = await Factory('get', url, {});
     if (res.status_cd === 1) {
-      // showSnackbar(JSON.stringify(res.data), 'error');
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res?.data?.message),
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     } else {
       setSelectedRecord(res.data);
       setOpenDialog(true);
@@ -61,9 +80,16 @@ export default function SalaryRevisions({ employeeMasterData, from, openDialog, 
     let url = `/payroll/bonus-incentives/${item.id}`;
     const { res } = await Factory('delete', url, {});
     if (res.status_cd === 1) {
-      // showSnackbar(JSON.stringify(res.data), 'error');
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res?.data?.message),
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     } else {
-      // showSnackbar('Record Deleted Successfully', 'success');
       getData();
     }
   };
