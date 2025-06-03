@@ -25,6 +25,8 @@ const FileListDialog = ({ open, onClose, files, onDelete }) => {
       return file.url.name;
     } else if (file.url) {
       return file.url.split('/').pop();
+    } else if (file.file) {
+      return file.file.split('/').pop();
     }
     return file.name;
   };
