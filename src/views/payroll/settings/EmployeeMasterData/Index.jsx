@@ -64,7 +64,6 @@ function EmployeeList() {
     const url = `/payroll/employees?payroll_id=${payrollId}`;
     const { res } = await Factory('get', url, {});
     setLoading(false);
-    console.log(res);
     if (res?.status_cd === 0) {
       setEmployees(res?.data || []);
     } else {

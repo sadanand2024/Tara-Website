@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useDispatch } from 'store';
+import axios from 'axios';
 
 // material-ui
 import { useTheme } from '@mui/material/styles';
@@ -41,6 +42,9 @@ export default function JWTRegister({ ...others }) {
   const dispatch = useDispatch();
   const [showPassword, setShowPassword] = useState(false);
   const [checked, setChecked] = useState(true);
+  const [showOTPField, setShowOTPField] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
   const [strength, setStrength] = useState(0);
   const [level, setLevel] = useState();
@@ -73,19 +77,54 @@ export default function JWTRegister({ ...others }) {
     changePassword('123456');
   }, []);
 
+  const handleRequestOTP = async (values) => {
+    try {
+      await axios.post(`${import.meta.env.VITE_APP_BASE_URL}/user_management/request-otp/`, {
+        email: values.email
+      });
+      setEmail(values.email);
+      setPassword(values.password);
+      setShowOTPField(true);
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'OTP sent successfully',
+          variant: 'alert',
+          alert: { color: 'success' },
+          close: false
+        })
+      );
+    } catch (err) {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: err.response?.data?.error || 'Failed to send OTP. Please try again.',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
+      throw err;
+    }
+  };
+
   return (
     <>
       <Grid container direction="column" spacing={2} sx={{ justifyContent: 'center' }}>
         <Grid container sx={{ alignItems: 'center', justifyContent: 'center' }} size={12}>
           <Box sx={{ mb: 2 }}>
-            <Typography variant="subtitle1">Sign up with Email address</Typography>
+            <Typography variant="subtitle1">
+              {showOTPField ? 'Enter OTP to complete registration' : 'Sign up with Email address'}
+            </Typography>
           </Box>
         </Grid>
       </Grid>
       <Formik
+        enableReinitialize
         initialValues={{
           email: '',
           password: '',
+          otp: '',
           ...(isBusinessContext ? { organizationName: '' } : {}),
           moduleId: moduleId,
           type: type || '',
@@ -101,12 +140,29 @@ export default function JWTRegister({ ...others }) {
           email: Yup.string().email('Must be a valid email').max(255).required('Email is required'),
           password: Yup.string()
             .required('Password is required')
-            .test('no-leading-trailing-whitespace', 'Password can not start or end with spaces', (value) => value === value.trim())
+            .test('no-leading-trailing-whitespace', 'Password can not start or end with spaces', (value) => value === value.trim()),
+          otp: Yup.string().when('showOTPField', {
+            is: true,
+            then: (schema) => schema.required('OTP is required')
+          })
         })}
         onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
           try {
+            if (!showOTPField) {
+              await handleRequestOTP(values);
+              return;
+            }
+
             const trimmedEmail = values.email.trim();
-            const response = await register(trimmedEmail, values.password, values.organizationName, moduleId, type, context_type);
+            const response = await register(
+              trimmedEmail,
+              values.otp,
+              values.password,
+              values.organizationName,
+              moduleId,
+              type,
+              context_type
+            );
 
             setStatus({ success: true });
             setSubmitting(false);
@@ -114,16 +170,12 @@ export default function JWTRegister({ ...others }) {
             dispatch(
               openSnackbar({
                 open: true,
-                message: 'Your registration has been successfully completed.',
+                message: 'Your registration has been successfully completed. Please login to continue.',
                 variant: 'alert',
                 alert: { color: 'success' },
                 close: false
               })
             );
-
-            setTimeout(() => {
-              navigate(authParam ? `/login?auth=${authParam}` : '/login', { replace: true });
-            }, 1500);
           } catch (err) {
             console.error('Registration failed:', err);
 
@@ -152,7 +204,7 @@ export default function JWTRegister({ ...others }) {
         {({ errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values }) => (
           <form noValidate onSubmit={handleSubmit} {...others}>
             {/* Only show organization name if business context */}
-            {isBusinessContext && (
+            {isBusinessContext && !showOTPField && (
               <FormControl
                 fullWidth
                 error={Boolean(touched.organizationName && errors.organizationName)}
@@ -176,93 +228,115 @@ export default function JWTRegister({ ...others }) {
               </FormControl>
             )}
 
-            <FormControl fullWidth error={Boolean(touched.email && errors.email)} sx={{ ...theme.typography.customInput }}>
-              <InputLabel htmlFor="outlined-adornment-email-register">Email Address</InputLabel>
-              <OutlinedInput
-                id="outlined-adornment-email-register"
-                type="email"
-                value={values.email}
-                name="email"
-                onBlur={handleBlur}
-                onChange={handleChange}
-                inputProps={{}}
-              />
-              {touched.email && errors.email && (
-                <FormHelperText error id="standard-weight-helper-text--register">
-                  {errors.email}
-                </FormHelperText>
-              )}
-            </FormControl>
+            {!showOTPField ? (
+              <>
+                <FormControl fullWidth error={Boolean(touched.email && errors.email)} sx={{ ...theme.typography.customInput }}>
+                  <InputLabel htmlFor="outlined-adornment-email-register">Email Address</InputLabel>
+                  <OutlinedInput
+                    id="outlined-adornment-email-register"
+                    type="email"
+                    value={values.email}
+                    name="email"
+                    onBlur={handleBlur}
+                    onChange={handleChange}
+                    inputProps={{}}
+                  />
+                  {touched.email && errors.email && (
+                    <FormHelperText error id="standard-weight-helper-text--register">
+                      {errors.email}
+                    </FormHelperText>
+                  )}
+                </FormControl>
 
-            <FormControl fullWidth error={Boolean(touched.password && errors.password)} sx={{ ...theme.typography.customInput }}>
-              <InputLabel htmlFor="outlined-adornment-password-register">Password</InputLabel>
-              <OutlinedInput
-                id="outlined-adornment-password-register"
-                type={showPassword ? 'text' : 'password'}
-                value={values.password}
-                name="password"
-                label="Password"
-                onBlur={handleBlur}
-                onChange={(e) => {
-                  handleChange(e);
-                  changePassword(e.target.value);
-                }}
-                endAdornment={
-                  <InputAdornment position="end">
-                    <IconButton
-                      aria-label="toggle password visibility"
-                      onClick={handleClickShowPassword}
-                      onMouseDown={handleMouseDownPassword}
-                      edge="end"
-                      size="large"
-                    >
-                      {showPassword ? <Visibility /> : <VisibilityOff />}
-                    </IconButton>
-                  </InputAdornment>
-                }
-                inputProps={{}}
-              />
-              {touched.password && errors.password && (
-                <FormHelperText error id="standard-weight-helper-text-password-register">
-                  {errors.password}
-                </FormHelperText>
-              )}
-            </FormControl>
+                <FormControl fullWidth error={Boolean(touched.password && errors.password)} sx={{ ...theme.typography.customInput }}>
+                  <InputLabel htmlFor="outlined-adornment-password-register">Password</InputLabel>
+                  <OutlinedInput
+                    id="outlined-adornment-password-register"
+                    type={showPassword ? 'text' : 'password'}
+                    value={values.password}
+                    name="password"
+                    label="Password"
+                    onBlur={handleBlur}
+                    onChange={(e) => {
+                      handleChange(e);
+                      changePassword(e.target.value);
+                    }}
+                    endAdornment={
+                      <InputAdornment position="end">
+                        <IconButton
+                          aria-label="toggle password visibility"
+                          onClick={handleClickShowPassword}
+                          onMouseDown={handleMouseDownPassword}
+                          edge="end"
+                          size="large"
+                        >
+                          {showPassword ? <Visibility /> : <VisibilityOff />}
+                        </IconButton>
+                      </InputAdornment>
+                    }
+                    inputProps={{}}
+                  />
+                  {touched.password && errors.password && (
+                    <FormHelperText error id="standard-weight-helper-text-password-register">
+                      {errors.password}
+                    </FormHelperText>
+                  )}
+                </FormControl>
 
-            {strength !== 0 && (
-              <FormControl fullWidth>
-                <Box sx={{ mb: 2 }}>
-                  <Grid container spacing={2} sx={{ alignItems: 'center' }}>
-                    <Grid>
-                      <Box sx={{ width: 85, height: 8, borderRadius: '7px', bgcolor: level?.color }} />
-                    </Grid>
-                    <Grid>
-                      <Typography variant="subtitle1" sx={{ fontSize: '0.75rem' }}>
-                        {level?.label}
-                      </Typography>
-                    </Grid>
-                  </Grid>
-                </Box>
+                {strength !== 0 && (
+                  <FormControl fullWidth>
+                    <Box sx={{ mb: 2 }}>
+                      <Grid container spacing={2} sx={{ alignItems: 'center' }}>
+                        <Grid>
+                          <Box sx={{ width: 85, height: 8, borderRadius: '7px', bgcolor: level?.color }} />
+                        </Grid>
+                        <Grid>
+                          <Typography variant="subtitle1" sx={{ fontSize: '0.75rem' }}>
+                            {level?.label}
+                          </Typography>
+                        </Grid>
+                      </Grid>
+                    </Box>
+                  </FormControl>
+                )}
+              </>
+            ) : (
+              <FormControl fullWidth error={Boolean(touched.otp && errors.otp)} sx={{ ...theme.typography.customInput }}>
+                <InputLabel htmlFor="outlined-adornment-otp-register">OTP</InputLabel>
+                <OutlinedInput
+                  id="outlined-adornment-otp-register"
+                  value={values.otp}
+                  name="otp"
+                  onBlur={handleBlur}
+                  onChange={handleChange}
+                  inputProps={{}}
+                />
+                {touched.otp && errors.otp && (
+                  <FormHelperText error id="standard-weight-helper-text-otp-register">
+                    {errors.otp}
+                  </FormHelperText>
+                )}
               </FormControl>
             )}
-
-            <Grid container sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
-              <Grid>
-                <FormControlLabel
-                  control={
-                    <Checkbox checked={checked} onChange={(event) => setChecked(event.target.checked)} name="checked" color="primary" />
-                  }
-                  label={
-                    <Typography variant="subtitle1">
-                      Agree with &nbsp;
-                      <Typography variant="subtitle1" component={Link} to="#">
-                        Terms & Condition.
+            {!showOTPField && (
+              <Grid container sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
+                <Grid>
+                  <FormControlLabel
+                    control={
+                      <Checkbox checked={checked} onChange={(event) => setChecked(event.target.checked)} name="checked" color="primary" />
+                    }
+                    label={
+                      <Typography variant="subtitle1">
+                        Agree with &nbsp;
+                        <Typography variant="subtitle1" component={Link} to="#">
+                          Terms & Condition.
+                        </Typography>
                       </Typography>
-                    </Typography>
-                  }
-                />
+                    }
+                  />
+                </Grid>
               </Grid>
-            </Grid>
+            )}
             {errors.submit && (
               <Box sx={{ mt: 3 }}>
                 <FormHelperText error>{errors.submit}</FormHelperText>
@@ -272,7 +346,7 @@ export default function JWTRegister({ ...others }) {
             <Box sx={{ mt: 2 }}>
               <AnimateButton>
                 <Button disableElevation disabled={isSubmitting} fullWidth size="large" type="submit" variant="contained" color="secondary">
-                  Sign up
+                  {showOTPField ? 'Complete Registration' : 'Sign up'}
                 </Button>
               </AnimateButton>
             </Box>

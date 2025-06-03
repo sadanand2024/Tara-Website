@@ -28,8 +28,6 @@ function SalaryDetails({
   setEnablePreviewButton,
   enablePreviewButton
 }) {
-  // console.log(employeeData);
-  const [open, setOpen] = useState(false);
   const [payrollid, setPayrollId] = useState(null);
   const [salary_teamplates_data, setSalary_teamplates_data] = useState([]);
   const [searchParams] = useSearchParams();
@@ -91,7 +89,6 @@ function SalaryDetails({
       if (from === 'Salary Revisions') {
         postData.update_month = new Date().getMonth() + 1;
       }
-      console.log(postData);
       // Determine API method and URL
       const method = employeeData?.employee_salary?.id ? 'put' : 'post';
       const url = employeeData?.employee_salary?.id
@@ -212,15 +209,11 @@ function SalaryDetails({
   // }, [values.annual_ctc]);
 
   useEffect(() => {
-    console.log(employeeData?.employee_salary);
-
     if (employeeData?.employee_salary) {
-      let lastSalary = employeeData.employee_salary;
-      console.log(lastSalary);
       setValues((prev) => ({
         ...prev,
         ...employeeData?.employee_salary,
-        tax_regime_opted: lastSalary?.tax_regime_opted || 'old'
+        tax_regime_opted: employeeData.employee_salary?.tax_regime_opted || 'old'
       }));
     }
   }, [employeeData]);
