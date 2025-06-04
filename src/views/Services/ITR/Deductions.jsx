@@ -25,6 +25,7 @@ import {
 } from '@mui/material';
 import Factory from 'utils/Factory';
 import { set } from 'lodash-es';
+import { convertFieldResponseIntoMuiTextFieldProps } from '@mui/x-date-pickers/internals';
 const donationsSchema = Yup.object().shape({
   donations: Yup.array().of(
     Yup.object().shape({
@@ -48,45 +49,54 @@ const investmentsSchema = Yup.object().shape({
 
 const mediclaimSchema = Yup.object()
   .shape({
-    selfFamily: Yup.number().typeError('Must be a number').min(0, 'Cannot be negative').notRequired(),
-    selfSenior: Yup.number().typeError('Must be a number').min(0, 'Cannot be negative').notRequired(),
-    parents: Yup.number().typeError('Must be a number').min(0, 'Cannot be negative').notRequired(),
-    parentsSenior: Yup.number().typeError('Must be a number').min(0, 'Cannot be negative').notRequired(),
-    checkup: Yup.number().typeError('Must be a number').min(0, 'Cannot be negative').notRequired(),
-    receipts: Yup.array().notRequired()
+    self_family_non_senior_citizen: Yup.number().typeError('Must be a number').min(0, 'Cannot be negative').notRequired(),
+    self_senior_citizen: Yup.number().typeError('Must be a number').min(0, 'Cannot be negative').notRequired(),
+    parents_non_senior_citizen: Yup.number().typeError('Must be a number').min(0, 'Cannot be negative').notRequired(),
+    parents_senior_citizen: Yup.number().typeError('Must be a number').min(0, 'Cannot be negative').notRequired(),
+    preventive_health_checkup: Yup.number().typeError('Must be a number').min(0, 'Cannot be negative').notRequired(),
+    file: Yup.array().notRequired()
   })
   .test('at-least-one', 'At least one amount is required', (values) => {
-    return values.selfFamily || values.selfSenior || values.parents || values.parentsSenior || values.checkup;
+    return (
+      values.self_family_non_senior_citizen ||
+      values.self_senior_citizen ||
+      values.parents_non_senior_citizen ||
+      values.parents_senior_citizen ||
+      values.preventive_health_checkup
+    );
   });
 
 const donationModes = ['Cash', 'Cheque', 'Online Transfer'];
 const investmentTypes = ['PPF', 'NSC', 'ELSS', 'Life Insurance', 'Tuition Fees', 'Others'];
 const educationOfOptions = ['self', 'spouse', 'children', 'dependent'];
-const disabilityNature = [
+const nature_of_disability = [
   'Blindness',
-  'Low vision',
-  'Leprosy-cured',
-  'Hearing impairment',
-  'Locomotor disability',
-  'Mental illness',
-  'Others'
+  'Deaf and Dumb',
+  'Low Vision',
+  'Leprosy Cured',
+  'Hearing Impairment',
+  'Locomotor Disability',
+  'Mental Illness',
+  'Mental Retardation',
+  'Multiple Disabilities',
+  'others'
 ];
-const disabilitySeverity = ['40%-80%', '>80%'];
-const rentHraPaid = ['Yes', 'No'];
-const firstHomeIsFirst = ['Yes', 'No'];
-const politicalDonated = ['Yes', 'No'];
+const severity = ['40-80%', '>80%'];
+const pay_rent_without_recieving_hra = ['Yes', 'No'];
+const are_you_first_time_homebuyer = ['Yes', 'No'];
+const donation_made_to_political_party = ['Yes', 'No'];
 
 const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setFileDialogOpen, setDialogFilesData }) => {
   const { enqueueSnackbar } = useSnackbar();
-  const [investments, setInvestments] = React.useState([{ type: '', amount: '', doc: null }]);
+  const [investments, setInvestments] = React.useState([{ investment: '', amount: '', file: null }]);
   const [donations, setDonations] = React.useState([{ name: '', amount: '', mode: '', file: null }]);
   const [mediclaim, setMediclaim] = React.useState({
-    selfFamily: '',
-    selfSenior: '',
-    parents: '',
-    parentsSenior: '',
-    checkup: '',
-    receipts: []
+    self_family_non_senior_citizen: '',
+    self_senior_citizen: '',
+    parents_non_senior_citizen: '',
+    parents_senior_citizen: '',
+    preventive_health_checkup: '',
+    file: []
   });
   const [section80E, setSection80E] = useState({
     amount: '',
@@ -94,7 +104,8 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
     borrower_name: '',
     loan_outstanding_as_on_31st_march: '',
     is_it_approved_bank: 'false',
-    other_files: null
+    other_files: null,
+    document_files: { other_files: null }
   });
   const [section80EE, setSection80EE] = useState({
     amount: '',
@@ -102,31 +113,77 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
   });
   const [section80EEB, setSection80EEB] = useState({
     other_files: null,
-    vehicleRegistrationNumber: ''
+    vehicle_registration_number: ''
   });
   const [otherDeductions, setOtherDeductions] = useState({
-    savingsInterest: '',
-    fdInterest: '',
-    disabilityNature: '',
-    disabilitySeverity: '',
-    disabilityAmount: '',
-    disabilityCert: null,
-    rentHraPaid: 'no',
-    rentHraAmount: '',
-    firstHomeIsFirst: 'no',
-    firstHomeInterest: '',
-    firstHomeDate: '',
-    politicalDonated: 'no',
-    politicalAmount: ''
+    total_saving_interest: '',
+    total_fd_interest: '',
+    nature_of_disability: '',
+    severity: '',
+    deduction_amount: '',
+    deduction_file: null,
+    pay_rent_without_recieving_hra: 'false',
+    pay_rent_amount: '',
+    are_you_first_time_homebuyer: 'false',
+    amount_of_interest_paid: '',
+    date_of_loan_sanctioned: '',
+    donation_made_to_political_party: 'false',
+    donation_amount: ''
+  });
+
+  const [section80DDB, setSection80DDB] = useState({
+    name_of_disease: '',
+    files: []
   });
 
   useEffect(() => {
     if (deductions.data) {
-      setDonations([...deductions.data.section_80g]);
-      setSection80E({ ...deductions.data.section_80e });
-      setSection80EE({ ...deductions.data.section_80ee });
-      setSection80EEB({ ...deductions.data.section_80eeb });
-      setOtherDeductions({ ...deductions.data.other_deductions });
+      if (deductions.data.section_80g.length > 0) {
+        setDonations([...deductions.data.section_80g]);
+      }
+      if (deductions.data.section_80e !== null) {
+        setSection80E({
+          ...deductions.data.section_80e,
+          education_of: deductions.data.section_80e?.education_of ?? '',
+          is_it_approved_bank: (deductions.data.section_80e?.is_it_approved_bank ?? 'false').toString()
+        });
+      }
+      if (deductions.data.section_80ee.length > 0) {
+        setSection80EE({
+          ...deductions.data.section_80ee[0]
+        });
+      }
+      if (deductions.data.section_80eeb !== null) {
+        setSection80EEB({
+          ...deductions.data.section_80eeb
+        });
+      }
+      if (deductions.data.section_80ettattbu !== null) {
+        setOtherDeductions({
+          ...deductions.data.section_80ettattbu,
+          nature_of_disability: deductions.data.section_80ettattbu?.nature_of_disability ?? '',
+          severity: deductions.data.section_80ettattbu?.severity ?? '',
+          pay_rent_without_recieving_hra: deductions.data.section_80ettattbu?.pay_rent_without_recieving_hra ?? 'false',
+          are_you_first_time_homebuyer: deductions.data.section_80ettattbu?.are_you_first_time_homebuyer ?? 'false',
+          donation_made_to_political_party: deductions.data.section_80ettattbu?.donation_made_to_political_party ?? 'false'
+        });
+      }
+
+      if (deductions.data.section_80c.length > 0) {
+        setInvestments([...deductions.data.section_80c]);
+      }
+      if (deductions.data.section_80d !== null) {
+        setMediclaim({
+          ...deductions.data.section_80d,
+          file: deductions.data?.section_80d?.section_80d_documents
+        });
+      }
+      if (deductions.data.section_80ddb !== null) {
+        setSection80DDB({
+          ...deductions.data.section_80ddb,
+          files: deductions.data?.section_80ddb?.documents
+        });
+      }
     }
   }, [deductions]);
 
@@ -137,25 +194,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
         <Typography variant="h5" mb={2} sx={{ textDecoration: 'underline' }}>
           Section 80G - Deduction for Donations made
         </Typography>
-        <Formik
-          initialValues={{ donations }}
-          enableReinitialize
-          validationSchema={donationsSchema}
-          onSubmit={(values) => {
-            const formData = new FormData();
-            values.donations.forEach((donation, idx) => {
-              formData.append(`donations[${idx}][name]`, donation.name || '');
-              formData.append(`donations[${idx}][amount]`, donation.amount || '');
-              formData.append(`donations[${idx}][mode]`, donation.mode || '');
-              if (donation.file) {
-                formData.append(`donations[${idx}][file]`, donation.file);
-              }
-            });
-            for (let pair of formData.entries()) {
-              console.log(pair[0] + ':', pair[1]);
-            }
-          }}
-        >
+        <Formik initialValues={{ donations }} enableReinitialize validationSchema={donationsSchema}>
           {({ values, setFieldValue, errors }) => (
             <Form>
               <Table size="small">
@@ -269,12 +308,18 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                               }
                               const response = await Factory(type, url, formData);
                               if (response.res.status_cd === 0) {
-                                enqueueSnackbar(response.res.message, {
+                                if (type === 'post') {
+                                  let __donations = donations;
+                                  __donations[idx] = response.res.data;
+                                  setDonations([...__donations]);
+                                  setFieldValue('donations', [...__donations]);
+                                }
+                                enqueueSnackbar('Saved Successfully', {
                                   anchorOrigin: { vertical: 'top', horizontal: 'right' },
                                   variant: 'success'
                                 });
                               } else {
-                                enqueueSnackbar(response.res.message, {
+                                enqueueSnackbar('Error saving data', {
                                   anchorOrigin: { vertical: 'top', horizontal: 'right' },
                                   variant: 'error'
                                 });
@@ -287,9 +332,21 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                             <IconButton
                               size="small"
                               color="error"
-                              onClick={() => {
-                                const newArr = values.donations.filter((_, i) => i !== idx);
-                                setFieldValue('donations', newArr);
+                              onClick={async () => {
+                                const response = await Factory('delete', `/income_tax_returns/section-80g/${row.id}/delete/`);
+                                if (response.res.status_cd === 0) {
+                                  const newArr = values.donations.filter((_, i) => i !== idx);
+                                  setFieldValue('donations', newArr);
+                                  enqueueSnackbar('Donation deleted successfully', {
+                                    anchorOrigin: { vertical: 'top', horizontal: 'right' },
+                                    variant: 'success'
+                                  });
+                                } else {
+                                  enqueueSnackbar('Error deleting data', {
+                                    anchorOrigin: { vertical: 'top', horizontal: 'right' },
+                                    variant: 'error'
+                                  });
+                                }
                               }}
                             >
                               <DeleteIcon />
@@ -317,7 +374,11 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
 
       {/* Section 80E, 80TTA/80TTB, 80U, and Other Deductions Combined */}
       <Formik
-        initialValues={section80E}
+        initialValues={{
+          ...section80E,
+          education_of: section80E.education_of ?? '',
+          is_it_approved_bank: section80E.is_it_approved_bank ?? 'false'
+        }}
         enableReinitialize
         onSubmit={async (values) => {
           const formData = new FormData();
@@ -326,8 +387,8 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
           formData.append('education_of', values.education_of || '');
           formData.append('borrower_name', values.borrower_name || '');
           formData.append('is_it_approved_bank', values.is_it_approved_bank || '');
-          if (values.other_files) {
-            Array.from(values.other_files).forEach((file) => {
+          if (values.document_files.other_files) {
+            Array.from(values.document_files.other_files).forEach((file) => {
               if (file instanceof File) formData.append('other_files', file);
             });
           }
@@ -354,42 +415,53 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
               </Typography>
               <Grid2 container spacing={2} alignItems="center" mb={2}>
                 <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+                  <Typography>Loan Amount</Typography>
+                </Grid2>
+                <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
                   <TextField
                     size="small"
                     fullWidth
-                    label="Amount"
+                    placeholder="Loan Amount"
                     type="number"
                     name="amount"
                     value={values.amount}
                     onChange={(e) => setFieldValue('amount', e.target.value)}
                   />
                 </Grid2>
-                <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+                  <Typography>Education of</Typography>
+                </Grid2>
+                <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
                   <Autocomplete
                     size="small"
                     fullWidth
                     options={educationOfOptions}
                     getOptionLabel={(option) => option.charAt(0).toUpperCase() + option.slice(1)}
-                    value={values.education_of}
+                    value={values.education_of ?? ''}
                     onChange={(_, v) => setFieldValue('education_of', v)}
-                    renderInput={(params) => <TextField {...params} label="Education of" />}
+                    renderInput={(params) => <TextField {...params} placeholder="Education of" />}
                   />
                 </Grid2>
-                <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+                  <Typography>Borrower Name</Typography>
+                </Grid2>
+                <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
                   <TextField
                     size="small"
                     fullWidth
-                    label="Borrower Name"
+                    placeholder="Borrower Name"
                     name="borrower_name"
                     value={values.borrower_name}
                     onChange={(e) => setFieldValue('borrower_name', e.target.value)}
                   />
                 </Grid2>
-                <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+                <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                   <Typography>Is it an approved Bank/NBFC?</Typography>
+                </Grid2>
+                <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                   <RadioGroup row value={values.is_it_approved_bank} onChange={(_, v) => setFieldValue('is_it_approved_bank', v)}>
-                    <FormControlLabel value="true" control={<Radio size="small" />} label="Yes" />
-                    <FormControlLabel value="false" control={<Radio size="small" />} label="No" />
+                    <FormControlLabel value={true} control={<Radio size="small" />} label="Yes" />
+                    <FormControlLabel value={false} control={<Radio size="small" />} label="No" />
                   </RadioGroup>
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 5 }}>
@@ -399,16 +471,16 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                   <Box>
                     <Button variant="contained" component="label" size="small">
                       Upload
-                      <input type="file" multiple hidden onChange={(e) => setFieldValue('other_files', e.target.files)} />
+                      <input type="file" multiple hidden onChange={(e) => setFieldValue('document_files.other_files', e.target.files)} />
                     </Button>
-                    {values.other_files && (
+                    {values?.document_files?.other_files && (
                       <Button
                         size="small"
                         sx={{ ml: 1 }}
                         variant="outlined"
                         onClick={() => {
                           setFileDialogOpen(true);
-                          setDialogFilesData([values.other_files]);
+                          setDialogFilesData(values.document_files.other_files.files || values.document_files.other_files);
                         }}
                       >
                         View
@@ -422,8 +494,8 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                 <Grid2 size={{ xs: 12, sm: 12, md: 7 }}>
                   <TextField
                     size="small"
-                    label="Amount"
                     type="number"
+                    placeholder="Loan outstanding amount as on 31st March"
                     name="loan_outstanding_as_on_31st_march"
                     value={values.loan_outstanding_as_on_31st_march}
                     onChange={(e) => setFieldValue('loan_outstanding_as_on_31st_march', e.target.value)}
@@ -439,23 +511,26 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
           </Form>
         )}
       </Formik>
-
       {/* Section 80EE - Interest on Loan Taken for Residential House Property */}
       <Formik
-        initialValues={section80EE}
+        initialValues={{
+          ...section80EE,
+          loan_outstanding_as_on_31st_march: section80EE.loan_outstanding_as_on_31st_march ?? ''
+        }}
         enableReinitialize
         onSubmit={async (values) => {
           const formData = new FormData();
           formData.append('deductions', deductions.data.id);
-          formData.append('amount', values.amount || '');
-          if (values.other_files) {
-            Array.from(values.other_files).forEach((file) => {
+          formData.append('loan_outstanding_as_on_31st_march', values.loan_outstanding_as_on_31st_march || '');
+          if (values.document_files.other_files) {
+            Array.from(values.document_files.other_files).forEach((file) => {
               if (file instanceof File) formData.append('other_files', file);
             });
           }
           setSection80EE(values);
-          const response = await Factory('post', `/income_tax_returns/section-80ee/`, formData);
+          const response = await Factory('post', `/income_tax_returns/section-80ee/upsert/`, formData);
           if (response.res.status_cd === 0) {
+            // setSection80EE([response.res.data.data]);
             enqueueSnackbar('Section 80EE saved successfully', {
               anchorOrigin: { vertical: 'top', horizontal: 'right' },
               variant: 'success'
@@ -489,19 +564,19 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                         onChange={(e) => {
                           const file = e.target.files;
                           if (file) {
-                            setFieldValue('other_files', file);
+                            setFieldValue('document_files.other_files', file);
                           }
                         }}
                       />
                     </Button>
-                    {values.other_files && (
+                    {values?.document_files?.other_files && (
                       <Button
                         size="small"
                         sx={{ ml: 1 }}
                         variant="outlined"
                         onClick={() => {
                           setFileDialogOpen(true);
-                          setDialogFilesData([values.other_files]);
+                          setDialogFilesData(values?.document_files?.other_files?.files || values?.document_files?.other_files);
                         }}
                       >
                         View
@@ -516,9 +591,9 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                   <TextField
                     size="small"
                     label="Amount"
-                    name="amount"
-                    value={values.amount}
-                    onChange={(e) => setFieldValue('amount', e.target.value)}
+                    name="loan_outstanding_as_on_31st_march"
+                    value={values.loan_outstanding_as_on_31st_march}
+                    onChange={(e) => setFieldValue('loan_outstanding_as_on_31st_march', e.target.value)}
                   />
                 </Grid2>
               </Grid2>
@@ -534,11 +609,14 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
 
       {/* Section 80EEB: Interest paid on purchase of Electric vehicle */}
       <Formik
-        initialValues={section80EEB}
+        initialValues={{
+          ...section80EEB,
+          vehicle_registration_number: section80EEB.vehicle_registration_number ?? ''
+        }}
         enableReinitialize
         onSubmit={async (values) => {
           const formData = new FormData();
-          formData.append('vehicleRegistrationNumber', values.vehicleRegistrationNumber || '');
+          formData.append('vehicle_registration_number', values.vehicle_registration_number || '');
           formData.append('deductions', deductions.data.id);
           if (values.other_files) {
             Array.from(values.other_files).forEach((file) => {
@@ -546,7 +624,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
             });
           }
           setSection80EEB(values);
-          const response = await Factory('post', `/income_tax_returns/section-80ee/`, formData);
+          const response = await Factory('post', `/income_tax_returns/section-80eeb/upsert/`, formData);
           if (response.res.status_cd === 0) {
             enqueueSnackbar('Section 80EEB saved successfully', {
               anchorOrigin: { vertical: 'top', horizontal: 'right' },
@@ -564,7 +642,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
           <Form>
             <Card sx={{ mb: 3, p: { xs: 2, sm: 3 } }}>
               <Typography variant="h5" mt={0} mb={2} sx={{ textDecoration: 'underline' }}>
-                Section80 EEB: Interest paid on purchase of Electric vehicle
+                Section 80EEB: Interest paid on purchase of Electric vehicle
               </Typography>
               <Grid2 container spacing={2} alignItems="center" mb={2}>
                 <Grid2 size={{ xs: 12, sm: 6, md: 5 }}>
@@ -577,8 +655,9 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                       <input
                         type="file"
                         hidden
+                        multiple
                         onChange={(e) => {
-                          const file = e.target.files[0];
+                          const file = e.target.files;
                           if (file) {
                             setFieldValue('other_files', file);
                           }
@@ -591,11 +670,8 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                         sx={{ ml: 1 }}
                         variant="outlined"
                         onClick={() => {
-                          if (typeof values.other_files === 'string') {
-                            window.open(values.other_files, '_blank');
-                          } else {
-                            window.open(URL.createObjectURL(values.other_files), '_blank');
-                          }
+                          setFileDialogOpen(true);
+                          setDialogFilesData(values.other_files.files || values.other_files);
                         }}
                       >
                         View
@@ -610,9 +686,9 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                   <TextField
                     size="small"
                     label="Vehicle Registration Number"
-                    name="vehicleRegistrationNumber"
-                    value={values.vehicleRegistrationNumber}
-                    onChange={(e) => setFieldValue('vehicleRegistrationNumber', e.target.value)}
+                    name="vehicle_registration_number"
+                    value={values.vehicle_registration_number}
+                    onChange={(e) => setFieldValue('vehicle_registration_number', e.target.value)}
                   />
                 </Grid2>
               </Grid2>
@@ -628,28 +704,33 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
 
       {/* Combine Section 80TTA/80TTB, 80U, and Other deductions into one form */}
       <Formik
-        initialValues={otherDeductions}
+        initialValues={{
+          ...otherDeductions,
+          nature_of_disability: otherDeductions.nature_of_disability ?? '',
+          severity: otherDeductions.severity ?? '',
+          pay_rent_without_recieving_hra: otherDeductions.pay_rent_without_recieving_hra ?? 'false',
+          are_you_first_time_homebuyer: otherDeductions.are_you_first_time_homebuyer ?? 'false',
+          donation_made_to_political_party: otherDeductions.donation_made_to_political_party ?? 'false'
+        }}
         enableReinitialize
         onSubmit={async (values) => {
           const formData = new FormData();
-          formData.append('savingsInterest', values.savingsInterest || '');
-          formData.append('fdInterest', values.fdInterest || '');
-          formData.append('disabilityNature', values.disabilityNature || '');
-          formData.append('disabilitySeverity', values.disabilitySeverity || '');
-          formData.append('disabilityAmount', values.disabilityAmount || '');
-          if (values.disabilityCert) {
-            formData.append('disabilityCert', values.disabilityCert);
+          formData.append('deductions', deductions.data.id);
+          formData.append('total_saving_interest', values.total_saving_interest || '');
+          formData.append('total_fd_interest', values.total_fd_interest || '');
+          formData.append('nature_of_disability', values.nature_of_disability || '');
+          formData.append('severity', values.severity || '');
+          formData.append('deduction_amount', values.deduction_amount || '');
+          if (values.deduction_file) {
+            if (values.deduction_file instanceof File) formData.append('deduction_file', values.deduction_file);
           }
-          formData.append('rentHraPaid', values.rentHraPaid || '');
-          formData.append('rentHraAmount', values.rentHraAmount || '');
-          formData.append('firstHomeIsFirst', values.firstHomeIsFirst || '');
-          formData.append('firstHomeInterest', values.firstHomeInterest || '');
-          formData.append('firstHomeDate', values.firstHomeDate || '');
-          formData.append('politicalDonated', values.politicalDonated || '');
-          formData.append('politicalAmount', values.politicalAmount || '');
-          for (let pair of formData.entries()) {
-            console.log(pair[0] + ':', pair[1]);
-          }
+          formData.append('pay_rent_without_recieving_hra', values.pay_rent_without_recieving_hra || 'false');
+          formData.append('pay_rent_amount', values.pay_rent_amount || '');
+          formData.append('are_you_first_time_homebuyer', values.are_you_first_time_homebuyer || 'false');
+          formData.append('amount_of_interest_paid', values.amount_of_interest_paid || '');
+          formData.append('date_of_loan_sanctioned', values.date_of_loan_sanctioned || '');
+          formData.append('donation_made_to_political_party', values.donation_made_to_political_party || '');
+          formData.append('donation_amount', values.donation_amount || '');
           setOtherDeductions(values);
           let type = otherDeductions.id ? 'put' : 'post';
           let url = otherDeductions.id
@@ -683,9 +764,9 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                     size="small"
                     fullWidth
                     label="Total savings interest"
-                    name="savingsInterest"
-                    value={values.savingsInterest}
-                    onChange={(e) => setFieldValue('savingsInterest', e.target.value)}
+                    name="total_saving_interest"
+                    value={values.total_saving_interest}
+                    onChange={(e) => setFieldValue('total_saving_interest', e.target.value)}
                   />
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
@@ -693,9 +774,9 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                     size="small"
                     fullWidth
                     label="Total FD/RD interest (above 60 yrs)"
-                    name="fdInterest"
-                    value={values.fdInterest}
-                    onChange={(e) => setFieldValue('fdInterest', e.target.value)}
+                    name="total_fd_interest"
+                    value={values.total_fd_interest}
+                    onChange={(e) => setFieldValue('total_fd_interest', e.target.value)}
                   />
                 </Grid2>
               </Grid2>
@@ -709,19 +790,19 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                   <Autocomplete
                     size="small"
                     fullWidth
-                    options={disabilityNature}
-                    value={values.disabilityNature}
-                    onChange={(_, v) => setFieldValue('disabilityNature', v)}
+                    options={nature_of_disability}
+                    value={values.nature_of_disability ?? ''}
+                    onChange={(_, v) => setFieldValue('nature_of_disability', v)}
                     renderInput={(params) => <TextField {...params} label="Nature of Disability" />}
                   />
                 </Grid2>
-                <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+                <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                   <Autocomplete
                     size="small"
                     fullWidth
-                    options={disabilitySeverity}
-                    value={values.disabilitySeverity}
-                    onChange={(_, v) => setFieldValue('disabilitySeverity', v)}
+                    options={severity}
+                    value={values.severity ?? ''}
+                    onChange={(_, v) => setFieldValue('severity', v)}
                     renderInput={(params) => <TextField {...params} label="Severity" />}
                   />
                 </Grid2>
@@ -731,16 +812,28 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                     fullWidth
                     label="Deduction Amount"
                     type="number"
-                    name="disabilityAmount"
-                    value={values.disabilityAmount}
-                    onChange={(e) => setFieldValue('disabilityAmount', e.target.value)}
+                    name="deduction_amount"
+                    value={values.deduction_amount}
+                    onChange={(e) => setFieldValue('deduction_amount', e.target.value)}
                   />
                 </Grid2>
-                <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                  <Button size="small" variant="contained" component="label">
+                <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                  <Button size="small" variant="contained" sx={{ mr: 1 }} component="label">
                     Upload Certificate
-                    <input type="file" hidden onChange={(e) => setFieldValue('disabilityCert', e.target.files[0])} />
+                    <input type="file" hidden onChange={(e) => setFieldValue('deduction_file', e.target.files[0])} />
                   </Button>
+                  {values.deduction_file && (
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      onClick={() => {
+                        setFileDialogOpen(true);
+                        setDialogFilesData([{ url: values.deduction_file }]);
+                      }}
+                    >
+                      View
+                    </Button>
+                  )}
                 </Grid2>
               </Grid2>
 
@@ -752,21 +845,24 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
               <Grid2 container alignItems="center" spacing={2} mb={3}>
                 <Grid2 size={{ xs: 12, sm: 4 }}>
                   <Typography>Did you pay Rent without receiving HRA?</Typography>
-                  <RadioGroup row value={values.rentHraPaid} onChange={(_, v) => setFieldValue('rentHraPaid', v)}>
-                    <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
-                    <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
+                  <RadioGroup
+                    row
+                    value={values.pay_rent_without_recieving_hra}
+                    onChange={(_, v) => setFieldValue('pay_rent_without_recieving_hra', v)}
+                  >
+                    <FormControlLabel value={true} control={<Radio size="small" />} label="Yes" />
+                    <FormControlLabel value={false} control={<Radio size="small" />} label="No" />
                   </RadioGroup>
                 </Grid2>
-
                 <Grid2 size={{ xs: 12, sm: 8 }}>
-                  {values.rentHraPaid === 'yes' && (
+                  {values.pay_rent_without_recieving_hra === true && (
                     <Box display="flex" alignItems="center" gap={2} mt={1}>
                       <Typography>Amount</Typography>
                       <TextField
                         size="small"
                         type="number"
-                        value={values.rentHraAmount}
-                        onChange={(e) => setFieldValue('rentHraAmount', e.target.value)}
+                        value={values.pay_rent_amount}
+                        onChange={(e) => setFieldValue('pay_rent_amount', e.target.value)}
                         sx={{ maxWidth: 200 }}
                       />
                     </Box>
@@ -777,12 +873,16 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
               <Grid2 container alignItems="center" spacing={2} mb={3}>
                 <Grid2 size={{ xs: 12, sm: 3 }}>
                   <Typography>Are you a first time homebuyer?</Typography>
-                  <RadioGroup row value={values.firstHomeIsFirst} onChange={(_, v) => setFieldValue('firstHomeIsFirst', v)}>
-                    <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
-                    <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
+                  <RadioGroup
+                    row
+                    value={values.are_you_first_time_homebuyer}
+                    onChange={(_, v) => setFieldValue('are_you_first_time_homebuyer', v)}
+                  >
+                    <FormControlLabel value={true} control={<Radio size="small" />} label="Yes" />
+                    <FormControlLabel value={false} control={<Radio size="small" />} label="No" />
                   </RadioGroup>
                 </Grid2>
-                {values.firstHomeIsFirst === 'yes' && (
+                {values.are_you_first_time_homebuyer === true && (
                   <>
                     <Grid2 size={{ xs: 12, sm: 4.5 }}>
                       <Box display="flex" alignItems="center" gap={2} mt={1}>
@@ -790,8 +890,8 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                         <TextField
                           size="small"
                           type="number"
-                          value={values.firstHomeInterest}
-                          onChange={(e) => setFieldValue('firstHomeInterest', e.target.value)}
+                          value={values.amount_of_interest_paid}
+                          onChange={(e) => setFieldValue('amount_of_interest_paid', e.target.value)}
                           sx={{ maxWidth: 200 }}
                         />
                       </Box>
@@ -802,8 +902,8 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                         <TextField
                           size="small"
                           type="date"
-                          value={values.firstHomeDate}
-                          onChange={(e) => setFieldValue('firstHomeDate', e.target.value)}
+                          value={values.date_of_loan_sanctioned}
+                          onChange={(e) => setFieldValue('date_of_loan_sanctioned', e.target.value)}
                           InputLabelProps={{ shrink: true }}
                           sx={{ maxWidth: 200 }}
                         />
@@ -817,20 +917,24 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
               <Grid2 container alignItems="center" spacing={2} mb={3}>
                 <Grid2 size={{ xs: 12, sm: 4 }}>
                   <Typography>Donations made to political/rural i&d org?</Typography>
-                  <RadioGroup row value={values.politicalDonated} onChange={(_, v) => setFieldValue('politicalDonated', v)}>
-                    <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
-                    <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
+                  <RadioGroup
+                    row
+                    value={values.donation_made_to_political_party}
+                    onChange={(_, v) => setFieldValue('donation_made_to_political_party', v)}
+                  >
+                    <FormControlLabel value={true} control={<Radio size="small" />} label="Yes" />
+                    <FormControlLabel value={false} control={<Radio size="small" />} label="No" />
                   </RadioGroup>
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 8 }}>
-                  {values.politicalDonated === 'yes' && (
+                  {values.donation_made_to_political_party === true && (
                     <Box display="flex" alignItems="center" gap={2} mt={1}>
                       <Typography>Amount</Typography>
                       <TextField
                         size="small"
                         type="number"
-                        value={values.politicalAmount}
-                        onChange={(e) => setFieldValue('politicalAmount', e.target.value)}
+                        value={values.donation_amount}
+                        onChange={(e) => setFieldValue('donation_amount', e.target.value)}
                         sx={{ maxWidth: 200 }}
                       />
                     </Box>
@@ -853,24 +957,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
         <Typography variant="h5" mt={0} mb={2} sx={{ textDecoration: 'underline' }}>
           Section 80C - Claim deductions for investments made
         </Typography>
-        <Formik
-          initialValues={{ investments }}
-          enableReinitialize
-          validationSchema={investmentsSchema}
-          onSubmit={(values) => {
-            const formData = new FormData();
-            values.investments.forEach((investment, idx) => {
-              formData.append(`investments[${idx}][type]`, investment.type || '');
-              formData.append(`investments[${idx}][amount]`, investment.amount || '');
-              if (investment.doc) {
-                formData.append(`investments[${idx}][doc]`, investment.doc);
-              }
-            });
-            for (let pair of formData.entries()) {
-              console.log(pair[0] + ':', pair[1]);
-            }
-          }}
-        >
+        <Formik initialValues={{ investments }} enableReinitialize validationSchema={investmentsSchema}>
           {({ values, setFieldValue, errors }) => (
             <Form>
               <Table size="small">
@@ -890,18 +977,18 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                           size="small"
                           fullWidth
                           options={investmentTypes}
-                          value={row.type}
+                          value={row?.investment}
                           onChange={(_, v) => {
                             const newArr = [...values.investments];
-                            newArr[idx].type = v;
+                            newArr[idx].investment = v;
                             setFieldValue('investments', newArr);
                           }}
                           renderInput={(params) => (
                             <TextField
                               {...params}
                               placeholder="Investment/Payment"
-                              error={Boolean(errors.investments?.[idx]?.type)}
-                              helperText={errors.investments?.[idx]?.type}
+                              error={Boolean(errors.investments?.[idx]?.investment)}
+                              helperText={errors.investments?.[idx]?.investment}
                             />
                           )}
                         />
@@ -912,7 +999,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                           fullWidth
                           placeholder="Amount"
                           type="number"
-                          value={row.amount}
+                          value={row?.amount}
                           onChange={(e) => {
                             const newArr = [...values.investments];
                             newArr[idx].amount = e.target.value;
@@ -930,21 +1017,22 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                             hidden
                             onChange={(e) => {
                               const newArr = [...values.investments];
-                              newArr[idx].doc = e.target.files[0];
+                              // newArr[idx].file = e.target.files[0];
+                              newArr[idx].documents = [e.target.files[0]];
                               setFieldValue('investments', newArr);
                             }}
                           />
                         </Button>
-                        {row.doc && (
+                        {row?.documents.length > 0 && (
                           <Button
                             size="small"
                             variant="outlined"
                             sx={{ ml: 1 }}
                             onClick={() => {
-                              if (typeof row.doc === 'string') {
-                                window.open(row.doc, '_blank');
+                              if (typeof row?.documents[0].file_url === 'string') {
+                                window.open(row?.documents[0].file_url, '_blank');
                               } else {
-                                window.open(URL.createObjectURL(row.doc), '_blank');
+                                window.open(URL.createObjectURL(row?.documents[0]), '_blank');
                               }
                             }}
                           >
@@ -958,15 +1046,34 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                             size="small"
                             variant="contained"
                             color="primary"
-                            onClick={() => {
+                            onClick={async () => {
                               const formData = new FormData();
-                              formData.append('type', row.type || '');
+                              formData.append('deductions', deductions.data.id || '');
+                              formData.append('investment', row.investment || '');
                               formData.append('amount', row.amount || '');
-                              if (row.doc) {
-                                formData.append('doc', row.doc);
+                              if (row?.documents && row.documents[0] instanceof File) {
+                                formData.append('file', row.documents[0]);
                               }
-                              for (let pair of formData.entries()) {
-                                console.log(pair[0] + ':', pair[1]);
+
+                              let type = row.id ? 'put' : 'post';
+                              let url = row.id ? `/income_tax_returns/section-80c/${row.id}/` : `/income_tax_returns/section-80c/`;
+                              const response = await Factory(type, url, formData);
+                              if (response.res.status_cd === 0) {
+                                if (type === 'post') {
+                                  let __investments = investments;
+                                  __investments[idx] = response.res;
+                                  setInvestments([...__investments]);
+                                  setFieldValue('investments', [...__investments]);
+                                }
+                                enqueueSnackbar('Saved Successfully', {
+                                  anchorOrigin: { vertical: 'top', horizontal: 'right' },
+                                  variant: 'success'
+                                });
+                              } else {
+                                enqueueSnackbar('Error saving data', {
+                                  anchorOrigin: { vertical: 'top', horizontal: 'right' },
+                                  variant: 'error'
+                                });
                               }
                             }}
                           >
@@ -998,9 +1105,6 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                 >
                   Add Row
                 </Button>
-                <Button size="small" variant="contained" color="primary" type="submit">
-                  Save Investments
-                </Button>
               </Box>
             </Form>
           )}
@@ -1016,20 +1120,31 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
           initialValues={mediclaim}
           enableReinitialize
           validationSchema={mediclaimSchema}
-          onSubmit={(values) => {
+          onSubmit={async (values) => {
             const formData = new FormData();
-            formData.append('selfFamily', values.selfFamily || '');
-            formData.append('selfSenior', values.selfSenior || '');
-            formData.append('parents', values.parents || '');
-            formData.append('parentsSenior', values.parentsSenior || '');
-            formData.append('checkup', values.checkup || '');
-            if (Array.isArray(values.receipts)) {
-              values.receipts.forEach((file, idx) => {
-                if (file) formData.append(`receipts[${idx}]`, file);
+            formData.append('deductions', deductions.data.id || '');
+            formData.append('self_family_non_senior_citizen', values.self_family_non_senior_citizen || '');
+            formData.append('self_senior_citizen', values.self_senior_citizen || '');
+            formData.append('parents_non_senior_citizen', values.parents_non_senior_citizen || '');
+            formData.append('parents_senior_citizen', values.parents_senior_citizen || '');
+            formData.append('preventive_health_checkup', values.preventive_health_checkup || '');
+            if (Array.isArray(values.file)) {
+              values.file.forEach((file, idx) => {
+                if (file instanceof File) formData.append('files', file);
               });
             }
-            for (let pair of formData.entries()) {
-              console.log(pair[0] + ':', pair[1]);
+            let url = `/income_tax_returns/section-80d/full/`;
+            const response = await Factory('post', url, formData);
+            if (response.res.status_cd === 0) {
+              enqueueSnackbar('Saved Successfully', {
+                anchorOrigin: { vertical: 'top', horizontal: 'right' },
+                variant: 'success'
+              });
+            } else {
+              enqueueSnackbar('Error saving data', {
+                anchorOrigin: { vertical: 'top', horizontal: 'right' },
+                variant: 'error'
+              });
             }
           }}
         >
@@ -1045,10 +1160,10 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                     fullWidth
                     label="Amount"
                     type="number"
-                    value={values.selfFamily}
-                    onChange={(e) => setFieldValue('selfFamily', e.target.value)}
-                    error={Boolean(errors.selfFamily)}
-                    helperText={errors.selfFamily}
+                    value={values.self_family_non_senior_citizen}
+                    onChange={(e) => setFieldValue('self_family_non_senior_citizen', e.target.value)}
+                    error={Boolean(errors.self_family_non_senior_citizen)}
+                    helperText={errors.self_family_non_senior_citizen}
                   />
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
@@ -1060,10 +1175,10 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                     fullWidth
                     label="Amount"
                     type="number"
-                    value={values.selfSenior}
-                    onChange={(e) => setFieldValue('selfSenior', e.target.value)}
-                    error={Boolean(errors.selfSenior)}
-                    helperText={errors.selfSenior}
+                    value={values.self_senior_citizen}
+                    onChange={(e) => setFieldValue('self_senior_citizen', e.target.value)}
+                    error={Boolean(errors.self_senior_citizen)}
+                    helperText={errors.self_senior_citizen}
                   />
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
@@ -1075,10 +1190,10 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                     fullWidth
                     label="Amount"
                     type="number"
-                    value={values.parents}
-                    onChange={(e) => setFieldValue('parents', e.target.value)}
-                    error={Boolean(errors.parents)}
-                    helperText={errors.parents}
+                    value={values.parents_non_senior_citizen}
+                    onChange={(e) => setFieldValue('parents_non_senior_citizen', e.target.value)}
+                    error={Boolean(errors.parents_non_senior_citizen)}
+                    helperText={errors.parents_non_senior_citizen}
                   />
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
@@ -1090,10 +1205,10 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                     fullWidth
                     label="Amount"
                     type="number"
-                    value={values.parentsSenior}
-                    onChange={(e) => setFieldValue('parentsSenior', e.target.value)}
-                    error={Boolean(errors.parentsSenior)}
-                    helperText={errors.parentsSenior}
+                    value={values.parents_senior_citizen}
+                    onChange={(e) => setFieldValue('parents_senior_citizen', e.target.value)}
+                    error={Boolean(errors.parents_senior_citizen)}
+                    helperText={errors.parents_senior_citizen}
                   />
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
@@ -1105,10 +1220,10 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                     fullWidth
                     label="Amount"
                     type="number"
-                    value={values.checkup}
-                    onChange={(e) => setFieldValue('checkup', e.target.value)}
-                    error={Boolean(errors.checkup)}
-                    helperText={errors.checkup}
+                    value={values.preventive_health_checkup}
+                    onChange={(e) => setFieldValue('preventive_health_checkup', e.target.value)}
+                    error={Boolean(errors.preventive_health_checkup)}
+                    helperText={errors.preventive_health_checkup}
                   />
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
@@ -1120,20 +1235,23 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                       Upload
                       <input
                         type="file"
+                        multiple
                         hidden
-                        onChange={(e) => setFieldValue('receipts', [...(values.receipts || []), e.target.files[0]])}
+                        onChange={(e) => setFieldValue('file', [...(values.file || []), ...e.target.files])}
                       />
                     </Button>
-                    <Button
-                      size="small"
-                      variant="outlined"
-                      onClick={() => {
-                        setFileDialogOpen(true);
-                        setDialogFilesData(values.receipts);
-                      }}
-                    >
-                      View
-                    </Button>
+                    {values.file && (
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        onClick={() => {
+                          setFileDialogOpen(true);
+                          setDialogFilesData([...values.file]);
+                        }}
+                      >
+                        View
+                      </Button>
+                    )}
                   </Stack>
                 </Grid2>
               </Grid2>
@@ -1146,40 +1264,42 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
           )}
         </Formik>
       </Card>
-      {/*upload loan Sanction document/interest certificate 
-upload 
-+upload 
-*vehicle Registration Number 
-Enter 
-80DDB: 
-Medical treatment of Specified disease 
-*Name of Specified disease 
-Enter 
-*upload medical bills  */}
+      {/* 80DDB: Medical treatment of Specified disease */}
       <Card sx={{ mb: 3, p: { xs: 2, sm: 3 } }}>
         <Formik
-          initialValues={{
-            specifiedDisease: '',
-            medicalBills: null
-          }}
+          initialValues={section80DDB}
+          enableReinitialize
           validationSchema={Yup.object().shape({
-            specifiedDisease: Yup.string().required('Specified disease name is required'),
-            medicalBills: Yup.mixed().required('Medical bills are required')
+            name_of_disease: Yup.string().required('Specified disease name is required'),
+            files: Yup.mixed().required('Medical bills are required')
           })}
-          onSubmit={(values) => {
+          onSubmit={async (values) => {
             // Handle form submission
             const formData = new FormData();
-            formData.append('specifiedDisease', values.specifiedDisease || '');
             formData.append('deductions', deductions.data.id);
-            if (values.medicalBills) {
-              formData.append('medicalBills', values.medicalBills);
+            formData.append('name_of_disease', values.name_of_disease || '');
+            Array.from(values.files).forEach((file) => {
+              if (file instanceof File) formData.append('files', file);
+            });
+
+            const response = await Factory('post', `/income_tax_returns/section-80ddb/upsert/`, formData);
+            if (response.res.status_cd === 0) {
+              enqueueSnackbar('Saved Successfully', {
+                anchorOrigin: { vertical: 'top', horizontal: 'right' },
+                variant: 'success'
+              });
+            } else {
+              enqueueSnackbar('Error saving data', {
+                anchorOrigin: { vertical: 'top', horizontal: 'right' },
+                variant: 'error'
+              });
             }
           }}
         >
           {({ values, errors, touched, setFieldValue, handleSubmit }) => (
             <Form>
               <Typography variant="h5" mt={0} mb={2} sx={{ textDecoration: 'underline' }}>
-                Section80 DDB: Medical treatment of Specified disease
+                Section 80DDB: Medical treatment of Specified disease
               </Typography>
               <Grid2 container spacing={2} alignItems="center" mb={2}>
                 <Grid2 size={{ xs: 12, sm: 6, md: 5 }}>
@@ -1190,11 +1310,11 @@ Enter
                     size="small"
                     fullWidth
                     label="Specified Disease"
-                    name="specifiedDisease"
-                    value={values.specifiedDisease}
-                    onChange={(e) => setFieldValue('specifiedDisease', e.target.value)}
-                    error={Boolean(touched.specifiedDisease && errors.specifiedDisease)}
-                    helperText={touched.specifiedDisease && errors.specifiedDisease}
+                    name="name_of_disease"
+                    value={values.name_of_disease}
+                    onChange={(e) => setFieldValue('name_of_disease', e.target.value)}
+                    error={Boolean(touched.name_of_disease && errors.name_of_disease)}
+                    helperText={touched.name_of_disease && errors.name_of_disease}
                   />
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 5 }}>
@@ -1207,23 +1327,27 @@ Enter
                       <input
                         type="file"
                         hidden
+                        multiple
                         onChange={(e) => {
-                          const file = e.target.files[0];
+                          const file = e.target.files;
                           if (file) {
-                            setFieldValue('medicalBills', file);
+                            setFieldValue('files', [...values.files, ...file]);
                           }
                         }}
                       />
                     </Button>
-                    {values.medicalBills && (
-                      <Typography variant="body2" sx={{ mt: 1 }}>
-                        {values.medicalBills.name}
-                      </Typography>
-                    )}
-                    {touched.medicalBills && errors.medicalBills && (
-                      <Typography variant="caption" color="error">
-                        {errors.medicalBills}
-                      </Typography>
+                    {values.files && (
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        onClick={() => {
+                          setFileDialogOpen(true);
+                          setDialogFilesData([...values.files]);
+                        }}
+                        sx={{ ml: 1 }}
+                      >
+                        View
+                      </Button>
                     )}
                   </Box>
                 </Grid2>
