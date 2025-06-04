@@ -119,7 +119,16 @@ export default function WorkLocationDialog({ open, handleClose, fetchWorkLocatio
           <CustomInput
             name={field.name}
             value={values[field.name]}
-            onChange={handleChange}
+            onChange={(e) => {
+              if (field.name === 'address_pincode') {
+                const numericValue = e.target.value.replace(/\D/g, '');
+                if (numericValue.length <= 6) {
+                  setFieldValue(field.name, numericValue);
+                }
+              } else {
+                setFieldValue(field.name, e.target.value);
+              }
+            }}
             onBlur={handleBlur}
             error={touched[field.name] && Boolean(errors[field.name])}
             helperText={touched[field.name] && errors[field.name]}

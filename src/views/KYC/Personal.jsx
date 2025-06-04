@@ -304,9 +304,11 @@ const Personal = ({ open, onClose, onSubmit, isSubmitting, cancel }) => {
           </Grid>
         </DialogContent>
         <DialogActions sx={{ p: 2, px: 3 }}>
-          <Button onClick={onClose} variant="outlined" color="error" size="medium">
-            Cancel
-          </Button>
+          {cancel && (
+            <Button onClick={onClose} variant="outlined" color="error" size="medium">
+              Cancel
+            </Button>
+          )}
           <Button
             type="submit"
             variant="contained"

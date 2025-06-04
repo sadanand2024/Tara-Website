@@ -28,11 +28,13 @@ import useAuth from 'hooks/useAuth';
 import useScriptRef from 'hooks/useScriptRef';
 import { strengthColor, strengthIndicator } from 'utils/password-strength';
 import { openSnackbar } from 'store/slices/snackbar';
+import OtpInput from 'react18-input-otp';
+import { ThemeMode } from 'config';
 
 // assets
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
-
+import AuthCodeVerification from './AuthCodeVerification';
 // ===========================|| JWT - REGISTER ||=========================== //
 
 export default function JWTRegister({ ...others }) {
@@ -49,6 +51,7 @@ export default function JWTRegister({ ...others }) {
   const [strength, setStrength] = useState(0);
   const [level, setLevel] = useState();
   const { register } = useAuth();
+  const borderColor = theme.palette.mode === ThemeMode.DARK ? theme.palette.grey[200] : theme.palette.grey[300];
 
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword);
@@ -153,6 +156,21 @@ export default function JWTRegister({ ...others }) {
               return;
             }
 
+            // Validate OTP length before proceeding
+            if (!values.otp || values.otp.length !== 6) {
+              setErrors({ submit: 'Please enter complete 6-digit OTP' });
+              dispatch(
+                openSnackbar({
+                  open: true,
+                  message: 'Please enter complete 6-digit OTP',
+                  variant: 'alert',
+                  alert: { color: 'error' },
+                  close: false
+                })
+              );
+              return;
+            }
+
             const trimmedEmail = values.email.trim();
             const response = await register(
               trimmedEmail,
@@ -170,18 +188,18 @@ export default function JWTRegister({ ...others }) {
             dispatch(
               openSnackbar({
                 open: true,
-                message: 'Your registration has been successfully completed. Please login to continue.',
+                message: 'Your registration has been successfully completed',
                 variant: 'alert',
                 alert: { color: 'success' },
                 close: false
               })
             );
           } catch (err) {
-            console.error('Registration failed:', err);
+            // console.error('Registration failed:', err);
 
             setStatus({ success: false });
 
-            let errorMsg = err.error || 'Registration failed. Please try again.';
+            let errorMsg = err.response?.data?.error || 'Registration failed. Please try again.';
             if (err.error) {
               errorMsg = err.error;
             }
@@ -301,22 +319,32 @@ export default function JWTRegister({ ...others }) {
                 )}
               </>
             ) : (
-              <FormControl fullWidth error={Boolean(touched.otp && errors.otp)} sx={{ ...theme.typography.customInput }}>
-                <InputLabel htmlFor="outlined-adornment-otp-register">OTP</InputLabel>
-                <OutlinedInput
-                  id="outlined-adornment-otp-register"
-                  value={values.otp}
-                  name="otp"
-                  onBlur={handleBlur}
-                  onChange={handleChange}
-                  inputProps={{}}
-                />
-                {touched.otp && errors.otp && (
-                  <FormHelperText error id="standard-weight-helper-text-otp-register">
-                    {errors.otp}
-                  </FormHelperText>
-                )}
-              </FormControl>
+              <OtpInput
+                value={values.otp}
+                onChange={(otpNumber) => {
+                  // Only allow numbers
+                  const numbersOnly = otpNumber.replace(/[^0-9]/g, '');
+                  handleChange({ target: { name: 'otp', value: numbersOnly } });
+                }}
+                numInputs={6}
+                type="number"
+                shouldAutoFocus
+                containerStyle={{ justifyContent: 'space-between' }}
+                inputStyle={{
+                  width: '100%',
+                  margin: '8px',
+                  padding: '10px',
+                  border: `1px solid ${borderColor}`,
+                  borderRadius: 4,
+                  ':hover': {
+                    borderColor: theme.palette.primary.main
+                  }
+                }}
+                focusStyle={{
+                  outline: 'none',
+                  border: `2px solid ${theme.palette.primary.main}`
+                }}
+              />
             )}
             {!showOTPField && (
               <Grid container sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
@@ -337,11 +365,11 @@ export default function JWTRegister({ ...others }) {
                 </Grid>
               </Grid>
             )}
-            {errors.submit && (
+            {/* {errors.submit && (
               <Box sx={{ mt: 3 }}>
                 <FormHelperText error>{errors.submit}</FormHelperText>
               </Box>
-            )}
+            )} */}
 
             <Box sx={{ mt: 2 }}>
               <AnimateButton>

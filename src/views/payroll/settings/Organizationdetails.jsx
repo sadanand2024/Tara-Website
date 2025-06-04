@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { CardContent, Button, Box, Typography, Tooltip, Card, IconButton } from '@mui/material';
+import { CardContent, Button, Box, Typography, Tooltip, Card } from '@mui/material';
 import Grid2 from '@mui/material/Grid2';
-import CustomUpload from 'utils/CustomUpload';
 import { indian_States_And_UTs } from 'utils/indian_States_And_UT';
 import { industries } from 'utils/industries';
 import { entity_choices } from 'utils/Entity-types';
@@ -18,6 +17,7 @@ import { openSnackbar } from 'store/slices/snackbar';
 import { useSelector } from 'react-redux';
 import CircularProgress from '@mui/material/CircularProgress';
 import DeleteIcon from '@mui/icons-material/Delete';
+import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
 
 import MainCard from 'ui-component/cards/MainCard';
 import CustomAutocomplete from 'utils/CustomAutocomplete';
@@ -34,7 +34,6 @@ function Organizationdetails() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const payrollId = searchParams.get('payrollid');
 
   const initialData = {
     business_name: '',
@@ -141,11 +140,8 @@ function Organizationdetails() {
       };
 
       postData.append('business_details', JSON.stringify(postBusinessDetails.business_details));
-      if (formik.touched.logo && values.logo !== formik.initialValues.logo) {
-        // Only append logo if it's a File object, not a URL string
-        if (values.logo instanceof File) {
-          postData.append('logo', values.logo);
-        }
+      if (values.logo && typeof values.logo !== 'string') {
+        postData.append('logo', values.logo);
       }
       postData.append('sender_email', values.sender_email);
       postData.append('filling_address_line1', values.filling_address_line1);
@@ -183,48 +179,13 @@ function Organizationdetails() {
     }
   });
 
-  const handleDeleteLogo = async () => {
-    if (!payrollId) return;
-
-    setLoading(true);
-    const url = `/payroll/clear-payroll-org-logo/${payrollId}/`;
-    const { res, error } = await Factory('delete', url, {});
-    setLoading(false);
-
-    if (res.status_cd === 0) {
-      setValues((prev) => ({
-        ...prev,
-        logo: null
-      }));
-      dispatch(
-        openSnackbar({
-          open: true,
-          message: 'Logo deleted successfully',
-          variant: 'alert',
-          alert: { color: 'success' },
-          close: false
-        })
-      );
-    } else {
-      dispatch(
-        openSnackbar({
-          open: true,
-          message: res.data.data ? JSON.stringify(res.data.data) : 'Failed to delete logo',
-          variant: 'alert',
-          alert: { color: 'error' },
-          close: false
-        })
-      );
-    }
-  };
-
   const renderFields = (fields) => {
     return fields.map((field) => {
       if (field.name === 'logo') {
         return (
           <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4 }}>
             <Typography gutterBottom>{field.label}</Typography>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            {/* <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <CustomUpload
                 title="Upload Logo"
                 setData={(data) => {
@@ -237,7 +198,15 @@ function Organizationdetails() {
                 onDelete={handleDeleteLogo}
                 sx={{ width: '100%' }}
               />
-            </Box>
+            </Box> */}
+            <RenderFileUpload
+              label={field.label}
+              fieldName={field.name}
+              file={values[field.name]}
+              setFieldValue={setFieldValue}
+              touched={touched[field.name]}
+              errors={errors[field.name]}
+            />
           </Grid2>
         );
       }
@@ -303,15 +272,22 @@ function Organizationdetails() {
             onChange={(e) => {
               const value = e.target.value;
 
-              if (field.name === 'pan' && value.length > 10) {
-                return;
-              }
               if (field.name === 'pan') {
-                setFieldValue(field.name, value.toUpperCase());
+                if (value.length <= 10) {
+                  // Allow only uppercase letters and numbers
+                  const formattedValue = value.replace(/[^A-Z0-9]/gi, '').toUpperCase();
+                  setFieldValue(field.name, formattedValue);
+                }
+              } else if (['org_address_pincode', 'filling_address_pincode'].includes(field.name)) {
+                const numericValue = value.replace(/\D/g, '');
+                if (numericValue.length <= 6) {
+                  setFieldValue(field.name, numericValue);
+                }
               } else {
                 setFieldValue(field.name, value);
               }
             }}
+            type={field.name === 'pan' ? 'text' : field.name === 'org_address_pincode' ? 'number' : 'text'}
             onBlur={handleBlur}
             error={touched[field.name] && Boolean(errors[field.name])}
             helperText={touched[field.name] && errors[field.name]}
@@ -433,7 +409,6 @@ function Organizationdetails() {
     if (id) {
       getOrgDetails(id); // Call directly
     } else if (businessId) {
-      console.log('anand');
       individual_Business_get();
     }
   }, [searchParams, businessId]);
