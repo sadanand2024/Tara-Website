@@ -94,12 +94,18 @@ const RenderTable = ({
                     {body_keys.map((key, cellIndex) => (
                       <TableCell key={cellIndex}>{row[key]}</TableCell>
                     ))}
-                    <TableCell>
+                    <TableCell align="center">
                       {from === 'Salary Revisions' ? (
                         <Button
                           variant="outlined"
                           size="small"
-                          onClick={() => navigate(`/payrollsetup/add-employee?employee_id=${row.id}&payrollid=${payrollId}&tabValue=1`)}
+                          onClick={() => {
+                            navigate(
+                              `/payroll/settings/add-employee?employee_id=${
+                                row.employee_id
+                              }&payrollid=${payrollId}&from=${'Salary Revisions'}&tabValue=${Number(1)}`
+                            );
+                          }}
                         >
                           Edit Pay Structure
                         </Button>

@@ -182,8 +182,8 @@ const PayrollWorkflows = ({ type }) => {
           { name: 'department', label: 'Department' },
           { name: 'designation', label: 'Designation' },
           { name: 'current_ctc', label: 'Current CTC' },
-          { name: 'created_on', label: 'last Revison' },
-          { name: 'revised_ctc', label: '	Revised CTC' }
+          { name: 'last_revision', label: 'Last Revision' },
+          { name: 'revised_ctc', label: 'Revised CTC' }
         ]
       },
       {

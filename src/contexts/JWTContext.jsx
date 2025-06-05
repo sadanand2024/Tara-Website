@@ -101,7 +101,7 @@ export function JWTProvider({ children }) {
     }); // ✅ Update local context state
   };
 
-  const register = async (email, password, organizationName, moduleId, type, context_type) => {
+  const register = async (email, otp, password, organizationName, moduleId, type, context_type) => {
     try {
       let url = '';
       if (type === 'product') {
@@ -109,11 +109,12 @@ export function JWTProvider({ children }) {
       } else if (type === 'service') {
         url = '/user_management/register/register_user_with_service/';
       } else {
-        url = '/user_management/register/standard ';
+        url = '/user_management/register/standard';
       }
       let __postData = {
         email,
-        password
+        password,
+        otp
       };
       if (context_type === 'business' && type === 'product') {
         __postData.business_name = organizationName;
@@ -125,6 +126,20 @@ export function JWTProvider({ children }) {
       }
       const response = await axios.post(url, __postData);
       if (response.status === 201 && response.statusText === 'Created') {
+        const serviceToken = response.data.access_token;
+        const user = response.data;
+
+        if (serviceToken) {
+          setSession(serviceToken, user);
+          reduxDispatch(storeUser(user)); // ✅ Send user to Redux
+          dispatch({
+            type: LOGIN,
+            payload: {
+              isLoggedIn: true,
+              user
+            }
+          });
+        }
         return response.data;
       }
     } catch (error) {

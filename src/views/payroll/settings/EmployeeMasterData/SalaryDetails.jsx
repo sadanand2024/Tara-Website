@@ -12,6 +12,7 @@ import { openSnackbar } from 'store/slices/snackbar';
 import { TextField } from '@mui/material';
 import { FormGroup, FormControlLabel, Radio } from '@mui/material';
 import SalaryTemplate from './SalaryTemplate';
+import { useNavigate } from 'react-router-dom';
 const validationSchema = Yup.object({
   // template_name: Yup.string().required('Template Name is required'),
   annual_ctc: Yup.number().required('Annual CTC is required').positive('Annual CTC must be a positive number')
@@ -24,17 +25,15 @@ function SalaryDetails({
   createdEmployeeId,
   setSubmitRef,
   onNext,
-  from,
   setEnablePreviewButton,
   enablePreviewButton
 }) {
-  // console.log(employeeData);
-  const [open, setOpen] = useState(false);
   const [payrollid, setPayrollId] = useState(null);
   const [salary_teamplates_data, setSalary_teamplates_data] = useState([]);
   const [searchParams] = useSearchParams();
+  const [from, setFrom] = useState(null);
   const dispatch = useDispatch();
-
+  const navigate = useNavigate();
   const fields = [
     { name: 'salary_template', label: 'Salary Template' },
     { name: 'annual_ctc', label: 'Annual CTC' }
@@ -45,6 +44,11 @@ function SalaryDetails({
     if (id) setPayrollId(id);
   }, [searchParams]);
 
+  useEffect(() => {
+    const from = searchParams.get('from');
+
+    if (from) setFrom(from);
+  }, [searchParams]);
   const formik = useFormik({
     initialValues: {
       template_name: '',
@@ -61,12 +65,14 @@ function SalaryDetails({
     validationSchema,
 
     onSubmit: async (values) => {
-      let postData = { ...values };
-      if (values.errorMessage) {
+      const postData = { ...values };
+
+      // Show error if present in form values
+      if (postData.errorMessage) {
         dispatch(
           openSnackbar({
             open: true,
-            message: values.errorMessage,
+            message: postData.errorMessage,
             variant: 'alert',
             alert: { color: 'error' },
             close: false
@@ -75,26 +81,20 @@ function SalaryDetails({
         return;
       }
 
-      if (employeeData?.id) {
-        postData.employee = employeeData.id;
-      } else if (createdEmployeeId) {
-        postData.employee = createdEmployeeId;
-      }
-
-      let method = 'post';
-      let url = '/payroll/employee-salary';
-
-      if (employeeData?.employee_salary) {
-        const lastSalaryRecord = employeeData.employee_salary;
-        if (lastSalaryRecord?.id) {
-          method = 'put';
-          url = `/payroll/employee-salary/${lastSalaryRecord.id}`;
-        }
+      // Assign employee ID
+      const employeeId = employeeData?.id || createdEmployeeId;
+      if (employeeId) {
+        postData.employee = employeeId;
       }
       if (from === 'Salary Revisions') {
-        method = 'post';
-        url = '/payroll/employee-salary';
+        postData.update_month = new Date().getMonth() + 1;
       }
+      // Determine API method and URL
+      const method = employeeData?.employee_salary?.id ? 'put' : 'post';
+      const url = employeeData?.employee_salary?.id
+        ? `/payroll/employee-salary/${employeeData.employee_salary.id}`
+        : '/payroll/employee-salary';
+
       const { res } = await Factory(method, url, postData);
 
       if (res?.status_cd === 1) {
@@ -107,18 +107,23 @@ function SalaryDetails({
             close: false
           })
         );
+        return;
+      }
+
+      // Success case
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Data Saved Successfully',
+          variant: 'alert',
+          alert: { color: 'success' },
+          close: false
+        })
+      );
+      if (from === 'Salary Revisions') {
+        navigate(-1);
       } else {
-        dispatch(
-          openSnackbar({
-            open: true,
-            message: 'Data Saved Successfully',
-            variant: 'alert',
-            alert: { color: 'success' },
-            close: false
-          })
-        );
         onNext();
-        const employeeId = employeeData?.id || createdEmployeeId;
         await fetchEmployeeData(employeeId);
       }
     }
@@ -204,15 +209,11 @@ function SalaryDetails({
   // }, [values.annual_ctc]);
 
   useEffect(() => {
-    console.log(employeeData?.employee_salary);
-
     if (employeeData?.employee_salary) {
-      let lastSalary = employeeData.employee_salary;
-      console.log(lastSalary);
       setValues((prev) => ({
         ...prev,
         ...employeeData?.employee_salary,
-        tax_regime_opted: lastSalary?.tax_regime_opted || 'old'
+        tax_regime_opted: employeeData.employee_salary?.tax_regime_opted || 'old'
       }));
     }
   }, [employeeData]);

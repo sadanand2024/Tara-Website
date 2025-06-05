@@ -115,7 +115,7 @@ export default function Index() {
     navigate(`/payroll${href}?payrollid=${payrollId}&tabValue=${index}&month=${month}&financial_year=${financialYear}`);
   };
   return (
-    <MainCard title={`Monthly Payroll Dashboard ${months[month - 1]}`} tagline="Explore your monthly payroll details">
+    <MainCard title={`Monthly Payroll Dashboard of ${months[month - 1]}`} tagline="Explore your monthly payroll details">
       {' '}
       <Box sx={{ pb: 3 }}>
         <Grid2 container spacing={{ xs: 2, md: 3 }}>

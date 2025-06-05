@@ -15,7 +15,7 @@ import { storeUser } from 'store/slices/account'; // redux slice
 export default function Dashboard() {
   const reduxDispatch = useReduxDispatch(); // ✅ Redux dispatcher
   const snackbar = useSnackbar();
-  const user = useSelector((state) => state).accountReducer.user;
+  const user = useSelector((state) => state.accountReducer.user);
   const [accDialog, setAccDialog] = useState(false);
   const [personalKYCDialog, setPersonalKYCDialog] = useState(false);
   const [businessKYCDialog, setBusinessKYCDialog] = useState(false);

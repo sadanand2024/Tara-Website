@@ -33,8 +33,7 @@ const TABLE_HEADERS = [
   'Earned Gross',
   'Total Earnings',
   'Total Deductions',
-  'Net Pay',
-  'Status'
+  'Net Pay'
 ];
 
 const PayrollSummary = ({ payrollId, month, financialYear }) => {
@@ -165,7 +164,9 @@ const PayrollSummary = ({ payrollId, month, financialYear }) => {
                     {header}
                   </TableCell>
                 ))}
-                <TableCell sx={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>Action</TableCell>
+                <TableCell align="center" sx={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>
+                  Action
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -184,20 +185,20 @@ const PayrollSummary = ({ payrollId, month, financialYear }) => {
               ) : (
                 paginatedData.map((item, index) => (
                   <TableRow key={item.id || index}>
-                    <TableCell>{item.associate_id || '-'}</TableCell>
-                    <TableCell>{item.employee_name || '-'}</TableCell>
-                    <TableCell>{item.department || '-'}</TableCell>
-                    <TableCell>{item.designation || '-'}</TableCell>
-                    <TableCell>{item.paid_days || '-'}</TableCell>
-                    <TableCell>{item.ctc || '-'}</TableCell>
-                    <TableCell>{item.actual_gross || '-'}</TableCell>
-                    <TableCell>{item.gross_salary || '-'}</TableCell>
-                    <TableCell>{item.earned_salary || '-'}</TableCell>
-                    <TableCell>{item.deductions?.['Total'] || '-'}</TableCell>
-                    <TableCell>{item.net_salary || '-'}</TableCell>
-                    <TableCell>{item.status || '-'}</TableCell>
+                    <TableCell>{item.associate_id || 'NA'}</TableCell>
+                    <TableCell>{item.employee_name || 'NA'}</TableCell>
+                    <TableCell>{item.department || 'NA'}</TableCell>
+                    <TableCell>{item.designation || 'NA'}</TableCell>
+                    <TableCell>{item.paid_days || 'NA'}</TableCell>
+                    <TableCell>{item.ctc || 'NA'}</TableCell>
+                    <TableCell>{item.actual_gross || 'NA'}</TableCell>
+                    <TableCell>{item.gross_salary || 'NA'}</TableCell>
+                    <TableCell>{item.earned_salary || 'NA'}</TableCell>
+                    <TableCell>{item.deductions?.['Total'] || 'NA'}</TableCell>
+                    <TableCell>{item.net_salary || 'NA'}</TableCell>
                     <TableCell>
                       <Typography
+                        align="center"
                         variant="body2"
                         sx={{
                           cursor: 'pointer',

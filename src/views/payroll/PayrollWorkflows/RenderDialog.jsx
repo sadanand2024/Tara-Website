@@ -95,8 +95,8 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
         return {
           employee: '',
           current_ctc: '',
-          created_on: '',
-          revised_ctc: ''
+          updated_on: '',
+          current_ctc: ''
         };
       case 'Tds':
         return {
@@ -182,12 +182,7 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
         });
 
       case 'Salary Revisions':
-        return Yup.object({
-          employee: Yup.string().required('Employee is required'),
-          current_ctc: Yup.string().required('Current CTC is required'),
-          created_on: Yup.string().required('Created on is required'),
-          revised_ctc: Yup.string().required('Revised CTC is required')
-        });
+        return Yup.object({});
       case 'Tds':
         return Yup.object({
           employee: Yup.string().required('Employee is required'),
@@ -418,11 +413,12 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
           <CustomAutocomplete
             value={employeeMasterData?.find((emp) => emp.id === values[field.name]) || null}
             onChange={(event, newValue) => {
+              console.log(newValue);
               setFieldValue(field.name, newValue?.id || '');
               setFieldValue('department', newValue.department_name);
               setFieldValue('designation', newValue.designation_name);
               if (from === 'Salary Revisions') {
-                // setFieldValue('current_ctc', newValue.current_ctc);
+                setFieldValue('current_ctc', newValue.employee_salary.annual_ctc);
                 // setFieldValue('revised_ctc', newValue.current_ctc);
               }
             }}
@@ -552,7 +548,8 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
               field.name === 'present_days' ||
               field.name === 'week_offs' ||
               field.name === 'pan' ||
-              field.name === 'regime'
+              field.name === 'regime' ||
+              field.name === 'current_ctc'
             }
           />
         )}
@@ -609,16 +606,18 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
           >
             Cancel
           </Button>
-          <Button onClick={handleSubmit} type="submit" variant="contained" color="primary">
-            Submit
-          </Button>
+          {from !== 'Salary Revisions' && (
+            <Button onClick={handleSubmit} type="submit" variant="contained" color="primary">
+              Submit
+            </Button>
+          )}
         </Stack>
       }
     >
       <Box component="form" onSubmit={handleSubmit}>
         <Grid2 container spacing={2}>
           {/* Render dynamic fields for department */}
-          {renderFields(fields)}
+          {from === 'Salary Revisions' && selectedRecord === null ? renderFields(fields.slice(0, 4)) : renderFields(fields)}
         </Grid2>
         {from === 'Exits' && (
           <Grid2 container spacing={3} sx={{ mt: 2 }}>
