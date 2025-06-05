@@ -791,7 +791,7 @@ export default function ITR() {
                           type="post"
                           data={taxPaidDetails}
                           status={taxPaidDetails.status}
-                          urlEndpoint="taxPaid"
+                          urlEndpoint={`/income_tax_returns/tax-paid-details/create-or-update/`}
                           recId={taxPaidDetails.id}
                           service_request={service_id}
                           task_id={taxPaidDetails.task_id}
