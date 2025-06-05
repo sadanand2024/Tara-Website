@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Typography,
@@ -40,9 +40,9 @@ const foreignDocTypes = [
 
 const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDialogFilesData, service_id }) => {
   const { enqueueSnackbar } = useSnackbar();
-  const salary_income = data.find((item) => item.category_name === 'Salary Income');
-  const other_income = data.find((item) => item.category_name === 'Other Income');
-  const nri_employee_salary = data.find((item) => item.category_name === 'NRI Employee Salary');
+  const [salary_income, setSalaryIncome] = useState(data.find((item) => item.category_name === 'Salary Income'));
+  const [other_income, setOtherIncome] = useState(data.find((item) => item.category_name === 'Other Income'));
+  const [nri_employee_salary, setForeignIncome] = useState(data.find((item) => item.category_name === 'NRI Employee Salary'));
   // Validation schemas
   const docsSchema = Yup.object({
     notes: Yup.object({
@@ -227,6 +227,7 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
           variant: 'success',
           anchorOrigin: { vertical: 'top', horizontal: 'right' }
         });
+        setSalaryIncome((prev) => ({ ...prev, data: res.res.data }));
       } else {
         enqueueSnackbar('Error saving Foreign/NRI Employment & Salary Details!', {
           variant: 'error',
@@ -309,10 +310,20 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
             </TableBody>
           </Table>
         </Box>
-        <Box display="flex" justifyContent="flex-end" mt={2}>
+
+        <Box display="flex" justifyContent="flex-end" mt={2} gap={2}>
           <Button type="submit" variant="contained" color="primary">
             Save Documents
           </Button>
+          <GetActionButtons
+            type="put"
+            data={salary_income}
+            status={salary_income.data[0].status}
+            urlEndpoint={`salary-income`}
+            service_request={service_id}
+            recId={salary_income.data[0].id}
+            setData={setSalaryIncome}
+          />
         </Box>
       </form>
       {/* Section 2: Details of any other income you wish to share */}
@@ -1110,13 +1121,13 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
           {/* <Button type="submit" variant="contained" color="primary">
             Save House Property Income
           </Button> */}
-          <GetActionButtons
+          {/* <GetActionButtons
             data={properties}
             status={properties.status}
             urlEndpoint="personal-information"
             taskId={properties.id}
             setData={setProperties}
-          />
+          /> */}
         </Box>
       </Box>
     </form>
@@ -1134,11 +1145,11 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
       purchase_doc: null,
       sale_doc: null,
       reinvestment_made: 'no',
-      reinvestment: {
-        invest_in: '',
+      reinvestment_details_docs: null,
+      reinvestment_details: {
+        invested_in: '',
         invest_amount: '',
-        invest_date: '',
-        reinvestment_details_docs: null
+        invest_date: ''
       }
     }
   ];
@@ -1146,19 +1157,27 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
     data.find((item) => item.category_name === 'Capital Gains Applicable Details') || null
   );
   let [cg_equity_mutual, setCgEquityMutual] = React.useState(
-    data.find((item) => item.category_name === 'Capital Gain Equity Mutual Fund') || null
+    data.find((item) => item.category_name === 'Capital Gains Equity Mutual Fund') || null
   );
-  let [cg_other_sources, setCgOtherSources] = React.useState(
-    data.find((item) => item.category_name === 'Capital Gain from Other Sources') || null
-  );
+  let [cg_other_sources, setCgOtherSources] = React.useState(data.find((item) => item.category_name === 'Other Capital Gains') || null);
   const [selectedTypes, setSelectedTypes] = React.useState([]);
   const [properties, setProperties] = React.useState(initialState);
   const [numOtherGains, setNumOtherGains] = React.useState(1);
-  const enqueueSnackbar = useSnackbar();
+  const { enqueueSnackbar } = useSnackbar();
   const propertyTypes = ['land', 'plot', 'building'];
   const gainTypes = ['Equity shares', 'Mutual funds', 'Property/Land', 'Foreign equity', 'Others'];
   const eqMfTypes = ['Equity shares', 'Mutual funds (equity)', 'Mutual funds (debt/hybrid)'];
   const investOptions = ['Bonds', 'Property', 'Other'];
+  const [otherGainsRows, setOtherGainsRows] = React.useState([
+    {
+      asset_details: '',
+      purchase_date: '',
+      purchase_value: '',
+      sale_date: '',
+      sale_value: '',
+      doc: null
+    }
+  ]);
 
   useEffect(() => {
     if (cg_property_land) {
@@ -1167,6 +1186,95 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
         setProperties(cg_property_land.data.capital_gains_property_details);
     }
   }, [cg_property_land]);
+
+  useEffect(() => {
+    if (cg_other_sources) {
+      setOtherGainsRows(cg_other_sources.data);
+    }
+  }, [cg_other_sources]);
+
+  useEffect(() => {
+    if (otherGainsRows.length === 0) {
+      setOtherGainsRows([
+        {
+          asset_details: '',
+          purchase_date: '',
+          purchase_value: '',
+          sale_date: '',
+          sale_value: '',
+          doc: null
+        }
+      ]);
+    }
+  }, [otherGainsRows]);
+
+  const removeProperty = async (property) => {
+    const response = await Factory('delete', `/income_tax_returns/capital-gains/delete-property/${property.id}/`);
+    if (response.res.status_cd === 0) {
+      let __properties = [...properties];
+      __properties.splice(__properties.indexOf(property), 1);
+      setProperties(__properties);
+      enqueueSnackbar('Property removed successfully', {
+        anchorOrigin: { vertical: 'top', horizontal: 'right' },
+        variant: 'success'
+      });
+    } else {
+      enqueueSnackbar('Error removing property', { anchorOrigin: { vertical: 'top', horizontal: 'right' }, variant: 'error' });
+    }
+  };
+
+  // State for CAMS/Broker statements form
+  const [equity_mutual_fund_type, setEquityMutualFundType] = React.useState([]);
+  const [camsFiles, setCamsFiles] = React.useState([]);
+  const [soldForeignShares, setSoldForeignShares] = React.useState('no');
+  const [soldUnlistedShares, setSoldUnlistedShares] = React.useState('no');
+
+  useEffect(() => {
+    if (cg_equity_mutual) {
+      setEquityMutualFundType(cg_equity_mutual.data.equity_mutual_fund_type);
+      setCamsFiles(cg_equity_mutual.data.documents);
+      setSoldForeignShares(cg_equity_mutual.data.sell_any_foreign_sales);
+      setSoldUnlistedShares(cg_equity_mutual.data.sell_any_unlisted_sales);
+    }
+  }, [cg_equity_mutual]);
+
+  const handleCamsInstrumentChange = (type) => (e) => {
+    setEquityMutualFundType((prev) => (e.target.checked ? [...prev, type] : prev.filter((t) => t !== type)));
+  };
+
+  const handleCamsFilesChange = (e) => {
+    setCamsFiles(Array.from(e.target.files));
+  };
+
+  const handleCamsSave = async () => {
+    const formData = new FormData();
+    formData.append('service_request', service_id);
+    formData.append('service_task', cg_equity_mutual.task_id);
+    formData.append('status', 'in progress');
+    formData.append('equity_mutual_fund_type', JSON.stringify(equity_mutual_fund_type));
+    camsFiles.forEach((file) => {
+      if (file instanceof File) formData.append('documents', file);
+    });
+    formData.append('sell_any_foreign_sales', soldForeignShares);
+    formData.append('sell_any_unlisted_sales', soldUnlistedShares);
+    for (let pair of formData.entries()) {
+      console.log(pair[0] + ':', pair[1]);
+    }
+    const response = await Factory('post', `/income_tax_returns/capital-gains/equity-mutual-fund/submit/`, formData);
+    console.log(response);
+    if (response.res.status_cd === 0) {
+      enqueueSnackbar('Equity Mutual Fund Income submitted successfully', {
+        anchorOrigin: { vertical: 'top', horizontal: 'right' },
+        variant: 'success'
+      });
+    } else {
+      enqueueSnackbar('Error submitting Equity Mutual Fund Income', {
+        anchorOrigin: { vertical: 'top', horizontal: 'right' },
+        variant: 'error'
+      });
+    }
+  };
+
   return (
     <Box>
       {/* Capital Gains Type Selection */}
@@ -1176,7 +1284,7 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
           {gainTypes.map((type) => (
             <FormControlLabel
               key={type}
-              control={<Checkbox />}
+              control={<Checkbox checked={selectedTypes.includes(type)} />}
               onChange={async (e) => {
                 const isChecked = e.target.checked;
                 let __selectedTypes = isChecked ? [...selectedTypes, type] : selectedTypes.filter((t) => t !== type);
@@ -1190,7 +1298,7 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                 if (response.res.status_cd === 0) {
                   setSelectedTypes(response.res.data.gains_applicable);
                   if (response.res.data.capital_gains_property_details.length > 0) {
-                    setsetCgPropertyLand(response.res.data);
+                    setCgPropertyLand((prev) => ({ ...prev, data: response.res.data }));
                     setProperties(response.res.data.capital_gains_property_details);
                   } else {
                     setProperties(initialState);
@@ -1308,10 +1416,9 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                   <input
                     type="file"
                     hidden
-                    multiple
                     onChange={(e) => {
                       const updated = [...properties];
-                      updated[idx].purchase_doc = e.target.files;
+                      updated[idx].purchase_doc = e.target.files[0];
                       setProperties(updated);
                     }}
                   />
@@ -1338,10 +1445,9 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                   <input
                     type="file"
                     hidden
-                    multiple
                     onChange={(e) => {
                       const updated = [...properties];
-                      updated[idx].sale_doc = e.target.files;
+                      updated[idx].sale_doc = e.target.files[0];
                       setProperties(updated);
                     }}
                   />
@@ -1399,11 +1505,11 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                           size="small"
                           fullWidth
                           options={investOptions}
-                          value={property?.invest_in}
+                          value={property?.reinvestment_details?.invested_in}
                           onChange={(_, v) => {
                             const updated = [...properties];
-                            console.log(updated);
-                            updated[idx].reinvestment.invest_in = v;
+                            console.log(updated[idx]);
+                            updated[idx].reinvestment_details.invested_in = v;
                             setProperties(updated);
                           }}
                           renderInput={(params) => <TextField {...params} placeholder="Select" />}
@@ -1415,10 +1521,10 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                           fullWidth
                           placeholder="Amount"
                           type="number"
-                          value={property?.invest_amount}
+                          value={property?.reinvestment_details?.invest_amount}
                           onChange={(e) => {
                             const updated = [...properties];
-                            updated[idx].reinvestment.invest_amount = e.target.value;
+                            updated[idx].reinvestment_details.invest_amount = e.target.value;
                             setProperties(updated);
                           }}
                         />
@@ -1429,10 +1535,10 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                           type="date"
                           fullWidth
                           InputLabelProps={{ shrink: true }}
-                          value={property.reinvestment?.invest_date}
+                          value={property?.reinvestment_details?.invest_date}
                           onChange={(e) => {
                             const updated = [...properties];
-                            updated[idx].reinvestment.invest_date = e.target.value;
+                            updated[idx].reinvestment_details.invest_date = e.target.value;
                             setProperties(updated);
                           }}
                         />
@@ -1443,22 +1549,21 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                           <input
                             type="file"
                             hidden
-                            multiple
                             onChange={(e) => {
                               const updated = [...properties];
-                              updated[idx].reinvestment.reinvestment_details_docs = e.target.files;
+                              updated[idx].reinvestment_details_docs = e.target.files[0];
                               setProperties(updated);
                             }}
                           />
                         </Button>
-                        {properties[idx].reinvestment?.reinvestment_details_docs && (
+                        {properties[idx].reinvestment_details_docs && (
                           <Button
                             size="small"
                             variant="outlined"
                             sx={{ ml: 1 }}
                             onClick={() => {
                               setFileDialogOpen(true);
-                              setDialogFilesData([...properties[idx].reinvestment?.reinvestment_details_docs]);
+                              setDialogFilesData([...properties[idx].reinvestment_details_docs]);
                             }}
                           >
                             View
@@ -1480,26 +1585,36 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                   const formData = new FormData();
                   formData.append('service_request', service_id);
                   formData.append('service_task', cg_property_land.task_id);
+                  formData.append('capital_gains_applicable', cg_property_land.data.id);
+                  formData.append('reinvestment_made', properties[idx].reinvestment_made);
                   formData.append('status', 'in progress');
-                  formData.append('reinvestment_details', JSON.stringify(properties[idx].reinvestment));
                   formData.append('gains_applicable', selectedTypes);
 
                   Object.entries(propertyToSave).forEach(([key, value]) => {
-                    if (key === 'purchase_doc' || key === 'sale_doc' || (key === 'reinvestment_details_docs' && value)) {
-                      Array.from(value).forEach((file) => {
-                        if (file instanceof File) {
-                          formData.append(key, file);
+                    if (value) {
+                      if (key === 'purchase_doc' || key === 'sale_doc' || key === 'reinvestment_details_docs') {
+                        if (value instanceof File) {
+                          formData.append(key, value);
                         }
-                      });
+                      } else {
+                        if (key === 'reinvestment_details') {
+                          if (properties[idx].reinvestment_made === 'yes') formData.append(key, JSON.stringify(value));
+                        } else {
+                          formData.append(key, value);
+                        }
+                      }
                     }
                   });
+
                   let type = properties[idx].id ? 'put' : 'post';
                   let url = properties[idx].id
                     ? `/income_tax_returns/capital-gains/update-property/${properties[idx].id}/`
-                    : `/income_tax_returns/capital-gains/create-or-update/`;
+                    : `/income_tax_returns/capital-gains/add-property/`;
                   const response = await Factory(type, url, formData);
-                  console.log(response);
                   if (response.res.status_cd === 0) {
+                    let __properties = [...properties];
+                    __properties[idx] = response.res.data;
+                    setProperties(__properties);
                     enqueueSnackbar('Property saved successfully', {
                       anchorOrigin: { vertical: 'top', horizontal: 'right' },
                       variant: 'success'
@@ -1517,7 +1632,7 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                   variant="outlined"
                   color="error"
                   onClick={() => {
-                    setProperties(properties.filter((_, i) => i !== idx));
+                    removeProperty(properties[idx]);
                   }}
                 >
                   Remove
@@ -1541,11 +1656,13 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                   sale_value: '',
                   purchase_doc: null,
                   sale_doc: null,
-                  reinvestment: 'no',
-                  invest_in: '',
-                  invest_amount: '',
-                  invest_date: '',
-                  reinvestment_details_docs: null
+                  reinvestment_made: 'no',
+                  reinvestment_details_docs: null,
+                  reinvestment_details: {
+                    invested_in: '',
+                    invest_amount: '',
+                    invest_date: ''
+                  }
                 }
               ]);
             }}
@@ -1557,48 +1674,65 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
         <Typography variant="subtitle1" fontWeight={700} mb={2}>
           Capital Gain from Equity / Mutual Fund
         </Typography>
-        {/* 1. Instrument checkboxes */}
-        <Box mb={2}>
-          <Typography mb={1}>Which instrument(s) did you sell?</Typography>
-          <Box display="flex" flexWrap="wrap" gap={2}>
-            {eqMfTypes.map((type) => (
-              <FormControlLabel key={type} control={<Checkbox />} label={type} />
-            ))}
+        <Paper sx={{ p: 2, mb: 3, border: '1px solid #e0e0e0', bgcolor: '#fff' }}>
+          {/* 1. Instrument checkboxes */}
+          <Box mb={2}>
+            <Typography mb={1}>Which instrument(s) did you sell?</Typography>
+            <Box display="flex" flexWrap="wrap" gap={2}>
+              {eqMfTypes.map((type) => (
+                <FormControlLabel
+                  key={type}
+                  control={<Checkbox checked={equity_mutual_fund_type.includes(type)} onChange={handleCamsInstrumentChange(type)} />}
+                  label={type}
+                />
+              ))}
+            </Box>
           </Box>
-        </Box>
-        {/* 2. File upload for CAMS/Broker statements */}
-        <Box mb={2}>
-          <Typography mb={1}>Upload CAMS / Broker statements:</Typography>
-          <Stack direction="row" spacing={2} alignItems="center">
-            <Button size="small" variant="contained" component="label">
-              Upload
-              <input type="file" hidden multiple />
-            </Button>
-            <Typography variant="body2">0 files</Typography>
-            <Button size="small" variant="outlined">
-              View
-            </Button>
-            <Button size="small" variant="outlined">
-              Upload
+          {/* 2. File upload for CAMS/Broker statements */}
+          <Box mb={2}>
+            <Typography mb={1}>Upload CAMS / Broker statements:</Typography>
+            <Stack direction="row" spacing={2} alignItems="center">
+              <Button size="small" variant="contained" component="label">
+                Upload
+                <input type="file" hidden multiple onChange={handleCamsFilesChange} />
+              </Button>
+              <Typography variant="body2">{camsFiles.length} file(s) selected</Typography>
+              {camsFiles.length > 0 && (
+                <Button
+                  size="small"
+                  variant="outlined"
+                  onClick={() => {
+                    setFileDialogOpen(true);
+                    setDialogFilesData(camsFiles);
+                  }}
+                >
+                  View
+                </Button>
+              )}
+            </Stack>
+          </Box>
+          {/* 3. Did you sell any foreign shares? */}
+          <Stack direction="row" spacing={2} alignItems="center" mb={2}>
+            <Typography mb={1}>Did you sell any foreign shares?</Typography>
+            <RadioGroup row value={soldForeignShares} onChange={(_, v) => setSoldForeignShares(v)}>
+              <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
+              <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
+            </RadioGroup>
+          </Stack>
+          {/* 4. Did you sell any unlisted shares? */}
+          <Stack direction="row" spacing={2} alignItems="center" mb={2}>
+            <Typography mb={1}>Did you sell any unlisted shares?</Typography>
+            <RadioGroup row value={soldUnlistedShares} onChange={(_, v) => setSoldUnlistedShares(v)}>
+              <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
+              <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
+            </RadioGroup>
+          </Stack>
+          <Stack direction="row" sx={{ justifyContent: 'flex-end' }} spacing={2} mb={2}>
+            <Button size="small" variant="contained" onClick={handleCamsSave}>
+              Save
             </Button>
           </Stack>
-        </Box>
-        {/* 3. Did you sell any foreign shares? */}
-        <Stack direction="row" spacing={2} alignItems="center" mb={2}>
-          <Typography mb={1}>Did you sell any foreign shares?</Typography>
-          <RadioGroup row>
-            <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
-            <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
-          </RadioGroup>
-        </Stack>
-        {/* 4. Did you sell any unlisted shares? */}
-        <Stack direction="row" spacing={2} alignItems="center" mb={2}>
-          <Typography mb={1}>Did you sell any unlisted shares?</Typography>
-          <RadioGroup row>
-            <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
-            <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
-          </RadioGroup>
-        </Stack>
+        </Paper>
         {/* 5. Details of other Capital Gains table (already present) */}
         <Box mb={2}>
           <Typography fontWeight={600} mb={1}>
@@ -1608,43 +1742,168 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
             <Table size="small">
               <TableHead>
                 <TableRow>
-                  <TableCell sx={{ bgcolor: 'primary.main', color: 'white !important' }}>Asset Details</TableCell>
-                  <TableCell sx={{ bgcolor: 'primary.main', color: 'white !important' }}>Purchase Date</TableCell>
-                  <TableCell sx={{ bgcolor: 'primary.main', color: 'white !important' }}>Purchase Value</TableCell>
-                  <TableCell sx={{ bgcolor: 'primary.main', color: 'white !important' }}>Sale Date</TableCell>
-                  <TableCell sx={{ bgcolor: 'primary.main', color: 'white !important' }}>Sale Value</TableCell>
-                  <TableCell sx={{ bgcolor: 'primary.main', color: 'white !important' }}>Doc</TableCell>
-                  <TableCell sx={{ bgcolor: 'primary.main', color: 'white !important' }}></TableCell>
+                  <TableCell sx={{ bgcolor: 'primary.main', color: 'white !important', width: '15%' }}>Asset Details</TableCell>
+                  <TableCell sx={{ bgcolor: 'primary.main', color: 'white !important', width: '15%' }}>Purchase Date</TableCell>
+                  <TableCell sx={{ bgcolor: 'primary.main', color: 'white !important', width: '15%' }}>Purchase Value</TableCell>
+                  <TableCell sx={{ bgcolor: 'primary.main', color: 'white !important', width: '13%' }}>Sale Date</TableCell>
+                  <TableCell sx={{ bgcolor: 'primary.main', color: 'white !important', width: '14%' }}>Sale Value</TableCell>
+                  <TableCell sx={{ bgcolor: 'primary.main', color: 'white !important', width: '15%' }}>Doc</TableCell>
+                  <TableCell sx={{ bgcolor: 'primary.main', color: 'white !important', width: '15%' }}>Action</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {Array.from({ length: numOtherGains }).map((_, idx) => (
+                {otherGainsRows.map((_, idx) => (
                   <TableRow key={idx}>
-                    <TableCell>
-                      <TextField size="small" fullWidth placeholder="Asset Details" />
+                    <TableCell sx={{ px: 0.5, py: 1, pl: 1 }}>
+                      <TextField
+                        size="small"
+                        fullWidth
+                        placeholder="Asset Details"
+                        value={otherGainsRows?.[idx]?.asset_details || ''}
+                        onChange={(e) => {
+                          const updated = [...(otherGainsRows || [])];
+                          if (!updated[idx]) updated[idx] = {};
+                          updated[idx].asset_details = e.target.value;
+                          setOtherGainsRows(updated);
+                        }}
+                      />
                     </TableCell>
-                    <TableCell>
-                      <TextField size="small" type="date" fullWidth InputLabelProps={{ shrink: true }} placeholder="Purchase Date" />
+                    <TableCell sx={{ px: 0.5, py: 1 }}>
+                      <TextField
+                        size="small"
+                        type="date"
+                        fullWidth
+                        InputLabelProps={{ shrink: true }}
+                        placeholder="Purchase Date"
+                        value={otherGainsRows?.[idx]?.purchase_date || ''}
+                        onChange={(e) => {
+                          const updated = [...(otherGainsRows || [])];
+                          if (!updated[idx]) updated[idx] = {};
+                          updated[idx].purchase_date = e.target.value;
+                          setOtherGainsRows(updated);
+                        }}
+                      />
                     </TableCell>
-                    <TableCell>
-                      <TextField size="small" fullWidth placeholder="Purchase Value" />
+                    <TableCell sx={{ px: 0.5, py: 1 }}>
+                      <TextField
+                        size="small"
+                        fullWidth
+                        placeholder="Purchase Value"
+                        value={otherGainsRows?.[idx]?.purchase_value || ''}
+                        onChange={(e) => {
+                          const updated = [...(otherGainsRows || [])];
+                          if (!updated[idx]) updated[idx] = {};
+                          updated[idx].purchase_value = e.target.value;
+                          setOtherGainsRows(updated);
+                        }}
+                      />
                     </TableCell>
-                    <TableCell>
-                      <TextField size="small" type="date" fullWidth InputLabelProps={{ shrink: true }} placeholder="Sale Date" />
+                    <TableCell sx={{ px: 0.5, py: 1 }}>
+                      <TextField
+                        size="small"
+                        type="date"
+                        fullWidth
+                        InputLabelProps={{ shrink: true }}
+                        placeholder="Sale Date"
+                        value={otherGainsRows?.[idx]?.sale_date || ''}
+                        onChange={(e) => {
+                          const updated = [...(otherGainsRows || [])];
+                          if (!updated[idx]) updated[idx] = {};
+                          updated[idx].sale_date = e.target.value;
+                          setOtherGainsRows(updated);
+                        }}
+                      />
                     </TableCell>
-                    <TableCell>
-                      <TextField size="small" fullWidth placeholder="Sale Value" />
+                    <TableCell sx={{ px: 0.5, py: 1 }}>
+                      <TextField
+                        size="small"
+                        fullWidth
+                        placeholder="Sale Value"
+                        value={otherGainsRows?.[idx]?.sale_value || ''}
+                        onChange={(e) => {
+                          const updated = [...(otherGainsRows || [])];
+                          if (!updated[idx]) updated[idx] = {};
+                          updated[idx].sale_value = e.target.value;
+                          setOtherGainsRows(updated);
+                        }}
+                      />
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ px: 0.5, py: 1 }}>
                       <Stack direction="row" spacing={1} sx={{ p: 0 }}>
                         <Button size="small" variant="contained" component="label">
                           Upload
-                          <input type="file" hidden />
+                          <input
+                            type="file"
+                            hidden
+                            multiple={true}
+                            onChange={(e) => {
+                              const updated = [...otherGainsRows];
+                              updated[idx].doc = e.target.files;
+                              setOtherGainsRows(updated);
+                            }}
+                          />
                         </Button>
-                        <Button size="small" variant="outlined">
-                          View
-                        </Button>
+                        {otherGainsRows?.[idx]?.doc && (
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            onClick={() => {
+                              setFileDialogOpen(true);
+                              setDialogFilesData([otherGainsRows?.[idx]?.doc]);
+                            }}
+                          >
+                            View
+                          </Button>
+                        )}
                       </Stack>
+                    </TableCell>
+                    <TableCell sx={{ px: 0.5, py: 1 }}>
+                      <Button
+                        size="small"
+                        variant="contained"
+                        color="primary"
+                        onClick={async () => {
+                          const row = otherGainsRows?.[idx] || {};
+                          const formData = new FormData();
+                          formData.append('service_request', service_id);
+                          formData.append('service_task', cg_other_sources.task_id);
+                          formData.append('status', 'in progress');
+                          formData.append('asset_details', row.asset_details || '');
+                          formData.append('purchase_date', row.purchase_date || '');
+                          formData.append('purchase_value', row.purchase_value || '');
+                          formData.append('sale_date', row.sale_date || '');
+                          formData.append('sale_value', row.sale_value || '');
+                          Array.from(row.doc).forEach((file) => {
+                            if (file instanceof File) formData.append('documents', file);
+                          });
+                          const response = await Factory('post', `/income_tax_returns/other-capital-gains/with-files/`, formData);
+                          console.log(response);
+                          if (response.res.status_cd === 0) {
+                            enqueueSnackbar('Other Capital Gains submitted successfully', {
+                              anchorOrigin: { vertical: 'top', horizontal: 'right' },
+                              variant: 'success'
+                            });
+                          } else {
+                            enqueueSnackbar('Error submitting Other Capital Gains', {
+                              anchorOrigin: { vertical: 'top', horizontal: 'right' },
+                              variant: 'error'
+                            });
+                          }
+                        }}
+                      >
+                        Save
+                      </Button>
+                      <IconButton
+                        size="small"
+                        color="error"
+                        onClick={() => {
+                          const updated = [...otherGainsRows];
+                          updated.splice(idx, 1);
+                          setOtherGainsRows(updated);
+                        }}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -1652,7 +1911,23 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
             </Table>
           </Paper>
           <Box display="flex" justifyContent="flex-end">
-            <Button size="small" variant="outlined" onClick={() => setNumOtherGains(numOtherGains + 1)}>
+            <Button
+              size="small"
+              variant="outlined"
+              onClick={() =>
+                setOtherGainsRows([
+                  ...otherGainsRows,
+                  {
+                    asset_details: '',
+                    purchase_date: '',
+                    purchase_value: '',
+                    sale_date: '',
+                    sale_value: '',
+                    doc: null
+                  }
+                ])
+              }
+            >
               Add Row
             </Button>
           </Box>
