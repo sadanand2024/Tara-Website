@@ -9,6 +9,7 @@ const GetActionButtons = ({ type, data, status, urlEndpoint, recId, service_requ
   // console.log('recId', recId);
   // console.log('service_request', service_request);
   // console.log('setData', setData);
+  const [statusData, setStatusData] = useState(false);
   const user = useSelector((state) => state).accountReducer.user;
   let assignee = data.assignee;
   let rewiewer = data.reviewer;
