@@ -25,15 +25,16 @@ const GetActionButtons = ({ type, data, status, urlEndpoint, recId, service_requ
     if (type === 'put') {
       payload = { status: changedStatus };
     } else {
-      payload = { service_task: task_id, service_request: service_request, status: changedStatus };
+      payload = { service_task: task_id, service_request: parseInt(service_request), status: changedStatus };
     }
-
+    console.log(payload);
     let response;
     if (type === 'post') {
       response = await Factory('post', urlEndpoint, payload);
     } else {
       response = await Factory('put', `/income_tax_returns/${urlEndpoint}/${recId}/`, payload, {});
     }
+    console.log(response);
     if (response.res.status_cd === 0) {
       enqueueSnackbar('Status updated successfully', { anchorOrigin: { vertical: 'top', horizontal: 'right' }, variant: 'success' });
       setStatusData(changedStatus);
@@ -44,7 +45,7 @@ const GetActionButtons = ({ type, data, status, urlEndpoint, recId, service_requ
 
   return (
     <>
-      {recId && (
+      {task_id && (
         <>
           {Uid === assignee && (statusData === 'in progress' || statusData === 'revoked') && (
             <Button type="button" variant="outlined" color="secondary" onClick={() => changeStatus('sent for approval')} mr={1}>

@@ -137,51 +137,51 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
   });
 
   useEffect(() => {
-    if (deductions.data) {
-      if (deductions.data.section_80g.length > 0) {
-        setDonations([...deductions.data.section_80g]);
+    if (deductions?.data) {
+      if (deductions?.data?.section_80g?.length > 0) {
+        setDonations([...deductions?.data?.section_80g]);
       }
-      if (deductions.data.section_80e !== null) {
+      if (deductions?.data?.section_80e !== null) {
         setSection80E({
-          ...deductions.data.section_80e,
-          education_of: deductions.data.section_80e?.education_of ?? '',
-          is_it_approved_bank: (deductions.data.section_80e?.is_it_approved_bank ?? 'false').toString()
+          ...deductions?.data?.section_80e,
+          education_of: deductions?.data?.section_80e?.education_of ?? '',
+          is_it_approved_bank: (deductions?.data?.section_80e?.is_it_approved_bank ?? 'false').toString()
         });
       }
-      if (deductions.data.section_80ee.length > 0) {
+      if (deductions?.data?.section_80ee?.length > 0) {
         setSection80EE({
-          ...deductions.data.section_80ee[0]
+          ...deductions?.data?.section_80ee[0]
         });
       }
-      if (deductions.data.section_80eeb !== null) {
+      if (deductions?.data?.section_80eeb !== null) {
         setSection80EEB({
-          ...deductions.data.section_80eeb
+          ...deductions?.data?.section_80eeb
         });
       }
-      if (deductions.data.section_80ettattbu !== null) {
+      if (deductions?.data?.section_80ettattbu !== null) {
         setOtherDeductions({
-          ...deductions.data.section_80ettattbu,
-          nature_of_disability: deductions.data.section_80ettattbu?.nature_of_disability ?? '',
-          severity: deductions.data.section_80ettattbu?.severity ?? '',
-          pay_rent_without_recieving_hra: deductions.data.section_80ettattbu?.pay_rent_without_recieving_hra ?? 'false',
-          are_you_first_time_homebuyer: deductions.data.section_80ettattbu?.are_you_first_time_homebuyer ?? 'false',
-          donation_made_to_political_party: deductions.data.section_80ettattbu?.donation_made_to_political_party ?? 'false'
+          ...deductions?.data?.section_80ettattbu,
+          nature_of_disability: deductions?.data?.section_80ettattbu?.nature_of_disability ?? '',
+          severity: deductions?.data?.section_80ettattbu?.severity ?? '',
+          pay_rent_without_recieving_hra: deductions?.data?.section_80ettattbu?.pay_rent_without_recieving_hra ?? 'false',
+          are_you_first_time_homebuyer: deductions?.data?.section_80ettattbu?.are_you_first_time_homebuyer ?? 'false',
+          donation_made_to_political_party: deductions?.data?.section_80ettattbu?.donation_made_to_political_party ?? 'false'
         });
       }
 
-      if (deductions.data.section_80c.length > 0) {
-        setInvestments([...deductions.data.section_80c]);
+      if (deductions?.data?.section_80c?.length > 0) {
+        setInvestments([...deductions?.data?.section_80c]);
       }
-      if (deductions.data.section_80d !== null) {
+      if (deductions?.data?.section_80d !== null) {
         setMediclaim({
-          ...deductions.data.section_80d,
-          file: deductions.data?.section_80d?.section_80d_documents
+          ...deductions?.data?.section_80d,
+          file: deductions?.data?.section_80d?.section_80d_documents
         });
       }
-      if (deductions.data.section_80ddb !== null) {
+      if (deductions?.data?.section_80ddb !== null) {
         setSection80DDB({
-          ...deductions.data.section_80ddb,
-          files: deductions.data?.section_80ddb?.documents
+          ...deductions?.data?.section_80ddb,
+          files: deductions?.data?.section_80ddb?.documents
         });
       }
     }
@@ -328,7 +328,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                           >
                             Save
                           </Button>
-                          {values.donations.length > 1 && (
+                          {values?.donations?.length > 1 && (
                             <IconButton
                               size="small"
                               color="error"
@@ -1023,7 +1023,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                             }}
                           />
                         </Button>
-                        {row?.documents.length > 0 && (
+                        {row?.documents?.length > 0 && (
                           <Button
                             size="small"
                             variant="outlined"
@@ -1079,12 +1079,12 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                           >
                             Save
                           </Button>
-                          {values.investments.length > 1 && (
+                          {values?.investments?.length > 1 && (
                             <IconButton
                               size="small"
                               color="error"
                               onClick={() => {
-                                const newArr = values.investments.filter((_, i) => i !== idx);
+                                const newArr = values?.investments?.filter((_, i) => i !== idx);
                                 setFieldValue('investments', newArr);
                               }}
                             >
