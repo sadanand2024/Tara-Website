@@ -70,20 +70,20 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
   // Initial values
   const docsInitial = {
     docs: {
-      form16: salary_income.data.length > 0 ? salary_income.data[0].documents.FORM_16 : [],
-      payslip: salary_income.data.length > 0 ? salary_income.data[0].documents.PAYSLIP : [],
-      bank: salary_income.data.length > 0 ? salary_income.data[0].documents.BANK_STATEMENT : []
+      form16: salary_income?.data?.length > 0 ? salary_income?.data[0]?.documents?.FORM_16 : [],
+      payslip: salary_income?.data?.length > 0 ? salary_income?.data[0]?.documents?.PAYSLIP : [],
+      bank: salary_income?.data?.length > 0 ? salary_income?.data[0]?.documents?.BANK_STATEMENT : []
     },
     notes: {
-      form16: salary_income.data.length > 0 ? salary_income.data[0].form_16_notes : '',
-      payslip: salary_income.data.length > 0 ? salary_income.data[0].payslip_notes : '',
-      bank: salary_income.data.length > 0 ? salary_income.data[0].bank_statement_notes : ''
+      form16: salary_income?.data?.length > 0 ? salary_income?.data[0]?.form_16_notes : '',
+      payslip: salary_income?.data?.length > 0 ? salary_income?.data[0]?.payslip_notes : '',
+      bank: salary_income?.data?.length > 0 ? salary_income?.data[0]?.bank_statement_notes : ''
     }
   };
   const otherIncomeInitial = {
     otherIncome:
-      other_income.data.length > 0
-        ? other_income.data
+      other_income?.data?.length > 0 && other_income?.data[0]?.other_income_info.length > 0
+        ? other_income?.data[0]?.other_income_info
         : [
             {
               amount: '',
@@ -95,27 +95,30 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
   };
   const foreignInitial = {
     foreignDocs: {
-      foreignSalarySlip: nri_employee_salary.data.length > 0 ? nri_employee_salary.data[0].foreigner_documents.salary_slip_files.files : [],
+      foreignSalarySlip:
+        nri_employee_salary?.data?.length > 0 ? nri_employee_salary?.data[0]?.foreigner_documents?.salary_slip_files?.files : [],
       foreignBankStmt:
-        nri_employee_salary.data.length > 0 ? nri_employee_salary.data[0].foreigner_documents.bank_statement_files.files : [],
+        nri_employee_salary?.data?.length > 0 ? nri_employee_salary?.data[0]?.foreigner_documents?.bank_statement_files?.files : [],
       taxPaidAbroad:
-        nri_employee_salary.data.length > 0 ? nri_employee_salary.data[0].foreigner_documents.tax_paid_certificate_board_files.files : []
+        nri_employee_salary?.data?.length > 0
+          ? nri_employee_salary?.data[0]?.foreigner_documents?.tax_paid_certificate_board_files?.files
+          : []
     },
     periodFrom:
-      nri_employee_salary.data.length > 0 && nri_employee_salary.data[0].employment_history.length > 0
-        ? nri_employee_salary.data[0].employment_history[0].from_date
+      nri_employee_salary?.data?.length > 0 && nri_employee_salary?.data[0]?.employment_history?.length > 0
+        ? nri_employee_salary?.data[0]?.employment_history[0]?.from_date
         : '',
     periodTo:
-      nri_employee_salary.data.length > 0 && nri_employee_salary.data[0].employment_history.length > 0
-        ? nri_employee_salary.data[0].employment_history[0].to_date
+      nri_employee_salary?.data?.length > 0 && nri_employee_salary?.data[0]?.employment_history?.length > 0
+        ? nri_employee_salary?.data[0]?.employment_history[0]?.to_date
         : '',
     country:
-      nri_employee_salary.data.length > 0 && nri_employee_salary.data[0].employment_history.length > 0
-        ? nri_employee_salary.data[0].employment_history[0].country
+      nri_employee_salary?.data?.length > 0 && nri_employee_salary?.data[0]?.employment_history?.length > 0
+        ? nri_employee_salary?.data[0]?.employment_history[0]?.country
         : '',
     salaryReceivedIn:
-      nri_employee_salary.data.length > 0 && nri_employee_salary.data[0].employment_history.length > 0
-        ? nri_employee_salary.data[0].employment_history[0].salary_received
+      nri_employee_salary?.data?.length > 0 && nri_employee_salary?.data[0]?.employment_history?.length > 0
+        ? nri_employee_salary?.data[0]?.employment_history[0]?.salary_received
         : ''
   };
 
@@ -125,14 +128,14 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
     enableReinitialize: true,
     // validationSchema: docsSchema,
     onSubmit: async (values) => {
-      let type = salary_income.data.length > 0 ? 'put' : 'post';
+      let type = salary_income?.data?.length > 0 ? 'put' : 'post';
       let url =
-        salary_income.data.length > 0
-          ? `/income_tax_returns/salary-income/${salary_income.data[0].id}/`
+        salary_income?.data?.length > 0
+          ? `/income_tax_returns/salary-income/${salary_income?.data[0]?.id}/`
           : '/income_tax_returns/salary-income/';
       let formData = new FormData();
       formData.append('service_request', service_id);
-      formData.append('service_task', salary_income.task_id);
+      formData.append('service_task', salary_income?.task_id);
       if (values.docs.bank && Array.isArray(values.docs.bank)) {
         values.docs.bank.forEach((bank) => {
           if (bank instanceof File) {
@@ -233,7 +236,7 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
   });
 
   const removeRow = async (idx, recId) => {
-    const res = await Factory('delete', `/income_tax_returns/other-income-details/${recId}/`, {}, {});
+    const res = await Factory('delete', `/income_tax_returns/other-income-details/${recId}/delete`, {}, {});
     if (res.res.status_cd === 0) {
       otherIncomeFormik.setFieldValue(
         `otherIncome`,
@@ -269,7 +272,7 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
               </TableRow>
             </TableHead>
             <TableBody sx={{ alignItems: 'flex-start' }}>
-              {docTypes.map((doc) => {
+              {docTypes?.map((doc) => {
                 return (
                   <TableRow key={doc.key} sx={{ height: 50, verticalAlign: 'center' }}>
                     <TableCell>{doc.label}</TableCell>
@@ -362,7 +365,7 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {otherIncomeFormik.values.otherIncome.map((row, idx) => (
+                      {otherIncomeFormik.values.otherIncome?.map((row, idx) => (
                         <TableRow key={idx}>
                           <TableCell>
                             <TextField
@@ -434,18 +437,17 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
                                   formData.append('details', row.details || '');
                                   formData.append('amount', row.amount || '');
                                   formData.append('notes', row.notes || '');
-                                  formData.append('file', row.file);
+                                  if (row.id) formData.append('id', row.id);
+                                  if (row.file && row.file instanceof File) formData.append('file', row.file);
                                   let type = 'post';
                                   let url = '/income_tax_returns/other-income-details/';
-                                  if (row.id) {
-                                    type = 'put';
-                                    url = `/income_tax_returns/other-income-details/${row.id}/`;
-                                  }
                                   const res = await Factory(type, url, formData, {});
                                   if (res.res.status_cd === 0) {
                                     let __otherIncome = { ...other_income };
-                                    __otherIncome.data[idx] = res.res;
-                                    otherIncomeFormik.setFieldValue(`otherIncome[${idx}].id`, res.res.id);
+                                    __otherIncome.data[0].other_income_info = res.res.other_income_info;
+                                    otherIncomeFormik.setFieldValue(`otherIncome`, res.res.other_income_info);
+                                    console.log(__otherIncome);
+                                    console.log(otherIncomeFormik.values);
                                     setOtherIncome(__otherIncome);
                                     enqueueSnackbar('Other income saved successfully!', {
                                       variant: 'success',
@@ -456,7 +458,7 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
                               >
                                 Save
                               </Button>
-                              {otherIncomeFormik.values.otherIncome.length > 1 && (
+                              {otherIncomeFormik?.values?.otherIncome?.length > 1 && (
                                 <Button size="small" color="error" onClick={() => removeRow(idx, row.id)}>
                                   <DeleteIcon />
                                 </Button>
@@ -480,7 +482,7 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
                     type="post"
                     data={other_income}
                     status={other_income.data[0].status}
-                    urlEndpoint={`other-income-details`}
+                    urlEndpoint={`/income_tax_returns/other-income-details/`}
                     service_request={service_id}
                     task_id={other_income.task_id}
                     recId={other_income.data[0].id}
@@ -512,7 +514,7 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
               </TableRow>
             </TableHead>
             <TableBody sx={{ alignItems: 'flex-start' }}>
-              {foreignDocTypes.map((doc) => {
+              {foreignDocTypes?.map((doc) => {
                 return (
                   <TableRow key={doc.key} sx={{ height: 50, verticalAlign: 'center' }}>
                     <TableCell>{doc.label}</TableCell>
@@ -606,7 +608,7 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
               <FormControlLabel
                 control={
                   <Checkbox
-                    checked={foreignFormik.values.salaryReceivedIn.includes('indian')}
+                    checked={foreignFormik.values.salaryReceivedIn?.includes('indian')}
                     onChange={(e) => {
                       const checked = e.target.checked;
                       let arr = [...foreignFormik.values.salaryReceivedIn];
@@ -621,7 +623,7 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
               <FormControlLabel
                 control={
                   <Checkbox
-                    checked={foreignFormik.values.salaryReceivedIn.includes('foreign')}
+                    checked={foreignFormik.values.salaryReceivedIn?.includes('foreign')}
                     onChange={(e) => {
                       const checked = e.target.checked;
                       let arr = [...foreignFormik.values.salaryReceivedIn];
@@ -636,7 +638,7 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
               <FormControlLabel
                 control={
                   <Checkbox
-                    checked={foreignFormik.values.salaryReceivedIn.includes('both')}
+                    checked={foreignFormik.values.salaryReceivedIn?.includes('both')}
                     onChange={(e) => {
                       const checked = e.target.checked;
                       let arr = [...foreignFormik.values.salaryReceivedIn];
@@ -672,10 +674,12 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
 };
 
 const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDialogFilesData, service_id }) => {
-  data = data[0];
+  let _wholeData = data[0];
+  data = data[0].data[0].property_info;
   const { enqueueSnackbar } = useSnackbar();
-  const [numProperties, setNumProperties] = React.useState(data.data.length > 0 ? data.data.length : 1);
+  const [numProperties, setNumProperties] = React.useState(data?.length > 0 ? data?.length : 1);
   const initialProperties = {
+    id: null,
     type_of_property: '',
     property_address: {
       address_line1: '',
@@ -698,8 +702,7 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
     upload_loan_interest_certificate: null,
     loan_statement: null
   };
-  console.log(data);
-  const [properties, setProperties] = React.useState(data.data.length > 0 ? data.data : [initialProperties]);
+  const [properties, setProperties] = React.useState(data?.length > 0 ? data : [initialProperties]);
 
   // Add/Remove property handlers
   const handleAddProperty = () => {
@@ -731,10 +734,28 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
       }
     ]);
   };
-  const handleRemoveProperty = () => {
-    if (numProperties > 1) {
+  const removeProperty = async (property, idx) => {
+    console.log(numProperties);
+    // if (numProperties > 1) {
+    //   setNumProperties(numProperties - 1);
+    //   setProperties(properties.slice(0, -1));
+    // }
+
+    const res = await Factory('delete', `/income_tax_returns/house-property-details/${property.id}/delete`, {}, {});
+    if (res.res.status_cd === 0) {
+      let __properties = [...properties];
+      __properties.splice(idx, 1);
+      setProperties(__properties);
       setNumProperties(numProperties - 1);
-      setProperties(properties.slice(0, -1));
+      enqueueSnackbar('Property deleted successfully!', {
+        variant: 'success',
+        anchorOrigin: { vertical: 'top', horizontal: 'right' }
+      });
+    } else {
+      enqueueSnackbar('Error deleting property!', {
+        variant: 'error',
+        anchorOrigin: { vertical: 'top', horizontal: 'right' }
+      });
     }
   };
   // Handle field change
@@ -756,38 +777,12 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
     updated[idx][field] = file;
     setProperties(updated);
   };
-  // Form submit
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (properties.length === 0) {
-      if (enqueueSnackbar)
-        enqueueSnackbar('At least one property is required.', { anchorOrigin: { vertical: 'top', horizontal: 'right' }, variant: 'error' });
-      else alert('At least one property is required.');
-      return;
-    }
-    const formData = new FormData();
-    properties.forEach((property, idx) => {
-      Object.entries(property).forEach(([key, value]) => {
-        if (key === 'property_address') {
-          formData.append(`properties[${idx}][${key}]`, JSON.stringify(value));
-        } else if (value instanceof File) {
-          formData.append(`properties[${idx}][${key}]`, value);
-        } else {
-          formData.append(`properties[${idx}][${key}]`, value ?? '');
-        }
-      });
-    });
-    if (enqueueSnackbar)
-      enqueueSnackbar('House Property Income saved!', { anchorOrigin: { vertical: 'top', horizontal: 'right' }, variant: 'success' });
-    else alert('House Property Income saved!');
-    // To POST: await Factory('post', '/your-endpoint', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
-  };
 
   // Add this async function to post a single property
   const postProperty = async (property, idx) => {
     const formData = new FormData();
     formData.append('service_request', service_id);
-    formData.append('service_task', data.task_id);
+    formData.append('service_task', _wholeData.task_id);
     formData.append('status', 'in progress');
 
     Object.entries(property).forEach(([key, value]) => {
@@ -807,6 +802,8 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
     try {
       const res = await Factory('post', '/income_tax_returns/house-property-details/upsert/', formData, {});
       if (res.res.status_cd === 0) {
+        console.log(res.res.data);
+        setProperties(res.res.data.property_info);
         if (enqueueSnackbar)
           enqueueSnackbar(`Property ${idx + 1} saved!`, { variant: 'success', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
       } else {
@@ -820,14 +817,14 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form>
       <Box>
         <Box display="flex" justifyContent="space-between" mb={2}>
           <Typography variant="subtitle1" fontWeight={700}>
             Enter House Property Details
           </Typography>
         </Box>
-        {properties.map((property, idx) => (
+        {properties?.map((property, idx) => (
           <Paper key={idx} sx={{ p: 3, mb: 2, borderRadius: 2, bgcolor: '#f8fafc' }}>
             <Typography variant="h4" sx={{ textDecoration: 'underline' }} mb={2}>
               Property {idx + 1}
@@ -1138,7 +1135,7 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
               </Button>
 
               {numProperties > 1 && (
-                <Button size="small" color="error" variant="outlined" onClick={handleRemoveProperty} sx={{ ml: 2 }}>
+                <Button size="small" color="error" variant="outlined" onClick={() => removeProperty(properties[idx], idx)} sx={{ ml: 2 }}>
                   Remove Property
                 </Button>
               )}
@@ -1146,16 +1143,17 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
           </Paper>
         ))}
 
-        <Box display="flex" justifyContent="flex-end" mt={1}>
+        <Box display="flex" justifyContent="flex-end" mt={1} gap={2}>
           <Button type="button" variant="outlined" size="small" color="primary" onClick={handleAddProperty}>
             Add Property
           </Button>
           <GetActionButtons
-            data={properties}
-            status={properties.status}
-            urlEndpoint="personal-information"
-            taskId={properties.id}
-            setData={setProperties}
+            type="post"
+            data={_wholeData.data[0]}
+            service_request={service_id}
+            status={_wholeData.data[0].status}
+            urlEndpoint="/income_tax_returns/house-property-details/upsert/"
+            task_id={_wholeData.task_id}
           />
         </Box>
       </Box>
@@ -1210,20 +1208,20 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
 
   useEffect(() => {
     if (cg_property_land) {
-      setSelectedTypes(cg_property_land.data.gains_applicable);
-      if (cg_property_land.data.capital_gains_property_details.length > 0)
-        setProperties(cg_property_land.data.capital_gains_property_details);
+      setSelectedTypes(cg_property_land?.data?.gains_applicable);
+      if (cg_property_land?.data?.capital_gains_property_details?.length > 0)
+        setProperties(cg_property_land?.data?.capital_gains_property_details);
     }
   }, [cg_property_land]);
 
   useEffect(() => {
     if (cg_other_sources) {
-      setOtherGainsRows(cg_other_sources.data);
+      setOtherGainsRows(cg_other_sources?.data);
     }
   }, [cg_other_sources]);
 
   useEffect(() => {
-    if (otherGainsRows.length === 0) {
+    if (otherGainsRows?.length === 0) {
       setOtherGainsRows([
         {
           asset_details: '',
@@ -1260,10 +1258,10 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
 
   useEffect(() => {
     if (cg_equity_mutual) {
-      setEquityMutualFundType(cg_equity_mutual.data.equity_mutual_fund_type);
-      setCamsFiles(cg_equity_mutual.data.documents);
-      setSoldForeignShares(cg_equity_mutual.data.sell_any_foreign_sales);
-      setSoldUnlistedShares(cg_equity_mutual.data.sell_any_unlisted_sales);
+      setEquityMutualFundType(cg_equity_mutual?.data?.equity_mutual_fund_type);
+      setCamsFiles(cg_equity_mutual?.data?.documents);
+      setSoldForeignShares(cg_equity_mutual?.data?.sell_any_foreign_sales);
+      setSoldUnlistedShares(cg_equity_mutual?.data?.sell_any_unlisted_sales);
     }
   }, [cg_equity_mutual]);
 
@@ -1307,10 +1305,10 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
       <Box mb={3}>
         <Typography mb={1}>Select the type of Capital Gains applicable:</Typography>
         <Box display="flex" flexWrap="wrap" gap={2}>
-          {gainTypes.map((type) => (
+          {gainTypes?.map((type) => (
             <FormControlLabel
               key={type}
-              control={<Checkbox checked={selectedTypes.includes(type)} />}
+              control={<Checkbox checked={selectedTypes?.includes(type)} />}
               onChange={async (e) => {
                 const isChecked = e.target.checked;
                 let __selectedTypes = isChecked ? [...selectedTypes, type] : selectedTypes.filter((t) => t !== type);
@@ -1323,7 +1321,7 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                 });
                 if (response.res.status_cd === 0) {
                   setSelectedTypes(response.res.data.gains_applicable);
-                  if (response.res.data.capital_gains_property_details.length > 0) {
+                  if (response.res.data.capital_gains_property_details?.length > 0) {
                     setCgPropertyLand((prev) => ({ ...prev, data: response.res.data }));
                     setProperties(response.res.data.capital_gains_property_details);
                   } else {
@@ -1341,7 +1339,7 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
         <Typography variant="subtitle1" fontWeight={700} mb={2}>
           Capital Gain from Property / Land
         </Typography>
-        {properties.map((property, idx) => (
+        {properties?.map((property, idx) => (
           <Paper key={idx} sx={{ p: 2, mb: 3, border: '1px solid #e0e0e0', bgcolor: '#fff' }}>
             <Typography fontWeight={600} mb={1}>
               Capital gain details for property {idx + 1}
@@ -1637,9 +1635,11 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                     : `/income_tax_returns/capital-gains/add-property/`;
                   const response = await Factory(type, url, formData);
                   if (response.res.status_cd === 0) {
-                    let __properties = [...properties];
-                    __properties[idx] = response.res.data;
-                    setProperties(__properties);
+                    if (type === 'post') {
+                      let __properties = [...properties];
+                      __properties[idx] = response.res.data;
+                      setProperties(__properties);
+                    }
                     enqueueSnackbar('Property saved successfully', {
                       anchorOrigin: { vertical: 'top', horizontal: 'right' },
                       variant: 'success'
@@ -1651,7 +1651,7 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
               >
                 Save
               </Button>
-              {properties.length > 1 && (
+              {properties?.length > 1 && (
                 <Button
                   size="small"
                   variant="outlined"
@@ -1666,7 +1666,7 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
             </Box>
           </Paper>
         ))}
-        <Box display="flex" justifyContent="flex-end" mt={2}>
+        <Box display="flex" justifyContent="flex-end" mt={2} gap={2}>
           <Button
             size="small"
             variant="outlined"
@@ -1694,6 +1694,17 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
           >
             Add Property Sold
           </Button>
+          {console.log(cg_property_land)}
+          <GetActionButtons
+            type="post"
+            data={cg_property_land.data}
+            status={cg_property_land.data.status}
+            urlEndpoint={`/income_tax_returns/capital-gains/add-property/`}
+            recId={cg_property_land.data.id}
+            service_request={service_id}
+            task_id={cg_property_land.task_id}
+            setData={setProperties}
+          />
         </Box>
         {/* Capital Gain from Equity/Mutual Fund */}
         <Typography variant="subtitle1" fontWeight={700} mb={2}>
@@ -1704,10 +1715,10 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
           <Box mb={2}>
             <Typography mb={1}>Which instrument(s) did you sell?</Typography>
             <Box display="flex" flexWrap="wrap" gap={2}>
-              {eqMfTypes.map((type) => (
+              {eqMfTypes?.map((type) => (
                 <FormControlLabel
                   key={type}
-                  control={<Checkbox checked={equity_mutual_fund_type.includes(type)} onChange={handleCamsInstrumentChange(type)} />}
+                  control={<Checkbox checked={equity_mutual_fund_type?.includes(type)} onChange={handleCamsInstrumentChange(type)} />}
                   label={type}
                 />
               ))}
@@ -1721,8 +1732,8 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                 Upload
                 <input type="file" hidden multiple onChange={handleCamsFilesChange} />
               </Button>
-              <Typography variant="body2">{camsFiles.length} file(s) selected</Typography>
-              {camsFiles.length > 0 && (
+              <Typography variant="body2">{camsFiles?.length} file(s) selected</Typography>
+              {camsFiles?.length > 0 && (
                 <Button
                   size="small"
                   variant="outlined"
@@ -1756,6 +1767,15 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
             <Button size="small" variant="contained" onClick={handleCamsSave}>
               Save
             </Button>
+            <GetActionButtons
+              type="post"
+              data={cg_equity_mutual}
+              status={cg_equity_mutual.data.status}
+              urlEndpoint={`/income_tax_returns/capital-gains/equity-mutual-fund/submit/`}
+              recId={cg_equity_mutual.data.id}
+              service_request={service_id}
+              task_id={cg_equity_mutual.task_id}
+            />
           </Stack>
         </Paper>
         {/* 5. Details of other Capital Gains table (already present) */}
@@ -1777,7 +1797,7 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                 </TableRow>
               </TableHead>
               <TableBody>
-                {otherGainsRows.map((_, idx) => (
+                {otherGainsRows?.map((_, idx) => (
                   <TableRow key={idx}>
                     <TableCell sx={{ px: 0.5, py: 1, pl: 1 }}>
                       <TextField
@@ -1954,6 +1974,15 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
             >
               Add Row
             </Button>
+            <GetActionButtons
+              type="post"
+              data={cg_other_sources}
+              status={cg_other_sources.data.status}
+              urlEndpoint={`/income_tax_returns/other-capital-gains/with-files/`}
+              recId={cg_other_sources.data.id}
+              service_request={service_id}
+              task_id={cg_other_sources.task_id}
+            />
           </Box>
         </Box>
       </Paper>
@@ -2028,8 +2057,8 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
   const businessTypes = ['Trading', 'Manufacturing', 'Profession', 'Other'];
 
   useEffect(() => {
-    if (data.data.length > 0) {
-      setBusinessRows(data.data.map(transformBusinessApiResponse));
+    if (data?.data?.length > 0) {
+      setBusinessRows(data?.data?.map(transformBusinessApiResponse));
     } else {
       setBusinessRows([
         {
@@ -2096,7 +2125,7 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
           key === 'gstReturnsFile' ||
           key === 'otherDocsFile'
         ) {
-          if (value && value.length > 0) {
+          if (value && value?.length > 0) {
             Array.from(value).forEach((file) => {
               if (file instanceof File) {
                 formData.append(key, file);
@@ -2128,7 +2157,7 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
 
   return (
     <Box>
-      {Array.from({ length: businessRows.length }).map((_, idx) => {
+      {Array.from({ length: businessRows?.length }).map((_, idx) => {
         const section = selectedSection[idx];
         const sectionData = sectionPresumptiveData[section] || { nature: '', presumptive_rate: '', presumptive_income: '' };
         return (
@@ -2811,7 +2840,7 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
               >
                 Save
               </Button>
-              {businessRows.length > 1 && (
+              {businessRows?.length > 1 && (
                 <Button
                   size="small"
                   color="error"
@@ -2867,7 +2896,7 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
   );
 };
 
-const interestTypes = ['Savings', 'FD', 'RD', 'NRO', 'NRE', 'Others'];
+const interestTypes = ['Savings Account', 'Recurring Deposit', 'NRO Account', 'NRE Account', 'Fixed Deposit', 'Other'];
 
 const relationOptions = ['Relative', 'Non-relative'];
 
@@ -3100,29 +3129,29 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
   const [winningsRows, setWinningsRows] = React.useState([{ source: '', amount: '', file: '' }]);
 
   useEffect(() => {
-    if (interest_income.data.length > 0) {
-      setInterestApplicable(interest_income.data[0].interest_income);
-      if (interest_income.data[0].documents.length > 0) {
-        setInterestRows(interest_income.data[0].documents);
+    if (interest_income?.data?.length > 0) {
+      setInterestApplicable(interest_income?.data[0]?.interest_income);
+      if (interest_income?.data[0]?.documents?.length > 0) {
+        setInterestRows(interest_income?.data[0]?.documents);
       }
     }
   }, [interest_income]);
 
   useEffect(() => {
-    if (dividend_income.data.length > 0) {
-      setDividendApplicable(dividend_income.data[0].dividend_income);
-      if (dividend_income.data[0].documents.length > 0) {
-        setDividendRows(dividend_income.data[0].documents);
+    if (dividend_income?.data?.length > 0) {
+      setDividendApplicable(dividend_income?.data[0]?.dividend_income);
+      if (dividend_income?.data[0]?.documents?.length > 0) {
+        setDividendRows(dividend_income?.data[0]?.documents);
       }
     }
   }, [dividend_income]);
 
   useEffect(() => {
-    if (gift_income.data.length > 0) {
-      setGiftApplicable(gift_income.data[0].gift_income);
-      if (gift_income.data[0].gift_income_details.length > 0) {
+    if (gift_income?.data?.length > 0) {
+      setGiftApplicable(gift_income?.data[0]?.gift_income);
+      if (gift_income?.data[0]?.gift_income_details?.length > 0) {
         setGiftRows(
-          gift_income.data[0].documents.map((row) => ({
+          gift_income?.data[0]?.documents?.map((row) => ({
             ...row,
             received_from: row.received_from || '',
             date_received: row.date_received || '',
@@ -3134,20 +3163,20 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
   }, [gift_income]);
 
   useEffect(() => {
-    if (family_income.data.length > 0) {
-      setFamilyApplicable(family_income.data[0].family_pension_income);
-      if (family_income.data[0].family_pension_income_docs.length > 0) {
-        setFamilyRows(family_income.data[0].documents);
+    if (family_income?.data?.length > 0) {
+      setFamilyApplicable(family_income?.data[0]?.family_pension_income);
+      if (family_income?.data[0]?.family_pension_income_docs?.length > 0) {
+        setFamilyRows(family_income?.data[0]?.documents);
       }
     }
   }, [family_income]);
 
   useEffect(() => {
-    if (foreign_income.data.length > 0) {
-      setForeignApplicable(foreign_income.data[0].foreign_income);
-      if (foreign_income.data[0].foreign_income_docs.length > 0) {
+    if (foreign_income?.data?.length > 0) {
+      setForeignApplicable(foreign_income?.data[0]?.foreign_income);
+      if (foreign_income?.data[0]?.foreign_income_docs?.length > 0) {
         setForeignRows(
-          foreign_income.data[0].documents.map((row) => ({
+          foreign_income?.data[0]?.documents?.map((row) => ({
             ...row,
             type_of_income: row.type_of_income || '',
             tax_paid_abroad: row.tax_paid_abroad || 'no',
@@ -3159,10 +3188,10 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
   }, [foreign_income]);
 
   useEffect(() => {
-    if (winning_income.data.length > 0) {
-      setWinningsApplicable(winning_income.data[0].winning_income);
-      if (winning_income.data[0].winnings_income_docs.length > 0) {
-        setWinningsRows(winning_income.data[0].documents);
+    if (winning_income?.data?.length > 0) {
+      setWinningsApplicable(winning_income?.data[0]?.winning_income);
+      if (winning_income?.data[0]?.winnings_income_docs?.length > 0) {
+        setWinningsRows(winning_income?.data[0]?.documents);
       }
     }
   }, [winning_income]);
@@ -3246,7 +3275,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
 
   const saveGiftRow = async (row, idx) => {
     let type = row.id ? 'put' : 'post';
-    let url = row.id ? `/income_tax_returns/gift-income-document/${row.id}/update/` : `/income_tax_returns/interest-income-doc/add/`;
+    let url = row.id ? `/income_tax_returns/gift-income-document/${row.id}/update/` : `/income_tax_returns/gift-income-document/add/`;
     let formData = new FormData();
     formData.append('amount', row.amount);
     formData.append('received_from', row.received_from);
@@ -3353,7 +3382,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                 </TableRow>
               </TableHead>
               <TableBody>
-                {interestRows.map((row, idx) => (
+                {interestRows?.map((row, idx) => (
                   <TableRow key={idx}>
                     <TableCell>
                       <Autocomplete
@@ -3429,7 +3458,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                         <Button size="small" variant="contained" onClick={() => saveInterestRow(row, idx)}>
                           Save
                         </Button>
-                        {interestRows.length > 1 && (
+                        {interestRows?.length > 1 && (
                           <IconButton size="small" color="error" onClick={() => setInterestRows(interestRows.filter((_, i) => i !== idx))}>
                             <DeleteIcon />
                           </IconButton>
@@ -3480,7 +3509,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                 </TableRow>
               </TableHead>
               <TableBody>
-                {dividendRows.map((row, idx) => (
+                {dividendRows?.map((row, idx) => (
                   <TableRow key={idx}>
                     <TableCell>
                       <TextField
@@ -3542,7 +3571,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                         <Button size="small" variant="contained" onClick={() => saveDividendRow(row, idx)}>
                           Save
                         </Button>
-                        {dividendRows.length > 1 && (
+                        {dividendRows?.length > 1 && (
                           <IconButton size="small" color="error" onClick={() => setDividendRows(dividendRows.filter((_, i) => i !== idx))}>
                             <DeleteIcon />
                           </IconButton>
@@ -3592,7 +3621,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                 </TableRow>
               </TableHead>
               <TableBody>
-                {giftRows.map((row, idx) => (
+                {giftRows?.map((row, idx) => (
                   <TableRow key={idx}>
                     <TableCell>
                       <TextField
@@ -3660,13 +3689,13 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                         }}
                       >
                         <FormControlLabel
-                          value="yes"
-                          control={<Radio size="small" checked={row.was_it_marriage_related === 'yes'} />}
+                          value="Yes"
+                          control={<Radio size="small" checked={row.was_it_marriage_related === 'Yes'} />}
                           label="Yes"
                         />
                         <FormControlLabel
-                          value="no"
-                          control={<Radio size="small" checked={row.was_it_marriage_related === 'no'} />}
+                          value="No"
+                          control={<Radio size="small" checked={row.was_it_marriage_related === 'No'} />}
                           label="No"
                         />
                       </RadioGroup>
@@ -3705,7 +3734,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                         <Button size="small" variant="contained" onClick={() => saveGiftRow(row, idx)}>
                           Save
                         </Button>
-                        {giftRows.length > 1 && (
+                        {giftRows?.length > 1 && (
                           <IconButton size="small" color="error" onClick={() => setGiftRows(giftRows.filter((_, i) => i !== idx))}>
                             <DeleteIcon />
                           </IconButton>
@@ -3724,7 +3753,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
               onClick={() =>
                 setGiftRows([
                   ...giftRows,
-                  { amount: '', received_from: '', relation: '', date_received: '', was_it_marriage_related: 'no' }
+                  { amount: '', received_from: '', relation: '', date_received: '', was_it_marriage_related: 'No' }
                 ])
               }
             >
@@ -3761,7 +3790,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                 </TableRow>
               </TableHead>
               <TableBody>
-                {familyRows.map((row, idx) => (
+                {familyRows?.map((row, idx) => (
                   <TableRow key={idx}>
                     <TableCell>
                       <TextField
@@ -3824,7 +3853,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                         <Button size="small" variant="contained" onClick={() => saveFamilyRow(row, idx)}>
                           Save
                         </Button>
-                        {familyRows.length > 1 && (
+                        {familyRows?.length > 1 && (
                           <IconButton size="small" color="error" onClick={() => setFamilyRows(familyRows.filter((_, i) => i !== idx))}>
                             <DeleteIcon />
                           </IconButton>
@@ -3878,7 +3907,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                 </TableRow>
               </TableHead>
               <TableBody>
-                {foreignRows.map((row, idx) => (
+                {foreignRows?.map((row, idx) => (
                   <TableRow key={idx}>
                     <TableCell sx={{ p: 0.5, py: 1 }}>
                       <Autocomplete
@@ -3995,7 +4024,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                         <Button size="small" variant="contained" onClick={() => saveForeignRow(row, idx)}>
                           Save
                         </Button>
-                        {foreignRows.length > 1 && (
+                        {foreignRows?.length > 1 && (
                           <IconButton size="small" color="error" onClick={() => setForeignRows(foreignRows.filter((_, i) => i !== idx))}>
                             <DeleteIcon />
                           </IconButton>
@@ -4051,7 +4080,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                 </TableRow>
               </TableHead>
               <TableBody>
-                {winningsRows.map((row, idx) => (
+                {winningsRows?.map((row, idx) => (
                   <TableRow key={idx}>
                     <TableCell>
                       <Autocomplete
@@ -4114,7 +4143,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                         <Button size="small" variant="contained" onClick={() => saveWinningsRow(row, idx)}>
                           Save
                         </Button>
-                        {winningsRows.length > 1 && (
+                        {winningsRows?.length > 1 && (
                           <IconButton size="small" color="error" onClick={() => setWinningsRows(winningsRows.filter((_, i) => i !== idx))}>
                             <DeleteIcon />
                           </IconButton>
@@ -4137,52 +4166,111 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
   );
 };
 
-const AgricultureIncome = ({ data, service_id }) => {
+const AgricultureIncome = ({ data, service_id, setFileDialogOpen, fileDialogOpen, dialogFilesData, setDialogFilesData }) => {
+  const { enqueueSnackbar } = useSnackbar();
   data = data[0];
-  const [hasAgriIncome, setHasAgriIncome] = React.useState('Applicable');
+  console.log(data);
+  const [agricultureIncome, setAgricultureIncome] = React.useState({
+    agriculture: data.data[0].agriculture_income || 'Not Applicable',
+    amount: data.data[0].agricultural_income || '',
+    file: data.data[0].agricultural_income_file || ''
+  });
 
   const postIncomeApplicability = async (v) => {
-    const res = await Factory('post', `/income_tax_returns/agriculture-income/upsert/`, {
-      service_request: parseInt(service_id),
-      service_task: parseInt(data.task_id),
-      agriculture: v,
-      status: 'in progress'
-    });
+    let formData = new FormData();
+    formData.append('service_request', parseInt(service_id));
+    formData.append('service_task', parseInt(data.task_id));
+    formData.append('agriculture', v);
+    formData.append('status', 'in progress');
+    const res = await Factory('post', `/income_tax_returns/agriculture-income/upsert/`, formData);
     if (res.res.status_cd === 0) {
       return true;
     }
   };
 
+  const postAgriculturalIncome = async () => {
+    let formData = new FormData();
+    formData.append('agriculture_income', parseInt(data.data[0].id));
+    formData.append('service_request', parseInt(service_id));
+    formData.append('service_task', parseInt(data.task_id));
+    formData.append('agricultural_income_file', agricultureIncome.file);
+    formData.append('agricultural_income', agricultureIncome.amount);
+    formData.append('status', 'in progress');
+    const res = await Factory('post', `/income_tax_returns/agriculture-income/upsert/`, formData);
+    if (res.res.status_cd === 0) {
+      console.log(res.res);
+      enqueueSnackbar('Agricultural income saved successfully', {
+        anchorOrigin: { vertical: 'top', horizontal: 'right' },
+        variant: 'success'
+      });
+    } else {
+      enqueueSnackbar('Error saving agricultural income', { anchorOrigin: { vertical: 'top', horizontal: 'right' }, variant: 'error' });
+    }
+  };
+
   return (
     <Box>
-      <Typography variant="h6" mb={2} sx={{ textDecoration: 'underline' }}>
-        Agricultural Income
-      </Typography>
       <Stack direction="row" spacing={2} alignItems="center" mb={2}>
-        <Typography>Do you have agricultural income during F.Y.?</Typography>
+        <Typography>Do you have agricultural income during F.Y.? </Typography>
         <RadioGroup
           row
-          value={hasAgriIncome}
+          value={agricultureIncome.agriculture}
           onChange={(_, v) => {
             postIncomeApplicability(v);
-            setHasAgriIncome(v);
+            setAgricultureIncome({ ...agricultureIncome, agriculture: v });
           }}
         >
           <FormControlLabel value="Applicable" control={<Radio size="small" />} label="Yes" />
           <FormControlLabel value="Not Applicable" control={<Radio size="small" />} label="No" />
         </RadioGroup>
       </Stack>
-      {hasAgriIncome === 'Applicable' && (
+      {agricultureIncome.agriculture === 'Applicable' && (
         <Stack direction="row" spacing={2} alignItems="center" mb={2}>
           <Typography>If yes, enter net agricultural income earned</Typography>
-          <TextField size="small" fullWidth sx={{ maxWidth: 200 }} label="Agricultural Income" />
+          <TextField
+            size="small"
+            fullWidth
+            sx={{ maxWidth: 200 }}
+            onChange={(e) => setAgricultureIncome({ ...agricultureIncome, amount: e.target.value })}
+            label="Agricultural Income"
+          />
           <Button size="small" variant="contained" component="label">
             Upload
-            <input type="file" hidden />
+            <input type="file" hidden onChange={(e) => setAgricultureIncome({ ...agricultureIncome, file: e.target.files[0] })} />
           </Button>
-          <Typography variant="caption">Upload Receipts</Typography>
+          {agricultureIncome.file && (
+            <Button
+              size="small"
+              variant="outlined"
+              sx={{ ml: 1 }}
+              onClick={() => {
+                setFileDialogOpen(true);
+                setDialogFilesData([
+                  {
+                    url: agricultureIncome.file instanceof File ? agricultureIncome.file.name : agricultureIncome.file
+                  }
+                ]);
+              }}
+            >
+              View
+            </Button>
+          )}
         </Stack>
       )}
+      <Box display="flex" justifyContent="flex-end" gap={2}>
+        <Button size="small" variant="contained" onClick={postAgriculturalIncome}>
+          Save
+        </Button>
+        {console.log(data)}
+        <GetActionButtons
+          type="post"
+          data={data}
+          status={data.data[0].status}
+          urlEndpoint={`/income_tax_returns/agriculture-income/upsert/`}
+          service_request={service_id}
+          task_id={data.task_id}
+        />
+      </Box>
     </Box>
   );
 };
@@ -4245,7 +4333,16 @@ const IncomeDetails = ({ data, type, fileDialogOpen, setFileDialogOpen, dialogFi
         />
       );
     case 'agriculture':
-      return <AgricultureIncome data={data.agriculture_income} service_id={service_id} />;
+      return (
+        <AgricultureIncome
+          data={data.agriculture_income}
+          service_id={service_id}
+          setFileDialogOpen={setFileDialogOpen}
+          fileDialogOpen={fileDialogOpen}
+          dialogFilesData={dialogFilesData}
+          setDialogFilesData={setDialogFilesData}
+        />
+      );
   }
 };
 
