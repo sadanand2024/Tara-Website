@@ -239,19 +239,12 @@ export default function ITR() {
       setTaxPaidDetails({
         task_id: response.res.data.tasks_data['Tax Paid Details'].task_id || null,
         id: response.res.data.tasks_data['Tax Paid Details'].data?.id || null,
-        as26File: {
-          name:
-            response.res.data.tasks_data['Tax Paid Details'].data?.documents?.['26AS'].files?.length > 0
-              ? response.res.data.tasks_data['Tax Paid Details'].data?.documents?.['26AS'].files[0].url
-              : null
-        },
-        aisFile: {
-          name:
-            response.res.data.tasks_data['Tax Paid Details'].data?.documents?.['AIS'].files?.length > 0
-              ? response.res.data.tasks_data['Tax Paid Details'].data?.documents?.['AIS'].files[0].url
-              : null
-        },
-        challans: response.res.data.tasks_data['Tax Paid Details'].data?.documents?.['AdvanceTax'].files || []
+        as26File: response.res.data.tasks_data['Tax Paid Details'].data?.documents?.['26AS'].files || [],
+        aisFile: response.res.data.tasks_data['Tax Paid Details'].data?.documents?.['AIS'].files || [],
+        challans: response.res.data.tasks_data['Tax Paid Details'].data?.documents?.['AdvanceTax'].files || [],
+        status: response.res.data.tasks_data['Tax Paid Details']?.data?.status || null,
+        reviewer: response.res.data.tasks_data['Tax Paid Details']?.data?.reviewer || null,
+        assignee: response.res.data.tasks_data['Tax Paid Details']?.data?.assignee || null
       });
     }
   };
@@ -413,50 +406,78 @@ export default function ITR() {
                           <Typography>Upload PAN</Typography>
                         </Grid2>
                         <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                          <TextField
-                            size="small"
-                            fullWidth
-                            value={values.pan ? getFileName(values.pan) : ''}
-                            placeholder="Upload PAN"
-                            InputProps={{ readOnly: true }}
-                            onClick={() => document.getElementById('panFileInput').click()}
-                            error={Boolean(touched.pan && errors.pan)}
-                            helperText={touched.pan && errors.pan ? errors.pan : ' '}
-                          />
-                          <input
-                            id="panFileInput"
-                            type="file"
-                            hidden
-                            onChange={(e) => {
-                              setFieldValue('pan', e.target.files[0]);
-                              setFieldTouched('pan', true, true);
-                            }}
-                          />
+                          <Button size="small" variant="contained" component="label">
+                            Upload
+                            <input
+                              id="panFileInput"
+                              type="file"
+                              hidden
+                              onChange={(e) => {
+                                setFieldValue('pan', e.target.files[0]);
+                                setFieldTouched('pan', true, true);
+                              }}
+                            />
+                          </Button>
+                          {values.pan && (
+                            <Button
+                              size="small"
+                              variant="outlined"
+                              sx={{ ml: 1 }}
+                              onClick={() => {
+                                if (typeof values.pan === 'string') {
+                                  window.open(values.pan, '_blank');
+                                } else {
+                                  window.open(URL.createObjectURL(values.pan), '_blank');
+                                }
+                              }}
+                            >
+                              View
+                            </Button>
+                          )}
+                          {touched.pan && errors.pan && (
+                            <Typography color="error" variant="caption">
+                              {errors.pan}
+                            </Typography>
+                          )}
                         </Grid2>
                         {/* Upload Aadhaar */}
                         <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
                           <Typography>Upload Aadhaar</Typography>
                         </Grid2>
                         <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                          <TextField
-                            size="small"
-                            fullWidth
-                            value={values.aadhar ? getFileName(values.aadhar) : ''}
-                            placeholder="Upload Aadhaar"
-                            InputProps={{ readOnly: true }}
-                            onClick={() => document.getElementById('aadhaarFileInput').click()}
-                            error={Boolean(touched.aadhar && errors.aadhar)}
-                            helperText={touched.aadhar && errors.aadhar ? errors.aadhar : ' '}
-                          />
-                          <input
-                            id="aadhaarFileInput"
-                            type="file"
-                            hidden
-                            onChange={(e) => {
-                              setFieldValue('aadhar', e.target.files[0]);
-                              setFieldTouched('aadhar', true, true);
-                            }}
-                          />
+                          <Button size="small" variant="contained" component="label">
+                            Upload
+                            <input
+                              id="aadhaarFileInput"
+                              type="file"
+                              hidden
+                              onChange={(e) => {
+                                setFieldValue('aadhar', e.target.files[0]);
+                                setFieldTouched('aadhar', true, true);
+                              }}
+                            />
+                          </Button>
+                          {values.aadhar && (
+                            <Button
+                              size="small"
+                              variant="outlined"
+                              sx={{ ml: 1 }}
+                              onClick={() => {
+                                if (typeof values.aadhar === 'string') {
+                                  window.open(values.aadhar, '_blank');
+                                } else {
+                                  window.open(URL.createObjectURL(values.aadhar), '_blank');
+                                }
+                              }}
+                            >
+                              View
+                            </Button>
+                          )}
+                          {touched.aadhar && errors.aadhar && (
+                            <Typography color="error" variant="caption">
+                              {errors.aadhar}
+                            </Typography>
+                          )}
                         </Grid2>
                         {/* Mobile number */}
                         <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
@@ -599,10 +620,11 @@ export default function ITR() {
                           Save Personal Info
                         </Button>
                         <GetActionButtons
+                          type="put"
                           data={personalInfo}
                           status={personalInfo.status}
                           urlEndpoint="personal-information"
-                          taskId={personalInfo.id}
+                          recId={personalInfo.id}
                           setData={setPersonalInfo}
                         />
                       </Box>
@@ -666,41 +688,75 @@ export default function ITR() {
                         <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
                           <Typography>Upload 26AS</Typography>
                         </Grid2>
-                        <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                          <TextField
-                            size="small"
-                            fullWidth
-                            value={values.as26File ? getFileName(values.as26File) : ''}
-                            placeholder="Upload 26AS"
-                            InputProps={{ readOnly: true }}
-                            onClick={() => document.getElementById('as26FileInput').click()}
-                            error={Boolean(touched.as26File && errors.as26File)}
-                            helperText={touched.as26File && errors.as26File ? errors.as26File : ' '}
-                          />
-                          <input id="as26FileInput" type="file" hidden onChange={(e) => setFieldValue('as26File', e.target.files[0])} />
+                        <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+                          <Button size="small" variant="contained" component="label">
+                            Upload
+                            <input
+                              id="as26FileInput"
+                              type="file"
+                              multiple={true}
+                              hidden
+                              onChange={(e) => setFieldValue('as26File', e.target.files)}
+                            />
+                          </Button>
+                          {values.as26File && (
+                            <Button
+                              size="small"
+                              variant="outlined"
+                              sx={{ ml: 1 }}
+                              onClick={() => {
+                                setFileDialogOpen(true);
+                                setDialogFilesData(values.as26File);
+                              }}
+                            >
+                              View
+                            </Button>
+                          )}
+                          {touched.as26File && errors.as26File && (
+                            <Typography color="error" variant="caption">
+                              {errors.as26File}
+                            </Typography>
+                          )}
                         </Grid2>
                         {/* Upload AIS */}
                         <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
                           <Typography>Upload AIS</Typography>
                         </Grid2>
-                        <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                          <TextField
-                            size="small"
-                            fullWidth
-                            value={values.aisFile ? getFileName(values.aisFile) : ''}
-                            placeholder="Upload AIS"
-                            InputProps={{ readOnly: true }}
-                            onClick={() => document.getElementById('aisFileInput').click()}
-                            error={Boolean(touched.aisFile && errors.aisFile)}
-                            helperText={touched.aisFile && errors.aisFile ? errors.aisFile : ' '}
-                          />
-                          <input id="aisFileInput" type="file" hidden onChange={(e) => setFieldValue('aisFile', e.target.files[0])} />
+                        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                          <Button size="small" variant="contained" component="label">
+                            Upload
+                            <input
+                              id="aisFileInput"
+                              type="file"
+                              multiple={true}
+                              hidden
+                              onChange={(e) => setFieldValue('aisFile', e.target.files)}
+                            />
+                          </Button>
+                          {values.aisFile && (
+                            <Button
+                              size="small"
+                              variant="outlined"
+                              sx={{ ml: 1 }}
+                              onClick={() => {
+                                setFileDialogOpen(true);
+                                setDialogFilesData(values.aisFile);
+                              }}
+                            >
+                              View
+                            </Button>
+                          )}
+                          {touched.aisFile && errors.aisFile && (
+                            <Typography color="error" variant="caption">
+                              {errors.aisFile}
+                            </Typography>
+                          )}
                         </Grid2>
                         {/* Advance tax / Self Assisted Tax Challan */}
-                        <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+                        <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
                           <Typography>Advance tax / Self Assisted Tax Challan</Typography>
                         </Grid2>
-                        <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+                        <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
                           <Box display="flex" alignItems="center" gap={1}>
                             <input
                               id="challanInputNew"
@@ -732,10 +788,14 @@ export default function ITR() {
                           Save Tax Paid Details
                         </Button>
                         <GetActionButtons
+                          type="post"
                           data={taxPaidDetails}
                           status={taxPaidDetails.status}
                           urlEndpoint="taxPaid"
-                          taskId={taxPaidDetails.task_id}
+                          recId={taxPaidDetails.id}
+                          service_request={service_id}
+                          task_id={taxPaidDetails.task_id}
+                          setData={setTaxPaidDetails}
                         />
                       </Box>
                     </Form>

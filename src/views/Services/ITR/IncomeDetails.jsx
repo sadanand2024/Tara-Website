@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Typography,
@@ -40,9 +40,9 @@ const foreignDocTypes = [
 
 const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDialogFilesData, service_id }) => {
   const { enqueueSnackbar } = useSnackbar();
-  const salary_income = data.find((item) => item.category_name === 'Salary Income');
-  const other_income = data.find((item) => item.category_name === 'Other Income');
-  const nri_employee_salary = data.find((item) => item.category_name === 'NRI Employee Salary');
+  const [salary_income, setSalaryIncome] = useState(data.find((item) => item.category_name === 'Salary Income'));
+  const [other_income, setOtherIncome] = useState(data.find((item) => item.category_name === 'Other Income'));
+  const [nri_employee_salary, setForeignIncome] = useState(data.find((item) => item.category_name === 'NRI Employee Salary'));
   // Validation schemas
   const docsSchema = Yup.object({
     notes: Yup.object({
@@ -227,6 +227,7 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
           variant: 'success',
           anchorOrigin: { vertical: 'top', horizontal: 'right' }
         });
+        setSalaryIncome((prev) => ({ ...prev, data: res.res.data }));
       } else {
         enqueueSnackbar('Error saving Foreign/NRI Employment & Salary Details!', {
           variant: 'error',
@@ -309,10 +310,20 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
             </TableBody>
           </Table>
         </Box>
-        <Box display="flex" justifyContent="flex-end" mt={2}>
+
+        <Box display="flex" justifyContent="flex-end" mt={2} gap={2}>
           <Button type="submit" variant="contained" color="primary">
             Save Documents
           </Button>
+          <GetActionButtons
+            type="put"
+            data={salary_income}
+            status={salary_income.data[0].status}
+            urlEndpoint={`salary-income`}
+            service_request={service_id}
+            recId={salary_income.data[0].id}
+            setData={setSalaryIncome}
+          />
         </Box>
       </form>
       {/* Section 2: Details of any other income you wish to share */}
@@ -1110,13 +1121,13 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
           {/* <Button type="submit" variant="contained" color="primary">
             Save House Property Income
           </Button> */}
-          <GetActionButtons
+          {/* <GetActionButtons
             data={properties}
             status={properties.status}
             urlEndpoint="personal-information"
             taskId={properties.id}
             setData={setProperties}
-          />
+          /> */}
         </Box>
       </Box>
     </form>
