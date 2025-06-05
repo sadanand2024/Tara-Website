@@ -95,8 +95,7 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
         return {
           employee: '',
           current_ctc: '',
-          updated_on: '',
-          current_ctc: ''
+          updated_on: ''
         };
       case 'Tds':
         return {

@@ -32,7 +32,7 @@ const PRODUCTS_DATA = [
 ];
 const TabPanel = ({ children, value, index }) => (
   <div role="tabpanel" hidden={value !== index} id={`simple-tabpanel-${index}`} aria-labelledby={`simple-tab-${index}`}>
-    {value === index && <Box sx={{ pt: 2.5 }}>{children}</Box>}
+    {value === index && <Box sx={{ pt: 0 }}>{children}</Box>}
   </div>
 );
 

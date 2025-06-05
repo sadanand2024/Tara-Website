@@ -13,7 +13,7 @@ const LabourLicenceRegistration = () => {
   const [step, setStep] = React.useState(0);
   const activeStep = step;
   const handleStepClick = (targetStep) => {
-    if (targetStep <= step + 1) setStep(targetStep);
+    setStep(targetStep);
   };
 
   return (

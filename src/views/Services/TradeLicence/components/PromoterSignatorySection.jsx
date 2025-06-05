@@ -30,7 +30,6 @@ const PromoterSignatorySection = () => {
   const getSignatoryDetails = async () => {
     const url = `/tradelicense/signatory-details/by-request-or-task?service_request_id=25`;
     const { res } = await Factory('get', url);
-    console.log(res);
     if (res.status_cd === 0) {
       const promoters =
         res.data?.map((item) => ({
@@ -218,7 +217,6 @@ const PromoterSignatorySection = () => {
   useEffect(() => {
     getSignatoryDetails();
   }, []);
-  console.log(errors);
   return (
     <form onSubmit={formik.handleSubmit}>
       <Card sx={{ p: 3, mt: 4 }}>

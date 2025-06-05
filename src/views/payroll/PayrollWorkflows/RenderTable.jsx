@@ -12,7 +12,8 @@ import {
   Pagination,
   Button,
   Box,
-  CircularProgress
+  CircularProgress,
+  Grid2
 } from '@mui/material';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
@@ -139,17 +140,18 @@ const RenderTable = ({
           />
         </TableContainer>
       )}
-
-      {safeTableData.length > rowsPerPage && (
-        <Stack direction="row" justifyContent="center" alignItems="center" sx={{ py: 2 }}>
-          <Pagination
-            count={Math.ceil(safeTableData.length / rowsPerPage)}
-            page={currentPage}
-            onChange={handlePageChange}
-            color="primary"
-            shape="rounded"
-          />
-        </Stack>
+      {safeTableData.length > 0 && (
+        <Grid2 size={12}>
+          <Stack direction="row" justifyContent="center" sx={{ mt: 2 }}>
+            <Pagination
+              count={Math.ceil(safeTableData.length / rowsPerPage)}
+              page={currentPage}
+              onChange={handlePageChange}
+              shape="rounded"
+              color="primary"
+            />
+          </Stack>
+        </Grid2>
       )}
     </Stack>
   );
