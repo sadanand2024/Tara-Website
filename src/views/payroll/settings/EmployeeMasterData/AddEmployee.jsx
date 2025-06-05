@@ -14,7 +14,7 @@ import Factory from 'utils/Factory';
 function StepperComponent() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [activeStep, setActiveStep] = useState(1);
+  const [activeStep, setActiveStep] = useState(0);
   const [payrollId, setPayrollId] = useState(null);
   const [employeeId, setEmployeeId] = useState(null);
   const [employeeData, setEmployeeData] = useState(null);

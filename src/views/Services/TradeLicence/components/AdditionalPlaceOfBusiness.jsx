@@ -152,9 +152,7 @@ const AdditionalPlaceOfBusiness = ({ businessPremises }) => {
       }
     }
   });
-  const renderField = (field, formikContext) => {
-    const { values, errors, touched, handleChange, handleBlur, setFieldValue } = formikContext;
-
+  const renderField = (field) => {
     switch (field.type) {
       case 'text':
         return field.name === 'state' || field.name === 'nature_of_possession' || field.name === 'road_type' ? (
@@ -260,7 +258,7 @@ const AdditionalPlaceOfBusiness = ({ businessPremises }) => {
         <Grid2 container spacing={2}>
           {additionalFields.map((field) => (
             <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4 }}>
-              {renderField(field, formik)}
+              {renderField(field)}
             </Grid2>
           ))}
         </Grid2>
