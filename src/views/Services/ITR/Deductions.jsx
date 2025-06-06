@@ -3,6 +3,7 @@ import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import DeleteIcon from '@mui/icons-material/Delete';
 import IconButton from '@mui/material/IconButton';
+import GetActionButtons from '../FormHelpers';
 import { useSnackbar } from 'notistack';
 import {
   Box,
@@ -1365,9 +1366,19 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
         <Button variant="outlined" color="primary" onClick={() => setStep(step - 1)}>
           Back
         </Button>
-        <Button variant="contained" color="primary" onClick={() => setStep(step + 1)}>
-          Continue
-        </Button>
+        <Stack direction="row" spacing={1}>
+          <GetActionButtons
+            type="post"
+            urlEndpoint="/income_tax_returns/deductions/upsert/"
+            status={deductions?.data?.status}
+            data={deductions}
+            service_request={service_id}
+            task_id={deductions?.task_id}
+          />
+          <Button variant="contained" color="primary" onClick={() => setStep(step + 1)}>
+            Continue
+          </Button>
+        </Stack>
       </Box>
     </Box>
   );

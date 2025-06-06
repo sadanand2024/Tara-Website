@@ -44,6 +44,7 @@ import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import AgricultureIcon from '@mui/icons-material/Agriculture';
 import Avatar from '@mui/material/Avatar';
+import StepContent from '@mui/material/StepContent';
 
 const steps = ['Personal Info', 'Income Details', 'Deductions', 'Review & Filing'];
 
@@ -91,6 +92,7 @@ const taxPaidSchema = Yup.object().shape({
 // Add validation schemas for Donations, Investments, Mediclaim
 
 export default function ITR() {
+  const [reviewAndFiling, setReviewAndFiling] = React.useState({ draft_income_file: null });
   const [searchParams] = useSearchParams();
   const service_id = searchParams.get('service_id');
   const [step, setStep] = React.useState(0);
@@ -228,7 +230,7 @@ export default function ITR() {
     }
   };
 
-  const getStep1Data = async (step) => {
+  const getStep1Data = async () => {
     const response = await Factory(
       'get',
       `/income_tax_returns/service-request-section-data?service_request_id=${service_id}&section=personal_info`
@@ -249,7 +251,7 @@ export default function ITR() {
     }
   };
 
-  const getStep2Data = async (step) => {
+  const getStep2Data = async () => {
     const response = await Factory(
       'get',
       `/income_tax_returns/service-request-section-data?service_request_id=${service_id}&section=income_details`
@@ -261,7 +263,7 @@ export default function ITR() {
     }
   };
 
-  const getStep3Data = async (step) => {
+  const getStep3Data = async () => {
     const response = await Factory(
       'get',
       `/income_tax_returns/service-request-section-data?service_request_id=${service_id}&section=deductions`
@@ -271,6 +273,18 @@ export default function ITR() {
       if (response.res.data.tasks_data.Deductions.data === null) addDeduction(response.res.data.tasks_data.Deductions.task_id);
     } else {
       setDeductions([]);
+    }
+  };
+
+  const getStep4Data = async () => {
+    const response = await Factory(
+      'get',
+      `/income_tax_returns/service-request-section-data?service_request_id=${service_id}&section=review`
+    );
+    if (response.res.status_cd === 0) {
+      setReviewAndFiling(response.res.data.tasks_data['Review Filing Certificate']);
+    } else {
+      setReviewAndFiling(null);
     }
   };
   // useEffect(() => {
@@ -284,11 +298,15 @@ export default function ITR() {
     if (step === 0) getStep1Data(service_id);
     if (step === 1) getStep2Data(service_id);
     if (step === 2) getStep3Data(service_id);
+    if (step === 3) getStep4Data(service_id);
   }, [step]);
 
   const handleOpenFileDialog = (files, title) => {
     setFileDialogOpen(true);
   };
+
+  const [reviewStep, setReviewStep] = React.useState(0);
+  const reviewSteps = ['Drafting', 'Filing', 'Acknowledgement'];
 
   return (
     <Card sx={{ minHeight: '100vh', p: { xs: 1, md: 4 } }}>
@@ -615,7 +633,7 @@ export default function ITR() {
                           })}
                         </Grid2>
                       </Box>
-                      <Box display="flex" justifyContent="flex-end" gap={2}>
+                      <Box display="flex" justifyContent="flex-end" gap={1}>
                         <Button type="submit" variant="contained" color="primary">
                           Save Personal Info
                         </Button>
@@ -625,7 +643,8 @@ export default function ITR() {
                           status={personalInfo.status}
                           urlEndpoint="personal-information"
                           recId={personalInfo.id}
-                          setData={setPersonalInfo}
+                          task_id={personalInfo.task_id}
+                          service_request={service_id}
                         />
                       </Box>
                     </Form>
@@ -783,7 +802,7 @@ export default function ITR() {
                           </Box>
                         </Grid2>
                       </Grid2>
-                      <Box display="flex" justifyContent="flex-end" mt={0} gap={2}>
+                      <Box display="flex" justifyContent="flex-end" mt={0} gap={1}>
                         <Button type="submit" variant="contained" color="primary">
                           Save Tax Paid Details
                         </Button>
@@ -795,7 +814,6 @@ export default function ITR() {
                           recId={taxPaidDetails.id}
                           service_request={service_id}
                           task_id={taxPaidDetails.task_id}
-                          setData={setTaxPaidDetails}
                         />
                       </Box>
                     </Form>
@@ -866,63 +884,220 @@ export default function ITR() {
           {/* Review & Filing Step */}
           {step === 3 && (
             <Box>
-              <Box display="flex" justifyContent="flex-start" mt={2} gap={2}>
-                <Button variant="outlined" color="primary" onClick={() => setStep(step - 1)}>
-                  Back
-                </Button>
-              </Box>
-              <Typography variant="h5" mb={3} sx={{ textDecoration: 'underline' }}>
-                Draft Income Tax Computation
-              </Typography>
-              <Stack direction="row" spacing={2} mb={3}>
-                <Button variant="outlined">View</Button>
-                <Button variant="contained">Upload</Button>
-              </Stack>
-
-              <Typography variant="h5" mb={2} sx={{ textDecoration: 'underline' }}>
-                Approval / Workflow
-              </Typography>
-              <Stack direction="row" spacing={2} mb={3}>
-                <Button variant="outlined">View</Button>
-                <Button variant="contained" color="success">
-                  Approve
-                </Button>
-                <Button variant="contained" color="warning">
-                  Rework
-                </Button>
-              </Stack>
-
-              <Typography variant="h5" mb={2} sx={{ textDecoration: 'underline' }}>
-                Proceed to Filing
-              </Typography>
-              <Stack direction="row" spacing={2} mb={2}>
-                <Button variant="outlined">View</Button>
-                <Button variant="contained" color="primary">
-                  Proceed to File
-                </Button>
-              </Stack>
-              <Box mb={4}>
-                <Typography mb={1}>Mode of e-verification?</Typography>
-                <Autocomplete
-                  size="small"
-                  fullWidth
-                  options={['Aadhaar OTP', 'Net Banking', 'DSC', 'EVC']}
-                  renderInput={(params) => <TextField {...params} placeholder="Select mode" />}
-                  sx={{ maxWidth: 300 }}
-                />
-              </Box>
-
-              <Stack direction="row" spacing={6} mt={4}>
-                <Paper elevation={2} sx={{ p: 3, minWidth: 120, textAlign: 'center', bgcolor: '#f8fafc' }}>
-                  <Typography variant="h6">Filing</Typography>
-                </Paper>
-                <Paper elevation={2} sx={{ p: 3, minWidth: 120, textAlign: 'center', bgcolor: '#f8fafc' }}>
-                  <Typography variant="h6">Ack</Typography>
-                </Paper>
-              </Stack>
+              <Stepper activeStep={reviewStep} orientation="vertical" sx={{ mb: 4 }}>
+                {reviewSteps.map((label, idx) => (
+                  <Step key={label}>
+                    <StepLabel>{label}</StepLabel>
+                    <StepContent>
+                      {idx === 0 && (
+                        <Box
+                          sx={{
+                            p: 4,
+                            pr: 10,
+                            boxShadow: '0px 0px 10px 0px rgba(66, 66, 66, 0.1)',
+                            bgcolor: 'white',
+                            width: 'fit-content',
+                            borderRadius: 2,
+                            mb: 1
+                          }}
+                        >
+                          <Typography variant="h5" mb={3} sx={{ textDecoration: 'underline' }}>
+                            Draft Income Tax Computation
+                          </Typography>
+                          <Stack direction="row" spacing={2} mb={3}>
+                            {console.log(reviewAndFiling)}
+                            <Button
+                              variant="contained"
+                              size="small"
+                              onClick={() => document.getElementById('draftIncomeTaxComputationInput').click()}
+                            >
+                              <input
+                                id="draftIncomeTaxComputationInput"
+                                type="file"
+                                hidden
+                                onChange={async (e) => {
+                                  let type = reviewAndFiling?.data?.id ? 'put' : 'post';
+                                  let urlEndpoint = reviewAndFiling?.data?.id
+                                    ? `/income_tax_returns/review-filing/${reviewAndFiling?.data?.id}/`
+                                    : '/income_tax_returns/review-filing/';
+                                  const formData = new FormData();
+                                  formData.append('service_request', service_id);
+                                  formData.append('service_task', reviewAndFiling.task_id);
+                                  formData.append('draft_income_file', e.target.files[0]);
+                                  formData.append('filing_status', 'in progress');
+                                  formData.append('status', 'in progress');
+                                  const res = await Factory(type, urlEndpoint, formData, {});
+                                  console.log(res.res);
+                                  if (res.res.status_cd === 0) {
+                                    setReviewAndFiling({ ...reviewAndFiling, data: { ...res.res.data } });
+                                    enqueueSnackbar('Draft income tax computation saved successfully!', {
+                                      variant: 'success',
+                                      anchorOrigin: { vertical: 'top', horizontal: 'right' }
+                                    });
+                                  } else {
+                                    enqueueSnackbar('Error saving draft income tax computation.', {
+                                      variant: 'error',
+                                      anchorOrigin: { vertical: 'top', horizontal: 'right' }
+                                    });
+                                  }
+                                }}
+                              />
+                              Upload
+                            </Button>
+                            {reviewAndFiling?.data?.draft_income_file && (
+                              <Button
+                                variant="outlined"
+                                size="small"
+                                onClick={() => {
+                                  if (typeof reviewAndFiling?.data?.draft_income_file === 'string') {
+                                    window.open(reviewAndFiling?.data?.draft_income_file, '_blank');
+                                  } else if (reviewAndFiling?.data?.draft_income_file) {
+                                    window.open(URL.createObjectURL(reviewAndFiling?.data?.draft_income_file), '_blank');
+                                  }
+                                }}
+                              >
+                                View
+                              </Button>
+                            )}
+                          </Stack>
+                          <Box display="flex" justifyContent="flex-start" gap={1}>
+                            <GetActionButtons
+                              type="put"
+                              data={reviewAndFiling}
+                              status={reviewAndFiling?.data?.filing_status}
+                              urlEndpoint="review-filing"
+                              recId={reviewAndFiling?.data?.id}
+                              task_id={reviewAndFiling?.data?.task_id}
+                              service_request={service_id}
+                              filingHelper={true}
+                              setReviewStep={setReviewStep}
+                              step={1}
+                            />
+                          </Box>
+                          {/* <Button variant="contained" color="primary" onClick={() => setReviewStep(1)} sx={{ mt: 2 }}>
+                            Next
+                          </Button> */}
+                        </Box>
+                      )}
+                      {idx === 1 && (
+                        <Box
+                          sx={{
+                            p: 4,
+                            pr: 10,
+                            boxShadow: '0px 0px 10px 0px rgba(66, 66, 66, 0.1)',
+                            bgcolor: 'white',
+                            width: 'fit-content',
+                            borderRadius: 2,
+                            mb: 1
+                          }}
+                        >
+                          <Typography variant="h5" mb={3} sx={{ textDecoration: 'underline' }}>
+                            Upload Filed Acknowledgement
+                          </Typography>
+                          <Stack direction="row" spacing={2} mb={3}>
+                            <Button
+                              variant="contained"
+                              size="small"
+                              onClick={() => document.getElementById('draftIncomeTaxComputationInput').click()}
+                            >
+                              <input
+                                id="draftIncomeTaxComputationInput"
+                                type="file"
+                                hidden
+                                onChange={async (e) => {
+                                  let type = reviewAndFiling?.data?.id ? 'put' : 'post';
+                                  let urlEndpoint = reviewAndFiling?.data?.id
+                                    ? `/income_tax_returns/review-filing/${reviewAndFiling?.data?.id}/`
+                                    : '/income_tax_returns/review-filing/';
+                                  const formData = new FormData();
+                                  formData.append('service_request', service_id);
+                                  formData.append('service_task', reviewAndFiling.task_id);
+                                  formData.append('review_certificate', e.target.files[0]);
+                                  formData.append('approval_status', 'pending');
+                                  formData.append('status', 'in progress');
+                                  const res = await Factory(type, urlEndpoint, formData, {});
+                                  console.log(res.res);
+                                  if (res.res.status_cd === 0) {
+                                    setReviewAndFiling({ ...reviewAndFiling, data: { ...res.res.data } });
+                                    enqueueSnackbar('Filed acknowledgement saved successfully!', {
+                                      variant: 'success',
+                                      anchorOrigin: { vertical: 'top', horizontal: 'right' }
+                                    });
+                                  } else {
+                                    enqueueSnackbar('Error saving filed acknowledgement.', {
+                                      variant: 'error',
+                                      anchorOrigin: { vertical: 'top', horizontal: 'right' }
+                                    });
+                                  }
+                                }}
+                              />
+                              Upload
+                            </Button>
+                            {reviewAndFiling?.data?.review_certificate && (
+                              <Button
+                                variant="outlined"
+                                size="small"
+                                onClick={() => {
+                                  if (typeof reviewAndFiling?.data?.review_certificate === 'string') {
+                                    window.open(reviewAndFiling?.data?.review_certificate, '_blank');
+                                  } else if (reviewAndFiling?.data?.review_certificate) {
+                                    window.open(URL.createObjectURL(reviewAndFiling?.data?.review_certificate), '_blank');
+                                  }
+                                }}
+                              >
+                                View
+                              </Button>
+                            )}
+                          </Stack>
+                          <Box display="flex" justifyContent="flex-start" gap={1}>
+                            {console.log(reviewAndFiling)}
+                            {console.log(service_id)}
+                            <GetActionButtons
+                              type="put"
+                              data={reviewAndFiling}
+                              status={reviewAndFiling?.data?.approval_status}
+                              urlEndpoint="review-filing"
+                              recId={reviewAndFiling?.data?.id}
+                              task_id={reviewAndFiling?.task_id}
+                              service_request={service_id}
+                              filingHelper={'filed'}
+                              setReviewStep={setReviewStep}
+                              step={2}
+                            />
+                          </Box>
+                          {/* <Button variant="contained" color="primary" onClick={() => setReviewStep(1)} sx={{ mt: 2 }}>
+                            Next
+                          </Button> */}
+                        </Box>
+                      )}
+                      {idx === 2 && (
+                        <Box>
+                          <Stack direction="row" spacing={6} mt={4}>
+                            <Paper elevation={2} sx={{ p: 3, minWidth: 120, textAlign: 'center', bgcolor: '#f8fafc' }}>
+                              <Typography variant="h6">Filing</Typography>
+                            </Paper>
+                            <Paper elevation={2} sx={{ p: 3, minWidth: 120, textAlign: 'center', bgcolor: '#f8fafc' }}>
+                              <Typography variant="h6">Ack</Typography>
+                            </Paper>
+                          </Stack>
+                          <Button variant="outlined" color="primary" onClick={() => setReviewStep(1)} sx={{ mt: 2 }}>
+                            Back
+                          </Button>
+                        </Box>
+                      )}
+                    </StepContent>
+                  </Step>
+                ))}
+              </Stepper>
             </Box>
           )}
         </Paper>
+
+        <Box display="flex" justifyContent="flex-start" mt={2} gap={2}>
+          <Button variant="outlined" color="primary" onClick={() => setStep(step - 1)}>
+            Back
+          </Button>
+        </Box>
       </Box>
       <FileListDialog
         open={fileDialogOpen}

@@ -328,7 +328,7 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
           </Table>
         </Box>
 
-        <Box display="flex" justifyContent="flex-end" mt={2} gap={2}>
+        <Box display="flex" justifyContent="flex-end" mt={2} gap={1}>
           <Button type="submit" variant="contained" color="primary">
             Save Documents
           </Button>
@@ -340,6 +340,7 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
             service_request={service_id}
             recId={salary_income?.data[0]?.id}
             setData={setSalaryIncome}
+            task_id={salary_income?.task_id}
           />
         </Box>
       </form>
@@ -446,8 +447,6 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
                                     let __otherIncome = { ...other_income };
                                     __otherIncome.data[0].other_income_info = res.res.other_income_info;
                                     otherIncomeFormik.setFieldValue(`otherIncome`, res.res.other_income_info);
-                                    console.log(__otherIncome);
-                                    console.log(otherIncomeFormik.values);
                                     setOtherIncome(__otherIncome);
                                     enqueueSnackbar('Other income saved successfully!', {
                                       variant: 'success',
@@ -470,7 +469,7 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
                     </TableBody>
                   </Table>
                 </Box>
-                <Box display="flex" justifyContent="flex-end" mt={2} gap={2}>
+                <Box display="flex" justifyContent="flex-end" mt={2} gap={1}>
                   <Button
                     size="small"
                     variant="outlined"
@@ -735,12 +734,6 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
     ]);
   };
   const removeProperty = async (property, idx) => {
-    console.log(numProperties);
-    // if (numProperties > 1) {
-    //   setNumProperties(numProperties - 1);
-    //   setProperties(properties.slice(0, -1));
-    // }
-
     const res = await Factory('delete', `/income_tax_returns/house-property-details/${property.id}/delete`, {}, {});
     if (res.res.status_cd === 0) {
       let __properties = [...properties];
@@ -802,7 +795,6 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
     try {
       const res = await Factory('post', '/income_tax_returns/house-property-details/upsert/', formData, {});
       if (res.res.status_cd === 0) {
-        console.log(res.res.data);
         setProperties(res.res.data.property_info);
         if (enqueueSnackbar)
           enqueueSnackbar(`Property ${idx + 1} saved!`, { variant: 'success', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
@@ -1215,9 +1207,19 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
   }, [cg_property_land]);
 
   useEffect(() => {
-    if (cg_other_sources) {
-      setOtherGainsRows(cg_other_sources?.data);
-    }
+    if (cg_other_sources && cg_other_sources?.data?.length > 0 && cg_other_sources?.data[0]?.other_capital_gain_info.length > 0)
+      setOtherGainsRows(cg_other_sources?.data[0]?.other_capital_gain_info);
+    else
+      setOtherGainsRows([
+        {
+          asset_details: '',
+          purchase_date: '',
+          purchase_value: '',
+          sale_date: '',
+          sale_value: '',
+          doc: null
+        }
+      ]);
   }, [cg_other_sources]);
 
   useEffect(() => {
@@ -1666,7 +1668,7 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
             </Box>
           </Paper>
         ))}
-        <Box display="flex" justifyContent="flex-end" mt={2} gap={2}>
+        <Box display="flex" justifyContent="flex-end" mt={2} gap={1}>
           <Button
             size="small"
             variant="outlined"
@@ -1694,12 +1696,11 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
           >
             Add Property Sold
           </Button>
-          {console.log(cg_property_land)}
           <GetActionButtons
             type="post"
             data={cg_property_land.data}
             status={cg_property_land.data.status}
-            urlEndpoint={`/income_tax_returns/capital-gains/add-property/`}
+            urlEndpoint={`/income_tax_returns/capital-gains/upsert/`}
             recId={cg_property_land.data.id}
             service_request={service_id}
             task_id={cg_property_land.task_id}
@@ -1763,7 +1764,7 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
               <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
             </RadioGroup>
           </Stack>
-          <Stack direction="row" sx={{ justifyContent: 'flex-end' }} spacing={2} mb={2}>
+          <Stack direction="row" sx={{ justifyContent: 'flex-end' }} spacing={1} mb={2}>
             <Button size="small" variant="contained" onClick={handleCamsSave}>
               Save
             </Button>
@@ -1954,7 +1955,7 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
               </TableBody>
             </Table>
           </Paper>
-          <Box display="flex" justifyContent="flex-end">
+          <Box display="flex" justifyContent="flex-end" gap={1}>
             <Button
               size="small"
               variant="outlined"
@@ -1977,9 +1978,9 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
             <GetActionButtons
               type="post"
               data={cg_other_sources}
-              status={cg_other_sources.data.status}
+              status={cg_other_sources?.data[0]?.status}
               urlEndpoint={`/income_tax_returns/other-capital-gains/with-files/`}
-              recId={cg_other_sources.data.id}
+              recId={cg_other_sources?.data[0]?.id}
               service_request={service_id}
               task_id={cg_other_sources.task_id}
             />
@@ -2057,8 +2058,8 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
   const businessTypes = ['Trading', 'Manufacturing', 'Profession', 'Other'];
 
   useEffect(() => {
-    if (data?.data?.length > 0) {
-      setBusinessRows(data?.data?.map(transformBusinessApiResponse));
+    if (data?.data?.length > 0 && data?.data[0]?.business_professional_income_info?.length > 0) {
+      setBusinessRows(data.data[0].business_professional_income_info.map(transformBusinessApiResponse));
     } else {
       setBusinessRows([
         {
@@ -2106,6 +2107,7 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
     formData.append('service_request', service_id);
     formData.append('service_task', data.task_id);
     formData.append('status', 'in progress');
+
     formData.append('opting_data', JSON.stringify(opting_data));
     Object.entries(businessData).forEach(([key, value]) => {
       if (
@@ -2139,16 +2141,43 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
         }
       }
     });
-    let type = businessData.id ? 'put' : 'post';
+    let type = 'post';
     let url = '/income_tax_returns/business-professional-income/';
     const res = await Factory(type, url, formData);
     if (res.res.status_cd === 0) {
+      if (!businessData.id) {
+        let updated = [...businessRows];
+        updated[idx] = transformBusinessApiResponse(res.res.id);
+        setBusinessRows(updated);
+      }
       enqueueSnackbar('Business/Profession Income saved successfully!', {
         variant: 'success',
         anchorOrigin: { vertical: 'top', horizontal: 'right' }
       });
     } else {
       enqueueSnackbar('Business/Profession Income save failed', {
+        variant: 'error',
+        anchorOrigin: { vertical: 'top', horizontal: 'right' }
+      });
+    }
+  };
+
+  const removeBusinessIncome = async (row, idx) => {
+    const res = await Factory('delete', `/income_tax_returns/business-professional-income/document/${row.id}/delete/`, {});
+
+    if (res.res.status_cd === 0) {
+      let updated = [...businessRows];
+      updated.splice(idx, 1);
+      setBusinessRows(updated);
+      let updatedSection = [...selectedSection];
+      updatedSection.splice(idx, 1);
+      setSelectedSection(updatedSection);
+      enqueueSnackbar('Business/Profession Income deleted successfully!', {
+        variant: 'success',
+        anchorOrigin: { vertical: 'top', horizontal: 'right' }
+      });
+    } else {
+      enqueueSnackbar('Business/Profession Income delete failed', {
         variant: 'error',
         anchorOrigin: { vertical: 'top', horizontal: 'right' }
       });
@@ -2312,13 +2341,13 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                     />
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                    <Typography>Digital % Receipts</Typography>
+                    <Typography>Digital Percentage Receipts</Typography>
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
                     <TextField
                       size="small"
                       fullWidth
-                      placeholder="Digital % Receipts"
+                      placeholder="Digital Percentage Receipts"
                       value={businessRows[idx]?.digital_receipts || ''}
                       onChange={(e) => {
                         const updated = [...businessRows];
@@ -2497,13 +2526,13 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                     />
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                    <Typography>Digital % Receipts</Typography>
+                    <Typography>Digital Percentage Receipts</Typography>
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                     <TextField
                       size="small"
                       fullWidth
-                      placeholder="Digital % Receipts"
+                      placeholder="Digital Percentage Receipts"
                       value={businessRows[idx]?.digital_receipts || ''}
                       onChange={(e) => {
                         const updated = [...businessRows];
@@ -2846,8 +2875,7 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                   color="error"
                   variant="outlined"
                   onClick={() => {
-                    setBusinessRows(businessRows.filter((_, i) => i !== idx));
-                    setSelectedSection(selectedSection.filter((_, i) => i !== idx));
+                    removeBusinessIncome(businessRows[idx], idx);
                   }}
                 >
                   Remove
@@ -2857,7 +2885,7 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
           </Paper>
         );
       })}
-      <Box display="flex" justifyContent="flex-end" mt={2}>
+      <Box display="flex" justifyContent="flex-end" mt={2} gap={1}>
         <Button
           size="small"
           variant="outlined"
@@ -2891,6 +2919,14 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
         >
           Add Business/Profession
         </Button>
+        <GetActionButtons
+          type="post"
+          urlEndpoint="/income_tax_returns/business-professional-income/"
+          status={data.data[0].status}
+          data={data}
+          service_request={service_id}
+          task_id={data.task_id}
+        />
       </Box>
     </Box>
   );
@@ -3103,7 +3139,7 @@ const currencyOptions = ['INR', 'USD', 'GBP', 'EUR', 'Other'];
 const winningsSources = ['Lottery', 'Game Show', 'Others'];
 
 const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDialogFilesData, service_id }) => {
-  const enqueueSnackbar = useSnackbar();
+  const { enqueueSnackbar } = useSnackbar();
   const [interest_income, setInterestIncome] = React.useState(data.find((item) => item.category_name === 'Interest Income'));
   const [dividend_income, setDividendIncome] = React.useState(data.find((item) => item.category_name === 'Dividend Income'));
   const [gift_income, setGiftIncome] = React.useState(data.find((item) => item.category_name === 'Gift Income'));
@@ -3147,17 +3183,11 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
   }, [dividend_income]);
 
   useEffect(() => {
+    console.log;
     if (gift_income?.data?.length > 0) {
       setGiftApplicable(gift_income?.data[0]?.gift_income);
       if (gift_income?.data[0]?.gift_income_details?.length > 0) {
-        setGiftRows(
-          gift_income?.data[0]?.documents?.map((row) => ({
-            ...row,
-            received_from: row.received_from || '',
-            date_received: row.date_received || '',
-            was_it_marriage_related: row.was_it_marriage_related || 'no'
-          }))
-        );
+        setGiftRows(gift_income?.data[0]?.gift_income_details);
       }
     }
   }, [gift_income]);
@@ -3166,7 +3196,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
     if (family_income?.data?.length > 0) {
       setFamilyApplicable(family_income?.data[0]?.family_pension_income);
       if (family_income?.data[0]?.family_pension_income_docs?.length > 0) {
-        setFamilyRows(family_income?.data[0]?.documents);
+        setFamilyRows(family_income?.data[0]?.family_pension_income_docs);
       }
     }
   }, [family_income]);
@@ -3175,14 +3205,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
     if (foreign_income?.data?.length > 0) {
       setForeignApplicable(foreign_income?.data[0]?.foreign_income);
       if (foreign_income?.data[0]?.foreign_income_docs?.length > 0) {
-        setForeignRows(
-          foreign_income?.data[0]?.documents?.map((row) => ({
-            ...row,
-            type_of_income: row.type_of_income || '',
-            tax_paid_abroad: row.tax_paid_abroad || 'no',
-            form67_file: row.form67_file || ''
-          }))
-        );
+        setForeignRows(foreign_income?.data[0]?.foreign_income_docs);
       }
     }
   }, [foreign_income]);
@@ -3191,7 +3214,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
     if (winning_income?.data?.length > 0) {
       setWinningsApplicable(winning_income?.data[0]?.winning_income);
       if (winning_income?.data[0]?.winnings_income_docs?.length > 0) {
-        setWinningsRows(winning_income?.data[0]?.documents);
+        setWinningsRows(winning_income?.data[0]?.winnings_income_docs);
       }
     }
   }, [winning_income]);
@@ -3247,9 +3270,14 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
     formData.append('interest_income', interest_income.data[0].id);
     const res = await Factory(type, url, formData);
     if (res.res.status_cd === 0) {
-      enqueueSnackbar('Saved successfully', { anchorOrigin: { vertical: 'top', horizontal: 'right' } }, { variant: 'success' });
+      if (type === 'post') {
+        let __interest_rows = JSON.parse(JSON.stringify(interestRows));
+        __interest_rows[idx] = res.res.data;
+        setInterestRows(__interest_rows);
+      }
+      enqueueSnackbar('Saved successfully', { variant: 'success', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
     } else {
-      enqueueSnackbar('Error saving ', { anchorOrigin: { vertical: 'top', horizontal: 'right' } }, { variant: 'error' });
+      enqueueSnackbar('Error saving ', { variant: 'error', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
     }
   };
 
@@ -3267,9 +3295,14 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
     formData.append('dividend_income', dividend_income.data[0].id);
     const res = await Factory(type, url, formData);
     if (res.res.status_cd === 0) {
-      enqueueSnackbar('Saved successfully', { anchorOrigin: { vertical: 'top', horizontal: 'right' } }, { variant: 'success' });
+      if (type === 'post') {
+        let __dividend_rows = JSON.parse(JSON.stringify(dividendRows));
+        __dividend_rows[idx] = res.res.data;
+        setDividendRows(__dividend_rows);
+      }
+      enqueueSnackbar('Saved successfully', { variant: 'success', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
     } else {
-      enqueueSnackbar('Error saving', { anchorOrigin: { vertical: 'top', horizontal: 'right' } }, { variant: 'error' });
+      enqueueSnackbar('Error saving', { variant: 'error', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
     }
   };
 
@@ -3282,15 +3315,17 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
     formData.append('relation', row.relation);
     formData.append('date_received', row.date_received);
     formData.append('was_it_marriage_related', row.was_it_marriage_related);
-    if (row.file instanceof File) {
-      formData.append('file', row.file);
-    }
     formData.append('gift_income', gift_income.data[0].id);
     const res = await Factory(type, url, formData);
     if (res.res.status_cd === 0) {
-      enqueueSnackbar('Saved successfully', { anchorOrigin: { vertical: 'top', horizontal: 'right' } }, { variant: 'success' });
+      if (type === 'post') {
+        let __gift_rows = JSON.parse(JSON.stringify(giftRows));
+        __gift_rows[idx] = res.res.data;
+        setGiftRows(__gift_rows);
+      }
+      enqueueSnackbar('Saved successfully', { variant: 'success', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
     } else {
-      enqueueSnackbar('Error saving', { anchorOrigin: { vertical: 'top', horizontal: 'right' } }, { variant: 'error' });
+      enqueueSnackbar('Error saving', { variant: 'error', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
     }
   };
 
@@ -3302,13 +3337,18 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
     let formData = {};
     formData.amount = row.amount;
     formData.source = row.source;
-    formData.append('family_pension_income', family_income.data[0].id);
+    formData.family_pension = family_income.data[0].id;
 
     const res = await Factory(type, url, formData);
     if (res.res.status_cd === 0) {
-      enqueueSnackbar('Saved successfully', { anchorOrigin: { vertical: 'top', horizontal: 'right' } }, { variant: 'success' });
+      if (type === 'post') {
+        let __family_rows = JSON.parse(JSON.stringify(familyRows));
+        __family_rows[idx] = res.res.data;
+        setFamilyRows(__family_rows);
+      }
+      enqueueSnackbar('Saved successfully', { variant: 'success', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
     } else {
-      enqueueSnackbar('Error saving', { anchorOrigin: { vertical: 'top', horizontal: 'right' } }, { variant: 'error' });
+      enqueueSnackbar('Error saving', { variant: 'error', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
     }
   };
 
@@ -3327,9 +3367,14 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
     formData.append('foreign_income', foreign_income.data[0].id);
     const res = await Factory(type, url, formData);
     if (res.res.status_cd === 0) {
-      enqueueSnackbar('Saved successfully', { anchorOrigin: { vertical: 'top', horizontal: 'right' } }, { variant: 'success' });
+      if (type === 'post') {
+        let __foreign_rows = JSON.parse(JSON.stringify(foreignRows));
+        __foreign_rows[idx] = res.res.data;
+        setForeignRows(__foreign_rows);
+      }
+      enqueueSnackbar('Saved successfully', { variant: 'success', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
     } else {
-      enqueueSnackbar('Error saving', { anchorOrigin: { vertical: 'top', horizontal: 'right' } }, { variant: 'error' });
+      enqueueSnackbar('Error saving', { variant: 'error', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
     }
   };
 
@@ -3345,12 +3390,57 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
     formData.append('winning_income', winning_income.data[0].id);
     const res = await Factory(type, url, formData);
     if (res.res.status_cd === 0) {
-      enqueueSnackbar('Saved successfully', { anchorOrigin: { vertical: 'top', horizontal: 'right' } }, { variant: 'success' });
+      if (type === 'post') {
+        let __winnings_rows = JSON.parse(JSON.stringify(winningsRows));
+        __winnings_rows[idx] = res.res.data;
+        setWinningsRows(__winnings_rows);
+      }
+      enqueueSnackbar('Saved successfully', { variant: 'success', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
     } else {
-      enqueueSnackbar('Error saving', { anchorOrigin: { vertical: 'top', horizontal: 'right' } }, { variant: 'error' });
+      enqueueSnackbar('Error saving', { variant: 'error', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
     }
   };
 
+  const removeRow = async (id, type, idx) => {
+    const res = await Factory('delete', `/income_tax_returns/${type}/${id}/delete/`);
+    if (res.res.status_cd === 0) {
+      switch (type) {
+        case 'interest-income-doc':
+          let __interest_rows = JSON.parse(JSON.stringify(interestRows));
+          __interest_rows.splice(idx, 1);
+          setInterestRows(__interest_rows);
+          break;
+        case 'dividend-income-document':
+          let __dividend_rows = JSON.parse(JSON.stringify(dividendRows));
+          __dividend_rows.splice(idx, 1);
+          setDividendRows(__dividend_rows);
+          break;
+        case 'gift-income-document':
+          let __gift_rows = JSON.parse(JSON.stringify(giftRows));
+          __gift_rows.splice(idx, 1);
+          setGiftRows(__gift_rows);
+          break;
+        case 'family-pension-income-documents':
+          let __family_rows = JSON.parse(JSON.stringify(familyRows));
+          __family_rows.splice(idx, 1);
+          setFamilyRows(__family_rows);
+          break;
+        case 'foreign-income-info':
+          let __foreign_rows = JSON.parse(JSON.stringify(foreignRows));
+          __foreign_rows.splice(idx, 1);
+          setForeignRows(__foreign_rows);
+          break;
+        case 'winning-income-docs':
+          let __winnings_rows = JSON.parse(JSON.stringify(winningsRows));
+          __winnings_rows.splice(idx, 1);
+          setWinningsRows(__winnings_rows);
+          break;
+      }
+      enqueueSnackbar('Deleted successfully!', { variant: 'success', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
+    } else {
+      enqueueSnackbar('Error deleting', { variant: 'error', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
+    }
+  };
   return (
     <Box>
       {/* Interest Income Section */}
@@ -3459,7 +3549,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                           Save
                         </Button>
                         {interestRows?.length > 1 && (
-                          <IconButton size="small" color="error" onClick={() => setInterestRows(interestRows.filter((_, i) => i !== idx))}>
+                          <IconButton size="small" color="error" onClick={() => removeRow(row.id, 'interest-income-doc', idx)}>
                             <DeleteIcon />
                           </IconButton>
                         )}
@@ -3470,17 +3560,28 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
               </TableBody>
             </Table>
           </Box>
-          <Box display="flex" justifyContent="flex-end">
-            <Button
-              size="small"
-              variant="outlined"
-              onClick={() => setInterestRows([...interestRows, { interest_type: '', interest_earned: '', bank_name: '' }])}
-            >
-              Add Row
-            </Button>
-          </Box>
         </>
       )}
+      <Box display="flex" justifyContent="flex-end" gap={1}>
+        {interestApplicable === 'Applicable' && (
+          <Button
+            size="small"
+            variant="outlined"
+            onClick={() => setInterestRows([...interestRows, { interest_type: '', interest_earned: '', bank_name: '' }])}
+          >
+            Add Row
+          </Button>
+        )}
+        <GetActionButtons
+          type="post"
+          data={interest_income}
+          setData={setInterestRows}
+          service_request={service_id}
+          task_id={interest_income.task_id}
+          urlEndpoint="/income_tax_returns/interest-income/upsert/"
+          status={interest_income?.data[0]?.status}
+        />
+      </Box>
       {/* Dividend Income Section */}
       <Stack direction="row" spacing={2} alignItems="center" mb={dividendApplicable === 'Applicable' ? 0 : 2}>
         <Typography>Dividend Income: </Typography>
@@ -3516,10 +3617,10 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                         size="small"
                         fullWidth
                         placeholder="Received From"
-                        value={row.from}
+                        value={row.received_from}
                         onChange={(e) => {
                           const updated = [...dividendRows];
-                          updated[idx].from = e.target.value;
+                          updated[idx].received_from = e.target.value;
                           setDividendRows(updated);
                         }}
                       />
@@ -3529,10 +3630,10 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                         size="small"
                         fullWidth
                         placeholder="Dividend Received"
-                        value={row.received}
+                        value={row.dividend_received}
                         onChange={(e) => {
                           const updated = [...dividendRows];
-                          updated[idx].received = e.target.value;
+                          updated[idx].dividend_received = e.target.value;
                           setDividendRows(updated);
                         }}
                       />
@@ -3572,7 +3673,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                           Save
                         </Button>
                         {dividendRows?.length > 1 && (
-                          <IconButton size="small" color="error" onClick={() => setDividendRows(dividendRows.filter((_, i) => i !== idx))}>
+                          <IconButton size="small" color="error" onClick={() => removeRow(row.id, 'dividend-income-document', idx)}>
                             <DeleteIcon />
                           </IconButton>
                         )}
@@ -3583,13 +3684,24 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
               </TableBody>
             </Table>
           </Box>
-          <Box display="flex" justifyContent="flex-end">
-            <Button size="small" variant="outlined" onClick={() => setDividendRows([...dividendRows, { from: '', received: '' }])}>
-              Add Row
-            </Button>
-          </Box>
         </>
       )}
+      <Box display="flex" justifyContent="flex-end" gap={1}>
+        {dividendApplicable === 'Applicable' && (
+          <Button size="small" variant="outlined" onClick={() => setDividendRows([...dividendRows, { from: '', received: '' }])}>
+            Add Row
+          </Button>
+        )}
+        <GetActionButtons
+          type="post"
+          data={dividend_income}
+          setData={setDividendRows}
+          service_request={service_id}
+          task_id={dividend_income.task_id}
+          urlEndpoint="/income_tax_returns/dividend-income/upsert/"
+          status={dividend_income?.data[0]?.status}
+        />
+      </Box>
       {/* Gift Income Section */}
       <Stack direction="row" spacing={2} alignItems="center" mb={giftApplicable === 'Applicable' ? 0 : 2}>
         <Typography>Gift Income: </Typography>
@@ -3611,19 +3723,20 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
             <Table size="small">
               <TableHead>
                 <TableRow>
-                  <TableCell>Amount</TableCell>
-                  <TableCell>Received From</TableCell>
-                  <TableCell>Relation</TableCell>
-                  <TableCell>Date Received</TableCell>
-                  <TableCell>Marriage?</TableCell>
-                  <TableCell align="center">Document</TableCell>
-                  <TableCell align="center">Actions</TableCell>
+                  <TableCell sx={{ width: '17%' }}>Amount</TableCell>
+                  <TableCell sx={{ width: '18%' }}>Received From</TableCell>
+                  <TableCell sx={{ width: '20%' }}>Relation</TableCell>
+                  <TableCell sx={{ width: '20%' }}>Date Received</TableCell>
+                  <TableCell sx={{ width: '15%' }}>Marriage?</TableCell>
+                  <TableCell sx={{ width: '20%' }} align="center">
+                    Actions
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {giftRows?.map((row, idx) => (
                   <TableRow key={idx}>
-                    <TableCell>
+                    <TableCell sx={{ p: 0.5, py: 1 }}>
                       <TextField
                         size="small"
                         fullWidth
@@ -3636,7 +3749,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                         }}
                       />
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ p: 0.5, py: 1 }}>
                       <TextField
                         size="small"
                         fullWidth
@@ -3649,7 +3762,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                         }}
                       />
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ p: 0.5, py: 1 }}>
                       <Autocomplete
                         size="small"
                         fullWidth
@@ -3663,7 +3776,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                         renderInput={(params) => <TextField {...params} placeholder="Relation" />}
                       />
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ p: 0.5, py: 1 }}>
                       <TextField
                         size="small"
                         fullWidth
@@ -3678,7 +3791,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                         }}
                       />
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ p: 0.5, py: 1 }} align="center">
                       <RadioGroup
                         row
                         value={row.was_it_marriage_related}
@@ -3692,42 +3805,15 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                           value="Yes"
                           control={<Radio size="small" checked={row.was_it_marriage_related === 'Yes'} />}
                           label="Yes"
+                          sx={{ m: 0 }}
                         />
                         <FormControlLabel
                           value="No"
                           control={<Radio size="small" checked={row.was_it_marriage_related === 'No'} />}
                           label="No"
+                          sx={{ m: 0 }}
                         />
                       </RadioGroup>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Button size="small" variant="contained" component="label">
-                        Upload
-                        <input
-                          type="file"
-                          hidden
-                          onChange={(e) => {
-                            if (e.target.files[0]) {
-                              const updated = [...giftRows];
-                              updated[idx].file = e.target.files[0];
-                              setGiftRows(updated);
-                            }
-                          }}
-                        />
-                      </Button>
-                      {row.file && (
-                        <Button
-                          size="small"
-                          variant="outlined"
-                          sx={{ ml: 1 }}
-                          onClick={() => {
-                            setFileDialogOpen(true);
-                            setDialogFilesData([{ url: row.file instanceof File ? URL.createObjectURL(row.file) : row.file }]);
-                          }}
-                        >
-                          View
-                        </Button>
-                      )}
                     </TableCell>
                     <TableCell align="center">
                       <Stack direction="row" spacing={1} alignItems="center">
@@ -3735,7 +3821,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                           Save
                         </Button>
                         {giftRows?.length > 1 && (
-                          <IconButton size="small" color="error" onClick={() => setGiftRows(giftRows.filter((_, i) => i !== idx))}>
+                          <IconButton size="small" color="error" onClick={() => removeRow(row.id, 'gift-income-document', idx)}>
                             <DeleteIcon />
                           </IconButton>
                         )}
@@ -3746,22 +3832,30 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
               </TableBody>
             </Table>
           </Box>
-          <Box display="flex" justifyContent="flex-end">
-            <Button
-              size="small"
-              variant="outlined"
-              onClick={() =>
-                setGiftRows([
-                  ...giftRows,
-                  { amount: '', received_from: '', relation: '', date_received: '', was_it_marriage_related: 'No' }
-                ])
-              }
-            >
-              Add Row
-            </Button>
-          </Box>
         </>
       )}
+      <Box display="flex" justifyContent="flex-end" gap={1}>
+        {giftApplicable === 'Applicable' && (
+          <Button
+            size="small"
+            variant="outlined"
+            onClick={() =>
+              setGiftRows([...giftRows, { amount: '', received_from: '', relation: '', date_received: '', was_it_marriage_related: 'No' }])
+            }
+          >
+            Add Row
+          </Button>
+        )}
+        <GetActionButtons
+          type="post"
+          data={gift_income}
+          setData={setGiftRows}
+          service_request={service_id}
+          task_id={gift_income.task_id}
+          urlEndpoint="/income_tax_returns/gift-income/upsert/"
+          status={gift_income?.data[0]?.status}
+        />
+      </Box>
       {/* Family Pension Income Section */}
       <Stack direction="row" spacing={2} alignItems="center" mb={familyApplicable === 'Applicable' ? 0 : 2}>
         <Typography>Family Pension Income: </Typography>
@@ -3785,7 +3879,6 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                 <TableRow>
                   <TableCell>Amount Received</TableCell>
                   <TableCell>Source</TableCell>
-                  <TableCell align="center">Document</TableCell>
                   <TableCell align="center">Actions</TableCell>
                 </TableRow>
               </TableHead>
@@ -3819,42 +3912,14 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                         renderInput={(params) => <TextField {...params} placeholder="Source" />}
                       />
                     </TableCell>
-                    <TableCell align="center">
-                      <Button size="small" variant="contained" component="label">
-                        Upload
-                        <input
-                          type="file"
-                          hidden
-                          onChange={(e) => {
-                            if (e.target.files[0]) {
-                              const updated = [...familyRows];
-                              updated[idx].file = e.target.files[0];
-                              setFamilyRows(updated);
-                            }
-                          }}
-                        />
-                      </Button>
-                      {row.file && (
-                        <Button
-                          size="small"
-                          variant="outlined"
-                          sx={{ ml: 1 }}
-                          onClick={() => {
-                            setFileDialogOpen(true);
-                            setDialogFilesData([{ url: row.file instanceof File ? URL.createObjectURL(row.file) : row.file }]);
-                          }}
-                        >
-                          View
-                        </Button>
-                      )}
-                    </TableCell>
+
                     <TableCell align="center">
                       <Stack direction="row" spacing={1} alignItems="center">
                         <Button size="small" variant="contained" onClick={() => saveFamilyRow(row, idx)}>
                           Save
                         </Button>
                         {familyRows?.length > 1 && (
-                          <IconButton size="small" color="error" onClick={() => setFamilyRows(familyRows.filter((_, i) => i !== idx))}>
+                          <IconButton size="small" color="error" onClick={() => removeRow(row.id, 'family-pension-income-documents', idx)}>
                             <DeleteIcon />
                           </IconButton>
                         )}
@@ -3865,13 +3930,24 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
               </TableBody>
             </Table>
           </Box>
-          <Box display="flex" justifyContent="flex-end">
-            <Button size="small" variant="outlined" onClick={() => setFamilyRows([...familyRows, { amount: '', source: '' }])}>
-              Add Row
-            </Button>
-          </Box>
         </>
       )}
+      <Box display="flex" justifyContent="flex-end" gap={1}>
+        {familyApplicable === 'Applicable' && (
+          <Button size="small" variant="outlined" onClick={() => setFamilyRows([...familyRows, { amount: '', source: '' }])}>
+            Add Row
+          </Button>
+        )}
+        <GetActionButtons
+          type="post"
+          data={family_income}
+          setData={setFamilyRows}
+          service_request={service_id}
+          task_id={family_income.task_id}
+          urlEndpoint="/income_tax_returns/family-pension-income/upsert/"
+          status={family_income?.data[0]?.status}
+        />
+      </Box>
       {/* Foreign Income Section */}
       <Stack direction="row" spacing={2} alignItems="center" mb={foreignApplicable === 'Applicable' ? 0 : 2}>
         <Typography>Foreign Income: </Typography>
@@ -3893,10 +3969,10 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
             <Table size="small">
               <TableHead>
                 <TableRow>
-                  <TableCell sx={{ p: 0.5, py: 1, width: '13%' }}>Type of Income</TableCell>
+                  <TableCell sx={{ p: 0.5, py: 1, width: '20%' }}>Type of Income</TableCell>
                   <TableCell sx={{ p: 0.5, py: 1, width: '20%' }}>Country</TableCell>
-                  <TableCell sx={{ p: 0.5, py: 1, width: '13%' }}>Currency</TableCell>
-                  <TableCell sx={{ p: 0.5, py: 1, width: '20%' }}>Amount</TableCell>
+                  <TableCell sx={{ p: 0.5, py: 1, width: '10%' }}>Currency</TableCell>
+                  <TableCell sx={{ p: 0.5, py: 1, width: '15%' }}>Amount</TableCell>
                   <TableCell sx={{ p: 0.5, py: 1, width: '15%' }}>Tax Paid Abroad?</TableCell>
                   <TableCell sx={{ p: 0.5, py: 1, width: '20%' }} align="center">
                     Document
@@ -4025,7 +4101,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                           Save
                         </Button>
                         {foreignRows?.length > 1 && (
-                          <IconButton size="small" color="error" onClick={() => setForeignRows(foreignRows.filter((_, i) => i !== idx))}>
+                          <IconButton size="small" color="error" onClick={() => removeRow(row.id, 'foreign-income-info', idx)}>
                             <DeleteIcon />
                           </IconButton>
                         )}
@@ -4036,22 +4112,33 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
               </TableBody>
             </Table>
           </Box>
-          <Box display="flex" justifyContent="flex-end">
-            <Button
-              size="small"
-              variant="outlined"
-              onClick={() =>
-                setForeignRows([
-                  ...foreignRows,
-                  { type_of_income: '', country: '', currency: '', amount: '', tax_paid_abroad: 'no', form67_file: '' }
-                ])
-              }
-            >
-              Add Row
-            </Button>
-          </Box>
         </>
       )}
+      <Box display="flex" justifyContent="flex-end" gap={1}>
+        {foreignApplicable === 'Applicable' && (
+          <Button
+            size="small"
+            variant="outlined"
+            onClick={() =>
+              setForeignRows([
+                ...foreignRows,
+                { type_of_income: '', country: '', currency: '', amount: '', tax_paid_abroad: 'no', form67_file: '' }
+              ])
+            }
+          >
+            Add Row
+          </Button>
+        )}
+        <GetActionButtons
+          type="post"
+          data={foreign_income}
+          setData={setForeignRows}
+          service_request={service_id}
+          task_id={foreign_income.task_id}
+          urlEndpoint="/income_tax_returns/foreign-income/upsert/"
+          status={foreign_income?.data[0]?.status}
+        />
+      </Box>
       {/* Winnings/Lottery Income Section */}
       <Stack direction="row" spacing={2} alignItems="center" mb={winningsApplicable === 'Applicable' ? 0 : 2}>
         <Typography>Winnings/Lottery Income: </Typography>
@@ -4067,6 +4154,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
           <FormControlLabel value="Not Applicable" control={<Radio size="small" />} label="Not Applicable" />
         </RadioGroup>
       </Stack>
+      {console.log(winningsRows)}
       {winningsApplicable === 'Applicable' && (
         <>
           <Box sx={{ p: 0, boxShadow: '0px 0px 10px 0px rgba(66, 66, 66, 0.1)', borderRadius: 2, mb: 1 }}>
@@ -4144,7 +4232,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                           Save
                         </Button>
                         {winningsRows?.length > 1 && (
-                          <IconButton size="small" color="error" onClick={() => setWinningsRows(winningsRows.filter((_, i) => i !== idx))}>
+                          <IconButton size="small" color="error" onClick={() => removeRow(row.id, 'winning-income-docs', idx)}>
                             <DeleteIcon />
                           </IconButton>
                         )}
@@ -4155,13 +4243,24 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
               </TableBody>
             </Table>
           </Box>
-          <Box display="flex" justifyContent="flex-end">
-            <Button size="small" variant="outlined" onClick={() => setWinningsRows([...winningsRows, { source: '', amount: '' }])}>
-              Add Row
-            </Button>
-          </Box>
         </>
       )}
+      <Box display="flex" justifyContent="flex-end" gap={1}>
+        {winningsApplicable === 'Applicable' && (
+          <Button size="small" variant="outlined" onClick={() => setWinningsRows([...winningsRows, { source: '', amount: '' }])}>
+            Add Row
+          </Button>
+        )}
+        <GetActionButtons
+          type="post"
+          data={winning_income}
+          setData={setWinningsRows}
+          service_request={service_id}
+          task_id={winning_income.task_id}
+          urlEndpoint="/income_tax_returns/winning-income/upsert/"
+          status={winning_income?.data[0]?.status}
+        />
+      </Box>
     </Box>
   );
 };
@@ -4169,7 +4268,6 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
 const AgricultureIncome = ({ data, service_id, setFileDialogOpen, fileDialogOpen, dialogFilesData, setDialogFilesData }) => {
   const { enqueueSnackbar } = useSnackbar();
   data = data[0];
-  console.log(data);
   const [agricultureIncome, setAgricultureIncome] = React.useState({
     agriculture: data.data[0].agriculture_income || 'Not Applicable',
     amount: data.data[0].agricultural_income || '',
@@ -4198,7 +4296,6 @@ const AgricultureIncome = ({ data, service_id, setFileDialogOpen, fileDialogOpen
     formData.append('status', 'in progress');
     const res = await Factory('post', `/income_tax_returns/agriculture-income/upsert/`, formData);
     if (res.res.status_cd === 0) {
-      console.log(res.res);
       enqueueSnackbar('Agricultural income saved successfully', {
         anchorOrigin: { vertical: 'top', horizontal: 'right' },
         variant: 'success'
@@ -4261,7 +4358,6 @@ const AgricultureIncome = ({ data, service_id, setFileDialogOpen, fileDialogOpen
         <Button size="small" variant="contained" onClick={postAgriculturalIncome}>
           Save
         </Button>
-        {console.log(data)}
         <GetActionButtons
           type="post"
           data={data}
