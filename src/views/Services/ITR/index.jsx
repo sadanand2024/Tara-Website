@@ -18,8 +18,14 @@ import {
   AccordionSummary,
   AccordionDetails,
   Stack,
-  Checkbox
+  Checkbox,
+  Table,
+  TableHead,
+  TableBody,
+  TableCell,
+  TableRow
 } from '@mui/material';
+import Deductions from './Deductions';
 import Factory from 'utils/Factory';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import IncomeDetails from './IncomeDetails';
@@ -38,6 +44,7 @@ import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import AgricultureIcon from '@mui/icons-material/Agriculture';
 import Avatar from '@mui/material/Avatar';
+import StepContent from '@mui/material/StepContent';
 
 const steps = ['Personal Info', 'Income Details', 'Deductions', 'Review & Filing'];
 
@@ -83,41 +90,9 @@ const taxPaidSchema = Yup.object().shape({
 });
 
 // Add validation schemas for Donations, Investments, Mediclaim
-const donationsSchema = Yup.object().shape({
-  donations: Yup.array().of(
-    Yup.object().shape({
-      name: Yup.string().nullable(),
-      amount: Yup.number().typeError('Amount must be a number').positive('Amount must be positive'),
-      mode: Yup.string(),
-      receipt: Yup.mixed()
-    })
-  )
-});
-
-const investmentsSchema = Yup.object().shape({
-  investments: Yup.array().of(
-    Yup.object().shape({
-      type: Yup.string().nullable(),
-      amount: Yup.number().typeError('Amount must be a number').positive('Amount must be positive'),
-      doc: Yup.mixed()
-    })
-  )
-});
-
-const mediclaimSchema = Yup.object()
-  .shape({
-    selfFamily: Yup.number().typeError('Must be a number').min(0, 'Cannot be negative').notRequired(),
-    selfSenior: Yup.number().typeError('Must be a number').min(0, 'Cannot be negative').notRequired(),
-    parents: Yup.number().typeError('Must be a number').min(0, 'Cannot be negative').notRequired(),
-    parentsSenior: Yup.number().typeError('Must be a number').min(0, 'Cannot be negative').notRequired(),
-    checkup: Yup.number().typeError('Must be a number').min(0, 'Cannot be negative').notRequired(),
-    receipts: Yup.array().notRequired()
-  })
-  .test('at-least-one', 'At least one amount is required', (values) => {
-    return values.selfFamily || values.selfSenior || values.parents || values.parentsSenior || values.checkup;
-  });
 
 export default function ITR() {
+  const [reviewAndFiling, setReviewAndFiling] = React.useState({ draft_income_file: null });
   const [searchParams] = useSearchParams();
   const service_id = searchParams.get('service_id');
   const [step, setStep] = React.useState(0);
@@ -158,56 +133,16 @@ export default function ITR() {
     challans: []
   });
   const [incomeDetails, setIncomeDetails] = React.useState([]);
-  const [donations, setDonations] = React.useState([{ name: '', amount: '', mode: '', receipt: null }]);
+  const [deductions, setDeductions] = React.useState([]);
   const [eduLoan, setEduLoan] = React.useState({ amount: '', educationOf: '', borrower: '', approved: 'no' });
   const [savings, setSavings] = React.useState({ savings: '', fdrd: '' });
   const [disability, setDisability] = React.useState({ nature: '', severity: '', amount: '', cert: null });
   const [rentHra, setRentHra] = React.useState({ paid: 'no', amount: '' });
   const [firstHome, setFirstHome] = React.useState({ isFirst: 'no', interest: '', date: '' });
   const [political, setPolitical] = React.useState({ donated: 'no', amount: '' });
-  const donationModes = ['Cash', 'Cheque', 'Bank'];
-  const educationOfOptions = ['Self', 'Spouse', 'Children', 'Dependent'];
-  const disabilityNature = [
-    'Blindness',
-    'Low vision',
-    'Leprosy-cured',
-    'Hearing impairment',
-    'Locomotor disability',
-    'Mental illness',
-    'Others'
-  ];
-  const disabilitySeverity = ['40%-80%', '>80%'];
-  const [investments, setInvestments] = React.useState([{ type: '', amount: '', doc: null }]);
-  const [mediclaim, setMediclaim] = React.useState({
-    selfFamily: '',
-    selfSenior: '',
-    parents: '',
-    parentsSenior: '',
-    checkup: '',
-    receipts: []
-  });
-  const investmentTypes = ['PPF', 'NSC', 'ELSS', 'Life Insurance', 'Tuition Fees', 'Others'];
+
   const [fileDialogOpen, setFileDialogOpen] = useState(false);
   const [dialogFilesData, setDialogFilesData] = useState([]);
-  const [otherDeductions, setOtherDeductions] = useState({
-    eduLoanAmount: '',
-    eduLoanEducationOf: '',
-    eduLoanBorrower: '',
-    eduLoanApproved: 'no',
-    savingsInterest: '',
-    fdInterest: '',
-    disabilityNature: '',
-    disabilitySeverity: '',
-    disabilityAmount: '',
-    disabilityCert: null,
-    rentHraPaid: 'no',
-    rentHraAmount: '',
-    firstHomeIsFirst: 'no',
-    firstHomeInterest: '',
-    firstHomeDate: '',
-    politicalDonated: 'no',
-    politicalAmount: ''
-  });
 
   const personalInfoFormikRef = useRef();
   const taxPaidFormikRef = useRef();
@@ -282,7 +217,20 @@ export default function ITR() {
 
   const { enqueueSnackbar } = useSnackbar();
 
-  const getStep1Data = async (step) => {
+  const addDeduction = async (taskId) => {
+    const response = await Factory('post', `/income_tax_returns/deductions/upsert/`, {
+      service_request: service_id,
+      service_task: taskId,
+      status: 'in progress'
+    });
+    if (response.res.status_cd === 0) {
+      getStep3Data();
+    } else {
+      setDeductions([]);
+    }
+  };
+
+  const getStep1Data = async () => {
     const response = await Factory(
       'get',
       `/income_tax_returns/service-request-section-data?service_request_id=${service_id}&section=personal_info`
@@ -293,24 +241,17 @@ export default function ITR() {
       setTaxPaidDetails({
         task_id: response.res.data.tasks_data['Tax Paid Details'].task_id || null,
         id: response.res.data.tasks_data['Tax Paid Details'].data?.id || null,
-        as26File: {
-          name:
-            response.res.data.tasks_data['Tax Paid Details'].data?.documents?.['26AS'].files?.length > 0
-              ? response.res.data.tasks_data['Tax Paid Details'].data?.documents?.['26AS'].files[0].url
-              : null
-        },
-        aisFile: {
-          name:
-            response.res.data.tasks_data['Tax Paid Details'].data?.documents?.['AIS'].files?.length > 0
-              ? response.res.data.tasks_data['Tax Paid Details'].data?.documents?.['AIS'].files[0].url
-              : null
-        },
-        challans: response.res.data.tasks_data['Tax Paid Details'].data?.documents?.['AdvanceTax'].files || []
+        as26File: response.res.data.tasks_data['Tax Paid Details'].data?.documents?.['26AS'].files || [],
+        aisFile: response.res.data.tasks_data['Tax Paid Details'].data?.documents?.['AIS'].files || [],
+        challans: response.res.data.tasks_data['Tax Paid Details'].data?.documents?.['AdvanceTax'].files || [],
+        status: response.res.data.tasks_data['Tax Paid Details']?.data?.status || null,
+        reviewer: response.res.data.tasks_data['Tax Paid Details']?.data?.reviewer || null,
+        assignee: response.res.data.tasks_data['Tax Paid Details']?.data?.assignee || null
       });
     }
   };
 
-  const getStep2Data = async (step) => {
+  const getStep2Data = async () => {
     const response = await Factory(
       'get',
       `/income_tax_returns/service-request-section-data?service_request_id=${service_id}&section=income_details`
@@ -322,6 +263,30 @@ export default function ITR() {
     }
   };
 
+  const getStep3Data = async () => {
+    const response = await Factory(
+      'get',
+      `/income_tax_returns/service-request-section-data?service_request_id=${service_id}&section=deductions`
+    );
+    if (response.res.status_cd === 0) {
+      setDeductions(response.res.data.tasks_data.Deductions);
+      if (response.res.data.tasks_data.Deductions.data === null) addDeduction(response.res.data.tasks_data.Deductions.task_id);
+    } else {
+      setDeductions([]);
+    }
+  };
+
+  const getStep4Data = async () => {
+    const response = await Factory(
+      'get',
+      `/income_tax_returns/service-request-section-data?service_request_id=${service_id}&section=review`
+    );
+    if (response.res.status_cd === 0) {
+      setReviewAndFiling(response.res.data.tasks_data['Review Filing Certificate']);
+    } else {
+      setReviewAndFiling(null);
+    }
+  };
   // useEffect(() => {
   //   if (service_id) {
   //     getServiceTasks(service_id);
@@ -332,11 +297,16 @@ export default function ITR() {
   useEffect(() => {
     if (step === 0) getStep1Data(service_id);
     if (step === 1) getStep2Data(service_id);
+    if (step === 2) getStep3Data(service_id);
+    if (step === 3) getStep4Data(service_id);
   }, [step]);
 
   const handleOpenFileDialog = (files, title) => {
     setFileDialogOpen(true);
   };
+
+  const [reviewStep, setReviewStep] = React.useState(0);
+  const reviewSteps = ['Drafting', 'Filing', 'Acknowledgement'];
 
   return (
     <Card sx={{ minHeight: '100vh', p: { xs: 1, md: 4 } }}>
@@ -454,50 +424,78 @@ export default function ITR() {
                           <Typography>Upload PAN</Typography>
                         </Grid2>
                         <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                          <TextField
-                            size="small"
-                            fullWidth
-                            value={values.pan ? getFileName(values.pan) : ''}
-                            placeholder="Upload PAN"
-                            InputProps={{ readOnly: true }}
-                            onClick={() => document.getElementById('panFileInput').click()}
-                            error={Boolean(touched.pan && errors.pan)}
-                            helperText={touched.pan && errors.pan ? errors.pan : ' '}
-                          />
-                          <input
-                            id="panFileInput"
-                            type="file"
-                            hidden
-                            onChange={(e) => {
-                              setFieldValue('pan', e.target.files[0]);
-                              setFieldTouched('pan', true, true);
-                            }}
-                          />
+                          <Button size="small" variant="contained" component="label">
+                            Upload
+                            <input
+                              id="panFileInput"
+                              type="file"
+                              hidden
+                              onChange={(e) => {
+                                setFieldValue('pan', e.target.files[0]);
+                                setFieldTouched('pan', true, true);
+                              }}
+                            />
+                          </Button>
+                          {values.pan && (
+                            <Button
+                              size="small"
+                              variant="outlined"
+                              sx={{ ml: 1 }}
+                              onClick={() => {
+                                if (typeof values.pan === 'string') {
+                                  window.open(values.pan, '_blank');
+                                } else {
+                                  window.open(URL.createObjectURL(values.pan), '_blank');
+                                }
+                              }}
+                            >
+                              View
+                            </Button>
+                          )}
+                          {touched.pan && errors.pan && (
+                            <Typography color="error" variant="caption">
+                              {errors.pan}
+                            </Typography>
+                          )}
                         </Grid2>
                         {/* Upload Aadhaar */}
                         <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
                           <Typography>Upload Aadhaar</Typography>
                         </Grid2>
                         <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                          <TextField
-                            size="small"
-                            fullWidth
-                            value={values.aadhar ? getFileName(values.aadhar) : ''}
-                            placeholder="Upload Aadhaar"
-                            InputProps={{ readOnly: true }}
-                            onClick={() => document.getElementById('aadhaarFileInput').click()}
-                            error={Boolean(touched.aadhar && errors.aadhar)}
-                            helperText={touched.aadhar && errors.aadhar ? errors.aadhar : ' '}
-                          />
-                          <input
-                            id="aadhaarFileInput"
-                            type="file"
-                            hidden
-                            onChange={(e) => {
-                              setFieldValue('aadhar', e.target.files[0]);
-                              setFieldTouched('aadhar', true, true);
-                            }}
-                          />
+                          <Button size="small" variant="contained" component="label">
+                            Upload
+                            <input
+                              id="aadhaarFileInput"
+                              type="file"
+                              hidden
+                              onChange={(e) => {
+                                setFieldValue('aadhar', e.target.files[0]);
+                                setFieldTouched('aadhar', true, true);
+                              }}
+                            />
+                          </Button>
+                          {values.aadhar && (
+                            <Button
+                              size="small"
+                              variant="outlined"
+                              sx={{ ml: 1 }}
+                              onClick={() => {
+                                if (typeof values.aadhar === 'string') {
+                                  window.open(values.aadhar, '_blank');
+                                } else {
+                                  window.open(URL.createObjectURL(values.aadhar), '_blank');
+                                }
+                              }}
+                            >
+                              View
+                            </Button>
+                          )}
+                          {touched.aadhar && errors.aadhar && (
+                            <Typography color="error" variant="caption">
+                              {errors.aadhar}
+                            </Typography>
+                          )}
                         </Grid2>
                         {/* Mobile number */}
                         <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
@@ -635,16 +633,18 @@ export default function ITR() {
                           })}
                         </Grid2>
                       </Box>
-                      <Box display="flex" justifyContent="flex-end" gap={2}>
+                      <Box display="flex" justifyContent="flex-end" gap={1}>
                         <Button type="submit" variant="contained" color="primary">
                           Save Personal Info
                         </Button>
                         <GetActionButtons
+                          type="put"
                           data={personalInfo}
                           status={personalInfo.status}
                           urlEndpoint="personal-information"
-                          taskId={personalInfo.id}
-                          setData={setPersonalInfo}
+                          recId={personalInfo.id}
+                          task_id={personalInfo.task_id}
+                          service_request={service_id}
                         />
                       </Box>
                     </Form>
@@ -707,42 +707,75 @@ export default function ITR() {
                         <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
                           <Typography>Upload 26AS</Typography>
                         </Grid2>
-                        {console.log(values.as26File)}
-                        <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                          <TextField
-                            size="small"
-                            fullWidth
-                            value={values.as26File ? getFileName(values.as26File) : ''}
-                            placeholder="Upload 26AS"
-                            InputProps={{ readOnly: true }}
-                            onClick={() => document.getElementById('as26FileInput').click()}
-                            error={Boolean(touched.as26File && errors.as26File)}
-                            helperText={touched.as26File && errors.as26File ? errors.as26File : ' '}
-                          />
-                          <input id="as26FileInput" type="file" hidden onChange={(e) => setFieldValue('as26File', e.target.files[0])} />
+                        <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+                          <Button size="small" variant="contained" component="label">
+                            Upload
+                            <input
+                              id="as26FileInput"
+                              type="file"
+                              multiple={true}
+                              hidden
+                              onChange={(e) => setFieldValue('as26File', e.target.files)}
+                            />
+                          </Button>
+                          {values.as26File && (
+                            <Button
+                              size="small"
+                              variant="outlined"
+                              sx={{ ml: 1 }}
+                              onClick={() => {
+                                setFileDialogOpen(true);
+                                setDialogFilesData(values.as26File);
+                              }}
+                            >
+                              View
+                            </Button>
+                          )}
+                          {touched.as26File && errors.as26File && (
+                            <Typography color="error" variant="caption">
+                              {errors.as26File}
+                            </Typography>
+                          )}
                         </Grid2>
                         {/* Upload AIS */}
                         <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
                           <Typography>Upload AIS</Typography>
                         </Grid2>
-                        <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                          <TextField
-                            size="small"
-                            fullWidth
-                            value={values.aisFile ? getFileName(values.aisFile) : ''}
-                            placeholder="Upload AIS"
-                            InputProps={{ readOnly: true }}
-                            onClick={() => document.getElementById('aisFileInput').click()}
-                            error={Boolean(touched.aisFile && errors.aisFile)}
-                            helperText={touched.aisFile && errors.aisFile ? errors.aisFile : ' '}
-                          />
-                          <input id="aisFileInput" type="file" hidden onChange={(e) => setFieldValue('aisFile', e.target.files[0])} />
+                        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+                          <Button size="small" variant="contained" component="label">
+                            Upload
+                            <input
+                              id="aisFileInput"
+                              type="file"
+                              multiple={true}
+                              hidden
+                              onChange={(e) => setFieldValue('aisFile', e.target.files)}
+                            />
+                          </Button>
+                          {values.aisFile && (
+                            <Button
+                              size="small"
+                              variant="outlined"
+                              sx={{ ml: 1 }}
+                              onClick={() => {
+                                setFileDialogOpen(true);
+                                setDialogFilesData(values.aisFile);
+                              }}
+                            >
+                              View
+                            </Button>
+                          )}
+                          {touched.aisFile && errors.aisFile && (
+                            <Typography color="error" variant="caption">
+                              {errors.aisFile}
+                            </Typography>
+                          )}
                         </Grid2>
                         {/* Advance tax / Self Assisted Tax Challan */}
-                        <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+                        <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
                           <Typography>Advance tax / Self Assisted Tax Challan</Typography>
                         </Grid2>
-                        <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+                        <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
                           <Box display="flex" alignItems="center" gap={1}>
                             <input
                               id="challanInputNew"
@@ -769,15 +802,18 @@ export default function ITR() {
                           </Box>
                         </Grid2>
                       </Grid2>
-                      <Box display="flex" justifyContent="flex-end" mt={0} gap={2}>
+                      <Box display="flex" justifyContent="flex-end" mt={0} gap={1}>
                         <Button type="submit" variant="contained" color="primary">
                           Save Tax Paid Details
                         </Button>
                         <GetActionButtons
+                          type="post"
                           data={taxPaidDetails}
                           status={taxPaidDetails.status}
-                          urlEndpoint="taxPaid"
-                          taskId={taxPaidDetails.task_id}
+                          urlEndpoint={`/income_tax_returns/tax-paid-details/create-or-update/`}
+                          recId={taxPaidDetails.id}
+                          service_request={service_id}
+                          task_id={taxPaidDetails.task_id}
                         />
                       </Box>
                     </Form>
@@ -807,7 +843,7 @@ export default function ITR() {
                     </Box>
                   </AccordionSummary>
                   <AccordionDetails sx={{ p: 0 }}>
-                    <Box sx={{ p: 2, borderTop: '1px solid #e0e0e0'}}>
+                    <Box sx={{ p: 2, borderTop: '1px solid #e0e0e0' }}>
                       <IncomeDetails
                         service_id={service_id}
                         data={incomeDetails}
@@ -835,690 +871,233 @@ export default function ITR() {
 
           {/* Deductions Step */}
           {step === 2 && (
-            <Box>
-              {/* Section 80G - Donations */}
-              <Card sx={{ mb: 3, p: { xs: 2, sm: 3 } }}>
-                <Typography variant="h5" mb={2} sx={{ textDecoration: 'underline' }}>
-                  Section 80G - Deduction for Donations made
-                </Typography>
-                <Formik
-                  initialValues={{ donations }}
-                  enableReinitialize
-                  validationSchema={donationsSchema}
-                  onSubmit={(values) => {
-                    const formData = new FormData();
-                    values.donations.forEach((donation, idx) => {
-                      formData.append(`donations[${idx}][name]`, donation.name || '');
-                      formData.append(`donations[${idx}][amount]`, donation.amount || '');
-                      formData.append(`donations[${idx}][mode]`, donation.mode || '');
-                      if (donation.receipt) {
-                        formData.append(`donations[${idx}][receipt]`, donation.receipt);
-                      }
-                    });
-                    for (let pair of formData.entries()) {
-                      console.log(pair[0] + ':', pair[1]);
-                    }
-                  }}
-                >
-                  {({ values, setFieldValue, errors }) => (
-                    <Form>
-                      {values.donations.map((row, idx) => (
-                        <Paper key={idx} sx={{ p: 2, mb: 2, borderRadius: 2, bgcolor: '#f8fafc' }}>
-                          <Grid2 container spacing={2} alignItems="center">
-                            <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                              <TextField
-                                size="small"
-                                fullWidth
-                                label="Name of Donee"
-                                value={row.name}
-                                onChange={(e) => {
-                                  const newArr = [...values.donations];
-                                  newArr[idx].name = e.target.value;
-                                  setFieldValue('donations', newArr);
-                                }}
-                                error={Boolean(errors.donations?.[idx]?.name)}
-                                helperText={errors.donations?.[idx]?.name}
-                              />
-                            </Grid2>
-                            <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                              <TextField
-                                size="small"
-                                fullWidth
-                                label="Amount"
-                                value={row.amount}
-                                onChange={(e) => {
-                                  const newArr = [...values.donations];
-                                  newArr[idx].amount = e.target.value;
-                                  setFieldValue('donations', newArr);
-                                }}
-                                error={Boolean(errors.donations?.[idx]?.amount)}
-                                helperText={errors.donations?.[idx]?.amount}
-                              />
-                            </Grid2>
-                            <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                              <Autocomplete
-                                size="small"
-                                fullWidth
-                                options={donationModes}
-                                value={row.mode}
-                                onChange={(_, v) => {
-                                  const newArr = [...values.donations];
-                                  newArr[idx].mode = v;
-                                  setFieldValue('donations', newArr);
-                                }}
-                                renderInput={(params) => <TextField {...params} label="Mode" />}
-                              />
-                            </Grid2>
-                            <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                              <Button size="small" variant="contained" component="label">
-                                Upload
-                                <input
-                                  type="file"
-                                  hidden
-                                  onChange={(e) => {
-                                    const newArr = [...values.donations];
-                                    newArr[idx].receipt = e.target.files[0];
-                                    setFieldValue('donations', newArr);
-                                  }}
-                                />
-                              </Button>
-                            </Grid2>
-                            <Grid2 size={{ xs: 12, sm: 6, md: 1 }} display="flex" justifyContent="flex-end">
-                              <Button
-                                size="small"
-                                variant="contained"
-                                color="primary"
-                                onClick={() => {
-                                  const formData = new FormData();
-                                  formData.append('name', row.name || '');
-                                  formData.append('amount', row.amount || '');
-                                  formData.append('mode', row.mode || '');
-                                  if (row.receipt) {
-                                    formData.append('receipt', row.receipt);
-                                  }
-                                  for (let pair of formData.entries()) {
-                                    console.log(pair[0] + ':', pair[1]);
-                                  }
-                                }}
-                              >
-                                Save
-                              </Button>
-                            </Grid2>
-                            {values.donations.length > 1 && (
-                              <Grid2 size={{ xs: 12, sm: 6, md: 1 }} display="flex" justifyContent="flex-end">
-                                <IconButton
-                                  size="small"
-                                  color="error"
-                                  onClick={() => {
-                                    const newArr = values.donations.filter((_, i) => i !== idx);
-                                    setFieldValue('donations', newArr);
-                                  }}
-                                >
-                                  <DeleteIcon />
-                                </IconButton>
-                              </Grid2>
-                            )}
-                          </Grid2>
-                        </Paper>
-                      ))}
-                      <Box display="flex" justifyContent="flex-end" gap={2}>
-                        <Button
-                          size="small"
-                          variant="outlined"
-                          onClick={() =>
-                            setFieldValue('donations', [...values.donations, { name: '', amount: '', mode: '', receipt: null }])
-                          }
-                        >
-                          Add Row
-                        </Button>
-                      </Box>
-                    </Form>
-                  )}
-                </Formik>
-              </Card>
-
-              {/* Section 80E, 80TTA/80TTB, 80U, and Other Deductions Combined */}
-              <Card sx={{ mb: 3, p: { xs: 2, sm: 3 } }}>
-                <Formik
-                  initialValues={otherDeductions}
-                  enableReinitialize
-                  onSubmit={async (values) => {
-                    setOtherDeductions(values);
-                    // TODO: Save logic for all combined deductions here
-                  }}
-                >
-                  {({ values, setFieldValue }) => (
-                    <Form>
-                      {/* Section 80E - Interest on Education Loan */}
-                      <Typography variant="h5" mt={0} mb={2} sx={{ textDecoration: 'underline' }}>
-                        Section 80E - Interest on Education Loan
-                      </Typography>
-                      <Grid2 container spacing={2} alignItems="center" mb={2}>
-                        <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                          <TextField
-                            size="small"
-                            fullWidth
-                            label="Amount"
-                            name="eduLoanAmount"
-                            value={values.eduLoanAmount}
-                            onChange={(e) => setFieldValue('eduLoanAmount', e.target.value)}
-                          />
-                        </Grid2>
-                        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                          <Autocomplete
-                            size="small"
-                            fullWidth
-                            options={educationOfOptions}
-                            value={values.eduLoanEducationOf}
-                            onChange={(_, v) => setFieldValue('eduLoanEducationOf', v)}
-                            renderInput={(params) => <TextField {...params} label="Education of" />}
-                          />
-                        </Grid2>
-                        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                          <TextField
-                            size="small"
-                            fullWidth
-                            label="Borrower Name"
-                            name="eduLoanBorrower"
-                            value={values.eduLoanBorrower}
-                            onChange={(e) => setFieldValue('eduLoanBorrower', e.target.value)}
-                          />
-                        </Grid2>
-                        <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                          <Typography>Is it an approved Bank/NBFC?</Typography>
-                          <RadioGroup row value={values.eduLoanApproved} onChange={(_, v) => setFieldValue('eduLoanApproved', v)}>
-                            <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
-                            <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
-                          </RadioGroup>
-                        </Grid2>
-                      </Grid2>
-
-                      {/* Section 80TTA/80TTB - Interest on Savings */}
-                      <Typography variant="h5" mt={0} mb={2} sx={{ textDecoration: 'underline' }}>
-                        Section 80TTA/80TTB - Interest on Savings
-                      </Typography>
-                      <Grid2 container spacing={2} alignItems="center" mb={2}>
-                        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                          <TextField
-                            size="small"
-                            fullWidth
-                            label="Total savings interest"
-                            name="savingsInterest"
-                            value={values.savingsInterest}
-                            onChange={(e) => setFieldValue('savingsInterest', e.target.value)}
-                          />
-                        </Grid2>
-                        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                          <TextField
-                            size="small"
-                            fullWidth
-                            label="Total FD/RD interest (above 60 yrs)"
-                            name="fdInterest"
-                            value={values.fdInterest}
-                            onChange={(e) => setFieldValue('fdInterest', e.target.value)}
-                          />
-                        </Grid2>
-                      </Grid2>
-
-                      {/* Section 80U - Person with Disability */}
-                      <Typography variant="h5" mt={0} mb={2} sx={{ textDecoration: 'underline' }}>
-                        Section 80U - Person with Disability
-                      </Typography>
-                      <Grid2 container spacing={2} alignItems="center" mb={2}>
-                        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                          <Autocomplete
-                            size="small"
-                            fullWidth
-                            options={disabilityNature}
-                            value={values.disabilityNature}
-                            onChange={(_, v) => setFieldValue('disabilityNature', v)}
-                            renderInput={(params) => <TextField {...params} label="Nature of Disability" />}
-                          />
-                        </Grid2>
-                        <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                          <Autocomplete
-                            size="small"
-                            fullWidth
-                            options={disabilitySeverity}
-                            value={values.disabilitySeverity}
-                            onChange={(_, v) => setFieldValue('disabilitySeverity', v)}
-                            renderInput={(params) => <TextField {...params} label="Severity" />}
-                          />
-                        </Grid2>
-                        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                          <TextField
-                            size="small"
-                            fullWidth
-                            label="Deduction Amount"
-                            name="disabilityAmount"
-                            value={values.disabilityAmount}
-                            onChange={(e) => setFieldValue('disabilityAmount', e.target.value)}
-                          />
-                        </Grid2>
-                        <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                          <Button size="small" variant="contained" component="label">
-                            Upload Certificate
-                            <input type="file" hidden onChange={(e) => setFieldValue('disabilityCert', e.target.files[0])} />
-                          </Button>
-                        </Grid2>
-                      </Grid2>
-
-                      {/* Other Deductions */}
-                      <Typography variant="h5" mt={0} mb={2} sx={{ textDecoration: 'underline' }}>
-                        Other deductions
-                      </Typography>
-                      {/* Did you pay Rent without receiving HRA? */}
-                      <Grid2 container alignItems="center" spacing={2} mb={3}>
-                        <Grid2 size={{ xs: 12, sm: 4 }}>
-                          <Typography>Did you pay Rent without receiving HRA?</Typography>
-                          <RadioGroup row value={values.rentHraPaid} onChange={(_, v) => setFieldValue('rentHraPaid', v)}>
-                            <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
-                            <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
-                          </RadioGroup>
-                        </Grid2>
-                        <Grid2 size={{ xs: 12, sm: 8 }}>
-                          {values.rentHraPaid === 'yes' && (
-                            <Box display="flex" alignItems="center" gap={2} mt={1}>
-                              <Typography>Amount</Typography>
-                              <TextField
-                                size="small"
-                                value={values.rentHraAmount}
-                                onChange={(e) => setFieldValue('rentHraAmount', e.target.value)}
-                                sx={{ maxWidth: 200 }}
-                              />
-                            </Box>
-                          )}
-                        </Grid2>
-                      </Grid2>
-                      {/* Are you a first time homebuyer? */}
-                      <Grid2 container alignItems="center" spacing={2} mb={3}>
-                        <Grid2 size={{ xs: 12, sm: 3 }}>
-                          <Typography>Are you a first time homebuyer?</Typography>
-                          <RadioGroup row value={values.firstHomeIsFirst} onChange={(_, v) => setFieldValue('firstHomeIsFirst', v)}>
-                            <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
-                            <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
-                          </RadioGroup>
-                        </Grid2>
-                        {values.firstHomeIsFirst === 'yes' && (
-                          <>
-                            <Grid2 size={{ xs: 12, sm: 4.5 }}>
-                              <Box display="flex" alignItems="center" gap={2} mt={1}>
-                                <Typography>Amount of interest paid</Typography>
-                                <TextField
-                                  size="small"
-                                  value={values.firstHomeInterest}
-                                  onChange={(e) => setFieldValue('firstHomeInterest', e.target.value)}
-                                  sx={{ maxWidth: 200 }}
-                                />
-                              </Box>
-                            </Grid2>
-                            <Grid2 size={{ xs: 12, sm: 4.5 }}>
-                              <Box display="flex" alignItems="center" gap={2} mt={1}>
-                                <Typography>Date of Loan Sanctioned</Typography>
-                                <TextField
-                                  size="small"
-                                  type="date"
-                                  value={values.firstHomeDate}
-                                  onChange={(e) => setFieldValue('firstHomeDate', e.target.value)}
-                                  InputLabelProps={{ shrink: true }}
-                                  sx={{ maxWidth: 200 }}
-                                />
-                              </Box>
-                            </Grid2>
-                          </>
-                        )}
-                      </Grid2>
-                      {/* Donations made to political/party (80GGC)? */}
-                      <Grid2 container alignItems="center" spacing={2} mb={3}>
-                        <Grid2 size={{ xs: 12, sm: 4 }}>
-                          <Typography>Donations made to political/rural i&d org?</Typography>
-                          <RadioGroup row value={values.politicalDonated} onChange={(_, v) => setFieldValue('politicalDonated', v)}>
-                            <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
-                            <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
-                          </RadioGroup>
-                        </Grid2>
-                        <Grid2 size={{ xs: 12, sm: 8 }}>
-                          {values.politicalDonated === 'yes' && (
-                            <Box display="flex" alignItems="center" gap={2} mt={1}>
-                              <Typography>Amount</Typography>
-                              <TextField
-                                size="small"
-                                value={values.politicalAmount}
-                                onChange={(e) => setFieldValue('politicalAmount', e.target.value)}
-                                sx={{ maxWidth: 200 }}
-                              />
-                            </Box>
-                          )}
-                        </Grid2>
-                      </Grid2>
-                      <Box display="flex" justifyContent="flex-end">
-                        <Button size="small" variant="contained" color="primary" type="submit">
-                          Save All Deductions
-                        </Button>
-                      </Box>
-                    </Form>
-                  )}
-                </Formik>
-              </Card>
-
-              {/* Section 80C - Claim deductions for investments made */}
-              <Card sx={{ mb: 3, p: { xs: 2, sm: 3 } }}>
-                <Typography variant="h5" mt={0} mb={2} sx={{ textDecoration: 'underline' }}>
-                  Section 80C - Claim deductions for investments made
-                </Typography>
-                <Formik
-                  initialValues={{ investments }}
-                  enableReinitialize
-                  validationSchema={investmentsSchema}
-                  onSubmit={(values) => {
-                    const formData = new FormData();
-                    values.investments.forEach((investment, idx) => {
-                      formData.append(`investments[${idx}][type]`, investment.type || '');
-                      formData.append(`investments[${idx}][amount]`, investment.amount || '');
-                      if (investment.doc) {
-                        formData.append(`investments[${idx}][doc]`, investment.doc);
-                      }
-                    });
-                    for (let pair of formData.entries()) {
-                      console.log(pair[0] + ':', pair[1]);
-                    }
-                  }}
-                >
-                  {({ values, setFieldValue, errors }) => (
-                    <Form>
-                      {values.investments.map((row, idx) => (
-                        <Paper key={idx} sx={{ p: 2, mb: 2, borderRadius: 2, bgcolor: '#f8fafc' }}>
-                          <Grid2 container spacing={2} alignItems="center">
-                            <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                              <Autocomplete
-                                size="small"
-                                fullWidth
-                                options={investmentTypes}
-                                value={row.type}
-                                onChange={(_, v) => {
-                                  const newArr = [...values.investments];
-                                  newArr[idx].type = v;
-                                  setFieldValue('investments', newArr);
-                                }}
-                                renderInput={(params) => (
-                                  <TextField
-                                    {...params}
-                                    label="Investment/Payment"
-                                    error={Boolean(errors.investments?.[idx]?.type)}
-                                    helperText={errors.investments?.[idx]?.type}
-                                  />
-                                )}
-                              />
-                            </Grid2>
-                            <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                              <TextField
-                                size="small"
-                                fullWidth
-                                label="Amount"
-                                value={row.amount}
-                                onChange={(e) => {
-                                  const newArr = [...values.investments];
-                                  newArr[idx].amount = e.target.value;
-                                  setFieldValue('investments', newArr);
-                                }}
-                                error={Boolean(errors.investments?.[idx]?.amount)}
-                                helperText={errors.investments?.[idx]?.amount}
-                              />
-                            </Grid2>
-                            <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                              <Button size="small" variant="contained" component="label">
-                                Upload
-                                <input
-                                  type="file"
-                                  hidden
-                                  onChange={(e) => {
-                                    const newArr = [...values.investments];
-                                    newArr[idx].doc = e.target.files[0];
-                                    setFieldValue('investments', newArr);
-                                  }}
-                                />
-                              </Button>
-                            </Grid2>
-                            {values.investments.length > 1 && (
-                              <Grid2 size={{ xs: 12, sm: 6, md: 2 }} display="flex" justifyContent="flex-end">
-                                <IconButton
-                                  size="small"
-                                  color="error"
-                                  onClick={() => {
-                                    const newArr = values.investments.filter((_, i) => i !== idx);
-                                    setFieldValue('investments', newArr);
-                                  }}
-                                >
-                                  <DeleteIcon />
-                                </IconButton>
-                              </Grid2>
-                            )}
-                          </Grid2>
-                        </Paper>
-                      ))}
-                      <Box display="flex" justifyContent="flex-end" gap={2}>
-                        <Button
-                          size="small"
-                          variant="outlined"
-                          onClick={() => setFieldValue('investments', [...values.investments, { type: '', amount: '', doc: null }])}
-                        >
-                          Add Row
-                        </Button>
-                        <Button size="small" variant="contained" color="primary" type="submit">
-                          Save Investments
-                        </Button>
-                      </Box>
-                    </Form>
-                  )}
-                </Formik>
-              </Card>
-
-              {/* Section 80D - Claim deduction for medical insurance paid */}
-              <Card sx={{ mb: 3, p: { xs: 2, sm: 3 } }}>
-                <Typography variant="h5" mt={0} mb={2} sx={{ textDecoration: 'underline' }}>
-                  Section 80D - Claim deduction for medical insurance paid
-                </Typography>
-                <Formik
-                  initialValues={mediclaim}
-                  enableReinitialize
-                  validationSchema={mediclaimSchema}
-                  onSubmit={(values) => {
-                    const formData = new FormData();
-                    formData.append('selfFamily', values.selfFamily || '');
-                    formData.append('selfSenior', values.selfSenior || '');
-                    formData.append('parents', values.parents || '');
-                    formData.append('parentsSenior', values.parentsSenior || '');
-                    formData.append('checkup', values.checkup || '');
-                    if (Array.isArray(values.receipts)) {
-                      values.receipts.forEach((file, idx) => {
-                        if (file) formData.append(`receipts[${idx}]`, file);
-                      });
-                    }
-                    for (let pair of formData.entries()) {
-                      console.log(pair[0] + ':', pair[1]);
-                    }
-                  }}
-                >
-                  {({ values, setFieldValue, errors }) => (
-                    <Form>
-                      <Grid2 container spacing={2} alignItems="center" mb={2}>
-                        <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                          <Typography>Self & Family (Non-senior citizen)</Typography>
-                        </Grid2>
-                        <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                          <TextField
-                            size="small"
-                            fullWidth
-                            label="Amount"
-                            value={values.selfFamily}
-                            onChange={(e) => setFieldValue('selfFamily', e.target.value)}
-                            error={Boolean(errors.selfFamily)}
-                            helperText={errors.selfFamily}
-                          />
-                        </Grid2>
-                        <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                          <Typography>Self (Senior Citizen)</Typography>
-                        </Grid2>
-                        <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                          <TextField
-                            size="small"
-                            fullWidth
-                            label="Amount"
-                            value={values.selfSenior}
-                            onChange={(e) => setFieldValue('selfSenior', e.target.value)}
-                            error={Boolean(errors.selfSenior)}
-                            helperText={errors.selfSenior}
-                          />
-                        </Grid2>
-                        <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                          <Typography>Parents (Non-senior)</Typography>
-                        </Grid2>
-                        <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                          <TextField
-                            size="small"
-                            fullWidth
-                            label="Amount"
-                            value={values.parents}
-                            onChange={(e) => setFieldValue('parents', e.target.value)}
-                            error={Boolean(errors.parents)}
-                            helperText={errors.parents}
-                          />
-                        </Grid2>
-                        <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                          <Typography>Parents (Senior)</Typography>
-                        </Grid2>
-                        <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                          <TextField
-                            size="small"
-                            fullWidth
-                            label="Amount"
-                            value={values.parentsSenior}
-                            onChange={(e) => setFieldValue('parentsSenior', e.target.value)}
-                            error={Boolean(errors.parentsSenior)}
-                            helperText={errors.parentsSenior}
-                          />
-                        </Grid2>
-                        <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                          <Typography>Preventive Health Checkup</Typography>
-                        </Grid2>
-                        <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                          <TextField
-                            size="small"
-                            fullWidth
-                            label="Amount"
-                            value={values.checkup}
-                            onChange={(e) => setFieldValue('checkup', e.target.value)}
-                            error={Boolean(errors.checkup)}
-                            helperText={errors.checkup}
-                          />
-                        </Grid2>
-                        <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                          <Typography>Upload premium receipts</Typography>
-                        </Grid2>
-                        <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                          <Stack direction="row" spacing={1} justifyContent="flex-end">
-                            <Button size="small" variant="contained" component="label">
-                              Upload
-                              <input
-                                type="file"
-                                hidden
-                                onChange={(e) => setFieldValue('receipts', [...(values.receipts || []), e.target.files[0]])}
-                              />
-                            </Button>
-                            <Button
-                              size="small"
-                              variant="outlined"
-                              onClick={() => {
-                                setFileDialogOpen(true);
-                                setDialogFilesData(values.receipts);
-                              }}
-                            >
-                              View
-                            </Button>
-                          </Stack>
-                        </Grid2>
-                      </Grid2>
-                      <Box display="flex" justifyContent="flex-end">
-                        <Button size="small" variant="contained" color="primary" type="submit">
-                          Save Mediclaim
-                        </Button>
-                      </Box>
-                    </Form>
-                  )}
-                </Formik>
-              </Card>
-
-              <Box display="flex" justifyContent="space-between" mt={2} gap={2}>
-                <Button variant="outlined" color="primary" onClick={() => setStep(step - 1)}>
-                  Back
-                </Button>
-                <Button variant="contained" color="primary" onClick={() => setStep(step + 1)}>
-                  Continue
-                </Button>
-              </Box>
-            </Box>
+            <Deductions
+              setFileDialogOpen={setFileDialogOpen}
+              setDialogFilesData={setDialogFilesData}
+              deductions={deductions}
+              setDeductions={setDeductions}
+              service_id={service_id}
+              step={step}
+              setStep={setStep}
+            />
           )}
-
           {/* Review & Filing Step */}
           {step === 3 && (
             <Box>
-              <Box display="flex" justifyContent="flex-start" mt={2} gap={2}>
-                <Button variant="outlined" color="primary" onClick={() => setStep(step - 1)}>
-                  Back
-                </Button>
-              </Box>
-              <Typography variant="h5" mb={3} sx={{ textDecoration: 'underline' }}>
-                Draft Income Tax Computation
-              </Typography>
-              <Stack direction="row" spacing={2} mb={3}>
-                <Button variant="outlined">View</Button>
-                <Button variant="contained">Upload</Button>
-              </Stack>
-
-              <Typography variant="h5" mb={2} sx={{ textDecoration: 'underline' }}>
-                Approval / Workflow
-              </Typography>
-              <Stack direction="row" spacing={2} mb={3}>
-                <Button variant="outlined">View</Button>
-                <Button variant="contained" color="success">
-                  Approve
-                </Button>
-                <Button variant="contained" color="warning">
-                  Rework
-                </Button>
-              </Stack>
-
-              <Typography variant="h5" mb={2} sx={{ textDecoration: 'underline' }}>
-                Proceed to Filing
-              </Typography>
-              <Stack direction="row" spacing={2} mb={2}>
-                <Button variant="outlined">View</Button>
-                <Button variant="contained" color="primary">
-                  Proceed to File
-                </Button>
-              </Stack>
-              <Box mb={4}>
-                <Typography mb={1}>Mode of e-verification?</Typography>
-                <Autocomplete
-                  size="small"
-                  fullWidth
-                  options={['Aadhaar OTP', 'Net Banking', 'DSC', 'EVC']}
-                  renderInput={(params) => <TextField {...params} placeholder="Select mode" />}
-                  sx={{ maxWidth: 300 }}
-                />
-              </Box>
-
-              <Stack direction="row" spacing={6} mt={4}>
-                <Paper elevation={2} sx={{ p: 3, minWidth: 120, textAlign: 'center', bgcolor: '#f8fafc' }}>
-                  <Typography variant="h6">Filing</Typography>
-                </Paper>
-                <Paper elevation={2} sx={{ p: 3, minWidth: 120, textAlign: 'center', bgcolor: '#f8fafc' }}>
-                  <Typography variant="h6">Ack</Typography>
-                </Paper>
-              </Stack>
+              <Stepper activeStep={reviewStep} orientation="vertical" sx={{ mb: 4 }}>
+                {reviewSteps.map((label, idx) => (
+                  <Step key={label}>
+                    <StepLabel>{label}</StepLabel>
+                    <StepContent>
+                      {idx === 0 && (
+                        <Box
+                          sx={{
+                            p: 4,
+                            pr: 10,
+                            boxShadow: '0px 0px 10px 0px rgba(66, 66, 66, 0.1)',
+                            bgcolor: 'white',
+                            width: 'fit-content',
+                            borderRadius: 2,
+                            mb: 1
+                          }}
+                        >
+                          <Typography variant="h5" mb={3} sx={{ textDecoration: 'underline' }}>
+                            Draft Income Tax Computation
+                          </Typography>
+                          <Stack direction="row" spacing={2} mb={3}>
+                            {console.log(reviewAndFiling)}
+                            <Button
+                              variant="contained"
+                              size="small"
+                              onClick={() => document.getElementById('draftIncomeTaxComputationInput').click()}
+                            >
+                              <input
+                                id="draftIncomeTaxComputationInput"
+                                type="file"
+                                hidden
+                                onChange={async (e) => {
+                                  let type = reviewAndFiling?.data?.id ? 'put' : 'post';
+                                  let urlEndpoint = reviewAndFiling?.data?.id
+                                    ? `/income_tax_returns/review-filing/${reviewAndFiling?.data?.id}/`
+                                    : '/income_tax_returns/review-filing/';
+                                  const formData = new FormData();
+                                  formData.append('service_request', service_id);
+                                  formData.append('service_task', reviewAndFiling.task_id);
+                                  formData.append('draft_income_file', e.target.files[0]);
+                                  formData.append('filing_status', 'in progress');
+                                  formData.append('status', 'in progress');
+                                  const res = await Factory(type, urlEndpoint, formData, {});
+                                  console.log(res.res);
+                                  if (res.res.status_cd === 0) {
+                                    setReviewAndFiling({ ...reviewAndFiling, data: { ...res.res.data } });
+                                    enqueueSnackbar('Draft income tax computation saved successfully!', {
+                                      variant: 'success',
+                                      anchorOrigin: { vertical: 'top', horizontal: 'right' }
+                                    });
+                                  } else {
+                                    enqueueSnackbar('Error saving draft income tax computation.', {
+                                      variant: 'error',
+                                      anchorOrigin: { vertical: 'top', horizontal: 'right' }
+                                    });
+                                  }
+                                }}
+                              />
+                              Upload
+                            </Button>
+                            {reviewAndFiling?.data?.draft_income_file && (
+                              <Button
+                                variant="outlined"
+                                size="small"
+                                onClick={() => {
+                                  if (typeof reviewAndFiling?.data?.draft_income_file === 'string') {
+                                    window.open(reviewAndFiling?.data?.draft_income_file, '_blank');
+                                  } else if (reviewAndFiling?.data?.draft_income_file) {
+                                    window.open(URL.createObjectURL(reviewAndFiling?.data?.draft_income_file), '_blank');
+                                  }
+                                }}
+                              >
+                                View
+                              </Button>
+                            )}
+                          </Stack>
+                          <Box display="flex" justifyContent="flex-start" gap={1}>
+                            <GetActionButtons
+                              type="put"
+                              data={reviewAndFiling}
+                              status={reviewAndFiling?.data?.filing_status}
+                              urlEndpoint="review-filing"
+                              recId={reviewAndFiling?.data?.id}
+                              task_id={reviewAndFiling?.data?.task_id}
+                              service_request={service_id}
+                              filingHelper={true}
+                              setReviewStep={setReviewStep}
+                              step={1}
+                            />
+                          </Box>
+                          {/* <Button variant="contained" color="primary" onClick={() => setReviewStep(1)} sx={{ mt: 2 }}>
+                            Next
+                          </Button> */}
+                        </Box>
+                      )}
+                      {idx === 1 && (
+                        <Box
+                          sx={{
+                            p: 4,
+                            pr: 10,
+                            boxShadow: '0px 0px 10px 0px rgba(66, 66, 66, 0.1)',
+                            bgcolor: 'white',
+                            width: 'fit-content',
+                            borderRadius: 2,
+                            mb: 1
+                          }}
+                        >
+                          <Typography variant="h5" mb={3} sx={{ textDecoration: 'underline' }}>
+                            Upload Filed Acknowledgement
+                          </Typography>
+                          <Stack direction="row" spacing={2} mb={3}>
+                            <Button
+                              variant="contained"
+                              size="small"
+                              onClick={() => document.getElementById('draftIncomeTaxComputationInput').click()}
+                            >
+                              <input
+                                id="draftIncomeTaxComputationInput"
+                                type="file"
+                                hidden
+                                onChange={async (e) => {
+                                  let type = reviewAndFiling?.data?.id ? 'put' : 'post';
+                                  let urlEndpoint = reviewAndFiling?.data?.id
+                                    ? `/income_tax_returns/review-filing/${reviewAndFiling?.data?.id}/`
+                                    : '/income_tax_returns/review-filing/';
+                                  const formData = new FormData();
+                                  formData.append('service_request', service_id);
+                                  formData.append('service_task', reviewAndFiling.task_id);
+                                  formData.append('review_certificate', e.target.files[0]);
+                                  formData.append('approval_status', 'pending');
+                                  formData.append('status', 'in progress');
+                                  const res = await Factory(type, urlEndpoint, formData, {});
+                                  console.log(res.res);
+                                  if (res.res.status_cd === 0) {
+                                    setReviewAndFiling({ ...reviewAndFiling, data: { ...res.res.data } });
+                                    enqueueSnackbar('Filed acknowledgement saved successfully!', {
+                                      variant: 'success',
+                                      anchorOrigin: { vertical: 'top', horizontal: 'right' }
+                                    });
+                                  } else {
+                                    enqueueSnackbar('Error saving filed acknowledgement.', {
+                                      variant: 'error',
+                                      anchorOrigin: { vertical: 'top', horizontal: 'right' }
+                                    });
+                                  }
+                                }}
+                              />
+                              Upload
+                            </Button>
+                            {reviewAndFiling?.data?.review_certificate && (
+                              <Button
+                                variant="outlined"
+                                size="small"
+                                onClick={() => {
+                                  if (typeof reviewAndFiling?.data?.review_certificate === 'string') {
+                                    window.open(reviewAndFiling?.data?.review_certificate, '_blank');
+                                  } else if (reviewAndFiling?.data?.review_certificate) {
+                                    window.open(URL.createObjectURL(reviewAndFiling?.data?.review_certificate), '_blank');
+                                  }
+                                }}
+                              >
+                                View
+                              </Button>
+                            )}
+                          </Stack>
+                          <Box display="flex" justifyContent="flex-start" gap={1}>
+                            {console.log(reviewAndFiling)}
+                            {console.log(service_id)}
+                            <GetActionButtons
+                              type="put"
+                              data={reviewAndFiling}
+                              status={reviewAndFiling?.data?.approval_status}
+                              urlEndpoint="review-filing"
+                              recId={reviewAndFiling?.data?.id}
+                              task_id={reviewAndFiling?.task_id}
+                              service_request={service_id}
+                              filingHelper={'filed'}
+                              setReviewStep={setReviewStep}
+                              step={2}
+                            />
+                          </Box>
+                          {/* <Button variant="contained" color="primary" onClick={() => setReviewStep(1)} sx={{ mt: 2 }}>
+                            Next
+                          </Button> */}
+                        </Box>
+                      )}
+                      {idx === 2 && (
+                        <Box>
+                          <Stack direction="row" spacing={6} mt={4}>
+                            <Paper elevation={2} sx={{ p: 3, minWidth: 120, textAlign: 'center', bgcolor: '#f8fafc' }}>
+                              <Typography variant="h6">Filing</Typography>
+                            </Paper>
+                            <Paper elevation={2} sx={{ p: 3, minWidth: 120, textAlign: 'center', bgcolor: '#f8fafc' }}>
+                              <Typography variant="h6">Ack</Typography>
+                            </Paper>
+                          </Stack>
+                          <Button variant="outlined" color="primary" onClick={() => setReviewStep(1)} sx={{ mt: 2 }}>
+                            Back
+                          </Button>
+                        </Box>
+                      )}
+                    </StepContent>
+                  </Step>
+                ))}
+              </Stepper>
             </Box>
           )}
         </Paper>
+
+        <Box display="flex" justifyContent="flex-start" mt={2} gap={2}>
+          <Button variant="outlined" color="primary" onClick={() => setStep(step - 1)}>
+            Back
+          </Button>
+        </Box>
       </Box>
       <FileListDialog
         open={fileDialogOpen}

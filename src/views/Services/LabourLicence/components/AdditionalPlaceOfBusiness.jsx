@@ -148,9 +148,7 @@ export default function AdditionalPlaceOfBusiness({ businessPremises }) {
       }
     }
   });
-  const renderField = (field, formikContext) => {
-    const { values, errors, touched, handleChange, handleBlur, setFieldValue } = formikContext;
-
+  const renderField = (field) => {
     switch (field.type) {
       case 'text':
         return field.name === 'state' || field.name === 'nature_of_possession' ? (
@@ -251,7 +249,7 @@ export default function AdditionalPlaceOfBusiness({ businessPremises }) {
             {additionalFields.map((field) =>
               field.name !== 'bankStatement' ? (
                 <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4 }}>
-                  {renderField(field, formik)}
+                  {renderField(field)}
                 </Grid2>
               ) : null
             )}

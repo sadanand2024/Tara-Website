@@ -7,6 +7,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import DeleteIcon from '@mui/icons-material/Delete';
 
 const truncateFileName = (fileName, maxLength = 6) => {
+  if (!fileName) return '';
   if (fileName.length <= maxLength) return fileName;
   return fileName.substring(0, maxLength) + '...';
 };

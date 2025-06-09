@@ -84,6 +84,13 @@ const InvoiceNumberFormat = ({ businessDetails, handleBack, handleNext }) => {
           });
         } else {
           setFormatOptions((prev) => ({ ...prev, [field]: checked }));
+          // Clear prefix value when prefix checkbox is unchecked
+          if (field === 'usePrefix' && !checked) {
+            setFormValues((prev) => ({ ...prev, prefix: '' }));
+          }
+          if (field === 'useRunningNumber' && !checked) {
+            setFormValues((prev) => ({ ...prev, startingNumber: '1' }));
+          }
         }
       }
     };
@@ -186,6 +193,21 @@ const InvoiceNumberFormat = ({ businessDetails, handleBack, handleNext }) => {
       postData.is_common_format = 'yes';
     } else {
       postData.is_common_format = 'no';
+    }
+
+    if (postType === 'put') {
+      if (selectedRecord.id === null) {
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'Please select a GSTIN ',
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
+        return;
+      }
     }
     const url = postType === 'post' ? `/invoicing/invoice-formats/` : `/invoicing/invoice-formats/${selectedRecord.id}/`;
 
@@ -440,6 +462,9 @@ const InvoiceNumberFormat = ({ businessDetails, handleBack, handleNext }) => {
         <Stack direction="row" spacing={2}>
           <Button variant="outlined" onClick={handleBack}>
             Back
+          </Button>
+          <Button variant="contained" onClick={handleSave}>
+            Save
           </Button>
         </Stack>
       </Box>

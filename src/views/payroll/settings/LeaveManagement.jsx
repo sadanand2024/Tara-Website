@@ -29,7 +29,7 @@ import { Edit, Delete } from '@mui/icons-material';
 import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
 
 function LeaveManagement() {
-  const [leaveType, setLeaveType] = useState('Paid');
+  const [leaveType, setLeaveType] = useState('All');
   const [loading, setLoading] = useState(false);
   const [payrollId, setPayrollId] = useState(null);
   const [data, setData] = useState([]);
@@ -60,7 +60,7 @@ function LeaveManagement() {
   }, [payrollId]);
 
   useEffect(() => {
-    const filtered = data.filter((d) => d.leave_type.toLowerCase() === leaveType.toLowerCase());
+    const filtered = leaveType === 'All' ? data : data.filter((d) => d.leave_type.toLowerCase() === leaveType.toLowerCase());
     setFilteredData(filtered);
     setPage(1);
   }, [leaveType, data]);
@@ -106,7 +106,7 @@ function LeaveManagement() {
             <Typography variant="subtitle1">Leave Type</Typography>
             <CustomAutocomplete
               value={leaveType}
-              options={['Paid', 'UnPaid']}
+              options={['All', 'Paid', 'UnPaid']}
               onChange={(_, val) => setLeaveType(val)}
               sx={{ minWidth: 220 }}
             />

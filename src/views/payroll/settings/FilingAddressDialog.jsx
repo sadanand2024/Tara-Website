@@ -9,7 +9,7 @@ import { openSnackbar } from 'store/slices/snackbar';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useSelector } from 'react-redux';
 export default function FilingAddressDialog({ filingAddressDialog, setFilingAddressDialog, getOrgDetails, currentFilingAddress }) {
-  const user = useSelector((state) => state).accountReducer.user;
+  const user = useSelector((state) => state.accountReducer.user);
 
   let businessId = user.active_context.business_id;
   const [selctedLocation, setSelctedLocation] = useState(currentFilingAddress || {});
@@ -134,17 +134,27 @@ export default function FilingAddressDialog({ filingAddressDialog, setFilingAddr
       ) : (
         <Modal
           open={filingAddressDialog}
-          showClose={true}
+          showClose={false}
           handleClose={() => {
             setFilingAddressDialog(false);
           }}
           maxWidth="sm"
-          header={{ title: 'Update Filing Address', subheader: '' }}
+          title="Update Filing Address"
+          footer={
+            <Stack direction="row" spacing={2} justifyContent="space-between" sx={{ width: '100%' }}>
+              <Button variant="outlined" color="error" onClick={() => setFilingAddressDialog(false)}>
+                Cancel
+              </Button>
+              <Button variant="contained" onClick={saveFilingAddress}>
+                Save
+              </Button>
+            </Stack>
+          }
         >
-          <Box p={2}>
+          <Box>
             <Grid2 container spacing={3}>
               <Grid2 size={{ xs: 12 }}>
-                <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 1 }}>
                   Select Filing Address <span style={{ color: 'red' }}>*</span>
                 </Typography>
                 <CustomAutocomplete
@@ -170,9 +180,6 @@ export default function FilingAddressDialog({ filingAddressDialog, setFilingAddr
                   }}
                 >
                   <CardContent>
-                    <Typography variant="subtitle2" sx={{ mb: 1, color: 'text.secondary' }}>
-                      {selctedLocation.location_name}
-                    </Typography>
                     {[
                       { label: 'Address Line 1', value: selctedLocation.address_line1 },
                       { label: 'Address Line 2', value: selctedLocation.address_line2 },
@@ -183,12 +190,11 @@ export default function FilingAddressDialog({ filingAddressDialog, setFilingAddr
                     ].map((item, index) => (
                       <Typography
                         key={index}
-                        variant="body2"
+                        variant="subtitle1"
                         sx={{
                           display: 'flex',
                           justifyContent: 'space-between',
                           py: 0.5,
-                          fontWeight: 500,
                           borderBottom: index !== 5 ? '1px solid' : 'none',
                           borderColor: 'divider'
                         }}
@@ -205,26 +211,6 @@ export default function FilingAddressDialog({ filingAddressDialog, setFilingAddr
                 <Typography variant="body2" sx={{ mt: 2, fontWeight: 'bold' }}>
                   Note: <span style={{ fontWeight: 400 }}>Select a work location to use as your filing address</span>
                 </Typography>
-              </Grid2>
-
-              {/* Button Stack */}
-              <Grid2 size={{ xs: 12 }}>
-                <Stack direction="row" spacing={2} justifyContent="flex-end">
-                  <Button onClick={() => setFilingAddressDialog(false)} variant="outlined" color="error">
-                    Cancel
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="contained"
-                    color="primary"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      saveFilingAddress();
-                    }}
-                  >
-                    Save
-                  </Button>
-                </Stack>
               </Grid2>
             </Grid2>
           </Box>

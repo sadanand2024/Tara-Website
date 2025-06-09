@@ -21,7 +21,6 @@ export default function TabTwo({ getCustomersData, customers, businessDetails, h
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
-  console.log(businessDetails);
   return (
     <>
       {/* Header Section */}

@@ -12,7 +12,8 @@ import {
   Pagination,
   Button,
   Box,
-  CircularProgress
+  CircularProgress,
+  Grid2
 } from '@mui/material';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
@@ -58,7 +59,6 @@ const RenderTable = ({
   const handlePageChange = (_, value) => {
     setCurrentPage(value);
   };
-
   const safeTableData = Array.isArray(tableData) ? tableData : [];
   const paginatedData = safeTableData.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
   return (
@@ -95,12 +95,18 @@ const RenderTable = ({
                     {body_keys.map((key, cellIndex) => (
                       <TableCell key={cellIndex}>{row[key]}</TableCell>
                     ))}
-                    <TableCell>
+                    <TableCell align="center">
                       {from === 'Salary Revisions' ? (
                         <Button
                           variant="outlined"
                           size="small"
-                          onClick={() => navigate(`/payrollsetup/add-employee?employee_id=${row.id}&payrollid=${payrollId}&tabValue=1`)}
+                          onClick={() => {
+                            navigate(
+                              `/payroll/settings/add-employee?employee_id=${
+                                row.employee_id
+                              }&payrollid=${payrollId}&from=${'Salary Revisions'}&tabValue=${Number(1)}`
+                            );
+                          }}
                         >
                           Edit Pay Structure
                         </Button>
@@ -109,9 +115,11 @@ const RenderTable = ({
                           <IconButton color="primary" onClick={() => handleEdit(row)}>
                             <Edit />
                           </IconButton>
-                          <IconButton color="error" onClick={() => handleOpenDeleteDialog(row)}>
-                            <Delete />
-                          </IconButton>
+                          {from !== 'Tds' ? (
+                            <IconButton color="error" onClick={() => handleOpenDeleteDialog(row)}>
+                              <Delete />
+                            </IconButton>
+                          ) : null}
                         </Box>
                       )}
                     </TableCell>
@@ -132,17 +140,18 @@ const RenderTable = ({
           />
         </TableContainer>
       )}
-
-      {safeTableData.length > rowsPerPage && (
-        <Stack direction="row" justifyContent="center" alignItems="center" sx={{ py: 2 }}>
-          <Pagination
-            count={Math.ceil(safeTableData.length / rowsPerPage)}
-            page={currentPage}
-            onChange={handlePageChange}
-            color="primary"
-            shape="rounded"
-          />
-        </Stack>
+      {safeTableData.length > 0 && (
+        <Grid2 size={12}>
+          <Stack direction="row" justifyContent="center" sx={{ mt: 2 }}>
+            <Pagination
+              count={Math.ceil(safeTableData.length / rowsPerPage)}
+              page={currentPage}
+              onChange={handlePageChange}
+              shape="rounded"
+              color="primary"
+            />
+          </Stack>
+        </Grid2>
       )}
     </Stack>
   );

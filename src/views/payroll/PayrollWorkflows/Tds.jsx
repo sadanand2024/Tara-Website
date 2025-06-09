@@ -5,36 +5,35 @@ import Factory from 'utils/Factory';
 import { useSearchParams } from 'react-router-dom';
 import RenderDialog from './RenderDialog';
 
-export default function Exits({ employeeMasterData, from, openDialog, fields, setOpenDialog }) {
+export default function Tds({ employeeMasterData, from, openDialog, fields, setOpenDialog }) {
   const headerData = [
     'Employee ID',
     'Employee Name',
-    'Department',
-    'Designations',
-    'Exit Date',
-    'Total Days',
-    'Paid Days',
-    'Settlement Date',
-    'Actual CTC',
-    'F & F'
+    'Pan',
+    'Regime',
+    'Annual Est Income',
+    // 'Annual Tax Libility',
+    'TDS Month',
+    'TDS YTD'
   ];
+
   const body_keys = [
     'associate_id',
     'employee_name',
-    'department',
-    'designation',
-    'exit_date',
-    'total_days',
-    'paid_days',
-    'settlement_sdate',
-    'annual_ctc',
-    'final_settlement_amount'
+    'pan',
+    'regime',
+    'annual_tds',
+    // 'annual_tax_libility',
+    'tds',
+    'tds_ytd'
   ];
+
   const [payrollid, setPayrollId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]);
   const [selectedRecord, setSelectedRecord] = useState(null);
-
+  const [month, setMonth] = useState(null);
+  const [financialYear, setFinancialYear] = useState(null);
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
@@ -43,10 +42,22 @@ export default function Exits({ employeeMasterData, from, openDialog, fields, se
       setPayrollId(id);
     }
   }, [searchParams]);
+  useEffect(() => {
+    const month = searchParams.get('month');
+    if (month) {
+      setMonth(month);
+    }
+  }, [searchParams]);
+  useEffect(() => {
+    const financialYear = searchParams.get('financial_year');
+    if (financialYear) {
+      setFinancialYear(financialYear);
+    }
+  }, [searchParams]);
 
   const getData = async () => {
     setLoading(true);
-    const url = `/payroll/payroll-exit-settlement?payroll_id=${payrollid}`;
+    const url = `/payroll/employee-tds?payroll_id=${payrollid}&month=${month}&financial_year=${financialYear}`;
     const { res, error } = await Factory('get', url, {});
     setLoading(false);
     if (res.status_cd === 0) {
@@ -56,7 +67,7 @@ export default function Exits({ employeeMasterData, from, openDialog, fields, se
     }
   };
   const handleEdit = async (item) => {
-    let url = `/payroll/employee-exit/${item.id}`;
+    let url = `/payroll/employee-tds/${item.id}`;
     const { res } = await Factory('get', url, {});
     if (res.status_cd === 1) {
       // showSnackbar(JSON.stringify(res.data), 'error');
@@ -65,16 +76,7 @@ export default function Exits({ employeeMasterData, from, openDialog, fields, se
       setOpenDialog(true);
     }
   };
-  const handleDelete = async (item) => {
-    let url = `/payroll/employee-exit/${item.id}`;
-    const { res } = await Factory('delete', url, {});
-    if (res.status_cd === 1) {
-      showSnackbar(JSON.stringify(res.data), 'error');
-    } else {
-      // showSnackbar('Record Deleted Successfully', 'success');
-      getData();
-    }
-  };
+
   useEffect(() => {
     if (payrollid) {
       getData();
@@ -86,12 +88,12 @@ export default function Exits({ employeeMasterData, from, openDialog, fields, se
         headerData={headerData}
         tableData={data}
         handleEdit={handleEdit}
-        handleDelete={handleDelete}
+        // handleDelete={handleDelete}
         body_keys={body_keys}
         selectedRecord={selectedRecord}
         setSelectedRecord={setSelectedRecord}
-        loading={loading}
         from={from}
+        loading={loading}
         setLoading={setLoading}
       />
       <RenderDialog

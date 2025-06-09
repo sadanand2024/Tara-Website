@@ -95,8 +95,17 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
         return {
           employee: '',
           current_ctc: '',
-          created_on: '',
-          revised_ctc: ''
+          updated_on: ''
+        };
+      case 'Tds':
+        return {
+          employee: '',
+          pan: '',
+          regime: '',
+          annual_tds: '',
+          // annual_tax_libility: '',
+          tds: '',
+          tds_ytd: ''
         };
       default:
         return {
@@ -172,11 +181,16 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
         });
 
       case 'Salary Revisions':
+        return Yup.object({});
+      case 'Tds':
         return Yup.object({
           employee: Yup.string().required('Employee is required'),
-          current_ctc: Yup.string().required('Current CTC is required'),
-          created_on: Yup.string().required('Created on is required'),
-          revised_ctc: Yup.string().required('Revised CTC is required')
+          pan: Yup.string().required('PAN is required'),
+          regime: Yup.string().required('Regime is required'),
+          annual_tds: Yup.string().required('Annual Estimate is required'),
+          // annual_tax_libility: Yup.string().required('Annual tax liability is required'),
+          tds: Yup.string().required('TDS (Month) is required'),
+          tds_ytd: Yup.string().required('TDS YTD is required')
         });
 
       // Add more validation cases for different scenarios (e.g., Transfers)
@@ -352,6 +366,40 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
           );
         }
       }
+      if (from === 'Tds') {
+        setLoading(true);
+        let url = selectedRecord?.id ? `/payroll/employee-tds/${selectedRecord?.id}` : `/payroll/employee-tds`;
+        let method = selectedRecord?.id ? 'put' : 'Post';
+        let postData = {
+          ...values
+        };
+        postData.payroll = payrollid;
+        const { res, error } = await Factory(method, url, postData);
+        setLoading(false);
+        if (res.status_cd === 0) {
+          dispatch(
+            openSnackbar({
+              open: true,
+              message: 'Data Saved Successfully',
+              variant: 'alert',
+              alert: { color: 'success' },
+              close: false
+            })
+          );
+          getData();
+          setOpenDialog(false);
+        } else {
+          dispatch(
+            openSnackbar({
+              open: true,
+              message: JSON.stringify(res.data.data),
+              variant: 'alert',
+              alert: { color: 'error' },
+              close: false
+            })
+          );
+        }
+      }
     }
   });
   const renderFields = (fields) => {
@@ -364,11 +412,12 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
           <CustomAutocomplete
             value={employeeMasterData?.find((emp) => emp.id === values[field.name]) || null}
             onChange={(event, newValue) => {
+              console.log(newValue);
               setFieldValue(field.name, newValue?.id || '');
               setFieldValue('department', newValue.department_name);
               setFieldValue('designation', newValue.designation_name);
               if (from === 'Salary Revisions') {
-                // setFieldValue('current_ctc', newValue.current_ctc);
+                setFieldValue('current_ctc', newValue.employee_salary.annual_ctc);
                 // setFieldValue('revised_ctc', newValue.current_ctc);
               }
             }}
@@ -381,7 +430,7 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
             error={touched[field.name] && Boolean(errors[field.name])}
             helperText={touched[field.name] && errors[field.name]}
             size="small"
-            disabled={from === 'Attendance' && field.name === 'employee'}
+            disabled={(from === 'Attendance' && field.name === 'employee') || (from === 'Tds' && field.name === 'employee')}
           />
         ) : field.name === 'loan_type' || field.name === 'bonus_type' || field.name === 'month' ? (
           <CustomAutocomplete
@@ -496,7 +545,10 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
               field.name === 'total_days_of_month' ||
               field.name === 'holidays' ||
               field.name === 'present_days' ||
-              field.name === 'week_offs'
+              field.name === 'week_offs' ||
+              field.name === 'pan' ||
+              field.name === 'regime' ||
+              field.name === 'current_ctc'
             }
           />
         )}
@@ -504,7 +556,6 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
     ));
   };
   const { values, setValues, handleChange, errors, touched, handleSubmit, handleBlur, resetForm, setFieldValue } = formik;
-  console.log(values);
   useEffect(() => {
     if (selectedRecord !== null) {
       // Convert month name to numeric value if it exists
@@ -517,6 +568,7 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
       }));
     }
   }, [selectedRecord]);
+  // console.log(values);
   return (
     <Modal
       open={openDialog}
@@ -532,7 +584,9 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
                 ? 'Bonus & Incentives'
                 : from === 'Salary Revisions'
                   ? 'Salary Revisions'
-                  : ''
+                  : from === 'Tds'
+                    ? 'TDS'
+                    : ''
       }
       showClose={true}
       handleClose={() => {
@@ -551,16 +605,18 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
           >
             Cancel
           </Button>
-          <Button onClick={handleSubmit} type="submit" variant="contained" color="primary">
-            Submit
-          </Button>
+          {from !== 'Salary Revisions' && (
+            <Button onClick={handleSubmit} type="submit" variant="contained" color="primary">
+              Submit
+            </Button>
+          )}
         </Stack>
       }
     >
       <Box component="form" onSubmit={handleSubmit}>
         <Grid2 container spacing={2}>
           {/* Render dynamic fields for department */}
-          {renderFields(fields)}
+          {from === 'Salary Revisions' && selectedRecord === null ? renderFields(fields.slice(0, 4)) : renderFields(fields)}
         </Grid2>
         {from === 'Exits' && (
           <Grid2 container spacing={3} sx={{ mt: 2 }}>

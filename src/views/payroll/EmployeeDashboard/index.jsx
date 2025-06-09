@@ -28,11 +28,11 @@ const PRODUCTS_DATA = [
   { title: 'Loans & Advances', href: '/payroll-workflows', icon: <AccountBalanceWalletIcon />, color: '#FF9800' },
   { title: 'Bonus & Incentives', href: '/payroll-workflows', icon: <EmojiEventsIcon />, color: '#9C27B0' },
   { title: 'Salary Revisions', href: '/payroll-workflows', icon: <UpdateIcon />, color: '#009688' },
-  { title: 'Other Deductions', href: '/payroll-workflows', icon: <ReceiptIcon />, color: '#673AB7' }
+  { title: 'TDS', href: '/payroll-workflows', icon: <ReceiptIcon />, color: '#673AB7' }
 ];
 const TabPanel = ({ children, value, index }) => (
   <div role="tabpanel" hidden={value !== index} id={`simple-tabpanel-${index}`} aria-labelledby={`simple-tab-${index}`}>
-    {value === index && <Box sx={{ pt: 2.5 }}>{children}</Box>}
+    {value === index && <Box sx={{ pt: 0 }}>{children}</Box>}
   </div>
 );
 
@@ -115,7 +115,7 @@ export default function Index() {
     navigate(`/payroll${href}?payrollid=${payrollId}&tabValue=${index}&month=${month}&financial_year=${financialYear}`);
   };
   return (
-    <MainCard title={`Monthly Payroll Dashboard ${months[month - 1]}`} tagline="Explore your monthly payroll details">
+    <MainCard title={`Monthly Payroll Dashboard of ${months[month - 1]}`} tagline="Explore your monthly payroll details">
       {' '}
       <Box sx={{ pb: 3 }}>
         <Grid2 container spacing={{ xs: 2, md: 3 }}>

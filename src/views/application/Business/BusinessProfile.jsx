@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
+import { Autocomplete } from '@mui/material';
 import { useSnackbar } from 'notistack';
 import {
   Box,
@@ -79,7 +80,7 @@ const validationSchema = Yup.object({
     then: () => Yup.string().required('MSME number is required'),
     otherwise: () => Yup.string().nullable()
   }),
-  is_multiple_branches: Yup.string().oneOf(['yes', 'no']).required(),
+  // is_multiple_branches: Yup.string().oneOf(['yes', 'no']).required(),
   branches: Yup.array().when('is_multiple_branches', {
     is: 'yes',
     then: () =>
@@ -92,7 +93,76 @@ const validationSchema = Yup.object({
     otherwise: () => Yup.array().nullable()
   })
 });
-
+const businessProfileFields = [
+  {
+    name: 'nameOfBusiness',
+    label: 'Business Name',
+    type: 'text'
+  },
+  {
+    name: 'business_nature',
+    label: 'Business Nature',
+    type: 'text'
+  },
+  {
+    name: 'pan',
+    label: 'PAN',
+    type: 'text'
+  },
+  {
+    name: 'registrationNumber',
+    label: 'Registration Number',
+    type: 'text'
+  },
+  {
+    name: 'entityType',
+    label: 'Entity Type',
+    type: 'autocomplete',
+    options: Object.values(entityTypeMapping)
+  },
+  {
+    name: 'dob_or_incorp_date',
+    label: 'Date of Incorporation',
+    type: 'date'
+  }
+];
+let primaryContactFields = [
+  {
+    name: 'email',
+    label: 'Email',
+    type: 'text'
+  },
+  {
+    name: 'mobile_number',
+    label: 'Mobile Number',
+    type: 'text'
+  },
+  {
+    name: 'headOffice.address_line1',
+    label: 'Address Line 1',
+    type: 'text'
+  },
+  {
+    name: 'headOffice.address_line2',
+    label: 'Address Line 2',
+    type: 'text'
+  },
+  {
+    name: 'headOffice.city',
+    label: 'City',
+    type: 'text'
+  },
+  {
+    name: 'headOffice.state',
+    label: 'State',
+    type: 'text'
+  },
+  {
+    name: 'headOffice.pincode',
+    label: 'Pincode',
+    type: 'text'
+  }
+];
 const BusinessProfile = ({ user, tabChange, tabval }) => {
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
@@ -103,29 +173,103 @@ const BusinessProfile = ({ user, tabChange, tabval }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [branches, setBranches] = useState([]);
   const [isMultipleBranches, setIsMultipleBranches] = useState('no');
-  const formik = useFormik({
-    initialValues: {
-      nameOfBusiness: '',
-      business_nature: '',
-      pan: '',
-      registrationNumber: '',
-      entityType: '',
-      dob_or_incorp_date: '',
-      email: '',
-      mobile_number: '',
-      headOffice: {
-        address_line1: '',
-        address_line2: '',
-        city: '',
-        state: '',
-        pincode: ''
-      },
-      is_msme_registered: 'no',
-      msme_registration_type: '',
-      msme_registration_number: '',
-      trade_name: ''
+  const [initialValues, setInitialValues] = useState({
+    nameOfBusiness: '',
+    business_nature: '',
+    pan: '',
+    registrationNumber: '',
+    entityType: '',
+    dob_or_incorp_date: '',
+    email: '',
+    mobile_number: '',
+    headOffice: {
+      address_line1: '',
+      address_line2: '',
+      city: '',
+      state: '',
+      pincode: ''
     },
+    is_msme_registered: 'no',
+    msme_registration_type: '',
+    msme_registration_number: '',
+    trade_name: ''
+  });
+
+  // Fetch initial data
+  useEffect(() => {
+    const fetchAllData = async () => {
+      try {
+        setIsLoading(true);
+        // Fetch business profile
+        const profileResponse = await Factory('get', `/user_management/businesses/${user.active_context.business_id}/`, {}, {});
+        if (profileResponse.res.status_cd === 0) {
+          const profileData = profileResponse.res.data;
+          setInitialValues({
+            nameOfBusiness: profileData.nameOfBusiness || '',
+            business_nature: profileData.business_nature || '',
+            pan: profileData.pan || '',
+            registrationNumber: profileData.registrationNumber || '',
+            entityType: profileData.entityType || '',
+            dob_or_incorp_date: profileData.dob_or_incorp_date || '',
+            email: profileData.email || '',
+            mobile_number: profileData.mobile_number || '',
+            headOffice: {
+              address_line1: profileData.headOffice?.address_line1 || '',
+              address_line2: profileData.headOffice?.address_line2 || '',
+              city: profileData.headOffice?.city || '',
+              state: profileData.headOffice?.state || '',
+              pincode: profileData.headOffice?.pincode || ''
+            },
+            is_msme_registered: profileData.is_msme_registered || 'no',
+            msme_registration_type: profileData.msme_registration_type || '',
+            msme_registration_number: profileData.msme_registration_number || '',
+            trade_name: profileData.trade_name || ''
+          });
+        }
+
+        // Fetch branches
+        const branchesResponse = await Factory('get', `/user_management/branches/${user.active_context.business_id}/`, {}, {});
+        if (branchesResponse.res.status_cd === 0) {
+          if (branchesResponse.res.data.length > 0) {
+            setIsMultipleBranches('yes');
+            setBranches(branchesResponse.res.data);
+          } else {
+            setIsMultipleBranches('no');
+            setBranches([]);
+          }
+        }
+        // Fetch logo
+        const logoResponse = await Factory('get', `/user_management/business-logo/${user.active_context.business_id}/`, {}, {});
+        if (logoResponse.res.status_cd === 0) {
+          setLogoUrlDetails(logoResponse.res.data);
+          setLogoposttype('put');
+        } else {
+          setLogoUrlDetails(null);
+          setLogoposttype('post');
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        enqueueSnackbar('Failed to load data', {
+          variant: 'error',
+          anchorOrigin: { vertical: 'top', horizontal: 'right' },
+          ContentProps: {
+            sx: {
+              color: 'white'
+            }
+          }
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAllData();
+  }, [user.active_context.business_id]);
+
+  const formik = useFormik({
+    initialValues,
     validationSchema,
+    enableReinitialize: true,
     onSubmit: async (values) => {
       try {
         setIsSubmitting(true);
@@ -135,7 +279,7 @@ const BusinessProfile = ({ user, tabChange, tabval }) => {
           dispatch(
             openSnackbar({
               open: true,
-              message: JSON.stringify(response.res.data || error),
+              message: 'Business profile updated successfully',
               variant: 'alert',
               alert: { color: 'success' },
               close: false
@@ -265,77 +409,75 @@ const BusinessProfile = ({ user, tabChange, tabval }) => {
     newBranches[index] = { ...newBranches[index], [field]: value };
     setBranches(newBranches);
   };
-
-  // Single useEffect for all data fetching
-  useEffect(() => {
-    const fetchAllData = async () => {
-      try {
-        setIsLoading(true);
-        // Fetch business profile
-        const profileResponse = await Factory('get', `/user_management/businesses/${user.active_context.business_id}/`, {}, {});
-        if (profileResponse.res.status_cd === 0) {
-          const profileData = profileResponse.res.data;
-          formik.setValues({
-            nameOfBusiness: profileData.nameOfBusiness || '',
-            business_nature: profileData.business_nature || '',
-            pan: profileData.pan || '',
-            registrationNumber: profileData.registrationNumber || '',
-            entityType: profileData.entityType || '',
-            dob_or_incorp_date: profileData.dob_or_incorp_date || '',
-            email: profileData.email || '',
-            mobile_number: profileData.mobile_number || '',
-            headOffice: {
-              address_line1: profileData.headOffice?.address_line1 || '',
-              address_line2: profileData.headOffice?.address_line2 || '',
-              city: profileData.headOffice?.city || '',
-              state: profileData.headOffice?.state || '',
-              pincode: profileData.headOffice?.pincode || ''
-            },
-            is_msme_registered: profileData.is_msme_registered || 'no',
-            msme_registration_type: profileData.msme_registration_type || '',
-            msme_registration_number: profileData.msme_registration_number || '',
-            trade_name: profileData.trade_name || ''
-          });
-        }
-
-        // Fetch branches
-        const branchesResponse = await Factory('get', `/user_management/branches/${user.active_context.business_id}/`, {}, {});
-        if (branchesResponse.res.status_cd === 0) {
-          if (branchesResponse.res.data.length > 0) {
-            setIsMultipleBranches('yes');
-            setBranches(branchesResponse.res.data);
-          } else {
-            setIsMultipleBranches('no');
-            setBranches([]);
-          }
-        }
-        // Fetch logo
-        const logoResponse = await Factory('get', `/user_management/business-logo/${user.active_context.business_id}/`, {}, {});
-        if (logoResponse.res.status_cd === 0) {
-          setLogoUrlDetails(logoResponse.res.data);
-          setLogoposttype('put');
-        } else {
-          setLogoUrlDetails(null);
-          setLogoposttype('post');
-        }
-      } catch (error) {
-        console.error('Error fetching data:', error);
-        enqueueSnackbar('Failed to load data', {
-          variant: 'error',
-          anchorOrigin: { vertical: 'top', horizontal: 'right' },
-          ContentProps: {
-            sx: {
-              color: 'white'
-            }
-          }
-        });
-      } finally {
-        setIsLoading(false);
-      }
+  const renderField = (field) => {
+    // Helper function to get nested value
+    const getNestedValue = (obj, path) => {
+      return path.split('.').reduce((acc, part) => (acc ? acc[part] : undefined), obj);
     };
 
-    fetchAllData();
-  }, [user.active_context.business_id]);
+    switch (field.type) {
+      case 'autocomplete':
+        return (
+          <Autocomplete
+            fullWidth
+            size="small"
+            options={field.options}
+            value={getNestedValue(values, field.name)}
+            onChange={(e, value) => setFieldValue(field.name, value)}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                name={field.name}
+                onChange={(e, value) => setFieldValue(field.name, value)}
+                error={touched[field.name] && Boolean(errors[field.name])}
+                helperText={touched[field.name] && errors[field.name]}
+              />
+            )}
+          />
+        );
+      case 'text':
+        return (
+          <TextField
+            fullWidth
+            size="small"
+            name={field.name}
+            value={getNestedValue(values, field.name)}
+            onChange={(e) => {
+              if (field.name === 'pan') {
+                let value = e.target.value;
+                if (value.length === 10) {
+                  setFieldValue(field.name, value.toUpperCase());
+                } else {
+                  return;
+                }
+              } else {
+                setFieldValue(field.name, e.target.value);
+              }
+            }}
+            error={touched[field.name] && Boolean(errors[field.name])}
+            helperText={touched[field.name] && errors[field.name]}
+            onBlur={handleBlur}
+          />
+        );
+      case 'date':
+        return (
+          <TextField
+            fullWidth
+            size="small"
+            type="date"
+            name={field.name}
+            value={getNestedValue(values, field.name)}
+            onChange={(e) => setFieldValue(field.name, e.target.value)}
+            onBlur={handleBlur}
+            error={touched[field.name] && Boolean(errors[field.name])}
+            helperText={touched[field.name] && errors[field.name]}
+          />
+        );
+
+      default:
+        return null;
+    }
+  };
 
   const handleSaveBranch = async (index) => {
     let branchesdata = branches[index];
@@ -382,9 +524,10 @@ const BusinessProfile = ({ user, tabChange, tabval }) => {
       </Box>
     );
   }
-
+  const { values, handleChange, errors, touched, handleSubmit, handleBlur, resetForm, setFieldValue } = formik;
+  console.log(errors);
   return (
-    <Box component="form" onSubmit={formik.handleSubmit}>
+    <Box component="form" onSubmit={handleSubmit}>
       <Grid2 container spacing={2}>
         {/* Business Name Header */}
         <Grid2 size={{ xs: 12 }}>
@@ -432,219 +575,29 @@ const BusinessProfile = ({ user, tabChange, tabval }) => {
             </Grid2>
           </Grid2>
         </Grid2>
-        {/* First Row: Business Name, Business PAN, and Logo */}
-        <Grid2 size={{ xs: 12, sm: 6 }}>
-          <TextField
-            fullWidth
-            size="small"
-            id="nameOfBusiness"
-            name="nameOfBusiness"
-            label="Business Name"
-            value={formik.values.nameOfBusiness}
-            onChange={formik.handleChange}
-            error={formik.touched.nameOfBusiness && Boolean(formik.errors.nameOfBusiness)}
-            helperText={formik.touched.nameOfBusiness && formik.errors.nameOfBusiness}
-          />
-        </Grid2>
-
-        <Grid2 size={{ xs: 12, sm: 6 }}>
-          <TextField
-            fullWidth
-            size="small"
-            id="pan"
-            name="pan"
-            label="Business PAN"
-            value={formik.values.pan}
-            onChange={formik.handleChange}
-            error={formik.touched.pan && Boolean(formik.errors.pan)}
-            helperText={formik.touched.pan && formik.errors.pan}
-          />
-        </Grid2>
-
-        <Grid2 size={{ xs: 12, sm: 6 }}>
-          <FormControl fullWidth size="small" error={formik.touched.business_nature && Boolean(formik.errors.business_nature)}>
-            <InputLabel>Industry</InputLabel>
-            <Select
-              id="business_nature"
-              name="business_nature"
-              value={formik.values.business_nature}
-              label="Industry"
-              onChange={formik.handleChange}
-            >
-              {industries.map((industry) => (
-                <MenuItem key={industry} value={industry}>
-                  {industry}
-                </MenuItem>
-              ))}
-            </Select>
-            {formik.touched.business_nature && formik.errors.business_nature && (
-              <FormHelperText>{formik.errors.business_nature}</FormHelperText>
-            )}
-          </FormControl>
-        </Grid2>
-
-        <Grid2 size={{ xs: 12, sm: 6 }}>
-          <FormControl fullWidth size="small" error={formik.touched.entityType && Boolean(formik.errors.entityType)}>
-            <InputLabel>Entity Type</InputLabel>
-            <Select id="entityType" name="entityType" value={formik.values.entityType} label="Entity Type" onChange={formik.handleChange}>
-              {Object.entries(entityTypeMapping).map(([value, label]) => (
-                <MenuItem key={value} value={value}>
-                  {label}
-                </MenuItem>
-              ))}
-            </Select>
-            {formik.touched.entityType && formik.errors.entityType && <FormHelperText>{formik.errors.entityType}</FormHelperText>}
-          </FormControl>
-        </Grid2>
-
-        <Grid2 size={{ xs: 12, sm: 6 }}>
-          <TextField
-            fullWidth
-            size="small"
-            id="registrationNumber"
-            name="registrationNumber"
-            label="Registration No."
-            value={formik.values.registrationNumber}
-            onChange={formik.handleChange}
-            error={formik.touched.registrationNumber && Boolean(formik.errors.registrationNumber)}
-            helperText={formik.touched.registrationNumber && formik.errors.registrationNumber}
-          />
-        </Grid2>
-
-        <Grid2 size={{ xs: 12, sm: 6 }}>
-          <TextField
-            fullWidth
-            size="small"
-            id="dob_or_incorp_date"
-            name="dob_or_incorp_date"
-            label="Date of Incorporation"
-            type="date"
-            value={formik.values.dob_or_incorp_date}
-            onChange={formik.handleChange}
-            error={formik.touched.dob_or_incorp_date && Boolean(formik.errors.dob_or_incorp_date)}
-            helperText={formik.touched.dob_or_incorp_date && formik.errors.dob_or_incorp_date}
-            InputLabelProps={{
-              shrink: true
-            }}
-          />
-        </Grid2>
+        {businessProfileFields.map((field) => (
+          <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4 }}>
+            <Typography color="text.secondary" fontWeight={500} mb={1}>
+              {field.label}
+            </Typography>
+            {renderField(field)}
+          </Grid2>
+        ))}
 
         {/* Primary Contact */}
         <Grid2 size={{ xs: 12 }}>
-          <Typography variant="h5" color="text.primary" gutterBottom sx={{ mt: 2 }}>
+          <Typography variant="h4" color="text.primary" gutterBottom sx={{ mt: 2 }}>
             Primary Contact
           </Typography>
         </Grid2>
-
-        <Grid2 size={{ xs: 12, sm: 6, md: 6 }}>
-          <TextField
-            fullWidth
-            size="small"
-            id="email"
-            name="email"
-            label="Email"
-            value={formik.values.email}
-            onChange={formik.handleChange}
-            error={formik.touched.email && Boolean(formik.errors.email)}
-            helperText={formik.touched.email && formik.errors.email}
-          />
-        </Grid2>
-
-        <Grid2 size={{ xs: 12, sm: 6, md: 6 }}>
-          <TextField
-            fullWidth
-            size="small"
-            id="mobile_number"
-            name="mobile_number"
-            label="Mobile"
-            value={formik.values.mobile_number}
-            onChange={formik.handleChange}
-            error={formik.touched.mobile_number && Boolean(formik.errors.mobile_number)}
-            helperText={formik.touched.mobile_number && formik.errors.mobile_number}
-          />
-        </Grid2>
-
-        <Grid2 size={{ xs: 12, sm: 6 }}>
-          <TextField
-            fullWidth
-            size="small"
-            id="headOffice.address_line1"
-            name="headOffice.address_line1"
-            label="Address Line 1"
-            value={formik.values.headOffice.address_line1}
-            onChange={formik.handleChange}
-            error={formik.touched.headOffice?.address_line1 && Boolean(formik.errors.headOffice?.address_line1)}
-            helperText={formik.touched.headOffice?.address_line1 && formik.errors.headOffice?.address_line1}
-          />
-        </Grid2>
-
-        <Grid2 size={{ xs: 12, sm: 6 }}>
-          <TextField
-            fullWidth
-            size="small"
-            id="headOffice.address_line2"
-            name="headOffice.address_line2"
-            label="Address Line 2"
-            value={formik.values.headOffice.address_line2}
-            onChange={formik.handleChange}
-            error={formik.touched.headOffice?.address_line2 && Boolean(formik.errors.headOffice?.address_line2)}
-            helperText={formik.touched.headOffice?.address_line2 && formik.errors.headOffice?.address_line2}
-          />
-        </Grid2>
-
-        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-          <TextField
-            fullWidth
-            size="small"
-            id="headOffice.city"
-            name="headOffice.city"
-            label="City"
-            value={formik.values.headOffice.city}
-            onChange={formik.handleChange}
-            error={formik.touched.headOffice?.city && Boolean(formik.errors.headOffice?.city)}
-            helperText={formik.touched.headOffice?.city && formik.errors.headOffice?.city}
-          />
-        </Grid2>
-
-        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-          <FormControl fullWidth size="small" error={formik.touched.headOffice?.state && Boolean(formik.errors.headOffice?.state)}>
-            <InputLabel>State</InputLabel>
-            <Select
-              id="headOffice.state"
-              name="headOffice.state"
-              value={formik.values.headOffice.state}
-              label="State"
-              onChange={formik.handleChange}
-            >
-              {__IndianStates.map((state) => (
-                <MenuItem key={state} value={state}>
-                  {state}
-                </MenuItem>
-              ))}
-            </Select>
-            {formik.touched.headOffice?.state && formik.errors.headOffice?.state && (
-              <FormHelperText>{formik.errors.headOffice?.state}</FormHelperText>
-            )}
-          </FormControl>
-        </Grid2>
-
-        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-          <TextField
-            fullWidth
-            size="small"
-            id="headOffice.pincode"
-            name="headOffice.pincode"
-            label="PIN Code"
-            value={formik.values.headOffice.pincode}
-            onChange={formik.handleChange}
-            error={formik.touched.headOffice?.pincode && Boolean(formik.errors.headOffice?.pincode)}
-            helperText={formik.touched.headOffice?.pincode && formik.errors.headOffice?.pincode}
-          />
-        </Grid2>
-
-        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-          <TextField fullWidth size="small" id="country" name="country" label="Country" value="India" disabled />
-        </Grid2>
+        {primaryContactFields.map((field) => (
+          <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4 }}>
+            <Typography color="text.secondary" fontWeight={500} mb={1}>
+              {field.label}
+            </Typography>
+            {renderField(field)}
+          </Grid2>
+        ))}
 
         {/* MSME Section */}
         <Grid2 size={{ xs: 12 }}>
@@ -652,35 +605,31 @@ const BusinessProfile = ({ user, tabChange, tabval }) => {
             <Typography variant="subtitle1" gutterBottom>
               Is your business MSME Registered?
             </Typography>
-            <RadioGroup row name="is_msme_registered" value={formik.values.is_msme_registered} onChange={formik.handleChange}>
+            <RadioGroup row name="is_msme_registered" value={values.is_msme_registered} onChange={handleChange}>
               <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
               <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
             </RadioGroup>
           </FormControl>
         </Grid2>
 
-        {formik.values.is_msme_registered === 'yes' && (
+        {values.is_msme_registered === 'yes' && (
           <>
             <Grid2 size={{ xs: 12, sm: 6 }}>
-              <FormControl
-                fullWidth
-                size="small"
-                error={formik.touched.msme_registration_type && Boolean(formik.errors.msme_registration_type)}
-              >
+              <FormControl fullWidth size="small" error={touched.msme_registration_type && Boolean(errors.msme_registration_type)}>
                 <InputLabel>MSME/Udyam Registration Type</InputLabel>
                 <Select
                   id="msme_registration_type"
                   name="msme_registration_type"
-                  value={formik.values.msme_registration_type}
+                  value={values.msme_registration_type}
                   label="MSME/Udyam Registration Type"
-                  onChange={formik.handleChange}
+                  onChange={handleChange}
                 >
                   <MenuItem value="micro">Micro</MenuItem>
                   <MenuItem value="small">Small</MenuItem>
                   <MenuItem value="medium">Medium</MenuItem>
                 </Select>
-                {formik.touched.msme_registration_type && formik.errors.msme_registration_type && (
-                  <FormHelperText>{formik.errors.msme_registration_type}</FormHelperText>
+                {touched.msme_registration_type && errors.msme_registration_type && (
+                  <FormHelperText>{errors.msme_registration_type}</FormHelperText>
                 )}
               </FormControl>
             </Grid2>
@@ -692,10 +641,10 @@ const BusinessProfile = ({ user, tabChange, tabval }) => {
                 id="msme_registration_number"
                 name="msme_registration_number"
                 label="MSME/Udyam Registration Number"
-                value={formik.values.msme_registration_number}
-                onChange={formik.handleChange}
-                error={formik.touched.msme_registration_number && Boolean(formik.errors.msme_registration_number)}
-                helperText={formik.touched.msme_registration_number && formik.errors.msme_registration_number}
+                value={values.msme_registration_number}
+                onChange={handleChange}
+                error={touched.msme_registration_number && Boolean(errors.msme_registration_number)}
+                helperText={touched.msme_registration_number && errors.msme_registration_number}
               />
             </Grid2>
           </>
