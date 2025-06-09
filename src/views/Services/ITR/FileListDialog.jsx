@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -17,9 +17,19 @@ import {
   Card
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import Factory from '../../../utils/Factory';
+import { useSnackbar } from 'notistack';
+import { Download, Visibility } from '@mui/icons-material';
 
-const FileListDialog = ({ open, onClose, files }) => {
+const FileListDialog = ({ open, onClose, files, getStep1Data, getStep2Data, getStep3Data, step }) => {
+  const { enqueueSnackbar } = useSnackbar();
+  const [filesData, setFilesData] = useState([]);
+
   console.log(files);
+  useEffect(() => {
+    if (files.files) setFilesData(files.files);
+  }, [files]);
+
   const getFileName = (file) => {
     if (file.url instanceof File) {
       return file.url.name;
@@ -33,9 +43,36 @@ const FileListDialog = ({ open, onClose, files }) => {
     return file.name;
   };
 
-  const onDelete = (index, id) => {
-    console.log(index, id);
+  const viewFile = async (file, action) => {
+    console.log(file.url);
+    const response = await Factory('get', `/docwallet/generate_presigned_url?url=${file.url}`, {}, {});
+    if (response.res.status_cd === 0) {
+      let url = response.res.data.url;
+      window.open(url, '_blank');
+    }
   };
+
+  const removefile = (index) => {
+    let __files = JSON.parse(JSON.stringify(filesData));
+    __files.splice(index, 1);
+    setFilesData(__files);
+    if (step === 0) getStep1Data();
+    if (step === 1) getStep2Data();
+    if (step === 2) getStep3Data();
+  };
+  const onDelete = async (index, id) => {
+    if (!id) removefile(index);
+    else {
+      const response = await Factory('delete', `/income_tax_returns/${files.urlEndpoint}/files/${id}/delete/`, {});
+      if (response.res.status_cd === 0) {
+        removefile(index);
+        enqueueSnackbar('File deleted successfully', { variant: 'success', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
+      } else {
+        enqueueSnackbar('File deletion failed', { variant: 'error', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
+      }
+    }
+  };
+  console.log(filesData);
   return (
     <Dialog
       open={open}
@@ -45,7 +82,7 @@ const FileListDialog = ({ open, onClose, files }) => {
       sx={{ p: 0, m: 0, '& .MuiDialog-paper': { p: 0, m: 0 } }}
       id="file-list-dialog1"
     >
-      {files?.length === 0 ? (
+      {filesData?.length === 0 ? (
         <Box sx={{ p: 10, textAlign: 'center' }}>
           <Typography>No files to display</Typography>
         </Box>
@@ -55,18 +92,22 @@ const FileListDialog = ({ open, onClose, files }) => {
             <Table size="small" sx={{ width: '100%', px: 0, py: 0 }}>
               <TableHead sx={{ backgroundColor: 'primary.main' }}>
                 <TableRow>
-                  <TableCell sx={{ color: 'white !important', px: 2, py: 1.5 }}>Filename</TableCell>
-                  <TableCell sx={{ color: 'white !important', px: 2, py: 1.5 }} align="right">
-                    Action
+                  <TableCell sx={{ color: 'white !important', px: 2, py: 1.5, width: '75%' }}>Filename</TableCell>
+                  <TableCell sx={{ color: 'white !important', px: 2, py: 1.5, width: '25%' }} align="center">
+                    Actions
                   </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {files?.map((file, index) => (
+                {filesData?.map((file, index) => (
                   <TableRow key={index}>
                     <TableCell>{getFileName(file)}</TableCell>
-                    <TableCell align="right">
-                      <IconButton size="small" color="error" onClick={() => onDelete(index, file.id)}>
+                    <TableCell align="center">
+                      <IconButton size="small" color="primary" onClick={() => viewFile(file, 'view')}>
+                        <Visibility />/
+                        <Download />
+                      </IconButton>
+                      <IconButton size="small" color="error" onClick={() => onDelete(index, file.id, file)}>
                         <DeleteIcon />
                       </IconButton>
                     </TableCell>

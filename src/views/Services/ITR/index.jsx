@@ -30,6 +30,7 @@ import Factory from 'utils/Factory';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import IncomeDetails from './IncomeDetails';
 import DeleteIcon from '@mui/icons-material/Delete';
+import DownloadIcon from '@mui/icons-material/Download';
 import IconButton from '@mui/material/IconButton';
 import { useSearchParams } from 'react-router-dom';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
@@ -84,10 +85,19 @@ const personalInfoSchema = Yup.object().shape({
   assignee: Yup.number().nullable(),
   reviewer: Yup.number().nullable()
 });
+
 const taxPaidSchema = Yup.object().shape({
   as26File: Yup.mixed().required('26AS is required'),
   aisFile: Yup.mixed().required('AIS is required')
 });
+
+const viewFile = async (url) => {
+  const response = await Factory('get', `/docwallet/generate_presigned_url?url=${url}`, {}, {});
+  if (response.res.status_cd === 0) {
+    let url = response.res.data.url;
+    window.open(url, '_blank');
+  }
+};
 
 // Add validation schemas for Donations, Investments, Mediclaim
 
@@ -308,6 +318,14 @@ export default function ITR() {
   const [reviewStep, setReviewStep] = React.useState(0);
   const reviewSteps = ['Drafting', 'Filing', 'Acknowledgement'];
 
+  useEffect(() => {
+    if (reviewAndFiling?.data?.approval_status === 'completed') setReviewStep(2);
+    // } else if (reviewAndFiling?.data?.approval_status === 'drafted') {
+    //   setReviewStep(0);
+    // } else if (reviewAndFiling?.data?.approval_status === 'filed') {
+    //   setReviewStep(1);
+    // }
+  }, [reviewAndFiling]);
   return (
     <Card sx={{ minHeight: '100vh', p: { xs: 1, md: 4 } }}>
       <Typography variant="h3" mb={0.5}>
@@ -443,7 +461,7 @@ export default function ITR() {
                               sx={{ ml: 1 }}
                               onClick={() => {
                                 if (typeof values.pan === 'string') {
-                                  window.open(values.pan, '_blank');
+                                  viewFile(values.pan);
                                 } else {
                                   window.open(URL.createObjectURL(values.pan), '_blank');
                                 }
@@ -482,7 +500,7 @@ export default function ITR() {
                               sx={{ ml: 1 }}
                               onClick={() => {
                                 if (typeof values.aadhar === 'string') {
-                                  window.open(values.aadhar, '_blank');
+                                  viewFile(values.aadhar);
                                 } else {
                                   window.open(URL.createObjectURL(values.aadhar), '_blank');
                                 }
@@ -663,19 +681,16 @@ export default function ITR() {
                     formData.append('service_request', service_id);
                     formData.append('service_task', taxPaidDetails.task_id);
                     formData.append('status', 'in progress');
-                    if (values.as26File && values.as26File instanceof File) {
-                      formData.append('form26as_files', values.as26File);
-                    }
-                    if (values.aisFile && values.aisFile instanceof File) {
-                      formData.append('ais_files', values.aisFile);
-                    }
-                    if (values.challans && Array.isArray(values.challans)) {
-                      values.challans.forEach((challan) => {
-                        if (challan instanceof File) {
-                          formData.append('advance_tax_files', challan);
-                        }
-                      });
-                    }
+                    Array.from(values.as26File).forEach((file) => {
+                      if (file instanceof File) formData.append('form26as_files', file);
+                    });
+                    Array.from(values.aisFile).forEach((file) => {
+                      if (file instanceof File) formData.append('ais_files', file);
+                    });
+                    Array.from(values.challans).forEach((file) => {
+                      if (file instanceof File) formData.append('advance_tax_files', file);
+                    });
+
                     try {
                       const res = await Factory('post', '/income_tax_returns/tax-paid-details/create-or-update/', formData, {});
                       if (res.res.status_cd === 0) {
@@ -715,7 +730,9 @@ export default function ITR() {
                               type="file"
                               multiple={true}
                               hidden
-                              onChange={(e) => setFieldValue('as26File', e.target.files)}
+                              onChange={(e) =>
+                                setFieldValue('as26File', values.as26File ? [...values.as26File, ...e.target.files] : e.target.files)
+                              }
                             />
                           </Button>
                           {values.as26File && (
@@ -725,7 +742,7 @@ export default function ITR() {
                               sx={{ ml: 1 }}
                               onClick={() => {
                                 setFileDialogOpen(true);
-                                setDialogFilesData(values.as26File);
+                                setDialogFilesData({ files: values.as26File, urlEndpoint: 'tax-paid-details' });
                               }}
                             >
                               View
@@ -749,7 +766,9 @@ export default function ITR() {
                               type="file"
                               multiple={true}
                               hidden
-                              onChange={(e) => setFieldValue('aisFile', e.target.files)}
+                              onChange={(e) =>
+                                setFieldValue('aisFile', values.aisFile ? [...values.aisFile, ...e.target.files] : e.target.files)
+                              }
                             />
                           </Button>
                           {values.aisFile && (
@@ -759,7 +778,7 @@ export default function ITR() {
                               sx={{ ml: 1 }}
                               onClick={() => {
                                 setFileDialogOpen(true);
-                                setDialogFilesData(values.aisFile);
+                                setDialogFilesData({ files: values.aisFile, urlEndpoint: 'tax-paid-details' });
                               }}
                             >
                               View
@@ -783,7 +802,8 @@ export default function ITR() {
                               hidden
                               multiple={true}
                               onChange={(e) => {
-                                if (e.target.files[0]) setFieldValue('challans', [...values.challans, ...e.target.files]);
+                                if (e.target.files[0])
+                                  setFieldValue('challans', values.challans ? [...values.challans, ...e.target.files] : e.target.files);
                               }}
                             />
                             <Button size="small" variant="contained" onClick={() => document.getElementById('challanInputNew').click()}>
@@ -794,7 +814,7 @@ export default function ITR() {
                               variant="outlined"
                               onClick={() => {
                                 setFileDialogOpen(true);
-                                setDialogFilesData(values.challans);
+                                setDialogFilesData({ files: values.challans, urlEndpoint: 'tax-paid-details' });
                               }}
                             >
                               View
@@ -924,10 +944,10 @@ export default function ITR() {
                                   formData.append('service_request', service_id);
                                   formData.append('service_task', reviewAndFiling.task_id);
                                   formData.append('draft_income_file', e.target.files[0]);
+                                  formData.append('approval_status', 'pending');
                                   formData.append('filing_status', 'in progress');
                                   formData.append('status', 'in progress');
                                   const res = await Factory(type, urlEndpoint, formData, {});
-                                  console.log(res.res);
                                   if (res.res.status_cd === 0) {
                                     setReviewAndFiling({ ...reviewAndFiling, data: { ...res.res.data } });
                                     enqueueSnackbar('Draft income tax computation saved successfully!', {
@@ -962,16 +982,14 @@ export default function ITR() {
                           </Stack>
                           <Box display="flex" justifyContent="flex-start" gap={1}>
                             <GetActionButtons
-                              type="put"
                               data={reviewAndFiling}
-                              status={reviewAndFiling?.data?.filing_status}
-                              urlEndpoint="review-filing"
+                              status={reviewAndFiling?.data?.approval_status}
                               recId={reviewAndFiling?.data?.id}
                               task_id={reviewAndFiling?.data?.task_id}
                               service_request={service_id}
                               filingHelper={true}
                               setReviewStep={setReviewStep}
-                              step={1}
+                              step={reviewStep}
                             />
                           </Box>
                           {/* <Button variant="contained" color="primary" onClick={() => setReviewStep(1)} sx={{ mt: 2 }}>
@@ -1013,7 +1031,7 @@ export default function ITR() {
                                   formData.append('service_request', service_id);
                                   formData.append('service_task', reviewAndFiling.task_id);
                                   formData.append('review_certificate', e.target.files[0]);
-                                  formData.append('approval_status', 'pending');
+                                  formData.append('filing_status', 'in progress');
                                   formData.append('status', 'in progress');
                                   const res = await Factory(type, urlEndpoint, formData, {});
                                   console.log(res.res);
@@ -1050,19 +1068,17 @@ export default function ITR() {
                             )}
                           </Stack>
                           <Box display="flex" justifyContent="flex-start" gap={1}>
-                            {console.log(reviewAndFiling)}
-                            {console.log(service_id)}
                             <GetActionButtons
                               type="put"
                               data={reviewAndFiling}
-                              status={reviewAndFiling?.data?.approval_status}
+                              status={reviewAndFiling?.data?.filing_status}
                               urlEndpoint="review-filing"
                               recId={reviewAndFiling?.data?.id}
                               task_id={reviewAndFiling?.task_id}
                               service_request={service_id}
-                              filingHelper={'filed'}
+                              filingHelper={true}
                               setReviewStep={setReviewStep}
-                              step={2}
+                              step={reviewStep}
                             />
                           </Box>
                           {/* <Button variant="contained" color="primary" onClick={() => setReviewStep(1)} sx={{ mt: 2 }}>
@@ -1071,18 +1087,40 @@ export default function ITR() {
                         </Box>
                       )}
                       {idx === 2 && (
-                        <Box>
-                          <Stack direction="row" spacing={6} mt={4}>
-                            <Paper elevation={2} sx={{ p: 3, minWidth: 120, textAlign: 'center', bgcolor: '#f8fafc' }}>
-                              <Typography variant="h6">Filing</Typography>
-                            </Paper>
-                            <Paper elevation={2} sx={{ p: 3, minWidth: 120, textAlign: 'center', bgcolor: '#f8fafc' }}>
-                              <Typography variant="h6">Ack</Typography>
-                            </Paper>
+                        <Box
+                          sx={{
+                            p: 4,
+                            pr: 8,
+                            boxShadow: '0px 0px 10px 0px rgba(66, 66, 66, 0.1)',
+                            bgcolor: 'white',
+                            width: 'fit-content',
+                            borderRadius: 2,
+                            mb: 1
+                          }}
+                        >
+                          <Stack direction="column" spacing={1}>
+                            <Typography variant="h5" mb={3} sx={{ textDecoration: 'underline' }}>
+                              Download Filed Acknowledgement
+                            </Typography>
+                            <Button variant="outlined" color="secondary" onClick={() => console.log(reviewAndFiling)}>
+                              Download
+                              <IconButton
+                                size="small"
+                                color="secondary"
+                                sx={{ alignSelf: 'center', '&:hover': { backgroundColor: 'transparent' } }}
+                                onClick={() => {
+                                  if (reviewAndFiling?.data?.review_certificate) {
+                                    window.open(reviewAndFiling?.data?.review_certificate, '_blank');
+                                  }
+                                }}
+                              >
+                                <DownloadIcon sx={{ width: { xs: 24, md: 24 }, height: { xs: 24, md: 24 } }} />
+                              </IconButton>
+                            </Button>
                           </Stack>
-                          <Button variant="outlined" color="primary" onClick={() => setReviewStep(1)} sx={{ mt: 2 }}>
+                          {/* <Button variant="outlined" color="primary" onClick={() => setReviewStep(1)} sx={{ mt: 2 }}>
                             Back
-                          </Button>
+                          </Button> */}
                         </Box>
                       )}
                     </StepContent>
@@ -1100,6 +1138,10 @@ export default function ITR() {
         </Box>
       </Box>
       <FileListDialog
+        getStep1Data={getStep1Data}
+        getStep2Data={getStep2Data}
+        getStep3Data={getStep3Data}
+        step={step}
         open={fileDialogOpen}
         files={dialogFilesData}
         setFiles={setDialogFilesData}
