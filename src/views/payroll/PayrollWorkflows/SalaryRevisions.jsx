@@ -9,7 +9,7 @@ import { openSnackbar } from 'store/slices/snackbar';
 export default function SalaryRevisions({ employeeMasterData, from, openDialog, fields, setOpenDialog }) {
   const dispatch = useDispatch();
   const headerData = ['Employee ID', 'Employee Name', 'Department', 'Designation', 'Previous CTC', 'Last Revision', 'Revised CTC'];
-  const body_keys = ['associate_id', 'employee_name', 'department', 'designation', 'previous_ctc', 'updated_on', 'current_ctc'];
+  const body_keys = ['associate_id', 'employee_name', 'department', 'designation', 'previous_ctc', 'revision_date', 'current_ctc'];
   const [payrollid, setPayrollId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]);
@@ -43,7 +43,6 @@ export default function SalaryRevisions({ employeeMasterData, from, openDialog, 
     const url = `/payroll/salary-revision?payroll_id=${payrollid}&month=${month}&year=${year}`;
     const { res, error } = await Factory('get', url, {});
     setLoading(false);
-    console.log(res);
     if (res.status_cd === 0) {
       setData(res.data || []);
     } else {

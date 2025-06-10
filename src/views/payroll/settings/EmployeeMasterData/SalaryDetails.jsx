@@ -29,6 +29,8 @@ function SalaryDetails({
   enablePreviewButton
 }) {
   const [payrollid, setPayrollId] = useState(null);
+  const [month, setMonth] = useState(null);
+  const [financial_year, setFinancialYear] = useState(null);
   const [salary_teamplates_data, setSalary_teamplates_data] = useState([]);
   const [searchParams] = useSearchParams();
   const [from, setFrom] = useState(null);
@@ -40,8 +42,11 @@ function SalaryDetails({
   ];
   useEffect(() => {
     const id = searchParams.get('payrollid');
-
+    const month = searchParams.get('month');
+    const financial_year = searchParams.get('financial_year');
+    if (month) setMonth(month);
     if (id) setPayrollId(id);
+    if (financial_year) setFinancialYear(financial_year);
   }, [searchParams]);
 
   useEffect(() => {
@@ -89,6 +94,8 @@ function SalaryDetails({
       if (from === 'Salary Revisions') {
         postData.update_month = new Date().getMonth() + 1;
       }
+      postData.payroll_month = Number(month) || new Date().getMonth() + 1;
+      postData.payroll_year = Number(financial_year.split('-')[0]) || new Date().getFullYear();
       // Determine API method and URL
       const method = employeeData?.employee_salary?.id ? 'put' : 'post';
       const url = employeeData?.employee_salary?.id
