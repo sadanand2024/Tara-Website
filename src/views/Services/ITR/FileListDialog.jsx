@@ -45,12 +45,13 @@ const FileListDialog = ({ open, onClose, files, getStep1Data, getStep2Data, getS
   const viewFile = async (file, action) => {
     let url = file.url || file.file || file.file_url || file;
     if (file instanceof File) {
-      url = URL.createObjectURL(file);
-    }
-    const response = await Factory('get', `/docwallet/generate_presigned_url?url=${url}`, {}, {});
-    if (response.res.status_cd === 0) {
-      let url = response.res.data.url;
-      window.open(url, '_blank');
+      window.open(URL.createObjectURL(file), '_blank');
+    } else {
+      const response = await Factory('get', `/docwallet/generate_presigned_url?url=${url}`, {}, {});
+      if (response.res.status_cd === 0) {
+        let url = response.res.data.url;
+        window.open(url, '_blank');
+      }
     }
   };
 
@@ -74,6 +75,7 @@ const FileListDialog = ({ open, onClose, files, getStep1Data, getStep2Data, getS
       }
     }
   };
+  console.log(filesData);
   return (
     <Dialog
       open={open}

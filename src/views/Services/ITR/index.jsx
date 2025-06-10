@@ -65,12 +65,12 @@ const personalInfoSchema = Yup.object().shape({
     .required('Mobile is required')
     .matches(/^[6-9]\d{9}$/, 'Please enter a valid 10-digit mobile number starting with 6-9'),
   email: Yup.string().email('Invalid email').required('Email is required'),
-  first_name: Yup.string().nullable(),
-  middle_name: Yup.string(),
+  first_name: Yup.string().required('First name is required'),
+  middle_name: Yup.string().nullable(),
   last_name: Yup.string().required('Last name is required'),
   gender: Yup.string().required('Gender is required'),
   residentail_status: Yup.string().required('Residential status is required'),
-  status: Yup.string(),
+  status: Yup.string().nullable(),
   non_resident_indian: Yup.string().nullable(),
   salary_income: Yup.string().nullable(),
   other_income: Yup.string().nullable(),
@@ -255,19 +255,25 @@ export default function ITR() {
     );
     if (response.res.status_cd === 0) {
       setTasks(response.res.data.tasks_data);
-      setPersonalInfo(response.res.data.tasks_data['Personal Information'].data);
-      setTaxPaidDetails({
-        task_id: response.res.data.tasks_data['Tax Paid Details'].task_id || null,
-        id: response.res.data.tasks_data['Tax Paid Details'].data?.id || null,
-        as26File: response.res.data.tasks_data['Tax Paid Details'].data?.documents?.['26AS'].files || [],
-        aisFile: response.res.data.tasks_data['Tax Paid Details'].data?.documents?.['AIS'].files || [],
-        challans: response.res.data.tasks_data['Tax Paid Details'].data?.documents?.['AdvanceTax'].files || [],
-        status: response.res.data.tasks_data['Tax Paid Details']?.data?.status || null,
-        reviewer: response.res.data.tasks_data['Tax Paid Details']?.data?.reviewer || null,
-        assignee: response.res.data.tasks_data['Tax Paid Details']?.data?.assignee || null
-      });
+      if (response.res.data.tasks_data['Personal Information'].data !== null) {
+        setPersonalInfo(response.res.data.tasks_data['Personal Information'].data);
+      }
+      if (response.res.data.tasks_data['Tax Paid Details'].data !== null) {
+        setTaxPaidDetails({
+          task_id: response.res.data.tasks_data['Tax Paid Details'].task_id || null,
+          id: response.res.data.tasks_data['Tax Paid Details'].data?.id || null,
+          as26File: response.res.data.tasks_data['Tax Paid Details'].data?.documents?.['26AS'].files || [],
+          aisFile: response.res.data.tasks_data['Tax Paid Details'].data?.documents?.['AIS'].files || [],
+          challans: response.res.data.tasks_data['Tax Paid Details'].data?.documents?.['AdvanceTax'].files || [],
+          status: response.res.data.tasks_data['Tax Paid Details']?.data?.status || null,
+          reviewer: response.res.data.tasks_data['Tax Paid Details']?.data?.reviewer || null,
+          assignee: response.res.data.tasks_data['Tax Paid Details']?.data?.assignee || null
+        });
+      }
+      setLoadingStep1(false);
+    } else {
+      setLoadingStep1(false);
     }
-    setLoadingStep1(false);
   };
 
   const getStep2Data = async () => {
@@ -430,7 +436,10 @@ export default function ITR() {
                           type = 'post';
                         }
                         const formData = new FormData();
+                        formData.append('service_request', service_id);
+                        formData.append('service_task', tasks?.['Personal Information']?.task_id);
                         Object.entries(values).forEach(([key, value]) => {
+                          if (value === null) return;
                           if (key === 'pan' || key === 'aadhar') {
                             if (value instanceof File) {
                               formData.append(key, value);
@@ -444,11 +453,14 @@ export default function ITR() {
                         if (type === 'put') formData.append('id', personalInfo.id);
                         const res = await Factory(type, url, formData, {});
                         if (res.res.status_cd === 0) {
+                          setPersonalInfo({ ...res.res.data });
+                          Object.keys(res.res.data).forEach((key) => {
+                            setFieldValue(key, res.res.data[key]);
+                          });
                           enqueueSnackbar('Personal Information saved successfully!', {
                             variant: 'success',
                             anchorOrigin: { vertical: 'top', horizontal: 'right' }
                           });
-                          setPersonalInfo(res.res.data);
                         } else {
                           enqueueSnackbar('Error saving personal info.', {
                             variant: 'error',
@@ -482,7 +494,6 @@ export default function ITR() {
                                   hidden
                                   onChange={(e) => {
                                     setFieldValue('pan', e.target.files[0]);
-                                    setFieldTouched('pan', true, true);
                                   }}
                                 />
                               </Button>
@@ -492,10 +503,10 @@ export default function ITR() {
                                   variant="outlined"
                                   sx={{ ml: 1 }}
                                   onClick={() => {
-                                    if (values?.pan instanceof File) {
+                                    if (typeof values?.pan === 'string') {
                                       viewFile(values.pan);
                                     } else {
-                                      window.open(URL.createObjectURL(values.pan), '_blank');
+                                      window.open(URL.createObjectURL(values?.pan), '_blank');
                                     }
                                   }}
                                 >
@@ -521,7 +532,6 @@ export default function ITR() {
                                   hidden
                                   onChange={(e) => {
                                     setFieldValue('aadhar', e.target.files[0]);
-                                    setFieldTouched('aadhar', true, true);
                                   }}
                                 />
                               </Button>
@@ -532,9 +542,9 @@ export default function ITR() {
                                   sx={{ ml: 1 }}
                                   onClick={() => {
                                     if (values?.aadhar instanceof File) {
-                                      viewFile(values.aadhar);
-                                    } else {
                                       window.open(URL.createObjectURL(values.aadhar), '_blank');
+                                    } else {
+                                      viewFile(values.aadhar);
                                     }
                                   }}
                                 >
@@ -691,11 +701,11 @@ export default function ITR() {
                             </Button>
                             <GetActionButtons
                               type="put"
-                              data={personalInfo}
-                              status={personalInfo?.status}
+                              data={personalInfo || null}
+                              status={personalInfo?.status || null}
                               urlEndpoint="personal-information"
-                              recId={personalInfo?.id}
-                              task_id={personalInfo?.task_id}
+                              recId={personalInfo?.id || null}
+                              task_id={personalInfo?.service_task || null}
                               service_request={service_id}
                             />
                           </Box>
@@ -713,7 +723,7 @@ export default function ITR() {
                         const formData = new FormData();
                         setTaxPaidDetails(values);
                         formData.append('service_request', service_id);
-                        formData.append('service_task', taxPaidDetails.task_id);
+                        formData.append('service_task', tasks?.['Tax Paid Details']?.task_id);
                         formData.append('status', 'in progress');
                         Array.from(values.as26File).forEach((file) => {
                           if (file instanceof File) formData.append('form26as_files', file);
@@ -862,12 +872,12 @@ export default function ITR() {
                             </Button>
                             <GetActionButtons
                               type="post"
-                              data={taxPaidDetails}
-                                status={taxPaidDetails?.status}
+                              data={taxPaidDetails || null}
+                              status={taxPaidDetails?.status || null}
                               urlEndpoint={`/income_tax_returns/tax-paid-details/create-or-update/`}
-                              recId={taxPaidDetails?.id}
+                              recId={taxPaidDetails?.id || null}
                               service_request={service_id}
-                              task_id={taxPaidDetails?.task_id}
+                              task_id={taxPaidDetails?.task_id || null}
                             />
                           </Box>
                         </Form>
@@ -1098,7 +1108,6 @@ export default function ITR() {
                                     formData.append('filing_status', 'in progress');
                                     formData.append('status', 'in progress');
                                     const res = await Factory(type, urlEndpoint, formData, {});
-                                    console.log(res.res);
                                     if (res.res.status_cd === 0) {
                                       setReviewAndFiling({ ...reviewAndFiling, data: { ...res.res.data } });
                                       enqueueSnackbar('Filed acknowledgement saved successfully!', {
@@ -1166,17 +1175,20 @@ export default function ITR() {
                               <Typography variant="h5" mb={3} sx={{ textDecoration: 'underline' }}>
                                 Download Filed Acknowledgement
                               </Typography>
-                              <Button variant="outlined" color="secondary" onClick={() => console.log(reviewAndFiling)}>
+                              <Button
+                                variant="outlined"
+                                color="secondary"
+                                onClick={() => {
+                                  if (reviewAndFiling?.data?.review_certificate) {
+                                    viewFile(reviewAndFiling?.data?.review_certificate);
+                                  }
+                                }}
+                              >
                                 Download
                                 <IconButton
                                   size="small"
                                   color="secondary"
                                   sx={{ alignSelf: 'center', '&:hover': { backgroundColor: 'transparent' } }}
-                                  onClick={() => {
-                                    if (reviewAndFiling?.data?.review_certificate) {
-                                      viewFile(reviewAndFiling?.data?.review_certificate);
-                                    }
-                                  }}
                                 >
                                   <DownloadIcon sx={{ width: { xs: 24, md: 24 }, height: { xs: 24, md: 24 } }} />
                                 </IconButton>
