@@ -25,8 +25,15 @@ import {
   Radio
 } from '@mui/material';
 import Factory from 'utils/Factory';
-import { set } from 'lodash-es';
-import { convertFieldResponseIntoMuiTextFieldProps } from '@mui/x-date-pickers/internals';
+
+const viewFile = async (url) => {
+  const response = await Factory('get', `/docwallet/generate_presigned_url?url=${url}`, {}, {});
+  if (response.res.status_cd === 0) {
+    let url = response.res.data.url;
+    window.open(url, '_blank');
+  }
+};
+
 const donationsSchema = Yup.object().shape({
   donations: Yup.array().of(
     Yup.object().shape({
@@ -109,12 +116,12 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
     document_files: { other_files: null }
   });
   const [section80EE, setSection80EE] = useState({
-    amount: '',
-    other_files: null
+    loan_outstanding_as_on_31st_march: '',
+    document_files: { other_files: null }
   });
   const [section80EEB, setSection80EEB] = useState({
-    other_files: null,
-    vehicle_registration_number: ''
+    vehicle_registration_number: '',
+    documents: { other_files: null }
   });
   const [otherDeductions, setOtherDeductions] = useState({
     total_saving_interest: '',
@@ -276,7 +283,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                             onClick={() => {
                               // Show file dialog or download
                               if (typeof row.file === 'string') {
-                                window.open(row.file, '_blank');
+                                viewFile(row.file, '_blank');
                               } else {
                                 window.open(URL.createObjectURL(row.file), '_blank');
                               }
@@ -388,8 +395,8 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
           formData.append('education_of', values.education_of || '');
           formData.append('borrower_name', values.borrower_name || '');
           formData.append('is_it_approved_bank', values.is_it_approved_bank || '');
-          if (values.document_files.other_files) {
-            Array.from(values.document_files.other_files).forEach((file) => {
+          if (values.document_files.other_files.files) {
+            Array.from(values.document_files.other_files.files).forEach((file) => {
               if (file instanceof File) formData.append('other_files', file);
             });
           }
@@ -472,7 +479,17 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                   <Box>
                     <Button variant="contained" component="label" size="small">
                       Upload
-                      <input type="file" multiple hidden onChange={(e) => setFieldValue('document_files.other_files', e.target.files)} />
+                      <input
+                        type="file"
+                        multiple
+                        hidden
+                        onChange={(e) => {
+                          setFieldValue('document_files.other_files.files', [
+                            ...e.target.files,
+                            ...values.document_files.other_files.files
+                          ]);
+                        }}
+                      />
                     </Button>
                     {values?.document_files?.other_files && (
                       <Button
@@ -481,7 +498,10 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                         variant="outlined"
                         onClick={() => {
                           setFileDialogOpen(true);
-                          setDialogFilesData(values.document_files.other_files.files || values.document_files.other_files);
+                          setDialogFilesData({
+                            files: values.document_files.other_files.files || values.document_files.other_files,
+                            urlEndpoint: 'section-80e'
+                          });
                         }}
                       >
                         View
@@ -523,8 +543,8 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
           const formData = new FormData();
           formData.append('deductions', deductions.data.id);
           formData.append('loan_outstanding_as_on_31st_march', values.loan_outstanding_as_on_31st_march || '');
-          if (values.document_files.other_files) {
-            Array.from(values.document_files.other_files).forEach((file) => {
+          if (values.document_files.other_files.files) {
+            Array.from(values.document_files.other_files.files).forEach((file) => {
               if (file instanceof File) formData.append('other_files', file);
             });
           }
@@ -552,7 +572,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
               </Typography>
               <Grid2 container spacing={2} alignItems="center" mb={2}>
                 <Grid2 size={{ xs: 12, sm: 6, md: 5 }}>
-                  <Typography>Upload sanction letter/interest Certificate (other documents )</Typography>
+                  <Typography>Upload sanction letter/interest Certificate ( other documents )</Typography>
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                   <Box>
@@ -565,19 +585,22 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                         onChange={(e) => {
                           const file = e.target.files;
                           if (file) {
-                            setFieldValue('document_files.other_files', file);
+                            setFieldValue('document_files.other_files.files', [...file, ...values.document_files.other_files.files]);
                           }
                         }}
                       />
                     </Button>
-                    {values?.document_files?.other_files && (
+                    {values?.document_files?.other_files?.files && (
                       <Button
                         size="small"
                         sx={{ ml: 1 }}
                         variant="outlined"
                         onClick={() => {
                           setFileDialogOpen(true);
-                          setDialogFilesData(values?.document_files?.other_files?.files || values?.document_files?.other_files);
+                          setDialogFilesData({
+                            files: values?.document_files?.other_files?.files,
+                            urlEndpoint: 'section-80ee'
+                          });
                         }}
                       >
                         View
@@ -619,8 +642,8 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
           const formData = new FormData();
           formData.append('vehicle_registration_number', values.vehicle_registration_number || '');
           formData.append('deductions', deductions.data.id);
-          if (values.other_files) {
-            Array.from(values.other_files).forEach((file) => {
+          if (values.documents.other_files.files) {
+            Array.from(values.documents.other_files.files).forEach((file) => {
               if (file instanceof File) formData.append('other_files', file);
             });
           }
@@ -660,19 +683,22 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                         onChange={(e) => {
                           const file = e.target.files;
                           if (file) {
-                            setFieldValue('other_files', file);
+                            setFieldValue('documents.other_files.files', [...file, ...values.documents.other_files.files]);
                           }
                         }}
                       />
                     </Button>
-                    {values.other_files && (
+                    {values.documents.other_files && (
                       <Button
                         size="small"
                         sx={{ ml: 1 }}
                         variant="outlined"
                         onClick={() => {
                           setFileDialogOpen(true);
-                          setDialogFilesData(values.other_files.files || values.other_files);
+                          setDialogFilesData({
+                            files: values.documents.other_files.files || values.documents.other_files,
+                            urlEndpoint: 'section-80eeb'
+                          });
                         }}
                       >
                         View
@@ -828,8 +854,11 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                       size="small"
                       variant="outlined"
                       onClick={() => {
-                        setFileDialogOpen(true);
-                        setDialogFilesData([{ url: values.deduction_file }]);
+                        if (values.deduction_file instanceof File) {
+                          window.open(URL.createObjectURL(values.deduction_file), '_blank');
+                        } else {
+                          viewFile(values.deduction_file);
+                        }
                       }}
                     >
                       View
@@ -1030,10 +1059,10 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                             variant="outlined"
                             sx={{ ml: 1 }}
                             onClick={() => {
-                              if (typeof row?.documents[0].file_url === 'string') {
-                                window.open(row?.documents[0].file_url, '_blank');
-                              } else {
+                              if (row?.documents[0] instanceof File) {
                                 window.open(URL.createObjectURL(row?.documents[0]), '_blank');
+                              } else {
+                                viewFile(row?.documents[0].file_url);
                               }
                             }}
                           >
@@ -1247,7 +1276,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                         variant="outlined"
                         onClick={() => {
                           setFileDialogOpen(true);
-                          setDialogFilesData([...values.file]);
+                          setDialogFilesData({ files: values.file, urlEndpoint: 'section-80d' });
                         }}
                       >
                         View
@@ -1343,7 +1372,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                         variant="outlined"
                         onClick={() => {
                           setFileDialogOpen(true);
-                          setDialogFilesData([...values.files]);
+                          setDialogFilesData({ files: values.files, urlEndpoint: 'section-80ddb' });
                         }}
                         sx={{ ml: 1 }}
                       >

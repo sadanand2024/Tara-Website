@@ -427,8 +427,7 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
                                 size="small"
                                 variant="outlined"
                                 onClick={() => {
-                                  console.log(row.file);
-                                  if (typeof row.file === 'string') {
+                                  if (row.file instanceof File) {
                                     viewFile(row.file);
                                   } else {
                                     window.open(URL.createObjectURL(row.file), '_blank');
@@ -2071,11 +2070,11 @@ function transformBusinessApiResponse(apiObj) {
     grossturnover_or_receipts: apiObj.opting_data?.grossturnover_or_receipts || '',
     digital_receipts: apiObj.opting_data?.digital_receipts || '',
     // Documents (use first file or array as needed)
-    as26File: apiObj.documents?.['26AS']?.files?.[0]?.url || null,
-    aisFile: apiObj.documents?.['AIS']?.files?.[0]?.url || null,
-    gstReturnsFile: apiObj.documents?.['GST Returns']?.files?.[0]?.url || null,
-    bankStatementFile: apiObj.documents?.['Bank Statements']?.files?.[0]?.url || null,
-    otherDocsFile: apiObj.documents?.['Other']?.files?.[0]?.url || null
+    form26as_files: apiObj.documents?.['26AS']?.files || null,
+    ais_files: apiObj.documents?.['AIS']?.files || null,
+    gst_returns_files: apiObj.documents?.['GST Returns']?.files || null,
+    bank_statements_files: apiObj.documents?.['Bank Statements']?.files || null,
+    other_files: apiObj.documents?.['Other']?.files || null
     // Add more fields as needed
   };
 }
@@ -2102,13 +2101,13 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
           nature: '',
           presumptive_rate: '',
           presumptive_income: '',
-          bankStatementFile: null,
-          as26File: null,
-          aisFile: null,
-          plFile: null,
-          bsFile: null,
-          gstReturnsFile: null,
-          otherDocsFile: null,
+          bank_statements_files: null,
+          form26as_files: null,
+          ais_files: null,
+          profit_loss_statement_files: null,
+          balance_sheet_files: null,
+          gst_returns_files: null,
+          other_files: null,
           opting_for_presumptive_taxation: 'no',
           bookMaintained: 'no',
           gst_registered: 'no'
@@ -2149,13 +2148,13 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
         key !== 'section'
       ) {
         if (
-          key === 'bankStatementFile' ||
-          key === 'as26File' ||
-          key === 'aisFile' ||
-          key === 'plFile' ||
-          key === 'bsFile' ||
-          key === 'gstReturnsFile' ||
-          key === 'otherDocsFile'
+          key === 'bank_statements_files' ||
+          key === 'form26as_files' ||
+          key === 'ais_files' ||
+          key === 'profit_loss_statement_files' ||
+          key === 'balance_sheet_files' ||
+          key === 'gst_returns_files' ||
+          key === 'other_files'
         ) {
           if (value && value?.length > 0) {
             Array.from(value).forEach((file) => {
@@ -2400,23 +2399,23 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                           onChange={(e) => {
                             if (e.target.files) {
                               const updatedBank = [...businessRows];
-                              updatedBank[idx].bankStatementFile = e.target.files;
+                              updatedBank[idx].bank_statements_files = e.target.files;
                               setBusinessRows(updatedBank);
                             }
                           }}
                         />
                       </Button>
-                      {businessRows[idx]?.bankStatementFile && (
+                      {businessRows[idx]?.bank_statements_files && (
                         <Button
                           size="small"
                           variant="outlined"
                           sx={{ ml: 1 }}
                           onClick={() => {
                             setFileDialogOpen(true);
-                            let file = businessRows[idx].bankStatementFile?.startsWith('http')
-                              ? [{ url: businessRows[idx].bankStatementFile }]
-                              : [...businessRows[idx].bankStatementFile];
-                            setDialogFilesData(file);
+                            setDialogFilesData({
+                              files: [...businessRows[idx].bank_statements_files],
+                              urlEndpoint: 'business-professional-income'
+                            });
                           }}
                         >
                           View
@@ -2437,23 +2436,20 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                         onChange={(e) => {
                           if (e.target.files) {
                             const updated = [...businessRows];
-                            updated[idx].as26File = e.target.files;
+                            updated[idx].form26as_files = e.target.files;
                             setBusinessRows(updated);
                           }
                         }}
                       />
                     </Button>
-                    {businessRows[idx]?.as26File && (
+                    {businessRows[idx]?.form26as_files && (
                       <Button
                         size="small"
                         variant="outlined"
                         sx={{ ml: 1 }}
                         onClick={() => {
                           setFileDialogOpen(true);
-                          let file = businessRows[idx].as26File?.startsWith('http')
-                            ? [{ url: businessRows[idx].as26File }]
-                            : [...businessRows[idx].as26File];
-                          setDialogFilesData(file);
+                          setDialogFilesData({ files: [...businessRows[idx].form26as_files], urlEndpoint: 'business-professional-income' });
                         }}
                       >
                         View
@@ -2473,23 +2469,20 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                         onChange={(e) => {
                           if (e.target.files) {
                             const updatedAIS = [...businessRows];
-                            updatedAIS[idx].aisFile = e.target.files;
+                            updatedAIS[idx].ais_files = e.target.files;
                             setBusinessRows(updatedAIS);
                           }
                         }}
                       />
                     </Button>
-                    {businessRows[idx]?.aisFile && (
+                    {businessRows[idx]?.ais_files && (
                       <Button
                         size="small"
                         variant="outlined"
                         sx={{ ml: 1 }}
                         onClick={() => {
                           setFileDialogOpen(true);
-                          let file = businessRows[idx].aisFile?.startsWith('http')
-                            ? [{ url: businessRows[idx].aisFile }]
-                            : [...businessRows[idx].aisFile];
-                          setDialogFilesData(file);
+                          setDialogFilesData({ files: [...businessRows[idx].ais_files], urlEndpoint: 'business-professional-income' });
                         }}
                       >
                         View
@@ -2509,23 +2502,20 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                         onChange={(e) => {
                           if (e.target.files) {
                             const updatedOtherDocs = [...businessRows];
-                            updatedOtherDocs[idx].otherDocsFile = e.target.files;
+                            updatedOtherDocs[idx].other_files = e.target.files;
                             setBusinessRows(updatedOtherDocs);
                           }
                         }}
                       />
                     </Button>
-                    {businessRows[idx]?.otherDocsFile && (
+                    {businessRows[idx]?.other_files && (
                       <Button
                         size="small"
                         variant="outlined"
                         sx={{ ml: 1 }}
                         onClick={() => {
                           setFileDialogOpen(true);
-                          let file = businessRows[idx].otherDocsFile?.startsWith('http')
-                            ? [{ url: businessRows[idx].otherDocsFile }]
-                            : [...businessRows[idx].otherDocsFile];
-                          setDialogFilesData(file);
+                          setDialogFilesData({ files: [...businessRows[idx].other_files], urlEndpoint: 'business-professional-income' });
                         }}
                       >
                         View
@@ -2601,22 +2591,22 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                           onChange={(e) => {
                             if (e.target.files) {
                               const updatedBank = [...businessRows];
-                              updatedBank[idx].bankStatementFile = e.target.files;
+                              updatedBank[idx].bank_statements_files = e.target.files;
                               setBusinessRows(updatedBank);
                             }
                           }}
                         />
                       </Button>
-                      {businessRows[idx]?.bankStatementFile && (
+                      {businessRows[idx]?.bank_statements_files && (
                         <Button
                           size="small"
                           variant="outlined"
                           sx={{ ml: 1 }}
                           onClick={() => {
                             setFileDialogOpen(true);
-                            let file = businessRows[idx].bankStatementFile?.startsWith('http')
-                              ? [{ url: businessRows[idx].bankStatementFile }]
-                              : [...businessRows[idx].bankStatementFile];
+                            let file = businessRows[idx].bank_statements_files?.startsWith('http')
+                              ? [{ url: businessRows[idx].bank_statements_files }]
+                              : [...businessRows[idx].bank_statements_files];
                             setDialogFilesData(file);
                           }}
                         >
@@ -2658,23 +2648,23 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                             onChange={(e) => {
                               if (e.target.files) {
                                 const updated = [...businessRows];
-                                updated[idx].plFile = e.target.files;
+                                updated[idx].profit_loss_statement_files = e.target.files;
                                 setBusinessRows(updated);
                               }
                             }}
                           />
                         </Button>
-                        {businessRows[idx]?.plFile && (
+                        {businessRows[idx]?.profit_loss_statement_files && (
                           <Button
                             size="small"
                             variant="outlined"
                             sx={{ ml: 1 }}
                             onClick={() => {
                               setFileDialogOpen(true);
-                              let file = businessRows[idx].plFile?.startsWith('http')
-                                ? [{ url: businessRows[idx].plFile }]
-                                : [...businessRows[idx].plFile];
-                              setDialogFilesData(file);
+                              setDialogFilesData({
+                                files: [...businessRows[idx].profit_loss_statement_files],
+                                urlEndpoint: 'business-professional-income'
+                              });
                             }}
                           >
                             View
@@ -2694,23 +2684,23 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                             onChange={(e) => {
                               if (e.target.files) {
                                 const updated = [...businessRows];
-                                updated[idx].bsFile = e.target.files;
+                                updated[idx].balance_sheet_files = e.target.files;
                                 setBusinessRows(updated);
                               }
                             }}
                           />
                         </Button>
-                        {businessRows[idx]?.bsFile && (
+                        {businessRows[idx]?.balance_sheet_files && (
                           <Button
                             size="small"
                             variant="outlined"
                             sx={{ ml: 1 }}
                             onClick={() => {
                               setFileDialogOpen(true);
-                              let file = businessRows[idx].bsFile?.startsWith('http')
-                                ? [{ url: businessRows[idx].bsFile }]
-                                : [...businessRows[idx].bsFile];
-                              setDialogFilesData(file);
+                              setDialogFilesData({
+                                files: [...businessRows[idx].balance_sheet_files],
+                                urlEndpoint: 'business-professional-income'
+                              });
                             }}
                           >
                             View
@@ -2752,23 +2742,23 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                             onChange={(e) => {
                               if (e.target.files) {
                                 const updated = [...businessRows];
-                                updated[idx].gstReturnsFile = e.target.files;
+                                updated[idx].gst_returns_files = e.target.files;
                                 setBusinessRows(updated);
                               }
                             }}
                           />
                         </Button>
-                        {businessRows[idx]?.gstReturnsFile && (
+                        {businessRows[idx]?.gst_returns_files && (
                           <Button
                             size="small"
                             variant="outlined"
                             sx={{ ml: 1 }}
                             onClick={() => {
                               setFileDialogOpen(true);
-                              let file = businessRows[idx].gstReturnsFile?.startsWith('http')
-                                ? [{ url: businessRows[idx].gstReturnsFile }]
-                                : [...businessRows[idx].gstReturnsFile];
-                              setDialogFilesData(file);
+                              setDialogFilesData({
+                                files: [...businessRows[idx].gst_returns_files],
+                                urlEndpoint: 'business-professional-income'
+                              });
                             }}
                           >
                             View
@@ -2790,23 +2780,20 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                         onChange={(e) => {
                           if (e.target.files) {
                             const updated = [...businessRows];
-                            updated[idx].as26File = e.target.files;
+                            updated[idx].form26as_files = e.target.files;
                             setBusinessRows(updated);
                           }
                         }}
                       />
                     </Button>
-                    {businessRows[idx]?.as26File && (
+                    {businessRows[idx]?.form26as_files && (
                       <Button
                         size="small"
                         variant="outlined"
                         sx={{ ml: 1 }}
                         onClick={() => {
                           setFileDialogOpen(true);
-                          let file = businessRows[idx].as26File?.startsWith('http')
-                            ? [{ url: businessRows[idx].as26File }]
-                            : [...businessRows[idx].as26File];
-                          setDialogFilesData(file);
+                          setDialogFilesData({ files: [...businessRows[idx].form26as_files], urlEndpoint: 'business-professional-income' });
                         }}
                       >
                         View
@@ -2826,23 +2813,20 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                         onChange={(e) => {
                           if (e.target.files) {
                             const updated = [...businessRows];
-                            updated[idx].aisFile = e.target.files;
+                            updated[idx].ais_files = e.target.files;
                             setBusinessRows(updated);
                           }
                         }}
                       />
                     </Button>
-                    {businessRows[idx]?.aisFile && (
+                    {businessRows[idx]?.ais_files && (
                       <Button
                         size="small"
                         variant="outlined"
                         sx={{ ml: 1 }}
                         onClick={() => {
                           setFileDialogOpen(true);
-                          let file = businessRows[idx].aisFile?.startsWith('http')
-                            ? [{ url: businessRows[idx].aisFile }]
-                            : [...businessRows[idx].aisFile];
-                          setDialogFilesData(file);
+                          setDialogFilesData({ files: [...businessRows[idx].ais_files], urlEndpoint: 'business-professional-income' });
                         }}
                       >
                         View
@@ -2862,23 +2846,20 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                         onChange={(e) => {
                           if (e.target.files) {
                             const updated = [...businessRows];
-                            updated[idx].otherDocsFile = e.target.files;
+                            updated[idx].other_files = e.target.files;
                             setBusinessRows(updated);
                           }
                         }}
                       />
                     </Button>
-                    {businessRows[idx]?.otherDocsFile && (
+                    {businessRows[idx]?.other_files && (
                       <Button
                         size="small"
                         variant="outlined"
                         sx={{ ml: 1 }}
                         onClick={() => {
                           setFileDialogOpen(true);
-                          let file = businessRows[idx].otherDocsFile?.startsWith('http')
-                            ? [{ url: businessRows[idx].otherDocsFile }]
-                            : [...businessRows[idx].otherDocsFile];
-                          setDialogFilesData(file);
+                          setDialogFilesData({ files: [...businessRows[idx].other_files], urlEndpoint: 'business-professional-income' });
                         }}
                       >
                         View
@@ -2932,13 +2913,13 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                 nature: '',
                 presumptive_rate: '',
                 presumptive_income: '',
-                bankStatementFile: null,
-                as26File: null,
-                aisFile: null,
-                plFile: null,
-                bsFile: null,
-                gstReturnsFile: null,
-                otherDocsFile: null,
+                bank_statements_files: null,
+                form26as_files: null,
+                ais_files: null,
+                profit_loss_statement_files: null,
+                balance_sheet_files: null,
+                gst_returns_files: null,
+                other_files: null,
                 opting_for_presumptive_taxation: 'no',
                 bookMaintained: 'no',
                 gst_registered: 'no'
@@ -4120,10 +4101,11 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                           variant="outlined"
                           sx={{ ml: 1 }}
                           onClick={() => {
-                            setFileDialogOpen(true);
-                            setDialogFilesData([
-                              { url: row.form67_file instanceof File ? URL.createObjectURL(row.form67_file) : row.form67_file }
-                            ]);
+                            if (row.form67_file instanceof File) {
+                              window.open(URL.createObjectURL(row.form67_file), '_blank');
+                            } else {
+                              viewFile(row.form67_file);
+                            }
                           }}
                         >
                           View
@@ -4252,8 +4234,11 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                           variant="outlined"
                           sx={{ ml: 1 }}
                           onClick={() => {
-                            setFileDialogOpen(true);
-                            setDialogFilesData([{ url: row.file instanceof File ? URL.createObjectURL(row.file) : row.file }]);
+                            if (row.file instanceof File) {
+                              window.open(URL.createObjectURL(row.file), '_blank');
+                            } else {
+                              viewFile(row.file);
+                            }
                           }}
                         >
                           View
@@ -4302,11 +4287,10 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
 const AgricultureIncome = ({ data, service_id, setFileDialogOpen, fileDialogOpen, dialogFilesData, setDialogFilesData }) => {
   const { enqueueSnackbar } = useSnackbar();
   data = data[0];
-  console.log(data.data[0].agriculture_income_docs[0].amount);
   const [agricultureIncome, setAgricultureIncome] = React.useState({
     agriculture: data.data[0].agriculture || 'Not Applicable',
-    amount: data.data[0].agriculture_income_docs[0].amount || '',
-    file: data.data[0].agriculture_income_docs[0].file || ''
+    amount: data.data[0].agriculture_income_docs.amount || '',
+    file: data.data[0].agriculture_income_docs.file || ''
   });
 
   const postIncomeApplicability = async (v) => {

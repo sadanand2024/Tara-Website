@@ -27,10 +27,10 @@ const GetActionButtons = ({
       console.log(status);
       if (step === 0 && status === 'approved') {
         status = 'completed';
-        setReviewStep(1);
+        // setReviewStep(1);
       } else if (step === 1 && status === 'filed') {
         status = 'completed';
-        setReviewStep(2);
+        // setReviewStep(2);
       }
       setStatusData(status);
     }
