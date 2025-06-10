@@ -34,7 +34,14 @@ const DocumentsRequired = ({ documents }) => {
   const maxRows = Math.max(documentsCol1.length, documentsCol2.length);
 
   return (
-    <Box sx={{ py: { xs: 4, md: 8 }, px: { xs: 2, md: 4 }, maxWidth: 'lg', margin: '0 auto',mt:{xs:0,lg:-5} }}>
+    <Box sx={{ 
+      py: { xs: 4, md: 8 }, 
+      px: { xs: 2, md: 4 }, 
+      maxWidth: 'lg', 
+      margin: '0 auto',
+      mt: { xs: 0, lg: 0 },
+      position: 'relative'
+    }}>
       <Typography
         variant="h2"
         fontWeight={700}
@@ -51,13 +58,13 @@ const DocumentsRequired = ({ documents }) => {
 
       <Grid container spacing={{ xs: 2, md: 4 }} alignItems="flex-start">
         {/* Left Content - Documents List Container */}
-        <Grid size={{xs:12,md:6}}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Grid container spacing={2} sx={{ mt: { xs: 0, lg: 0 } }}>
             {/* Render items row by row */}
             {[...Array(maxRows)].map((_, rowIndex) => (
               <React.Fragment key={rowIndex}>
                 {/* Left Column Item */}
-                <Grid size={{xs:6}} >
+                <Grid size={{ xs: 6 }}>
                   {documentsCol1[rowIndex] && (
                     <ListItem
                       disableGutters
@@ -93,12 +100,8 @@ const DocumentsRequired = ({ documents }) => {
                           fontSize: '16px',
                           lineHeight: 1.4,
                           color: '#001033',
-                          Width: '174px',
+                          width: '174px',
                           height: '40px',
-                          // Styles to limit text to two lines
-                          // display: '-webkit-box',
-                          // WebkitLineClamp: 1,
-                          // WebkitBoxOrient: 'horizontal',
                           overflow: 'hidden',
                         }}
                       />
@@ -107,7 +110,7 @@ const DocumentsRequired = ({ documents }) => {
                 </Grid>
 
                 {/* Right Column Item */}
-                <Grid size={{xs:6}} >
+                <Grid size={{ xs: 6 }}>
                   {documentsCol2[rowIndex] && (
                     <ListItem
                       disableGutters
@@ -143,13 +146,17 @@ const DocumentsRequired = ({ documents }) => {
                           fontSize: '16px',
                           lineHeight: 1.4,
                           color: '#001033',
-                          Width: '174px',
+                          width: '174px',
                           height: '43px',
-                          // Styles to limit text to two lines
-                          display: '-webkit-box',
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: 'vertical',
                           overflow: 'hidden',
+                        }}
+                        sx={{
+                          '& .MuiTypography-root': {
+                            display: '-webkit-box',
+                            webkitLineClamp: 2,
+                            webkitBoxOrient: 'vertical',
+                            overflow: 'hidden'
+                          }
                         }}
                       />
                     </ListItem>
@@ -161,10 +168,10 @@ const DocumentsRequired = ({ documents }) => {
         </Grid>
 
         {/* Right Content - Illustration */}
-        <Grid size={{xs:12,md:6}} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <Grid size={{ xs: 12, md: 6 }} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
           {/* <Box
             component="img"
-            src={Document_required} // **REPLACE WITH YOUR ACTUAL ILLUSTRATION PATH**
+            src={Document_required}
             alt="Documents Illustration"
             sx={{
               width: 700,

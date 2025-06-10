@@ -1,17 +1,18 @@
 import { useMemo } from 'react';
-import { Link as RouterLink } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 // material-ui
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid2';
-import Stack from '@mui/material/Stack';
+import {Stack, useTheme }from '@mui/material';
 import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import Icon1 from 'assets/images/icons/Icon1.svg';
 import Icon2 from 'assets/images/icons/Icon2.svg';
 import Icon3 from 'assets/images/icons/Icon3.svg';
+// import { ThemeMode } from 'config';
 
 // third party
 import { motion } from 'framer-motion';
@@ -41,6 +42,13 @@ const HeaderAnimationImage = styled('img')({
 // ==============================|| LANDING - HEADER PAGE ||============================== //
 
 export default function HeaderSection() {
+  const theme = useTheme();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  const moduleId = searchParams.get('id');
+  const type = searchParams.get('type');
+  const context = searchParams.get('context');
   const { mode, themeDirection } = useConfig();
 
   const headerSX = { fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem', lg: '2.5rem' } };
@@ -114,7 +122,7 @@ export default function HeaderSection() {
                       whiteSpace: { xs: 'normal', md: 'nowrap',lg: 'nowrap'}
                     }}
                   >
-                    Unified Software for
+                  Unified Software for
                   </Typography>
                   <Typography
                     variant="h1"
@@ -127,7 +135,7 @@ export default function HeaderSection() {
                       whiteSpace: { xs: 'nowrap', md: 'nowrap' }
                     }}
                   >
-                    Invoicing, Payroll, ITR, GST,
+                  Invoicing, Payroll, ITR, GST,
                   </Typography>
                   <Typography
                     variant="h1"
@@ -140,13 +148,12 @@ export default function HeaderSection() {
                       whiteSpace: { xs: 'normal', md: 'nowrap' }
                     }}
                   >
-                    Accounting & More
+                  Accounting & More
                   </Typography>
                 </Box>
               </motion.div>
             </Grid>
-            <Grid sx={{ mt: { xs: 0, md: -2.5 }, textAlign: { xs: 'center', sm: 'center', md: 'left' },mr: { xs:'center', sm:'flex-start', md:'flex-start', lg:'flex-start'},
- }} size={12}>
+            <Grid sx={{ mt: { xs: 0, md: -2.5 }, textAlign: { xs: 'center', sm: 'center', md: 'left' },mr: { xs:'center', sm:'flex-start', md:'flex-start', lg:'flex-start'}}} size={12}>
               <motion.div
                 initial={{ opacity: 0, translateY: 550 }}
                 animate={{ opacity: 1, translateY: 0 }}
@@ -230,10 +237,10 @@ export default function HeaderSection() {
                 animate={{ opacity: 1, translateY: 0 }}
                 transition={{ type: 'spring', stiffness: 150, damping: 30, delay: 0.4 }}
               >
-                <Grid 
-                  container 
-                  spacing={2} 
-                  sx={{ 
+                <Grid
+                  container
+                  spacing={2}
+                  sx={{
                     justifyContent: { xs: 'center', sm: 'center', md: 'flex-start' }, 
                     mb: { xs: 3, sm: 4, md: 5 },
                     mt: { xs: -2, sm: -3, md: -4 }
@@ -242,9 +249,8 @@ export default function HeaderSection() {
                   <Grid>
                     <AnimateButton>
                       <Button
-                        component={RouterLink}
-                        to="/register"
-                        size="large"
+                      onClick={() => navigate(`/register?id=${moduleId}&context=${context}&type=${type}`)}
+                      size="large"
                         variant="contained"
                         color="secondary"
                         sx={{
@@ -260,8 +266,8 @@ export default function HeaderSection() {
                   <Grid>
                     <AnimateButton>
                       <Button
-                    component={RouterLink}
-                        to="/book-consultation"
+                    onClick={() => navigate(`/book-consultation?id=${moduleId}&context=${context}&type=${type}`)}
+
                         size="large"
                         variant="outlined"
                         color="secondary"

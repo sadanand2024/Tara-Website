@@ -31,9 +31,13 @@ const PromoterSignatorySection = () => {
     const url = `/tradelicense/signatory-details/by-request-or-task?service_request_id=25`;
     const { res } = await Factory('get', url);
     console.log(res);
-    if (res.status_cd === 0) {
+       const signatoryinfo = res?.data?.signatory_info ?? res?.signatory_info ?? [];
+           if (res.status_cd === 0 && Array.isArray(signatoryinfo)) {
+
+
+    // if (res.status_cd === 0) {
       const promoters =
-        res.data?.map((item) => ({
+        signatoryinfo.map((item) => ({
           name: item.name || '',
           aadhar_image: item.aadhar_image || null,
           pan_image: item.pan_image || null,

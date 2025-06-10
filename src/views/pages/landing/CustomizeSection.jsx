@@ -4,14 +4,17 @@ import Button from '@mui/material/Button';
 import CardMedia from '@mui/material/CardMedia';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid2';
-import Stack from '@mui/material/Stack';
+// import Stack from '@mui/material/Stack';
+import {Stack, useTheme } from '@mui/material';
 import Typography from '@mui/material/Typography';
 import Document from 'assets/images/landing/Document.png';
 import invoicing from 'assets/images/landing/invoicing.png';
 import payroll from 'assets/images/landing/payroll.png';
 import Virtualcfo from 'assets/images/landing/Virtualcfo.png';
+
 import { useState } from 'react';
-import { Link as RouterLink } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+
 
 // assets
 
@@ -20,14 +23,14 @@ import { Link as RouterLink } from 'react-router-dom';
 // ==============================|| LANDING - CUSTOMIZE ||============================== //
 
 export default function CustomizeSection() {
-  const listSX = {
-    display: 'flex',
-    gap: '0.7rem',
-    padding: '10px 0',
-    fontSize: '1rem',
-    color: 'grey.900',
-    svg: { color: 'secondary.main', minWidth: 20 }
-  };
+  const theme = useTheme();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  const moduleId = searchParams.get('id');
+  const type = searchParams.get('type');
+  const context = searchParams.get('context');
+
 
   const [hoveredCard, setHoveredCard] = useState(null);
 
@@ -61,11 +64,11 @@ export default function CustomizeSection() {
 
         {/* New Card Section */}
         <Grid size={12} sx={{ mt: { xs:10, md: 10,lg:10 }, ml: { xs:1, lg:2 } }}>
-          <Grid container spacing={{ xs: 2, sm: 3, md: 10, lg:20 }} justifyContent="center">
+          <Grid container spacing={{ xs:0, sm: 3, md: 10, lg:7}} justifyContent="center">
             {serviceCards.map((card, index) => (
               <Grid
                 key={index}
-                size={{ xs: 6, sm: 6, md: 3 }}
+                size={{ xs: 6, sm: 6, md: 3,lg:3 }}
                 sx={{ 
                   textAlign: 'center',
                   display: 'flex',
@@ -74,7 +77,6 @@ export default function CustomizeSection() {
                 onMouseEnter={() => setHoveredCard(index)}
                 onMouseLeave={() => setHoveredCard(null)}
               >
-                <RouterLink to="/register" style={{ textDecoration: 'none' }}>
                   <Box
                     sx={{
                       display: 'flex',
@@ -121,8 +123,6 @@ export default function CustomizeSection() {
                         alignItems: { xs: 'flex-start', sm: 'center', md: 'flex-start', lg: 'flex-start' }, // Fix here
                         width: { xs: '181px', sm: '280px', md: '280px', lg: '280px' },
                         height: { xs: '158px', sm: '115px', md: '115px', lg: '123px' },
-
-
                         bottom: 0,
                         left: 0,
                         right: 0,
@@ -139,7 +139,7 @@ export default function CustomizeSection() {
                         // height: '115px'
                       }}
                     >
-                      <Typography variant="h3" textAlign:left sx={{ mt:-1, mb: 1, color: '#0023AF' }}>
+                      <Typography variant="h3" sx={{ mt:-1, mb: 1, color: '#0023AF', textAlign: 'left' }}>
                         {card.title}
                       </Typography>
                         
@@ -160,10 +160,10 @@ export default function CustomizeSection() {
                       </Typography>
                       <Stack direction="row" spacing={2} alignItems="flex-start" justifyContent="flex-start"sx={{mt:1}} >
                         <Box sx={{ display: { xs: 'block', sm: 'none' }, alignItems: { xs: 'flex-start', sm: 'center', md: 'flex-start', lg: 'flex-start' } // Fix here
- }}>
+}}>
                           <Typography
-                           component={RouterLink}
-                        to="/register"
+                          onClick={() => navigate(`/register?id=${moduleId}&context=${context}&type=${type}`)}
+
                             variant="h5"
                             sx={{
                               mt: 0,
@@ -180,8 +180,8 @@ export default function CustomizeSection() {
                         </Box>
                         <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
                       <Button
-                       component={RouterLink}
-                        to="/register"
+                      onClick={() => navigate(`/register?id=${moduleId}&context=${context}&type=${type}`)}
+
                         variant="contained"
                         color="secondary"
                           sx={{
@@ -199,13 +199,14 @@ export default function CustomizeSection() {
                     </Button>
 
                           <Button
-                           component={RouterLink}
-                        to="/book-consultation"
-                            variant="Outlined"
-                         color="primary"
+                          
+                      onClick={() => navigate(`/book-consultation?id=${moduleId}&context=${context}&type=${type}`)}
+
+                          variant="Outlined"
+                          color="primary"
                           sx={{
                           textTransform: 'none',
-                           fontWeight: 500,
+                          fontWeight: 500,
                             width: '115px',
                             height: '31px',
                             ml:1,
@@ -220,7 +221,7 @@ export default function CustomizeSection() {
                       </Stack>
                     </Box>
                   </Box>
-                </RouterLink>
+                
               </Grid>
             ))}
           </Grid>

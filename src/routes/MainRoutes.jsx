@@ -59,6 +59,7 @@ const ITRSummary = Loadable(lazy(() => import('views/Services/ITR')));
 const MSMEDashboard = Loadable(lazy(() => import('views/Services/MSME')));
 const TradeLicence = Loadable(lazy(() => import('views/Services/TradeLicence')));
 const LabourLicence = Loadable(lazy(() => import('views/Services/LabourLicence')));
+const GstRegistration = Loadable(lazy(() => import('views/Services/GST')));
 
 //Admin Panel
 const UserManagement = Loadable(lazy(() => import('views/SuperAdmin/UserManagement')));
@@ -150,6 +151,10 @@ const MainRoutes = {
     {
       path: '/app/my-services/labour-license',
       element: <LabourLicence />
+    },
+     {
+      path: '/app/my-services/gst-registration',
+      element: <GstRegistration />
     },
     {
       path: '/app/users',
