@@ -32,6 +32,8 @@ import { useNavigate } from 'react-router-dom';
 export default function RenderDialog({ from, openDialog, fields, setOpenDialog, setLoading, employeeMasterData, selectedRecord, getData }) {
   const [searchParams] = useSearchParams();
   const [payrollid, setPayrollId] = useState(null); // Payroll ID fetched from URL
+  const [month, setMonth] = useState(null); // Payroll ID fetched from URL
+  const [financial_year, setFinancialYear] = useState(null);
   const financialYearOptions = generateFinancialYears();
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -39,8 +41,16 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
   // Update payroll ID from search params
   useEffect(() => {
     const id = searchParams.get('payrollid');
+    const month = searchParams.get('month');
+    const financial_year = searchParams.get('financial_year');
     if (id) {
       setPayrollId(Number(id));
+    }
+    if (month) {
+      setMonth(Number(month));
+    }
+    if (financial_year) {
+      setFinancialYear(financial_year);
     }
   }, [searchParams]);
 
@@ -94,8 +104,10 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
       case 'Salary Revisions':
         return {
           employee: '',
+          department: '',
+          designation: '',
           current_ctc: '',
-          updated_on: ''
+          revision_date: ''
         };
       case 'Tds':
         return {
@@ -103,7 +115,6 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
           pan: '',
           regime: '',
           annual_tds: '',
-          // annual_tax_libility: '',
           tds: '',
           tds_ytd: ''
         };
@@ -412,13 +423,11 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
           <CustomAutocomplete
             value={employeeMasterData?.find((emp) => emp.id === values[field.name]) || null}
             onChange={(event, newValue) => {
-              console.log(newValue);
               setFieldValue(field.name, newValue?.id || '');
-              setFieldValue('department', newValue.department_name);
-              setFieldValue('designation', newValue.designation_name);
-              if (from === 'Salary Revisions') {
+              setFieldValue('department', newValue?.department_name || '');
+              setFieldValue('designation', newValue?.designation_name || '');
+              if (from === 'Salary Revisions' && newValue?.employee_salary?.annual_ctc) {
                 setFieldValue('current_ctc', newValue.employee_salary.annual_ctc);
-                // setFieldValue('revised_ctc', newValue.current_ctc);
               }
             }}
             options={employeeMasterData || []}
@@ -555,6 +564,7 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
       </Grid2>
     ));
   };
+
   const { values, setValues, handleChange, errors, touched, handleSubmit, handleBlur, resetForm, setFieldValue } = formik;
   useEffect(() => {
     if (selectedRecord !== null) {
@@ -568,7 +578,6 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
       }));
     }
   }, [selectedRecord]);
-  // console.log(values);
   return (
     <Modal
       open={openDialog}
@@ -706,7 +715,7 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
               onClick={() => {
                 if (values.employee !== '' && values.employee !== null) {
                   navigate(
-                    `/payroll/settings/add-employee?employee_id=${values.employee}&payrollid=${payrollid}&from=${'Salary Revisions'}&tabValue=${Number(1)}`
+                    `/payroll/settings/add-employee?employee_id=${values.employee}&payrollid=${payrollid}&from=${'Salary Revisions'}&tabValue=${Number(1)}&month=${month}&financial_year=${financial_year}`
                   );
                 } else {
                   dispatch(

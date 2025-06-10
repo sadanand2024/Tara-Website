@@ -40,7 +40,8 @@ const RenderTable = ({
   const [searchParams] = useSearchParams();
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
-
+  const [month, setMonth] = useState(null);
+  const [financial_year, setFinancialYear] = useState(null);
   const handleOpenDeleteDialog = (row) => {
     setSelectedRow(row);
     setOpenDeleteDialog(true);
@@ -53,7 +54,11 @@ const RenderTable = ({
 
   useEffect(() => {
     const id = searchParams.get('payrollid');
+    const month = searchParams.get('month');
+    const financial_year = searchParams.get('financial_year');
     if (id) setPayrollId(id);
+    if (month) setMonth(month);
+    if (financial_year) setFinancialYear(financial_year);
   }, [searchParams]);
 
   const handlePageChange = (_, value) => {
@@ -101,11 +106,11 @@ const RenderTable = ({
                           variant="outlined"
                           size="small"
                           onClick={() => {
-                            navigate(
-                              `/payroll/settings/add-employee?employee_id=${
-                                row.employee_id
-                              }&payrollid=${payrollId}&from=${'Salary Revisions'}&tabValue=${Number(1)}`
-                            );
+                            if (row.employee_id !== '' && row.employee_id !== null) {
+                              navigate(
+                                `/payroll/settings/add-employee?employee_id=${row.employee_id}&payrollid=${payrollId}&from=${'Salary Revisions'}&tabValue=${Number(1)}&month=${month}&financial_year=${financial_year}`
+                              );
+                            }
                           }}
                         >
                           Edit Pay Structure
