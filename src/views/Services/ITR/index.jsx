@@ -503,10 +503,10 @@ export default function ITR() {
                                   variant="outlined"
                                   sx={{ ml: 1 }}
                                   onClick={() => {
-                                    if (values?.pan instanceof File) {
+                                    if (typeof values?.pan === 'string') {
                                       viewFile(values.pan);
                                     } else {
-                                      window.open(URL.createObjectURL(values.pan), '_blank');
+                                      window.open(URL.createObjectURL(values?.pan), '_blank');
                                     }
                                   }}
                                 >
@@ -542,9 +542,9 @@ export default function ITR() {
                                   sx={{ ml: 1 }}
                                   onClick={() => {
                                     if (values?.aadhar instanceof File) {
-                                      viewFile(values.aadhar);
-                                    } else {
                                       window.open(URL.createObjectURL(values.aadhar), '_blank');
+                                    } else {
+                                      viewFile(values.aadhar);
                                     }
                                   }}
                                 >
