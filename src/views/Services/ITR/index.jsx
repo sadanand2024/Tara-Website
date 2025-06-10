@@ -122,16 +122,16 @@ export default function ITR() {
     residentail_status: '',
     status: '',
     non_resident_indian: null,
-    salary_income: null,
-    other_income: null,
-    foreign_income: null,
-    house_property_income: null,
-    interest_income: null,
-    dividend_income: null,
-    gift_income: null,
-    family_pension_income: null,
-    agriculture_income: null,
-    winning_income: null,
+    salary_income: 'no',
+    other_income: 'no',
+    foreign_income: 'no',
+    house_property_income: 'no',
+    interest_income: 'no',
+    dividend_income: 'no',
+    gift_income: 'no',
+    family_pension_income: 'no',
+    agriculture_income: 'no',
+    winning_income: 'no',
     service_request: null,
     service_task: null,
     assignee: null,
@@ -486,13 +486,13 @@ export default function ITR() {
                                   }}
                                 />
                               </Button>
-                              {values.pan && (
+                              {values?.pan && (
                                 <Button
                                   size="small"
                                   variant="outlined"
                                   sx={{ ml: 1 }}
                                   onClick={() => {
-                                    if (typeof values.pan === 'string') {
+                                    if (values?.pan instanceof File) {
                                       viewFile(values.pan);
                                     } else {
                                       window.open(URL.createObjectURL(values.pan), '_blank');
@@ -502,7 +502,7 @@ export default function ITR() {
                                   View
                                 </Button>
                               )}
-                              {touched.pan && errors.pan && (
+                              {touched?.pan && errors?.pan && (
                                 <Typography color="error" variant="caption">
                                   {errors.pan}
                                 </Typography>
@@ -525,13 +525,13 @@ export default function ITR() {
                                   }}
                                 />
                               </Button>
-                              {values.aadhar && (
+                              {values?.aadhar && (
                                 <Button
                                   size="small"
                                   variant="outlined"
                                   sx={{ ml: 1 }}
                                   onClick={() => {
-                                    if (typeof values.aadhar === 'string') {
+                                    if (values?.aadhar instanceof File) {
                                       viewFile(values.aadhar);
                                     } else {
                                       window.open(URL.createObjectURL(values.aadhar), '_blank');
@@ -541,7 +541,7 @@ export default function ITR() {
                                   View
                                 </Button>
                               )}
-                              {touched.aadhar && errors.aadhar && (
+                              {touched?.aadhar && errors?.aadhar && (
                                 <Typography color="error" variant="caption">
                                   {errors.aadhar}
                                 </Typography>
@@ -557,8 +557,8 @@ export default function ITR() {
                                 size="small"
                                 fullWidth
                                 name="mobile_number"
-                                value={values.mobile_number || ''}
-                                error={Boolean(touched.mobile_number && errors.mobile_number)}
+                                value={values?.mobile_number || ''}
+                                error={Boolean(touched?.mobile_number && errors?.mobile_number)}
                                 helperText={<ErrorMessage name="mobile_number" />}
                               />
                             </Grid2>
@@ -572,8 +572,8 @@ export default function ITR() {
                                 size="small"
                                 fullWidth
                                 name="email"
-                                value={values.email || ''}
-                                error={Boolean(touched.email && errors.email)}
+                                value={values?.email || ''}
+                                error={Boolean(touched?.email && errors?.email)}
                                 helperText={<ErrorMessage name="email" />}
                               />
                             </Grid2>
@@ -589,8 +589,8 @@ export default function ITR() {
                                   fullWidth
                                   name="first_name"
                                   placeholder="First"
-                                  value={values.first_name || ''}
-                                  error={Boolean(touched.first_name && errors.first_name)}
+                                  value={values?.first_name || ''}
+                                  error={Boolean(touched?.first_name && errors?.first_name)}
                                   helperText={<ErrorMessage name="first_name" />}
                                 />
                               </Grid2>
@@ -601,7 +601,7 @@ export default function ITR() {
                                   fullWidth
                                   name="middle_name"
                                   placeholder="Middle"
-                                  value={values.middle_name || ''}
+                                  value={values?.middle_name || ''}
                                 />
                               </Grid2>
                               <Grid2 size={{ xs: 12, sm: 4 }}>
@@ -611,7 +611,7 @@ export default function ITR() {
                                   fullWidth
                                   name="last_name"
                                   placeholder="Last"
-                                  value={values.last_name || ''}
+                                  value={values?.last_name || ''}
                                 />
                               </Grid2>
                             </Grid2>
@@ -620,13 +620,13 @@ export default function ITR() {
                               <Typography>Gender</Typography>
                             </Grid2>
                             <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                              <RadioGroup row value={values.gender} onChange={(e) => setFieldValue('gender', e.target.value)}>
+                              <RadioGroup row value={values?.gender} onChange={(e) => setFieldValue('gender', e.target.value)}>
                                 <FormControlLabel value="male" control={<Radio size="small" />} label="Male" />
                                 <FormControlLabel value="female" control={<Radio size="small" />} label="Female" />
                               </RadioGroup>
-                              {touched.gender && errors.gender && (
+                              {touched?.gender && errors?.gender && (
                                 <Typography color="error" variant="caption">
-                                  {errors.gender}
+                                  {errors?.gender}
                                 </Typography>
                               )}
                             </Grid2>
@@ -639,14 +639,16 @@ export default function ITR() {
                                 size="small"
                                 fullWidth
                                 options={['Resident', 'Non-Resident', 'Resident but Not Ordinarily Resident']}
-                                value={values.residentail_status || ''}
+                                value={values?.residentail_status || ''}
                                 onChange={(e, value) => setFieldValue('residentail_status', value || '')}
                                 renderInput={(params) => (
                                   <TextField
                                     {...params}
                                     placeholder="Select status"
-                                    error={Boolean(touched.residentail_status && errors.residentail_status)}
-                                    helperText={touched.residentail_status && errors.residentail_status ? errors.residentail_status : ' '}
+                                    error={Boolean(touched?.residentail_status && errors?.residentail_status)}
+                                    helperText={
+                                      touched?.residentail_status && errors?.residentail_status ? errors?.residentail_status : ' '
+                                    }
                                   />
                                 )}
                               />
@@ -672,7 +674,7 @@ export default function ITR() {
                                     <FormControlLabel
                                       control={
                                         <Checkbox
-                                          checked={values[fieldName] === 'yes'}
+                                          checked={values?.[fieldName] === 'yes'}
                                           onChange={(e) => setFieldValue(fieldName, e.target.checked ? 'yes' : null)}
                                         />
                                       }
@@ -690,10 +692,10 @@ export default function ITR() {
                             <GetActionButtons
                               type="put"
                               data={personalInfo}
-                              status={personalInfo.status}
+                              status={personalInfo?.status}
                               urlEndpoint="personal-information"
-                              recId={personalInfo.id}
-                              task_id={personalInfo.task_id}
+                              recId={personalInfo?.id}
+                              task_id={personalInfo?.task_id}
                               service_request={service_id}
                             />
                           </Box>
@@ -767,7 +769,7 @@ export default function ITR() {
                                   }
                                 />
                               </Button>
-                              {values.as26File && (
+                              {values?.as26File && (
                                 <Button
                                   size="small"
                                   variant="outlined"
@@ -780,7 +782,7 @@ export default function ITR() {
                                   View
                                 </Button>
                               )}
-                              {touched.as26File && errors.as26File && (
+                              {touched?.as26File && errors?.as26File && (
                                 <Typography color="error" variant="caption">
                                   {errors.as26File}
                                 </Typography>
@@ -803,7 +805,7 @@ export default function ITR() {
                                   }
                                 />
                               </Button>
-                              {values.aisFile && (
+                              {values?.aisFile && (
                                 <Button
                                   size="small"
                                   variant="outlined"
@@ -816,9 +818,9 @@ export default function ITR() {
                                   View
                                 </Button>
                               )}
-                              {touched.aisFile && errors.aisFile && (
+                              {touched?.aisFile && errors?.aisFile && (
                                 <Typography color="error" variant="caption">
-                                  {errors.aisFile}
+                                  {errors?.aisFile}
                                 </Typography>
                               )}
                             </Grid2>
@@ -861,11 +863,11 @@ export default function ITR() {
                             <GetActionButtons
                               type="post"
                               data={taxPaidDetails}
-                              status={taxPaidDetails.status}
+                                status={taxPaidDetails?.status}
                               urlEndpoint={`/income_tax_returns/tax-paid-details/create-or-update/`}
-                              recId={taxPaidDetails.id}
+                              recId={taxPaidDetails?.id}
                               service_request={service_id}
-                              task_id={taxPaidDetails.task_id}
+                              task_id={taxPaidDetails?.task_id}
                             />
                           </Box>
                         </Form>
