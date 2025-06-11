@@ -89,8 +89,9 @@ const personalInfoSchema = Yup.object().shape({
 });
 
 const taxPaidSchema = Yup.object().shape({
-  as26File: Yup.mixed().required('26AS is required'),
-  aisFile: Yup.mixed().required('AIS is required')
+  form26as_files: Yup.mixed().required('26AS is required'),
+  ais_files: Yup.mixed().required('AIS is required'),
+  advance_tax_files: Yup.array().of(Yup.mixed())
 });
 
 const viewFile = async (url) => {
@@ -140,9 +141,9 @@ export default function ITR() {
   const [taxPaidDetails, setTaxPaidDetails] = useState({
     id: null,
     task_id: null,
-    as26File: null,
-    aisFile: null,
-    challans: []
+    form26as_files: null,
+    ais_files: null,
+    advance_tax_files: []
   });
   const [incomeDetails, setIncomeDetails] = React.useState([]);
   const [deductions, setDeductions] = React.useState([]);
@@ -262,9 +263,9 @@ export default function ITR() {
         setTaxPaidDetails({
           task_id: response.res.data.tasks_data['Tax Paid Details'].task_id || null,
           id: response.res.data.tasks_data['Tax Paid Details'].data?.id || null,
-          as26File: response.res.data.tasks_data['Tax Paid Details'].data?.documents?.['26AS'].files || [],
-          aisFile: response.res.data.tasks_data['Tax Paid Details'].data?.documents?.['AIS'].files || [],
-          challans: response.res.data.tasks_data['Tax Paid Details'].data?.documents?.['AdvanceTax'].files || [],
+          form26as_files: response.res.data.tasks_data['Tax Paid Details'].data?.documents?.['26AS']?.files || [],
+          ais_files: response.res.data.tasks_data['Tax Paid Details'].data?.documents?.['AIS']?.files || [],
+          advance_tax_files: response.res.data.tasks_data['Tax Paid Details'].data?.documents?.['AdvanceTax']?.files || [],
           status: response.res.data.tasks_data['Tax Paid Details']?.data?.status || null,
           reviewer: response.res.data.tasks_data['Tax Paid Details']?.data?.reviewer || null,
           assignee: response.res.data.tasks_data['Tax Paid Details']?.data?.assignee || null
@@ -318,12 +319,6 @@ export default function ITR() {
     }
     setLoadingStep4(false);
   };
-  // useEffect(() => {
-  //   if (service_id) {
-  //     getServiceTasks(service_id);
-  //     // fetchITRDetails();
-  //   }
-  // }, [service_id]);
 
   useEffect(() => {
     if (step === 0) getStep1Data(service_id);
@@ -331,10 +326,6 @@ export default function ITR() {
     if (step === 2) getStep3Data(service_id);
     if (step === 3) getStep4Data(service_id);
   }, [step]);
-
-  const handleOpenFileDialog = (files, title) => {
-    setFileDialogOpen(true);
-  };
 
   const [reviewStep, setReviewStep] = React.useState(0);
   const reviewSteps = ['Drafting', 'Filing', 'Acknowledgement'];
@@ -453,10 +444,6 @@ export default function ITR() {
                         if (type === 'put') formData.append('id', personalInfo.id);
                         const res = await Factory(type, url, formData, {});
                         if (res.res.status_cd === 0) {
-                          setPersonalInfo({ ...res.res.data });
-                          Object.keys(res.res.data).forEach((key) => {
-                            setFieldValue(key, res.res.data[key]);
-                          });
                           enqueueSnackbar('Personal Information saved successfully!', {
                             variant: 'success',
                             anchorOrigin: { vertical: 'top', horizontal: 'right' }
@@ -725,13 +712,13 @@ export default function ITR() {
                         formData.append('service_request', service_id);
                         formData.append('service_task', tasks?.['Tax Paid Details']?.task_id);
                         formData.append('status', 'in progress');
-                        Array.from(values.as26File).forEach((file) => {
+                        Array.from(values.form26as_files).forEach((file) => {
                           if (file instanceof File) formData.append('form26as_files', file);
                         });
-                        Array.from(values.aisFile).forEach((file) => {
+                        Array.from(values.ais_files).forEach((file) => {
                           if (file instanceof File) formData.append('ais_files', file);
                         });
-                        Array.from(values.challans).forEach((file) => {
+                        Array.from(values.advance_tax_files).forEach((file) => {
                           if (file instanceof File) formData.append('advance_tax_files', file);
                         });
 
@@ -775,26 +762,29 @@ export default function ITR() {
                                   multiple={true}
                                   hidden
                                   onChange={(e) =>
-                                    setFieldValue('as26File', values.as26File ? [...values.as26File, ...e.target.files] : e.target.files)
+                                    setFieldValue(
+                                      'form26as_files',
+                                      values.form26as_files ? [...values.form26as_files, ...e.target.files] : [...e.target.files]
+                                    )
                                   }
                                 />
                               </Button>
-                              {values?.as26File && (
+                              {values?.form26as_files && (
                                 <Button
                                   size="small"
                                   variant="outlined"
                                   sx={{ ml: 1 }}
                                   onClick={() => {
                                     setFileDialogOpen(true);
-                                    setDialogFilesData({ files: values.as26File, urlEndpoint: 'tax-paid-details' });
+                                    setDialogFilesData({ files: values.form26as_files, urlEndpoint: 'tax-paid-details' });
                                   }}
                                 >
                                   View
                                 </Button>
                               )}
-                              {touched?.as26File && errors?.as26File && (
+                              {touched?.form26as_files && errors?.form26as_files && (
                                 <Typography color="error" variant="caption">
-                                  {errors.as26File}
+                                  {errors.form26as_files}
                                 </Typography>
                               )}
                             </Grid2>
@@ -811,26 +801,29 @@ export default function ITR() {
                                   multiple={true}
                                   hidden
                                   onChange={(e) =>
-                                    setFieldValue('aisFile', values.aisFile ? [...values.aisFile, ...e.target.files] : e.target.files)
+                                    setFieldValue(
+                                      'ais_files',
+                                      values.ais_files ? [...values.ais_files, ...e.target.files] : [...e.target.files]
+                                    )
                                   }
                                 />
                               </Button>
-                              {values?.aisFile && (
+                              {values?.ais_files && (
                                 <Button
                                   size="small"
                                   variant="outlined"
                                   sx={{ ml: 1 }}
                                   onClick={() => {
                                     setFileDialogOpen(true);
-                                    setDialogFilesData({ files: values.aisFile, urlEndpoint: 'tax-paid-details' });
+                                    setDialogFilesData({ files: values.ais_files, urlEndpoint: 'tax-paid-details' });
                                   }}
                                 >
                                   View
                                 </Button>
                               )}
-                              {touched?.aisFile && errors?.aisFile && (
+                              {touched?.ais_files && errors?.ais_files && (
                                 <Typography color="error" variant="caption">
-                                  {errors?.aisFile}
+                                  {errors?.ais_files}
                                 </Typography>
                               )}
                             </Grid2>
@@ -847,7 +840,10 @@ export default function ITR() {
                                   multiple={true}
                                   onChange={(e) => {
                                     if (e.target.files[0])
-                                      setFieldValue('challans', values.challans ? [...values.challans, ...e.target.files] : e.target.files);
+                                      setFieldValue(
+                                        'advance_tax_files',
+                                        values.advance_tax_files ? [...values.advance_tax_files, ...e.target.files] : [...e.target.files]
+                                      );
                                   }}
                                 />
                                 <Button size="small" variant="contained" onClick={() => document.getElementById('challanInputNew').click()}>
@@ -858,7 +854,7 @@ export default function ITR() {
                                   variant="outlined"
                                   onClick={() => {
                                     setFileDialogOpen(true);
-                                    setDialogFilesData({ files: values.challans, urlEndpoint: 'tax-paid-details' });
+                                    setDialogFilesData({ files: values.advance_tax_files, urlEndpoint: 'tax-paid-details' });
                                   }}
                                 >
                                   View

@@ -385,7 +385,7 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
                               size="small"
                               fullWidth
                               placeholder="Details"
-                              value={row.details}
+                              value={row?.details}
                               onChange={(e) => otherIncomeFormik.setFieldValue(`otherIncome[${idx}].details`, e.target.value)}
                             />
                           </TableCell>
@@ -395,7 +395,7 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
                               fullWidth
                               placeholder="Amount"
                               type="number"
-                              value={row.amount}
+                              value={row?.amount}
                               onChange={(e) => otherIncomeFormik.setFieldValue(`otherIncome[${idx}].amount`, e.target.value)}
                             />
                           </TableCell>
@@ -404,7 +404,7 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
                               size="small"
                               fullWidth
                               placeholder="Notes"
-                              value={row.notes}
+                              value={row?.notes}
                               onChange={(e) => otherIncomeFormik.setFieldValue(`otherIncome[${idx}].notes`, e.target.value)}
                             />
                           </TableCell>
@@ -1217,7 +1217,7 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
 
   useEffect(() => {
     if (cg_property_land) {
-      setSelectedTypes(cg_property_land?.data?.gains_applicable);
+      setSelectedTypes(cg_property_land?.data?.gains_applicable || []);
       if (cg_property_land?.data?.capital_gains_property_details?.length > 0)
         setProperties(cg_property_land?.data?.capital_gains_property_details);
     }
@@ -1277,15 +1277,21 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
 
   useEffect(() => {
     if (cg_equity_mutual) {
-      setEquityMutualFundType(cg_equity_mutual?.data?.equity_mutual_fund_type);
-      setCamsFiles(cg_equity_mutual?.data?.documents);
-      setSoldForeignShares(cg_equity_mutual?.data?.sell_any_foreign_sales);
-      setSoldUnlistedShares(cg_equity_mutual?.data?.sell_any_unlisted_sales);
+      setEquityMutualFundType(cg_equity_mutual?.data?.equity_mutual_fund_type || []);
+      setCamsFiles(cg_equity_mutual?.data?.documents || []);
+      setSoldForeignShares(cg_equity_mutual?.data?.sell_any_foreign_sales || 'no');
+      setSoldUnlistedShares(cg_equity_mutual?.data?.sell_any_unlisted_sales || 'no');
     }
   }, [cg_equity_mutual]);
 
   const handleCamsInstrumentChange = (type) => (e) => {
-    setEquityMutualFundType((prev) => (e.target.checked ? [...prev, type] : prev.filter((t) => t !== type)));
+    let __equity_mutual_fund_type = equity_mutual_fund_type;
+    if (equity_mutual_fund_type.length === 0) {
+      __equity_mutual_fund_type = [type];
+    } else {
+      __equity_mutual_fund_type = e.target.checked ? [...equity_mutual_fund_type, type] : equity_mutual_fund_type.filter((t) => t !== type);
+    }
+    setEquityMutualFundType(__equity_mutual_fund_type);
   };
 
   const handleCamsFilesChange = (e) => {
@@ -1329,9 +1335,14 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
               key={type}
               control={<Checkbox checked={selectedTypes?.includes(type)} />}
               onChange={async (e) => {
+                console.log('selectedTypes', selectedTypes);
                 const isChecked = e.target.checked;
-                let __selectedTypes = isChecked ? [...selectedTypes, type] : selectedTypes.filter((t) => t !== type);
-                setSelectedTypes(__selectedTypes);
+                let __selectedTypes = selectedTypes;
+                if (selectedTypes.length === 0) {
+                  __selectedTypes = [type];
+                } else {
+                  __selectedTypes = isChecked ? [...selectedTypes, type] : selectedTypes.filter((t) => t !== type);
+                }
                 const response = await Factory('post', `/income_tax_returns/capital-gains/upsert/`, {
                   service_request: parseInt(service_id),
                   service_task: cg_property_land.task_id,
@@ -3757,7 +3768,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                         size="small"
                         fullWidth
                         placeholder="Amount"
-                        value={row.amount}
+                        value={row?.amount}
                         onChange={(e) => {
                           const updated = [...giftRows];
                           updated[idx].amount = e.target.value;
@@ -3906,7 +3917,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                         size="small"
                         fullWidth
                         placeholder="Amount Received"
-                        value={row.amount}
+                        value={row?.amount}
                         onChange={(e) => {
                           const updated = [...familyRows];
                           updated[idx].amount = e.target.value;
@@ -3919,7 +3930,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                         size="small"
                         fullWidth
                         options={pensionSources}
-                        value={row.source}
+                        value={row?.source}
                         onChange={(_, v) => {
                           const updated = [...familyRows];
                           updated[idx].source = v;
@@ -4048,7 +4059,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                         size="small"
                         fullWidth
                         placeholder="Amount"
-                        value={row.amount}
+                        value={row?.amount}
                         onChange={(e) => {
                           const updated = [...foreignRows];
                           updated[idx].amount = e.target.value;
@@ -4059,7 +4070,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                     <TableCell sx={{ p: 0.5, py: 1 }}>
                       <RadioGroup
                         row
-                        value={row.tax_paid_abroad}
+                        value={row?.tax_paid_abroad}
                         onChange={(_, v) => {
                           const updated = [...foreignRows];
                           updated[idx].tax_paid_abroad = v;
@@ -4191,7 +4202,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                         size="small"
                         fullWidth
                         options={winningsSources}
-                        value={row.source}
+                        value={row?.source}
                         onChange={(_, v) => {
                           const updated = [...winningsRows];
                           updated[idx].source = v;
@@ -4205,7 +4216,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                         size="small"
                         fullWidth
                         placeholder="Amount"
-                        value={row.amount}
+                        value={row?.amount}
                         onChange={(e) => {
                           const updated = [...winningsRows];
                           updated[idx].amount = e.target.value;
@@ -4299,10 +4310,10 @@ const AgricultureIncome = ({ data, service_id, setFileDialogOpen, fileDialogOpen
     if (data.data.length > 0) {
       let __data = {
         agriculture: data.data[0].agriculture || 'Not Applicable',
-        amount: data.data[0].agriculture_income_docs.amount || '',
-        file: data.data[0].agriculture_income_docs.file || ''
+        amount: data.data[0].agriculture_income_docs?.amount || '',
+        file: data.data[0].agriculture_income_docs?.file || ''
       };
-      setAgricultureIncome({ ...agricultureIncome, file: data.data[0].agriculture_income_docs.file });
+      setAgricultureIncome(__data);
     }
   }, [data]);
   const postIncomeApplicability = async (v) => {
@@ -4359,7 +4370,7 @@ const AgricultureIncome = ({ data, service_id, setFileDialogOpen, fileDialogOpen
             size="small"
             fullWidth
             sx={{ maxWidth: 200 }}
-            value={agricultureIncome.amount}
+            value={agricultureIncome?.amount}
             onChange={(e) => setAgricultureIncome({ ...agricultureIncome, amount: e.target.value })}
             placeholder="Agricultural Income"
           />
@@ -4367,16 +4378,16 @@ const AgricultureIncome = ({ data, service_id, setFileDialogOpen, fileDialogOpen
             Upload
             <input type="file" hidden onChange={(e) => setAgricultureIncome({ ...agricultureIncome, file: e.target.files[0] })} />
           </Button>
-          {agricultureIncome.file && (
+          {agricultureIncome?.file && (
             <Button
               size="small"
               variant="outlined"
               sx={{ ml: 1 }}
               onClick={() => {
-                if (agricultureIncome.file instanceof File) {
-                  viewFile(agricultureIncome.file);
+                if (agricultureIncome?.file instanceof File) {
+                  viewFile(agricultureIncome?.file);
                 } else {
-                  window.open(agricultureIncome.file, '_blank');
+                  window.open(agricultureIncome?.file, '_blank');
                 }
               }}
             >
