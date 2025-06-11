@@ -95,6 +95,25 @@ const are_you_first_time_homebuyer = ['Yes', 'No'];
 const donation_made_to_political_party = ['Yes', 'No'];
 
 const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setFileDialogOpen, setDialogFilesData }) => {
+  const initialData = {
+    section_80e: {
+      amount: '',
+      education_of: '',
+      borrower_name: '',
+      loan_outstanding_as_on_31st_march: '',
+      is_it_approved_bank: 'false',
+      other_files: null,
+      document_files: { other_files: { files: [] } }
+    },
+    section_80ee: {
+      loan_outstanding_as_on_31st_march: '',
+      document_files: { other_files: { files: [] } }
+    },
+    section_80eeb: {
+      vehicle_registration_number: '',
+      documents: { other_files: { files: [] } }
+    }
+  };
   const { enqueueSnackbar } = useSnackbar();
   const [investments, setInvestments] = React.useState([{ investment: '', amount: '', file: null }]);
   const [donations, setDonations] = React.useState([{ name: '', amount: '', mode: '', file: null }]);
@@ -106,23 +125,9 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
     preventive_health_checkup: '',
     file: []
   });
-  const [section80E, setSection80E] = useState({
-    amount: '',
-    education_of: '',
-    borrower_name: '',
-    loan_outstanding_as_on_31st_march: '',
-    is_it_approved_bank: 'false',
-    other_files: null,
-    document_files: { other_files: null }
-  });
-  const [section80EE, setSection80EE] = useState({
-    loan_outstanding_as_on_31st_march: '',
-    document_files: { other_files: null }
-  });
-  const [section80EEB, setSection80EEB] = useState({
-    vehicle_registration_number: '',
-    documents: { other_files: null }
-  });
+  const [section80E, setSection80E] = useState(initialData.section_80e);
+  const [section80EE, setSection80EE] = useState(initialData.section_80ee);
+  const [section80EEB, setSection80EEB] = useState(initialData.section_80eeb);
   const [otherDeductions, setOtherDeductions] = useState({
     total_saving_interest: '',
     total_fd_interest: '',
@@ -491,7 +496,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                         }}
                       />
                     </Button>
-                    {values?.document_files?.other_files && (
+                    {values?.document_files?.other_files.files.length > 0 && (
                       <Button
                         size="small"
                         sx={{ ml: 1 }}
@@ -590,7 +595,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                         }}
                       />
                     </Button>
-                    {values?.document_files?.other_files?.files && (
+                    {values?.document_files?.other_files?.files.length > 0 && (
                       <Button
                         size="small"
                         sx={{ ml: 1 }}
@@ -688,7 +693,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                         }}
                       />
                     </Button>
-                    {values.documents.other_files && (
+                    {values.documents.other_files.files.length > 0 && (
                       <Button
                         size="small"
                         sx={{ ml: 1 }}
@@ -696,7 +701,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                         onClick={() => {
                           setFileDialogOpen(true);
                           setDialogFilesData({
-                            files: values.documents.other_files.files || values.documents.other_files,
+                            files: values.documents.other_files.files,
                             urlEndpoint: 'section-80eeb'
                           });
                         }}

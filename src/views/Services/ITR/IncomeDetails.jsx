@@ -4285,14 +4285,26 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
 };
 
 const AgricultureIncome = ({ data, service_id, setFileDialogOpen, fileDialogOpen, dialogFilesData, setDialogFilesData }) => {
+  console.log(data);
   const { enqueueSnackbar } = useSnackbar();
+  let initialData = {
+    agriculture: 'Not Applicable',
+    amount: '',
+    file: ''
+  };
   data = data[0];
-  const [agricultureIncome, setAgricultureIncome] = React.useState({
-    agriculture: data.data[0].agriculture || 'Not Applicable',
-    amount: data.data[0].agriculture_income_docs.amount || '',
-    file: data.data[0].agriculture_income_docs.file || ''
-  });
+  const [agricultureIncome, setAgricultureIncome] = React.useState(initialData);
 
+  useEffect(() => {
+    if (data.data.length > 0) {
+      let __data = {
+        agriculture: data.data[0].agriculture || 'Not Applicable',
+        amount: data.data[0].agriculture_income_docs.amount || '',
+        file: data.data[0].agriculture_income_docs.file || ''
+      };
+      setAgricultureIncome({ ...agricultureIncome, file: data.data[0].agriculture_income_docs.file });
+    }
+  }, [data]);
   const postIncomeApplicability = async (v) => {
     let formData = new FormData();
     formData.append('service_request', parseInt(service_id));
