@@ -315,7 +315,7 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
                             onClick={() => {
                               setFileDialogOpen(true);
                               setDialogFilesData({
-                                files: docsFormik.values.docs[doc.key].files,
+                                files: docsFormik.values.docs[doc.key]?.files || [],
                                 urlEndpoint: 'salary-documents'
                               });
                             }}
@@ -428,9 +428,9 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
                                 variant="outlined"
                                 onClick={() => {
                                   if (row.file instanceof File) {
-                                    viewFile(row.file);
-                                  } else {
                                     window.open(URL.createObjectURL(row.file), '_blank');
+                                  } else {
+                                    viewFile(row.file);
                                   }
                                 }}
                               >
@@ -564,7 +564,7 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
                           onClick={() => {
                             setFileDialogOpen(true);
                             setDialogFilesData({
-                              files: foreignFormik.values.foreignDocs[doc.key].files,
+                              files: foreignFormik.values.foreignDocs[doc.key]?.files || [],
                               urlEndpoint: 'nri-salary-details'
                             });
                           }}
@@ -734,16 +734,16 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
           state: '',
           pincode: ''
         },
-        owned_property: '',
+        owned_property: false,
         ownership_percentage: '',
         country: '',
-        is_it_property_let_out: '',
+        is_it_property_let_out: false,
         annual_rent_received: '',
         rent_received: '',
-        pay_municipal_tax: '',
+        pay_municipal_tax: false,
         municipal_tax_paid: '',
         municipal_tax_receipt: null,
-        home_loan_on_property: '',
+        home_loan_on_property: false,
         interest_during_financial_year: '',
         principal_during_financial_year: '',
         upload_loan_interest_certificate: null,
@@ -921,8 +921,8 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <RadioGroup row value={property.owned_property || ''} onChange={(_, v) => handleChange(idx, 'owned_property', v)}>
-                  <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
-                  <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
+                  <FormControlLabel value={true} control={<Radio size="small" />} label="Yes" />
+                  <FormControlLabel value={false} control={<Radio size="small" />} label="No" />
                 </RadioGroup>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
@@ -953,8 +953,8 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
                   value={property.is_it_property_let_out || ''}
                   onChange={(_, v) => handleChange(idx, 'is_it_property_let_out', v)}
                 >
-                  <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
-                  <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
+                  <FormControlLabel value={true} control={<Radio size="small" />} label="Yes" />
+                  <FormControlLabel value={false} control={<Radio size="small" />} label="No" />
                 </RadioGroup>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
@@ -988,8 +988,8 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <RadioGroup row value={property.pay_municipal_tax || ''} onChange={(_, v) => handleChange(idx, 'pay_municipal_tax', v)}>
-                  <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
-                  <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
+                  <FormControlLabel value={true} control={<Radio size="small" />} label="Yes" />
+                  <FormControlLabel value={false} control={<Radio size="small" />} label="No" />
                 </RadioGroup>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
@@ -1045,8 +1045,8 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
                   value={property.home_loan_on_property || ''}
                   onChange={(_, v) => handleChange(idx, 'home_loan_on_property', v)}
                 >
-                  <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
-                  <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
+                  <FormControlLabel value={true} control={<Radio size="small" />} label="Yes" />
+                  <FormControlLabel value={false} control={<Radio size="small" />} label="No" />
                 </RadioGroup>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
