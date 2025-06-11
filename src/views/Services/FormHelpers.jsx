@@ -24,6 +24,7 @@ const GetActionButtons = ({
 
   useEffect(() => {
     if (status) {
+      console.log(status);
       if (step === 0 && status === 'approved') {
         status = 'completed';
         setReviewStep(1);

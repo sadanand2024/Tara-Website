@@ -18,7 +18,8 @@ import {
   Autocomplete,
   RadioGroup,
   Stack,
-  IconButton
+  IconButton,
+  FormControl
 } from '@mui/material';
 import { useFormik, FieldArray, FormikProvider } from 'formik';
 import * as Yup from 'yup';
@@ -26,7 +27,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { useSnackbar } from 'notistack';
 import GetActionButtons from '../FormHelpers';
 import Factory from '../../../utils/Factory';
-
+import RaiseRequest from '../RaiseRequest';
 const viewFile = async (url) => {
   const response = await Factory('get', `/docwallet/generate_presigned_url?url=${url}`, {}, {});
   if (response.res.status_cd === 0) {
@@ -264,9 +265,12 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
     <>
       {/* Section 1: Upload Required Documents */}
       <form onSubmit={docsFormik.handleSubmit} autoComplete="off">
-        <Typography variant="h5" mb={2} sx={{ textDecoration: 'underline' }}>
-          Upload Required Documents
-        </Typography>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
+          <Typography variant="h5" sx={{ textDecoration: 'underline' }}>
+            Upload Required Documents
+          </Typography>
+          <RaiseRequest fields={['Form 16', 'Payslip', 'Bank Statement']} task_id={salary_income?.task_id} />
+        </Stack>
         <Box sx={{ p: 0, boxShadow: '0px 0px 10px 0px rgba(66, 66, 66, 0.1)', borderRadius: 2 }}>
           <Table size="small">
             <TableHead>
@@ -359,9 +363,12 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
       {/* Section 2: Details of any other income you wish to share */}
       <FormikProvider value={otherIncomeFormik}>
         <form onSubmit={otherIncomeFormik.handleSubmit} autoComplete="off">
-          <Typography variant="h5" mt={4} mb={2} sx={{ textDecoration: 'underline' }}>
-            Details of any other income you wish to share
-          </Typography>
+          <Stack direction="row" justifyContent="space-between" alignItems="center" mt={4} mb={2}>
+            <Typography variant="h5" sx={{ textDecoration: 'underline' }}>
+              Details of any other income you wish to share
+            </Typography>
+            <RaiseRequest fields={[]} task_id={other_income?.task_id} />
+          </Stack>
           <FieldArray
             name="otherIncome"
             render={(arrayHelpers) => (
@@ -515,9 +522,15 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
 
       {/* Section 3: Foreign/NRI Employment & Salary Details */}
       <form onSubmit={foreignFormik.handleSubmit} autoComplete="off">
-        <Typography variant="h5" mt={5} mb={2} sx={{ textDecoration: 'underline' }}>
-          Foreign/NRI Employment & Salary Details
-        </Typography>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" mt={4} mb={2}>
+          <Typography variant="h5" sx={{ textDecoration: 'underline' }}>
+            Foreign/NRI Employment & Salary Details
+          </Typography>
+          <RaiseRequest
+            fields={['Foreign Salary Slip', 'Foreign Bank Statement', 'Tax Paid Abroad Certificate']}
+            task_id={nri_employee_salary?.task_id}
+          />
+        </Stack>
         <Box sx={{ p: 0, boxShadow: '0px 0px 10px 0px rgba(66, 66, 66, 0.1)', borderRadius: 2 }}>
           <Table size="small">
             <TableHead>
@@ -620,54 +633,22 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
               </Grid2>
             </Grid2>
             {/* Salary Received In */}
-            <Box mt={2} mb={2}>
-              <Typography mb={1}>Salary Received In</Typography>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={foreignFormik.values.salaryReceivedIn?.includes('indian')}
-                    onChange={(e) => {
-                      const checked = e.target.checked;
-                      let arr = [...foreignFormik.values.salaryReceivedIn];
-                      if (checked) arr.push('indian');
-                      else arr = arr.filter((v) => v !== 'indian');
-                      foreignFormik.setFieldValue('salaryReceivedIn', arr);
-                    }}
-                  />
-                }
-                label="Indian Bank"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={foreignFormik.values.salaryReceivedIn?.includes('foreign')}
-                    onChange={(e) => {
-                      const checked = e.target.checked;
-                      let arr = [...foreignFormik.values.salaryReceivedIn];
-                      if (checked) arr.push('foreign');
-                      else arr = arr.filter((v) => v !== 'foreign');
-                      foreignFormik.setFieldValue('salaryReceivedIn', arr);
-                    }}
-                  />
-                }
-                label="Foreign Bank"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={foreignFormik.values.salaryReceivedIn?.includes('both')}
-                    onChange={(e) => {
-                      const checked = e.target.checked;
-                      let arr = [...foreignFormik.values.salaryReceivedIn];
-                      if (checked) arr.push('both');
-                      else arr = arr.filter((v) => v !== 'both');
-                      foreignFormik.setFieldValue('salaryReceivedIn', arr);
-                    }}
-                  />
-                }
-                label="Both"
-              />
-            </Box>
+            <FormControl component="fieldset" sx={{ mt: 2 }}>
+              <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                Salary Received In
+              </Typography>
+              <RadioGroup
+                row
+                name="salaryReceivedIn"
+                value={foreignFormik.values.salaryReceivedIn || ''}
+                onChange={(e) => foreignFormik.setFieldValue('salaryReceivedIn', e.target.value)}
+              >
+                <FormControlLabel value="india" control={<Radio size="small" />} label="India" />
+                <FormControlLabel value="foreign" control={<Radio size="small" />} label="Foreign" />
+                <FormControlLabel value="both" control={<Radio size="small" />} label="Both" />
+                {/* Add more options as needed */}
+              </RadioGroup>
+            </FormControl>
           </Box>
         </Box>
 
@@ -828,11 +809,32 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
   return (
     <form>
       <Box>
-        <Box display="flex" justifyContent="space-between" mb={2}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
           <Typography variant="subtitle1" fontWeight={700}>
             Enter House Property Details
           </Typography>
-        </Box>
+          <RaiseRequest
+            fields={[
+              'Type of Property',
+              'Country (if Foreign)',
+              'Property Address',
+              'Is it Co-owned Property?',
+              'Ownership Percentage',
+              'Is it let-out?',
+              'Annual Rent Received',
+              'Rent Received In',
+              'Did you pay municipal taxes?',
+              'Municipal tax paid',
+              'Municipal tax receipt',
+              'Home loan on this property?',
+              'Interest paid during the FY',
+              'Principal paid during the FY',
+              'Loan interest certificate',
+              'Loan statement'
+            ]}
+            task_id={_wholeData.task_id}
+          />
+        </Stack>
         {properties?.map((property, idx) => (
           <Paper key={idx} sx={{ p: 3, mb: 2, borderRadius: 2, bgcolor: '#f8fafc' }}>
             <Typography variant="h4" sx={{ textDecoration: 'underline' }} mb={2}>
@@ -1366,9 +1368,28 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
       </Box>
       {/* Capital Gain from Property/Land */}
       <Paper sx={{ p: 3, mb: 4, borderRadius: 2, bgcolor: '#f8fafc' }}>
-        <Typography variant="subtitle1" fontWeight={700} mb={2}>
-          Capital Gain from Property / Land
-        </Typography>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
+          <Typography variant="subtitle1" fontWeight={700}>
+            Capital Gain from Property / Land
+          </Typography>
+          <RaiseRequest
+            fields={[
+              'Property Type',
+              'Date of Purchase',
+              'Purchase Cost',
+              'Date of Sale',
+              'Sale Value',
+              'Upload purchase doc',
+              'Upload sale doc',
+              'Reinvestment made',
+              'Invested In',
+              'Invest Amount',
+              'Invest Date',
+              'Upload reinvestment details doc'
+            ]}
+            task_id={cg_property_land?.task_id}
+          />
+        </Stack>
         {properties?.map((property, idx) => (
           <Paper key={idx} sx={{ p: 2, mb: 3, border: '1px solid #e0e0e0', bgcolor: '#fff' }}>
             <Typography fontWeight={600} mb={1}>
@@ -1745,9 +1766,15 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
           />
         </Box>
         {/* Capital Gain from Equity/Mutual Fund */}
-        <Typography variant="subtitle1" fontWeight={700} mb={2}>
-          Capital Gain from Equity / Mutual Fund
-        </Typography>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1} mt={4}>
+          <Typography variant="subtitle1" fontWeight={700}>
+            Capital Gain from Equity / Mutual Fund
+          </Typography>
+          <RaiseRequest
+            fields={['Instrument', 'CAMS/Broker statements', 'Did you sell any foreign shares?', 'Did you sell any unlisted shares?']}
+            task_id={cg_equity_mutual?.task_id}
+          />
+        </Stack>
         <Paper sx={{ p: 2, mb: 3, border: '1px solid #e0e0e0', bgcolor: '#fff' }}>
           {/* 1. Instrument checkboxes */}
           <Box mb={2}>
@@ -1779,7 +1806,7 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                     setFileDialogOpen(true);
                     setDialogFilesData({
                       files: camsFiles,
-                      urlEndpoint: '/income_tax_returns/capital-gains/equity-mutual-fund/upload-cams/'
+                      urlEndpoint: 'capital-gains-equity-mutual-fund'
                     });
                   }}
                 >
@@ -1820,10 +1847,16 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
           </Stack>
         </Paper>
         {/* 5. Details of other Capital Gains table (already present) */}
-        <Box mb={2}>
-          <Typography fontWeight={600} mb={1}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1} mt={3}>
+          <Typography variant="subtitle1" fontWeight={700}>
             Details of other Capital Gains
           </Typography>
+          <RaiseRequest
+            fields={['Asset Details', 'Purchase Date', 'Purchase Value', 'Sale Date', 'Sale Value', 'Upload doc']}
+            task_id={cg_other_sources?.task_id}
+          />
+        </Stack>
+        <Box mb={2}>
           <Paper elevation={2} sx={{ mb: 2, borderRadius: 1, overflow: 'hidden' }}>
             <Table size="small">
               <TableHead>
@@ -2185,11 +2218,7 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
     let url = '/income_tax_returns/business-professional-income/';
     const res = await Factory(type, url, formData);
     if (res.res.status_cd === 0) {
-      if (!businessData.id) {
-        let updated = [...businessRows];
-        updated[idx] = transformBusinessApiResponse(res.res.id);
-        setBusinessRows(updated);
-      }
+      setBusinessRows(res.res.id.business_professional_income_info.map(transformBusinessApiResponse));
       enqueueSnackbar('Business/Profession Income saved successfully!', {
         variant: 'success',
         anchorOrigin: { vertical: 'top', horizontal: 'right' }
@@ -2226,6 +2255,32 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
 
   return (
     <Box>
+      <Stack direction="row" sx={{ justifyContent: 'space-between' }} spacing={2} alignItems="center" mb={2}>
+        <Typography variant="subtitle1" fontWeight={700}>
+          Business/Professional Income:
+        </Typography>
+        <RaiseRequest
+          fields={[
+            'Business Name',
+            'Business Type',
+            'Opting for presumptive?',
+            'Section/Type of',
+            'Nature',
+            'Presumptive Rate',
+            'Presumptive Income',
+            'Bank Statements',
+            'Form 26AS',
+            'AIS',
+            'Profit & Loss Statement',
+            'Balance Sheet',
+            'GST Returns',
+            'Gross Turnover',
+            'Digital Percentage Receipts',
+            'Net Profit'
+          ]}
+          task_id={data.task_id}
+        />
+      </Stack>
       {Array.from({ length: businessRows?.length }).map((_, idx) => {
         const section = selectedSection[idx];
         const sectionData = sectionPresumptiveData[section] || { nature: '', presumptive_rate: '', presumptive_income: '' };
@@ -2615,10 +2670,10 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                           sx={{ ml: 1 }}
                           onClick={() => {
                             setFileDialogOpen(true);
-                            let file = businessRows[idx].bank_statements_files?.startsWith('http')
-                              ? [{ url: businessRows[idx].bank_statements_files }]
-                              : [...businessRows[idx].bank_statements_files];
-                            setDialogFilesData(file);
+                            setDialogFilesData({
+                              files: [...businessRows[idx].bank_statements_files],
+                              urlEndpoint: 'business-professional-income'
+                            });
                           }}
                         >
                           View
@@ -2956,7 +3011,7 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
 
 const interestTypes = ['Savings Account', 'Recurring Deposit', 'NRO Account', 'NRE Account', 'Fixed Deposit', 'Other'];
 
-const relationOptions = ['Relative', 'Non-relative'];
+const relationOptions = ['Relative', 'Non Relative'];
 
 const pensionSources = ['Government', 'Private'];
 const foreignIncomeTypes = ['Dividend', 'Interest', 'Others'];
@@ -3441,7 +3496,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
           __gift_rows.splice(idx, 1);
           setGiftRows(__gift_rows);
           break;
-        case 'family-pension-income-documents':
+        case 'family-pension-income-documents/files':
           let __family_rows = JSON.parse(JSON.stringify(familyRows));
           __family_rows.splice(idx, 1);
           setFamilyRows(__family_rows);
@@ -3465,19 +3520,27 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
   return (
     <Box>
       {/* Interest Income Section */}
-      <Stack direction="row" spacing={2} alignItems="center" mb={interestApplicable === 'Applicable' ? 0 : 2}>
-        <Typography>Interest Income: </Typography>
-        <RadioGroup
-          row
-          value={interestApplicable}
-          onChange={(_, v) => {
-            let res = postIncomeApplicability(v, 'interest-income', 'interest_income', interest_income.task_id);
-            if (res) setInterestApplicable(v);
-          }}
-        >
-          <FormControlLabel value="Applicable" control={<Radio size="small" />} label="Applicable" />
-          <FormControlLabel value="Not Applicable" control={<Radio size="small" />} label="Not Applicable" />
-        </RadioGroup>
+      <Stack
+        direction="row"
+        spacing={2}
+        alignItems="center"
+        sx={{ mb: interestApplicable === 'Applicable' ? 0 : 2, justifyContent: 'space-between' }}
+      >
+        <Stack direction="row" spacing={2} alignItems="center">
+          <Typography>Interest Income: </Typography>
+          <RadioGroup
+            row
+            value={interestApplicable}
+            onChange={(_, v) => {
+              let res = postIncomeApplicability(v, 'interest-income', 'interest_income', interest_income.task_id);
+              if (res) setInterestApplicable(v);
+            }}
+          >
+            <FormControlLabel value="Applicable" control={<Radio size="small" />} label="Applicable" />
+            <FormControlLabel value="Not Applicable" control={<Radio size="small" />} label="Not Applicable" />
+          </RadioGroup>
+        </Stack>
+        <RaiseRequest fields={[]} task_id={interest_income.task_id} />
       </Stack>
       {interestApplicable === 'Applicable' && (
         <>
@@ -3607,19 +3670,31 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
         />
       </Box>
       {/* Dividend Income Section */}
-      <Stack direction="row" spacing={2} alignItems="center" mb={dividendApplicable === 'Applicable' ? 0 : 2}>
-        <Typography>Dividend Income: </Typography>
-        <RadioGroup
-          row
-          value={dividendApplicable}
-          onChange={(_, v) => {
-            setDividendApplicable(v);
-            postIncomeApplicability(v, 'dividend-income', 'dividend_income', dividend_income.task_id);
-          }}
-        >
-          <FormControlLabel value="Applicable" control={<Radio size="small" />} label="Applicable" />
-          <FormControlLabel value="Not Applicable" control={<Radio size="small" />} label="Not Applicable" />
-        </RadioGroup>
+      <Stack
+        direction="row"
+        spacing={2}
+        alignItems="center"
+        sx={{
+          mb: dividendApplicable === 'Applicable' ? 1 : 2,
+          justifyContent: 'space-between',
+          mt: 2
+        }}
+      >
+        <Stack direction="row" spacing={2} alignItems="center">
+          <Typography>Dividend Income: </Typography>
+          <RadioGroup
+            row
+            value={dividendApplicable}
+            onChange={(_, v) => {
+              setDividendApplicable(v);
+              postIncomeApplicability(v, 'dividend-income', 'dividend_income', dividend_income.task_id);
+            }}
+          >
+            <FormControlLabel value="Applicable" control={<Radio size="small" />} label="Applicable" />
+            <FormControlLabel value="Not Applicable" control={<Radio size="small" />} label="Not Applicable" />
+          </RadioGroup>
+        </Stack>
+        <RaiseRequest fields={[]} task_id={dividend_income.task_id} />
       </Stack>
       {dividendApplicable === 'Applicable' && (
         <>
@@ -3654,6 +3729,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                         size="small"
                         fullWidth
                         placeholder="Dividend Received"
+                        type="number"
                         value={row.dividend_received}
                         onChange={(e) => {
                           const updated = [...dividendRows];
@@ -3730,19 +3806,27 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
         />
       </Box>
       {/* Gift Income Section */}
-      <Stack direction="row" spacing={2} alignItems="center" mb={giftApplicable === 'Applicable' ? 0 : 2}>
-        <Typography>Gift Income: </Typography>
-        <RadioGroup
-          row
-          value={giftApplicable}
-          onChange={(_, v) => {
-            setGiftApplicable(v);
-            postIncomeApplicability(v, 'gift-income', 'gift_income', gift_income.task_id);
-          }}
-        >
-          <FormControlLabel value="Applicable" control={<Radio size="small" />} label="Applicable" />
-          <FormControlLabel value="Not Applicable" control={<Radio size="small" />} label="Not Applicable" />
-        </RadioGroup>
+      <Stack
+        direction="row"
+        spacing={2}
+        alignItems="center"
+        sx={{ mb: giftApplicable === 'Applicable' ? 1 : 2, justifyContent: 'space-between', mt: 2 }}
+      >
+        <Stack direction="row" spacing={2} alignItems="center">
+          <Typography>Gift Income: </Typography>
+          <RadioGroup
+            row
+            value={giftApplicable}
+            onChange={(_, v) => {
+              setGiftApplicable(v);
+              postIncomeApplicability(v, 'gift-income', 'gift_income', gift_income.task_id);
+            }}
+          >
+            <FormControlLabel value="Applicable" control={<Radio size="small" />} label="Applicable" />
+            <FormControlLabel value="Not Applicable" control={<Radio size="small" />} label="Not Applicable" />
+          </RadioGroup>
+        </Stack>
+        <RaiseRequest fields={[]} task_id={gift_income.task_id} />
       </Stack>
       {giftApplicable === 'Applicable' && (
         <>
@@ -3768,6 +3852,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                         size="small"
                         fullWidth
                         placeholder="Amount"
+                        type="number"
                         value={row?.amount}
                         onChange={(e) => {
                           const updated = [...giftRows];
@@ -3884,19 +3969,27 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
         />
       </Box>
       {/* Family Pension Income Section */}
-      <Stack direction="row" spacing={2} alignItems="center" mb={familyApplicable === 'Applicable' ? 0 : 2}>
-        <Typography>Family Pension Income: </Typography>
-        <RadioGroup
-          row
-          value={familyApplicable}
-          onChange={(_, v) => {
-            setFamilyApplicable(v);
-            postIncomeApplicability(v, 'family-pension-income', 'family_pension_income', family_income.task_id);
-          }}
-        >
-          <FormControlLabel value="Applicable" control={<Radio size="small" />} label="Applicable" />
-          <FormControlLabel value="Not Applicable" control={<Radio size="small" />} label="Not Applicable" />
-        </RadioGroup>
+      <Stack
+        direction="row"
+        spacing={2}
+        alignItems="center"
+        sx={{ mb: familyApplicable === 'Applicable' ? 1 : 2, justifyContent: 'space-between', mt: 2 }}
+      >
+        <Stack direction="row" spacing={2} alignItems="center">
+          <Typography>Family Pension Income: </Typography>
+          <RadioGroup
+            row
+            value={familyApplicable}
+            onChange={(_, v) => {
+              setFamilyApplicable(v);
+              postIncomeApplicability(v, 'family-pension-income', 'family_pension_income', family_income.task_id);
+            }}
+          >
+            <FormControlLabel value="Applicable" control={<Radio size="small" />} label="Applicable" />
+            <FormControlLabel value="Not Applicable" control={<Radio size="small" />} label="Not Applicable" />
+          </RadioGroup>
+        </Stack>
+        <RaiseRequest fields={[]} task_id={family_income.task_id} />
       </Stack>
       {familyApplicable === 'Applicable' && (
         <>
@@ -3917,6 +4010,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                         size="small"
                         fullWidth
                         placeholder="Amount Received"
+                        type="number"
                         value={row?.amount}
                         onChange={(e) => {
                           const updated = [...familyRows];
@@ -3946,7 +4040,11 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                           Save
                         </Button>
                         {familyRows?.length > 1 && (
-                          <IconButton size="small" color="error" onClick={() => removeRow(row.id, 'family-pension-income-documents', idx)}>
+                          <IconButton
+                            size="small"
+                            color="error"
+                            onClick={() => removeRow(row.id, 'family-pension-income-documents/files', idx)}
+                          >
                             <DeleteIcon />
                           </IconButton>
                         )}
@@ -3976,19 +4074,27 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
         />
       </Box>
       {/* Foreign Income Section */}
-      <Stack direction="row" spacing={2} alignItems="center" mb={foreignApplicable === 'Applicable' ? 0 : 2}>
-        <Typography>Foreign Income: </Typography>
-        <RadioGroup
-          row
-          value={foreignApplicable}
-          onChange={(_, v) => {
-            setForeignApplicable(v);
-            postIncomeApplicability(v, 'foreign-income', 'foreign_income', foreign_income.task_id);
-          }}
-        >
-          <FormControlLabel value="Applicable" control={<Radio size="small" />} label="Applicable" />
-          <FormControlLabel value="Not Applicable" control={<Radio size="small" />} label="Not Applicable" />
-        </RadioGroup>
+      <Stack
+        direction="row"
+        spacing={2}
+        alignItems="center"
+        sx={{ mb: foreignApplicable === 'Applicable' ? 1 : 2, justifyContent: 'space-between', mt: 2 }}
+      >
+        <Stack direction="row" spacing={2} alignItems="center">
+          <Typography>Foreign Income: </Typography>
+          <RadioGroup
+            row
+            value={foreignApplicable}
+            onChange={(_, v) => {
+              setForeignApplicable(v);
+              postIncomeApplicability(v, 'foreign-income', 'foreign_income', foreign_income.task_id);
+            }}
+          >
+            <FormControlLabel value="Applicable" control={<Radio size="small" />} label="Applicable" />
+            <FormControlLabel value="Not Applicable" control={<Radio size="small" />} label="Not Applicable" />
+          </RadioGroup>
+        </Stack>
+        <RaiseRequest fields={[]} task_id={foreign_income.task_id} />
       </Stack>
       {foreignApplicable === 'Applicable' && (
         <>
@@ -4059,6 +4165,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                         size="small"
                         fullWidth
                         placeholder="Amount"
+                        type="number"
                         value={row?.amount}
                         onChange={(e) => {
                           const updated = [...foreignRows];
@@ -4168,19 +4275,27 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
         />
       </Box>
       {/* Winnings/Lottery Income Section */}
-      <Stack direction="row" spacing={2} alignItems="center" mb={winningsApplicable === 'Applicable' ? 0 : 2}>
-        <Typography>Winnings/Lottery Income: </Typography>
-        <RadioGroup
-          row
-          value={winningsApplicable}
-          onChange={(_, v) => {
-            setWinningsApplicable(v);
-            postIncomeApplicability(v, 'winning-income', 'winning_income', winning_income.task_id);
-          }}
-        >
-          <FormControlLabel value="Applicable" control={<Radio size="small" />} label="Applicable" />
-          <FormControlLabel value="Not Applicable" control={<Radio size="small" />} label="Not Applicable" />
-        </RadioGroup>
+      <Stack
+        direction="row"
+        spacing={2}
+        alignItems="center"
+        sx={{ mb: winningsApplicable === 'Applicable' ? 1 : 2, justifyContent: 'space-between', mt: 2 }}
+      >
+        <Stack direction="row" spacing={2} alignItems="center">
+          <Typography>Winnings/Lottery Income: </Typography>
+          <RadioGroup
+            row
+            value={winningsApplicable}
+            onChange={(_, v) => {
+              setWinningsApplicable(v);
+              postIncomeApplicability(v, 'winning-income', 'winning_income', winning_income.task_id);
+            }}
+          >
+            <FormControlLabel value="Applicable" control={<Radio size="small" />} label="Applicable" />
+            <FormControlLabel value="Not Applicable" control={<Radio size="small" />} label="Not Applicable" />
+          </RadioGroup>
+        </Stack>
+        <RaiseRequest fields={[]} task_id={winning_income.task_id} />
       </Stack>
       {winningsApplicable === 'Applicable' && (
         <>
@@ -4216,6 +4331,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                         size="small"
                         fullWidth
                         placeholder="Amount"
+                        type="number"
                         value={row?.amount}
                         onChange={(e) => {
                           const updated = [...winningsRows];
@@ -4349,19 +4465,22 @@ const AgricultureIncome = ({ data, service_id, setFileDialogOpen, fileDialogOpen
 
   return (
     <Box>
-      <Stack direction="row" spacing={2} alignItems="center" mb={2}>
-        <Typography>Do you have agricultural income during F.Y.? </Typography>
-        <RadioGroup
-          row
-          value={agricultureIncome.agriculture}
-          onChange={(_, v) => {
-            postIncomeApplicability(v);
-            setAgricultureIncome({ ...agricultureIncome, agriculture: v });
-          }}
-        >
-          <FormControlLabel value="Applicable" control={<Radio size="small" />} label="Yes" />
-          <FormControlLabel value="Not Applicable" control={<Radio size="small" />} label="No" />
-        </RadioGroup>
+      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
+        <Box>
+          <Typography>Do you have agricultural income during F.Y.? </Typography>
+          <RadioGroup
+            row
+            value={agricultureIncome.agriculture}
+            onChange={(_, v) => {
+              postIncomeApplicability(v);
+              setAgricultureIncome({ ...agricultureIncome, agriculture: v });
+            }}
+          >
+            <FormControlLabel value="Applicable" control={<Radio size="small" />} label="Yes" />
+            <FormControlLabel value="Not Applicable" control={<Radio size="small" />} label="No" />
+          </RadioGroup>
+        </Box>
+        <RaiseRequest fields={['Agricultural income during F.Y.']} task_id={data?.task_id} />
       </Stack>
       {agricultureIncome.agriculture === 'Applicable' && (
         <Stack direction="row" spacing={1} alignItems="center" mb={2}>
@@ -4385,9 +4504,9 @@ const AgricultureIncome = ({ data, service_id, setFileDialogOpen, fileDialogOpen
               sx={{ ml: 1 }}
               onClick={() => {
                 if (agricultureIncome?.file instanceof File) {
-                  viewFile(agricultureIncome?.file);
+                  window.open(URL.createObjectURL(agricultureIncome?.file), '_blank');
                 } else {
-                  window.open(agricultureIncome?.file, '_blank');
+                  viewFile(agricultureIncome?.file);
                 }
               }}
             >

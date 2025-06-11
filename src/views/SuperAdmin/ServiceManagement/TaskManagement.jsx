@@ -17,6 +17,7 @@ import { useSelector } from 'store';
 import { gridSpacing } from 'store/constant';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
+import SubTasks from 'views/application/ManageTasks/SubTasks';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import MenuItem from '@mui/material/MenuItem';
@@ -181,11 +182,7 @@ export default function TaskManagement() {
           </Grid> */}
           {tab === 0 && <ServiceRequests searchQuery={searchQuery} assigned={true} />}
           {tab === 1 && <TaskTable searchQuery={searchQuery} assigned={true} />}
-          {tab === 2 && (
-            <Box sx={{ p: 3, textAlign: 'center', color: 'grey.600' }}>
-              <Typography variant="h6">Sub Tasks Table (Coming Soon)</Typography>
-            </Box>
-          )}
+          {tab === 2 && <SubTasks searchQuery={searchQuery} assigned={true} />}
         </Box>
       </MainCard>
       <Snackbar
