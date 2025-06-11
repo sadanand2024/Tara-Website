@@ -43,38 +43,30 @@ export default function NewRequests() {
   return (
     <>
       <MainCard
-        title={
-          <Grid container spacing={gridSpacing} sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
-            <Grid>
-              <Typography variant="h3" sx={{ p: 0 }}>
-                Service Requests
-              </Typography>
-            </Grid>
-            <Grid>
-              <Stack direction="row" spacing={2}>
-                {/* <Button variant="contained" startIcon={<AddIcon />} size="small">
+        title="Service Requests"
+        secondary={
+          <Stack direction="row" spacing={2}>
+            {/* <Button variant="contained" startIcon={<AddIcon />} size="small">
                   Add Servies
                 </Button>
                 <Button variant="contained" startIcon={<AddIcon />} size="small">
                   Bulk Assign
                 </Button> */}
-                <OutlinedInput
-                  id="input-search-list-style1"
-                  placeholder="Search"
-                  value={searchQuery}
-                  onChange={handleSearch}
-                  startAdornment={
-                    <InputAdornment position="start">
-                      <IconSearch stroke={1.5} size="16px" />
-                    </InputAdornment>
-                  }
-                  size="small"
-                />
-              </Stack>
-            </Grid>
-          </Grid>
+            <OutlinedInput
+              id="input-search-list-style1"
+              placeholder="Search"
+              value={searchQuery}
+              onChange={handleSearch}
+              startAdornment={
+                <InputAdornment position="start">
+                  <IconSearch stroke={1.5} size="16px" />
+                </InputAdornment>
+              }
+              size="small"
+            />
+          </Stack>
         }
-        content={false}
+        // content={false}
       >
         <ServiceRequests searchQuery={searchQuery} assigned={false} setSearchQuery={setSearchQuery} />
       </MainCard>

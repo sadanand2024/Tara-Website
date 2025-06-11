@@ -355,7 +355,7 @@ const InvoiceNumberFormat = ({ businessDetails, handleBack, handleNext }) => {
 
   return (
     <Box>
-      <Typography variant="h5" gutterBottom>
+      <Typography variant="h4" gutterBottom>
         Invoice Number Format Configuration
       </Typography>
 
@@ -485,9 +485,14 @@ const InvoiceNumberFormat = ({ businessDetails, handleBack, handleNext }) => {
 
           <Divider sx={{ my: 2 }} />
 
-          <Typography variant="h5">Preview</Typography>
+          <Typography variant="h5">
+            Preview <span style={{ color: 'text.textSecondary' }}> Ex : (INV-BR-2024-25-A-0001) </span>
+          </Typography>
           <Grid2 container spacing={2} my={2}>
             <Grid2 size={{ xs: 6 }}>
+              <Typography variant="body1" color="textSecondary" gutterBottom>
+                Current Format:
+              </Typography>
               <TextField size="small" fullWidth value={generatePreview()} disabled sx={{ backgroundColor: 'white' }} />
             </Grid2>
           </Grid2>

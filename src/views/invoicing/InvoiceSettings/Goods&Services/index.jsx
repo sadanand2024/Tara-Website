@@ -49,7 +49,8 @@ export default function TabThree({ businessDetails, handleNext, handleBack }) {
       <Grid2 container spacing={2}>
         {/* Header Section */}
         <Grid2 size={{ xs: 12 }}>
-          <Stack direction="row" alignItems="center" justifyContent="flex-end" spacing={2}>
+          <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={2}>
+            <Typography variant="h4">Goods & Services</Typography>
             <Button variant="contained" startIcon={<IconPlus size={16} />} onClick={handleOpen}>
               Add Item
             </Button>
@@ -95,7 +96,7 @@ export default function TabThree({ businessDetails, handleNext, handleBack }) {
           Back To Dashboard
         </Button>
         <Stack direction="row" spacing={2}>
-          <Button variant="contained" onClick={handleBack}>
+          <Button variant="outlined" onClick={handleBack}>
             Back
           </Button>
           <Button variant="contained" onClick={handleNext}>
