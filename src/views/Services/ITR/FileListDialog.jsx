@@ -22,6 +22,7 @@ import { useSnackbar } from 'notistack';
 import { Download, Visibility } from '@mui/icons-material';
 
 const FileListDialog = ({ open, onClose, files, getStep1Data, getStep2Data, getStep3Data, step }) => {
+  console.log('files', files);
   const { enqueueSnackbar } = useSnackbar();
   const [filesData, setFilesData] = useState([]);
 
