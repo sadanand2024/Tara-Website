@@ -75,7 +75,6 @@ const FileListDialog = ({ open, onClose, files, getStep1Data, getStep2Data, getS
       }
     }
   };
-  console.log(filesData);
   return (
     <Dialog
       open={open}
