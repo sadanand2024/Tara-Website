@@ -14,7 +14,8 @@ import {
   Stack,
   Tooltip,
   TextField,
-  Card
+  Card,
+  Autocomplete
 } from '@mui/material';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
@@ -23,28 +24,30 @@ import { openSnackbar } from 'store/slices/snackbar';
 import Factory from 'utils/Factory';
 import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
 
-const PromoterSignatorySection = () => {
+const StepTwo = () => {
   const dispatch = useDispatch();
   const [saveIndex, setSaveIndex] = useState(null); // <-- index of promoter to save
 
   const getSignatoryDetails = async () => {
-    const url = `/labourlicense/signatory-details/by-request?service_request_id=24`;
+    const url = `/gst/promoter-signatory-details/by-service-request/?service_request_id=32`;
     const { res } = await Factory('get', url);
-   const signatorydetailsinfo = res?.data?.signatory_details_info ?? res?.signatory_details_info ?? [];
+    // console.log('Signatory Details Response:', res.data.info_list);
 
-        if (res.status_cd === 0 && Array.isArray(signatorydetailsinfo)) {
+    const infoList = res?.data?.info_list ?? res?.info_list ?? [];
 
-    // if (res.status_cd === 0) {
+    if (res.status_cd === 0 && Array.isArray(infoList)) {
       const promoters =
-        signatorydetailsinfo.map((item) => ({
+        infoList.map((item) => ({
           name: item.name || '',
-          aadhar_image: item.aadhar_image || null,
-          pan_image: item.pan_image || null,
-          photo_image: item.photo_image || null,
-          address: item.address || '',
+          aadhaar: item.aadhaar || null,
+          pan: item.pan || null,
+          photo: item.photo || null,
+          residential_address: item.residential_address || '',
           email: item.email || '',
-          mobile_number: item.mobile_number || '',
-          residential_address: item.residential_address === 'yes',
+          mobile: item.mobile || '',
+          gender: item.gender || '',
+          designation: item.designation || '',
+          residential_same_as_aadhaar_address: item.residential_same_as_aadhaar_address === 'Yes',
           id: item.id || ''
         })) || [];
 
@@ -71,13 +74,15 @@ const PromoterSignatorySection = () => {
       promoters: [
         {
           name: '',
-          aadhar_image: null,
-          pan_image: null,
-          photo_image: null,
-          address: '',
+          aadhaar: null,
+          pan: null,
+          photo: null,
+          residential_address: '',
           email: '',
-          mobile_number: '',
-          residential_address: true
+          mobile: '',
+          gender: '',
+          designation: '',
+          residential_same_as_aadhaar_address: 'true'
         }
       ]
     },
@@ -85,13 +90,15 @@ const PromoterSignatorySection = () => {
       promoters: Yup.array().of(
         Yup.object({
           name: Yup.string().required('Name is required'),
-          aadhar_image: Yup.mixed().required('Aadhaar file is required'),
-          pan_image: Yup.mixed().required('PAN file is required'),
-          photo_image: Yup.mixed().required('Photo file is required'),
-          // address: Yup.string().required('Address is required'),
+          aadhaar: Yup.mixed().required('Aadhaar file is required'),
+          pan: Yup.mixed().required('PAN file is required'),
+          photo: Yup.mixed().required('Photo file is required'),
+          // residential_address: Yup.string().required('residential_address is required'),
           email: Yup.string().email('Invalid email').required('Email is required'),
-          mobile_number: Yup.string().required('Mobile is required'),
-          residential_address: Yup.boolean()
+          mobile: Yup.string().required('Mobile is required'),
+          gender: Yup.string().required('gender is required'),
+          designation: Yup.string().required('designation is required'),
+          residential_same_as_aadhaar_address: Yup.boolean('')
         })
       )
     }),
@@ -102,27 +109,32 @@ const PromoterSignatorySection = () => {
 
       try {
         let formData = new FormData();
-        formData.append('service_request', 24);
-        formData.append('service_task', 7);
+        formData.append('service_request', 32);
+        formData.append('service_task', 69);
         formData.append('name', promoter.name);
-        if (promoter.aadhar_image && typeof promoter.aadhar_image !== 'string') {
-          formData.append('aadhar_image', promoter.aadhar_image);
+        if (promoter.aadhaar && typeof promoter.aadhaar !== 'string') {
+          formData.append('aadhaar', promoter.aadhaar);
         }
-        if (promoter.pan_image && typeof promoter.pan_image !== 'string') {
-          formData.append('pan_image', promoter.pan_image);
+        if (promoter.pan && typeof promoter.pan !== 'string') {
+          formData.append('pan', promoter.pan);
         }
-        if (promoter.photo_image && typeof promoter.photo_image !== 'string') {
-          formData.append('photo_image', promoter.photo_image);
+        if (promoter.photo && typeof promoter.photo !== 'string') {
+          formData.append('photo', promoter.photo);
         }
         formData.append('email', promoter.email);
-        formData.append('mobile_number', promoter.mobile_number);
-        formData.append('address', promoter.address);
-        formData.append('residential_address', promoter.residential_address ? 'yes' : 'no');
+        formData.append('mobile', promoter.mobile);
+        formData.append('residential_address', promoter.residential_address);
+        formData.append('gender', promoter.gender);
+        formData.append('designation', promoter.designation);
+        formData.append('residential_same_as_aadhaar_address', promoter.residential_same_as_aadhaar_address ? 'Yes' : 'No');
         formData.append('status', 'in progress');
+        // formData.append('id', promoter.id || ''); // Include ID if it exists
+        // let url = `/gst/promoter-signatory-details/`;
 
-        let url = promoter.id ? `/labourlicense/signatory-details/${promoter.id}/` : `/labourlicense/signatory-details/`;
-
-        const { res } = await Factory(promoter.id ? 'put' : 'post', url, formData);
+        // const { res } = await Factory( 'post', url, formData);
+         let url = promoter.id ? `/gst/promoter-signatory-details/${promoter.id}/update/` : `/gst/promoter-signatory-details/`;
+        
+                const { res } = await Factory(promoter.id ? 'put' : 'post', url, formData);
 
         if (res.status_cd === 1) {
           dispatch(
@@ -169,13 +181,15 @@ const PromoterSignatorySection = () => {
         ...values.promoters,
         {
           name: '',
-          aadhar_image: null,
-          pan_image: null,
-          photo_image: null,
-          address: '',
+          aadhaar: null,
+          pan: null,
+          photo: null,
+          residential_address: '',
           email: '',
-          mobile_number: '',
-          residential_address: true
+          mobile: '',
+          gender: '',
+          designation: '',
+          residential_same_as_aadhaar_address: true
         }
       ]);
     }
@@ -197,7 +211,7 @@ const PromoterSignatorySection = () => {
       return;
     }
     // Otherwise, make API call
-    let url = `/labourlicense/signatory-details/${promoter.id}/`;
+    let url = `/gst/promoter-signatory-info/${promoter.id}/delete/`;
     const { res } = await Factory('delete', url);
     if (res.status_cd === 0) {
       const updatedPromoters = [...formik.values.promoters];
@@ -207,7 +221,7 @@ const PromoterSignatorySection = () => {
     if (res.status_cd === 1) {
       dispatch(
         openSnackbar({
-          open: true,
+          open: true, 
           message: JSON.stringify(res.data.data) || 'Something went wrong',
           variant: 'alert',
           alert: { color: 'error' },
@@ -245,7 +259,19 @@ const PromoterSignatorySection = () => {
           <Table>
             <TableHead>
               <TableRow sx={{ bgcolor: 'primary.main' }}>
-                {['Name', 'Aadhaar', 'PAN', 'Photo', 'Mobile', 'Email', 'Address', 'Same As Aadhaar', 'Action'].map((head) => (
+                {[
+                  'Name',
+                  'Mobile',
+                  'Email',
+                  'PAN',
+                  'Aadhaar',
+                  'Photo',
+                  'Gender',
+                  'Designation',
+                  'Residential Address',
+                  ' Same As Aadhaar',
+                  'Action'
+                ].map((head) => (
                   <TableCell
                     key={head}
                     sx={{
@@ -271,7 +297,7 @@ const PromoterSignatorySection = () => {
                     <TextField
                       fullWidth
                       size="small"
-                       sx={{
+                      sx={{
                         minWidth: 150,
                         maxWidth: 150
                       }}
@@ -284,60 +310,22 @@ const PromoterSignatorySection = () => {
                       helperText={touched.promoters?.[idx]?.name && errors.promoters?.[idx]?.name}
                     />
                   </TableCell>
-
-                  {/* Aadhaar Upload */}
-                  <TableCell>
-                    <RenderFileUpload
-                      label="Aadhaar"
-                      fieldName={`promoters[${idx}].aadhar_image`}
-                      file={promoter.aadhar_image}
-                       
-                      setFieldValue={setFieldValue}
-                      touched={touched.promoters?.[idx]?.aadhar_image}
-                      errors={errors.promoters?.[idx]?.aadhar_image}
-                    />
-                  </TableCell>
-
-                  {/* PAN Upload */}
-                  <TableCell>
-                    <RenderFileUpload
-                      label="PAN"
-                      fieldName={`promoters[${idx}].pan_image`}
-                      file={promoter.pan_image}
-                      setFieldValue={setFieldValue}
-                      touched={touched.promoters?.[idx]?.pan_image}
-                      errors={errors.promoters?.[idx]?.pan_image}
-                    />
-                  </TableCell>
-
-                  {/* Photo Upload */}
-                  <TableCell>
-                    <RenderFileUpload
-                      label="Photo"
-                      fieldName={`promoters[${idx}].photo_image`}
-                      file={promoter.photo_image}
-                      setFieldValue={setFieldValue}
-                      touched={touched.promoters?.[idx]?.photo_image}
-                      errors={errors.promoters?.[idx]?.photo_image}
-                    />
-                  </TableCell>
-
                   {/* Mobile */}
                   <TableCell>
                     <TextField
                       fullWidth
                       size="small"
-                      label="Mobile"
-                       sx={{
+                      sx={{
                         minWidth: 150,
                         maxWidth: 150
                       }}
-                      name={`promoters[${idx}].mobile_number`}
-                      value={promoter.mobile_number}
+                      label="Mobile"
+                      name={`promoters[${idx}].mobile`}
+                      value={promoter.mobile}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      error={touched.promoters?.[idx]?.mobile_number && Boolean(errors.promoters?.[idx]?.mobile_number)}
-                      helperText={touched.promoters?.[idx]?.mobile_number && errors.promoters?.[idx]?.mobile_number}
+                      error={touched.promoters?.[idx]?.mobile && Boolean(errors.promoters?.[idx]?.mobile)}
+                      helperText={touched.promoters?.[idx]?.mobile && errors.promoters?.[idx]?.mobile}
                     />
                   </TableCell>
 
@@ -346,11 +334,11 @@ const PromoterSignatorySection = () => {
                     <TextField
                       fullWidth
                       size="small"
-                      label="Email"
-                       sx={{
+                      sx={{
                         minWidth: 150,
                         maxWidth: 150
                       }}
+                      label="Email"
                       name={`promoters[${idx}].email`}
                       value={promoter.email}
                       onChange={handleChange}
@@ -359,10 +347,90 @@ const PromoterSignatorySection = () => {
                       helperText={touched.promoters?.[idx]?.email && errors.promoters?.[idx]?.email}
                     />
                   </TableCell>
-
-                  {/* Address */}
+                  {/* PAN Upload */}
                   <TableCell>
-                    {promoter.residential_address ? (
+                    <RenderFileUpload
+                      label="PAN"
+                      fieldName={`promoters[${idx}].pan`}
+                      file={promoter.pan}
+                      setFieldValue={setFieldValue}
+                      touched={touched.promoters?.[idx]?.pan}
+                      errors={errors.promoters?.[idx]?.pan}
+                    />
+                  </TableCell>
+
+                  {/* Aadhaar Upload */}
+                  <TableCell>
+                    <RenderFileUpload
+                      label="Aadhaar"
+                      fieldName={`promoters[${idx}].aadhaar`}
+                      file={promoter.aadhaar}
+                      setFieldValue={setFieldValue}
+                      touched={touched.promoters?.[idx]?.aadhaar}
+                      errors={errors.promoters?.[idx]?.aadhaar}
+                    />
+                  </TableCell>
+
+                  {/* Photo Upload */}
+                  <TableCell>
+                    <RenderFileUpload
+                      label="Photo"
+                      fieldName={`promoters[${idx}].photo`}
+                      file={promoter.photo}
+                      setFieldValue={setFieldValue}
+                      touched={touched.promoters?.[idx]?.photo}
+                      errors={errors.promoters?.[idx]?.photo}
+                    />
+                  </TableCell>
+
+                  {/* Mobile */}
+
+                  {/* Gender */}
+                  <TableCell>
+                    <Autocomplete
+                      fullWidth
+                      size="small"
+                       sx={{
+                        minWidth: 150,
+                        maxWidth: 150
+                      }}
+                      options={['male', 'female']}
+                      value={promoter.gender || ''}
+                      onChange={(e, value) => setFieldValue(`promoters[${idx}].gender`, value)}
+                      onBlur={handleBlur}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          label="Gender"
+                          name={`promoters[${idx}].gender`}
+                          error={touched.promoters?.[idx]?.gender && Boolean(errors.promoters?.[idx]?.gender)}
+                          helperText={touched.promoters?.[idx]?.gender && errors.promoters?.[idx]?.gender}
+                        />
+                      )}
+                    />
+                  </TableCell>
+
+                  <TableCell>
+                    <TextField
+                      fullWidth
+                      size="small"
+                       sx={{
+                        minWidth: 150,
+                        maxWidth: 150
+                      }}
+                      label="Designation"
+                      name={`promoters[${idx}].designation`}
+                      value={promoter.designation || ''}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      error={touched.promoters?.[idx]?.designation && Boolean(errors.promoters?.[idx]?.designation)}
+                      helperText={touched.promoters?.[idx]?.designation && errors.promoters?.[idx]?.designation}
+                    />
+                  </TableCell>
+
+                  {/* Residential Address */}
+                  <TableCell>
+                    {promoter.residential_same_as_aadhaar_address ? (
                       <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
                         Address as per Aadhaar
                       </Typography>
@@ -370,30 +438,28 @@ const PromoterSignatorySection = () => {
                       <TextField
                         fullWidth
                         size="small"
-                        label="Address"
-                         sx={{
-                        minWidth: 150,
-                        maxWidth: 150
-                      }}
-                        name={`promoters[${idx}].address`}
-                        value={promoter.address}
+                        label="Residential Address"
+                        name={`promoters[${idx}].residential_address`}
+                        value={promoter.residential_address}
                         onChange={handleChange}
                         onBlur={handleBlur}
-                        error={touched.promoters?.[idx]?.address && Boolean(errors.promoters?.[idx]?.address)}
-                        helperText={touched.promoters?.[idx]?.address && errors.promoters?.[idx]?.address}
+                        error={touched.promoters?.[idx]?.residential_address && Boolean(errors.promoters?.[idx]?.residential_address)}
+                        helperText={touched.promoters?.[idx]?.residential_address && errors.promoters?.[idx]?.residential_address}
                       />
                     )}
                   </TableCell>
 
-                  {/* Checkbox */}
+                  {/* Checkbox: Same as Aadhaar */}
                   <TableCell align="center">
                     <Tooltip title="Same as per Aadhaar">
                       <Checkbox
-                        checked={promoter.residential_address}
+                        checked={promoter.residential_same_as_aadhaar_address === true || promoter.residential_same_as_aadhaar_address === 'true'}
+
                         onChange={(e) => {
-                          setFieldValue(`promoters[${idx}].residential_address`, e.target.checked);
-                          if (e.target.checked) {
-                            setFieldValue(`promoters[${idx}].address`, ''); // Clear address field if checkbox checked
+                          const checked = e.target.checked;
+                          setFieldValue(`promoters[${idx}].residential_same_as_aadhaar_address`, checked);
+                          if (checked) {
+                            setFieldValue(`promoters[${idx}].residential_address`, '');
                           }
                         }}
                       />
@@ -429,4 +495,4 @@ const PromoterSignatorySection = () => {
   );
 };
 
-export default PromoterSignatorySection;
+export default StepTwo;

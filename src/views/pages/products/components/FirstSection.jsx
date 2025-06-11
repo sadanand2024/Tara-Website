@@ -138,7 +138,7 @@ function Items({ title, caption, image, link }) {
 export default function FirstSection({ data }) {
   const theme = useTheme();
   const downMD = useMediaQuery(theme.breakpoints.down('md'));
-  console.log(data);
+  // console.log(data);
   return (
     <Grid container sx={{ justifyContent: 'center', px: 1.25, gap: 7.5 }}>
       <Grid size={12}>

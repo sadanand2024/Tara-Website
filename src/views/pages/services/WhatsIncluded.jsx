@@ -1,7 +1,6 @@
 import CheckIcon from '@mui/icons-material/Check';
 import {
   Box,
-  Grid,
   List,
   ListItem,
   ListItemIcon,
@@ -9,6 +8,7 @@ import {
   Paper,
   Typography,
 } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import Include_image from 'assets/images/landing/Include_image.png';
 import React from 'react';
 import { Fade } from 'react-awesome-reveal';
@@ -16,89 +16,80 @@ import { Fade } from 'react-awesome-reveal';
 const WhatsIncluded = ({ title = "What's Included", items }) => {
   return (
     <Fade triggerOnce direction="up">
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: { xs: '60px', md: '125px' } }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: { xs: '60px', md: '60px' } }}>
         <Paper
           elevation={0}
           sx={{
             maxWidth: '1150px',
             width: '100%',
-            minHeight: { xs: 'auto', md: '505px' },
-            borderRadius: { xs: '12px', md: '12px' },
+            borderRadius: '20px',
             border: '0.5px solid #0023AF',
             backgroundColor: '#FFFFFF',
-            p: 0,
-            display: 'flex',
-            alignItems: 'stretch',
-            gap: '0',
             overflow: 'hidden',
+            height:'60%',
+            
           }}
         >
-          <Grid container spacing={{ xs: 0, md: 4 }} alignItems="stretch">
-            {/* Left Image */}
-            <Grid item xs={12} md={6} sx={{ p: 0, m: 0 ,}}>
+          <Grid container sx={{ minHeight: { xs: 'auto', md: '400px' },minWidth: { xs: 'auto', md: '600px' } }}>
+            {/* Left Image - exactly half width and full height */}
+            <Grid xs={12} md={6}>
               <Box
-                component="img"
-                src={Include_image}
-                alt="Service Features"
                 sx={{
-                  width: '100%',
-                  height: { xs: '300px', md: '100%' },
-                  borderRadius: { xs: '12px 12px 0 0', md: '6px 0 0 6px' },
-                  objectFit: 'cover',
-                  margin: 0,
-                  padding: 0,
-                  display: 'block',
+                  width: '548px',
+                  height: '100%',
+                  display: 'flex',
                 }}
-              />
+              >
+                <Box
+                  component="img"
+                  src={Include_image}
+                  alt="Service Features"
+                  sx={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    display: 'block',
+                  }}
+                />
+              </Box>
             </Grid>
 
             {/* Right Content */}
-            <Grid item xs={12} md={6}>
-              <Box
-                sx={{
-                  p: { xs: 3, sm: 4, md: 4 },
-                  height: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'center',
-                }}
-              >
+            <Grid xs={12} md={6} sx={{ display: 'flex', alignItems: 'center' }}>
+              <Box sx={{ p: { xs: 3, sm: 4, md: 4 }, width: '600px' }}>
                 <Typography
-                  gutterBottom
                   sx={{
-                    fontFamily: 'Manrope, sans-serif',
+                    fontFamily: 'Inter',
                     fontWeight: 700,
-                    fontSize: { xs: '28px', sm: '32px', md: '38px' },
+                    fontSize: { xs: '24px', sm: '28px', md: '28px' },
                     lineHeight: '120%',
-                    letterSpacing: '0px',
-                    mr: { xs: 0, md: '140px' },
                     color: '#000000',
-                    mb: { xs: 2, md: 3 },
+                    mt: { xs:2, md: -5 },
                   }}
                 >
                   {title}
                 </Typography>
-                <List dense sx={{ pl: { xs: 0, md: '24px' } }}>
+                <Box sx={{mt:-8}}>
+                <List dense sx={{mt:10}}>
                   {items.map((item, index) => (
                     <ListItem key={index} disableGutters>
-                      <ListItemIcon sx={{ minWidth: { xs: '28px', md: '32px' } }}>
-                        <CheckIcon sx={{ color: '#1d4ed8', fontSize: { xs: '20px', md: '24px' } }} />
+                      <ListItemIcon sx={{ minWidth: '30px' }}>
+                        <CheckIcon sx={{ color: '#1d4ed8' }} />
                       </ListItemIcon>
                       <ListItemText
                         primary={item}
                         primaryTypographyProps={{
                           fontFamily: 'Inter',
                           fontWeight: 500,
-                          fontSize: { xs: '18px', sm: '20px', md: '22px' },
-                          lineHeight: '140%',
-                          letterSpacing: '0px',
+                          fontSize: { xs: '16px', md: '18px' },
                           color: '#001033',
-                          margin: '2px',
+                          
                         }}
                       />
                     </ListItem>
                   ))}
                 </List>
+                </Box>
               </Box>
             </Grid>
           </Grid>

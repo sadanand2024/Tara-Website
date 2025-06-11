@@ -189,6 +189,15 @@ export default function Services() {
       docs: '0 uploaded',
       icon: <DescriptionIcon color="primary" sx={{ fontSize: 40 }} />,
       href: '/app/my-services/trade-license'
+    },
+    {
+      title: 'GST Registration - FY: 2024-25 (Business)',
+      status: 'In Progress',
+      progress: 0,
+      tasks: '0 Pending',
+      docs: '0 uploaded',
+      icon: <DescriptionIcon color="primary" sx={{ fontSize: 40 }} />,
+      href: '/app/my-services/gst-registration'
     }
   ];
 

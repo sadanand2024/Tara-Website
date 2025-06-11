@@ -20,23 +20,24 @@ const PricingPlans = ({ data }) => {
   return (
     <Fade triggerOnce direction="up">
       <Container sx={{ 
-        py: { xs: 3, md: 6 },
-        mt:{xs:0,lg:0}
+        py: { xs: 0,sm:1},
+        mt:{xs:0,sm:-6}
         // background: 'linear-gradient(270.18deg, rgba(184, 198, 255, 0.5) 0.15%, #FDFDFF 99.85%)'
       }}>
         {/* Section Title */}
         <Typography 
           variant="h2" 
-          fontWeight={700} 
-          textAlign="center" 
+          fontWeight={700}
+          textAlign="center"
           mb={4}
           sx={{
-            fontFamily: 'Manrope',
+            fontFamily: 'Inter',
             fontWeight: 700,
             fontSize: '38px',
             lineHeight: '100%',
             letterSpacing: '0px',
             color: '#000000',
+            mt: { xs: 0, lg:2},
             
           }}
         >
@@ -70,12 +71,12 @@ const PricingPlans = ({ data }) => {
                     variant: 'h6',
                     fontWeight: 800,
                     color: '#001033',
-                    fontSize: '22px',
+                    fontSize: '20px',
                     lineHeight: '100%',
                     letterSpacing: '0px',
-                    fontFamily: 'Manrope',
+                    fontFamily: 'Inter',
                     textAlign: 'left',
-                    whiteSpace: 'normal'
+                    whiteSpace: 'nowrap'
                   }}
                   subheaderTypographyProps={{
                     fontSize: '16px',
@@ -109,7 +110,7 @@ const PricingPlans = ({ data }) => {
                     variant="h5"
                     fontWeight={600}
                     sx={{
-                      fontSize: '28px',
+                      fontSize: '26px',
                       lineHeight: '100%',
                       letterSpacing: '0px',
                       fontFamily: 'Inter',
@@ -142,7 +143,10 @@ const PricingPlans = ({ data }) => {
                     </Box>
                   )}
                 </CardContent>
-                <CardActions sx={{ p:0.1, mt: 'auto', justifyContent: 'flex-start', padding: '0 16px 28px 16px' }}>
+                <CardActions sx={{ p:0.1, mt: 'auto', justifyContent: {
+      xs: 'center',  // center on mobile
+      sm: 'flex-start'  // left-aligned on tablet and above
+    }, padding: '0 16px 28px 16px' }}>
                   <Button
                     fullWidth
                     variant="contained"

@@ -17,7 +17,7 @@ const ProductPage = () => {
   const theme = useTheme();
   const { category } = useParams();
   const productData = productsData[category];
-  console.log(productData);
+  // console.log(productData);
   if (!productData) {
     return <ErrorPage />;
   }
