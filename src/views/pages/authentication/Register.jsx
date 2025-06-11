@@ -74,9 +74,6 @@ export default function Register() {
                           <Typography gutterBottom variant={downMD ? 'h3' : 'h2'} sx={{ color: 'secondary.main' }}>
                             Sign up
                           </Typography>
-                          <Typography variant="caption" sx={{ fontSize: '16px', textAlign: { xs: 'center', md: 'inherit' } }}>
-                            Enter your details to continue
-                          </Typography>
                         </Stack>
                       </Grid>
                     </Grid>

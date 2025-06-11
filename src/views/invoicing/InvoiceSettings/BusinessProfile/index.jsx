@@ -250,7 +250,6 @@ export default function TabOne({ businessDetails = {}, postType, handleNext, set
       formData.append('logo', file);
       logoposttype === 'post' && formData.append('business', businessDetails.id);
       let { res, error } = await Factory(logoposttype, url, formData);
-      console.log(res);
       if (res.status_cd === 0) {
         setLogoUrlDetails(res.data);
         setLogoposttype('put');

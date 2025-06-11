@@ -36,16 +36,14 @@ function Worklocation() {
   const [postType, setPostType] = useState('');
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
   const [openBulkDialog, setOpenBulkDialog] = useState(false);
-
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
+  const [currentPage, setCurrentPage] = useState(1);
   const paginatedData = workLocations.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
-
   const handlePageChange = (event, value) => setCurrentPage(value);
+
   const handleOpenDialog = () => setOpenDialog(true);
   const handleCloseDialog = () => setOpenDialog(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);

@@ -112,7 +112,8 @@ export default function SimpleTabs() {
         swift_code: invoicingProfile.swift_code,
         gst_details: invoicingProfile.gst_details || [],
         invoicing_profile_id: invoicingProfile.id,
-        invoice_format: invoicingProfile.invoice_format || []
+        invoice_format: invoicingProfile.invoice_format || [],
+        signature: invoicingProfile.signature || null
       };
 
       setBusinessDetails(normalized);

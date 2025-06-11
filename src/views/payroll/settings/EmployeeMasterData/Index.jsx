@@ -27,6 +27,7 @@ import { openSnackbar } from 'store/slices/snackbar';
 import { IconButton } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
 import DeleteDialog from 'ui-component/extended/DeleteDialog';
+import EmployeeBulkUploadDialog from 'ui-component/extended/EmployeeBulkUploadDialog';
 function EmployeeList() {
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -36,6 +37,10 @@ function EmployeeList() {
   const dispatch = useDispatch();
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
+  const [openBulkDialog, setOpenBulkDialog] = useState(false);
+  const closeBulkDialog = () => {
+    setOpenBulkDialog(false);
+  };
   const handleOpenDeleteDialog = (designation) => {
     setSelectedRow(designation);
     setOpenDeleteDialog(true);
@@ -64,7 +69,6 @@ function EmployeeList() {
     const url = `/payroll/employees?payroll_id=${payrollId}`;
     const { res } = await Factory('get', url, {});
     setLoading(false);
-    console.log(res);
     if (res?.status_cd === 0) {
       setEmployees(res?.data || []);
     } else {
@@ -127,11 +131,26 @@ function EmployeeList() {
         <MainCard
           title="Employee Master Data"
           secondary={
-            <Button variant="contained" onClick={() => navigate(`/payroll/settings/add-employee?payrollid=${payrollId}`)}>
-              Add Employee
-            </Button>
+            <Stack direction="row" spacing={2}>
+              <Button variant="outlined" color="secondary" onClick={() => setOpenBulkDialog(true)}>
+                Bulk Upload
+              </Button>
+              <Button variant="contained" onClick={() => navigate(`/payroll/settings/add-employee?payrollid=${payrollId}`)}>
+                Add Employee
+              </Button>
+            </Stack>
           }
         >
+          <EmployeeBulkUploadDialog
+            open={openBulkDialog}
+            handleClose={closeBulkDialog}
+            getData={fetchEmployees}
+            payrollid={payrollId}
+            type="Employees"
+            bulkUploadUrl="/payroll/employees/upload/"
+            xlsxTemplateUrl={`/payroll/download-template/${payrollId}/`}
+            // csvTemplateUrl="/payroll/download-template/csv?type=employee"
+          />
           <Grid2 container spacing={2}>
             <Grid2 size={{ xs: 12 }}>
               <TableContainer component={Paper}>
