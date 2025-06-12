@@ -6,7 +6,7 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid2';
-import {Stack, useTheme }from '@mui/material';
+import { Stack, useTheme } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import Icon1 from 'assets/images/icons/Icon1.svg';
@@ -31,7 +31,7 @@ import dashboard from 'assets/images/landing/Invoicedashboard.png';
 // styles
 const HeaderImage = styled('img')(({ theme }) => ({
   maxWidth: '100%',
-  borderRadius: 20,
+  borderRadius: 20
 }));
 
 const HeaderAnimationImage = styled('img')({
@@ -74,15 +74,17 @@ export default function HeaderSection() {
   );
 
   return (
-    <Container sx={{
-      height: { xs: 'auto', md: '100vh' },
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      py: { xs: 4, md: 0 },
-      mt: { xs:-14, sm: -8, md: -10 },
-      px: { xs: 2, sm: 3, md: 4 }
-    }}>
+    <Container
+      sx={{
+        height: { xs: 'auto', md: '100vh' },
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        py: { xs: 4, md: 0 },
+        mt: { xs: -14, sm: -8, md: -10 },
+        px: { xs: 2, sm: 3, md: 4 }
+      }}
+    >
       <Grid
         container
         spacing={{ xs: 3, sm: 4, md: 2 }}
@@ -90,39 +92,41 @@ export default function HeaderSection() {
           justifyContent: { xs: 'center', md: 'space-between' },
           alignItems: { xs: 'center', md: 'flex-start' },
           mt: { xs: 3, sm: 5, md: 18.75 },
-          mb: { xs: 3, sm: 4, md: 10 },
+          mb: { xs: 3, sm: 4, md: 10 }
         }}
       >
         <Grid size={{ xs: 12, md: 4 }}>
-          <Grid container spacing={{ xs: 2, sm: 3, md:6 }} sx={{ mt: { xs: 2, sm: 3, md: 5 },ml: { xs: 0, sm: 0, md: 2, lg: -8} }}>
+          <Grid container spacing={{ xs: 2, sm: 3, md: 6 }} sx={{ mt: { xs: 2, sm: 3, md: 5 }, ml: { xs: 0, sm: 0, md: 2, lg: -8 } }}>
             <Grid size={12}>
               <motion.div
                 initial={{ opacity: 0, translateY: 550 }}
                 animate={{ opacity: 1, translateY: 0 }}
                 transition={{ type: 'spring', stiffness: 150, damping: 30 }}
               >
-                <Box sx={{
-                  mt: { xs: 2, sm: 4, md: 6 },
-                  display: 'flex',
-                  flexDirection: 'column',
-                  fontStyle:'Inter',
-                  alignItems: { xs: 'center', sm: 'center', md: 'flex-start' },
-                  textAlign: { xs: 'center', sm: 'center', md: 'left' },
-                  gap: { xs:0.5, md: 1 },
-                }}>
-                  <Typography 
+                <Box
+                  sx={{
+                    mt: { xs: 2, sm: 4, md: 6 },
+                    display: 'flex',
+                    flexDirection: 'column',
+                    fontStyle: 'Inter',
+                    alignItems: { xs: 'center', sm: 'center', md: 'flex-start' },
+                    textAlign: { xs: 'center', sm: 'center', md: 'left' },
+                    gap: { xs: 0.5, md: 1 }
+                  }}
+                >
+                  <Typography
                     variant="h1"
-                    sx={{ 
-                      ...headerSX, 
+                    sx={{
+                      ...headerSX,
                       fontWeight: 700,
-                      lineHeight:'50px',
+                      lineHeight: '50px',
                       display: 'block',
-                      
-                      fontSize: { xs: '2rem', sm: '42px', md: '42px' ,lg:'42px'},
-                      whiteSpace: { xs: 'normal', md: 'nowrap',lg: 'nowrap'}
+
+                      fontSize: { xs: '2rem', sm: '42px', md: '42px', lg: '42px' },
+                      whiteSpace: { xs: 'normal', md: 'nowrap', lg: 'nowrap' }
                     }}
                   >
-                  Unified Software for
+                    Unified Software for
                   </Typography>
                   <Typography
                     variant="h1"
@@ -131,11 +135,11 @@ export default function HeaderSection() {
                       fontWeight: 700,
                       lineHeight: 1.0,
                       display: 'block',
-                      fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem',lg:'42px' },
+                      fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem', lg: '42px' },
                       whiteSpace: { xs: 'nowrap', md: 'nowrap' }
                     }}
                   >
-                  Invoicing, Payroll, ITR, GST,
+                    Invoicing, Payroll, ITR, GST,
                   </Typography>
                   <Typography
                     variant="h1"
@@ -144,16 +148,23 @@ export default function HeaderSection() {
                       fontWeight: 700,
                       lineHeight: 1,
                       display: 'block',
-                      fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem',lg:'42px' },
+                      fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem', lg: '42px' },
                       whiteSpace: { xs: 'normal', md: 'nowrap' }
                     }}
                   >
-                  Accounting & More
+                    Accounting & More
                   </Typography>
                 </Box>
               </motion.div>
             </Grid>
-            <Grid sx={{ mt: { xs: 0, md: -2.5 }, textAlign: { xs: 'center', sm: 'center', md: 'left' },mr: { xs:'center', sm:'flex-start', md:'flex-start', lg:'flex-start'}}} size={12}>
+            <Grid
+              sx={{
+                mt: { xs: 0, md: -2.5 },
+                textAlign: { xs: 'center', sm: 'center', md: 'left' },
+                mr: { xs: 'center', sm: 'flex-start', md: 'flex-start', lg: 'flex-start' }
+              }}
+              size={12}
+            >
               <motion.div
                 initial={{ opacity: 0, translateY: 550 }}
                 animate={{ opacity: 1, translateY: 0 }}
@@ -162,13 +173,13 @@ export default function HeaderSection() {
                 <Typography
                   variant="body1"
                   sx={{
-                    mt: { xs: 1, sm: 1.5, md: 2 }, 
-                    textAlign: { xs: 'center', sm: 'center', md: 'left' }, 
-                    color: 'text.secondary', 
+                    mt: { xs: 1, sm: 1.5, md: 2 },
+                    textAlign: { xs: 'center', sm: 'center', md: 'left' },
+                    color: 'text.secondary',
                     fontSize: { xs: '0.875rem', sm: '1rem', md: '1.125rem' },
-                    mb: { xs: 2, sm: 2.5, md: 3 }, 
-                    lineHeight:0.5,
-                    fontStyle:'Inter',
+                    mb: { xs: 2, sm: 2.5, md: 3 },
+                    lineHeight: 0.5,
+                    fontStyle: 'Inter',
                     // ml: { xs:'flex-start', sm:'flex-start', md:'flex-start', lg:'flex-start'},
 
                     fontWeight: 500,
@@ -177,18 +188,18 @@ export default function HeaderSection() {
                   }}
                 >
                   No more juggling tools—just one simple platform.A complete
-                  </Typography>
-                  <Typography
+                </Typography>
+                <Typography
                   variant="body1"
                   sx={{
-                    mt: { xs: 1, sm: 1.5, md: 2 }, 
-                    textAlign: { xs: 'center', sm: 'center', md: 'left' }, 
-                    color: 'text.secondary', 
+                    mt: { xs: 1, sm: 1.5, md: 2 },
+                    textAlign: { xs: 'center', sm: 'center', md: 'left' },
+                    color: 'text.secondary',
                     fontSize: { xs: '0.875rem', sm: '1rem', md: '1.125rem' },
-                    mb: { xs: 2, sm: 2.5, md: 3 }, 
-                    lineHeight:0.5,
-                    fontWeight:500,
-                    fontStyle:'Inter',
+                    mb: { xs: 2, sm: 2.5, md: 3 },
+                    lineHeight: 0.5,
+                    fontWeight: 500,
+                    fontStyle: 'Inter',
                     px: { xs: 1, sm: 2, md: 0 },
                     whiteSpace: { xs: 'nowrap', md: 'nowrap' }
                   }}
@@ -204,28 +215,46 @@ export default function HeaderSection() {
                 animate={{ opacity: 1, translateY: 0 }}
                 transition={{ type: 'spring', stiffness: 150, damping: 30, delay: 0.6 }}
               >
-                <Stack 
-                  direction={{ xs: 'row', sm: 'row' }} 
-                  spacing={{ xs: 2, sm: 4 }} 
-                  sx={{ 
-                    alignItems: 'center', 
-                    justifyContent: { xs: 'center', sm: 'center', md: 'flex-start' }, 
+                <Stack
+                  direction={{ xs: 'row', sm: 'row' }}
+                  spacing={{ xs: 2, sm: 4 }}
+                  sx={{
+                    alignItems: 'center',
+                    justifyContent: { xs: 'center', sm: 'center', md: 'flex-start' },
                     mb: { xs: 3, sm: 4, md: 5 },
                     mt: { xs: -2, sm: -3, md: -4 }
                   }}
                 >
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                     <img src={Icon1} alt="Integration Icon" style={{ width: '25px', height: '25px' }} />
-                    <Typography variant="h4" color="text.secondary" sx={{ fontWeight: 500,lineHeight:'28px',fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem',lg:'14px' } }}>Integration</Typography>
+                    <Typography
+                      variant="h4"
+                      color="text.secondary"
+                      sx={{ fontWeight: 500, lineHeight: '28px', fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem', lg: '14px' } }}
+                    >
+                      Integration
+                    </Typography>
                   </Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                     <img src={Icon2} alt="Automation Icon" style={{ width: '25px', height: '25px' }} />
-                    <Typography variant="h4" color="text.secondary" sx={{ fontWeight: 500,lineHeight:'28px', fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem',lg:'14px' } }}>Automation</Typography>
+                    <Typography
+                      variant="h4"
+                      color="text.secondary"
+                      sx={{ fontWeight: 500, lineHeight: '28px', fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem', lg: '14px' } }}
+                    >
+                      Automation
+                    </Typography>
                   </Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                     <img src={Icon3} alt="Simple Icon" style={{ width: '25px', height: '25px' }} />
 
-                    <Typography variant="h4" color="text.secondary" sx={{ fontWeight: 500,lineHeight:'28px', fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem',lg:'14px' } }}>Simple</Typography>
+                    <Typography
+                      variant="h4"
+                      color="text.secondary"
+                      sx={{ fontWeight: 500, lineHeight: '28px', fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem', lg: '14px' } }}
+                    >
+                      Simple
+                    </Typography>
                   </Box>
                 </Stack>
               </motion.div>
@@ -241,7 +270,7 @@ export default function HeaderSection() {
                   container
                   spacing={2}
                   sx={{
-                    justifyContent: { xs: 'center', sm: 'center', md: 'flex-start' }, 
+                    justifyContent: { xs: 'center', sm: 'center', md: 'flex-start' },
                     mb: { xs: 3, sm: 4, md: 5 },
                     mt: { xs: -2, sm: -3, md: -4 }
                   }}
@@ -249,14 +278,16 @@ export default function HeaderSection() {
                   <Grid>
                     <AnimateButton>
                       <Button
-                      onClick={() => navigate(`/register?id=${moduleId}&context=${context}&type=${type}`)}
-                      size="large"
-                        variant="contained"
+                        onClick={() => navigate(`/register?id=${moduleId}&context=${context}&type=${type}`)}
+                        size="large"
+                        variant="outlined"
                         color="secondary"
                         sx={{
-                          width: { xs: '100%', sm: 'auto',lg:'100%' },
+                          width: { xs: '100%', sm: 'auto', lg: '100%' },
                           fontSize: { xs: '0.875rem', sm: '1rem' },
-                          mt:{xs:0,sm:0,md:0,lg:-1}
+                          mt: { xs: 0, sm: 0, md: 0, lg: -1 },
+                          borderColor: ' #0023af',
+                          color: '#0023af'
                         }}
                       >
                         Get started for free
@@ -266,18 +297,19 @@ export default function HeaderSection() {
                   <Grid>
                     <AnimateButton>
                       <Button
-                    onClick={() => navigate(`/book-consultation?id=${moduleId}&context=${context}&type=${type}`)}
-
+                        onClick={() => navigate(`/book-consultation?id=${moduleId}&context=${context}&type=${type}`)}
                         size="large"
-                        variant="outlined"
+                        variant="contained"
                         color="secondary"
                         sx={{
-                          width: { xs: '100%', sm: 'auto',lg:'120%' },
-                          fontSize: { xs: '0.875rem', sm: '1rem',lg:'16px' },
-                          mt:{xs:0,sm:0,md:0,lg:-1}
-                      }}
+                          width: { xs: '100%', sm: 'auto', lg: '120%' },
+                          fontSize: { xs: '0.875rem', sm: '1rem', lg: '16px' },
+                          mt: { xs: 0, sm: 0, md: 0, lg: -1 },
+                          backgroundColor: '#0023af',
+                          color: '#ffd600'
+                        }}
                       >
-                        View Demo
+                        Book Consultation
                       </Button>
                     </AnimateButton>
                   </Grid>
@@ -286,7 +318,7 @@ export default function HeaderSection() {
             </Grid>
           </Grid>
         </Grid>
-        <Grid size={{ xs: 12, md: 8}} sx={{ mb: { xs: 3, sm: 4, md: 15 } }}>
+        <Grid size={{ xs: 12, md: 8 }} sx={{ mb: { xs: 3, sm: 4, md: 15 } }}>
           <Box
             sx={{
               position: 'relative',
@@ -296,18 +328,18 @@ export default function HeaderSection() {
               display: 'flex',
               justifyContent: { xs: 'center', sm: 'center', md: 'flex-end' },
               alignItems: 'center',
-              ml: { xs: 0, sm: 0, md: 40 },
+              ml: { xs: 0, sm: 0, md: 40 }
             }}
           >
             <HeaderImage
               src={dashboard}
               alt="Tara"
               sx={{
-                width: { xs: '100%', sm: '100%', md: '100%',lg:'110%' },
-                height: { xs: '100%', sm: '100%', md: '20%',lg:'200%' },
+                width: { xs: '100%', sm: '100%', md: '100%', lg: '110%' },
+                height: { xs: '100%', sm: '100%', md: '20%', lg: '200%' },
 
                 maxWidth: '200%',
-                maxHeight: '200%',
+                maxHeight: '200%'
               }}
             />
           </Box>

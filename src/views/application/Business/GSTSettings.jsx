@@ -32,7 +32,8 @@ import {
   FormHelperText,
   CircularProgress,
   Snackbar,
-  Alert
+  Alert,
+  Autocomplete
 } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import AddIcon from '@mui/icons-material/Add';
@@ -47,24 +48,24 @@ import Factory from 'utils/Factory';
 import DownloadIcon from '@mui/icons-material/Download';
 import DeleteConfirmationDialog from 'utils/DeleteConfirmationDialog';
 import { INDIAN_STATES } from 'utils/constants';
-
+import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
+import { useDispatch } from 'react-redux';
+import { openSnackbar } from 'store/slices/snackbar';
 const validationSchema = Yup.object().shape({
   gstin: Yup.string()
     .required('GST Number is required')
     .matches(/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/, 'Invalid GST Number format'),
   legal_name: Yup.string().required('Legal Name is required'),
   trade_name: Yup.string().required('Trade Name is required'),
-  branch_name: Yup.string().required('Branch/Vertical is required'),
   gst_username: Yup.string().required('Username in GST is required'),
   gst_password: Yup.string().required('Password is required'),
-  authorized_signatory_pan: Yup.string()
-    .required('Authorized Signatory PAN is required')
-    .matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN format'),
   address: Yup.string().required('Address is required'),
   state: Yup.string().required('State is required').oneOf(INDIAN_STATES, 'Please select a valid state'),
   pincode: Yup.string()
     .required('Pincode is required')
     .matches(/^[1-9][0-9]{5}$/, 'Invalid pincode format'),
+  branch_name: Yup.string(),
+  authorized_signatory_pan: Yup.string().matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN format'),
   is_composition_scheme: Yup.string().oneOf(['yes', 'no']).required('Composition Scheme is required'),
   composition_scheme_percent: Yup.string().when('is_composition_scheme', {
     is: (val) => val === 'yes',
@@ -91,23 +92,94 @@ const getFinancialYearOptions = () => {
 };
 
 const financialYearOptions = getFinancialYearOptions();
-
+const fields = [
+  {
+    name: 'gstin',
+    label: 'GST Number',
+    type: 'text'
+  },
+  {
+    name: 'legal_name',
+    label: 'Legal Name',
+    type: 'text'
+  },
+  {
+    name: 'trade_name',
+    label: 'Trade Name',
+    type: 'text'
+  },
+  {
+    name: 'branch_name',
+    label: 'Branch/Vertical',
+    type: 'text'
+  },
+  {
+    name: 'state',
+    label: 'State',
+    type: 'select',
+    options: INDIAN_STATES
+  },
+  {
+    name: 'address',
+    label: 'Address',
+    type: 'text'
+  },
+  {
+    name: 'pincode',
+    label: 'Pincode',
+    type: 'text'
+  },
+  {
+    name: 'authorized_signatory_pan',
+    label: 'Authorized Signatory PAN',
+    type: 'text'
+  },
+  {
+    name: 'gst_username',
+    label: 'Username in GST',
+    type: 'text'
+  },
+  {
+    name: 'gst_password',
+    label: 'Password in GST',
+    type: 'text'
+  },
+  {
+    name: 'gst_document',
+    label: 'GST Document',
+    type: 'file'
+  }
+];
+const fields_lut = [
+  {
+    name: 'lut_reg_no',
+    label: 'LUT Reg. No',
+    type: 'text'
+  },
+  {
+    name: 'dob',
+    label: 'DOB',
+    type: 'date'
+  },
+  {
+    name: 'financial_year',
+    label: 'Financial Year',
+    type: 'select',
+    options: financialYearOptions
+  }
+];
 const GSTSettings = () => {
   const [gstList, setGstList] = useState([]);
   const [open, setOpen] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteIndex, setDeleteIndex] = useState(null);
-  const user = useSelector((state) => state).accountReducer.user;
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: '',
-    severity: 'success'
-  });
+  const user = useSelector((state) => state.accountReducer.user);
+  const dispatch = useDispatch();
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
-    formik.resetForm();
+    resetForm();
     setOpen(false);
     setEditIndex(null);
   };
@@ -115,8 +187,7 @@ const GSTSettings = () => {
   const handleEdit = (index) => {
     setEditIndex(index);
     const newValues = { ...gstList[index] };
-    delete newValues['gst_document'];
-    formik.setValues(newValues);
+    setValues(newValues);
     setOpen(true);
   };
 
@@ -135,13 +206,37 @@ const GSTSettings = () => {
       const response = await Factory('delete', `/user_management/gst-details/${gstList[deleteIndex].id}/`, {}, {});
       if (response.res.status_cd === 0) {
         setGstList(gstList.filter((_, i) => i !== deleteIndex));
-        showNotification('GST details deleted successfully');
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'GST details deleted successfully',
+            variant: 'alert',
+            alert: { color: 'success' },
+            close: false
+          })
+        );
       } else {
-        showNotification('Failed to delete GST details', 'error');
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'Failed to delete GST details',
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
       }
     } catch (error) {
       console.error('Error deleting GST details:', error);
-      showNotification('Failed to delete GST details', 'error');
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Failed to delete GST details',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     } finally {
       handleDeleteClose();
     }
@@ -159,33 +254,99 @@ const GSTSettings = () => {
     }
   };
 
-  const handleSnackbarClose = (event, reason) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-    setSnackbar({ ...snackbar, open: false });
-  };
-
-  const showNotification = (message, severity = 'success') => {
-    setSnackbar({
-      open: true,
-      message,
-      severity
-    });
-  };
-
   const fetchGSTList = async () => {
     try {
       const response = await Factory('get', `/user_management/gst-details/${user.active_context.business_id}/`, {}, {});
       if (response.res.status_cd === 0) {
         setGstList(response.res.data);
       } else {
-        showNotification('Failed to fetch GST details', 'error');
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'Failed to fetch GST details',
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
       }
     } catch (error) {
       console.error('Error fetching GST details:', error);
-      showNotification('Failed to fetch GST details', 'error');
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Failed to fetch GST details',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     }
+  };
+
+  const renderFields = (fields) => {
+    return fields.map((field) => (
+      <Grid size={{ xs: 12, sm: 6, md: 4 }} key={field.name}>
+        <Typography variant="subtitle1" gutterBottom color="text.secondary">
+          {field.label}
+        </Typography>
+        {field.type === 'text' ? (
+          <TextField
+            fullWidth
+            size="small"
+            id={field.name}
+            name={field.name}
+            value={values[field.name] || ''}
+            onChange={(e) => {
+              const { value } = e.target;
+              if (field.name === 'authorized_signatory_pan') {
+                const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+                if (value.length > 10) return;
+                setFieldValue(field.name, value.toUpperCase());
+              } else {
+                setFieldValue(field.name, e.target.value);
+              }
+            }}
+            error={touched[field.name] && Boolean(errors[field.name])}
+            helperText={touched[field.name] && errors[field.name]}
+            InputLabelProps={{ shrink: true }}
+          />
+        ) : field.type === 'file' ? (
+          <RenderFileUpload
+            label={field.label}
+            fieldName={field.name}
+            file={values[field.name]}
+            setFieldValue={(e) => setFieldValue(field.name, e.target.value)}
+            touched={touched[field.name]}
+            errors={errors[field.name]}
+          />
+        ) : field.type === 'select' ? (
+          <Autocomplete
+            fullWidth
+            size="small"
+            id={field.name}
+            name={field.name}
+            value={values[field.name] || ''}
+            onChange={(e, value) => setFieldValue(field.name, value)}
+            options={field.options}
+            renderInput={(params) => <TextField {...params} />}
+          />
+        ) : field.type === 'date' ? (
+          <TextField
+            fullWidth
+            size="small"
+            id={field.name}
+            name={field.name}
+            value={values[field.name] || ''}
+            onChange={(e) => setFieldValue(field.name, e.target.value)}
+            error={touched[field.name] && Boolean(errors[field.name])}
+            helperText={touched[field.name] && errors[field.name]}
+            type="date"
+            InputLabelProps={{ shrink: true }}
+          />
+        ) : null}
+      </Grid>
+    ));
   };
 
   useEffect(() => {
@@ -239,31 +400,64 @@ const GSTSettings = () => {
             const updated = [...gstList];
             updated[editIndex] = response.res.data;
             setGstList(updated);
-            showNotification('GST details updated successfully');
+            dispatch(
+              openSnackbar({
+                open: true,
+                message: 'GST details updated successfully',
+                variant: 'alert',
+                alert: { color: 'success' },
+                close: false
+              })
+            );
           } else {
             setGstList([...gstList, response.res]);
-            showNotification('GST details added successfully');
+            dispatch(
+              openSnackbar({
+                open: true,
+                message: 'GST details added successfully',
+                variant: 'alert',
+                alert: { color: 'success' },
+                close: false
+              })
+            );
           }
           handleClose();
         } else {
-          showNotification(response.res.status_msg || 'Failed to save GST details', 'error');
+          dispatch(
+            openSnackbar({
+              open: true,
+              message: response.res.status_msg || 'Failed to save GST details',
+              variant: 'alert',
+              alert: { color: 'error' },
+              close: false
+            })
+          );
         }
       } catch (error) {
         console.error('Error submitting GST details:', error);
-        showNotification('Failed to save GST details', 'error');
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'Failed to save GST details',
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
       } finally {
         setSubmitting(false);
       }
     }
   });
-
+  const { values, setValues, touched, errors, handleSubmit, setFieldValue, handleBlur, resetForm, isSubmitting } = formik;
+  console.log(values);
   return (
     <Box>
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
         <Typography variant="h4" color="text.primary" gutterBottom>
           GST Settings
         </Typography>
-        <Button variant="contained" startIcon={<AddIcon />} size="small" onClick={handleOpen}>
+        <Button variant="contained" startIcon={<AddIcon />} onClick={handleOpen}>
           Add GST
         </Button>
       </Box>
@@ -352,212 +546,39 @@ const GSTSettings = () => {
             <CloseIcon />
           </IconButton>
         </DialogTitle>
-        <form autoComplete="off" onSubmit={formik.handleSubmit}>
+        <form autoComplete="off" onSubmit={handleSubmit}>
           <DialogContent dividers>
             {/* GST Details Group */}
             <Box mb={2}>
               <Grid container spacing={2}>
-                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    id="gstin"
-                    name="gstin"
-                    label="GST Number"
-                    value={formik.values.gstin}
-                    onChange={formik.handleChange}
-                    error={formik.touched.gstin && Boolean(formik.errors.gstin)}
-                    helperText={formik.touched.gstin && formik.errors.gstin}
-                  />
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    id="legal_name"
-                    name="legal_name"
-                    label="Legal Name"
-                    value={formik.values.legal_name}
-                    onChange={formik.handleChange}
-                    error={formik.touched.legal_name && Boolean(formik.errors.legal_name)}
-                    helperText={formik.touched.legal_name && formik.errors.legal_name}
-                  />
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    id="trade_name"
-                    name="trade_name"
-                    label="Trade Name"
-                    value={formik.values.trade_name}
-                    onChange={formik.handleChange}
-                    error={formik.touched.trade_name && Boolean(formik.errors.trade_name)}
-                    helperText={formik.touched.trade_name && formik.errors.trade_name}
-                  />
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    id="branch_name"
-                    name="branch_name"
-                    label="Branch/Vertical"
-                    value={formik.values.branch_name}
-                    onChange={formik.handleChange}
-                    error={formik.touched.branch_name && Boolean(formik.errors.branch_name)}
-                    helperText={formik.touched.branch_name && formik.errors.branch_name}
-                  />
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                  <FormControl fullWidth size="small" error={formik.touched.state && Boolean(formik.errors.state)}>
-                    <InputLabel>State</InputLabel>
-                    <Select
-                      id="state"
-                      name="state"
-                      value={formik.values.state}
-                      label="State"
-                      onChange={formik.handleChange}
-                      onBlur={formik.handleBlur}
-                    >
-                      {INDIAN_STATES.map((state) => (
-                        <MenuItem key={state} value={state}>
-                          {state}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                    {formik.touched.state && formik.errors.state && <FormHelperText>{formik.errors.state}</FormHelperText>}
-                  </FormControl>
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    id="address"
-                    name="address"
-                    label="Address"
-                    value={formik.values.address}
-                    onChange={formik.handleChange}
-                    error={formik.touched.address && Boolean(formik.errors.address)}
-                    helperText={formik.touched.address && formik.errors.address}
-                  />
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    id="pincode"
-                    name="pincode"
-                    label="Pincode"
-                    value={formik.values.pincode}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    error={formik.touched.pincode && Boolean(formik.errors.pincode)}
-                    helperText={formik.touched.pincode && formik.errors.pincode}
-                    inputProps={{ maxLength: 6 }}
-                  />
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    id="authorized_signatory_pan"
-                    name="authorized_signatory_pan"
-                    label="Authorized Signatory PAN"
-                    value={formik.values.authorized_signatory_pan}
-                    onChange={formik.handleChange}
-                    error={formik.touched.authorized_signatory_pan && Boolean(formik.errors.authorized_signatory_pan)}
-                    helperText={formik.touched.authorized_signatory_pan && formik.errors.authorized_signatory_pan}
-                  />
-                </Grid>
-
-                <Grid size={{ xs: 12, sm: 6, md: 4 }}></Grid>
-                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    id="gst_username"
-                    name="gst_username"
-                    autoComplete="new-gst_username"
-                    label="Username in GST"
-                    value={formik.values.gst_username}
-                    onChange={formik.handleChange}
-                    error={formik.touched.gst_username && Boolean(formik.errors.gst_username)}
-                    helperText={formik.touched.gst_username && formik.errors.gst_username}
-                  />
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    id="gst_password"
-                    name="gst_password"
-                    label="Password"
-                    autoComplete="new-gst_password"
-                    type="gst_password"
-                    value={formik.values.gst_password}
-                    onChange={formik.handleChange}
-                    error={formik.touched.gst_password && Boolean(formik.errors.gst_password)}
-                    helperText={formik.touched.gst_password && formik.errors.gst_password}
-                  />
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                  <Box>
-                    <Button variant="outlined" component="label" fullWidth size="small" sx={{ height: '40px', mb: 1 }}>
-                      {editIndex !== null && gstList[editIndex]?.gst_document ? 'Replace GST Certificate' : 'Upload GST Certificate'}
-                      <input type="file" hidden onChange={(e) => formik.setFieldValue('gst_document', e.currentTarget.files[0])} />
-                    </Button>
-                    {editIndex !== null && gstList[editIndex]?.gst_document && !formik.values.gst_document && (
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Typography variant="caption">Current file:</Typography>
-                        <Link
-                          component="button"
-                          variant="caption"
-                          onClick={() => handleDownload(gstList[editIndex].gst_document, `GST_${gstList[editIndex].gstin}`)}
-                        >
-                          GST_{gstList[editIndex].gstin}
-                        </Link>
-                      </Box>
-                    )}
-                    {formik.values.gst_document && (
-                      <Typography variant="caption" sx={{ ml: 1 }}>
-                        New file: {formik.values.gst_document.name}
-                      </Typography>
-                    )}
-                  </Box>
-                </Grid>
+                {renderFields(fields)}
               </Grid>
             </Box>
 
             {/* Schemes & Exports Group */}
             <Box mb={2}>
-              <Typography variant="subtitle1" fontWeight={600} gutterBottom color="text.primary">
+              {/* <Typography variant="subtitle1" fontWeight={600} gutterBottom color="text.primary">
                 Schemes & Exports
-              </Typography>
+              </Typography> */}
               <Grid container spacing={2}>
                 <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                   <FormControlLabel
                     control={
                       <Switch
-                        checked={formik.values.is_composition_scheme === 'yes'}
-                        onChange={(e) => formik.setFieldValue('is_composition_scheme', e.target.checked ? 'yes' : 'no')}
+                        checked={values.is_composition_scheme === 'yes'}
+                        onChange={(e) => setFieldValue('is_composition_scheme', e.target.checked ? 'yes' : 'no')}
                         name="is_composition_scheme"
                       />
                     }
                     label="Are you Reg. under Composition Scheme?"
                   />
                 </Grid>
-                {formik.values.is_composition_scheme === 'yes' && (
+                {values.is_composition_scheme === 'yes' && (
                   <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                     <Typography variant="body2" sx={{ mb: 1 }}>
                       Composition Scheme %
                     </Typography>
-                    <RadioGroup
-                      row
-                      name="composition_scheme_percent"
-                      value={formik.values.composition_scheme_percent}
-                      onChange={formik.handleChange}
-                    >
+                    <RadioGroup row name="composition_scheme_percent" value={values.composition_scheme_percent} onChange={setFieldValue}>
                       {compositionPercOptions.map((perc) => (
                         <FormControlLabel key={perc} value={perc} control={<Radio size="small" />} label={perc} />
                       ))}
@@ -568,8 +589,8 @@ const GSTSettings = () => {
                   <FormControlLabel
                     control={
                       <Switch
-                        checked={formik.values.is_export_sez === 'yes'}
-                        onChange={(e) => formik.setFieldValue('is_export_sez', e.target.checked ? 'yes' : 'no')}
+                        checked={values.is_export_sez === 'yes'}
+                        onChange={(e) => setFieldValue('is_export_sez', e.target.checked ? 'yes' : 'no')}
                         name="is_export_sez"
                       />
                     }
@@ -585,52 +606,7 @@ const GSTSettings = () => {
                 LUT Details
               </Typography>
               <Grid container spacing={2}>
-                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    id="lut_reg_no"
-                    name="lut_reg_no"
-                    label="LUT Reg. No"
-                    value={formik.values.lut_reg_no}
-                    onChange={formik.handleChange}
-                    error={formik.touched.lut_reg_no && Boolean(formik.errors.lut_reg_no)}
-                    helperText={formik.touched.lut_reg_no && formik.errors.lut_reg_no}
-                  />
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    id="dob"
-                    name="dob"
-                    label="DOB"
-                    type="date"
-                    value={formik.values.dob}
-                    onChange={formik.handleChange}
-                    InputLabelProps={{ shrink: true }}
-                    error={formik.touched.dob && Boolean(formik.errors.dob)}
-                    helperText={formik.touched.dob && formik.errors.dob}
-                  />
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                  <FormControl fullWidth size="small" error={formik.touched.financial_year && Boolean(formik.errors.financial_year)}>
-                    <InputLabel>Financial Year</InputLabel>
-                    <Select
-                      id="financial_year"
-                      name="financial_year"
-                      value={formik.values.financial_year}
-                      label="Financial Year"
-                      onChange={formik.handleChange}
-                    >
-                      {financialYearOptions.map((fy) => (
-                        <MenuItem key={fy} value={fy}>
-                          {fy}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
+                {renderFields(fields_lut)}
               </Grid>
             </Box>
           </DialogContent>
@@ -643,11 +619,11 @@ const GSTSettings = () => {
               variant="contained"
               size="small"
               color="primary"
-              disabled={formik.isSubmitting}
-              onClick={formik.handleSubmit}
+              disabled={isSubmitting}
+              onClick={handleSubmit}
               sx={{ position: 'relative', minWidth: '100px' }}
             >
-              {formik.isSubmitting ? (
+              {isSubmitting ? (
                 <>
                   <CircularProgress
                     size={24}
@@ -676,20 +652,9 @@ const GSTSettings = () => {
         onClose={handleDeleteClose}
         onConfirm={() => deleteIndex !== null && handleDelete()}
         title="Delete GST Details"
-        message="Are you sure you want to delete these GST details? This action cannot be undone."
+        message="Are you sure you want to delete this GST details? This action cannot be undone."
         itemName={deleteIndex !== null ? `GST Number: ${gstList[deleteIndex]?.gstin}` : ''}
       />
-
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={6000}
-        onClose={handleSnackbarClose}
-        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-      >
-        <Alert onClose={handleSnackbarClose} severity={snackbar.severity} variant="filled">
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
     </Box>
   );
 };
