@@ -170,6 +170,7 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
       formData.append('status', 'in progress');
       const res = await Factory(type, url, formData, {});
       if (res.res.status_cd === 0) {
+        setSalaryIncome((prev) => ({ ...prev, data: [res.res] }));
         enqueueSnackbar('Documents saved successfully!', {
           variant: 'success',
           anchorOrigin: { vertical: 'top', horizontal: 'right' }
@@ -460,16 +461,14 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
                                   formData.append('details', row.details || '');
                                   formData.append('amount', row.amount || '');
                                   formData.append('notes', row.notes || '');
-                                  if (row.id) formData.append('id', row.id);
+                                  if (other_income.data[0].other_income_info[idx])
+                                    formData.append('id', other_income.data[0].other_income_info[idx].id);
                                   if (row.file && row.file instanceof File) formData.append('file', row.file);
                                   let type = 'post';
                                   let url = '/income_tax_returns/other-income-details/';
                                   const res = await Factory(type, url, formData, {});
                                   if (res.res.status_cd === 0) {
-                                    let __otherIncome = { ...other_income };
-                                    __otherIncome.data[0].other_income_info = res.res.other_income_info;
-                                    otherIncomeFormik.setFieldValue(`otherIncome`, res.res.other_income_info);
-                                    setOtherIncome(__otherIncome);
+                                    setOtherIncome((prev) => ({ ...prev, data: [res.res] }));
                                     enqueueSnackbar('Other income saved successfully!', {
                                       variant: 'success',
                                       anchorOrigin: { vertical: 'top', horizontal: 'right' }
@@ -1337,7 +1336,6 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
               key={type}
               control={<Checkbox checked={selectedTypes?.includes(type)} />}
               onChange={async (e) => {
-                console.log('selectedTypes', selectedTypes);
                 const isChecked = e.target.checked;
                 let __selectedTypes = selectedTypes;
                 if (selectedTypes.length === 0) {
@@ -3250,7 +3248,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
   const [dividendRows, setDividendRows] = React.useState([{ received_from: '', dividend_received: '', file: '' }]);
   const [giftApplicable, setGiftApplicable] = React.useState('Not Applicable');
   const [giftRows, setGiftRows] = React.useState([
-    { amount: '', received_from: '', relation: '', date_received: '', was_it_marriage_related: 'no', file: '' }
+    { amount: '', received_from: '', relation: '', date_received: '', was_it_marriage_related: 'No', file: '' }
   ]);
   const [familyApplicable, setFamilyApplicable] = React.useState('Not Applicable');
   const [familyRows, setFamilyRows] = React.useState([{ amount: '', source: '', file: '' }]);
@@ -3544,7 +3542,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
         direction="row"
         spacing={2}
         alignItems="center"
-        sx={{ mb: interestApplicable === 'Applicable' ? 0 : 2, justifyContent: 'space-between' }}
+        sx={{ mb: interestApplicable === 'Applicable' ? 1 : 2, justifyContent: 'space-between' }}
       >
         <Stack direction="row" spacing={2} alignItems="center">
           <Typography>Interest Income: </Typography>
@@ -4440,7 +4438,7 @@ const AgricultureIncome = ({ data, service_id, setFileDialogOpen, fileDialogOpen
       file: ''
     },
     status: 'in progress',
-    agriculture: 'Applicable'
+    agriculture: 'Not Applicable'
   };
   data = data[0];
   const [agricultureIncome, setAgricultureIncome] = React.useState(initialData);
@@ -4451,7 +4449,6 @@ const AgricultureIncome = ({ data, service_id, setFileDialogOpen, fileDialogOpen
       if (__data?.agriculture_income_docs === null) {
         __data.agriculture_income_docs = { amount: '', file: '' };
       }
-      console.log(__data);
       setAgricultureIncome(__data);
     }
   }, [data]);
@@ -4463,17 +4460,17 @@ const AgricultureIncome = ({ data, service_id, setFileDialogOpen, fileDialogOpen
     formData.append('status', 'in progress');
     const res = await Factory('post', `/income_tax_returns/agriculture-income/upsert/`, formData);
     if (res.res.status_cd === 0) {
-      console.log(data);
-      console.log(agricultureIncome);
-      console.log(res.res.data);
-      // setAgricultureIncome({ ...agricultureIncome, agriculture: v });
+      let __data = res.res.data;
+      if (__data?.agriculture_income_docs === null) {
+        __data.agriculture_income_docs = { amount: '', file: '' };
+      }
+      setAgricultureIncome(__data);
       return true;
     }
   };
-
   const postAgriculturalIncome = async () => {
     let formData = new FormData();
-    let id = agricultureIncome.agriculture_income_docs.id;
+    let id = agricultureIncome?.agriculture_income_docs?.id || null;
     let type = 'post';
     let url = `/income_tax_returns/agriculture-income-docs/add/`;
     if (id) {
@@ -4490,6 +4487,8 @@ const AgricultureIncome = ({ data, service_id, setFileDialogOpen, fileDialogOpen
     formData.append('status', 'in progress');
     const res = await Factory(type, url, formData);
     if (res.res.status_cd === 0) {
+      if (type === 'post')
+        setAgricultureIncome((prev) => ({ ...prev, agriculture_income_docs: { ...prev.agriculture_income_docs, id: res.res.data.id } }));
       enqueueSnackbar('Agricultural income saved successfully', {
         anchorOrigin: { vertical: 'top', horizontal: 'right' },
         variant: 'success'
