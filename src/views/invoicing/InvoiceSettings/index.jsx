@@ -240,6 +240,7 @@ export default function SimpleTabs() {
                 setBusinessDetails={setBusinessDetails}
                 postType={postType}
                 handleNext={handleNext}
+                setTabValue={setValue}
               />
             </TabPanel>
             <TabPanel value={value} index={1}>

@@ -24,7 +24,7 @@ import { openSnackbar } from 'store/slices/snackbar';
 import { useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
-const InvoiceNumberFormat = ({ businessDetails, handleBack, handleNext }) => {
+const InvoiceNumberFormatComponent = ({ businessDetails, handleBack, handleNext }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [authorizedSignature, setAuthorizedSignature] = useState(null);
@@ -559,4 +559,4 @@ const InvoiceNumberFormat = ({ businessDetails, handleBack, handleNext }) => {
   );
 };
 
-export default InvoiceNumberFormat;
+export default InvoiceNumberFormatComponent;

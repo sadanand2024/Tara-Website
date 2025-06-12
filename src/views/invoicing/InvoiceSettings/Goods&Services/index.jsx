@@ -13,7 +13,7 @@ import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
 import EmptyDataPlaceholder from 'ui-component/extended/EmptyDataPlaceholder';
 
-export default function TabThree({ businessDetails, handleNext, handleBack }) {
+export default function GoodsServicesComponent({ businessDetails, handleNext, handleBack }) {
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState([]);
   const [type, setType] = useState('');

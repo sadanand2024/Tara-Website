@@ -31,7 +31,7 @@ import { businessTypesArray } from 'utils/businessTypesArray';
 import CustomUpload from 'utils/CustomUpload';
 import DeleteIcon from '@mui/icons-material/Delete';
 
-export default function TabOne({ businessDetails = {}, postType, handleNext, setBusinessDetails }) {
+export default function BusinessProfileComponnet({ businessDetails = {}, postType, handleNext, setBusinessDetails, setTabValue }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [logoUrlDetails, setLogoUrlDetails] = useState(null);
@@ -385,7 +385,8 @@ export default function TabOne({ businessDetails = {}, postType, handleNext, set
                           startIcon={<IconPlus size={16} />}
                           onClick={() => {
                             if (businessDetails.id) {
-                              navigate(`/apps/business-settings?BID=${businessDetails.id}&tabvalue=3`);
+                              // navigate(`/apps/business-settings?BID=${businessDetails.id}&tabvalue=3`);
+                              setTabValue(1);
                             }
                           }}
                           sx={{ ml: 2 }}

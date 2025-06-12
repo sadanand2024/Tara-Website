@@ -8,7 +8,7 @@ import AddCustomer from './AddCustomer';
 import CustomerList from './CustomerList';
 import { ConstructionOutlined } from '@mui/icons-material';
 
-export default function TabTwo({ getCustomersData, customers, businessDetails, handleNext, handleBack }) {
+export default function CustomersComponent({ getCustomersData, customers, businessDetails, handleNext, handleBack }) {
   const [open, setOpen] = useState(false);
   const [type, setType] = useState('add');
   useEffect(() => {
