@@ -25,7 +25,7 @@ import {
   Radio
 } from '@mui/material';
 import Factory from 'utils/Factory';
-
+import RaiseRequest from '../RaiseRequest';
 const viewFile = async (url) => {
   const response = await Factory('get', `/docwallet/generate_presigned_url?url=${url}`, {}, {});
   if (response.res.status_cd === 0) {
@@ -204,9 +204,11 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
     <Box>
       {/* Section 80G - Donations */}
       <Card sx={{ mb: 3, p: { xs: 2, sm: 3 } }}>
-        <Typography variant="h5" mb={2} sx={{ textDecoration: 'underline' }}>
-          Section 80G - Deduction for Donations made
-        </Typography>
+        <Stack direction="row" spacing={2} alignItems="center" mb={2}>
+          <Typography variant="h5" mb={2} sx={{ textDecoration: 'underline' }}>
+            Section 80G - Deduction for Donations made
+          </Typography>
+        </Stack>
         <Formik initialValues={{ donations }} enableReinitialize validationSchema={donationsSchema}>
           {({ values, setFieldValue, errors }) => (
             <Form>
@@ -1401,6 +1403,8 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
           Back
         </Button>
         <Stack direction="row" spacing={1}>
+          <RaiseRequest fields={[]} task_id={''} />
+
           <GetActionButtons
             type="post"
             urlEndpoint="/income_tax_returns/deductions/upsert/"

@@ -48,7 +48,7 @@ import Avatar from '@mui/material/Avatar';
 import StepContent from '@mui/material/StepContent';
 import CircularProgress from '@mui/material/CircularProgress';
 import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined';
-
+import RaiseRequest from '../RaiseRequest';
 const steps = ['Personal Info', 'Income Details', 'Deductions', 'Review & Filing'];
 
 const getFileName = (file) => {
@@ -409,9 +409,25 @@ export default function ITR() {
                 <>
                   {/* Personal Info Card */}
                   <Card sx={{ mb: 3, p: { xs: 2, sm: 3 } }}>
-                    <Typography variant="h5" fontWeight={700} mb={2}>
-                      <span style={{ textDecoration: 'underline' }}>Personal Information</span>
-                    </Typography>
+                    <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2.5 }}>
+                      <Typography variant="h5" fontWeight={700}>
+                        <span style={{ textDecoration: 'underline' }}>Personal Information</span>
+                      </Typography>
+                      <RaiseRequest
+                        fields={[
+                          'Pan',
+                          'Aadhaar',
+                          'Mobile Number',
+                          'Email',
+                          'First Name',
+                          'Middle Name',
+                          'Last Name',
+                          'Gender',
+                          'Residential Status'
+                        ]}
+                        task_id={tasks?.['Personal Information']?.task_id}
+                      />
+                    </Stack>
                     <Formik
                       innerRef={personalInfoFormikRef}
                       initialValues={personalInfo}
@@ -430,7 +446,7 @@ export default function ITR() {
                         formData.append('service_request', service_id);
                         formData.append('service_task', tasks?.['Personal Information']?.task_id);
                         Object.entries(values).forEach(([key, value]) => {
-                          if (value === null) return;
+                          if (value === null || key === 'status') return;
                           if (key === 'pan' || key === 'aadhar') {
                             if (value instanceof File) {
                               formData.append(key, value);
@@ -746,7 +762,10 @@ export default function ITR() {
                       {({ setFieldValue, values, errors, touched }) => (
                         <Form>
                           <Typography variant="h5" fontWeight={700} mb={2}>
-                            <span style={{ textDecoration: 'underline' }}>Tax Paid Details</span>
+                            <Stack direction="row" justifyContent="space-between" alignItems="center">
+                              <span style={{ textDecoration: 'underline' }}>Tax Paid Details</span>
+                              <RaiseRequest fields={['26AS', 'AIS', 'Advance Tax']} task_id={tasks?.['Tax Paid Details']?.task_id} />
+                            </Stack>
                           </Typography>
                           <Grid2 container spacing={2} alignItems="center">
                             {/* Upload 26AS */}

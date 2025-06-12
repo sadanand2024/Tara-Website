@@ -57,9 +57,11 @@ const FileListDialog = ({ open, onClose, files, getStep1Data, getStep2Data, getS
   };
 
   const removefile = (index) => {
-    let __files = JSON.parse(JSON.stringify(filesData));
-    __files.splice(index, 1);
-    setFilesData(__files);
+    setFilesData((prev) => {
+      const updated = [...prev];
+      updated.splice(index, 1);
+      return updated;
+    });
     if (step === 0) getStep1Data();
     if (step === 1) getStep2Data();
     if (step === 2) getStep3Data();

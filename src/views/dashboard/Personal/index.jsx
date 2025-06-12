@@ -135,10 +135,14 @@ export default function Personal() {
   const user = useSelector((state) => state.accountReducer.user);
   const navigate = useNavigate();
   useEffect(() => {
-    if (user.active_context.context_type !== 'personal') {
+    if (user?.all_contexts?.length === 0) {
+      navigate('/dashboard');
+    } else if (user?.active_context?.context_type === null) {
+      navigate('/dashboard');
+    } else if (user?.active_context?.context_type !== 'personal') {
       navigate('/dashboard/business');
     }
-  }, [user.active_context]);
+  }, [user?.active_context]);
   const services = [
     {
       title: 'Active Services',
@@ -185,7 +189,7 @@ export default function Personal() {
     <Box>
       <GreetingSection>
         <Heading variant="h1" color="primary.dark">
-          Hello {user.active_context.name || 'User'}!
+          Hello {user?.active_context?.name || 'User'}!
         </Heading>
         <Typography variant="h4" color="text.secondary">
           Let's stay on top of your finances!
