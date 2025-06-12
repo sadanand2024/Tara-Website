@@ -180,10 +180,10 @@ export default function Business() {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const user = useSelector((state) => state.accountReducer.user);
   useEffect(() => {
-    if (user.active_context.context_type !== 'business') {
+    if (user?.active_context?.context_type !== 'business') {
       navigate('/dashboard/personal');
     }
-  }, [user.active_context]);
+  }, [user?.active_context]);
   const companyInfo = {
     name: 'AQUA TECH SOLUTIONS PVT LTD',
     stats: {

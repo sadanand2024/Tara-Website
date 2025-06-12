@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import { cloneElement, useState } from 'react';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useLocation } from 'react-router-dom';
 
 // material-ui
 import MuiAppBar from '@mui/material/AppBar';
@@ -35,7 +35,7 @@ import {
 } from '@tabler/icons-react';
 import ProductsPanel from './ProductsPanel';
 import ServicesPanel from './ServicesPanel';
-function ElevationScroll({ children, window }) {
+function ElevationScroll({ children, window, pathname }) {
   const theme = useTheme();
   const trigger = useScrollTrigger({
     disableHysteresis: true,
@@ -43,14 +43,24 @@ function ElevationScroll({ children, window }) {
     target: window
   });
 
+   const getBackgroundColor = () => {
+    if (trigger) {
+      return '#FFFFFF';
+    }
+    return pathname === '/' ? 'linear-gradient(to left, #9DB0FF 0%, #F0F3FF 50%, #FFFFFF 100%)' : '#FFFFFF';
+  };
+
   return cloneElement(children, {
     elevation: trigger ? 1 : 0,
     style: {
-      backgroundColor: theme.palette.mode === ThemeMode.DARK && trigger ? theme.palette.dark[800] : theme.palette.background.default,
-      color: theme.palette.text.dark
+      background: getBackgroundColor(),
+      color: theme.palette.text.dark,
+      transition: 'background 0.3s ease-in-out'
     }
   });
 }
+
+ElevationScroll.propTypes = { children: PropTypes.node, window: PropTypes.any, pathname: PropTypes.string };
 
 // ==============================|| MINIMAL LAYOUT APP BAR ||============================== //
 
@@ -59,6 +69,8 @@ export default function AppBar({ ...others }) {
   const [openServices, setOpenServices] = useState(false);
   const [openProducts, setOpenProducts] = useState(false);
   const theme = useTheme();
+  const location = useLocation();
+  const { pathname } = location;
 
   const handleToggle = () => setOpenServices(!openServices);
   const handleClose = () => setOpenServices(false);
@@ -74,10 +86,10 @@ export default function AppBar({ ...others }) {
   };
 
   return (
-    <ElevationScroll {...others}>
+    <ElevationScroll {...others} pathname={pathname}>
       <MuiAppBar>
         {/* <Container> */}
-        <Toolbar sx={{ py: 0.5, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Toolbar sx={{ py:0.5, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           {/* Left: Logo */}
           <Box>
             <RouterLink to="/">
@@ -238,4 +250,3 @@ export default function AppBar({ ...others }) {
   );
 }
 
-ElevationScroll.propTypes = { children: PropTypes.node, window: PropTypes.any };

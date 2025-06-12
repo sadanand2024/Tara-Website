@@ -19,7 +19,6 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { useSearchParams } from 'react-router-dom';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
-
 import CustomInput from 'utils/CustomInput';
 import CustomAutocomplete from 'utils/CustomAutocomplete';
 import Factory from 'utils/Factory';
@@ -366,7 +365,7 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
 
     const faAnnual = annualCtc - totalWithoutFA - benefitsTotal;
     const faMonthly = faAnnual / 12;
-    if (faAnnual <= 0) {
+    if (faAnnual < 0) {
       const error = 'The system calculated Fixed Allowance cannot be less than zero. Check and enter valid salary details.';
       setFieldValue('errorMessage', error);
 

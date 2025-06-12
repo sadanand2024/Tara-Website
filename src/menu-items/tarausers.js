@@ -30,6 +30,14 @@ const TaraUsers = {
   type: 'group',
   children: [
     {
+      id: 'dashboard',
+      title: 'dashboard',
+      type: 'item',
+      url: '/dashboard',
+      icon: icons.IconBriefcase,
+      breadcrumbs: false
+    },
+    {
       id: 'service-summary',
       title: 'service-summary',
       type: 'item',

@@ -2,26 +2,30 @@ import { Box, Button, Grid, Stack, Typography } from '@mui/material';
 import AutomationIcon from 'assets/images/icons/Automation.svg';
 import CommitIcon from 'assets/images/icons/Commit.svg';
 import FinancialIcon from 'assets/images/icons/Financial.svg';
+import { Link as RouterLink } from 'react-router-dom';
+
 
 import React from 'react';
 
 const TaraFinanceSection = () => {
   return (
-    <Box sx={{ backgroundColor: '#f0f4ff', width: '100%', overflow: 'hidden',px:10 }}>
+    <Box sx={{ backgroundColor: '#f0f4ff', width: '100%', overflow: 'hidden',px:10,py:10,        display: { xs: 'none', sm: 'block' }, 
+}}>
       <Box
         sx={{
           padding: { xs: '20px 16px', sm: '30px 20px', md: '40px 20px' },
           textAlign: 'center',
           maxWidth: '1200px',
           margin: '0 auto',
+          mt: { xs: 0, sm: 0, md: 0, lg: -8},
         }}
       >
         {/* Title Section */}
         <Typography
           variant="h2"
           sx={{
-            fontFamily: 'Manrope, sans-serif',
-            fontSize: { xs: '1.5rem', sm: '1.75rem', md: '3rem' },
+            fontFamily: 'inter',
+            fontSize: { xs: '1.5rem', sm: '1.75rem', md: '40px' },
             fontWeight: 500,
             textAlign: 'center',
             color: '#002366',
@@ -39,10 +43,10 @@ const TaraFinanceSection = () => {
           variant="h3" 
           color="#00256B" 
           fontWeight="400" 
-          
+          fontFamily={'inter'}
           mb={4}
           sx={{
-            fontSize: { xs: '1.25rem', sm: '1.5rem', md: '1.5rem' },
+            fontSize: { xs: '1.25rem', sm: '1.5rem', md: '18px' },
             
           }}
         >
@@ -72,7 +76,9 @@ const TaraFinanceSection = () => {
                   sx={{
                     width: '64px',
                     height: '64px',
-                    mb: { xs:14, sm: 0, md:1 }
+                    mb: { xs:14, sm: 0, md:1 },
+                   ml: { xs:0, sm: 2, md:20 }
+
                   }}
                 />
               </Box>
@@ -82,7 +88,8 @@ const TaraFinanceSection = () => {
                   fontSize: { xs: '1rem', sm: '1.1rem', md: '1.2rem' },
                   fontWeight: 500,
                   mt: { xs: -6, sm: -7, md: -8 },
-                  lineHeight: 1.4
+                  lineHeight: 1.4,
+                  ml: { xs:0, sm: 2, md:20 }
                 }}
               >
                 Access a complete <br />
@@ -154,7 +161,9 @@ const TaraFinanceSection = () => {
                   sx={{
                     width: '64px',
                     height: '64px',
-                    mb: { xs:10, sm: 0, md:1 }
+                    mb: { xs:10, sm: 0, md:1 },
+                   mr: { xs:0, sm: 2, md:20 }
+
                   }}
                 />
               </Box>
@@ -164,7 +173,9 @@ const TaraFinanceSection = () => {
                   fontSize: { xs: '1rem', sm: '1.1rem', md: '1.2rem' },
                   fontWeight: 500,
                   mt: { xs: -6, sm: -7, md: -8 },
-                  lineHeight: 1.4
+                  lineHeight: 1.4,
+                 mr: { xs:0, sm: 2, md:20 }
+
                 }}
               >
                 No commitment, no <br />
@@ -182,6 +193,8 @@ const TaraFinanceSection = () => {
           sx={{ mt: { xs: 4, sm: 6, md: 8 } }}
         >
           <Button
+           component={RouterLink}
+          to="/book-consultation"
             variant="contained"
             sx={{
               backgroundColor: '#ffd600',
@@ -198,6 +211,8 @@ const TaraFinanceSection = () => {
             Get a Demo
           </Button>
           <Button
+           component={RouterLink}
+           to="/book-consultation"
             variant="outlined"
             sx={{
               borderColor: '#002aff',

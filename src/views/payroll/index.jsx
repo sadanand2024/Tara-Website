@@ -63,7 +63,6 @@ const PayrollDashboard = () => {
     setLoading(true);
     const url = `/payroll/payroll-summary-view?payroll_id=${businessDetails?.payroll_id}&month=${monthNumber}&financial_year=${financialYear}`;
     const { res, error } = await Factory('get', url, {});
-    console.log(res);
     setLoading(false);
     if (res?.status_cd === 0) {
       setMonthWiseData(res.data);

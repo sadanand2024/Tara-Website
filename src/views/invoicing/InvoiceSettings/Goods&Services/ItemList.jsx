@@ -11,7 +11,8 @@ import {
   Pagination,
   Typography,
   CircularProgress,
-  Box
+  Box,
+  Card
 } from '@mui/material';
 import Factory from 'utils/Factory';
 import AddItem from './AddItem';
@@ -92,77 +93,95 @@ const ItemList = ({ type, setType, handleClose, handleOpen, open, businessDetail
 
   return (
     <>
-      <TableContainer component={Paper} sx={{ mt: 2, borderRadius: 2, boxShadow: 1 }}>
-        <Table sx={{ minWidth: 750 }} size="small">
-          <TableHead>
-            <TableRow sx={{ bgcolor: 'grey.100' }}>
-              <TableCell>Name</TableCell>
-              <TableCell>Type</TableCell>
-              <TableCell>SKU</TableCell>
-              <TableCell>Description</TableCell>
-              <TableCell>GST%</TableCell>
-              <TableCell>Rate</TableCell>
-              <TableCell align="center">Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {loading ? (
-              <TableRow>
-                <TableCell colSpan={7} align="center">
-                  <CircularProgress size={24} />
-                </TableCell>
+      <Card
+        elevation={2}
+        sx={{
+          mb: 2,
+          '& .MuiTableContainer-root': {
+            borderRadius: 0
+          },
+          '& .MuiTableCell-root': {
+            color: 'text.primary'
+          },
+          '& .MuiTableHead-root .MuiTableCell-root': {
+            py: 1,
+            backgroundColor: 'primary.main',
+            color: '#fff'
+          }
+        }}
+      >
+        <TableContainer>
+          <Table size="small">
+            <TableHead>
+              <TableRow sx={{ bgcolor: 'grey.100' }}>
+                <TableCell>Name</TableCell>
+                <TableCell>Type</TableCell>
+                <TableCell>SKU</TableCell>
+                <TableCell>Description</TableCell>
+                <TableCell>GST%</TableCell>
+                <TableCell>Rate</TableCell>
+                <TableCell align="center">Actions</TableCell>
               </TableRow>
-            ) : paginatedData.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={7} align="center">
-                  <Typography variant="body2" color="text.secondary" sx={{ py: 3 }}>
-                    No item records found.
-                  </Typography>
-                </TableCell>
-              </TableRow>
-            ) : (
-              paginatedData.map((item, index) => (
-                <TableRow
-                  key={index}
-                  sx={{
-                    bgcolor: 'background.paper',
-                    '&:hover': {
-                      boxShadow: 1
-                    }
-                  }}
-                >
-                  <TableCell>{item.name}</TableCell>
-                  <TableCell>{item.type}</TableCell>
-                  <TableCell>{item.sku_value}</TableCell>
-                  <TableCell>{item.description}</TableCell>
-                  <TableCell>{item.gst_rate}</TableCell>
-                  <TableCell>{item.selling_price}</TableCell>
-                  <TableCell align="center">
-                    <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
-                      <IconButton color="primary" onClick={() => handleEdit(item)}>
-                        <Edit />
-                      </IconButton>
-                      <IconButton color="error" onClick={() => handleOpenDeleteDialog(item)}>
-                        <Delete />
-                      </IconButton>
-                    </Box>
+            </TableHead>
+            <TableBody>
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={7} align="center">
+                    <CircularProgress size={24} />
                   </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-        <DeleteDialog
-          open={openDeleteDialog}
-          onClose={() => setOpenDeleteDialog(false)}
-          onConfirm={handleConfirmDelete}
-          dialogData={{
-            title: 'Delete Record',
-            heading: 'Are you sure?',
-            description: 'This action will permanently delete the record.'
-          }}
-        />
-      </TableContainer>
+              ) : paginatedData.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} align="center">
+                    <Typography variant="body2" color="text.secondary" sx={{ py: 3 }}>
+                      No item records found.
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                paginatedData.map((item, index) => (
+                  <TableRow
+                    key={index}
+                    sx={{
+                      bgcolor: 'background.paper',
+                      '&:hover': {
+                        boxShadow: 1
+                      }
+                    }}
+                  >
+                    <TableCell>{item.name}</TableCell>
+                    <TableCell>{item.type}</TableCell>
+                    <TableCell>{item.sku_value}</TableCell>
+                    <TableCell>{item.description}</TableCell>
+                    <TableCell>{item.gst_rate}</TableCell>
+                    <TableCell>{item.selling_price}</TableCell>
+                    <TableCell align="center">
+                      <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
+                        <IconButton color="primary" onClick={() => handleEdit(item)}>
+                          <Edit />
+                        </IconButton>
+                        <IconButton color="error" onClick={() => handleOpenDeleteDialog(item)}>
+                          <Delete />
+                        </IconButton>
+                      </Box>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+          <DeleteDialog
+            open={openDeleteDialog}
+            onClose={() => setOpenDeleteDialog(false)}
+            onConfirm={handleConfirmDelete}
+            dialogData={{
+              title: 'Delete Record',
+              heading: 'Are you sure?',
+              description: 'This action will permanently delete the record.'
+            }}
+          />
+        </TableContainer>
+      </Card>
 
       {itemsList.length > 0 && (
         <Stack direction="row" justifyContent="center" sx={{ py: 2 }}>

@@ -84,8 +84,9 @@ export default function Dashboard() {
       if (user.user.is_super_admin) navigate('/dashboard/super-admin');
       // navigate('/dashboard/business');
       else if (user.all_contexts.length === 0) setAccDialog(true);
+      else if (user.active_context === null) switchContext(user.all_contexts[0].id);
       else if (user.active_context?.context_type === 'business') navigate('/dashboard/business');
-      else navigate('/dashboard/personal');
+      else if (user.active_context?.context_type === 'personal') navigate('/dashboard/personal');
     }, 1000);
   }, [user]);
 

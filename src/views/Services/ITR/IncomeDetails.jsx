@@ -18,7 +18,8 @@ import {
   Autocomplete,
   RadioGroup,
   Stack,
-  IconButton
+  IconButton,
+  FormControl
 } from '@mui/material';
 import { useFormik, FieldArray, FormikProvider } from 'formik';
 import * as Yup from 'yup';
@@ -26,6 +27,15 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { useSnackbar } from 'notistack';
 import GetActionButtons from '../FormHelpers';
 import Factory from '../../../utils/Factory';
+import RaiseRequest from '../RaiseRequest';
+const viewFile = async (url) => {
+  const response = await Factory('get', `/docwallet/generate_presigned_url?url=${url}`, {}, {});
+  if (response.res.status_cd === 0) {
+    let url = response.res.data.url;
+    window.open(url, '_blank');
+  }
+};
+
 const docTypes = [
   { key: 'form16', label: 'Form 16' },
   { key: 'payslip', label: 'Payslip' },
@@ -44,6 +54,7 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
   const [other_income, setOtherIncome] = useState(data.find((item) => item.category_name === 'Other Income'));
   const [nri_employee_salary, setForeignIncome] = useState(data.find((item) => item.category_name === 'NRI Employee Salary'));
   // Validation schemas
+
   const docsSchema = Yup.object({
     notes: Yup.object({
       form16: Yup.string(),
@@ -95,14 +106,10 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
   };
   const foreignInitial = {
     foreignDocs: {
-      foreignSalarySlip:
-        nri_employee_salary?.data?.length > 0 ? nri_employee_salary?.data[0]?.foreigner_documents?.salary_slip_files?.files : [],
-      foreignBankStmt:
-        nri_employee_salary?.data?.length > 0 ? nri_employee_salary?.data[0]?.foreigner_documents?.bank_statement_files?.files : [],
+      foreignSalarySlip: nri_employee_salary?.data?.length > 0 ? nri_employee_salary?.data[0]?.foreigner_documents?.salary_slip_files : [],
+      foreignBankStmt: nri_employee_salary?.data?.length > 0 ? nri_employee_salary?.data[0]?.foreigner_documents?.bank_statement_files : [],
       taxPaidAbroad:
-        nri_employee_salary?.data?.length > 0
-          ? nri_employee_salary?.data[0]?.foreigner_documents?.tax_paid_certificate_board_files?.files
-          : []
+        nri_employee_salary?.data?.length > 0 ? nri_employee_salary?.data[0]?.foreigner_documents?.tax_paid_certificate_board_files : []
     },
     periodFrom:
       nri_employee_salary?.data?.length > 0 && nri_employee_salary?.data[0]?.employment_history?.length > 0
@@ -136,22 +143,22 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
       let formData = new FormData();
       formData.append('service_request', service_id);
       formData.append('service_task', salary_income?.task_id);
-      if (values.docs.bank && Array.isArray(values.docs.bank)) {
-        values.docs.bank.forEach((bank) => {
+      if (values.docs.bank.files && Array.isArray(values.docs.bank.files)) {
+        values.docs.bank.files.forEach((bank) => {
           if (bank instanceof File) {
             formData.append('bank_statement_files', bank);
           }
         });
       }
-      if (values.docs.form16 && Array.isArray(values.docs.form16)) {
-        values.docs.form16.forEach((form16) => {
+      if (values.docs.form16.files && Array.isArray(values.docs.form16.files)) {
+        values.docs.form16.files.forEach((form16) => {
           if (form16 instanceof File) {
             formData.append('form16_files', form16);
           }
         });
       }
-      if (values.docs.payslip && Array.isArray(values.docs.payslip)) {
-        values.docs.payslip.forEach((payslip) => {
+      if (values.docs.payslip.files && Array.isArray(values.docs.payslip.files)) {
+        values.docs.payslip.files.forEach((payslip) => {
           if (payslip instanceof File) {
             formData.append('payslip_files', payslip);
           }
@@ -163,6 +170,7 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
       formData.append('status', 'in progress');
       const res = await Factory(type, url, formData, {});
       if (res.res.status_cd === 0) {
+        setSalaryIncome((prev) => ({ ...prev, data: [res.res] }));
         enqueueSnackbar('Documents saved successfully!', {
           variant: 'success',
           anchorOrigin: { vertical: 'top', horizontal: 'right' }
@@ -198,22 +206,22 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
       formData.append('service_task', nri_employee_salary.task_id);
       formData.append('status', 'in progress');
       formData.append('employment_history', JSON.stringify(employment_history));
-      if (values.foreignDocs.foreignBankStmt && Array.isArray(values.foreignDocs.foreignBankStmt)) {
-        values.foreignDocs.foreignBankStmt.forEach((bank) => {
+      if (values.foreignDocs.foreignBankStmt.files && Array.isArray(values.foreignDocs.foreignBankStmt.files)) {
+        values.foreignDocs.foreignBankStmt.files.forEach((bank) => {
           if (bank instanceof File) {
             formData.append('bank_statement_files', bank);
           }
         });
       }
-      if (values.foreignDocs.taxPaidAbroad && Array.isArray(values.foreignDocs.taxPaidAbroad)) {
-        values.foreignDocs.taxPaidAbroad.forEach((tax) => {
+      if (values.foreignDocs.taxPaidAbroad.files && Array.isArray(values.foreignDocs.taxPaidAbroad.files)) {
+        values.foreignDocs.taxPaidAbroad.files.forEach((tax) => {
           if (tax instanceof File) {
             formData.append('tax_paid_certificate_board_files', tax);
           }
         });
       }
-      if (values.foreignDocs.foreignSalarySlip && Array.isArray(values.foreignDocs.foreignSalarySlip)) {
-        values.foreignDocs.foreignSalarySlip.forEach((salary) => {
+      if (values.foreignDocs.foreignSalarySlip.files && Array.isArray(values.foreignDocs.foreignSalarySlip.files)) {
+        values.foreignDocs.foreignSalarySlip.files.forEach((salary) => {
           if (salary instanceof File) {
             formData.append('salary_slip_files', salary);
           }
@@ -258,9 +266,12 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
     <>
       {/* Section 1: Upload Required Documents */}
       <form onSubmit={docsFormik.handleSubmit} autoComplete="off">
-        <Typography variant="h5" mb={2} sx={{ textDecoration: 'underline' }}>
-          Upload Required Documents
-        </Typography>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
+          <Typography variant="h5" sx={{ textDecoration: 'underline' }}>
+            Upload Required Documents
+          </Typography>
+          <RaiseRequest fields={['Form 16', 'Payslip', 'Bank Statement']} task_id={salary_income?.task_id} />
+        </Stack>
         <Box sx={{ p: 0, boxShadow: '0px 0px 10px 0px rgba(66, 66, 66, 0.1)', borderRadius: 2 }}>
           <Table size="small">
             <TableHead>
@@ -279,7 +290,7 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
                     <TableCell>
                       <Box display="flex" flexDirection="column">
                         <Typography variant="body2" sx={{ minHeight: 24 }}>
-                          {docsFormik.values.docs[doc.key]?.count || 0} file(s)
+                          {docsFormik.values.docs[doc.key]?.files?.length || 0} file(s)
                         </Typography>
                       </Box>
                     </TableCell>
@@ -293,8 +304,11 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
                               hidden
                               multiple={true}
                               onChange={(e) => {
-                                if (e.target.files[0]) {
-                                  docsFormik.setFieldValue(`docs.${doc.key}`, [...docsFormik.values.docs[doc.key], ...e.target.files]);
+                                if (e.target.files) {
+                                  docsFormik.setFieldValue(`docs.${doc.key}.files`, [
+                                    ...(docsFormik.values.docs[doc.key]?.files || []),
+                                    ...e.target.files
+                                  ]);
                                 }
                               }}
                             />
@@ -305,7 +319,10 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
                             sx={{ mr: 1, mb: 0.5 }}
                             onClick={() => {
                               setFileDialogOpen(true);
-                              setDialogFilesData(docsFormik.values.docs[doc.key].files);
+                              setDialogFilesData({
+                                files: docsFormik.values.docs[doc.key]?.files || [],
+                                urlEndpoint: 'salary-documents'
+                              });
                             }}
                           >
                             View
@@ -347,9 +364,12 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
       {/* Section 2: Details of any other income you wish to share */}
       <FormikProvider value={otherIncomeFormik}>
         <form onSubmit={otherIncomeFormik.handleSubmit} autoComplete="off">
-          <Typography variant="h5" mt={4} mb={2} sx={{ textDecoration: 'underline' }}>
-            Details of any other income you wish to share
-          </Typography>
+          <Stack direction="row" justifyContent="space-between" alignItems="center" mt={4} mb={2}>
+            <Typography variant="h5" sx={{ textDecoration: 'underline' }}>
+              Details of any other income you wish to share
+            </Typography>
+            <RaiseRequest fields={[]} task_id={other_income?.task_id} />
+          </Stack>
           <FieldArray
             name="otherIncome"
             render={(arrayHelpers) => (
@@ -373,7 +393,7 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
                               size="small"
                               fullWidth
                               placeholder="Details"
-                              value={row.details}
+                              value={row?.details}
                               onChange={(e) => otherIncomeFormik.setFieldValue(`otherIncome[${idx}].details`, e.target.value)}
                             />
                           </TableCell>
@@ -383,7 +403,7 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
                               fullWidth
                               placeholder="Amount"
                               type="number"
-                              value={row.amount}
+                              value={row?.amount}
                               onChange={(e) => otherIncomeFormik.setFieldValue(`otherIncome[${idx}].amount`, e.target.value)}
                             />
                           </TableCell>
@@ -392,7 +412,7 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
                               size="small"
                               fullWidth
                               placeholder="Notes"
-                              value={row.notes}
+                              value={row?.notes}
                               onChange={(e) => otherIncomeFormik.setFieldValue(`otherIncome[${idx}].notes`, e.target.value)}
                             />
                           </TableCell>
@@ -415,8 +435,11 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
                                 size="small"
                                 variant="outlined"
                                 onClick={() => {
-                                  setFileDialogOpen(true);
-                                  setDialogFilesData([{ url: row.file }]);
+                                  if (row.file instanceof File) {
+                                    window.open(URL.createObjectURL(row.file), '_blank');
+                                  } else {
+                                    viewFile(row.file);
+                                  }
                                 }}
                               >
                                 View
@@ -438,16 +461,14 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
                                   formData.append('details', row.details || '');
                                   formData.append('amount', row.amount || '');
                                   formData.append('notes', row.notes || '');
-                                  if (row.id) formData.append('id', row.id);
+                                  if (other_income.data[0].other_income_info[idx])
+                                    formData.append('id', other_income.data[0].other_income_info[idx].id);
                                   if (row.file && row.file instanceof File) formData.append('file', row.file);
                                   let type = 'post';
                                   let url = '/income_tax_returns/other-income-details/';
                                   const res = await Factory(type, url, formData, {});
                                   if (res.res.status_cd === 0) {
-                                    let __otherIncome = { ...other_income };
-                                    __otherIncome.data[0].other_income_info = res.res.other_income_info;
-                                    otherIncomeFormik.setFieldValue(`otherIncome`, res.res.other_income_info);
-                                    setOtherIncome(__otherIncome);
+                                    setOtherIncome((prev) => ({ ...prev, data: [res.res] }));
                                     enqueueSnackbar('Other income saved successfully!', {
                                       variant: 'success',
                                       anchorOrigin: { vertical: 'top', horizontal: 'right' }
@@ -480,11 +501,11 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
                   <GetActionButtons
                     type="post"
                     data={other_income}
-                    status={other_income.data[0].status}
+                    status={other_income?.data[0]?.status}
                     urlEndpoint={`/income_tax_returns/other-income-details/`}
                     service_request={service_id}
-                    task_id={other_income.task_id}
-                    recId={other_income.data[0].id}
+                    task_id={other_income?.task_id}
+                    recId={other_income?.data[0]?.id}
                   />
                 </Box>
               </>
@@ -500,9 +521,15 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
 
       {/* Section 3: Foreign/NRI Employment & Salary Details */}
       <form onSubmit={foreignFormik.handleSubmit} autoComplete="off">
-        <Typography variant="h5" mt={5} mb={2} sx={{ textDecoration: 'underline' }}>
-          Foreign/NRI Employment & Salary Details
-        </Typography>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" mt={4} mb={2}>
+          <Typography variant="h5" sx={{ textDecoration: 'underline' }}>
+            Foreign/NRI Employment & Salary Details
+          </Typography>
+          <RaiseRequest
+            fields={['Foreign Salary Slip', 'Foreign Bank Statement', 'Tax Paid Abroad Certificate']}
+            task_id={nri_employee_salary?.task_id}
+          />
+        </Stack>
         <Box sx={{ p: 0, boxShadow: '0px 0px 10px 0px rgba(66, 66, 66, 0.1)', borderRadius: 2 }}>
           <Table size="small">
             <TableHead>
@@ -520,23 +547,23 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
                     <TableCell>
                       <Box display="flex" flexDirection="column">
                         <Typography variant="body2" sx={{ minHeight: 24 }}>
-                          {foreignFormik.values.foreignDocs[doc.key]?.length || 0} file(s)
+                          {foreignFormik.values.foreignDocs[doc.key]?.files?.length || 0} file(s)
                         </Typography>
                       </Box>
                     </TableCell>
                     <TableCell align="center">
                       <Stack direction="row" spacing={1} sx={{ alignItems: 'center', justifyContent: 'center' }}>
                         <Button size="small" variant="contained" component="label" sx={{ mb: 0.5 }}>
-                          {foreignFormik.values.foreignDocs[doc.key]?.length ? 'Add more' : 'Upload'}
+                          Upload
                           <input
                             type="file"
                             hidden
                             multiple={true}
                             onChange={(e) => {
-                              if (e.target.files[0]) {
-                                foreignFormik.setFieldValue(`foreignDocs.${doc.key}`, [
-                                  ...foreignFormik.values.foreignDocs[doc.key],
-                                  ...Array.from(e.target.files)
+                              if (e.target.files) {
+                                foreignFormik.setFieldValue(`foreignDocs.${doc.key}.files`, [
+                                  ...(foreignFormik.values.foreignDocs[doc.key]?.files || []),
+                                  ...e.target.files
                                 ]);
                               }
                             }}
@@ -548,7 +575,10 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
                           sx={{ mb: 0.5 }}
                           onClick={() => {
                             setFileDialogOpen(true);
-                            setDialogFilesData(foreignFormik.values.foreignDocs[doc.key]);
+                            setDialogFilesData({
+                              files: foreignFormik.values.foreignDocs[doc.key]?.files || [],
+                              urlEndpoint: 'nri-salary-details'
+                            });
                           }}
                         >
                           View
@@ -602,54 +632,22 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
               </Grid2>
             </Grid2>
             {/* Salary Received In */}
-            <Box mt={2} mb={2}>
-              <Typography mb={1}>Salary Received In</Typography>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={foreignFormik.values.salaryReceivedIn?.includes('indian')}
-                    onChange={(e) => {
-                      const checked = e.target.checked;
-                      let arr = [...foreignFormik.values.salaryReceivedIn];
-                      if (checked) arr.push('indian');
-                      else arr = arr.filter((v) => v !== 'indian');
-                      foreignFormik.setFieldValue('salaryReceivedIn', arr);
-                    }}
-                  />
-                }
-                label="Indian Bank"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={foreignFormik.values.salaryReceivedIn?.includes('foreign')}
-                    onChange={(e) => {
-                      const checked = e.target.checked;
-                      let arr = [...foreignFormik.values.salaryReceivedIn];
-                      if (checked) arr.push('foreign');
-                      else arr = arr.filter((v) => v !== 'foreign');
-                      foreignFormik.setFieldValue('salaryReceivedIn', arr);
-                    }}
-                  />
-                }
-                label="Foreign Bank"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={foreignFormik.values.salaryReceivedIn?.includes('both')}
-                    onChange={(e) => {
-                      const checked = e.target.checked;
-                      let arr = [...foreignFormik.values.salaryReceivedIn];
-                      if (checked) arr.push('both');
-                      else arr = arr.filter((v) => v !== 'both');
-                      foreignFormik.setFieldValue('salaryReceivedIn', arr);
-                    }}
-                  />
-                }
-                label="Both"
-              />
-            </Box>
+            <FormControl component="fieldset" sx={{ mt: 2 }}>
+              <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                Salary Received In
+              </Typography>
+              <RadioGroup
+                row
+                name="salaryReceivedIn"
+                value={foreignFormik.values.salaryReceivedIn || ''}
+                onChange={(e) => foreignFormik.setFieldValue('salaryReceivedIn', e.target.value)}
+              >
+                <FormControlLabel value="india" control={<Radio size="small" />} label="India" />
+                <FormControlLabel value="foreign" control={<Radio size="small" />} label="Foreign" />
+                <FormControlLabel value="both" control={<Radio size="small" />} label="Both" />
+                {/* Add more options as needed */}
+              </RadioGroup>
+            </FormControl>
           </Box>
         </Box>
 
@@ -660,11 +658,11 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
           <GetActionButtons
             type="post"
             data={nri_employee_salary}
-            status={nri_employee_salary.data[0].status}
+            status={nri_employee_salary?.data[0]?.status}
             urlEndpoint={`/income_tax_returns/nri-salary-details/upsert/`}
             service_request={service_id}
-            task_id={nri_employee_salary.task_id}
-            recId={nri_employee_salary.data[0].id}
+            task_id={nri_employee_salary?.task_id}
+            recId={nri_employee_salary?.data[0]?.id}
           />
         </Box>
       </form>
@@ -674,7 +672,7 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
 
 const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDialogFilesData, service_id }) => {
   let _wholeData = data[0];
-  data = data[0].data[0].property_info;
+  data = data[0]?.data[0]?.property_info;
   const { enqueueSnackbar } = useSnackbar();
   const [numProperties, setNumProperties] = React.useState(data?.length > 0 ? data?.length : 1);
   const initialProperties = {
@@ -716,16 +714,16 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
           state: '',
           pincode: ''
         },
-        owned_property: '',
+        owned_property: false,
         ownership_percentage: '',
         country: '',
-        is_it_property_let_out: '',
+        is_it_property_let_out: false,
         annual_rent_received: '',
         rent_received: '',
-        pay_municipal_tax: '',
+        pay_municipal_tax: false,
         municipal_tax_paid: '',
         municipal_tax_receipt: null,
-        home_loan_on_property: '',
+        home_loan_on_property: false,
         interest_during_financial_year: '',
         principal_during_financial_year: '',
         upload_loan_interest_certificate: null,
@@ -779,6 +777,7 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
     formData.append('status', 'in progress');
 
     Object.entries(property).forEach(([key, value]) => {
+      if (!value) return;
       if (key === 'property_address') {
         formData.append(key, JSON.stringify(value));
       } else if (value instanceof File) {
@@ -794,13 +793,11 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
 
     try {
       const res = await Factory('post', '/income_tax_returns/house-property-details/upsert/', formData, {});
-      if (res.res.status_cd === 0) {
-        setProperties(res.res.data.property_info);
-        if (enqueueSnackbar)
-          enqueueSnackbar(`Property ${idx + 1} saved!`, { variant: 'success', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
+      if (res.res?.status_cd === 0) {
+        if (res.res?.data?.property_info) setProperties(res.res?.data?.property_info);
+        enqueueSnackbar(`Property ${idx + 1} saved!`, { variant: 'success', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
       } else {
-        if (enqueueSnackbar)
-          enqueueSnackbar(`Error saving property ${idx + 1}`, { variant: 'error', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
+        enqueueSnackbar(`Error saving property ${idx + 1}`, { variant: 'error', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
       }
     } catch (err) {
       if (enqueueSnackbar)
@@ -811,11 +808,32 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
   return (
     <form>
       <Box>
-        <Box display="flex" justifyContent="space-between" mb={2}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
           <Typography variant="subtitle1" fontWeight={700}>
             Enter House Property Details
           </Typography>
-        </Box>
+          <RaiseRequest
+            fields={[
+              'Type of Property',
+              'Country (if Foreign)',
+              'Property Address',
+              'Is it Co-owned Property?',
+              'Ownership Percentage',
+              'Is it let-out?',
+              'Annual Rent Received',
+              'Rent Received In',
+              'Did you pay municipal taxes?',
+              'Municipal tax paid',
+              'Municipal tax receipt',
+              'Home loan on this property?',
+              'Interest paid during the FY',
+              'Principal paid during the FY',
+              'Loan interest certificate',
+              'Loan statement'
+            ]}
+            task_id={_wholeData.task_id}
+          />
+        </Stack>
         {properties?.map((property, idx) => (
           <Paper key={idx} sx={{ p: 3, mb: 2, borderRadius: 2, bgcolor: '#f8fafc' }}>
             <Typography variant="h4" sx={{ textDecoration: 'underline' }} mb={2}>
@@ -904,8 +922,8 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <RadioGroup row value={property.owned_property || ''} onChange={(_, v) => handleChange(idx, 'owned_property', v)}>
-                  <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
-                  <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
+                  <FormControlLabel value={true} control={<Radio size="small" />} label="Yes" />
+                  <FormControlLabel value={false} control={<Radio size="small" />} label="No" />
                 </RadioGroup>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
@@ -936,8 +954,8 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
                   value={property.is_it_property_let_out || ''}
                   onChange={(_, v) => handleChange(idx, 'is_it_property_let_out', v)}
                 >
-                  <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
-                  <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
+                  <FormControlLabel value={true} control={<Radio size="small" />} label="Yes" />
+                  <FormControlLabel value={false} control={<Radio size="small" />} label="No" />
                 </RadioGroup>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
@@ -971,8 +989,8 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <RadioGroup row value={property.pay_municipal_tax || ''} onChange={(_, v) => handleChange(idx, 'pay_municipal_tax', v)}>
-                  <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
-                  <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
+                  <FormControlLabel value={true} control={<Radio size="small" />} label="Yes" />
+                  <FormControlLabel value={false} control={<Radio size="small" />} label="No" />
                 </RadioGroup>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
@@ -1002,7 +1020,7 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
                     variant="outlined"
                     onClick={() => {
                       if (typeof property.municipal_tax_receipt === 'string') {
-                        window.open(property.municipal_tax_receipt, '_blank');
+                        viewFile(property.municipal_tax_receipt);
                       } else {
                         window.open(URL.createObjectURL(property.municipal_tax_receipt), '_blank');
                       }
@@ -1028,8 +1046,8 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
                   value={property.home_loan_on_property || ''}
                   onChange={(_, v) => handleChange(idx, 'home_loan_on_property', v)}
                 >
-                  <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
-                  <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
+                  <FormControlLabel value={true} control={<Radio size="small" />} label="Yes" />
+                  <FormControlLabel value={false} control={<Radio size="small" />} label="No" />
                 </RadioGroup>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
@@ -1076,7 +1094,7 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
                     variant="outlined"
                     onClick={() => {
                       if (typeof property.upload_loan_interest_certificate === 'string') {
-                        window.open(property.upload_loan_interest_certificate, '_blank');
+                        viewFile(property.upload_loan_interest_certificate);
                       } else {
                         window.open(URL.createObjectURL(property.upload_loan_interest_certificate), '_blank');
                       }
@@ -1102,7 +1120,7 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
                     variant="outlined"
                     onClick={() => {
                       if (typeof property.loan_statement === 'string') {
-                        window.open(property.loan_statement, '_blank');
+                        viewFile(property.loan_statement);
                       } else {
                         window.open(URL.createObjectURL(property.loan_statement), '_blank');
                       }
@@ -1141,11 +1159,11 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
           </Button>
           <GetActionButtons
             type="post"
-            data={_wholeData.data[0]}
+            data={_wholeData?.data[0]}
             service_request={service_id}
-            status={_wholeData.data[0].status}
+            status={_wholeData?.data[0]?.status}
             urlEndpoint="/income_tax_returns/house-property-details/upsert/"
-            task_id={_wholeData.task_id}
+            task_id={_wholeData?.task_id}
           />
         </Box>
       </Box>
@@ -1194,13 +1212,13 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
       purchase_value: '',
       sale_date: '',
       sale_value: '',
-      doc: null
+      documents: null
     }
   ]);
 
   useEffect(() => {
     if (cg_property_land) {
-      setSelectedTypes(cg_property_land?.data?.gains_applicable);
+      setSelectedTypes(cg_property_land?.data?.gains_applicable || []);
       if (cg_property_land?.data?.capital_gains_property_details?.length > 0)
         setProperties(cg_property_land?.data?.capital_gains_property_details);
     }
@@ -1217,7 +1235,7 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
           purchase_value: '',
           sale_date: '',
           sale_value: '',
-          doc: null
+          documents: null
         }
       ]);
   }, [cg_other_sources]);
@@ -1231,7 +1249,7 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
           purchase_value: '',
           sale_date: '',
           sale_value: '',
-          doc: null
+          documents: null
         }
       ]);
     }
@@ -1260,19 +1278,25 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
 
   useEffect(() => {
     if (cg_equity_mutual) {
-      setEquityMutualFundType(cg_equity_mutual?.data?.equity_mutual_fund_type);
-      setCamsFiles(cg_equity_mutual?.data?.documents);
-      setSoldForeignShares(cg_equity_mutual?.data?.sell_any_foreign_sales);
-      setSoldUnlistedShares(cg_equity_mutual?.data?.sell_any_unlisted_sales);
+      setEquityMutualFundType(cg_equity_mutual?.data?.equity_mutual_fund_type || []);
+      setCamsFiles(cg_equity_mutual?.data?.documents || []);
+      setSoldForeignShares(cg_equity_mutual?.data?.sell_any_foreign_sales || 'no');
+      setSoldUnlistedShares(cg_equity_mutual?.data?.sell_any_unlisted_sales || 'no');
     }
   }, [cg_equity_mutual]);
 
   const handleCamsInstrumentChange = (type) => (e) => {
-    setEquityMutualFundType((prev) => (e.target.checked ? [...prev, type] : prev.filter((t) => t !== type)));
+    let __equity_mutual_fund_type = equity_mutual_fund_type;
+    if (equity_mutual_fund_type.length === 0) {
+      __equity_mutual_fund_type = [type];
+    } else {
+      __equity_mutual_fund_type = e.target.checked ? [...equity_mutual_fund_type, type] : equity_mutual_fund_type.filter((t) => t !== type);
+    }
+    setEquityMutualFundType(__equity_mutual_fund_type);
   };
 
   const handleCamsFilesChange = (e) => {
-    setCamsFiles(Array.from(e.target.files));
+    setCamsFiles((prev) => [...prev, ...Array.from(e.target.files)]);
   };
 
   const handleCamsSave = async () => {
@@ -1313,8 +1337,12 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
               control={<Checkbox checked={selectedTypes?.includes(type)} />}
               onChange={async (e) => {
                 const isChecked = e.target.checked;
-                let __selectedTypes = isChecked ? [...selectedTypes, type] : selectedTypes.filter((t) => t !== type);
-                setSelectedTypes(__selectedTypes);
+                let __selectedTypes = selectedTypes;
+                if (selectedTypes.length === 0) {
+                  __selectedTypes = [type];
+                } else {
+                  __selectedTypes = isChecked ? [...selectedTypes, type] : selectedTypes.filter((t) => t !== type);
+                }
                 const response = await Factory('post', `/income_tax_returns/capital-gains/upsert/`, {
                   service_request: parseInt(service_id),
                   service_task: cg_property_land.task_id,
@@ -1338,9 +1366,28 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
       </Box>
       {/* Capital Gain from Property/Land */}
       <Paper sx={{ p: 3, mb: 4, borderRadius: 2, bgcolor: '#f8fafc' }}>
-        <Typography variant="subtitle1" fontWeight={700} mb={2}>
-          Capital Gain from Property / Land
-        </Typography>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
+          <Typography variant="subtitle1" fontWeight={700}>
+            Capital Gain from Property / Land
+          </Typography>
+          <RaiseRequest
+            fields={[
+              'Property Type',
+              'Date of Purchase',
+              'Purchase Cost',
+              'Date of Sale',
+              'Sale Value',
+              'Upload purchase doc',
+              'Upload sale doc',
+              'Reinvestment made',
+              'Invested In',
+              'Invest Amount',
+              'Invest Date',
+              'Upload reinvestment details doc'
+            ]}
+            task_id={cg_property_land?.task_id}
+          />
+        </Stack>
         {properties?.map((property, idx) => (
           <Paper key={idx} sx={{ p: 2, mb: 3, border: '1px solid #e0e0e0', bgcolor: '#fff' }}>
             <Typography fontWeight={600} mb={1}>
@@ -1454,8 +1501,11 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                     size="small"
                     variant="outlined"
                     onClick={() => {
-                      setFileDialogOpen(true);
-                      setDialogFilesData([...properties[idx].purchase_doc]);
+                      if (typeof properties[idx].purchase_doc === 'string') {
+                        viewFile(properties[idx].purchase_doc);
+                      } else {
+                        window.open(URL.createObjectURL(properties[idx].purchase_doc), '_blank');
+                      }
                     }}
                   >
                     View
@@ -1483,8 +1533,11 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                     size="small"
                     variant="outlined"
                     onClick={() => {
-                      setFileDialogOpen(true);
-                      setDialogFilesData([...properties[idx].sale_doc]);
+                      if (typeof properties[idx].sale_doc === 'string') {
+                        viewFile(properties[idx].sale_doc);
+                      } else {
+                        window.open(URL.createObjectURL(properties[idx].sale_doc), '_blank');
+                      }
                     }}
                     sx={{ ml: 1 }}
                   >
@@ -1587,8 +1640,11 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                             variant="outlined"
                             sx={{ ml: 1 }}
                             onClick={() => {
-                              setFileDialogOpen(true);
-                              setDialogFilesData([...properties[idx].reinvestment_details_docs]);
+                              if (typeof properties[idx].reinvestment_details_docs === 'string') {
+                                viewFile(properties[idx].reinvestment_details_docs);
+                              } else {
+                                window.open(URL.createObjectURL(properties[idx].reinvestment_details_docs), '_blank');
+                              }
                             }}
                           >
                             View
@@ -1698,19 +1754,25 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
           </Button>
           <GetActionButtons
             type="post"
-            data={cg_property_land.data}
-            status={cg_property_land.data.status}
+            data={cg_property_land?.data}
+            status={cg_property_land?.data?.status}
             urlEndpoint={`/income_tax_returns/capital-gains/upsert/`}
-            recId={cg_property_land.data.id}
+            recId={cg_property_land?.data?.id}
             service_request={service_id}
-            task_id={cg_property_land.task_id}
+            task_id={cg_property_land?.task_id}
             setData={setProperties}
           />
         </Box>
         {/* Capital Gain from Equity/Mutual Fund */}
-        <Typography variant="subtitle1" fontWeight={700} mb={2}>
-          Capital Gain from Equity / Mutual Fund
-        </Typography>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1} mt={4}>
+          <Typography variant="subtitle1" fontWeight={700}>
+            Capital Gain from Equity / Mutual Fund
+          </Typography>
+          <RaiseRequest
+            fields={['Instrument', 'CAMS/Broker statements', 'Did you sell any foreign shares?', 'Did you sell any unlisted shares?']}
+            task_id={cg_equity_mutual?.task_id}
+          />
+        </Stack>
         <Paper sx={{ p: 2, mb: 3, border: '1px solid #e0e0e0', bgcolor: '#fff' }}>
           {/* 1. Instrument checkboxes */}
           <Box mb={2}>
@@ -1740,7 +1802,10 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                   variant="outlined"
                   onClick={() => {
                     setFileDialogOpen(true);
-                    setDialogFilesData(camsFiles);
+                    setDialogFilesData({
+                      files: camsFiles,
+                      urlEndpoint: 'capital-gains-equity-mutual-fund'
+                    });
                   }}
                 >
                   View
@@ -1770,20 +1835,26 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
             </Button>
             <GetActionButtons
               type="post"
-              data={cg_equity_mutual}
-              status={cg_equity_mutual.data.status}
+              data={cg_equity_mutual?.data}
+              status={cg_equity_mutual?.data?.status}
               urlEndpoint={`/income_tax_returns/capital-gains/equity-mutual-fund/submit/`}
-              recId={cg_equity_mutual.data.id}
+              recId={cg_equity_mutual?.data?.id}
               service_request={service_id}
-              task_id={cg_equity_mutual.task_id}
+              task_id={cg_equity_mutual?.task_id}
             />
           </Stack>
         </Paper>
         {/* 5. Details of other Capital Gains table (already present) */}
-        <Box mb={2}>
-          <Typography fontWeight={600} mb={1}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1} mt={3}>
+          <Typography variant="subtitle1" fontWeight={700}>
             Details of other Capital Gains
           </Typography>
+          <RaiseRequest
+            fields={['Asset Details', 'Purchase Date', 'Purchase Value', 'Sale Date', 'Sale Value', 'Upload doc']}
+            task_id={cg_other_sources?.task_id}
+          />
+        </Stack>
+        <Box mb={2}>
           <Paper elevation={2} sx={{ mb: 2, borderRadius: 1, overflow: 'hidden' }}>
             <Table size="small">
               <TableHead>
@@ -1884,18 +1955,18 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                             multiple={true}
                             onChange={(e) => {
                               const updated = [...otherGainsRows];
-                              updated[idx].doc = e.target.files;
+                              updated[idx].documents = e.target.files;
                               setOtherGainsRows(updated);
                             }}
                           />
                         </Button>
-                        {otherGainsRows?.[idx]?.doc && (
+                        {otherGainsRows?.[idx]?.documents && (
                           <Button
                             size="small"
                             variant="outlined"
                             onClick={() => {
                               setFileDialogOpen(true);
-                              setDialogFilesData([otherGainsRows?.[idx]?.doc]);
+                              setDialogFilesData({ files: [...otherGainsRows?.[idx]?.documents], urlEndpoint: 'other-capital-gains' });
                             }}
                           >
                             View
@@ -1916,14 +1987,18 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                           formData.append('status', 'in progress');
                           formData.append('asset_details', row.asset_details || '');
                           formData.append('purchase_date', row.purchase_date || '');
+                          if (row.id) formData.append('id', row.id);
                           formData.append('purchase_value', row.purchase_value || '');
                           formData.append('sale_date', row.sale_date || '');
                           formData.append('sale_value', row.sale_value || '');
-                          Array.from(row.doc).forEach((file) => {
-                            if (file instanceof File) formData.append('documents', file);
-                          });
+                          if (row.documents && row.documents?.length > 0) {
+                            Array.from(row.documents).forEach((file) => {
+                              if (file instanceof File) formData.append('documents', file);
+                            });
+                          }
                           const response = await Factory('post', `/income_tax_returns/other-capital-gains/with-files/`, formData);
                           if (response.res.status_cd === 0) {
+                            setOtherGainsRows(response.res.data.data.other_capital_gain_info);
                             enqueueSnackbar('Other Capital Gains submitted successfully', {
                               anchorOrigin: { vertical: 'top', horizontal: 'right' },
                               variant: 'success'
@@ -1941,10 +2016,26 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                       <IconButton
                         size="small"
                         color="error"
-                        onClick={() => {
-                          const updated = [...otherGainsRows];
-                          updated.splice(idx, 1);
-                          setOtherGainsRows(updated);
+                        onClick={async () => {
+                          const res = await Factory(
+                            'delete',
+                            `/income_tax_returns/other-capital-gains/delete/${otherGainsRows?.[idx].id}/`,
+                            {}
+                          );
+                          if (res.res.status_cd === 0) {
+                            const updated = [...otherGainsRows];
+                            updated.splice(idx, 1);
+                            setOtherGainsRows(updated);
+                            enqueueSnackbar('Other Capital Gains deleted successfully', {
+                              anchorOrigin: { vertical: 'top', horizontal: 'right' },
+                              variant: 'success'
+                            });
+                          } else {
+                            enqueueSnackbar('Error deleting Other Capital Gains', {
+                              anchorOrigin: { vertical: 'top', horizontal: 'right' },
+                              variant: 'error'
+                            });
+                          }
                         }}
                       >
                         <DeleteIcon />
@@ -1968,7 +2059,7 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                     purchase_value: '',
                     sale_date: '',
                     sale_value: '',
-                    doc: null
+                    documents: null
                   }
                 ])
               }
@@ -1982,7 +2073,7 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
               urlEndpoint={`/income_tax_returns/other-capital-gains/with-files/`}
               recId={cg_other_sources?.data[0]?.id}
               service_request={service_id}
-              task_id={cg_other_sources.task_id}
+              task_id={cg_other_sources?.task_id}
             />
           </Box>
         </Box>
@@ -2028,9 +2119,9 @@ function transformBusinessApiResponse(apiObj) {
     business_type: apiObj.business_type || '',
     opting_for_presumptive_taxation: apiObj.opting_for_presumptive_taxation || 'no',
     gst_registered: apiObj.gst_registered || 'no',
-    status: apiObj.status || '',
-    service_request: apiObj.service_request,
-    service_task: apiObj.service_task,
+    status: apiObj?.status || '',
+    service_request: apiObj?.service_request,
+    service_task: apiObj?.service_task,
     assignee: apiObj?.assignee,
     reviewer: apiObj?.reviewer,
     // Opting data
@@ -2041,11 +2132,11 @@ function transformBusinessApiResponse(apiObj) {
     grossturnover_or_receipts: apiObj.opting_data?.grossturnover_or_receipts || '',
     digital_receipts: apiObj.opting_data?.digital_receipts || '',
     // Documents (use first file or array as needed)
-    as26File: apiObj.documents?.['26AS']?.files?.[0]?.url || null,
-    aisFile: apiObj.documents?.['AIS']?.files?.[0]?.url || null,
-    gstReturnsFile: apiObj.documents?.['GST Returns']?.files?.[0]?.url || null,
-    bankStatementFile: apiObj.documents?.['Bank Statements']?.files?.[0]?.url || null,
-    otherDocsFile: apiObj.documents?.['Other']?.files?.[0]?.url || null
+    form26as_files: apiObj.documents?.['26AS']?.files || null,
+    ais_files: apiObj.documents?.['AIS']?.files || null,
+    gst_returns_files: apiObj.documents?.['GST Returns']?.files || null,
+    bank_statements_files: apiObj.documents?.['Bank Statements']?.files || null,
+    other_files: apiObj.documents?.['Other']?.files || null
     // Add more fields as needed
   };
 }
@@ -2072,13 +2163,13 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
           nature: '',
           presumptive_rate: '',
           presumptive_income: '',
-          bankStatementFile: null,
-          as26File: null,
-          aisFile: null,
-          plFile: null,
-          bsFile: null,
-          gstReturnsFile: null,
-          otherDocsFile: null,
+          bank_statements_files: null,
+          form26as_files: null,
+          ais_files: null,
+          profit_loss_statement_files: null,
+          balance_sheet_files: null,
+          gst_returns_files: null,
+          other_files: null,
           opting_for_presumptive_taxation: 'no',
           bookMaintained: 'no',
           gst_registered: 'no'
@@ -2119,13 +2210,13 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
         key !== 'section'
       ) {
         if (
-          key === 'bankStatementFile' ||
-          key === 'as26File' ||
-          key === 'aisFile' ||
-          key === 'plFile' ||
-          key === 'bsFile' ||
-          key === 'gstReturnsFile' ||
-          key === 'otherDocsFile'
+          key === 'bank_statements_files' ||
+          key === 'form26as_files' ||
+          key === 'ais_files' ||
+          key === 'profit_loss_statement_files' ||
+          key === 'balance_sheet_files' ||
+          key === 'gst_returns_files' ||
+          key === 'other_files'
         ) {
           if (value && value?.length > 0) {
             Array.from(value).forEach((file) => {
@@ -2145,11 +2236,7 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
     let url = '/income_tax_returns/business-professional-income/';
     const res = await Factory(type, url, formData);
     if (res.res.status_cd === 0) {
-      if (!businessData.id) {
-        let updated = [...businessRows];
-        updated[idx] = transformBusinessApiResponse(res.res.id);
-        setBusinessRows(updated);
-      }
+      setBusinessRows(res.res.id.business_professional_income_info.map(transformBusinessApiResponse));
       enqueueSnackbar('Business/Profession Income saved successfully!', {
         variant: 'success',
         anchorOrigin: { vertical: 'top', horizontal: 'right' }
@@ -2163,7 +2250,7 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
   };
 
   const removeBusinessIncome = async (row, idx) => {
-    const res = await Factory('delete', `/income_tax_returns/business-professional-income/document/${row.id}/delete/`, {});
+    const res = await Factory('delete', `/income_tax_returns/business-professional-income/${row.id}/delete/`, {});
 
     if (res.res.status_cd === 0) {
       let updated = [...businessRows];
@@ -2186,6 +2273,32 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
 
   return (
     <Box>
+      <Stack direction="row" sx={{ justifyContent: 'space-between' }} spacing={2} alignItems="center" mb={2}>
+        <Typography variant="subtitle1" fontWeight={700}>
+          Business/Professional Income:
+        </Typography>
+        <RaiseRequest
+          fields={[
+            'Business Name',
+            'Business Type',
+            'Opting for presumptive?',
+            'Section/Type of',
+            'Nature',
+            'Presumptive Rate',
+            'Presumptive Income',
+            'Bank Statements',
+            'Form 26AS',
+            'AIS',
+            'Profit & Loss Statement',
+            'Balance Sheet',
+            'GST Returns',
+            'Gross Turnover',
+            'Digital Percentage Receipts',
+            'Net Profit'
+          ]}
+          task_id={data.task_id}
+        />
+      </Stack>
       {Array.from({ length: businessRows?.length }).map((_, idx) => {
         const section = selectedSection[idx];
         const sectionData = sectionPresumptiveData[section] || { nature: '', presumptive_rate: '', presumptive_income: '' };
@@ -2370,23 +2483,23 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                           onChange={(e) => {
                             if (e.target.files) {
                               const updatedBank = [...businessRows];
-                              updatedBank[idx].bankStatementFile = e.target.files;
+                              updatedBank[idx].bank_statements_files = e.target.files;
                               setBusinessRows(updatedBank);
                             }
                           }}
                         />
                       </Button>
-                      {businessRows[idx]?.bankStatementFile && (
+                      {businessRows[idx]?.bank_statements_files && (
                         <Button
                           size="small"
                           variant="outlined"
                           sx={{ ml: 1 }}
                           onClick={() => {
                             setFileDialogOpen(true);
-                            let file = businessRows[idx].bankStatementFile?.startsWith('http')
-                              ? [{ url: businessRows[idx].bankStatementFile }]
-                              : [...businessRows[idx].bankStatementFile];
-                            setDialogFilesData(file);
+                            setDialogFilesData({
+                              files: [...businessRows[idx].bank_statements_files],
+                              urlEndpoint: 'business-professional-income'
+                            });
                           }}
                         >
                           View
@@ -2407,23 +2520,20 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                         onChange={(e) => {
                           if (e.target.files) {
                             const updated = [...businessRows];
-                            updated[idx].as26File = e.target.files;
+                            updated[idx].form26as_files = e.target.files;
                             setBusinessRows(updated);
                           }
                         }}
                       />
                     </Button>
-                    {businessRows[idx]?.as26File && (
+                    {businessRows[idx]?.form26as_files && (
                       <Button
                         size="small"
                         variant="outlined"
                         sx={{ ml: 1 }}
                         onClick={() => {
                           setFileDialogOpen(true);
-                          let file = businessRows[idx].as26File?.startsWith('http')
-                            ? [{ url: businessRows[idx].as26File }]
-                            : [...businessRows[idx].as26File];
-                          setDialogFilesData(file);
+                          setDialogFilesData({ files: [...businessRows[idx].form26as_files], urlEndpoint: 'business-professional-income' });
                         }}
                       >
                         View
@@ -2443,23 +2553,20 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                         onChange={(e) => {
                           if (e.target.files) {
                             const updatedAIS = [...businessRows];
-                            updatedAIS[idx].aisFile = e.target.files;
+                            updatedAIS[idx].ais_files = e.target.files;
                             setBusinessRows(updatedAIS);
                           }
                         }}
                       />
                     </Button>
-                    {businessRows[idx]?.aisFile && (
+                    {businessRows[idx]?.ais_files && (
                       <Button
                         size="small"
                         variant="outlined"
                         sx={{ ml: 1 }}
                         onClick={() => {
                           setFileDialogOpen(true);
-                          let file = businessRows[idx].aisFile?.startsWith('http')
-                            ? [{ url: businessRows[idx].aisFile }]
-                            : [...businessRows[idx].aisFile];
-                          setDialogFilesData(file);
+                          setDialogFilesData({ files: [...businessRows[idx].ais_files], urlEndpoint: 'business-professional-income' });
                         }}
                       >
                         View
@@ -2479,23 +2586,20 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                         onChange={(e) => {
                           if (e.target.files) {
                             const updatedOtherDocs = [...businessRows];
-                            updatedOtherDocs[idx].otherDocsFile = e.target.files;
+                            updatedOtherDocs[idx].other_files = e.target.files;
                             setBusinessRows(updatedOtherDocs);
                           }
                         }}
                       />
                     </Button>
-                    {businessRows[idx]?.otherDocsFile && (
+                    {businessRows[idx]?.other_files && (
                       <Button
                         size="small"
                         variant="outlined"
                         sx={{ ml: 1 }}
                         onClick={() => {
                           setFileDialogOpen(true);
-                          let file = businessRows[idx].otherDocsFile?.startsWith('http')
-                            ? [{ url: businessRows[idx].otherDocsFile }]
-                            : [...businessRows[idx].otherDocsFile];
-                          setDialogFilesData(file);
+                          setDialogFilesData({ files: [...businessRows[idx].other_files], urlEndpoint: 'business-professional-income' });
                         }}
                       >
                         View
@@ -2571,23 +2675,23 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                           onChange={(e) => {
                             if (e.target.files) {
                               const updatedBank = [...businessRows];
-                              updatedBank[idx].bankStatementFile = e.target.files;
+                              updatedBank[idx].bank_statements_files = e.target.files;
                               setBusinessRows(updatedBank);
                             }
                           }}
                         />
                       </Button>
-                      {businessRows[idx]?.bankStatementFile && (
+                      {businessRows[idx]?.bank_statements_files && (
                         <Button
                           size="small"
                           variant="outlined"
                           sx={{ ml: 1 }}
                           onClick={() => {
                             setFileDialogOpen(true);
-                            let file = businessRows[idx].bankStatementFile?.startsWith('http')
-                              ? [{ url: businessRows[idx].bankStatementFile }]
-                              : [...businessRows[idx].bankStatementFile];
-                            setDialogFilesData(file);
+                            setDialogFilesData({
+                              files: [...businessRows[idx].bank_statements_files],
+                              urlEndpoint: 'business-professional-income'
+                            });
                           }}
                         >
                           View
@@ -2628,23 +2732,23 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                             onChange={(e) => {
                               if (e.target.files) {
                                 const updated = [...businessRows];
-                                updated[idx].plFile = e.target.files;
+                                updated[idx].profit_loss_statement_files = e.target.files;
                                 setBusinessRows(updated);
                               }
                             }}
                           />
                         </Button>
-                        {businessRows[idx]?.plFile && (
+                        {businessRows[idx]?.profit_loss_statement_files && (
                           <Button
                             size="small"
                             variant="outlined"
                             sx={{ ml: 1 }}
                             onClick={() => {
                               setFileDialogOpen(true);
-                              let file = businessRows[idx].plFile?.startsWith('http')
-                                ? [{ url: businessRows[idx].plFile }]
-                                : [...businessRows[idx].plFile];
-                              setDialogFilesData(file);
+                              setDialogFilesData({
+                                files: [...businessRows[idx].profit_loss_statement_files],
+                                urlEndpoint: 'business-professional-income'
+                              });
                             }}
                           >
                             View
@@ -2664,23 +2768,23 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                             onChange={(e) => {
                               if (e.target.files) {
                                 const updated = [...businessRows];
-                                updated[idx].bsFile = e.target.files;
+                                updated[idx].balance_sheet_files = e.target.files;
                                 setBusinessRows(updated);
                               }
                             }}
                           />
                         </Button>
-                        {businessRows[idx]?.bsFile && (
+                        {businessRows[idx]?.balance_sheet_files && (
                           <Button
                             size="small"
                             variant="outlined"
                             sx={{ ml: 1 }}
                             onClick={() => {
                               setFileDialogOpen(true);
-                              let file = businessRows[idx].bsFile?.startsWith('http')
-                                ? [{ url: businessRows[idx].bsFile }]
-                                : [...businessRows[idx].bsFile];
-                              setDialogFilesData(file);
+                              setDialogFilesData({
+                                files: [...businessRows[idx].balance_sheet_files],
+                                urlEndpoint: 'business-professional-income'
+                              });
                             }}
                           >
                             View
@@ -2722,23 +2826,23 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                             onChange={(e) => {
                               if (e.target.files) {
                                 const updated = [...businessRows];
-                                updated[idx].gstReturnsFile = e.target.files;
+                                updated[idx].gst_returns_files = e.target.files;
                                 setBusinessRows(updated);
                               }
                             }}
                           />
                         </Button>
-                        {businessRows[idx]?.gstReturnsFile && (
+                        {businessRows[idx]?.gst_returns_files && (
                           <Button
                             size="small"
                             variant="outlined"
                             sx={{ ml: 1 }}
                             onClick={() => {
                               setFileDialogOpen(true);
-                              let file = businessRows[idx].gstReturnsFile?.startsWith('http')
-                                ? [{ url: businessRows[idx].gstReturnsFile }]
-                                : [...businessRows[idx].gstReturnsFile];
-                              setDialogFilesData(file);
+                              setDialogFilesData({
+                                files: [...businessRows[idx].gst_returns_files],
+                                urlEndpoint: 'business-professional-income'
+                              });
                             }}
                           >
                             View
@@ -2760,23 +2864,20 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                         onChange={(e) => {
                           if (e.target.files) {
                             const updated = [...businessRows];
-                            updated[idx].as26File = e.target.files;
+                            updated[idx].form26as_files = e.target.files;
                             setBusinessRows(updated);
                           }
                         }}
                       />
                     </Button>
-                    {businessRows[idx]?.as26File && (
+                    {businessRows[idx]?.form26as_files && (
                       <Button
                         size="small"
                         variant="outlined"
                         sx={{ ml: 1 }}
                         onClick={() => {
                           setFileDialogOpen(true);
-                          let file = businessRows[idx].as26File?.startsWith('http')
-                            ? [{ url: businessRows[idx].as26File }]
-                            : [...businessRows[idx].as26File];
-                          setDialogFilesData(file);
+                          setDialogFilesData({ files: [...businessRows[idx].form26as_files], urlEndpoint: 'business-professional-income' });
                         }}
                       >
                         View
@@ -2796,23 +2897,20 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                         onChange={(e) => {
                           if (e.target.files) {
                             const updated = [...businessRows];
-                            updated[idx].aisFile = e.target.files;
+                            updated[idx].ais_files = e.target.files;
                             setBusinessRows(updated);
                           }
                         }}
                       />
                     </Button>
-                    {businessRows[idx]?.aisFile && (
+                    {businessRows[idx]?.ais_files && (
                       <Button
                         size="small"
                         variant="outlined"
                         sx={{ ml: 1 }}
                         onClick={() => {
                           setFileDialogOpen(true);
-                          let file = businessRows[idx].aisFile?.startsWith('http')
-                            ? [{ url: businessRows[idx].aisFile }]
-                            : [...businessRows[idx].aisFile];
-                          setDialogFilesData(file);
+                          setDialogFilesData({ files: [...businessRows[idx].ais_files], urlEndpoint: 'business-professional-income' });
                         }}
                       >
                         View
@@ -2832,23 +2930,20 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                         onChange={(e) => {
                           if (e.target.files) {
                             const updated = [...businessRows];
-                            updated[idx].otherDocsFile = e.target.files;
+                            updated[idx].other_files = e.target.files;
                             setBusinessRows(updated);
                           }
                         }}
                       />
                     </Button>
-                    {businessRows[idx]?.otherDocsFile && (
+                    {businessRows[idx]?.other_files && (
                       <Button
                         size="small"
                         variant="outlined"
                         sx={{ ml: 1 }}
                         onClick={() => {
                           setFileDialogOpen(true);
-                          let file = businessRows[idx].otherDocsFile?.startsWith('http')
-                            ? [{ url: businessRows[idx].otherDocsFile }]
-                            : [...businessRows[idx].otherDocsFile];
-                          setDialogFilesData(file);
+                          setDialogFilesData({ files: [...businessRows[idx].other_files], urlEndpoint: 'business-professional-income' });
                         }}
                       >
                         View
@@ -2902,13 +2997,13 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                 nature: '',
                 presumptive_rate: '',
                 presumptive_income: '',
-                bankStatementFile: null,
-                as26File: null,
-                aisFile: null,
-                plFile: null,
-                bsFile: null,
-                gstReturnsFile: null,
-                otherDocsFile: null,
+                bank_statements_files: null,
+                form26as_files: null,
+                ais_files: null,
+                profit_loss_statement_files: null,
+                balance_sheet_files: null,
+                gst_returns_files: null,
+                other_files: null,
                 opting_for_presumptive_taxation: 'no',
                 bookMaintained: 'no',
                 gst_registered: 'no'
@@ -2922,10 +3017,10 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
         <GetActionButtons
           type="post"
           urlEndpoint="/income_tax_returns/business-professional-income/"
-          status={data.data[0].status}
+          status={data?.data[0]?.status}
           data={data}
           service_request={service_id}
-          task_id={data.task_id}
+          task_id={data?.task_id}
         />
       </Box>
     </Box>
@@ -2934,7 +3029,7 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
 
 const interestTypes = ['Savings Account', 'Recurring Deposit', 'NRO Account', 'NRE Account', 'Fixed Deposit', 'Other'];
 
-const relationOptions = ['Relative', 'Non-relative'];
+const relationOptions = ['Relative', 'Non Relative'];
 
 const pensionSources = ['Government', 'Private'];
 const foreignIncomeTypes = ['Dividend', 'Interest', 'Others'];
@@ -3153,7 +3248,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
   const [dividendRows, setDividendRows] = React.useState([{ received_from: '', dividend_received: '', file: '' }]);
   const [giftApplicable, setGiftApplicable] = React.useState('Not Applicable');
   const [giftRows, setGiftRows] = React.useState([
-    { amount: '', received_from: '', relation: '', date_received: '', was_it_marriage_related: 'no', file: '' }
+    { amount: '', received_from: '', relation: '', date_received: '', was_it_marriage_related: 'No', file: '' }
   ]);
   const [familyApplicable, setFamilyApplicable] = React.useState('Not Applicable');
   const [familyRows, setFamilyRows] = React.useState([{ amount: '', source: '', file: '' }]);
@@ -3183,7 +3278,6 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
   }, [dividend_income]);
 
   useEffect(() => {
-    console.log;
     if (gift_income?.data?.length > 0) {
       setGiftApplicable(gift_income?.data[0]?.gift_income);
       if (gift_income?.data[0]?.gift_income_details?.length > 0) {
@@ -3420,7 +3514,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
           __gift_rows.splice(idx, 1);
           setGiftRows(__gift_rows);
           break;
-        case 'family-pension-income-documents':
+        case 'family-pension-income-documents/files':
           let __family_rows = JSON.parse(JSON.stringify(familyRows));
           __family_rows.splice(idx, 1);
           setFamilyRows(__family_rows);
@@ -3444,19 +3538,27 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
   return (
     <Box>
       {/* Interest Income Section */}
-      <Stack direction="row" spacing={2} alignItems="center" mb={interestApplicable === 'Applicable' ? 0 : 2}>
-        <Typography>Interest Income: </Typography>
-        <RadioGroup
-          row
-          value={interestApplicable}
-          onChange={(_, v) => {
-            let res = postIncomeApplicability(v, 'interest-income', 'interest_income', interest_income.task_id);
-            if (res) setInterestApplicable(v);
-          }}
-        >
-          <FormControlLabel value="Applicable" control={<Radio size="small" />} label="Applicable" />
-          <FormControlLabel value="Not Applicable" control={<Radio size="small" />} label="Not Applicable" />
-        </RadioGroup>
+      <Stack
+        direction="row"
+        spacing={2}
+        alignItems="center"
+        sx={{ mb: interestApplicable === 'Applicable' ? 1 : 2, justifyContent: 'space-between' }}
+      >
+        <Stack direction="row" spacing={2} alignItems="center">
+          <Typography>Interest Income: </Typography>
+          <RadioGroup
+            row
+            value={interestApplicable}
+            onChange={(_, v) => {
+              let res = postIncomeApplicability(v, 'interest-income', 'interest_income', interest_income.task_id);
+              if (res) setInterestApplicable(v);
+            }}
+          >
+            <FormControlLabel value="Applicable" control={<Radio size="small" />} label="Applicable" />
+            <FormControlLabel value="Not Applicable" control={<Radio size="small" />} label="Not Applicable" />
+          </RadioGroup>
+        </Stack>
+        <RaiseRequest fields={[]} task_id={interest_income.task_id} />
       </Stack>
       {interestApplicable === 'Applicable' && (
         <>
@@ -3535,8 +3637,11 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                           variant="outlined"
                           sx={{ ml: 1 }}
                           onClick={() => {
-                            setFileDialogOpen(true);
-                            setDialogFilesData([row.file]);
+                            if (row.file instanceof File) {
+                              window.open(URL.createObjectURL(row.file), '_blank');
+                            } else {
+                              viewFile(row.file);
+                            }
                           }}
                         >
                           View
@@ -3577,25 +3682,37 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
           data={interest_income}
           setData={setInterestRows}
           service_request={service_id}
-          task_id={interest_income.task_id}
+          task_id={interest_income?.task_id}
           urlEndpoint="/income_tax_returns/interest-income/upsert/"
           status={interest_income?.data[0]?.status}
         />
       </Box>
       {/* Dividend Income Section */}
-      <Stack direction="row" spacing={2} alignItems="center" mb={dividendApplicable === 'Applicable' ? 0 : 2}>
-        <Typography>Dividend Income: </Typography>
-        <RadioGroup
-          row
-          value={dividendApplicable}
-          onChange={(_, v) => {
-            setDividendApplicable(v);
-            postIncomeApplicability(v, 'dividend-income', 'dividend_income', dividend_income.task_id);
-          }}
-        >
-          <FormControlLabel value="Applicable" control={<Radio size="small" />} label="Applicable" />
-          <FormControlLabel value="Not Applicable" control={<Radio size="small" />} label="Not Applicable" />
-        </RadioGroup>
+      <Stack
+        direction="row"
+        spacing={2}
+        alignItems="center"
+        sx={{
+          mb: dividendApplicable === 'Applicable' ? 1 : 2,
+          justifyContent: 'space-between',
+          mt: 2
+        }}
+      >
+        <Stack direction="row" spacing={2} alignItems="center">
+          <Typography>Dividend Income: </Typography>
+          <RadioGroup
+            row
+            value={dividendApplicable}
+            onChange={(_, v) => {
+              setDividendApplicable(v);
+              postIncomeApplicability(v, 'dividend-income', 'dividend_income', dividend_income.task_id);
+            }}
+          >
+            <FormControlLabel value="Applicable" control={<Radio size="small" />} label="Applicable" />
+            <FormControlLabel value="Not Applicable" control={<Radio size="small" />} label="Not Applicable" />
+          </RadioGroup>
+        </Stack>
+        <RaiseRequest fields={[]} task_id={dividend_income.task_id} />
       </Stack>
       {dividendApplicable === 'Applicable' && (
         <>
@@ -3630,6 +3747,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                         size="small"
                         fullWidth
                         placeholder="Dividend Received"
+                        type="number"
                         value={row.dividend_received}
                         onChange={(e) => {
                           const updated = [...dividendRows];
@@ -3659,8 +3777,11 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                           variant="outlined"
                           sx={{ ml: 1 }}
                           onClick={() => {
-                            setFileDialogOpen(true);
-                            setDialogFilesData([{ url: row.file instanceof File ? URL.createObjectURL(row.file) : row.file }]);
+                            if (row.file instanceof File) {
+                              window.open(URL.createObjectURL(row.file), '_blank');
+                            } else {
+                              viewFile(row.file);
+                            }
                           }}
                         >
                           View
@@ -3697,25 +3818,33 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
           data={dividend_income}
           setData={setDividendRows}
           service_request={service_id}
-          task_id={dividend_income.task_id}
+          task_id={dividend_income?.task_id}
           urlEndpoint="/income_tax_returns/dividend-income/upsert/"
           status={dividend_income?.data[0]?.status}
         />
       </Box>
       {/* Gift Income Section */}
-      <Stack direction="row" spacing={2} alignItems="center" mb={giftApplicable === 'Applicable' ? 0 : 2}>
-        <Typography>Gift Income: </Typography>
-        <RadioGroup
-          row
-          value={giftApplicable}
-          onChange={(_, v) => {
-            setGiftApplicable(v);
-            postIncomeApplicability(v, 'gift-income', 'gift_income', gift_income.task_id);
-          }}
-        >
-          <FormControlLabel value="Applicable" control={<Radio size="small" />} label="Applicable" />
-          <FormControlLabel value="Not Applicable" control={<Radio size="small" />} label="Not Applicable" />
-        </RadioGroup>
+      <Stack
+        direction="row"
+        spacing={2}
+        alignItems="center"
+        sx={{ mb: giftApplicable === 'Applicable' ? 1 : 2, justifyContent: 'space-between', mt: 2 }}
+      >
+        <Stack direction="row" spacing={2} alignItems="center">
+          <Typography>Gift Income: </Typography>
+          <RadioGroup
+            row
+            value={giftApplicable}
+            onChange={(_, v) => {
+              setGiftApplicable(v);
+              postIncomeApplicability(v, 'gift-income', 'gift_income', gift_income.task_id);
+            }}
+          >
+            <FormControlLabel value="Applicable" control={<Radio size="small" />} label="Applicable" />
+            <FormControlLabel value="Not Applicable" control={<Radio size="small" />} label="Not Applicable" />
+          </RadioGroup>
+        </Stack>
+        <RaiseRequest fields={[]} task_id={gift_income.task_id} />
       </Stack>
       {giftApplicable === 'Applicable' && (
         <>
@@ -3741,7 +3870,8 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                         size="small"
                         fullWidth
                         placeholder="Amount"
-                        value={row.amount}
+                        type="number"
+                        value={row?.amount}
                         onChange={(e) => {
                           const updated = [...giftRows];
                           updated[idx].amount = e.target.value;
@@ -3851,25 +3981,33 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
           data={gift_income}
           setData={setGiftRows}
           service_request={service_id}
-          task_id={gift_income.task_id}
+          task_id={gift_income?.task_id}
           urlEndpoint="/income_tax_returns/gift-income/upsert/"
           status={gift_income?.data[0]?.status}
         />
       </Box>
       {/* Family Pension Income Section */}
-      <Stack direction="row" spacing={2} alignItems="center" mb={familyApplicable === 'Applicable' ? 0 : 2}>
-        <Typography>Family Pension Income: </Typography>
-        <RadioGroup
-          row
-          value={familyApplicable}
-          onChange={(_, v) => {
-            setFamilyApplicable(v);
-            postIncomeApplicability(v, 'family-pension-income', 'family_pension_income', family_income.task_id);
-          }}
-        >
-          <FormControlLabel value="Applicable" control={<Radio size="small" />} label="Applicable" />
-          <FormControlLabel value="Not Applicable" control={<Radio size="small" />} label="Not Applicable" />
-        </RadioGroup>
+      <Stack
+        direction="row"
+        spacing={2}
+        alignItems="center"
+        sx={{ mb: familyApplicable === 'Applicable' ? 1 : 2, justifyContent: 'space-between', mt: 2 }}
+      >
+        <Stack direction="row" spacing={2} alignItems="center">
+          <Typography>Family Pension Income: </Typography>
+          <RadioGroup
+            row
+            value={familyApplicable}
+            onChange={(_, v) => {
+              setFamilyApplicable(v);
+              postIncomeApplicability(v, 'family-pension-income', 'family_pension_income', family_income.task_id);
+            }}
+          >
+            <FormControlLabel value="Applicable" control={<Radio size="small" />} label="Applicable" />
+            <FormControlLabel value="Not Applicable" control={<Radio size="small" />} label="Not Applicable" />
+          </RadioGroup>
+        </Stack>
+        <RaiseRequest fields={[]} task_id={family_income.task_id} />
       </Stack>
       {familyApplicable === 'Applicable' && (
         <>
@@ -3890,7 +4028,8 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                         size="small"
                         fullWidth
                         placeholder="Amount Received"
-                        value={row.amount}
+                        type="number"
+                        value={row?.amount}
                         onChange={(e) => {
                           const updated = [...familyRows];
                           updated[idx].amount = e.target.value;
@@ -3903,7 +4042,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                         size="small"
                         fullWidth
                         options={pensionSources}
-                        value={row.source}
+                        value={row?.source}
                         onChange={(_, v) => {
                           const updated = [...familyRows];
                           updated[idx].source = v;
@@ -3919,7 +4058,11 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                           Save
                         </Button>
                         {familyRows?.length > 1 && (
-                          <IconButton size="small" color="error" onClick={() => removeRow(row.id, 'family-pension-income-documents', idx)}>
+                          <IconButton
+                            size="small"
+                            color="error"
+                            onClick={() => removeRow(row.id, 'family-pension-income-documents/files', idx)}
+                          >
                             <DeleteIcon />
                           </IconButton>
                         )}
@@ -3943,25 +4086,33 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
           data={family_income}
           setData={setFamilyRows}
           service_request={service_id}
-          task_id={family_income.task_id}
+          task_id={family_income?.task_id}
           urlEndpoint="/income_tax_returns/family-pension-income/upsert/"
           status={family_income?.data[0]?.status}
         />
       </Box>
       {/* Foreign Income Section */}
-      <Stack direction="row" spacing={2} alignItems="center" mb={foreignApplicable === 'Applicable' ? 0 : 2}>
-        <Typography>Foreign Income: </Typography>
-        <RadioGroup
-          row
-          value={foreignApplicable}
-          onChange={(_, v) => {
-            setForeignApplicable(v);
-            postIncomeApplicability(v, 'foreign-income', 'foreign_income', foreign_income.task_id);
-          }}
-        >
-          <FormControlLabel value="Applicable" control={<Radio size="small" />} label="Applicable" />
-          <FormControlLabel value="Not Applicable" control={<Radio size="small" />} label="Not Applicable" />
-        </RadioGroup>
+      <Stack
+        direction="row"
+        spacing={2}
+        alignItems="center"
+        sx={{ mb: foreignApplicable === 'Applicable' ? 1 : 2, justifyContent: 'space-between', mt: 2 }}
+      >
+        <Stack direction="row" spacing={2} alignItems="center">
+          <Typography>Foreign Income: </Typography>
+          <RadioGroup
+            row
+            value={foreignApplicable}
+            onChange={(_, v) => {
+              setForeignApplicable(v);
+              postIncomeApplicability(v, 'foreign-income', 'foreign_income', foreign_income.task_id);
+            }}
+          >
+            <FormControlLabel value="Applicable" control={<Radio size="small" />} label="Applicable" />
+            <FormControlLabel value="Not Applicable" control={<Radio size="small" />} label="Not Applicable" />
+          </RadioGroup>
+        </Stack>
+        <RaiseRequest fields={[]} task_id={foreign_income.task_id} />
       </Stack>
       {foreignApplicable === 'Applicable' && (
         <>
@@ -4032,7 +4183,8 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                         size="small"
                         fullWidth
                         placeholder="Amount"
-                        value={row.amount}
+                        type="number"
+                        value={row?.amount}
                         onChange={(e) => {
                           const updated = [...foreignRows];
                           updated[idx].amount = e.target.value;
@@ -4043,7 +4195,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                     <TableCell sx={{ p: 0.5, py: 1 }}>
                       <RadioGroup
                         row
-                        value={row.tax_paid_abroad}
+                        value={row?.tax_paid_abroad}
                         onChange={(_, v) => {
                           const updated = [...foreignRows];
                           updated[idx].tax_paid_abroad = v;
@@ -4085,10 +4237,11 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                           variant="outlined"
                           sx={{ ml: 1 }}
                           onClick={() => {
-                            setFileDialogOpen(true);
-                            setDialogFilesData([
-                              { url: row.form67_file instanceof File ? URL.createObjectURL(row.form67_file) : row.form67_file }
-                            ]);
+                            if (row.form67_file instanceof File) {
+                              window.open(URL.createObjectURL(row.form67_file), '_blank');
+                            } else {
+                              viewFile(row.form67_file);
+                            }
                           }}
                         >
                           View
@@ -4134,27 +4287,34 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
           data={foreign_income}
           setData={setForeignRows}
           service_request={service_id}
-          task_id={foreign_income.task_id}
+          task_id={foreign_income?.task_id}
           urlEndpoint="/income_tax_returns/foreign-income/upsert/"
           status={foreign_income?.data[0]?.status}
         />
       </Box>
       {/* Winnings/Lottery Income Section */}
-      <Stack direction="row" spacing={2} alignItems="center" mb={winningsApplicable === 'Applicable' ? 0 : 2}>
-        <Typography>Winnings/Lottery Income: </Typography>
-        <RadioGroup
-          row
-          value={winningsApplicable}
-          onChange={(_, v) => {
-            setWinningsApplicable(v);
-            postIncomeApplicability(v, 'winning-income', 'winning_income', winning_income.task_id);
-          }}
-        >
-          <FormControlLabel value="Applicable" control={<Radio size="small" />} label="Applicable" />
-          <FormControlLabel value="Not Applicable" control={<Radio size="small" />} label="Not Applicable" />
-        </RadioGroup>
+      <Stack
+        direction="row"
+        spacing={2}
+        alignItems="center"
+        sx={{ mb: winningsApplicable === 'Applicable' ? 1 : 2, justifyContent: 'space-between', mt: 2 }}
+      >
+        <Stack direction="row" spacing={2} alignItems="center">
+          <Typography>Winnings/Lottery Income: </Typography>
+          <RadioGroup
+            row
+            value={winningsApplicable}
+            onChange={(_, v) => {
+              setWinningsApplicable(v);
+              postIncomeApplicability(v, 'winning-income', 'winning_income', winning_income.task_id);
+            }}
+          >
+            <FormControlLabel value="Applicable" control={<Radio size="small" />} label="Applicable" />
+            <FormControlLabel value="Not Applicable" control={<Radio size="small" />} label="Not Applicable" />
+          </RadioGroup>
+        </Stack>
+        <RaiseRequest fields={[]} task_id={winning_income.task_id} />
       </Stack>
-      {console.log(winningsRows)}
       {winningsApplicable === 'Applicable' && (
         <>
           <Box sx={{ p: 0, boxShadow: '0px 0px 10px 0px rgba(66, 66, 66, 0.1)', borderRadius: 2, mb: 1 }}>
@@ -4175,7 +4335,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                         size="small"
                         fullWidth
                         options={winningsSources}
-                        value={row.source}
+                        value={row?.source}
                         onChange={(_, v) => {
                           const updated = [...winningsRows];
                           updated[idx].source = v;
@@ -4189,7 +4349,8 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                         size="small"
                         fullWidth
                         placeholder="Amount"
-                        value={row.amount}
+                        type="number"
+                        value={row?.amount}
                         onChange={(e) => {
                           const updated = [...winningsRows];
                           updated[idx].amount = e.target.value;
@@ -4218,8 +4379,11 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                           variant="outlined"
                           sx={{ ml: 1 }}
                           onClick={() => {
-                            setFileDialogOpen(true);
-                            setDialogFilesData([{ url: row.file instanceof File ? URL.createObjectURL(row.file) : row.file }]);
+                            if (row.file instanceof File) {
+                              window.open(URL.createObjectURL(row.file), '_blank');
+                            } else {
+                              viewFile(row.file);
+                            }
                           }}
                         >
                           View
@@ -4256,7 +4420,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
           data={winning_income}
           setData={setWinningsRows}
           service_request={service_id}
-          task_id={winning_income.task_id}
+          task_id={winning_income?.task_id}
           urlEndpoint="/income_tax_returns/winning-income/upsert/"
           status={winning_income?.data[0]?.status}
         />
@@ -4267,13 +4431,27 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
 
 const AgricultureIncome = ({ data, service_id, setFileDialogOpen, fileDialogOpen, dialogFilesData, setDialogFilesData }) => {
   const { enqueueSnackbar } = useSnackbar();
+  let initialData = {
+    id: null,
+    agriculture_income_docs: {
+      amount: '',
+      file: ''
+    },
+    status: 'in progress',
+    agriculture: 'Not Applicable'
+  };
   data = data[0];
-  const [agricultureIncome, setAgricultureIncome] = React.useState({
-    agriculture: data.data[0].agriculture_income || 'Not Applicable',
-    amount: data.data[0].agricultural_income || '',
-    file: data.data[0].agricultural_income_file || ''
-  });
+  const [agricultureIncome, setAgricultureIncome] = React.useState(initialData);
 
+  useEffect(() => {
+    if (data?.data?.length > 0) {
+      let __data = data.data[0];
+      if (__data?.agriculture_income_docs === null) {
+        __data.agriculture_income_docs = { amount: '', file: '' };
+      }
+      setAgricultureIncome(__data);
+    }
+  }, [data]);
   const postIncomeApplicability = async (v) => {
     let formData = new FormData();
     formData.append('service_request', parseInt(service_id));
@@ -4282,20 +4460,35 @@ const AgricultureIncome = ({ data, service_id, setFileDialogOpen, fileDialogOpen
     formData.append('status', 'in progress');
     const res = await Factory('post', `/income_tax_returns/agriculture-income/upsert/`, formData);
     if (res.res.status_cd === 0) {
+      let __data = res.res.data;
+      if (__data?.agriculture_income_docs === null) {
+        __data.agriculture_income_docs = { amount: '', file: '' };
+      }
+      setAgricultureIncome(__data);
       return true;
     }
   };
-
   const postAgriculturalIncome = async () => {
     let formData = new FormData();
+    let id = agricultureIncome?.agriculture_income_docs?.id || null;
+    let type = 'post';
+    let url = `/income_tax_returns/agriculture-income-docs/add/`;
+    if (id) {
+      type = 'put';
+      url = `/income_tax_returns/agriculture-income-docs/${id}/update/`;
+      formData.append('id', parseInt(id));
+    }
     formData.append('agriculture_income', parseInt(data.data[0].id));
     formData.append('service_request', parseInt(service_id));
     formData.append('service_task', parseInt(data.task_id));
-    formData.append('agricultural_income_file', agricultureIncome.file);
-    formData.append('agricultural_income', agricultureIncome.amount);
+    if (agricultureIncome.agriculture_income_docs.file instanceof File)
+      formData.append('file', agricultureIncome.agriculture_income_docs.file);
+    formData.append('amount', agricultureIncome.agriculture_income_docs.amount);
     formData.append('status', 'in progress');
-    const res = await Factory('post', `/income_tax_returns/agriculture-income/upsert/`, formData);
+    const res = await Factory(type, url, formData);
     if (res.res.status_cd === 0) {
+      if (type === 'post')
+        setAgricultureIncome((prev) => ({ ...prev, agriculture_income_docs: { ...prev.agriculture_income_docs, id: res.res.data.id } }));
       enqueueSnackbar('Agricultural income saved successfully', {
         anchorOrigin: { vertical: 'top', horizontal: 'right' },
         variant: 'success'
@@ -4307,46 +4500,63 @@ const AgricultureIncome = ({ data, service_id, setFileDialogOpen, fileDialogOpen
 
   return (
     <Box>
-      <Stack direction="row" spacing={2} alignItems="center" mb={2}>
-        <Typography>Do you have agricultural income during F.Y.? </Typography>
-        <RadioGroup
-          row
-          value={agricultureIncome.agriculture}
-          onChange={(_, v) => {
-            postIncomeApplicability(v);
-            setAgricultureIncome({ ...agricultureIncome, agriculture: v });
-          }}
-        >
-          <FormControlLabel value="Applicable" control={<Radio size="small" />} label="Yes" />
-          <FormControlLabel value="Not Applicable" control={<Radio size="small" />} label="No" />
-        </RadioGroup>
+      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
+        <Box>
+          <Typography>Do you have agricultural income during F.Y.? </Typography>
+          <RadioGroup
+            row
+            value={agricultureIncome.agriculture}
+            onChange={(_, v) => {
+              postIncomeApplicability(v);
+              setAgricultureIncome({ ...agricultureIncome, agriculture: v });
+            }}
+          >
+            <FormControlLabel value="Applicable" control={<Radio size="small" />} label="Yes" />
+            <FormControlLabel value="Not Applicable" control={<Radio size="small" />} label="No" />
+          </RadioGroup>
+        </Box>
+        <RaiseRequest fields={['Agricultural income during F.Y.']} task_id={data?.task_id} />
       </Stack>
       {agricultureIncome.agriculture === 'Applicable' && (
-        <Stack direction="row" spacing={2} alignItems="center" mb={2}>
+        <Stack direction="row" spacing={1} alignItems="center" mb={2}>
           <Typography>If yes, enter net agricultural income earned</Typography>
           <TextField
             size="small"
             fullWidth
             sx={{ maxWidth: 200 }}
-            onChange={(e) => setAgricultureIncome({ ...agricultureIncome, amount: e.target.value })}
-            label="Agricultural Income"
+            value={agricultureIncome?.agriculture_income_docs?.amount}
+            onChange={(e) =>
+              setAgricultureIncome({
+                ...agricultureIncome,
+                agriculture_income_docs: { ...agricultureIncome.agriculture_income_docs, amount: e.target.value }
+              })
+            }
+            placeholder="Agricultural Income"
           />
           <Button size="small" variant="contained" component="label">
             Upload
-            <input type="file" hidden onChange={(e) => setAgricultureIncome({ ...agricultureIncome, file: e.target.files[0] })} />
+            <input
+              type="file"
+              hidden
+              onChange={(e) =>
+                setAgricultureIncome({
+                  ...agricultureIncome,
+                  agriculture_income_docs: { ...agricultureIncome.agriculture_income_docs, file: e.target.files[0] }
+                })
+              }
+            />
           </Button>
-          {agricultureIncome.file && (
+          {agricultureIncome?.agriculture_income_docs?.file && (
             <Button
               size="small"
               variant="outlined"
               sx={{ ml: 1 }}
               onClick={() => {
-                setFileDialogOpen(true);
-                setDialogFilesData([
-                  {
-                    url: agricultureIncome.file instanceof File ? agricultureIncome.file.name : agricultureIncome.file
-                  }
-                ]);
+                if (agricultureIncome?.agriculture_income_docs?.file instanceof File) {
+                  window.open(URL.createObjectURL(agricultureIncome?.agriculture_income_docs?.file), '_blank');
+                } else {
+                  viewFile(agricultureIncome?.agriculture_income_docs?.file);
+                }
               }}
             >
               View
@@ -4361,10 +4571,10 @@ const AgricultureIncome = ({ data, service_id, setFileDialogOpen, fileDialogOpen
         <GetActionButtons
           type="post"
           data={data}
-          status={data.data[0].status}
+          status={data?.data[0]?.status}
           urlEndpoint={`/income_tax_returns/agriculture-income/upsert/`}
           service_request={service_id}
-          task_id={data.task_id}
+          task_id={data?.task_id}
         />
       </Box>
     </Box>

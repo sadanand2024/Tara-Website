@@ -13,17 +13,22 @@ import {
   Button,
   Divider,
   Grid2,
-  Stack
+  Stack,
+  Link
 } from '@mui/material';
 import Factory from 'utils/Factory';
-
+import UploadIcon from '@mui/icons-material/Upload';
+import FileUploadBox from 'ui-component/extended/FileUploadBox';
 import { useDispatch } from 'react-redux';
 import { openSnackbar } from 'store/slices/snackbar';
 import { useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-const InvoiceNumberFormat = ({ businessDetails, handleBack, handleNext }) => {
+
+const InvoiceNumberFormatComponent = ({ businessDetails, handleBack, handleNext }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [authorizedSignature, setAuthorizedSignature] = useState(null);
+  const [signaturePreview, setSignaturePreview] = useState(null);
   const [selectedRecord, setSelectedRecord] = useState({
     id: null,
     format_version: null,
@@ -31,7 +36,7 @@ const InvoiceNumberFormat = ({ businessDetails, handleBack, handleNext }) => {
   });
   const [selectedGSTIN, setSelectedGSTIN] = useState(null);
   const [postType, setPostType] = useState('');
-
+  const [size, setSize] = useState(0);
   const [formatOptions, setFormatOptions] = useState({
     sameFormatForAllGST: true,
     usePrefix: false,
@@ -243,7 +248,11 @@ const InvoiceNumberFormat = ({ businessDetails, handleBack, handleNext }) => {
     } else {
       setPostType('put');
     }
-
+    // Set initial signature preview if available
+    if (businessDetails.signature) {
+      setSignaturePreview(businessDetails.signature);
+      setAuthorizedSignature(null); // No local file selected yet
+    }
     if (businessDetails?.invoice_format?.length > 0) {
       const formats = businessDetails.invoice_format;
       if (formats.find((f) => f.is_common_format === 'no')) {
@@ -289,9 +298,64 @@ const InvoiceNumberFormat = ({ businessDetails, handleBack, handleNext }) => {
       }
     }
   }, [businessDetails]);
+
+  const handleSignatureUpload = async (files) => {
+    const file = files[0];
+    if (!file) return;
+
+    if (file.size > 10 * 1024) {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'File size exceeds 10 KB limit.',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
+      return;
+    }
+
+    // Prepare form data for API
+    const formData = new FormData();
+    formData.append('signature', file);
+
+    // Make API call
+    const url = `/invoicing/invoicing-profiles/${businessDetails.invoicing_profile_id}/update/`;
+    const { res } = await Factory('put', url, formData);
+
+    if (res.status_cd === 0) {
+      setAuthorizedSignature(file);
+      if (file.type.startsWith('image/')) {
+        setSignaturePreview(URL.createObjectURL(file));
+      } else if (file.type === 'application/pdf') {
+        setSignaturePreview(null);
+      }
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Authorized signature updated successfully',
+          variant: 'alert',
+          alert: { color: 'success' },
+          close: false
+        })
+      );
+    } else {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: res.message || 'Failed to update authorized signature',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
+    }
+  };
+
   return (
     <Box>
-      <Typography variant="h5" gutterBottom>
+      <Typography variant="h4" gutterBottom>
         Invoice Number Format Configuration
       </Typography>
 
@@ -320,7 +384,9 @@ const InvoiceNumberFormat = ({ businessDetails, handleBack, handleNext }) => {
 
       {formatOptions.separateFormatForEachGST && (
         <>
-          <Typography variant="h5">GSTIN-wise Formats</Typography>
+          <Typography variant="h5" sx={{ my: 2 }}>
+            GSTIN-wise Formats
+          </Typography>
           <Table>
             <TableHead>
               <TableRow>
@@ -364,7 +430,7 @@ const InvoiceNumberFormat = ({ businessDetails, handleBack, handleNext }) => {
       <Divider sx={{ my: 2 }} />
       {(formatOptions.sameFormatForAllGST || selectedGSTIN) && (
         <>
-          <Typography variant="h5">
+          <Typography variant="h5" sx={{ my: 2 }}>
             {formatOptions.sameFormatForAllGST
               ? 'Invoice Format Components (Common for all GSTs)'
               : `Editing Format for GSTIN: ${selectedGSTIN}`}
@@ -419,9 +485,14 @@ const InvoiceNumberFormat = ({ businessDetails, handleBack, handleNext }) => {
 
           <Divider sx={{ my: 2 }} />
 
-          <Typography variant="h5">Preview</Typography>
+          <Typography variant="h5">
+            Preview <span style={{ color: 'text.textSecondary' }}> Ex : (INV-BR-2024-25-A-0001) </span>
+          </Typography>
           <Grid2 container spacing={2} my={2}>
             <Grid2 size={{ xs: 6 }}>
+              <Typography variant="body1" color="textSecondary" gutterBottom>
+                Current Format:
+              </Typography>
               <TextField size="small" fullWidth value={generatePreview()} disabled sx={{ backgroundColor: 'white' }} />
             </Grid2>
           </Grid2>
@@ -448,7 +519,23 @@ const InvoiceNumberFormat = ({ businessDetails, handleBack, handleNext }) => {
         </>
       )}
 
-      <Divider sx={{ my: 2 }} />
+      {/* <Divider sx={{ my: 2 }} /> */}
+      <Typography variant="h5">Authorized Signature</Typography>
+      <Box sx={{ display: 'flex', gap: 2, justifyContent: 'space-between', my: 2 }}>
+        <FileUploadBox onFiles={handleSignatureUpload} accept="image/*,application/pdf" size="10 KB" />
+        {signaturePreview &&
+          (typeof signaturePreview === 'string' ? (
+            <img
+              style={{ width: '100px', height: '100px', borderRadius: '5%', objectFit: 'cover', border: '1px solid #ccc' }}
+              src={signaturePreview}
+              alt="Authorized Signature"
+            />
+          ) : (
+            <Box sx={{ display: 'flex', alignItems: 'center', height: 100 }}>
+              <Typography variant="body2">{authorizedSignature?.name}</Typography>
+            </Box>
+          ))}
+      </Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
         <Button
           variant="outlined"
@@ -472,4 +559,4 @@ const InvoiceNumberFormat = ({ businessDetails, handleBack, handleNext }) => {
   );
 };
 
-export default InvoiceNumberFormat;
+export default InvoiceNumberFormatComponent;

@@ -18,9 +18,9 @@ import taralogoWhite from 'assets/images/taralogoWhite.png'; // Tarafirstlogo_pn
 import { ThemeMode } from 'config';
 // assets
 
-import FacebookIcon from '@mui/icons-material/Facebook';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import InstagramIcon from '@mui/icons-material/Instagram';
+import LinkedInIcon from '@mui/icons-material/LinkedIn';
 import PublicIcon from '@mui/icons-material/Public';
 import XIcon from '@mui/icons-material/X';
 import YouTubeIcon from '@mui/icons-material/YouTube';
@@ -122,7 +122,7 @@ export default function FooterSection() {
                       <Typography variant="h4" color={textColor} sx={{ fontWeight: 500 }}>
                         Follow Us On
                       </Typography>
-                      <Stack direction="row" alignItems="center" spacing={{ xs: 2, sm: 1.5, md: 2 }}>
+                      <Stack direction="row" alignItems="center" spacing={{ xs: 2, sm: 1.5, md: 1 }}>
                         <IconButton size="small" aria-label="TaraFirst Github" component={Link} href="#">
                           <GitHubIcon
                             sx={{
@@ -131,7 +131,7 @@ export default function FooterSection() {
                             }}
                           />
                         </IconButton>
-                        <IconButton size="small" aria-label="TaraFirst Instagram" component={Link} href="#">
+                        <IconButton size="small" aria-label="TaraFirst Instagram" component={Link} href="https://www.instagram.com/tarafirst_official?igsh=dzM2OHJvMzRuOG9t">
                           <InstagramIcon
                             sx={{
                               color: 'text.secondary',
@@ -164,8 +164,8 @@ export default function FooterSection() {
                             }}
                           />
                         </IconButton>
-                        <IconButton size="small" aria-label="TaraFirst Facebook" component={Link} href="#">
-                          <FacebookIcon
+                        <IconButton size="small" aria-label="TaraFirst LinkedIn" component={Link} href="https://www.linkedin.com/company/tarafirst/">
+                          <LinkedInIcon
                             sx={{
                               color: 'text.secondary',
                               '&:hover': { color: 'primary.main' }

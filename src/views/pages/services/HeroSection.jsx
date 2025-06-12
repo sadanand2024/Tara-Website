@@ -1,7 +1,6 @@
 import { Box, Button, Container, Stack, Typography, useTheme } from '@mui/material';
 import heroPerson from 'assets/images/landing/hero-person.png';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-
 import React from 'react';
 import { Fade } from 'react-awesome-reveal';
 
@@ -17,37 +16,29 @@ const HeroWithImage = ({ data }) => {
       sx={{
         position: 'relative',
         py: { xs: 4, sm: 6, md: 8, lg: 10 },
-        mt: { xs:10, sm: 2, md: 4, lg: -5 },
+        mt: { xs: 6, sm: 8, md:1 },
         borderRadius: { xs: 2, sm: 3, md: 4 },
-        background: 'white',
-        overflow: 'hidden'
+        backgroundColor: 'white',
+        overflow: 'hidden',
       }}
     >
       <Container maxWidth="lg">
         <Stack
           direction={{ xs: 'column', md: 'row' }}
-          spacing={{ xs: 3, sm: 4, md: 6, lg: 8 }}
+          spacing={{ xs: 4, md: 8 }}
           alignItems="center"
           justifyContent="space-between"
         >
-          <Box sx={{ 
-            flex: 1, 
-            textAlign: { xs: 'center', md: 'left' },
-            width: { xs: '100%', md: '50%' }
-          }}>
+          {/* Text Content */}
+          <Box sx={{ flex: 1, textAlign: { xs: 'center', md: 'left' } }}>
             <Fade cascade damping={0.1} triggerOnce>
               <Typography
                 variant="h1"
                 sx={{
-                  fontFamily: 'Roboto, sans-serif',
                   fontWeight: 700,
-                  fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem', lg: '44px' },
-                  lineHeight: { xs: '1.3', sm: '1.4', md: '1.5', lg: '54px' },
-                  letterSpacing: '0%',
-                  color: 'text.primary',
-                  textAlign: { xs: 'center', md: 'left' },
-                  wordBreak: 'break-word',
-                  mb: { xs: 3, sm: 4, md: 6, lg:2 }
+                  fontSize: { xs: '1.75rem', sm: '2.25rem', md: '2.75rem', lg: '44px' },
+                  lineHeight: { xs: 1.3, sm: 1.4, md: 1.5, lg: '54px' },
+                  mb: { xs: 2, sm: 3, md: 4 },
                 }}
               >
                 {data.title}
@@ -57,24 +48,20 @@ const HeroWithImage = ({ data }) => {
                 variant="h5"
                 color="text.secondary"
                 sx={{
-                  fontFamily: 'Roboto, sans-serif',
                   fontWeight: 400,
-                  fontSize: { xs: '0.9rem', sm: '1rem', md: '1.2rem', lg: '20px' },
-                  lineHeight: { xs: '1.4', sm: '1.5', md: '1.6', lg: '29px' },
-                  letterSpacing: '0%',
-                  textAlign: { xs: 'center', md: 'left' },
-                  mb: { xs: 4, sm: 6, md: 8, lg: 4 }
+                  fontSize: { xs: '1rem', sm: '1.125rem', md: '1.25rem', lg: '20px' },
+                  lineHeight: { xs: 1.5, sm: 1.6, md: 1.7 },
+                  mb: { xs: 3, sm: 4, md: 5 },
                 }}
               >
                 {data.subtitle}
               </Typography>
 
               <Stack
-                direction={{ xs: 'column', sm: 'row' }}
-                spacing={{ xs: 2, sm: 3 }}
+                direction={{ xs: 'row', sm: 'row' }}
+                spacing={2}
                 justifyContent={{ xs: 'center', md: 'flex-start' }}
-                alignItems={{ xs: 'stretch', sm: 'center', md: 'flex-start' }}
-                sx={{ width: '100%' }}
+                alignItems={{ xs: 'stretch', sm: 'center' }}
               >
                 {data.ctas.map((cta, idx) => (
                   <Button
@@ -85,23 +72,20 @@ const HeroWithImage = ({ data }) => {
                     onClick={() => {
                       if (idx === 0) {
                         navigate(`/register?id=${service_id}&context=${service_type}&type=service`);
-                      } else if (cta.label === "Talk to Tax Expert") {
+                      } else if (cta.label === 'Talk to Tax Expert') {
                         navigate(`/book-consultation?id=${service_id}&context=${service_type}&type=service`);
                       } else {
                         navigate('/pages/contact-us');
                       }
                     }}
                     sx={{
-                      fontWeight: 500,
-                      px: { xs: 2, sm: 3, md: 4 },
-                      py: { xs: 1, sm: 1.5 },
-                      minWidth: { xs: '100%', sm: 160, md: 180 },
-                      height: { xs: 40, sm: 44, md: 48 },
+                      px: 3,
+                      minWidth: 160,
+                      height: 48,
                       textAlign: 'center',
-                      transition: 'all 0.3s ease',
                       '&:hover': {
-                        transform: 'translateY(-2px)'
-                      }
+                        transform: 'translateY(-2px)',
+                      },
                     }}
                   >
                     {cta.label}
@@ -111,51 +95,43 @@ const HeroWithImage = ({ data }) => {
             </Fade>
           </Box>
 
+          {/* Image Section */}
           <Box
             sx={{
+              flex: 1,
               position: 'relative',
-              width: { xs: '80%', sm: '80%', md: '50%', lg: 420 },
-              height: { xs: 250, sm: 300, md: 350, lg: 400 },
+              width: '100%',
+              maxWidth: { xs: 300, sm: 350, md: 400 },
+              height: { xs: 250, sm: 300, md: 400 },
+              mx: 'auto',
+              mt: { xs: 4, md: 0 },
               display: 'flex',
-              justifyContent: 'center',
               alignItems: 'center',
-              mt: { xs: 4, sm: 6, md: 0 }
+              justifyContent: 'center',
             }}
           >
+            {/* Background Circle */}
             <Box
               sx={{
                 position: 'absolute',
-                width: { xs: '50%', sm: '75%', md: '80%' },
-                height: { xs: '70%', sm: '75%', md: '80%' },
+                width: '90%',
+                height: '90%',
                 borderRadius: '50%',
-                background: theme.palette.primary.dark,
+                backgroundColor: theme.palette.primary.light,
+                opacity: 0.2,
                 zIndex: 1,
               }}
             />
 
+            {/* Image */}
             <Box
               sx={{
-                position: 'absolute',
+                position: 'relative',
                 width: '100%',
                 height: '100%',
-                borderRadius: '50%',
                 zIndex: 2,
-                top: { xs: '-5%', sm: '-8%', md: '-10%' },
-                left: { xs: '-5%', sm: '-8%', md: '-10%' },
-                transform: 'rotate(45deg)',
-                opacity: 0.5
-              }}
-            />
-
-            <Box
-              sx={{
-                // position: 'relative',
-                width: { xs: '85%', sm: '90%',lg:399 },
-                height: '100%',
-                borderRadius: '0%',
+                borderRadius: '16px',
                 overflow: 'hidden',
-                zIndex: 3,
-                
               }}
             >
               <img
@@ -164,7 +140,7 @@ const HeroWithImage = ({ data }) => {
                 style={{
                   width: '100%',
                   height: '100%',
-                  objectFit: 'cover',
+                  objectFit: 'contain',
                 }}
               />
             </Box>

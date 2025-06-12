@@ -1,6 +1,9 @@
 import ChevronLeft from '@mui/icons-material/ChevronLeft';
 import ChevronRight from '@mui/icons-material/ChevronRight';
 import { Box, Container, Link, Typography } from '@mui/material';
+import { Link as RouterLink } from 'react-router-dom';
+
+
 
 import React, { useRef } from 'react';
 
@@ -29,7 +32,7 @@ const RelatedServices = ({ related }) => {
         textAlign="center"
         fontWeight={700}
         sx={{
-          fontFamily: 'Manrope, sans-serif',
+          fontFamily: 'Inter',
           fontWeight: 700,
           lineHeight: '100%',
           letterSpacing: '0px',
@@ -42,7 +45,7 @@ const RelatedServices = ({ related }) => {
         Related Services
       </Typography>
 
-      <Box sx={{ position: 'relative',mt:{xs:-6,lg:-8} }}>
+      <Box sx={{ position: 'relative',mt:{xs:-6,lg:-8},width:{xs:'100%',lg: '120%'},ml:{xs:1,lg:-12} }}>
         <Box
           sx={{
             position: 'absolute',
@@ -104,7 +107,7 @@ const RelatedServices = ({ related }) => {
                   fontWeight={600}
                   mb={1}
                   sx={{
-                    fontFamily: 'Inter, sans-serif',
+                    fontFamily: 'Inter',
                     fontSize: '22px',
                     lineHeight: '26px',
                     letterSpacing: '0px',
@@ -119,7 +122,7 @@ const RelatedServices = ({ related }) => {
                   variant="body2"
                   color="#001033"
                   sx={{
-                    fontFamily: 'Inter, sans-serif',
+                    fontFamily: 'Inter',
                     fontWeight: 400,
                     fontSize: '18px',
                     lineHeight: '24px',
@@ -132,6 +135,8 @@ const RelatedServices = ({ related }) => {
               </Box>
               <Link
                 href={service.link}
+                 component={RouterLink}
+                 to="/book-consultation"
                 color="primary.main"
                 underline="none"
                 sx={{
@@ -164,6 +169,7 @@ const RelatedServices = ({ related }) => {
             justifyContent: 'center',
             width: 40,
             height: 40,
+            // mr:5,
             color:'#FFFFFF'
           }}
           onClick={scrollRight}
