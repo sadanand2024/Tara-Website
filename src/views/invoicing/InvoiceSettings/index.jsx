@@ -17,12 +17,13 @@ import InvoiceNumberFormat from './InvoiceNumberFormat';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
 import LocationCityIcon from '@mui/icons-material/LocationCity';
-import { Grid2, Typography, CardContent, Tabs, Tab, Divider, CardActions, Button, Box } from '@mui/material';
+import { Grid2, Typography, CardContent, Tabs, Tab, Divider, CardActions, Button, Box, CardHeader, Card } from '@mui/material';
 import { gridSpacing } from 'store/constant';
 import useConfig from 'hooks/useConfig';
 import ReceiptLongTwoToneIcon from '@mui/icons-material/ReceiptLongTwoTone';
 import GSTSettings from 'views/application/Business/GSTSettings';
-
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useTheme } from '@mui/material/styles';
 function TabPanel({ children, value, index, ...other }) {
   return (
     <div role="tabpanel" hidden={value !== index} id={`simple-tabpanel-${index}`} aria-labelledby={`simple-tab-${index}`} {...other}>
@@ -39,8 +40,12 @@ function a11yProps(index) {
 }
 
 export default function SimpleTabs() {
+  // Inside your component:
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('md')); // Change layout for md and below
+
   const { mode, borderRadius } = useConfig();
-  const [value, setValue] = useState(0);
+  const [value, setValue] = useState(1);
   const [businessDetails, setBusinessDetails] = useState(null);
   const [postType, setPostType] = useState('');
   const [loading, setLoading] = useState(true);
@@ -166,74 +171,96 @@ export default function SimpleTabs() {
       icon: <PanoramaTwoToneIcon />
     }
   ];
+
   return (
-    <MainCard title="Invoicing Settings">
-      <Grid2 container spacing={gridSpacing}>
-        <Grid2 size={{ xs: 12, lg: 2 }}>
-          <CardContent>
-            <Tabs
-              value={value}
-              onChange={handleChange}
-              orientation="vertical"
-              variant="scrollable"
-              sx={{
-                '& .MuiTabs-flexContainer': {
-                  borderBottom: 'none'
-                },
-                '& button': {
-                  color: mode === ThemeMode.DARK ? 'grey.600' : 'grey.900',
-                  minHeight: 'auto',
-                  minWidth: '100%',
-                  py: 1.5,
-                  px: 0,
-                  display: 'flex',
-                  flexDirection: 'row',
-                  alignItems: 'flex-start',
-                  textAlign: 'left',
-                  justifyContent: 'flex-start',
-                  borderRadius: `${borderRadius}px`
-                },
-                '& button.Mui-selected': {
-                  color: 'primary.main',
-                  bgcolor: mode === ThemeMode.DARK ? 'dark.main' : 'grey.50'
-                },
-                '& button > svg': {
-                  marginBottom: '0px !important',
-                  marginRight: 1.25,
-                  marginTop: 1.25,
-                  height: 20,
-                  width: 20
-                },
-                '& button > div > span': {
-                  display: 'block'
-                },
-                '& > div > span': {
-                  display: 'none'
-                }
-              }}
-            >
-              {tabsOption.map((tab, index) => (
-                <Tab
-                  key={index}
-                  icon={tab.icon}
-                  label={
-                    <Grid2 container direction="column">
-                      <Typography variant="subtitle1" color="inherit" sx={{ mt: 1 }}>
-                        {tab.label}
-                      </Typography>
-                      {/* <Typography variant="caption" sx={{ textTransform: 'capitalize' }}>
-                        {tab.caption}
-                      </Typography> */}
-                    </Grid2>
-                  }
-                  {...a11yProps(index)}
-                />
-              ))}
-            </Tabs>
-          </CardContent>
-        </Grid2>
-        <Grid2 size={{ xs: 12, lg: 10 }}>
-          <CardContent sx={{ borderLeft: '1px solid', borderColor: 'divider', height: '100%' }}>
+    <Card
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        width: '100%',
+        // height: '100%',
+        minHeight: '800px',
+        overflow: 'hidden'
+      }}
+    >
+      {/* Header at the top */}
+      <CardHeader title="Invoicing Settings" />
+      <Divider />
+      {/* Main content area: Tabs + TabPanels */}
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: isSmallScreen ? 'column' : 'row',
+          flexGrow: 1,
+          overflow: 'hidden'
+        }}
+      >
+        {/* Tabs section */}
+        <Tabs
+          value={value}
+          onChange={handleChange}
+          orientation={isSmallScreen ? 'horizontal' : 'vertical'}
+          variant="scrollable"
+          sx={{
+            minWidth: isSmallScreen ? '100%' : 240,
+            borderRight: isSmallScreen ? 'none' : '1px solid',
+            borderBottom: isSmallScreen ? '1px solid' : 'none',
+            borderColor: 'divider',
+            '& .MuiTabs-flexContainer': {
+              flexDirection: isSmallScreen ? 'row' : 'column'
+            },
+            '& button': {
+              color: mode === ThemeMode.DARK ? 'grey.600' : 'grey.900',
+              minHeight: 'auto',
+              minWidth: isSmallScreen ? 'auto' : '100%',
+              py: 1.5,
+              px: 2,
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'flex-start',
+              gap: 1,
+              borderRadius: `${borderRadius}px`,
+              mx: isSmallScreen ? 0.5 : 0
+            },
+            '& button.Mui-selected': {
+              color: 'primary.main',
+              bgcolor: mode === ThemeMode.DARK ? 'dark.main' : 'grey.100'
+            },
+            '& button > svg': {
+              height: 20,
+              width: 20
+            },
+            '& > div > span': {
+              display: 'none'
+            },
+            padding: 2
+          }}
+        >
+          {tabsOption.map((tab, index) => (
+            <Tab
+              key={index}
+              icon={tab.icon}
+              label={
+                <Typography variant="subtitle1" noWrap>
+                  {tab.label}
+                </Typography>
+              }
+              {...a11yProps(index)}
+            />
+          ))}
+        </Tabs>
+
+        {/* TabPanels content section */}
+        <Box sx={{ flexGrow: 1, width: '100%', overflowY: 'auto' }}>
+          <CardContent
+            sx={{
+              paddingTop: 2,
+              paddingBottom: 2,
+              paddingLeft: isSmallScreen ? 2 : 3,
+              paddingRight: 2
+            }}
+          >
             <TabPanel value={value} index={0}>
               <BusinessProfile
                 businessDetails={businessDetails}
@@ -265,7 +292,6 @@ export default function SimpleTabs() {
                 handleBack={handleBack}
               />
             </TabPanel>
-
             <TabPanel value={value} index={4}>
               <GoodsServices
                 businessDetails={businessDetails}
@@ -284,10 +310,9 @@ export default function SimpleTabs() {
               />
             </TabPanel>
           </CardContent>
-        </Grid2>
-      </Grid2>
-      <Divider />
-    </MainCard>
+        </Box>
+      </Box>
+    </Card>
   );
 }
 

@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
@@ -15,6 +16,8 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import axios from 'axios';
 import { useSnackbar } from 'notistack';
 import { useState } from 'react';
+let baseURL = import.meta.env.VITE_APP_BASE_URL;
+
 // Common styles
 const styles = {
   pageWrapper: {
@@ -167,7 +170,7 @@ const BookConsultationPage = () => {
   const [selectedDate, setSelectedDate] = useState(today.getDate());
   const [selectedTime, setSelectedTime] = useState('');
   const [step, setStep] = useState('calendar'); // 'calendar' or 'details'
-
+  const [bookedSlots, setBookedSlots] = useState([]);
   // Form state for details step
   const [form, setForm] = useState({ name: '', email: '', mobile_number: '', notes: '' });
   const [errors, setErrors] = useState({});
@@ -259,7 +262,8 @@ const BookConsultationPage = () => {
     setErrors(newErrors);
 
     // Format the date to YYYY-MM-DD
-    const formattedDate = selectedDateObj.toISOString().split('T')[0];
+    // const formattedDate = selectedDateObj.toISOString().split('T')[0];
+    const formattedDate = `${selectedDateObj.getFullYear()}-${String(selectedDateObj.getMonth() + 1).padStart(2, '0')}-${String(selectedDateObj.getDate()).padStart(2, '0')}`;
 
     let data = {
       name: form.name,
@@ -271,17 +275,16 @@ const BookConsultationPage = () => {
     };
 
     if (Object.keys(newErrors).length === 0) {
-      console.log('Submitting data:', data);
       const apiUrl = `${import.meta.env.VITE_APP_BASE_URL}/user_management/consultation`;
       axios
         .post(apiUrl, data)
         .then((response) => {
-          console.log(response);
           enqueueSnackbar('Consultation booked successfully!', {
             variant: 'success',
             anchorOrigin: { vertical: 'top', horizontal: 'right' },
             autoHideDuration: 3000
           });
+          // getBookedConsultations(formattedDate);
           handleReset();
         })
         .catch((error) => {
@@ -514,7 +517,14 @@ const BookConsultationPage = () => {
                       cursor: disabled ? 'not-allowed' : 'pointer',
                       opacity: disabled ? 0.5 : 1
                     }}
-                    onClick={() => !disabled && setSelectedDate(day)}
+                    onClick={() => {
+                      if (!disabled) {
+                        setSelectedDate(day);
+                        const selectedDateObj = new Date(year, month, day);
+                        const formattedDate = `${selectedDateObj.getFullYear()}-${String(selectedDateObj.getMonth() + 1).padStart(2, '0')}-${String(selectedDateObj.getDate()).padStart(2, '0')}`;
+                        getBookedConsultations(formattedDate);
+                      }
+                    }}
                   >
                     {day}
                   </Button>
@@ -552,75 +562,76 @@ const BookConsultationPage = () => {
                 No available time slots for this day.
               </Typography>
             ) : (
-              timeSlots.map((slot) => (
-                <Box
-                  key={slot}
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'flex-end',
-                    width: '100%'
-                  }}
-                >
-                  <Button
-                    variant={selectedTime === slot ? 'contained' : 'outlined'}
-                    color={selectedTime === slot ? 'inherit' : 'primary'}
-                    sx={{
-                      ...styles.timeSlotButton,
-                      width: selectedTime === slot ? 96 : 200,
-                      bgcolor: selectedTime === slot ? theme.palette.primary.dark : theme.palette.background.paper,
-                      color: selectedTime === slot ? '#fff' : theme.palette.primary.main,
-                      borderColor: selectedTime === slot ? theme.palette.primary.dark : theme.palette.primary.main,
-                      boxShadow: selectedTime === slot ? 2 : 0,
-                      '&:hover': {
-                        bgcolor: selectedTime === slot ? theme.palette.primary.dark : theme.palette.primary.main,
-                        color: '#fff'
-                      }
-                    }}
-                    onClick={() => setSelectedTime(slot)}
-                  >
-                    {slot}
-                  </Button>
+              timeSlots
+                .filter((slot) => !bookedSlots.includes(slot))
+                .map((slot) => (
                   <Box
+                    key={slot}
                     sx={{
-                      display: 'inline-block',
-                      overflow: 'hidden',
-                      width: selectedTime === slot ? 96 : 0,
-                      ml: selectedTime === slot ? 1 : 0,
-                      transition: 'width 0.25s cubic-bezier(0.4, 0, 0.2, 1), margin-left 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-                      verticalAlign: 'middle'
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'flex-end',
+                      width: '100%'
                     }}
                   >
-                    {selectedTime === slot && (
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        sx={{
-                          fontSize: 14,
-                          width: 96,
-                          py: 1.5,
-                          borderRadius: 2,
-                          boxShadow: 2,
-                          bgcolor: '#444d56',
-                          textTransform: 'none',
-                          minWidth: 0,
-                          transition: 'background 0.2s, color 0.2s'
-                        }}
-                        onClick={() => setStep('details')}
-                      >
-                        Next
-                      </Button>
-                    )}
+                    <Button
+                      variant={selectedTime === slot ? 'contained' : 'outlined'}
+                      color={selectedTime === slot ? 'inherit' : 'primary'}
+                      sx={{
+                        ...styles.timeSlotButton,
+                        width: selectedTime === slot ? 96 : 200,
+                        bgcolor: selectedTime === slot ? theme.palette.primary.dark : theme.palette.background.paper,
+                        color: selectedTime === slot ? '#fff' : theme.palette.primary.main,
+                        borderColor: selectedTime === slot ? theme.palette.primary.dark : theme.palette.primary.main,
+                        boxShadow: selectedTime === slot ? 2 : 0,
+                        '&:hover': {
+                          bgcolor: selectedTime === slot ? theme.palette.primary.dark : theme.palette.primary.main,
+                          color: '#fff'
+                        }
+                      }}
+                      onClick={() => setSelectedTime(slot)}
+                    >
+                      {slot}
+                    </Button>
+                    <Box
+                      sx={{
+                        display: 'inline-block',
+                        overflow: 'hidden',
+                        width: selectedTime === slot ? 96 : 0,
+                        ml: selectedTime === slot ? 1 : 0,
+                        transition: 'width 0.25s cubic-bezier(0.4, 0, 0.2, 1), margin-left 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+                        verticalAlign: 'middle'
+                      }}
+                    >
+                      {selectedTime === slot && (
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          sx={{
+                            fontSize: 14,
+                            width: 96,
+                            py: 1.5,
+                            borderRadius: 2,
+                            boxShadow: 2,
+                            bgcolor: '#444d56',
+                            textTransform: 'none',
+                            minWidth: 0,
+                            transition: 'background 0.2s, color 0.2s'
+                          }}
+                          onClick={() => setStep('details')}
+                        >
+                          Next
+                        </Button>
+                      )}
+                    </Box>
                   </Box>
-                </Box>
-              ))
+                ))
             )}
           </Box>
         </Box>
       </Box>
     </Box>
   );
-
   const renderDetailsForm = () => (
     <Box sx={styles.rightPanel}>
       <Box sx={{ px: { xs: 2, sm: 6 }, pt: { xs: 2, sm: 6 }, pb: 0, maxWidth: 600, width: '100%' }}>
@@ -729,7 +740,47 @@ const BookConsultationPage = () => {
       </Box>
     </Box>
   );
+  const getBookedConsultations = async (date) => {
+    try {
+      const response = await axios.get(`${baseURL}/user_management/booked-consultations/?date=${date}`);
+      if (response.data && response.data.booked_times) {
+        // Convert booked times to 12-hour format to match our timeSlots format
+        const formattedBookedSlots = response.data.booked_times.map((time) => {
+          const [hours, minutes] = time.split(':');
+          let hour = parseInt(hours);
+          let ampm = 'AM';
 
+          // For hours 1-6, they should be PM
+          if (hour >= 1 && hour <= 6) {
+            ampm = 'PM';
+            if (hour === 12) {
+              hour = 12;
+            } else {
+              hour = hour + 12; // Convert to 24-hour format first
+            }
+          }
+
+          // Now convert to 12-hour format
+          if (hour > 12) {
+            hour = hour - 12;
+          } else if (hour === 0) {
+            hour = 12;
+          }
+
+          return `${hour}:${minutes}${ampm}`;
+        });
+        setBookedSlots(formattedBookedSlots);
+      }
+    } catch (error) {
+      setBookedSlots([]);
+    }
+  };
+
+  // Fetch booked slots when date changes
+  useEffect(() => {
+    const dateStr = `${selectedDateObj.getFullYear()}-${String(selectedDateObj.getMonth() + 1).padStart(2, '0')}-${String(selectedDateObj.getDate()).padStart(2, '0')}`;
+    getBookedConsultations(dateStr);
+  }, [selectedDate, month, year]);
   return (
     <>
       <Box
@@ -747,7 +798,7 @@ const BookConsultationPage = () => {
           <Typography variant="h1" color="primary.main" gutterBottom>
             Book a Consultation
           </Typography>
-          <Typography color="text.secondary">Let’s Talk – Book Your Consultation Now! </Typography>
+          <Typography color="text.secondary">Let's Talk – Book Your Consultation Now! </Typography>
         </Box>
       </Box>
       <Box sx={{ ...styles.pageWrapper, bgcolor: theme.palette.background.default }}>

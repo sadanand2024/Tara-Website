@@ -283,7 +283,7 @@ export default function BusinessProfileComponnet({ businessDetails = {}, postTyp
       </Typography>
 
       <Grid2 container spacing={2}>
-        <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+        {/* <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
           <input
             accept="image/*"
             style={{ display: 'none' }}
@@ -319,7 +319,7 @@ export default function BusinessProfileComponnet({ businessDetails = {}, postTyp
               </Button>
             </label>
           </Box>
-        </Grid2>
+        </Grid2> */}
 
         {busineesprofileFields.basic_details.map((item, index) => (
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }} key={item.name}>
@@ -418,7 +418,7 @@ export default function BusinessProfileComponnet({ businessDetails = {}, postTyp
               ) : (
                 <>
                   <Typography component="label" sx={{ mb: 1 }}>
-                    {item.label}
+                    {item.name === 'nameOfBusiness' ? <span style={{ color: 'red' }}>*</span> : ''} {item.label}
                   </Typography>
 
                   <CustomInput
