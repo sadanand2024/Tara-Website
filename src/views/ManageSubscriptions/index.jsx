@@ -484,12 +484,12 @@ const ManageSubscriptions = () => {
                   >
                     <TableCell sx={{ pl: 3 }}>{index + 1}</TableCell>
                     <TableCell>{task.id}</TableCell>
-                    <TableCell>{task.service_name.charAt(0).toUpperCase() + task.service_name.slice(1)}</TableCell>
-                    <TableCell>{task.plan_name.charAt(0).toUpperCase() + task.plan_name.slice(1)}</TableCell>
+                    <TableCell>{task?.service_label || '-'}</TableCell>
+                    <TableCell>{task?.plan_name?.charAt(0)?.toUpperCase() + task?.plan_name?.slice(1) || '-'}</TableCell>
                     <TableCell>
                       {task.status === 'paid' ? (
                         <Chip
-                          label={task.status.charAt(0).toUpperCase() + task.status.slice(1)}
+                          label={task?.status?.charAt(0)?.toUpperCase() + task?.status?.slice(1) || '-'}
                           icon={<CheckCircleTwoToneIcon />}
                           color="success"
                           size="small"
@@ -501,13 +501,13 @@ const ManageSubscriptions = () => {
                         </Button>
                       )}
                     </TableCell>
-                    <TableCell>{task.payment_order_id || '-'}</TableCell>
+                    <TableCell>{task?.payment_order_id || '-'}</TableCell>
                     <TableCell>
                       <Typography variant="body1" color="text" fontWeight={500}>
-                        {task.created_at ? new Date(task.created_at).toLocaleDateString() : '-'}
+                        {task?.created_at ? new Date(task?.created_at).toLocaleDateString() : '-'}
                       </Typography>
                       <Typography variant="body1" color="text.secondary">
-                        {task.created_at ? new Date(task.created_at).toLocaleTimeString() : '-'}
+                        {task?.created_at ? new Date(task?.created_at).toLocaleTimeString() : '-'}
                       </Typography>
                     </TableCell>
                   </TableRow>
@@ -591,37 +591,39 @@ const ManageSubscriptions = () => {
               {paymentHistory?.length > 0 ? (
                 paymentHistory.map((payment) => (
                   <TableRow key={payment.id}>
-                    <TableCell>{new Date(payment.created_at).toLocaleDateString()}</TableCell>
+                    <TableCell>{new Date(payment?.created_at).toLocaleDateString()}</TableCell>
                     <TableCell>
-                      <Typography variant="subtitle2">{payment.plan_name || payment.suite_name}</Typography>
+                      <Typography variant="subtitle2">{payment?.plan_name || payment?.suite_name}</Typography>
                     </TableCell>
                     <TableCell>
                       <Typography variant="body2" color="primary.main" fontWeight={500}>
-                        ₹ {payment.amount}
+                        ₹ {payment?.amount}
                       </Typography>
                     </TableCell>
                     <TableCell>
                       <Chip
-                        label={payment.status === 'paid' && payment.payment_captured ? 'Paid' : 'Failed'}
-                        color={payment.status === 'paid' && payment.payment_captured ? 'success' : 'error'}
+                        label={payment?.status === 'paid' && payment?.payment_captured ? 'Paid' : 'Failed'}
+                        color={payment?.status === 'paid' && payment?.payment_captured ? 'success' : 'error'}
                         size="small"
                         sx={{ fontWeight: 500 }}
                       />
                     </TableCell>
                     <TableCell>
                       <Typography variant="body2">
-                        {payment.payment_method ? payment.payment_method.charAt(0).toUpperCase() + payment.payment_method.slice(1) : ''}
-                        {payment.card_last4 ? ` ••••${payment.card_last4}` : ''}
+                            {payment?.payment_method
+                          ? payment?.payment_method?.charAt(0)?.toUpperCase() + payment?.payment_method?.slice(1)
+                          : ''}
+                        {payment?.card_last4 ? ` ••••${payment?.card_last4}` : ''}
                       </Typography>
                     </TableCell>
                     <TableCell>
                       <Typography variant="caption" color="text.secondary">
-                        {payment.razorpay_order_id}
+                        {payment?.razorpay_order_id}
                       </Typography>
                     </TableCell>
                     <TableCell>
                       <Typography variant="caption" color="text.secondary">
-                        {payment.razorpay_payment_id}
+                        {payment?.razorpay_payment_id}
                       </Typography>
                     </TableCell>
                   </TableRow>

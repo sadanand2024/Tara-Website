@@ -1213,7 +1213,7 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
       purchase_value: '',
       sale_date: '',
       sale_value: '',
-      doc: null
+      documents: null
     }
   ]);
 
@@ -1236,7 +1236,7 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
           purchase_value: '',
           sale_date: '',
           sale_value: '',
-          doc: null
+          documents: null
         }
       ]);
   }, [cg_other_sources]);
@@ -1250,7 +1250,7 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
           purchase_value: '',
           sale_date: '',
           sale_value: '',
-          doc: null
+          documents: null
         }
       ]);
     }
@@ -1957,18 +1957,18 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                             multiple={true}
                             onChange={(e) => {
                               const updated = [...otherGainsRows];
-                              updated[idx].doc = e.target.files;
+                              updated[idx].documents = e.target.files;
                               setOtherGainsRows(updated);
                             }}
                           />
                         </Button>
-                        {otherGainsRows?.[idx]?.doc && (
+                        {otherGainsRows?.[idx]?.documents && (
                           <Button
                             size="small"
                             variant="outlined"
                             onClick={() => {
                               setFileDialogOpen(true);
-                              setDialogFilesData([otherGainsRows?.[idx]?.doc]);
+                              setDialogFilesData({ files: [...otherGainsRows?.[idx]?.documents], urlEndpoint: 'other-capital-gains' });
                             }}
                           >
                             View
@@ -1989,14 +1989,18 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                           formData.append('status', 'in progress');
                           formData.append('asset_details', row.asset_details || '');
                           formData.append('purchase_date', row.purchase_date || '');
+                          if (row.id) formData.append('id', row.id);
                           formData.append('purchase_value', row.purchase_value || '');
                           formData.append('sale_date', row.sale_date || '');
                           formData.append('sale_value', row.sale_value || '');
-                          Array.from(row.doc).forEach((file) => {
-                            if (file instanceof File) formData.append('documents', file);
-                          });
+                          if (row.documents && row.documents?.length > 0) {
+                            Array.from(row.documents).forEach((file) => {
+                              if (file instanceof File) formData.append('documents', file);
+                            });
+                          }
                           const response = await Factory('post', `/income_tax_returns/other-capital-gains/with-files/`, formData);
                           if (response.res.status_cd === 0) {
+                            setOtherGainsRows(response.res.data.data.other_capital_gain_info);
                             enqueueSnackbar('Other Capital Gains submitted successfully', {
                               anchorOrigin: { vertical: 'top', horizontal: 'right' },
                               variant: 'success'
@@ -2014,10 +2018,26 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                       <IconButton
                         size="small"
                         color="error"
-                        onClick={() => {
-                          const updated = [...otherGainsRows];
-                          updated.splice(idx, 1);
-                          setOtherGainsRows(updated);
+                        onClick={async () => {
+                          const res = await Factory(
+                            'delete',
+                            `/income_tax_returns/other-capital-gains/delete/${otherGainsRows?.[idx].id}/`,
+                            {}
+                          );
+                          if (res.res.status_cd === 0) {
+                            const updated = [...otherGainsRows];
+                            updated.splice(idx, 1);
+                            setOtherGainsRows(updated);
+                            enqueueSnackbar('Other Capital Gains deleted successfully', {
+                              anchorOrigin: { vertical: 'top', horizontal: 'right' },
+                              variant: 'success'
+                            });
+                          } else {
+                            enqueueSnackbar('Error deleting Other Capital Gains', {
+                              anchorOrigin: { vertical: 'top', horizontal: 'right' },
+                              variant: 'error'
+                            });
+                          }
                         }}
                       >
                         <DeleteIcon />
@@ -2041,7 +2061,7 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                     purchase_value: '',
                     sale_date: '',
                     sale_value: '',
-                    doc: null
+                    documents: null
                   }
                 ])
               }
@@ -2232,7 +2252,7 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
   };
 
   const removeBusinessIncome = async (row, idx) => {
-    const res = await Factory('delete', `/income_tax_returns/business-professional-income/document/${row.id}/delete/`, {});
+    const res = await Factory('delete', `/income_tax_returns/business-professional-income/${row.id}/delete/`, {});
 
     if (res.res.status_cd === 0) {
       let updated = [...businessRows];
@@ -4412,23 +4432,26 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
 };
 
 const AgricultureIncome = ({ data, service_id, setFileDialogOpen, fileDialogOpen, dialogFilesData, setDialogFilesData }) => {
-  console.log(data);
   const { enqueueSnackbar } = useSnackbar();
   let initialData = {
-    agriculture: 'Not Applicable',
-    amount: '',
-    file: ''
+    id: null,
+    agriculture_income_docs: {
+      amount: '',
+      file: ''
+    },
+    status: 'in progress',
+    agriculture: 'Applicable'
   };
   data = data[0];
   const [agricultureIncome, setAgricultureIncome] = React.useState(initialData);
 
   useEffect(() => {
-    if (data.data.length > 0) {
-      let __data = {
-        agriculture: data.data[0].agriculture || 'Not Applicable',
-        amount: data.data[0].agriculture_income_docs?.amount || '',
-        file: data.data[0].agriculture_income_docs?.file || ''
-      };
+    if (data?.data?.length > 0) {
+      let __data = data.data[0];
+      if (__data?.agriculture_income_docs === null) {
+        __data.agriculture_income_docs = { amount: '', file: '' };
+      }
+      console.log(__data);
       setAgricultureIncome(__data);
     }
   }, [data]);
@@ -4440,19 +4463,32 @@ const AgricultureIncome = ({ data, service_id, setFileDialogOpen, fileDialogOpen
     formData.append('status', 'in progress');
     const res = await Factory('post', `/income_tax_returns/agriculture-income/upsert/`, formData);
     if (res.res.status_cd === 0) {
+      console.log(data);
+      console.log(agricultureIncome);
+      console.log(res.res.data);
+      // setAgricultureIncome({ ...agricultureIncome, agriculture: v });
       return true;
     }
   };
 
   const postAgriculturalIncome = async () => {
     let formData = new FormData();
+    let id = agricultureIncome.agriculture_income_docs.id;
+    let type = 'post';
+    let url = `/income_tax_returns/agriculture-income-docs/add/`;
+    if (id) {
+      type = 'put';
+      url = `/income_tax_returns/agriculture-income-docs/${id}/update/`;
+      formData.append('id', parseInt(id));
+    }
     formData.append('agriculture_income', parseInt(data.data[0].id));
     formData.append('service_request', parseInt(service_id));
     formData.append('service_task', parseInt(data.task_id));
-    if (agricultureIncome.file instanceof File) formData.append('amount_file', agricultureIncome.file);
-    formData.append('amount', agricultureIncome.amount);
+    if (agricultureIncome.agriculture_income_docs.file instanceof File)
+      formData.append('file', agricultureIncome.agriculture_income_docs.file);
+    formData.append('amount', agricultureIncome.agriculture_income_docs.amount);
     formData.append('status', 'in progress');
-    const res = await Factory('post', `/income_tax_returns/agriculture-income-docs/add/`, formData);
+    const res = await Factory(type, url, formData);
     if (res.res.status_cd === 0) {
       enqueueSnackbar('Agricultural income saved successfully', {
         anchorOrigin: { vertical: 'top', horizontal: 'right' },
@@ -4489,24 +4525,38 @@ const AgricultureIncome = ({ data, service_id, setFileDialogOpen, fileDialogOpen
             size="small"
             fullWidth
             sx={{ maxWidth: 200 }}
-            value={agricultureIncome?.amount}
-            onChange={(e) => setAgricultureIncome({ ...agricultureIncome, amount: e.target.value })}
+            value={agricultureIncome?.agriculture_income_docs?.amount}
+            onChange={(e) =>
+              setAgricultureIncome({
+                ...agricultureIncome,
+                agriculture_income_docs: { ...agricultureIncome.agriculture_income_docs, amount: e.target.value }
+              })
+            }
             placeholder="Agricultural Income"
           />
           <Button size="small" variant="contained" component="label">
             Upload
-            <input type="file" hidden onChange={(e) => setAgricultureIncome({ ...agricultureIncome, file: e.target.files[0] })} />
+            <input
+              type="file"
+              hidden
+              onChange={(e) =>
+                setAgricultureIncome({
+                  ...agricultureIncome,
+                  agriculture_income_docs: { ...agricultureIncome.agriculture_income_docs, file: e.target.files[0] }
+                })
+              }
+            />
           </Button>
-          {agricultureIncome?.file && (
+          {agricultureIncome?.agriculture_income_docs?.file && (
             <Button
               size="small"
               variant="outlined"
               sx={{ ml: 1 }}
               onClick={() => {
-                if (agricultureIncome?.file instanceof File) {
-                  window.open(URL.createObjectURL(agricultureIncome?.file), '_blank');
+                if (agricultureIncome?.agriculture_income_docs?.file instanceof File) {
+                  window.open(URL.createObjectURL(agricultureIncome?.agriculture_income_docs?.file), '_blank');
                 } else {
-                  viewFile(agricultureIncome?.file);
+                  viewFile(agricultureIncome?.agriculture_income_docs?.file);
                 }
               }}
             >
