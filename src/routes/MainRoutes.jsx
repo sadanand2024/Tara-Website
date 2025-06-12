@@ -152,7 +152,7 @@ const MainRoutes = {
       path: '/app/my-services/labour-license',
       element: <LabourLicence />
     },
-     {
+    {
       path: '/app/my-services/gst-registration',
       element: <GstRegistration />
     },

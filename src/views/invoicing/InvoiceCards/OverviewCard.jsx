@@ -450,116 +450,114 @@ export default function OverviewCard({ invoicing_profile_data, businessId, open,
           </Grid2>
         </Grid2>
       </Box>
-      <Grid2>
-        <MainCard content={false} sx={{ mt: 3 }}>
-          <TableContainer
-            component={Paper}
-            sx={{
-              width: '100%',
-              borderRadius: 2,
-              boxShadow: 1,
-              overflowX: 'auto'
-            }}
-          >
-            <Table>
-              <TableHead>
-                <TableRow sx={{ bgcolor: 'grey.100' }}>
-                  <TableCell>Date</TableCell>
-                  <TableCell>Invoice Number</TableCell>
-                  <TableCell>Customer</TableCell>
-                  <TableCell>Payment Status</TableCell>
-                  <TableCell>Invoice Status</TableCell>
-                  <TableCell>Due Date</TableCell>
-                  <TableCell>Amount</TableCell>
-                  <TableCell>Balance Due</TableCell>
-                  <TableCell align="center">Action</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {paginatedData.length > 0 ? (
-                  paginatedData.map((invoice, index) => (
-                    <TableRow
-                      key={index}
-                      sx={{
-                        bgcolor: 'background.paper',
-                        borderRadius: 2,
-                        boxShadow: theme.customShadows.z1,
-                        '&:hover': {
-                          boxShadow: theme.customShadows.z4
-                        }
-                      }}
-                    >
-                      <TableCell>{invoice.invoice_date}</TableCell>
-                      <TableCell>{invoice.invoice_number}</TableCell>
-                      <TableCell>{invoice.customer}</TableCell>
-                      <TableCell>
-                        <Chip
-                          size="small"
-                          variant="outlined"
-                          label={invoice.payment_status}
-                          color={invoice.payment_status === 'Pending' || invoice.payment_status === 'Overdue' ? 'warning' : 'success'}
+      <Grid2 sx={{ mt: 3 }}>
+        <TableContainer
+          component={Paper}
+          sx={{
+            width: '100%',
+            borderRadius: 2,
+            boxShadow: 1,
+            overflowX: 'auto'
+          }}
+        >
+          <Table size="small">
+            <TableHead>
+              <TableRow sx={{ bgcolor: 'grey.100' }}>
+                <TableCell>Date</TableCell>
+                <TableCell>Invoice Number</TableCell>
+                <TableCell>Customer</TableCell>
+                <TableCell>Payment Status</TableCell>
+                <TableCell>Invoice Status</TableCell>
+                <TableCell>Due Date</TableCell>
+                <TableCell>Amount</TableCell>
+                <TableCell>Balance Due</TableCell>
+                <TableCell align="center">Action</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {paginatedData.length > 0 ? (
+                paginatedData.map((invoice, index) => (
+                  <TableRow
+                    key={index}
+                    sx={{
+                      bgcolor: 'background.paper',
+                      borderRadius: 2,
+                      boxShadow: theme.customShadows.z1,
+                      '&:hover': {
+                        boxShadow: theme.customShadows.z4
+                      }
+                    }}
+                  >
+                    <TableCell>{invoice.invoice_date}</TableCell>
+                    <TableCell>{invoice.invoice_number}</TableCell>
+                    <TableCell>{invoice.customer}</TableCell>
+                    <TableCell>
+                      <Chip
+                        size="small"
+                        variant="outlined"
+                        label={invoice.payment_status}
+                        color={invoice.payment_status === 'Pending' || invoice.payment_status === 'Overdue' ? 'warning' : 'success'}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        size="small"
+                        variant="outlined"
+                        label={invoice.invoice_status}
+                        color={invoice.invoice_status === 'Approved' ? 'success' : 'warning'}
+                      />
+                    </TableCell>
+                    <TableCell>{invoice.due_date}</TableCell>
+                    <TableCell>
+                      {indianCurrency}&nbsp;{invoice.total_amount}
+                    </TableCell>
+                    <TableCell>
+                      {indianCurrency}&nbsp;{invoice.balance_due}
+                    </TableCell>
+                    <TableCell align="center">
+                      {invoice?.id && (
+                        <ActionCell
+                          fromComponent="invoice"
+                          row={invoice}
+                          onEdit={() => navigate(`/app/invoice/editInvoice?id=${invoice.id}`)}
+                          onDelete={() => handleDelete(invoice.id)}
+                          onRecordPayment={() => navigate(`/app/invoice/recordpayment?id=${invoice.id}`)}
+                          onPaymentHistory={() => navigate(`/app/invoice/paymenthistory?id=${invoice.id}`)}
+                          onDownload={() => downloadInvoice(invoice.id)}
+                          onApprove={() => handleApprove(invoice.id)}
+                          onWriteOff={() => handleWriteOff(invoice.id)}
+                          deleteDialogData={{
+                            title: 'Delete record',
+                            heading: 'Are you sure you want to delete this record?',
+                            description: 'This action will permanently remove this record from the list.',
+                            successMessage: 'Record has been deleted.'
+                          }}
                         />
-                      </TableCell>
-                      <TableCell>
-                        <Chip
-                          size="small"
-                          variant="outlined"
-                          label={invoice.invoice_status}
-                          color={invoice.invoice_status === 'Approved' ? 'success' : 'warning'}
-                        />
-                      </TableCell>
-                      <TableCell>{invoice.due_date}</TableCell>
-                      <TableCell>
-                        {indianCurrency}&nbsp;{invoice.total_amount}
-                      </TableCell>
-                      <TableCell>
-                        {indianCurrency}&nbsp;{invoice.balance_due}
-                      </TableCell>
-                      <TableCell align="center">
-                        {invoice?.id && (
-                          <ActionCell
-                            fromComponent="invoice"
-                            row={invoice}
-                            onEdit={() => navigate(`/app/invoice/editInvoice?id=${invoice.id}`)}
-                            onDelete={() => handleDelete(invoice.id)}
-                            onRecordPayment={() => navigate(`/app/invoice/recordpayment?id=${invoice.id}`)}
-                            onPaymentHistory={() => navigate(`/app/invoice/paymenthistory?id=${invoice.id}`)}
-                            onDownload={() => downloadInvoice(invoice.id)}
-                            onApprove={() => handleApprove(invoice.id)}
-                            onWriteOff={() => handleWriteOff(invoice.id)}
-                            deleteDialogData={{
-                              title: 'Delete record',
-                              heading: 'Are you sure you want to delete this record?',
-                              description: 'This action will permanently remove this record from the list.',
-                              successMessage: 'Record has been deleted.'
-                            }}
-                          />
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={9}>
-                      <Stack alignItems="center" py={5}>
-                        <IconAlertCircle color="warning" size={32} />
-                        <Typography variant="subtitle1" color="text.secondary" mt={1}>
-                          No invoices found for the selected filter
-                        </Typography>
-                      </Stack>
+                      )}
                     </TableCell>
                   </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={9}>
+                    <Stack alignItems="center" py={5}>
+                      <IconAlertCircle color="warning" size={32} />
+                      <Typography variant="subtitle1" color="text.secondary" mt={1}>
+                        No invoices found for the selected filter
+                      </Typography>
+                    </Stack>
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
 
-          {invoicesList.length > 0 && (
-            <Stack direction="row" justifyContent="center" alignItems="center" sx={{ px: { xs: 0.5, sm: 2.5 }, py: 1.5 }}>
-              <Pagination count={totalPages} page={currentPage} onChange={handlePageChange} color="primary" />
-            </Stack>
-          )}
-        </MainCard>
+        {invoicesList.length > 0 && (
+          <Stack direction="row" justifyContent="center" alignItems="center" sx={{ px: { xs: 0.5, sm: 2.5 }, py: 1.5 }}>
+            <Pagination count={totalPages} page={currentPage} onChange={handlePageChange} color="primary" />
+          </Stack>
+        )}
       </Grid2>
       <FilterDialog
         financialYear={financialYear}

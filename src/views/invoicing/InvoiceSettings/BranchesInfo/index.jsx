@@ -5,7 +5,21 @@ import Factory from 'utils/Factory';
 import { Typography } from '@mui/material';
 import { Grid2 } from '@mui/material';
 import MainCard from 'ui-component/cards/MainCard';
-import { Button, Stack, Paper, Table, TableHead, TableBody, TableRow, TableCell, TableContainer, IconButton, Box } from '@mui/material';
+import {
+  Button,
+  Stack,
+  Paper,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+  TableContainer,
+  IconButton,
+  Box,
+  Card,
+  Pagination
+} from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
@@ -15,6 +29,7 @@ import CustomInput from 'utils/CustomInput';
 import { useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { IconPlus } from '@tabler/icons-react';
+import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
 export default function BranchesInfo({ handleBack, handleNext }) {
   const [branches, setBranches] = useState([]);
   const dispatch = useDispatch();
@@ -24,6 +39,12 @@ export default function BranchesInfo({ handleBack, handleNext }) {
   const [type, setType] = useState('');
   const [postType, setPostType] = useState('');
   const [selectedRecord, setSelectedRecord] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const handlePageChange = (event, value) => {
+    setCurrentPage(value);
+  };
+  const paginatedBranches = branches.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
   const branchFields = [
     { name: 'branch_name', label: 'Branch Name' },
     { name: 'branch_code', label: 'Branch Code' }
@@ -154,40 +175,64 @@ export default function BranchesInfo({ handleBack, handleNext }) {
     <Grid2 container spacing={2}>
       <Grid2 size={{ xs: 12 }}>
         <Stack direction="row" justifyContent="space-between" alignItems="center">
-          <Typography variant="h4"></Typography>
+          <Typography variant="h4">Branches Info</Typography>
           <Button startIcon={<IconPlus size={16} />} variant="contained" color="primary" onClick={handleOpenDialog}>
             Add Branch
           </Button>
         </Stack>
       </Grid2>
       <Grid2 size={{ xs: 12 }}>
-        <TableContainer component={Paper} sx={{ boxShadow: 1 }}>
-          <Table size="small">
-            <TableHead>
-              <TableRow sx={{ bgcolor: 'grey.100' }}>
-                <TableCell>Branch Name</TableCell>
-                <TableCell>Branch Code</TableCell>
-                <TableCell align="center">Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {branches.map((branch, index) => (
-                <TableRow key={branch.id}>
-                  <TableCell>{branch.branch_name}</TableCell>
-                  <TableCell>{branch.branch_code}</TableCell>
-                  <TableCell align="center">
-                    <IconButton color="primary" size="small" onClick={() => handleEditBranch(index)}>
-                      <Edit />
-                    </IconButton>
-                    <IconButton color="error" size="small" onClick={() => handleRemoveBranch(index)}>
-                      <Delete />
-                    </IconButton>
-                  </TableCell>
+        <Card
+          elevation={2}
+          sx={{
+            mb: 2,
+            '& .MuiTableContainer-root': {
+              borderRadius: 0
+            },
+            '& .MuiTableCell-root': {
+              color: 'text.primary'
+            },
+            '& .MuiTableHead-root .MuiTableCell-root': {
+              py: 1,
+              backgroundColor: 'primary.main',
+              color: '#fff'
+            }
+          }}
+        >
+          <TableContainer>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Branch Name</TableCell>
+                  <TableCell>Branch Code</TableCell>
+                  <TableCell align="center">Actions</TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+              </TableHead>
+
+              <TableBody>
+                {branches.map((branch, index) => (
+                  <TableRow key={branch.id}>
+                    <TableCell>{branch.branch_name}</TableCell>
+                    <TableCell>{branch.branch_code}</TableCell>
+                    <TableCell align="center">
+                      <IconButton color="primary" size="small" onClick={() => handleEditBranch(index)}>
+                        <Edit />
+                      </IconButton>
+                      <IconButton color="error" size="small" onClick={() => handleRemoveBranch(index)}>
+                        <Delete />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Card>
+        {branches.length > 0 && (
+          <Stack direction="row" justifyContent="center" sx={{ py: 2 }}>
+            <Pagination count={Math.ceil(branches.length / rowsPerPage)} page={currentPage} onChange={handlePageChange} />
+          </Stack>
+        )}
         <Modal
           open={open}
           showClose={true}

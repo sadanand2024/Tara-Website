@@ -1,31 +1,31 @@
 import React, { useEffect } from 'react';
-
-// material-ui
-import Button from '@mui/material/Button';
-import Grid from '@mui/material/Grid2';
-import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
-import Pagination from '@mui/material/Pagination';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import CircularProgress from '@mui/material/CircularProgress';
-import Box from '@mui/material/Box';
 import { useSnackbar } from 'notistack';
-import Avatar from '@mui/material/Avatar';
-import Autocomplete from '@mui/material/Autocomplete';
-import TextField from '@mui/material/TextField';
 import { gridSpacing } from 'store/constant';
 import Factory from 'utils/Factory';
 import { useSelector } from 'store';
 import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded';
-import Typography from '@mui/material/Typography';
-import Stack from '@mui/material/Stack';
-import Link from '@mui/material/Link';
-
+import {
+  Button,
+  Grid2,
+  Menu,
+  MenuItem,
+  Pagination,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  CircularProgress,
+  Box,
+  Avatar,
+  Autocomplete,
+  TextField,
+  Typography,
+  Stack,
+  Link,
+  Paper
+} from '@mui/material';
 // ==============================|| MANAGE USERS ||============================== //
 
 const ServiceRequests = ({ searchQuery, setUsers, assigned, setSearchQuery }) => {
@@ -35,16 +35,9 @@ const ServiceRequests = ({ searchQuery, setUsers, assigned, setSearchQuery }) =>
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [page, setPage] = React.useState(1);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
-  const [openAddDialog, setOpenAddDialog] = React.useState(false);
-  const [totalUsers, setTotalUsers] = React.useState(0);
-  const [selectedUser, setSelectedUser] = React.useState(null);
   const [requests, setRequests] = React.useState([]);
   const [loading, setLoading] = React.useState(false);
-  const [snackbar, setSnackbar] = React.useState({
-    open: false,
-    message: '',
-    severity: 'success'
-  });
+
   const [userOptions, setUserOptions] = React.useState([]);
   const [assignedUsers, setAssignedUsers] = React.useState({});
 
@@ -54,15 +47,12 @@ const ServiceRequests = ({ searchQuery, setUsers, assigned, setSearchQuery }) =>
       const response = await Factory('get', `/user_management/context/users?context_id=${user.active_context.id}`, {}, {});
       if (response.res.status_cd === 0) {
         setUserOptions(response.res.data.users);
-        setTotalUsers(response.res.data.total || response.res.data.users.length);
       } else {
         setUserOptions([]);
-        setTotalUsers(0);
       }
     } catch (error) {
       console.error('Error fetching users:', error);
       setUserOptions([]);
-      setTotalUsers(0);
     } finally {
       setLoading(false);
     }
@@ -291,9 +281,9 @@ const ServiceRequests = ({ searchQuery, setUsers, assigned, setSearchQuery }) =>
           </TableBody>
         </Table>
       </TableContainer>
-      <Grid sx={{ p: 1.5 }} size={12}>
-        <Grid container spacing={gridSpacing} sx={{ justifyContent: 'space-between' }}>
-          <Grid>
+      <Grid2 sx={{ p: 1.5 }} size={12}>
+        <Grid2 container spacing={gridSpacing} sx={{ justifyContent: 'space-between' }}>
+          <Grid2>
             <Pagination
               count={Math.ceil(filteredRequests.length / rowsPerPage)}
               page={page}
@@ -301,8 +291,8 @@ const ServiceRequests = ({ searchQuery, setUsers, assigned, setSearchQuery }) =>
               color="primary"
               shape="rounded"
             />
-          </Grid>
-          <Grid>
+          </Grid2>
+          <Grid2>
             <Button size="large" sx={{ color: 'grey.900' }} color="secondary" endIcon={<ExpandMoreRoundedIcon />} onClick={handleClick}>
               {rowsPerPage} Rows
             </Button>
@@ -326,9 +316,9 @@ const ServiceRequests = ({ searchQuery, setUsers, assigned, setSearchQuery }) =>
               <MenuItem onClick={() => handleChangeRowsPerPage(20)}>20 Rows</MenuItem>
               <MenuItem onClick={() => handleChangeRowsPerPage(30)}>30 Rows</MenuItem>
             </Menu>
-          </Grid>
-        </Grid>
-      </Grid>
+          </Grid2>
+        </Grid2>
+      </Grid2>
     </>
   );
 };
