@@ -460,6 +460,7 @@ export default function ITR() {
                         if (type === 'put') formData.append('id', personalInfo.id);
                         const res = await Factory(type, url, formData, {});
                         if (res.res.status_cd === 0) {
+                          setPersonalInfo((prev) => ({ ...prev, ...res.res.data }));
                           enqueueSnackbar('Personal Information saved successfully!', {
                             variant: 'success',
                             anchorOrigin: { vertical: 'top', horizontal: 'right' }
