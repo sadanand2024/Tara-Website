@@ -45,7 +45,7 @@ const RaiseRequest = ({ fields, task_id, details }) => {
     });
     if (response.res.status_cd === 0) {
       enqueueSnackbar('Request raised successfully', { variant: 'success', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
-      handleClose();
+      reset();
     } else {
       enqueueSnackbar('Request raised failed', { variant: 'error', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
     }

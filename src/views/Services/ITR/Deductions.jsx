@@ -597,6 +597,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                         }}
                       />
                     </Button>
+                    {console.log(values?.document_files?.other_files?.files)}
                     {values?.document_files?.other_files?.files.length > 0 && (
                       <Button
                         size="small"
@@ -606,7 +607,20 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                           setFileDialogOpen(true);
                           setDialogFilesData({
                             files: values?.document_files?.other_files?.files,
-                            urlEndpoint: 'section-80ee'
+                            urlEndpoint: 'section-80ee',
+                            removeFunction: (file) => {
+                              let updated = [...values.document_files.other_files.files];
+                              updated.splice(updated.indexOf(file), 1);
+                              setFieldValue('document_files.other_files.files', updated);
+
+                              setSection80EE({
+                                ...section80EE,
+                                document_files: {
+                                  ...section80EE.document_files,
+                                  other_files: { ...section80EE.document_files.other_files, files: updated }
+                                }
+                              });
+                            }
                           });
                         }}
                       >
@@ -1403,7 +1417,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
           Back
         </Button>
         <Stack direction="row" spacing={1}>
-          <RaiseRequest fields={[]} task_id={''} />
+          <RaiseRequest fields={[]} task_id={deductions?.task_id} />
 
           <GetActionButtons
             type="post"
