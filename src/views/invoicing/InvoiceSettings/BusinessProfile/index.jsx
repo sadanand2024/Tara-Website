@@ -174,7 +174,7 @@ export default function BusinessProfileComponnet({ businessDetails = {}, postTyp
           // setBusinessDetails(res.data.data),
           openSnackbar({
             open: true,
-            message: 'Data Saved Successfully',
+            message: postType === 'post' ? 'Data Saved Successfully' : 'Data Updated Successfully',
             variant: 'alert',
             alert: { color: 'success' },
             close: false

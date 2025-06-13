@@ -208,6 +208,7 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
                       setFieldValue(field.name, value);
                       if (value === 'No') {
                         setFieldValue('gstin', 'NA');
+                        setFieldValue('gst_type', '');
                         formik.setFieldTouched('gstin', false);
                         formik.setFieldError('gstin', '');
                       } else {
@@ -241,6 +242,7 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
                     }
                     error={touched[field.name] && Boolean(errors[field.name])}
                     helperText={touched[field.name] && errors[field.name]}
+                    disabled={field.name === 'gst_type' && values.gst_registered === 'No'}
                   />
                 </>
               ) : (
