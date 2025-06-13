@@ -36,7 +36,6 @@ const RaiseRequest = ({ fields, task_id, details }) => {
   const [otherRequestType, setOtherRequestType] = useState('');
   const [description, setDescription] = useState('');
 
-  console.log(requestType);
   const handleSubmit = async () => {
     let apiType = 'post';
     const response = await Factory(apiType, '/servicetasks/subtasks/', {
