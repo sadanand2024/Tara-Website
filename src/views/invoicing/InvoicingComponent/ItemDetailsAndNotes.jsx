@@ -72,7 +72,7 @@ const ItemDetailsAndNotes = ({
     <Box sx={{ mb: 4 }}>
       <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Typography variant="h4">Item Details</Typography>
-        <Button
+        {/* <Button
           variant="contained"
           startIcon={<IconPlus />}
           onClick={handleOpenAddItem}
@@ -84,7 +84,7 @@ const ItemDetailsAndNotes = ({
           }}
         >
           Add New Item
-        </Button>
+        </Button> */}
       </Box>
 
       <TableContainer
@@ -120,9 +120,49 @@ const ItemDetailsAndNotes = ({
                     size="small"
                     options={itemsList.map((item) => item.name)}
                     value={item.item || ''}
-                    onChange={(e, val) => handleItemChange(index, val)}
+                    onChange={(e, val) => {
+                      // Prevent setting the value if "Add New Item" is clicked
+                      if (val === null) return;
+                      handleItemChange(index, val);
+                    }}
                     onKeyDown={handleItemInputKeyDown}
                     renderInput={(params) => <TextField {...params} sx={{ minWidth: 200, maxWidth: 200 }} />}
+                    renderOption={(props, option) => (
+                      <li {...props} key={option}>
+                        {option}
+                      </li>
+                    )}
+                    ListboxProps={{
+                      style: { maxHeight: 250 },
+                      component: React.forwardRef(function CustomListboxComponent(props, ref) {
+                        const { children, ...rest } = props;
+                        return (
+                          <ul ref={ref} {...rest}>
+                            {children}
+                            <li style={{ padding: '8px 16px' }}>
+                              <Button
+                                variant="contained"
+                                fullWidth
+                                size="small"
+                                sx={{
+                                  bgcolor: 'primary.main',
+                                  '&:hover': {
+                                    bgcolor: 'primary.dark'
+                                  }
+                                }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleOpenAddItem();
+                                }}
+                                startIcon={<IconPlus size={18} />}
+                              >
+                                Add New Item
+                              </Button>
+                            </li>
+                          </ul>
+                        );
+                      })
+                    }}
                   />
                 </TableCell>
                 <TableCell>
@@ -189,7 +229,7 @@ const ItemDetailsAndNotes = ({
         </Table>
       </TableContainer>
 
-      <Box sx={{ mt: 2, display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+      <Box sx={{ mt: 2, display: 'flex', gap: 2, justifyContent: 'flex-start' }}>
         <Button
           variant="outlined"
           startIcon={<IconPlus />}

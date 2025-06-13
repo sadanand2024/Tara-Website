@@ -38,7 +38,10 @@ const InvoiceDetails = ({
   itemsList,
   getGoodsAndServicesData,
   branches,
-  setInvoiceNumberFormat
+  setInvoiceNumberFormat,
+  gstList,
+  getGSTDetails,
+  fetchBusinessDetails
 }) => {
   const invoiceDetailsFields = [
     { name: 'gstin', label: 'GSTIN' },
@@ -550,7 +553,7 @@ const InvoiceDetails = ({
           <Typography variant="h4">Invoice Details</Typography>
         </Box>
 
-        <Grid2 container spacing={2}>
+        <Grid2 container spacing={2} sx={{ mb: 4, mt: 4 }}>
           <InvoiceDetailsForm
             formik={formik}
             invoiceDetailsFields={invoiceDetailsFields}
@@ -559,21 +562,24 @@ const InvoiceDetails = ({
             getInvoiceFormat={getInvoiceFormat}
             branches={branches}
             setInvoiceNumberFormat={setInvoiceNumberFormat}
+            gstList={gstList}
+            getGSTDetails={getGSTDetails}
+            fetch_Business_Details={fetchBusinessDetails}
           />
         </Grid2>
-        <Divider sx={{ mb: 4, mt: 4 }} />
 
-        <BillingShippingForm
-          formik={formik}
-          onStateChange={(section, newState) => {
-            // Update the state in formik
-            formik.setFieldValue(`${section}.state`, newState);
-            // Trigger GST recalculation
-            recalculateTotals();
-          }}
-        />
+        <Grid2 sx={{ mb: 4, mt: 4 }}>
+          <BillingShippingForm
+            formik={formik}
+            onStateChange={(section, newState) => {
+              // Update the state in formik
+              formik.setFieldValue(`${section}.state`, newState);
+              // Trigger GST recalculation
+              recalculateTotals();
+            }}
+          />
+        </Grid2>
 
-        <Divider sx={{ mt: 4, mb: 4 }} />
         <Grid2 size={{ xs: 12, sm: 6 }}>
           <ItemDetailsAndNotes
             formik={formik}

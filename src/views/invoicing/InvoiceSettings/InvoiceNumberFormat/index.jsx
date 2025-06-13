@@ -228,7 +228,7 @@ const InvoiceNumberFormatComponent = ({ businessDetails, handleBack, handleNext 
           close: false
         })
       );
-      // navigate('/app/invoice');
+      navigate('/app/invoice');
     } else {
       dispatch(
         openSnackbar({
@@ -521,7 +521,7 @@ const InvoiceNumberFormatComponent = ({ businessDetails, handleBack, handleNext 
 
       {/* <Divider sx={{ my: 2 }} /> */}
       <Typography variant="h5">Authorized Signature</Typography>
-      <Box sx={{ display: 'flex', gap: 2, justifyContent: 'space-between', my: 2 }}>
+      <Box sx={{ display: 'flex', gap: 2, my: 2 }}>
         <FileUploadBox onFiles={handleSignatureUpload} accept="image/*,application/pdf" size="10 KB" />
         {signaturePreview &&
           (typeof signaturePreview === 'string' ? (

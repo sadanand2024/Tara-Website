@@ -71,8 +71,8 @@ const AddItem = ({ type, setType, open, from, handleClose, selectedItem, busines
         .test('valid-length', 'HSN/SAC must be 4, 6, or 8 digits', (val) => val && [4, 6, 8].includes(val.toString().length)),
       gst_rate: Yup.string().required('GST Rate is Required'),
       tax_preference: Yup.string().required('Tax Preference is Required'),
-      selling_price: Yup.number().typeError('Selling Rate must be a number').required('Selling Rate is required').integer(),
-      description: Yup.string().required('Description is Required')
+      selling_price: Yup.number().typeError('Selling Rate must be a number').required('Selling Rate is required').integer()
+      // description: Yup.string().required('Description is Required')
     }),
     onSubmit: async (values) => {
       const postData = {
@@ -199,8 +199,8 @@ const AddItem = ({ type, setType, open, from, handleClose, selectedItem, busines
                 </FormControl>
               ) : field.name === 'units' || field.name === 'gst_rate' || field.name === 'tax_preference' ? (
                 <>
-                  <Typography sx={{ mb: 1 }}>
-                    {field.label} <span style={{ color: 'red' }}>*</span>
+                  <Typography variant="body1" sx={{ mb: 1 }}>
+                    {field.label}
                   </Typography>
                   <CustomAutocomplete
                     name={field.name}
@@ -219,8 +219,8 @@ const AddItem = ({ type, setType, open, from, handleClose, selectedItem, busines
                 </>
               ) : (
                 <>
-                  <Typography sx={{ mb: 1 }}>
-                    {field.label} {field.name !== 'sku_value' && <span style={{ color: 'red' }}>*</span>}
+                  <Typography variant="body1" sx={{ mb: 1 }}>
+                    {field.label}
                   </Typography>
                   <CustomInput
                     name={field.name}
@@ -230,6 +230,8 @@ const AddItem = ({ type, setType, open, from, handleClose, selectedItem, busines
                     placeholder={field.name === 'selling_price' ? '₹' : ''}
                     error={touched[field.name] && Boolean(errors[field.name])}
                     helperText={touched[field.name] && errors[field.name]}
+                    multiline={field.name === 'description'}
+                    rows={field.name === 'description' ? 4 : 1}
                   />
                 </>
               )}
