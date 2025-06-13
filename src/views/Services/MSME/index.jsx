@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Paper,
@@ -27,44 +27,246 @@ import IconSave from '@mui/icons-material/Save';
 import IconArrowForward from '@mui/icons-material/ArrowForward';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-
+import { useSearchParams } from 'react-router-dom';
+import Factory from '../../../utils/Factory';
 const steps = [
   { label: 'Enterprise Profile', width: 180 },
   { label: 'Financial + Location Details', width: 220 },
   { label: 'Review, Filing & Certificate', width: 220 }
 ];
 
+const entityTypes = [
+  'Proprietorship',
+  'Partnership Firm',
+  'Limited Liability Partnership (LLP)',
+  'Private Limited Company (Pvt Ltd)',
+  'One Person Company (OPC)',
+  'Public Limited Company',
+  'Section 8 Company',
+  'Hindu Undivided Family (HUF)',
+  'Cooperative Society',
+  'Trusts & Societies'
+];
+const businessIdentityInitialValues = {
+  organisation_type: '',
+  business_name: '',
+  pan_of_business_or_COI: '',
+  aadhar_of_signatory: '',
+  mobile_number: '',
+  email_id: '',
+  Are_you_previously_registered_UAM: 'yes',
+  uam: '',
+  has_business_commenced: 'yes',
+  commencementDate: ''
+};
+
+const businessClassificationInitialValues = {
+  majorActivity: '',
+  natureOfBusiness: '',
+  nic2: '',
+  nic4: '',
+  nic5: ''
+};
+
+const financialLocationInitialValues = {
+  totalTurnover: '',
+  exportTurnover: '',
+  domesticTurnover: '',
+  investment: '',
+  itrFiled: '',
+  gstStatus: '',
+  gstCertificate: null
+};
+
+const reviewFilingCertificateInitialValues = {
+  reviewStatus: 'in_progress',
+  reviewComment: '',
+  filingStatus: 'in_progress',
+  certificateUploaded: false
+};
+
+const locationandinvestmentInitialValues = {
+  flat: '',
+  building: '',
+  street: '',
+  village: '',
+  city: '',
+  district: '',
+  state: '',
+  pin: '',
+  lat: '',
+  lng: '',
+  bankProof: null,
+  addressProof: null
+};
+
 const MSMEDashboard = () => {
   const [step, setStep] = React.useState(0);
-  // Additional state for new fields
-  const [orgType, setOrgType] = React.useState('');
-  const [businessName, setBusinessName] = React.useState('Test');
-  const [pan, setPan] = React.useState('');
-  const [coi, setCoi] = React.useState('');
-  const [aadhaar, setAadhaar] = React.useState('');
-  const [mobile, setMobile] = React.useState('');
-  const [email, setEmail] = React.useState('');
-  const [uamRegistered, setUamRegistered] = React.useState('yes');
-  const [uam, setUam] = React.useState('7-1');
-  const [businessCommenced, setBusinessCommenced] = React.useState('yes');
-  const [commencementDate, setCommencementDate] = React.useState('8-1');
-  const [plantNotApplicable, setPlantNotApplicable] = React.useState(false);
+  const [sectionData, setSectionData] = React.useState({});
+  const [businessIdentityData, setBusinessIdentityData] = React.useState(businessIdentityInitialValues);
+  const [businessClassificationData, setBusinessClassificationData] = React.useState(businessClassificationInitialValues);
+  const [financialLocationData, setFinancialLocationData] = React.useState(financialLocationInitialValues);
+  const [reviewFilingCertificateData, setReviewFilingCertificateData] = React.useState(reviewFilingCertificateInitialValues);
+  const [locationandinvestmentData, setLocationandinvestmentData] = React.useState(locationandinvestmentInitialValues);
+  const [loading, setLoading] = React.useState(false);
+  const [searchParams] = useSearchParams();
+  const service_id = searchParams.get('service_id');
 
-  // Step 3: Review, Filing & Certificate state
-  const [reviewStatus, setReviewStatus] = React.useState('in_progress');
-  const [reviewComment, setReviewComment] = React.useState('');
-  const [filingStatus, setFilingStatus] = React.useState('in_progress');
-  const [certificateUploaded, setCertificateUploaded] = React.useState(false);
-  // Local state for vertical stepper
-  const [verticalStep, setVerticalStep] = React.useState(0);
+  // 1. Business Identity Formik
+  const businessIdentityFormik = useFormik({
+    initialValues: businessIdentityInitialValues,
+    validationSchema: Yup.object({
+      organisation_type: Yup.string().required('Required'),
+      business_name: Yup.string().required('Required'),
+      pan_of_business_or_COI: Yup.mixed().required('Required'),
+      aadhar_of_signatory: Yup.mixed().required('Required'),
+      mobile_number: Yup.string().required('Required'),
+      email_id: Yup.string().email('Invalid email_id').required('Required'),
+      Are_you_previously_registered_UAM: Yup.string().required('Required'),
+      has_business_commenced: Yup.string().required('Required')
+    }),
+    onSubmit: async (values) => {
+      console.log(values);
+      const formData = new FormData();
+      formData.append('service_request', service_id);
+      formData.append('service_task', businessIdentityData.task_id);
+      if (values.pan_of_business_or_COI instanceof File) {
+        formData.append('pan_of_business_or_COI', values.pan_of_business_or_COI);
+      }
+      if (values.aadhar_of_signatory instanceof File) {
+        formData.append('aadhar_of_signatory', values.aadhar_of_signatory);
+      }
+      Object.entries(values).forEach(([key, value]) => {
+        if (value !== null && value !== undefined && !(value instanceof File)) {
+          formData.append(key, value);
+        }
+      });
+
+      // Debug log
+      for (let pair of formData.entries()) {
+        console.log(pair[0] + ': ' + pair[1]);
+      }
+      // const response = await Factory('post', '/msme/personal-information/', formData);
+      // console.log(response);
+      // if (response.res.status_cd === 0) {
+      //   console.log(response.res);
+      //   setBusinessIdentityData(response.res.data);
+      //   console.log('Business Identity Saved', response.res.data);
+      //   enqueueSnackbar('Business Identity Saved', { variant: 'success', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
+      // } else {
+      //   console.log(response.res.message);
+      //   enqueueSnackbar('Failed to save business identity', { variant: 'error', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
+      // }
+    }
+  });
+
+  // 2. Business Classification Inputs Formik
+  const businessClassificationFormik = useFormik({
+    initialValues: {
+      majorActivity: '',
+      natureOfBusiness: '',
+      nic2: '',
+      nic4: '',
+      nic5: '',
+      personsEmployedMale: '',
+      personsEmployedFemale: '',
+      personsEmployedOthers: '',
+      personsEmployedTotal: ''
+    },
+    validationSchema: Yup.object({
+      majorActivity: Yup.string().required('Required'),
+      natureOfBusiness: Yup.string().required('Required'),
+      nic2: Yup.string().required('Required'),
+      nic4: Yup.string().required('Required'),
+      nic5: Yup.string().required('Required'),
+      personsEmployedTotal: Yup.string().required('Required')
+    }),
+    onSubmit: (values) => {
+      console.log('Business Classification Inputs Saved', values);
+    }
+  });
+
+  // 3. Turnover & Investment Declaration Formik
+  const turnoverFormik = useFormik({
+    initialValues: {
+      totalTurnover: '',
+      exportTurnover: '',
+      domesticTurnover: '',
+      investment: '',
+      itrFiled: '',
+      gstStatus: '',
+      gstCertificate: null
+    },
+    validationSchema: Yup.object({
+      totalTurnover: Yup.string().required('Required'),
+      exportTurnover: Yup.string().required('Required'),
+      domesticTurnover: Yup.string().required('Required'),
+      investment: Yup.string().required('Required'),
+      itrFiled: Yup.string().required('Required'),
+      gstStatus: Yup.string().required('Required')
+    }),
+    onSubmit: (values) => {
+      console.log('Turnover & Investment Declaration Saved', values);
+    }
+  });
+
+  // 4. Registered Address & Units Formik
+  const addressFormik = useFormik({
+    initialValues: {
+      flat: '',
+      building: '',
+      street: '',
+      village: '',
+      city: '',
+      district: '',
+      state: '',
+      pin: '',
+      lat: '',
+      lng: '',
+      bankProof: null,
+      addressProof: null
+    },
+    validationSchema: Yup.object({
+      flat: Yup.string().required('Required'),
+      building: Yup.string().required('Required'),
+      street: Yup.string().required('Required'),
+      village: Yup.string().required('Required'),
+      city: Yup.string().required('Required'),
+      district: Yup.string().required('Required'),
+      state: Yup.string().required('Required'),
+      pin: Yup.string().required('Required'),
+      lat: Yup.string().required('Required'),
+      lng: Yup.string().required('Required')
+    }),
+    onSubmit: (values) => {
+      console.log('Registered Address & Units Saved', values);
+    }
+  });
+
+  // 5. Review, Filing & Certificate Formik
+  const reviewFormik = useFormik({
+    initialValues: {
+      reviewStatus: 'in_progress',
+      reviewComment: '',
+      filingStatus: 'in_progress',
+      certificateUploaded: false
+    },
+    validationSchema: Yup.object({
+      reviewStatus: Yup.string().required('Required'),
+      filingStatus: Yup.string().required('Required')
+    }),
+    onSubmit: (values) => {
+      console.log('Review, Filing & Certificate Saved', values);
+    }
+  });
 
   // Pass activeStep to stepper
   const activeStep = step;
 
   // Logic for enabling/disabling
-  const reviewDone = reviewStatus === 'done';
-  const reviewRequisition = reviewStatus === 'requisition';
-  const filingDone = filingStatus === 'done';
+  const reviewDone = reviewFormik.values.reviewStatus === 'done';
+  const reviewRequisition = reviewFormik.values.reviewStatus === 'requisition';
+  const filingDone = reviewFormik.values.filingStatus === 'done';
 
   // Allow navigation to steps <= current step + 1
   const handleStepClick = (targetStep) => {
@@ -73,18 +275,47 @@ const MSMEDashboard = () => {
 
   // Handlers for vertical stepper progression
   const handleProceedToFile = () => {
-    setFilingStatus('in_progress');
-    setVerticalStep(1);
+    reviewFormik.setFieldValue('filingStatus', 'in_progress');
+    reviewFormik.setFieldValue('certificateUploaded', false);
   };
   const handleUploadCertificate = () => {
-    setCertificateUploaded(true);
-    setVerticalStep(2);
+    reviewFormik.setFieldValue('certificateUploaded', true);
   };
 
   // In the MSMEDashboard component, add state for the checkbox
   const [nic2, setNic2] = React.useState('');
   const [nic4, setNic4] = React.useState('');
   const [nic5, setNic5] = React.useState('');
+
+  // State for plant/unit not applicable checkbox
+  const [plantNotApplicable, setPlantNotApplicable] = useState(false);
+
+  const getStepData = async (step) => {
+    let url = `/msme/service-request-section-data?service_request_id=${service_id}&section=`;
+    if (step === 0) {
+      url = url + 'enterprise_profile_info';
+    } else if (step === 1) {
+      url = url + 'financial_and_location_info';
+    } else if (step === 2) {
+      url = url + 'review_filing_certificate';
+    }
+    const response = await Factory('get', url, {});
+    if (response.res.status_cd === 0) {
+      setSectionData(response.res.data);
+      if (step === 0) {
+        setBusinessIdentityData(response.res.data['Business Identity']);
+        setBusinessClassificationData(response.res.data['Business Classification Inputs']);
+      } else if (step === 1) {
+        setFinancialLocationData(response.res.data['Financial + Location Details']);
+      } else if (step === 2) {
+        setReviewFilingCertificateData(response.res.data['Review, Filing & Certificate']);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (step === 0 || step === 1 || step === 2) getStepData(step);
+  }, [step]);
 
   return (
     <Card sx={{ minHeight: '100vh', p: { xs: 1, md: 4 } }}>
@@ -114,93 +345,143 @@ const MSMEDashboard = () => {
                   <Typography varient="subtitle1">Organisation type *</Typography>
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                  <TextField fullWidth size="small" value={orgType} onChange={(e) => setOrgType(e.target.value)} />
+                  <Autocomplete
+                    fullWidth
+                    size="small"
+                    options={entityTypes}
+                    value={businessIdentityFormik.values.organisation_type}
+                    onChange={(e, value) => businessIdentityFormik.setFieldValue('organisation_type', value)}
+                    renderInput={(params) => <TextField {...params} label="Organisation Type" />}
+                  />
                 </Grid2>
                 {/* 2. Business Name */}
                 <Grid2 size={{ xs: 12, sm: 6, md: 3 }} display="flex" alignItems="center">
                   <Typography varient="subtitle1">Business Name</Typography>
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                  <TextField fullWidth size="small" value={businessName} onChange={(e) => setBusinessName(e.target.value)} />
+                  <TextField
+                    fullWidth
+                    size="small"
+                    value={businessIdentityFormik.values.business_name}
+                    onChange={(e) => businessIdentityFormik.setFieldValue('business_name', e.target.value)}
+                  />
                 </Grid2>
                 {/* 3. PAN of Business & COI */}
                 <Grid2 size={{ xs: 12, sm: 6, md: 3 }} display="flex" alignItems="center">
                   <Typography varient="subtitle1">PAN of Business & C.O.I *</Typography>
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label=""
-                    value={coi ? coi.name || coi : ''}
-                    placeholder="Upload"
-                    InputProps={{ readOnly: true }}
-                    onClick={() => document.getElementById('coiInput').click()}
-                  />
-                  <input id="coiInput" type="file" hidden onChange={(e) => setCoi(e.target.files[0])} />
+                  <Stack direction="row" spacing={1}>
+                    <Button fullWidth size="small" variant="contained" onClick={() => document.getElementById('coiInput').click()}>
+                      Upload
+                    </Button>
+                    <input
+                      id="coiInput"
+                      type="file"
+                      hidden
+                      onChange={(e) => businessIdentityFormik.setFieldValue('pan_of_business_or_COI', e.target.files[0])}
+                    />
+                    {businessIdentityFormik.values.pan_of_business_or_COI && (
+                      <Button fullWidth size="small" variant="outlined" onClick={() => document.getElementById('coiInput').click()}>
+                        View
+                      </Button>
+                    )}
+                  </Stack>
                 </Grid2>
                 {/* 4. Aadhaar of authorized signatory */}
                 <Grid2 size={{ xs: 12, sm: 6, md: 3 }} display="flex" alignItems="center">
                   <Typography varient="subtitle1">Aadhaar of authorized signatory *</Typography>
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label=""
-                    value={aadhaar ? aadhaar.name || aadhaar : ''}
-                    placeholder="Upload"
-                    InputProps={{ readOnly: true }}
-                    onClick={() => document.getElementById('aadhaarInput').click()}
-                  />
-                  <input id="aadhaarInput" type="file" hidden onChange={(e) => setAadhaar(e.target.files[0])} />
+                  <Stack direction="row" spacing={1}>
+                    <Button fullWidth size="small" variant="contained" onClick={() => document.getElementById('aadhaarInput').click()}>
+                      Upload
+                    </Button>
+                    <input
+                      id="aadhaarInput"
+                      type="file"
+                      hidden
+                      onChange={(e) => businessIdentityFormik.setFieldValue('aadhar_of_signatory', e.target.files[0])}
+                    />
+                    {businessIdentityFormik.values.aadhar_of_signatory && (
+                      <Button fullWidth size="small" variant="outlined" onClick={() => document.getElementById('aadhaarInput').click()}>
+                        View
+                      </Button>
+                    )}
+                  </Stack>
                 </Grid2>
                 {/* 5. Mobile Number */}
                 <Grid2 size={{ xs: 12, sm: 6, md: 3 }} display="flex" alignItems="center">
                   <Typography varient="subtitle1">Mobile Number</Typography>
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                  <TextField fullWidth size="small" value={mobile} onChange={(e) => setMobile(e.target.value)} />
+                  <TextField
+                    fullWidth
+                    size="small"
+                    value={businessIdentityFormik.values.mobile_number}
+                    onChange={(e) => businessIdentityFormik.setFieldValue('mobile_number', e.target.value)}
+                  />
                 </Grid2>
                 {/* 6. Email ID */}
                 <Grid2 size={{ xs: 12, sm: 6, md: 3 }} display="flex" alignItems="center">
                   <Typography varient="subtitle1">Email ID</Typography>
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                  <TextField fullWidth size="small" value={email} onChange={(e) => setEmail(e.target.value)} />
+                  <TextField
+                    fullWidth
+                    size="small"
+                    value={businessIdentityFormik.values.email_id}
+                    onChange={(e) => businessIdentityFormik.setFieldValue('email_id', e.target.value)}
+                  />
                 </Grid2>
                 {/* 7. UAM Registered */}
-                <Grid2 size={{ xs: 12, sm: 6, md: 4 }} display="flex" alignItems="center">
+                <Grid2 size={{ xs: 12, sm: 6, md: 5 }} display="flex" alignItems="center">
                   <Typography varient="subtitle1">Are you previously registered under Udyog Aadhaar? (UAM)</Typography>
                 </Grid2>
-                <Grid2 size={{ xs: 12, sm: 6, md: 8 }}>
+                <Grid2 size={{ xs: 12, sm: 6, md: 7 }}>
                   <Stack direction="row" alignItems="center" spacing={2}>
-                    <RadioGroup row value={uamRegistered} sx={{ width: '40%' }} onChange={(e) => setUamRegistered(e.target.value)}>
+                    <RadioGroup
+                      row
+                      value={businessIdentityFormik.values.Are_you_previously_registered_UAM}
+                      sx={{ width: '40%' }}
+                      onChange={(e) => businessIdentityFormik.setFieldValue('Are_you_previously_registered_UAM', e.target.value)}
+                    >
                       <FormControlLabel value="yes" control={<Radio color="primary" />} label="Yes" />
                       <FormControlLabel value="no" control={<Radio color="primary" />} label="No" />
                     </RadioGroup>
-                    {uamRegistered === 'yes' && (
-                      <TextField size="small" fullWidth value={uam} onChange={(e) => setUam(e.target.value)} label="Enter UAM" />
+                    {businessIdentityFormik.values.Are_you_previously_registered_UAM === 'yes' && (
+                      <TextField
+                        size="small"
+                        fullWidth
+                        value={businessIdentityFormik.values.uam}
+                        onChange={(e) => businessIdentityFormik.setFieldValue('uam', e.target.value)}
+                        label="Enter UAM"
+                      />
                     )}
                   </Stack>
                 </Grid2>
                 {/* 8. Business Commenced */}
-                <Grid2 size={{ xs: 12, sm: 6, md: 4 }} display="flex" alignItems="center">
+                <Grid2 size={{ xs: 12, sm: 6, md: 5 }} gap={2} display="flex" alignItems="center">
                   <Typography varient="subtitle1">Has Business Commenced?</Typography>
+                  <RadioGroup
+                    row
+                    value={businessIdentityFormik.values.has_business_commenced}
+                    sx={{ width: '40%' }}
+                    onChange={(e) => businessIdentityFormik.setFieldValue('has_business_commenced', e.target.value)}
+                  >
+                    <FormControlLabel value="yes" control={<Radio color="primary" />} label="Yes" />
+                    <FormControlLabel value="no" control={<Radio color="primary" />} label="No" />
+                  </RadioGroup>
                 </Grid2>
-                <Grid2 size={{ xs: 12, sm: 6, md: 8 }}>
+                <Grid2 size={{ xs: 12, sm: 6, md: 7 }}>
                   <Stack direction="row" alignItems="center" spacing={2}>
-                    <RadioGroup row value={businessCommenced} sx={{ width: '40%' }} onChange={(e) => setBusinessCommenced(e.target.value)}>
-                      <FormControlLabel value="yes" control={<Radio color="primary" />} label="Yes" />
-                      <FormControlLabel value="no" control={<Radio color="primary" />} label="No" />
-                    </RadioGroup>
-                    {businessCommenced === 'yes' && (
+                    {businessIdentityFormik.values.has_business_commenced === 'yes' && (
                       <TextField
                         size="small"
                         fullWidth
-                        value={commencementDate}
-                        onChange={(e) => setCommencementDate(e.target.value)}
-                        label="Date of Commencement"
+                        value={businessIdentityFormik.values.commencementDate}
+                        onChange={(e) => businessIdentityFormik.setFieldValue('commencementDate', e.target.value)}
+                        type="date"
                       />
                     )}
                   </Stack>
@@ -212,21 +493,7 @@ const MSMEDashboard = () => {
                   variant="contained"
                   startIcon={<IconSave />}
                   color="primary"
-                  onClick={() => {
-                    console.log('Business Identity Saved', {
-                      orgType,
-                      businessName,
-                      pan,
-                      coi,
-                      aadhaar,
-                      mobile,
-                      email,
-                      uamRegistered,
-                      uam,
-                      businessCommenced,
-                      commencementDate
-                    });
-                  }}
+                  onClick={businessIdentityFormik.handleSubmit}
                 >
                   Save Business Identity
                 </Button>
@@ -319,16 +586,7 @@ const MSMEDashboard = () => {
                   variant="contained"
                   startIcon={<IconSave />}
                   color="primary"
-                  onClick={() => {
-                    console.log('Business Classification Inputs Saved', {
-                      // Add relevant state variables for this section
-                      // Example:
-                      // majorActivity, natureOfBusiness, nic2, nic4, nic5, personsEmployed, etc.
-                      nic2,
-                      nic4,
-                      nic5
-                    });
-                  }}
+                  onClick={businessClassificationFormik.handleSubmit}
                 >
                   Save Business Classification
                 </Button>
@@ -358,7 +616,7 @@ const MSMEDashboard = () => {
               <Typography variant="h4" mb={3}>
                 Review, Filing & Certificate
               </Typography>
-              <Stepper orientation="vertical" activeStep={verticalStep}>
+              <Stepper orientation="vertical" activeStep={reviewFormik.values.certificateUploaded ? 2 : 0}>
                 {/* Step 1: Review */}
                 <Step>
                   <StepLabel>Review</StepLabel>
@@ -366,8 +624,8 @@ const MSMEDashboard = () => {
                     <TextField
                       select
                       label="Status"
-                      value={reviewStatus}
-                      onChange={(e) => setReviewStatus(e.target.value)}
+                      value={reviewFormik.values.reviewStatus}
+                      onChange={(e) => reviewFormik.setFieldValue('reviewStatus', e.target.value)}
                       size="small"
                       sx={{ minWidth: 180, mb: 2 }}
                     >
@@ -381,8 +639,8 @@ const MSMEDashboard = () => {
                         multiline
                         minRows={2}
                         fullWidth
-                        value={reviewComment}
-                        onChange={(e) => setReviewComment(e.target.value)}
+                        value={reviewFormik.values.reviewComment}
+                        onChange={(e) => reviewFormik.setFieldValue('reviewComment', e.target.value)}
                       />
                     )}
                     <Button
@@ -404,11 +662,11 @@ const MSMEDashboard = () => {
                     <TextField
                       select
                       label="Status"
-                      value={filingStatus}
-                      onChange={(e) => setFilingStatus(e.target.value)}
+                      value={reviewFormik.values.filingStatus}
+                      onChange={(e) => reviewFormik.setFieldValue('filingStatus', e.target.value)}
                       size="small"
                       sx={{ minWidth: 180, mb: 2 }}
-                      disabled={verticalStep < 1}
+                      disabled={!filingDone}
                     >
                       <MenuItem value="in_progress">In progress</MenuItem>
                       <MenuItem value="done">Done</MenuItem>
@@ -418,7 +676,7 @@ const MSMEDashboard = () => {
                       variant="contained"
                       color="primary"
                       sx={{ ml: 2 }}
-                      disabled={!filingDone || verticalStep < 1}
+                      disabled={!filingDone}
                       onClick={handleUploadCertificate}
                     >
                       Upload Certificate
@@ -434,7 +692,7 @@ const MSMEDashboard = () => {
                       variant="contained"
                       sx={{ ml: 2 }}
                       color="primary"
-                      disabled={!certificateUploaded || verticalStep < 2}
+                      disabled={!reviewFormik.values.certificateUploaded}
                     >
                       Download
                     </Button>
@@ -955,156 +1213,164 @@ const FinancialLocationDetails = ({ plantNotApplicable, setPlantNotApplicable })
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 6, md: 8 }}></Grid2>
         </Grid2>
-        {!plantNotApplicable && plantUnits.map((unit, idx) => (
-          <Box key={idx} sx={{ border: '1px solid #e0e0e0', borderRadius: 2, p: 2, mb: 2, bgcolor: '#f8fafc' }}>
-            <Typography variant="subtitle1" mb={2}>Plant/Unit {idx + 1}</Typography>
-            <Grid2 container spacing={2}>
-              <Grid2 size={{ xs: 12, md: 4 }}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="Unit Name"
-                  name="unitName"
-                  value={unit.unitName}
-                  onChange={e => {
-                    const newUnits = [...plantUnits];
-                    newUnits[idx].unitName = e.target.value;
-                    setPlantUnits(newUnits);
-                  }}
-                />
+        {!plantNotApplicable &&
+          plantUnits.map((unit, idx) => (
+            <Box key={idx} sx={{ border: '1px solid #e0e0e0', borderRadius: 2, p: 2, mb: 2, bgcolor: '#f8fafc' }}>
+              <Typography variant="subtitle1" mb={2}>
+                Plant/Unit {idx + 1}
+              </Typography>
+              <Grid2 container spacing={2}>
+                <Grid2 size={{ xs: 12, md: 4 }}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="Unit Name"
+                    name="unitName"
+                    value={unit.unitName}
+                    onChange={(e) => {
+                      const newUnits = [...plantUnits];
+                      newUnits[idx].unitName = e.target.value;
+                      setPlantUnits(newUnits);
+                    }}
+                  />
+                </Grid2>
+                <Grid2 size={{ xs: 12, md: 4 }}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="Flat/Door/Block No"
+                    name="flat"
+                    value={unit.flat}
+                    onChange={(e) => {
+                      const newUnits = [...plantUnits];
+                      newUnits[idx].flat = e.target.value;
+                      setPlantUnits(newUnits);
+                    }}
+                  />
+                </Grid2>
+                <Grid2 size={{ xs: 12, md: 4 }}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="Name of Premise/Building"
+                    name="building"
+                    value={unit.building}
+                    onChange={(e) => {
+                      const newUnits = [...plantUnits];
+                      newUnits[idx].building = e.target.value;
+                      setPlantUnits(newUnits);
+                    }}
+                  />
+                </Grid2>
+                <Grid2 size={{ xs: 12, md: 4 }}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="Village/Town"
+                    name="village"
+                    value={unit.village}
+                    onChange={(e) => {
+                      const newUnits = [...plantUnits];
+                      newUnits[idx].village = e.target.value;
+                      setPlantUnits(newUnits);
+                    }}
+                  />
+                </Grid2>
+                <Grid2 size={{ xs: 12, md: 4 }}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="Road/Street/Lane"
+                    name="street"
+                    value={unit.street}
+                    onChange={(e) => {
+                      const newUnits = [...plantUnits];
+                      newUnits[idx].street = e.target.value;
+                      setPlantUnits(newUnits);
+                    }}
+                  />
+                </Grid2>
+                <Grid2 size={{ xs: 12, md: 4 }}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="City"
+                    name="city"
+                    value={unit.city}
+                    onChange={(e) => {
+                      const newUnits = [...plantUnits];
+                      newUnits[idx].city = e.target.value;
+                      setPlantUnits(newUnits);
+                    }}
+                  />
+                </Grid2>
+                <Grid2 size={{ xs: 12, md: 4 }}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="District"
+                    name="district"
+                    value={unit.district}
+                    onChange={(e) => {
+                      const newUnits = [...plantUnits];
+                      newUnits[idx].district = e.target.value;
+                      setPlantUnits(newUnits);
+                    }}
+                  />
+                </Grid2>
+                <Grid2 size={{ xs: 12, md: 4 }}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="State"
+                    name="state"
+                    value={unit.state}
+                    onChange={(e) => {
+                      const newUnits = [...plantUnits];
+                      newUnits[idx].state = e.target.value;
+                      setPlantUnits(newUnits);
+                    }}
+                  />
+                </Grid2>
+                <Grid2 size={{ xs: 12, md: 4 }}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="Pin Code"
+                    name="pin"
+                    value={unit.pin}
+                    onChange={(e) => {
+                      const newUnits = [...plantUnits];
+                      newUnits[idx].pin = e.target.value;
+                      setPlantUnits(newUnits);
+                    }}
+                  />
+                </Grid2>
               </Grid2>
-              <Grid2 size={{ xs: 12, md: 4 }}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="Flat/Door/Block No"
-                  name="flat"
-                  value={unit.flat}
-                  onChange={e => {
-                    const newUnits = [...plantUnits];
-                    newUnits[idx].flat = e.target.value;
-                    setPlantUnits(newUnits);
-                  }}
-                />
-              </Grid2>
-              <Grid2 size={{ xs: 12, md: 4 }}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="Name of Premise/Building"
-                  name="building"
-                  value={unit.building}
-                  onChange={e => {
-                    const newUnits = [...plantUnits];
-                    newUnits[idx].building = e.target.value;
-                    setPlantUnits(newUnits);
-                  }}
-                />
-              </Grid2>
-              <Grid2 size={{ xs: 12, md: 4 }}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="Village/Town"
-                  name="village"
-                  value={unit.village}
-                  onChange={e => {
-                    const newUnits = [...plantUnits];
-                    newUnits[idx].village = e.target.value;
-                    setPlantUnits(newUnits);
-                  }}
-                />
-              </Grid2>
-              <Grid2 size={{ xs: 12, md: 4 }}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="Road/Street/Lane"
-                  name="street"
-                  value={unit.street}
-                  onChange={e => {
-                    const newUnits = [...plantUnits];
-                    newUnits[idx].street = e.target.value;
-                    setPlantUnits(newUnits);
-                  }}
-                />
-              </Grid2>
-              <Grid2 size={{ xs: 12, md: 4 }}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="City"
-                  name="city"
-                  value={unit.city}
-                  onChange={e => {
-                    const newUnits = [...plantUnits];
-                    newUnits[idx].city = e.target.value;
-                    setPlantUnits(newUnits);
-                  }}
-                />
-              </Grid2>
-              <Grid2 size={{ xs: 12, md: 4 }}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="District"
-                  name="district"
-                  value={unit.district}
-                  onChange={e => {
-                    const newUnits = [...plantUnits];
-                    newUnits[idx].district = e.target.value;
-                    setPlantUnits(newUnits);
-                  }}
-                />
-              </Grid2>
-              <Grid2 size={{ xs: 12, md: 4 }}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="State"
-                  name="state"
-                  value={unit.state}
-                  onChange={e => {
-                    const newUnits = [...plantUnits];
-                    newUnits[idx].state = e.target.value;
-                    setPlantUnits(newUnits);
-                  }}
-                />
-              </Grid2>
-              <Grid2 size={{ xs: 12, md: 4 }}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="Pin Code"
-                  name="pin"
-                  value={unit.pin}
-                  onChange={e => {
-                    const newUnits = [...plantUnits];
-                    newUnits[idx].pin = e.target.value;
-                    setPlantUnits(newUnits);
-                  }}
-                />
-              </Grid2>
-            </Grid2>
-          </Box>
-        ))}
+            </Box>
+          ))}
         {!plantNotApplicable && (
           <Box display="flex" justifyContent="flex-end" mt={2}>
             <Button
               size="medium"
               variant="outlined"
               color="primary"
-              onClick={() => setPlantUnits([...plantUnits, {
-                unitName: '',
-                flat: '',
-                building: '',
-                village: '',
-                street: '',
-                city: '',
-                district: '',
-                state: '',
-                pin: ''
-              }])}
+              onClick={() =>
+                setPlantUnits([
+                  ...plantUnits,
+                  {
+                    unitName: '',
+                    flat: '',
+                    building: '',
+                    village: '',
+                    street: '',
+                    city: '',
+                    district: '',
+                    state: '',
+                    pin: ''
+                  }
+                ])
+              }
             >
               Add Plant/Unit
             </Button>
