@@ -27,6 +27,7 @@ import {
   CircularProgress
 } from '@mui/material';
 import DownloadIcon from '@mui/icons-material/Download';
+import RaiseRequest from '../RaiseRequest';
 import PersonIcon from '@mui/icons-material/Person';
 import GetActionButtons from '../FormHelpers';
 import IconSave from '@mui/icons-material/Save';
@@ -401,9 +402,27 @@ const MSMEDashboard = () => {
           {step === 0 && (
             <>
               {/* Task 1: Business Identity */}
-              <Typography variant="h4" mb={2}>
-                Business Identity
-              </Typography>
+              <Box display="flex" justifyContent="space-between" alignItems="center">
+                <Typography variant="h4" mb={2}>
+                  Business Identity
+                </Typography>
+                <RaiseRequest
+                  fields={[
+                    'Organisation type',
+                    'Business name',
+                    'PAN of Business & C.O.I',
+                    'Aadhaar of authorized signatory',
+                    'Mobile Number',
+                    'Email',
+                    'Are you previously registered under Udyog Aadhaar? (UAM)',
+                    'UAM number',
+                    'Has Business Commenced?',
+                    'Date of commencement'
+                  ]}
+                  task_id={sectionData.tasks['Business Identity']?.task_id}
+                />
+              </Box>
+
               <Typography color="text.secondary" sx={{ mb: 3, fontSize: 15 }}>
                 Please provide all info as per your government identity documents (PAN, Aadhaar etc.)
               </Typography>
@@ -685,9 +704,15 @@ const MSMEDashboard = () => {
               </Box>
               <Divider sx={{ my: 2 }} />
               {/* Task 2: Business Classification Inputs */}
-              <Typography variant="h4" mb={2} mt={4}>
-                Business Classification Inputs
-              </Typography>
+              <Box display="flex" justifyContent="space-between" alignItems="center">
+                <Typography variant="h4" mb={2} mt={4}>
+                  Business Classification Inputs
+                </Typography>
+                <RaiseRequest
+                  fields={['Major Activity', 'Nature of Business', 'NIC Codes', 'Number of persons employed']}
+                  task_id={sectionData.tasks['Business Classification Inputs']?.task_id}
+                />
+              </Box>
               <Grid2 container spacing={2}>
                 {/* 1. Major Activity */}
                 <Grid2 size={{ xs: 12, sm: 6, md: 4 }} display="flex" alignItems="center">
@@ -1238,9 +1263,19 @@ const FinancialLocationDetails = ({
     <Box>
       {/* Task 3: Turnover & Investment Declaration */}
       <form onSubmit={turnoverFormik.handleSubmit} autoComplete="off">
-        <Typography variant="h4" mb={2}>
-          Turnover & Investment Declaration
-        </Typography>
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+          <Typography variant="h4">Turnover & Investment Declaration</Typography>
+          <RaiseRequest
+            fields={[
+              'Turnover in INR',
+              'Investment in Plant & Machinery',
+              'Have you filed ITR for previous year?',
+              'Are you registered under GST?',
+              'GST Certificate'
+            ]}
+            task_id={sectionData.tasks['Turnover And InvestmentDeclaration']?.task_id}
+          />
+        </Box>
         <Grid2 container spacing={2} mb={2}>
           {/* Turnover in INR */}
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }} display="flex" alignItems="center">
@@ -1386,9 +1421,18 @@ const FinancialLocationDetails = ({
       <Divider sx={{ my: 2 }} />
       {/* Task 4: Registered Address & Units */}
       <form onSubmit={addressFormik.handleSubmit} autoComplete="off">
-        <Typography variant="h4" mb={2} mt={4}>
-          Registered Address & Units
-        </Typography>
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+          <Typography variant="h4">Registered Address & Units</Typography>
+          <RaiseRequest
+            fields={[
+              'Official address of enterprise',
+              'Bank statement/Cancelled Cheque',
+              'Official address proof',
+              'Location of the enterprise'
+            ]}
+            task_id={sectionData.tasks['Registered Address']?.task_id}
+          />
+        </Box>
         <Grid2 container spacing={2} mb={2}>
           {/* Official address of enterprise */}
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }} display="flex" alignItems="center">
