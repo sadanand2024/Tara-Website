@@ -3,6 +3,7 @@ import { Button } from '@mui/material';
 import { useSelector } from 'store';
 import { enqueueSnackbar } from 'notistack';
 import Factory from 'utils/Factory';
+import { ConstructionOutlined } from '@mui/icons-material';
 const GetActionButtons = ({
   type,
   data,
@@ -14,13 +15,15 @@ const GetActionButtons = ({
   task_id,
   filingHelper,
   setReviewStep,
-  step
+  step,
+  msme = false
 }) => {
   const [statusData, setStatusData] = useState(false);
   const user = useSelector((state) => state).accountReducer.user;
   let assignee = data?.assignee || '';
   let rewiewer = data?.reviewer || '';
   let Uid = user.user.id;
+  let service = msme ? 'msme' : 'income_tax_returns';
 
   useEffect(() => {
     if (status) {
@@ -33,7 +36,7 @@ const GetActionButtons = ({
       }
       setStatusData(status);
     }
-  }, [status]);
+  }, [status, data]);
 
   useEffect(() => {
     if (step === 1 && statusData === 'filed') setReviewStep(2);
@@ -43,11 +46,11 @@ const GetActionButtons = ({
     let payload = {};
     if (step === 0) {
       type = 'put';
-      urlEndpoint = `review-filing`;
+      urlEndpoint = msme ? urlEndpoint : `review-filing`;
       payload = { approval_status: changedStatus };
     } else if (step === 1) {
       type = 'put';
-      urlEndpoint = `review-filing`;
+      urlEndpoint = msme ? urlEndpoint : `review-filing`;
       payload = { filing_status: changedStatus };
     } else if (type === 'put') {
       payload = { status: changedStatus };
@@ -58,7 +61,7 @@ const GetActionButtons = ({
     if (type === 'post') {
       response = await Factory('post', urlEndpoint, payload);
     } else {
-      response = await Factory('put', `/income_tax_returns/${urlEndpoint}/${recId}/`, payload, {});
+      response = await Factory('put', `/${service}/${urlEndpoint}/${recId}/`, payload, {});
     }
     if (response.res.status_cd === 0) {
       enqueueSnackbar('Status updated successfully', { anchorOrigin: { vertical: 'top', horizontal: 'right' }, variant: 'success' });
