@@ -1078,8 +1078,8 @@ export default function ITR() {
                                 task_id={reviewAndFiling?.data?.task_id}
                                 service_request={service_id}
                                 filingHelper={true}
-                                setReviewStep={setReviewStep}
                                 step={reviewStep}
+                                setReviewStep={setReviewStep}
                               />
                             </Box>
                             {/* <Button variant="contained" color="primary" onClick={() => setReviewStep(1)} sx={{ mt: 2 }}>
