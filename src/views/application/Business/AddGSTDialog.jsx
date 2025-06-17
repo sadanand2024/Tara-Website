@@ -179,16 +179,11 @@ const fields_lut = [
     type: 'file'
   }
 ];
-const AddGSTDialog = ({ open, setOpen, getGSTDetails, selectedGST, setSelectedGST, fetch_Business_Details }) => {
+const AddGSTDialog = ({ open, setOpen, getGSTDetails, selectedGST, setSelectedGST, fetch_Business_Details, handleClose }) => {
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
   const user = useSelector((state) => state.accountReducer.user);
 
-  const handleClose = () => {
-    resetForm();
-    setOpen(false);
-    setSelectedGST(null);
-  };
   const renderFields = (fields) => {
     return fields.map((field) => (
       <Grid2 size={{ xs: 12, sm: 6, md: 4 }} key={field.name}>

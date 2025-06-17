@@ -36,7 +36,11 @@ const GSTSettings = () => {
   const dispatch = useDispatch();
 
   const handleOpen = () => setOpen(true);
-
+  const handleClose = () => {
+    resetForm();
+    setOpen(false);
+    setSelectedGST(null);
+  };
   const handleEdit = (index) => {
     setEditIndex(index);
     setSelectedGST(gstList[index]);
@@ -234,6 +238,7 @@ const GSTSettings = () => {
         fetch_Business_Details={fetchGSTList}
         selectedGST={selectedGST}
         setSelectedGST={setSelectedGST}
+        handleClose={handleClose}
       />
 
       <DeleteConfirmationDialog

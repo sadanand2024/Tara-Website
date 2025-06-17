@@ -515,7 +515,6 @@ const InvoiceDetails = ({
   }, [selectedInvoice]);
 
   const { values, setValues, errors, touched, handleSubmit, handleBlur, setFieldValue, resetForm } = formik;
-
   // const generateInvoiceNumber = async (newgstin, branch_code) => {
   //   const url = `/invoicing/invoicing-profiles/${businessDetailsData.id}/update/`;
   //   let formdata = new FormData();

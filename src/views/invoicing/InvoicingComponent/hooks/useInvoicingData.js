@@ -22,6 +22,7 @@ export const useInvoicingData = () => {
   const fetchBusinessDetails = async () => {
     const url = `/invoicing/invoicing-profiles/?business_id=${businessId}`;
     const { res } = await Factory('get', url, {});
+    console.log(res);
     if (res.status_cd === 0) {
       setBusinessDetails(res.data);
     } else {
@@ -87,7 +88,6 @@ export const useInvoicingData = () => {
     const url = `/user_management/gst-details/${businessId}/`;
     const { res } = await Factory('get', url, {});
     if (res.status_cd === 0) {
-      console.log(res.data);
       setGstList(res.data);
     }
   };
