@@ -243,7 +243,9 @@ const InvoiceNumberFormatComponent = ({ businessDetails, handleBack, handleNext 
   };
 
   useEffect(() => {
-    if (businessDetails.invoice_format.length === 0) {
+    if (!businessDetails) return;
+
+    if (!businessDetails.invoice_format || businessDetails.invoice_format.length === 0) {
       setPostType('post');
     } else {
       setPostType('put');
@@ -261,12 +263,6 @@ const InvoiceNumberFormatComponent = ({ businessDetails, handleBack, handleNext 
           sameFormatForAllGST: false,
           separateFormatForEachGST: true
         }));
-        // setSelectedRecord({
-        //   id: formats[0].id,
-        //   format_version: formats[0].format_version,
-        //   gstin: formats[0].gstin
-        // });
-        // setSelectedGSTIN(formats[0].gstin);
       } else {
         // Only one format = treat as common format
         const format = formats[0];
@@ -292,7 +288,6 @@ const InvoiceNumberFormatComponent = ({ businessDetails, handleBack, handleNext 
           prefix: format.prefix || '',
           startingNumber: String(format.running_number_start || '1')
         });
-        // setSelectedRecord(format);
         setSelectedGSTIN(format.gstin);
         setSelectedRecord(format);
       }
@@ -352,6 +347,14 @@ const InvoiceNumberFormatComponent = ({ businessDetails, handleBack, handleNext 
       );
     }
   };
+
+  if (!businessDetails) {
+    return (
+      <Box sx={{ p: 3 }}>
+        <Typography>Loading...</Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box>

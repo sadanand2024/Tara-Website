@@ -6,7 +6,6 @@ import { Grid2, Stack, Box, Typography, Autocomplete, TextField, IconButton, Men
 import MainCard from '../../../ui-component/cards/MainCard';
 import SubCard from '../../../ui-component/cards/SubCard';
 import { IconCurrencyRupee, IconCalendarStats, IconChartBar } from '@tabler/icons-react';
-import BillCard from '../../../ui-component/cards/BillCard';
 const yearlyStatsData = [
   {
     id: 'total_revenue',
@@ -22,6 +21,7 @@ const yearlyStatsData = [
     title: "Today's Revenue",
     href: 'pending',
     value: '0',
+
     icon: IconCurrencyRupee,
     color: 'primary.main',
     bgcolor: 'primary.lighter'
@@ -31,6 +31,7 @@ const yearlyStatsData = [
     title: 'Revenue this month',
     href: 'in_progress',
     value: '0',
+
     icon: IconCalendarStats,
     color: 'info.main',
     bgcolor: 'info.lighter'
@@ -41,7 +42,7 @@ const yearlyStatsData = [
     href: 'in_progress',
     value: '0',
     icon: IconCalendarStats,
-    color: 'primary.main',
+    color: 'warning.main',
     bgcolor: 'warning.lighter'
   },
   {
@@ -79,7 +80,7 @@ const YearlyStats = ({ theme, title, setTitle, financialYear, setFinancialYear, 
           <Grid2 container spacing={2}>
             {yearlyStatsData.map((item, index) => (
               <Grid2 key={index} size={{ xs: 12, sm: 6, md: 4, lg: 2.4 }}>
-                <BillCard
+                <SubCard
                   onClick={() => {
                     if (item.title === title) {
                       getInvoices(businessId);
@@ -88,23 +89,40 @@ const YearlyStats = ({ theme, title, setTitle, financialYear, setFinancialYear, 
                       getStatsData(item.id);
                     }
                   }}
-                  icon={item.icon ? <item.icon size={32} color={item.color} /> : null}
-                  title={item.title}
-                  secondary={`₹ ${dashboardData[item.id] || 0}`}
-                  color={item.color}
-                  index={index}
-                  bg={
-                    index === 0
-                      ? 'orange.light'
-                      : index === 1
-                        ? 'warning.light'
-                        : index === 2
-                          ? 'success.light'
-                          : index === 3
-                            ? 'success.light'
-                            : 'orange.light'
-                  }
-                />
+                  content={false}
+                  sx={{
+                    p: 2,
+                    cursor: 'pointer',
+                    bgcolor: item.title === title ? 'primary.lighter' : 'background.paper',
+                    transition: 'all 0.3s ease-in-out',
+                    '&:hover': {
+                      transform: 'translateY(-4px)',
+                      boxShadow: theme.customShadows.z4
+                    },
+                    borderTop: `3px solid ${theme.palette[item.color.split('.')[0]][item.color.split('.')[1]]}`
+                  }}
+                >
+                  <Stack spacing={2} alignItems="center">
+                    <Box
+                      sx={{
+                        width: 56,
+                        height: 56,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderRadius: '50%',
+                        bgcolor: item.bgcolor,
+                        color: item.color
+                      }}
+                    >
+                      <item.icon size={30} />
+                    </Box>
+                    <Typography variant="h4" color="text.secondary">
+                      {item.title}
+                    </Typography>
+                    <Typography variant="h3">₹&nbsp;{dashboardData[item.id] || 0}</Typography>
+                  </Stack>
+                </SubCard>
               </Grid2>
             ))}
           </Grid2>

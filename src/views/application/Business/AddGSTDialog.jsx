@@ -1,27 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Typography,
-  Grid2,
-  Box,
-  FormControlLabel,
-  Switch,
-  RadioGroup,
-  Radio,
-  CircularProgress,
-  TextField,
-  Autocomplete
-} from '@mui/material';
-import { IconButton } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
+import { Button, Typography, Grid2, Box, FormControlLabel, Switch, RadioGroup, Radio, TextField, Autocomplete, Stack } from '@mui/material';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { openSnackbar } from 'store/slices/snackbar';
 import Factory from 'utils/Factory';
+import Modal from 'ui-component/extended/Modal';
 
 import { INDIAN_STATES } from 'utils/constants';
 import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
@@ -357,123 +340,125 @@ const AddGSTDialog = ({ open, setOpen, getGSTDetails, selectedGST, setSelectedGS
     }
   }, [selectedGST]);
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
-      <DialogTitle sx={{ color: 'text.primary' }}>
-        {selectedGST !== null ? 'Edit GST Details' : 'Add GST Details'}
-        <IconButton aria-label="close" onClick={handleClose} sx={{ position: 'absolute', right: 8, top: 8 }}>
-          <CloseIcon />
-        </IconButton>
-      </DialogTitle>
-      <form autoComplete="off" onSubmit={handleSubmit}>
-        <DialogContent dividers>
-          {/* GST Details Group */}
-          <Box mb={2}>
-            <Grid2 container spacing={2}>
-              {renderFields(fields)}
-            </Grid2>
-          </Box>
-
-          {/* Schemes & Exports Group */}
-          <Box mb={2}>
-            {/* <Typography variant="subtitle1" fontWeight={600} gutterBottom color="text.primary">
-          Schemes & Exports
-        </Typography> */}
-            <Grid2 container spacing={2}>
-              <Grid2 size={{ xs: 12 }}>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={values.is_composition_scheme === 'yes'}
-                      onChange={(e) => {
-                        if (e.target.checked === false) {
-                          setFieldValue('composition_scheme_percent', '');
-                        }
-                        setFieldValue('is_composition_scheme', e.target.checked ? 'yes' : 'no');
-                      }}
-                      name="is_composition_scheme"
-                    />
-                  }
-                  label="Are you Reg. under Composition Scheme?"
-                  labelPlacement="start" // This puts the label on the left, switch on the right
-                  sx={{ width: '100%', justifyContent: 'space-between', m: 0 }}
-                />
-              </Grid2>
-
-              <Grid2 size={{ xs: 12 }}>
-                {values.is_composition_scheme === 'yes' && (
-                  <Grid2 size={{ xs: 12 }}>
-                    <Typography variant="body2" sx={{ mb: 1 }}>
-                      Composition Scheme %
-                    </Typography>
-                    <RadioGroup
-                      row
-                      name="composition_scheme_percent"
-                      value={values.composition_scheme_percent}
-                      onChange={(e) => {
-                        setFieldValue('composition_scheme_percent', e.target.value);
-                      }}
-                    >
-                      {compositionPercOptions.map((perc) => (
-                        <FormControlLabel key={perc} value={perc} control={<Radio size="small" />} label={perc} />
-                      ))}
-                    </RadioGroup>
-                  </Grid2>
-                )}
-              </Grid2>
-              <Grid2 size={{ xs: 12 }}>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={values.is_export_sez === 'yes'}
-                      onChange={(e) => {
-                        if (e.target.checked === false) {
-                          setFieldValue('lut_reg_no', '');
-                          setFieldValue('dob', '');
-                          setFieldValue('financial_year', '');
-                        }
-                        setFieldValue('is_export_sez', e.target.checked ? 'yes' : 'no');
-                      }}
-                      name="is_export_sez"
-                    />
-                  }
-                  label="Is your business involved in export/supply to sez/deemed exports?"
-                  labelPlacement="start" // This puts the label on the left, switch on the right
-                  sx={{ width: '100%', justifyContent: 'space-between', m: 0 }}
-                />
-              </Grid2>
-            </Grid2>
-          </Box>
-
-          {/* LUT Details Group */}
-          {values.is_export_sez === 'yes' && (
-            <Box mb={2}>
-              <Typography variant="subtitle1" fontWeight={600} gutterBottom color="text.primary">
-                LUT Details
-              </Typography>
-
-              <Grid2 container spacing={2}>
-                {renderFields(fields_lut)}
-              </Grid2>
-            </Box>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose} size="small" sx={{ color: 'text.primary' }}>
+    <Modal
+      open={open}
+      title={selectedGST !== null ? 'Edit GST Details' : 'Add GST Details'}
+      handleClose={() => {
+        resetForm();
+        handleClose();
+      }}
+      showClose={false}
+      footer={
+        <Stack direction="row" sx={{ width: 1, justifyContent: 'space-between', gap: 2 }}>
+          <Button
+            onClick={() => {
+              resetForm();
+              handleClose();
+            }}
+            variant="outlined"
+            color="error"
+          >
             Cancel
           </Button>
-          <Button
-            type="submit"
-            variant="contained"
-            size="small"
-            color="primary"
-            onClick={handleSubmit}
-            sx={{ position: 'relative', minWidth: '100px' }}
-          >
+          <Button onClick={handleSubmit} type="submit" variant="contained" color="primary">
             Save
           </Button>
-        </DialogActions>
-      </form>
-    </Dialog>
+        </Stack>
+      }
+    >
+      <Box component="form" onSubmit={handleSubmit} sx={{ padding: 2 }}>
+        {/* GST Details Group */}
+        <Box mb={2}>
+          <Grid2 container spacing={2}>
+            {renderFields(fields)}
+          </Grid2>
+        </Box>
+
+        {/* Schemes & Exports Group */}
+        <Box mb={2}>
+          {/* <Typography variant="subtitle1" fontWeight={600} gutterBottom color="text.primary">
+          Schemes & Exports
+        </Typography> */}
+          <Grid2 container spacing={2}>
+            <Grid2 size={{ xs: 12 }}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={values.is_composition_scheme === 'yes'}
+                    onChange={(e) => {
+                      if (e.target.checked === false) {
+                        setFieldValue('composition_scheme_percent', '');
+                      }
+                      setFieldValue('is_composition_scheme', e.target.checked ? 'yes' : 'no');
+                    }}
+                    name="is_composition_scheme"
+                  />
+                }
+                label="Are you Reg. under Composition Scheme?"
+                labelPlacement="start" // This puts the label on the left, switch on the right
+                sx={{ width: '100%', justifyContent: 'space-between', m: 0 }}
+              />
+            </Grid2>
+
+            <Grid2 size={{ xs: 12 }}>
+              {values.is_composition_scheme === 'yes' && (
+                <Grid2 size={{ xs: 12 }}>
+                  <Typography variant="body2" sx={{ mb: 1 }}>
+                    Composition Scheme %
+                  </Typography>
+                  <RadioGroup
+                    row
+                    name="composition_scheme_percent"
+                    value={values.composition_scheme_percent}
+                    onChange={(e) => {
+                      setFieldValue('composition_scheme_percent', e.target.value);
+                    }}
+                  >
+                    {compositionPercOptions.map((perc) => (
+                      <FormControlLabel key={perc} value={perc} control={<Radio size="small" />} label={perc} />
+                    ))}
+                  </RadioGroup>
+                </Grid2>
+              )}
+            </Grid2>
+            <Grid2 size={{ xs: 12 }}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={values.is_export_sez === 'yes'}
+                    onChange={(e) => {
+                      if (e.target.checked === false) {
+                        setFieldValue('lut_reg_no', '');
+                        setFieldValue('dob', '');
+                        setFieldValue('financial_year', '');
+                      }
+                      setFieldValue('is_export_sez', e.target.checked ? 'yes' : 'no');
+                    }}
+                    name="is_export_sez"
+                  />
+                }
+                label="Is your business involved in export/supply to sez/deemed exports?"
+                labelPlacement="start" // This puts the label on the left, switch on the right
+                sx={{ width: '100%', justifyContent: 'space-between', m: 0 }}
+              />
+            </Grid2>
+          </Grid2>
+        </Box>
+
+        {/* LUT Details Group */}
+        {values.is_export_sez === 'yes' && (
+          <Box mb={2}>
+            <Typography variant="subtitle1" fontWeight={600} gutterBottom color="text.primary">
+              LUT Details
+            </Typography>
+
+            <Grid2 container spacing={2}>
+              {renderFields(fields_lut)}
+            </Grid2>
+          </Box>
+        )}
+      </Box>
+    </Modal>
   );
 };
 

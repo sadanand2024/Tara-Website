@@ -43,14 +43,15 @@ export default function BusinessProfileComponnet({ businessDetails = {}, postTyp
     basic_details: [
       { name: 'nameOfBusiness', label: 'Business Name' },
       { name: 'registrationNumber', label: 'Business Registration Number' },
-      { name: 'gst_registered', label: 'GST Registered' },
+      { name: 'logo', label: 'Logo' },
+      { name: 'gst_registered', label: 'GST Registered ?' },
       { name: 'gstin', label: 'GSTIN' },
       { name: 'pan', label: 'PAN' },
       { name: 'entityType', label: 'Business Type' },
       { name: 'address_line1', label: 'Address Line 1' },
       { name: 'address_line2', label: 'Address Line 2' },
       { name: 'country', label: 'Country' },
-      { name: 'state', label: 'State' },
+      { name: 'state', label: 'State/Union Territory' },
       { name: 'pincode', label: 'Pincode' },
       { name: 'email', label: 'Email' },
       { name: 'mobile_number', label: 'Mobile' }
@@ -283,183 +284,183 @@ export default function BusinessProfileComponnet({ businessDetails = {}, postTyp
       </Typography>
 
       <Grid2 container spacing={2}>
-        {/* <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-          <input
-            accept="image/*"
-            style={{ display: 'none' }}
-            id="profile-image-upload"
-            type="file"
-            onChange={handleLogoChange}
-            ref={fileInputRef}
-          />
+        {busineesprofileFields.basic_details.map((item, index) =>
+          item.name === 'logo' ? (
+            <Grid2 size={{ xs: 12, sm: 6, md: 4 }} key={item.name}>
+              <input
+                accept="image/*"
+                style={{ display: 'none' }}
+                id="profile-image-upload"
+                type="file"
+                onChange={handleLogoChange}
+                ref={fileInputRef}
+              />
 
-          <Box display="flex" alignItems="center" gap={10}>
-            <Avatar
-              alt="Profile"
-              src={logoUrlDetails?.logo || (logoFile ? URL.createObjectURL(logoFile) : '')}
-              sx={{
-                width: 100,
-                height: 100,
-                boxShadow: 3,
-                border: '2px solid #fff',
-                background: '#fff'
-              }}
-              imgProps={{
-                style: {
-                  objectFit: 'contain',
-                  width: '100%',
-                  height: '100%'
-                }
-              }}
-            />
-
-            <label htmlFor="profile-image-upload">
-              <Button variant="contained" size="small" component="span">
-                Upload / Change Logo
-              </Button>
-            </label>
-          </Box>
-        </Grid2> */}
-
-        {busineesprofileFields.basic_details.map((item, index) => (
-          <Grid2 size={{ xs: 12, sm: 6, md: 4 }} key={item.name}>
-            <FormControl fullWidth>
-              {item.name === 'gst_registered' ? (
-                <Stack spacing={1}>
-                  <FormLabel sx={{ fontWeight: 500 }}>GST Registered</FormLabel>
-                  <RadioGroup
-                    row
-                    name="gst_registered"
-                    value={values.gst_registered}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      setFieldValue('gst_registered', value);
-
-                      // Handle conditional logic for GSTIN field
-                      if (value === 'No') {
-                        setFieldValue('gstin', 'NA');
-                        formik.setFieldTouched('gstin', false);
-                        formik.setFieldError('gstin', '');
-                      } else if (value === 'Yes') {
-                        setFieldValue('gstin', '');
-                      }
-                    }}
-                  >
-                    <FormControlLabel value="Yes" control={<Radio />} label="Yes" />
-                    <FormControlLabel value="No" control={<Radio />} label="No" />
-                  </RadioGroup>
-                  {touched.gst_registered && errors.gst_registered && (
-                    <Typography variant="caption" color="error">
-                      {errors.gst_registered}
-                    </Typography>
-                  )}
-                </Stack>
-              ) : item.name === 'gstin' ? (
-                <>
-                  <Typography component="label" sx={{ mb: 1 }}>
-                    {item.label}
-                  </Typography>
-
-                  <Grid2 container spacing={1} alignItems="center">
-                    <Grid2 size={{ xs: 8 }}>
-                      <CustomAutocomplete
-                        value={values[item.name] || ''}
-                        onChange={(e, newValue) => setFieldValue(item.name, newValue)}
-                        options={
-                          Array.isArray(businessDetails.gst_details)
-                            ? businessDetails.gst_details.map((gstItem) => gstItem.gstin) // Get gstin from gst_details
-                            : [] // Return empty array if gst_details is not an array
-                        }
-                        error={touched[item.name] && Boolean(errors[item.name])}
-                        helperText={touched[item.name] && errors[item.name]}
-                        name={item.name}
-                        disabled={values.gst_registered === 'No'} // Disable gstin field if gst_registered is 'No'
-                      />
-                    </Grid2>
-
-                    {values.gst_registered !== 'No' && (
-                      <Grid2 size={{ xs: 4 }}>
-                        <Button
-                          variant="contained"
-                          size="small"
-                          startIcon={<IconPlus size={16} />}
-                          onClick={() => {
-                            if (businessDetails.id) {
-                              // navigate(`/apps/business-settings?BID=${businessDetails.id}&tabvalue=3`);
-                              setTabValue(1);
-                            }
-                          }}
-                          sx={{ ml: 2 }}
-                        >
-                          Add GST
-                        </Button>
-                      </Grid2>
-                    )}
-                  </Grid2>
-                </>
-              ) : item.name === 'state' || item.name === 'entityType' ? (
-                <>
-                  <Typography sx={{ mb: 1 }}>{item.label}</Typography>
-                  <CustomAutocomplete
-                    value={values[item.name] || ''}
-                    onChange={(e, newValue) => setFieldValue(item.name, newValue)}
-                    options={
-                      item.name === 'entityType'
-                        ? values.pan && values.pan.length >= 4
-                          ? businessTypesArray[values.pan[3]] || entity_choices
-                          : entity_choices
-                        : indian_States_And_UTs
+              <Box display="flex" alignItems="center" gap={10}>
+                <Avatar
+                  alt="Profile"
+                  src={logoUrlDetails?.logo || (logoFile ? URL.createObjectURL(logoFile) : '')}
+                  sx={{
+                    width: 100,
+                    height: 100,
+                    boxShadow: 3,
+                    border: '2px solid #fff',
+                    background: '#fff'
+                  }}
+                  imgProps={{
+                    style: {
+                      objectFit: 'contain',
+                      width: '100%',
+                      height: '100%'
                     }
-                    error={touched[item.name] && Boolean(errors[item.name])}
-                    helperText={touched[item.name] && errors[item.name]}
-                    name={item.name}
-                  />
-                </>
-              ) : (
-                <>
-                  <Typography component="label" sx={{ mb: 1 }}>
-                    {item.name === 'nameOfBusiness' ? <span style={{ color: 'red' }}>*</span> : ''} {item.label}
-                  </Typography>
+                  }}
+                />
 
-                  <CustomInput
-                    name={item.name}
-                    value={values[item.name]}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      if (item.name === 'pan') {
-                        const upperValue = value.toUpperCase();
-                        // Check if the PAN length is greater than 10
-                        if (upperValue.length <= 10) {
-                          setFieldValue(item.name, upperValue);
-                          // If we have 4 characters, check the 4th letter to set business type
-                          if (upperValue.length >= 4) {
-                            const fourthLetter = upperValue[3];
-                            const businessTypes = businessTypesArray[fourthLetter];
-                            if (businessTypes && businessTypes.length > 0) {
-                              setFieldValue('entityType', businessTypes[0]); // Set the first business type as default
+                <label htmlFor="profile-image-upload">
+                  <Button variant="contained" size="small" component="span">
+                    Upload / Change Logo
+                  </Button>
+                </label>
+              </Box>
+            </Grid2>
+          ) : (
+            <Grid2 size={{ xs: 12, sm: 6, md: 4 }} key={item.name}>
+              <FormControl fullWidth>
+                {item.name === 'gst_registered' ? (
+                  <Stack spacing={1}>
+                    <FormLabel sx={{ fontWeight: 500 }}>GST Registered ?</FormLabel>
+                    <RadioGroup
+                      row
+                      name="gst_registered"
+                      value={values.gst_registered}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setFieldValue('gst_registered', value);
+
+                        // Handle conditional logic for GSTIN field
+                        if (value === 'No') {
+                          setFieldValue('gstin', 'NA');
+                          formik.setFieldTouched('gstin', false);
+                          formik.setFieldError('gstin', '');
+                        } else if (value === 'Yes') {
+                          setFieldValue('gstin', '');
+                        }
+                      }}
+                    >
+                      <FormControlLabel value="Yes" control={<Radio />} label="Yes" />
+                      <FormControlLabel value="No" control={<Radio />} label="No" />
+                    </RadioGroup>
+                    {touched.gst_registered && errors.gst_registered && (
+                      <Typography variant="caption" color="error">
+                        {errors.gst_registered}
+                      </Typography>
+                    )}
+                  </Stack>
+                ) : item.name === 'gstin' ? (
+                  <>
+                    <Typography component="label" sx={{ mb: 1 }}>
+                      {item.label}
+                    </Typography>
+
+                    <Grid2 container spacing={1} alignItems="center">
+                      <Grid2 size={{ xs: 8 }}>
+                        <CustomAutocomplete
+                          value={values[item.name] || ''}
+                          onChange={(e, newValue) => setFieldValue(item.name, newValue)}
+                          options={
+                            Array.isArray(businessDetails.gst_details)
+                              ? businessDetails.gst_details.map((gstItem) => gstItem.gstin) // Get gstin from gst_details
+                              : [] // Return empty array if gst_details is not an array
+                          }
+                          error={touched[item.name] && Boolean(errors[item.name])}
+                          helperText={touched[item.name] && errors[item.name]}
+                          name={item.name}
+                          disabled={values.gst_registered === 'No'} // Disable gstin field if gst_registered is 'No'
+                        />
+                      </Grid2>
+
+                      {values.gst_registered !== 'No' && (
+                        <Grid2 size={{ xs: 4 }}>
+                          <Button
+                            variant="contained"
+                            size="small"
+                            startIcon={<IconPlus size={16} />}
+                            onClick={() => {
+                              if (businessDetails.id) {
+                                // navigate(`/apps/business-settings?BID=${businessDetails.id}&tabvalue=3`);
+                                setTabValue(1);
+                              }
+                            }}
+                            sx={{ ml: 2 }}
+                          >
+                            Add GST
+                          </Button>
+                        </Grid2>
+                      )}
+                    </Grid2>
+                  </>
+                ) : item.name === 'state' || item.name === 'entityType' ? (
+                  <>
+                    <Typography sx={{ mb: 1 }}>{item.label}</Typography>
+                    <CustomAutocomplete
+                      value={values[item.name] || ''}
+                      onChange={(e, newValue) => setFieldValue(item.name, newValue)}
+                      options={
+                        item.name === 'entityType'
+                          ? values.pan && values.pan.length >= 4
+                            ? businessTypesArray[values.pan[3]] || entity_choices
+                            : entity_choices
+                          : indian_States_And_UTs
+                      }
+                      error={touched[item.name] && Boolean(errors[item.name])}
+                      helperText={touched[item.name] && errors[item.name]}
+                      name={item.name}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <Typography component="label" sx={{ mb: 1 }}>
+                      {item.name === 'nameOfBusiness' ? <span style={{ color: 'red' }}>*</span> : ''} {item.label}
+                    </Typography>
+
+                    <CustomInput
+                      name={item.name}
+                      value={values[item.name]}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (item.name === 'pan') {
+                          const upperValue = value.toUpperCase();
+                          // Check if the PAN length is greater than 10
+                          if (upperValue.length <= 10) {
+                            setFieldValue(item.name, upperValue);
+                            // If we have 4 characters, check the 4th letter to set business type
+                            if (upperValue.length >= 4) {
+                              const fourthLetter = upperValue[3];
+                              const businessTypes = businessTypesArray[fourthLetter];
+                              if (businessTypes && businessTypes.length > 0) {
+                                setFieldValue('entityType', businessTypes[0]); // Set the first business type as default
+                              }
                             }
+                          } else {
+                            // Optionally handle the error or set the value to an empty string
+                            setFieldValue(item.name, upperValue.substring(0, 10)); // Limit to 10 characters
                           }
                         } else {
-                          // Optionally handle the error or set the value to an empty string
-                          setFieldValue(item.name, upperValue.substring(0, 10)); // Limit to 10 characters
+                          setFieldValue(item.name, value);
                         }
-                      } else {
-                        setFieldValue(item.name, value);
-                      }
-                    }}
-                    onBlur={handleBlur}
-                    error={touched[item.name] && Boolean(errors[item.name])}
-                    helperText={touched[item.name] && errors[item.name]}
-                    disabled={item.name === 'country'}
-                  />
-                </>
-              )}
-            </FormControl>
-          </Grid2>
-        ))}
+                      }}
+                      onBlur={handleBlur}
+                      error={touched[item.name] && Boolean(errors[item.name])}
+                      helperText={touched[item.name] && errors[item.name]}
+                      disabled={item.name === 'country'}
+                    />
+                  </>
+                )}
+              </FormControl>
+            </Grid2>
+          )
+        )}
       </Grid2>
-
-      <Divider />
 
       <Typography variant="h4" sx={{ fontWeight: 'bold', pt: 3, mb: 2 }}>
         Bank Details

@@ -22,7 +22,6 @@ export const useInvoicingData = () => {
   const fetchBusinessDetails = async () => {
     const url = `/invoicing/invoicing-profiles/?business_id=${businessId}`;
     const { res } = await Factory('get', url, {});
-    console.log(res);
     if (res.status_cd === 0) {
       setBusinessDetails(res.data);
     } else {
@@ -96,6 +95,8 @@ export const useInvoicingData = () => {
     const { res } = await Factory('get', url, {});
     if (res.status_cd === 0) {
       setInvoiceNumberFormat(res.data.latest_invoice_number);
+    } else if (res.status_cd === 1 && res.data.error === 'No Invoice Format found for the provided profile.') {
+      setInvoiceNumberFormat(res.data.error);
     } else {
       dispatch(
         openSnackbar({
@@ -160,6 +161,7 @@ export const useInvoicingData = () => {
     branches,
     gstList,
     getGSTDetails,
-    fetchBusinessDetails
+    fetchBusinessDetails,
+    getCustomersData
   };
 };

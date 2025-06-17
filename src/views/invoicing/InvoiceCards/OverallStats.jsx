@@ -6,7 +6,7 @@ import { Grid2, Stack, Typography, Box } from '@mui/material';
 import SubCard from '../../../ui-component/cards/SubCard';
 import { ThemeMode } from 'config';
 import { IconCalendarEvent, IconCalendarTime, IconReceipt, IconAlertCircle, IconAlertTriangle } from '@tabler/icons-react';
-import BillCard from '../../../ui-component/cards/BillCard';
+
 const overallStatsData = [
   {
     id: 'over_dues',
@@ -60,35 +60,48 @@ const OverallStats = ({ theme, title, setTitle, dashboardData, getInvoices, getS
     <Grid2 container spacing={2} sx={{ mb: 4 }}>
       {overallStatsData.map((item, index) => (
         <Grid2 key={item.id} size={{ xs: 12, sm: 6, md: 4, lg: 2.4 }}>
-          <BillCard
+          <SubCard
             onClick={() => {
               if (item.title === title) {
                 getInvoices(businessId);
                 setTitle('Over All Financial Year Invoices');
               } else getStatsData(item.id);
             }}
-            title={item.title}
-            secondary={`₹ ${dashboardData[item.id] || 0}`}
-            color={item.color}
-            bg={
-              index === 0
-                ? 'orange.light'
-                : index === 1
-                  ? 'warning.light'
-                  : index === 2
-                    ? 'success.light'
-                    : index === 3
-                      ? 'success.light'
-                      : 'orange.light'
-            }
-            index={index}
+            content={false}
             sx={{
               p: 2,
               cursor: 'pointer',
               bgcolor: item.title === title ? 'primary.lighter' : 'background.paper',
-              transition: 'all 0.3s ease-in-out'
+              transition: 'all 0.3s ease-in-out',
+              '&:hover': {
+                transform: 'translateY(-4px)',
+                boxShadow: theme.customShadows.z4
+              },
+              borderTop: `3px solid ${theme.palette[item.color.split('.')[0]][item.color.split('.')[1]]}`
             }}
-          ></BillCard>
+          >
+            <Stack spacing={2} alignItems="center">
+              <Box
+                className="icon-box"
+                sx={{
+                  width: 56,
+                  height: 56,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: '50%',
+                  bgcolor: item.bgcolor,
+                  color: item.color
+                }}
+              >
+                <item.icon size={30} />
+              </Box>
+              <Typography variant="h4" color="text.secondary">
+                {item.title}
+              </Typography>
+              <Typography variant="h3">₹&nbsp;{dashboardData[item.id] || 0}</Typography>
+            </Stack>
+          </SubCard>
         </Grid2>
       ))}
     </Grid2>
