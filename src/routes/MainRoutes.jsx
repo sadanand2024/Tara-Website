@@ -132,6 +132,7 @@ const MainRoutes = {
       path: '/app/task-management/msme-registration',
       element: <MSMEDashboard />
     },
+   
     {
       path: '/app/my-services/msme-registration',
       element: <MSMEDashboard />
@@ -153,8 +154,13 @@ const MainRoutes = {
       element: <LabourLicence />
     },
      {
-      path: '/app/my-services/gst-registration',
+      path: '/app/my-services/registration',
       element: <GstRegistration />
+    },
+     {
+      path: '/app/task-management/registration',
+      element: <GstRegistration/>
+    
     },
     {
       path: '/app/users',

@@ -7,7 +7,10 @@ import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
 import { useDispatch } from 'react-redux';
 import { openSnackbar } from 'store/slices/snackbar';
 import Factory from 'utils/Factory';
-const StepTwo = () => {
+import { useSearchParams } from 'react-router-dom';
+const StepTwo = ({taskId}) => {
+  const [searchParams] = useSearchParams();
+  const service_id = searchParams.get('service_id');
   const dispatch = useDispatch();
   const formik = useFormik({
     initialValues: {
@@ -27,8 +30,8 @@ const StepTwo = () => {
       console.log(values);
       let url = values.id ? `/labourlicense/registration-documents/${values.id}/` : `/labourlicense/registration-documents/`;
       const formData = new FormData();
-      formData.append('service_request', 24);
-      formData.append('service_task', 9);
+      formData.append('service_request', service_id);
+      formData.append('service_task', taskId);
 
       if (values.certificate_of_incorporation && typeof values.certificate_of_incorporation !== 'string') {
         formData.append('certificate_of_incorporation', values.certificate_of_incorporation);
@@ -69,7 +72,7 @@ const StepTwo = () => {
     }
   });
   const getRegistrationDocuments = async () => {
-    const url = `/labourlicense/registration-documents/by-request-or-task?service_request_id=24`;
+    const url = `/labourlicense/registration-documents/by-request-or-task?service_request_id=${service_id}`;
     const { res } = await Factory('get', url);
     if (res.status_cd === 0) {
       formik.setValues(res.data);

@@ -8,8 +8,13 @@ import { useDispatch } from 'react-redux';
 import { Autocomplete, TextField } from '@mui/material';
 import { openSnackbar } from 'store/slices/snackbar';
 import Factory from 'utils/Factory';
+import { useSearchParams } from 'react-router-dom';
 import BusinessRegistrationDocumenst from './BusinessRegistrationDocumenst';
-const StepTwo = () => {
+const StepTwo = ({taskId,tradelicencedetailsTaskId}) => {
+  console.log('tradeLicencedetailsTaskId', tradelicencedetailsTaskId);
+  const [searchParams] = useSearchParams();
+  const service_id = searchParams.get('service_id');
+  
   const dispatch = useDispatch();
 
   const licenseOptions = [
@@ -41,8 +46,8 @@ const StepTwo = () => {
       console.log(values);
       let url = values.id ? `/tradelicense/trade-license-exist/${values.id}/` : `/tradelicense/trade-license-exist/`;
       const formData = new FormData();
-      formData.append('service_request', 25);
-      formData.append('service_task', 5);
+      formData.append('service_request', service_id);
+      formData.append('service_task', tradelicencedetailsTaskId);
       formData.append('apply_new_license', values.apply_new_license?.value);
       formData.append('trade_license_number', values.trade_license_number);
       if (values.trade_license_file && typeof values.trade_license_file !== 'string') {
@@ -76,7 +81,7 @@ const StepTwo = () => {
 
   // Fetch and set values for both forms
   const getTradeLicenseDeclaration = async () => {
-    const url = `/tradelicense/trade-license-exist/by-request-or-task?service_request_id=25`;
+    const url = `/tradelicense/trade-license-exist/by-request-or-task?service_request_id=${service_id}`;
     const { res } = await Factory('get', url);
     if (res.status_cd === 0) {
       // Format the response data to match form structure
@@ -162,8 +167,9 @@ const StepTwo = () => {
           </Button>
         </Box>
       </form>
-      <BusinessRegistrationDocumenst />
+      <BusinessRegistrationDocumenst taskId={taskId}/>
     </>
+  
   );
 };
 

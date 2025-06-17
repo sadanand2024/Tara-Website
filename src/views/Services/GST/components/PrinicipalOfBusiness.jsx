@@ -16,10 +16,14 @@ import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
 import Factory from 'utils/Factory';
 import { indian_States_And_UTs } from 'utils/indian_States_And_UT';
 import * as Yup from 'yup';
+import { useSearchParams } from 'react-router-dom';
 
 const PrincipleOfBusiness = () => {
+   const [searchParams] = useSearchParams();
+    const service_id = searchParams.get('service_id');
   const [prinicipalBusiness, setprinicipalBusiness] = useState({
     id: null,
+     task_id: null
   });
   const dispatch = useDispatch();
 
@@ -121,11 +125,12 @@ const PrincipleOfBusiness = () => {
       address_proof_file: Yup.mixed().required('Address Proof file is required'),
     }),
     onSubmit: async (values) => {
+      const task_id = prinicipalBusiness.task_id;
       try {
         let url = prinicipalBusiness.id ? `/gst/principal-place-details/${prinicipalBusiness.id}/` : `/gst/principal-place-details/`;
         let formData = new FormData();
-        formData.append('service_request', 32);
-        formData.append('service_task', 68);
+        formData.append('service_request',service_id);
+        formData.append('service_task',task_id);
         formData.append(
           'principal_place',
           JSON.stringify({
@@ -194,11 +199,14 @@ const PrincipleOfBusiness = () => {
   });
 
   const getprinicipalBusiness = async () => {
-    const url = `/gst/principal-place-details/by-service-request/?service_request_id=32`;
+    const url = `/gst/service-request-section-data?service_request_id=${service_id}&section=business_details`;
     const { res } = await Factory('get', url, {});
    
     if (res.status_cd === 0 && res.data) {
-      const data = res.data;
+    const data = res?.data?.task_data["Principal Place Details"]?.data;
+
+      // const data = res.data;
+      if (res?.data?.task_data && data !== null) {
       formik.setValues({
         pincode: data.principal_place?.pincode || '',
         state: data.principal_place?.state || '',
@@ -213,11 +221,19 @@ const PrincipleOfBusiness = () => {
         address_proof_file: data.address_proof_file || null,
         rental_agreement_or_noc: data.rental_agreement_or_noc || null,
         bank_statement_or_cancelled_cheque: data.bank_statement_or_cancelled_cheque || null,
+        task_id: res?.data?.task_data["Principal Place Details"]?.task_id || null,
       });
       setprinicipalBusiness({
         ...data,
-        id: data.id
+        // id: data.id,
+        task_id: res.data?.task_data["Principal Place Details"]?.task_id || null,
       });
+    }
+    else {
+        setprinicipalBusiness({
+          task_id: res?.data?.task_data["Principal Place Details"]?.task_id,
+        });
+      }
     }
   };
 

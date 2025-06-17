@@ -18,6 +18,8 @@ import React, { useEffect, useState } from 'react';
 import Factory from 'utils/Factory';
 import * as Yup from 'yup';
 import { openSnackbar } from 'store/slices/snackbar';
+import { useSearchParams } from 'react-router-dom';
+
 
 
 // Dummy placeholders - replace with your actual imports/context hooks
@@ -27,7 +29,9 @@ import { useDispatch } from 'react-redux';
 
 
 const RegistrationInfo = () => {
-  const [businessPremises, setBusinessPremises] = useState({});
+     const [searchParams] = useSearchParams();
+      const service_id = searchParams.get('service_id');
+  const [registrationInfo, setregistrationInfo] = useState({});
   const dispatch = useDispatch();
 
   const questions = [
@@ -68,14 +72,15 @@ const RegistrationInfo = () => {
     },
     validationSchema,
     onSubmit: async (values) => {
+      const task_id = registrationInfo.task_id;
       try {
-        const url = businessPremises.id
-          ? `/gst/registration-info/${businessPremises.id}/`
+        const url = registrationInfo.id
+          ? `/gst/registration-info/${registrationInfo.id}/`
           : `/gst/registration-info/`;
 
         const formData = new FormData();
-        formData.append('service_request',32);
-        formData.append('service_task', 67);
+        formData.append('service_request',service_id);
+        formData.append('service_task', task_id);
 
         // Map your form values to formData keys (adjust keys as per your API)
         formData.append('is_this_voluntary_registration', values.is_this_voluntary_registration);
@@ -85,7 +90,11 @@ const RegistrationInfo = () => {
         if (values.any_existing_registration === 'Yes') {
   formData.append('registration_number', values.registration_number);
   formData.append('date_of_registration', values.date_of_registration);
-}
+  }
+  else {
+  formData.append('registration_number', '');
+  formData.append('date_of_registration', '');
+  }
 
         // Example: if you had file inputs:
         // if (values.someFileField && typeof values.someFileField !== 'string') {
@@ -93,20 +102,20 @@ const RegistrationInfo = () => {
         // }
 
         // Replace Factory with your API calling method:
-        const { res } = await Factory(businessPremises.id ? 'put' : 'post', url, formData);
+        const { res } = await Factory(registrationInfo.id ? 'put' : 'post', url, formData);
 
         if (res.status_cd === 0) {
           dispatch(
             openSnackbar({
               open: true,
-              message: businessPremises.id ? 'Data updated successfully' : 'Data saved successfully',
+              message: registrationInfo.id ? 'Data updated successfully' : 'Data saved successfully',
               variant: 'alert',
               alert: { color: 'success' },
               close: false
             })
           );
-          // alert(businessPremises.id ? 'Data updated successfully' : 'Data saved successfully');
-          getBusinessPremises(); // Refresh data
+          // alert(registrationInfo.id ? 'Data updated successfully' : 'Data saved successfully');
+          getregistrationInfo(); // Refresh data
         } else {
           dispatch(
             openSnackbar({
@@ -125,14 +134,17 @@ const RegistrationInfo = () => {
     }
   });
 
-  // Move getBusinessPremises above useEffect so it's defined before useEffect runs
-  const getBusinessPremises = async () => {
-    const url = `/gst/registration-info/by-service-request/?service_request_id=32`;
+  // Move getregistrationInfo above useEffect so it's defined before useEffect runs
+  const getregistrationInfo = async () => {
+    const url = `/gst/service-request-section-data?service_request_id=${service_id}&section=business_details`;
     const { res } = await Factory('get', url);
+    
     // console.log(res.data , res.status_cd);
     if (res.status_cd === 0 && res.data) {
-      const data = res.data;
+      const data = res?.data?.task_data["Registration Info"]?.data;
+      // const data = res.data;
       // console.log(data);
+      if (res?.data?.task_data && data !== null) {
       formik.setValues({
         is_this_voluntary_registration: data.is_this_voluntary_registration || '',
         applying_for_casual_taxable_person: data.applying_for_casual_taxable_person || '',
@@ -141,16 +153,26 @@ const RegistrationInfo = () => {
         registration_number: data.registration_number || '',
         date_of_registration: data.date_of_registration || '',
         id:data.id || '',
+        task_id: res.data?.task_data["Registration Info"]?.task_id || null,
+
       });
-      setBusinessPremises({
+      setregistrationInfo({
         ...data,
+        task_id: res.data?.task_data["Registration Info"]?.task_id || null,
+
       });
+    }
+    else {
+        setregistrationInfo({
+          task_id: res?.data?.task_data["Registration Info"]?.task_id,
+        });
+      }
     }
   };
 
-  // useEffect must be after getBusinessPremises is defined
+  // useEffect must be after getregistrationInfo is defined
   useEffect(() => {
-    getBusinessPremises();
+    getregistrationInfo();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

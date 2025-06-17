@@ -5,7 +5,11 @@ import * as Yup from 'yup';
 import { useDispatch } from 'react-redux';
 import { openSnackbar } from 'store/slices/snackbar';
 import Factory from 'utils/Factory';
+import { useSearchParams } from 'react-router-dom';
 import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
+import DeleteIcon from '@mui/icons-material/Delete';
+import DownloadIcon from '@mui/icons-material/Download';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 const typeOfBusinessOptions = [
   'Proprietorship',
   'Partnership',
@@ -60,7 +64,9 @@ const fields = [
     type: 'file'
   }
 ];
-const BusinessIdentityStructureSection = () => {
+const BusinessIdentityStructureSection = ({ taskId }) => {
+  const [searchParams] = useSearchParams();
+  const service_id = searchParams.get('service_id');
   const dispatch = useDispatch();
   const [businessIdentityposttype, setBusinessIdentityposttype] = useState('post');
 
@@ -91,8 +97,8 @@ const BusinessIdentityStructureSection = () => {
         businessIdentityposttype === 'put' ? `/labourlicense/business-identity/${values.id}/` : `/labourlicense/business-identity/`;
 
       const formData = new FormData();
-      formData.append('service_request', 24);
-      formData.append('service_task', 6);
+      formData.append('service_request', service_id);
+      formData.append('service_task', taskId);
       formData.append('date_of_commencement', values.date_of_commencement);
       formData.append('nature_of_business', values.nature_of_business);
       formData.append('legal_name_of_business', values.legalNameOfBusiness);
@@ -195,7 +201,7 @@ const BusinessIdentityStructureSection = () => {
   };
   const { values, setValues, handleChange, errors, touched, handleSubmit, handleBlur, resetForm, setFieldValue } = formik;
   const getBusinessIdentity = async () => {
-    const url = `/labourlicense/business-identity/by-request-or-task?service_request_id=24`;
+    const url = `/labourlicense/business-identity/by-request-or-task?service_request_id=${service_id}`;
     const { res } = await Factory('get', url);
     if (res.status_cd === 0) {
       // Map API response to form fields

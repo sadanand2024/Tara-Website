@@ -6,6 +6,15 @@ import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
 import Factory from 'utils/Factory';
 import { useDispatch } from 'react-redux';
 import { openSnackbar } from 'store/slices/snackbar';
+import { useSearchParams } from 'react-router-dom';
+import Autocomplete from '@mui/material/Autocomplete';
+const DESIGNATION_CHOICES = [
+  { value: 'partner', label: 'Partner' },
+  { value: 'director', label: 'Director' },
+  { value: 'owner', label: 'Owner' },
+  { value: 'other', label: 'Other' },
+];
+
 const fields = [
   {
     label: 'Name',
@@ -15,7 +24,8 @@ const fields = [
   {
     label: 'Designation',
     name: 'designation',
-    type: 'text'
+    type: 'autocomplete',
+    options: DESIGNATION_CHOICES
   },
   {
     label: 'Mobile Number',
@@ -43,7 +53,11 @@ const fields = [
     type: 'file'
   }
 ];
-const ApplicantDetails = () => {
+
+const ApplicantDetails = ({applicantTaskId}) => {
+
+   const [searchParams] = useSearchParams();
+    const service_id = searchParams.get('service_id');
   const dispatch = useDispatch();
   const formik = useFormik({
     initialValues: {
@@ -65,12 +79,30 @@ const ApplicantDetails = () => {
       service_task: ''
     },
     validationSchema: Yup.object({
-      name: Yup.string().required('Name is required')
+      name: Yup.string().required('Name is required'),
+      designation: Yup.string().required('Designation is required'),
+      mobile_number: Yup.string()
+        .required('Mobile Number is required')
+        .matches(/^[0-9]+$/, 'Mobile Number must be a number')
+        .min(10, 'Mobile Number must be at least 10 digits')
+        .max(10, 'Mobile Number must not exceed 10 digits'),  
+      email: Yup.string().email('Invalid email format').required('Email is required'),
+      aadhaar_image: Yup.mixed().required('Aadhaar Image is required'),
+
+      pan_image: Yup.mixed().required('PAN Image is required'),
+      passport_photo: Yup.mixed().required('Passport Photo is required'), 
+      address: Yup.string().when('residential_address', {
+        is: 'no',
+        then: Yup.string().required('Address is required when residential address is not same as Aadhaar')
+      }),
+      residential_address: Yup.string().oneOf(['yes', 'no'], 'Residential address must be either yes or no')
+      
     }),
     onSubmit: async (values) => {
       let formData = new FormData();
-      formData.append('service_request', 25);
-      formData.append('service_task', 12);
+      // console.log('taskid', taskId);
+      formData.append('service_request',service_id);
+      formData.append('service_task',applicantTaskId);
       formData.append('name', values.name);
       formData.append('designation', values.designation);
       formData.append('mobile_number', values.mobile_number);
@@ -131,6 +163,27 @@ const ApplicantDetails = () => {
             helperText={touched[field.name] && errors[field.name]}
           />
         );
+        case 'autocomplete':
+  return (
+    <Autocomplete
+      fullWidth
+      size="small"
+      options={field.options}
+      value={field.options.find(option => option.value === values[field.name]) || null}
+      onChange={(e, value) => setFieldValue(field.name, value ? value.value : '')}
+      renderInput={(params) => (
+        <TextField
+          {...params}
+          name={field.name}
+          onChange={handleChange}
+          error={touched[field.name] && Boolean(errors[field.name])}
+          helperText={touched[field.name] && errors[field.name]}
+        />
+      )}
+    />
+  );
+
+              
       case 'file':
         return (
           <RenderFileUpload
@@ -151,7 +204,7 @@ const ApplicantDetails = () => {
     }
   };
   const getApplicantDetails = async () => {
-    let url = `/tradelicense/applicant-details/by-request-or-task?service_request_id=25`;
+    let url = `/tradelicense/applicant-details/by-request-or-task?service_request_id=${service_id}`;
     const { res } = await Factory('get', url);
     if (res.status_cd === 1) {
       dispatch(

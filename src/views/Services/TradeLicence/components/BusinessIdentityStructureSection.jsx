@@ -5,6 +5,7 @@ import * as Yup from 'yup';
 import { useDispatch } from 'react-redux';
 import { openSnackbar } from 'store/slices/snackbar';
 import Factory from 'utils/Factory';
+import { useSearchParams } from 'react-router-dom';
 import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
 import ApplicantDetails from './ApplicantDetails';
 const typeOfBusinessOptions = [
@@ -51,7 +52,10 @@ const fields = [
     type: 'file'
   }
 ];
-const BusinessIdentityStructureSection = () => {
+const BusinessIdentityStructureSection = ({taskId, applicantTaskId}) => {
+  console.log('taskxdcfghjId',  applicantTaskId);
+  const [searchParams] = useSearchParams();
+  const service_id = searchParams.get('service_id');
   const dispatch = useDispatch();
   const [businessIdentityposttype, setBusinessIdentityposttype] = useState('post');
 
@@ -73,8 +77,8 @@ const BusinessIdentityStructureSection = () => {
       const url = businessIdentityposttype === 'put' ? `/tradelicense/business-identity/${values.id}/` : `/tradelicense/business-identity/`;
 
       const formData = new FormData();
-      formData.append('service_request', 25);
-      formData.append('service_task', 11);
+      formData.append('service_request', service_id);
+      formData.append('service_task', taskId);
       formData.append('nature_of_business', values.nature_of_business);
       formData.append('legal_name_of_business', values.legal_name_of_business);
       formData.append('type_of_business', values.type_of_business);
@@ -175,7 +179,7 @@ const BusinessIdentityStructureSection = () => {
   };
   const { values, setValues, handleChange, errors, touched, handleSubmit, handleBlur, resetForm, setFieldValue } = formik;
   const getBusinessIdentity = async () => {
-    const url = `/tradelicense/business-identity/by-request-or-task?service_request_id=25`;
+    const url = `/tradelicense/business-identity/by-request-or-task?service_request_id=${service_id}`;
     const { res } = await Factory('get', url);
     if (res.status_cd === 0) {
       const responseData = {
@@ -228,7 +232,8 @@ const BusinessIdentityStructureSection = () => {
           </Stack>
         </form>
       </Card>
-      <ApplicantDetails />
+      <ApplicantDetails applicantTaskId={applicantTaskId} />
+
     </Box>
   );
 };
