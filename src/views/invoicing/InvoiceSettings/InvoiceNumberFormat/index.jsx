@@ -24,7 +24,7 @@ import { openSnackbar } from 'store/slices/snackbar';
 import { useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
-const InvoiceNumberFormat = ({ businessDetails, handleBack, handleNext }) => {
+const InvoiceNumberFormatComponent = ({ businessDetails, handleBack, handleNext }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [authorizedSignature, setAuthorizedSignature] = useState(null);
@@ -228,7 +228,7 @@ const InvoiceNumberFormat = ({ businessDetails, handleBack, handleNext }) => {
           close: false
         })
       );
-      // navigate('/app/invoice');
+      navigate('/app/invoice');
     } else {
       dispatch(
         openSnackbar({
@@ -355,7 +355,7 @@ const InvoiceNumberFormat = ({ businessDetails, handleBack, handleNext }) => {
 
   return (
     <Box>
-      <Typography variant="h5" gutterBottom>
+      <Typography variant="h4" gutterBottom>
         Invoice Number Format Configuration
       </Typography>
 
@@ -485,9 +485,14 @@ const InvoiceNumberFormat = ({ businessDetails, handleBack, handleNext }) => {
 
           <Divider sx={{ my: 2 }} />
 
-          <Typography variant="h5">Preview</Typography>
+          <Typography variant="h5">
+            Preview <span style={{ color: 'text.textSecondary' }}> Ex : (INV-BR-2024-25-A-0001) </span>
+          </Typography>
           <Grid2 container spacing={2} my={2}>
             <Grid2 size={{ xs: 6 }}>
+              <Typography variant="body1" color="textSecondary" gutterBottom>
+                Current Format:
+              </Typography>
               <TextField size="small" fullWidth value={generatePreview()} disabled sx={{ backgroundColor: 'white' }} />
             </Grid2>
           </Grid2>
@@ -516,7 +521,7 @@ const InvoiceNumberFormat = ({ businessDetails, handleBack, handleNext }) => {
 
       {/* <Divider sx={{ my: 2 }} /> */}
       <Typography variant="h5">Authorized Signature</Typography>
-      <Box sx={{ display: 'flex', gap: 2, justifyContent: 'space-between', my: 2 }}>
+      <Box sx={{ display: 'flex', gap: 2, my: 2 }}>
         <FileUploadBox onFiles={handleSignatureUpload} accept="image/*,application/pdf" size="10 KB" />
         {signaturePreview &&
           (typeof signaturePreview === 'string' ? (
@@ -554,4 +559,4 @@ const InvoiceNumberFormat = ({ businessDetails, handleBack, handleNext }) => {
   );
 };
 
-export default InvoiceNumberFormat;
+export default InvoiceNumberFormatComponent;

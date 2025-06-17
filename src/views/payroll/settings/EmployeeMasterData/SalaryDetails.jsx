@@ -94,8 +94,9 @@ function SalaryDetails({
       if (from === 'Salary Revisions') {
         postData.update_month = new Date().getMonth() + 1;
       }
-      postData.payroll_month = Number(month) || new Date().getMonth() + 1;
-      postData.payroll_year = Number(financial_year.split('-')[0]) || new Date().getFullYear();
+      postData.payroll_month = month === null ? new Date().getMonth() + 1 : Number(month);
+      let currentYear = `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`;
+      postData.payroll_year = financial_year === null ? currentYear.split('-')[0] : Number(financial_year.split('-')[0]);
       // Determine API method and URL
       const method = employeeData?.employee_salary?.id ? 'put' : 'post';
       const url = employeeData?.employee_salary?.id

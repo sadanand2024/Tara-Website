@@ -1,7 +1,7 @@
 // File: InvoiceDetailsForm.jsx
 
-import React from 'react';
-import { Typography, Grid2 } from '@mui/material';
+import React, { useState } from 'react';
+import { Typography, Grid2, Button } from '@mui/material';
 import CustomAutocomplete from 'utils/CustomAutocomplete';
 import CustomInput from 'utils/CustomInput';
 import CustomDatePicker from 'utils/CustomDateInput';
@@ -9,6 +9,8 @@ import { indian_States_And_UTs } from 'utils/indian_States_And_UT';
 import dayjs from 'dayjs';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
+import AddGSTIN from 'views/application/Business/AddGSTDialog';
+import { IconPlus } from '@tabler/icons-react';
 const InvoiceDetailsForm = ({
   formik,
   invoiceDetailsFields,
@@ -16,8 +18,22 @@ const InvoiceDetailsForm = ({
   customers,
   getInvoiceFormat,
   branches,
-  setInvoiceNumberFormat
+  setInvoiceNumberFormat,
+  getGSTDetails,
+  fetch_Business_Details
 }) => {
+  const [openAddGSTIN, setOpenAddGSTIN] = useState(false);
+  const dispatch = useDispatch();
+
+  const handleOpenAddGSTIN = () => {
+    setOpenAddGSTIN(true);
+  };
+
+  const handleCloseAddGSTIN = () => {
+    setOpenAddGSTIN(false);
+    fetch_Business_Details();
+  };
+
   const termsDropdown = [
     'NET 15',
     'NET 30',
@@ -121,21 +137,17 @@ const InvoiceDetailsForm = ({
             if (fieldName === 'gstin') {
               formik.setFieldValue('gstin', val || 'NA');
               if (businessDetailsData?.invoice_format?.find((item) => item.gstin === val || ('NA' && item.include_branch_code === false))) {
-                console.log('hjb');
                 getInvoiceFormat(val, 'NA');
                 formik.setFieldValue('branch_code', '');
                 formik.setFieldValue('invoice_number', '');
                 setInvoiceNumberFormat('');
               } else {
-                console.log('hjb2');
-                console.log(businessDetailsData?.invoice_format);
                 formik.setFieldValue('branch_code', '');
                 formik.setFieldValue('invoice_number', '');
                 setInvoiceNumberFormat('');
               }
             } else if (fieldName === 'branch_code') {
               formik.setFieldValue('branch_code', val || '');
-              console.log(businessDetailsData?.invoice_format);
               if (
                 businessDetailsData?.invoice_format?.find(
                   (item) => item.gstin === formik.values.gstin || ('NA' && item.include_branch_code === true)
@@ -147,11 +159,11 @@ const InvoiceDetailsForm = ({
             formik.setFieldValue(fieldName, val);
           }}
           disabled={
-            (fieldName === 'branch_code' &&
-              businessDetailsData?.invoice_format?.find(
-                (item) => item.gstin === formik.values.gstin || ('NA' && item.include_branch_code === false)
-              )) ||
-            (fieldName === 'branch_code' && formik.values.gstin === '')
+            fieldName === 'branch_code' &&
+            (businessDetailsData?.invoice_format?.find(
+              (item) => item.gstin === formik.values.gstin || ('NA' && item.include_branch_code === false)
+            ) ||
+              formik.values.gstin === '')
           }
           options={
             fieldName === 'gstin'
@@ -164,6 +176,41 @@ const InvoiceDetailsForm = ({
           }
           error={formik.touched[fieldName] && Boolean(formik.errors[fieldName])}
           helperText={formik.touched[fieldName] && formik.errors[fieldName]}
+          ListboxProps={
+            fieldName === 'gstin'
+              ? {
+                  style: { maxHeight: 250 },
+                  component: React.forwardRef(function CustomListboxComponent(props, ref) {
+                    const { children, ...rest } = props;
+                    return (
+                      <ul ref={ref} {...rest}>
+                        {children}
+                        <li style={{ padding: '8px 16px' }}>
+                          <Button
+                            startIcon={<IconPlus />}
+                            variant="contained"
+                            fullWidth
+                            size="small"
+                            sx={{
+                              bgcolor: 'primary.main',
+                              '&:hover': {
+                                bgcolor: 'primary.dark'
+                              }
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpenAddGSTIN();
+                            }}
+                          >
+                            Add GSTIN
+                          </Button>
+                        </li>
+                      </ul>
+                    );
+                  })
+                }
+              : undefined
+          }
         />
       );
     } else if (fieldName === 'terms') {
@@ -203,8 +250,16 @@ const InvoiceDetailsForm = ({
   };
   return (
     <Grid2 container spacing={2}>
+      <AddGSTIN
+        open={openAddGSTIN}
+        handleClose={handleCloseAddGSTIN}
+        businessDetailsData={businessDetailsData}
+        setOpen={setOpenAddGSTIN}
+        getGSTDetails={getGSTDetails}
+        fetchBusinessDetails={fetch_Business_Details}
+      />
       {invoiceDetailsFields.map((item) => (
-        <Grid2 size={{ xs: 12, sm: 6 }} key={item.name}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 4 }} key={item.name}>
           <Typography sx={{ mb: 1 }}>{item.label}</Typography>
           {renderField(item)}
         </Grid2>

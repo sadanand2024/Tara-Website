@@ -1,7 +1,7 @@
+import React from 'react';
 import { Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Stack, Typography, useTheme } from '@mui/material';
 import { IconX } from '@tabler/icons-react';
 import PropTypes from 'prop-types';
-import React from 'react';
 
 const BerryDialog = ({
   open,
@@ -28,8 +28,7 @@ const BerryDialog = ({
         sx: {
           borderRadius: 3,
           // px: { xs: 2, md: 3 },
-          py:0,
-          
+          py: 0
         }
       }}
     >
@@ -72,13 +71,12 @@ const BerryDialog = ({
 
       {/* Content */}
 
-      <DialogContent dividers sx={{ pt:1 }}>
-
+      <DialogContent dividers sx={{ pt: 1 }}>
         {children}
       </DialogContent>
 
       {/* Footer */}
-      {footer && <DialogActions sx={{ p:2 }}>{footer}</DialogActions>}
+      {footer && <DialogActions sx={{ p: 2 }}>{footer}</DialogActions>}
     </Dialog>
   );
 };

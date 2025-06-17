@@ -31,7 +31,7 @@ import { businessTypesArray } from 'utils/businessTypesArray';
 import CustomUpload from 'utils/CustomUpload';
 import DeleteIcon from '@mui/icons-material/Delete';
 
-export default function TabOne({ businessDetails = {}, postType, handleNext, setBusinessDetails }) {
+export default function BusinessProfileComponnet({ businessDetails = {}, postType, handleNext, setBusinessDetails, setTabValue }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [logoUrlDetails, setLogoUrlDetails] = useState(null);
@@ -174,7 +174,7 @@ export default function TabOne({ businessDetails = {}, postType, handleNext, set
           // setBusinessDetails(res.data.data),
           openSnackbar({
             open: true,
-            message: 'Data Saved Successfully',
+            message: postType === 'post' ? 'Data Saved Successfully' : 'Data Updated Successfully',
             variant: 'alert',
             alert: { color: 'success' },
             close: false
@@ -283,7 +283,7 @@ export default function TabOne({ businessDetails = {}, postType, handleNext, set
       </Typography>
 
       <Grid2 container spacing={2}>
-        <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+        {/* <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
           <input
             accept="image/*"
             style={{ display: 'none' }}
@@ -319,7 +319,7 @@ export default function TabOne({ businessDetails = {}, postType, handleNext, set
               </Button>
             </label>
           </Box>
-        </Grid2>
+        </Grid2> */}
 
         {busineesprofileFields.basic_details.map((item, index) => (
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }} key={item.name}>
@@ -385,7 +385,8 @@ export default function TabOne({ businessDetails = {}, postType, handleNext, set
                           startIcon={<IconPlus size={16} />}
                           onClick={() => {
                             if (businessDetails.id) {
-                              navigate(`/apps/business-settings?BID=${businessDetails.id}&tabvalue=3`);
+                              // navigate(`/apps/business-settings?BID=${businessDetails.id}&tabvalue=3`);
+                              setTabValue(1);
                             }
                           }}
                           sx={{ ml: 2 }}
@@ -417,7 +418,7 @@ export default function TabOne({ businessDetails = {}, postType, handleNext, set
               ) : (
                 <>
                   <Typography component="label" sx={{ mb: 1 }}>
-                    {item.label}
+                    {item.name === 'nameOfBusiness' ? <span style={{ color: 'red' }}>*</span> : ''} {item.label}
                   </Typography>
 
                   <CustomInput

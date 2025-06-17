@@ -1,5 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Pagination, Stack, Typography, Box } from '@mui/material';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Pagination,
+  Stack,
+  Typography,
+  Box,
+  Card
+} from '@mui/material';
 import Factory from 'utils/Factory';
 import AddCustomer from './AddCustomer';
 import ActionCell from '../../../../ui-component/extended/ActionCell';
@@ -50,85 +63,102 @@ const CustomerList = ({ type, open, handleOpen, handleClose, setType, businessDe
 
   return (
     <>
-      <TableContainer component={Paper} sx={{ mt: 2, borderRadius: 2, boxShadow: 1 }}>
-        <Table sx={{ minWidth: 750 }} size="small">
-          <TableHead>
-            <TableRow sx={{ bgcolor: 'grey.100' }}>
-              <TableCell>Name</TableCell>
-              <TableCell>PAN</TableCell>
-              <TableCell>GSTIN</TableCell>
-              <TableCell>Email</TableCell>
-              <TableCell>Mobile</TableCell>
-              <TableCell>Receivables</TableCell>
-              <TableCell align="center">Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {paginatedData.length === 0 ? (
+      <Card
+        elevation={2}
+        sx={{
+          mb: 2,
+          '& .MuiTableContainer-root': {
+            borderRadius: 0
+          },
+          '& .MuiTableCell-root': {
+            color: 'text.primary'
+          },
+          '& .MuiTableHead-root .MuiTableCell-root': {
+            py: 1,
+            backgroundColor: 'primary.main',
+            color: '#fff'
+          }
+        }}
+      >
+        <TableContainer>
+          <Table size="small">
+            <TableHead>
               <TableRow>
-                <TableCell colSpan={7} align="center">
-                  <EmptyDataPlaceholder title="No Data Found" subtitle="Start by adding a new Data." />
-                </TableCell>
+                <TableCell>Name</TableCell>
+                <TableCell>PAN</TableCell>
+                <TableCell>GSTIN</TableCell>
+                <TableCell>Email</TableCell>
+                <TableCell>Mobile</TableCell>
+                <TableCell>Receivables</TableCell>
+                <TableCell align="center">Actions</TableCell>
               </TableRow>
-            ) : (
-              paginatedData.map((customer, index) => (
-                <TableRow
-                  key={index}
-                  sx={{
-                    bgcolor: 'background.paper',
-                    '&:hover': {
-                      boxShadow: 1
-                    }
-                  }}
-                >
-                  <TableCell>{customer.name}</TableCell>
-                  <TableCell>{customer.pan_number}</TableCell>
-                  <TableCell>{customer.gstin || 'NA'}</TableCell>
-                  <TableCell>{customer.email}</TableCell>
-                  <TableCell>{customer.mobile_number}</TableCell>
-                  <TableCell>{customer.opening_balance}</TableCell>
-                  <TableCell align="center">
-                    <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
-                      <IconButton color="primary" onClick={() => handleEdit(customer)}>
-                        <Edit />
-                      </IconButton>
-                      <IconButton color="error" onClick={() => handleOpenDeleteDialog(customer)}>
-                        <Delete />
-                      </IconButton>
-                    </Box>
+            </TableHead>
+            <TableBody>
+              {paginatedData.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} align="center">
+                    <EmptyDataPlaceholder title="No Data Found" subtitle="Start by adding a new Data." />
                   </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-        <DeleteDialog
-          open={openDeleteDialog}
-          onClose={() => setOpenDeleteDialog(false)}
-          onConfirm={handleConfirmDelete}
-          dialogData={{
-            title: 'Delete Record',
-            heading: 'Are you sure?',
-            description: 'This action will permanently delete the record.'
-          }}
-        />
-      </TableContainer>
+              ) : (
+                paginatedData.map((customer, index) => (
+                  <TableRow
+                    key={index}
+                    sx={{
+                      bgcolor: 'background.paper',
+                      '&:hover': {
+                        boxShadow: 1
+                      }
+                    }}
+                  >
+                    <TableCell>{customer.name}</TableCell>
+                    <TableCell>{customer.pan_number}</TableCell>
+                    <TableCell>{customer.gstin || 'NA'}</TableCell>
+                    <TableCell>{customer.email}</TableCell>
+                    <TableCell>{customer.mobile_number}</TableCell>
+                    <TableCell>{customer.opening_balance}</TableCell>
+                    <TableCell align="center">
+                      <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
+                        <IconButton color="primary" onClick={() => handleEdit(customer)}>
+                          <Edit />
+                        </IconButton>
+                        <IconButton color="error" onClick={() => handleOpenDeleteDialog(customer)}>
+                          <Delete />
+                        </IconButton>
+                      </Box>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+          <DeleteDialog
+            open={openDeleteDialog}
+            onClose={() => setOpenDeleteDialog(false)}
+            onConfirm={handleConfirmDelete}
+            dialogData={{
+              title: 'Delete Record',
+              heading: 'Are you sure?',
+              description: 'This action will permanently delete the record.'
+            }}
+          />
+        </TableContainer>
 
+        <AddCustomer
+          type={type}
+          setType={setType}
+          businessDetailsData={businessDetailsData}
+          handleClose={handleClose}
+          open={open}
+          getCustomersData={getCustomersData}
+          selectedCustomer={selectedCustomer}
+        />
+      </Card>
       {customers.length > 0 && (
         <Stack direction="row" justifyContent="center" sx={{ py: 2 }}>
           <Pagination count={Math.ceil(customers.length / rowsPerPage)} page={currentPage} onChange={handlePageChange} />
         </Stack>
       )}
-
-      <AddCustomer
-        type={type}
-        setType={setType}
-        businessDetailsData={businessDetailsData}
-        handleClose={handleClose}
-        open={open}
-        getCustomersData={getCustomersData}
-        selectedCustomer={selectedCustomer}
-      />
     </>
   );
 };

@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Box, Grid, Typography, FormControlLabel, Checkbox } from '@mui/material';
+import { Box, Grid2, Typography, FormControlLabel, Checkbox } from '@mui/material';
 import CustomInput from 'utils/CustomInput';
 import CustomAutocomplete from 'utils/CustomAutocomplete';
 import { indian_States_And_UTs } from 'utils/indian_States_And_UT';
@@ -117,8 +117,8 @@ const BillingShippingForm = ({ formik, onStateChange }) => {
         />
       </Box>
 
-      <Grid container spacing={2}>
-        <Grid item xs={12} sm={6}>
+      <Grid2 container spacing={2}>
+        <Grid2 size={{ xs: 12, sm: 6 }}>
           <Typography variant="subtitle1" sx={{ mb: 1 }}>
             Billing Address
           </Typography>
@@ -128,9 +128,9 @@ const BillingShippingForm = ({ formik, onStateChange }) => {
               {renderField(item, 'billing_address')}
             </Box>
           ))}
-        </Grid>
+        </Grid2>
 
-        <Grid item xs={12} sm={6}>
+        <Grid2 size={{ xs: 12, sm: 6 }}>
           <Typography variant="subtitle1" sx={{ mb: 1 }}>
             Shipping Address
           </Typography>
@@ -140,8 +140,8 @@ const BillingShippingForm = ({ formik, onStateChange }) => {
               {renderField(item, 'shipping_address')}
             </Box>
           ))}
-        </Grid>
-      </Grid>
+        </Grid2>
+      </Grid2>
     </Box>
   );
 };

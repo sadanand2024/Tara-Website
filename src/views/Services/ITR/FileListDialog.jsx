@@ -22,7 +22,6 @@ import { useSnackbar } from 'notistack';
 import { Download, Visibility } from '@mui/icons-material';
 
 const FileListDialog = ({ open, onClose, files, getStep1Data, getStep2Data, getStep3Data, step }) => {
-  console.log('files', files);
   const { enqueueSnackbar } = useSnackbar();
   const [filesData, setFilesData] = useState([]);
 
@@ -56,20 +55,24 @@ const FileListDialog = ({ open, onClose, files, getStep1Data, getStep2Data, getS
     }
   };
 
-  const removefile = (index) => {
-    let __files = JSON.parse(JSON.stringify(filesData));
-    __files.splice(index, 1);
-    setFilesData(__files);
-    if (step === 0) getStep1Data();
-    if (step === 1) getStep2Data();
-    if (step === 2) getStep3Data();
+  const removefile = (index, get, file) => {
+    let updated = [...filesData];
+    updated.splice(index, 1);
+    setFilesData(updated);
+    if (files.removeFunction) files.removeFunction(file);
+    if (get) {
+      if (step === 0) getStep1Data();
+      if (step === 1) getStep2Data();
+      if (step === 2) getStep3Data();
+    }
   };
-  const onDelete = async (index, id) => {
-    if (!id) removefile(index);
+
+  const onDelete = async (index, id, file) => {
+    if (!id) removefile(index, false, file);
     else {
       const response = await Factory('delete', `/income_tax_returns/${files.urlEndpoint}/files/${id}/delete/`, {});
       if (response.res.status_cd === 0) {
-        removefile(index);
+        removefile(index, true, file);
         enqueueSnackbar('File deleted successfully', { variant: 'success', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
       } else {
         enqueueSnackbar('File deletion failed', { variant: 'error', anchorOrigin: { vertical: 'top', horizontal: 'right' } });

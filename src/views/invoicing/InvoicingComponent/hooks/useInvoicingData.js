@@ -11,6 +11,7 @@ export const useInvoicingData = () => {
   const [itemsList, setItemsList] = useState([]);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [branches, setBranches] = useState([]);
+  const [gstList, setGstList] = useState([]);
   const user = useSelector((state) => state.accountReducer.user);
   const businessId = user.active_context.business_id;
 
@@ -21,6 +22,7 @@ export const useInvoicingData = () => {
   const fetchBusinessDetails = async () => {
     const url = `/invoicing/invoicing-profiles/?business_id=${businessId}`;
     const { res } = await Factory('get', url, {});
+    console.log(res);
     if (res.status_cd === 0) {
       setBusinessDetails(res.data);
     } else {
@@ -82,7 +84,13 @@ export const useInvoicingData = () => {
       );
     }
   };
-
+  const getGSTDetails = async () => {
+    const url = `/user_management/gst-details/${businessId}/`;
+    const { res } = await Factory('get', url, {});
+    if (res.status_cd === 0) {
+      setGstList(res.data);
+    }
+  };
   const getInvoiceFormat = async (gstin, branch_code) => {
     let url = `/invoicing/latest/${businessDetails?.id}/?branch_code=${branch_code}&gstin=${gstin}`;
     const { res } = await Factory('get', url, {});
@@ -137,6 +145,9 @@ export const useInvoicingData = () => {
   useEffect(() => {
     getBranchesData();
   }, [businessId]);
+  useEffect(() => {
+    getGSTDetails();
+  }, [businessId]);
   return {
     businessDetails,
     customers,
@@ -146,6 +157,9 @@ export const useInvoicingData = () => {
     selectedInvoice,
     getInvoiceFormat,
     getGoodsAndServicesData,
-    branches
+    branches,
+    gstList,
+    getGSTDetails,
+    fetchBusinessDetails
   };
 };

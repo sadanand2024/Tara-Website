@@ -71,6 +71,24 @@ const dashboard = {
       caption: ''
     },
     {
+      id: 'invoicing',
+      title: 'invoicing',
+      type: 'item',
+      url: '/app/invoice',
+      icon: icons.IconReceipt2,
+      breadcrumbs: false,
+      caption: ''
+    },
+    {
+      id: 'payroll',
+      title: 'payroll',
+      type: 'item',
+      url: '/app/payroll',
+      icon: icons.IconCreditCard,
+      breadcrumbs: false,
+      caption: ''
+    },
+    {
       id: 'task-manager',
       title: 'task-manager',
       type: 'item',
@@ -96,25 +114,8 @@ const dashboard = {
       icon: icons.IconFolder,
       breadcrumbs: false,
       caption: ''
-    },
-    {
-      id: 'payroll',
-      title: 'payroll',
-      type: 'item',
-      url: '/app/payroll',
-      icon: icons.IconCreditCard,
-      breadcrumbs: false,
-      caption: ''
-    },
-    {
-      id: 'invoicing',
-      title: 'invoicing',
-      type: 'item',
-      url: '/app/invoice',
-      icon: icons.IconReceipt2,
-      breadcrumbs: false,
-      caption: ''
-    },
+    }
+
     // {
     //   id: 'document-drafting',
     //   title: 'document-drafting',

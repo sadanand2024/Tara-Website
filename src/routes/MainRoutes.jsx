@@ -155,6 +155,7 @@ const MainRoutes = {
     },
      {
       path: '/app/my-services/registration',
+
       element: <GstRegistration />
     },
      {
