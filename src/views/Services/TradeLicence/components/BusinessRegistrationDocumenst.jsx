@@ -5,9 +5,12 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import Factory from 'utils/Factory';
 import { useDispatch } from 'react-redux';
+import { useSearchParams } from 'react-router-dom';
 import { openSnackbar } from 'store/slices/snackbar';
 
-const BusinessRegistrationDocumenst = () => {
+const BusinessRegistrationDocumenst = ({taskId}) => {
+  const [searchParams] = useSearchParams();
+  const service_id = searchParams.get('service_id');
   const dispatch = useDispatch();
   const formik = useFormik({
     initialValues: {
@@ -26,8 +29,8 @@ const BusinessRegistrationDocumenst = () => {
     onSubmit: async (values) => {
       let url = values.id ? `/tradelicense/business-documents/${values.id}/` : `/tradelicense/business-documents/`;
       const formData = new FormData();
-      formData.append('service_request', 25);
-      formData.append('service_task', 16);
+      formData.append('service_request', service_id);
+      formData.append('service_task',taskId);
       if (values.incorporation_certificate && typeof values.incorporation_certificate !== 'string') {
         formData.append('incorporation_certificate', values.incorporation_certificate);
       }
@@ -68,7 +71,7 @@ const BusinessRegistrationDocumenst = () => {
   });
 
   const getRegistrationDocuments = async () => {
-    const url = `/tradelicense/business-documents/by-request-or-task?service_request_id=25`;
+    const url = `/tradelicense/business-documents/by-request-or-task?service_request_id=${service_id}`;
     const { res } = await Factory('get', url);
     if (res.status_cd === 0) {
       setValues({

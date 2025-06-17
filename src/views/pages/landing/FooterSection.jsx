@@ -284,6 +284,26 @@ export default function FooterSection() {
             </Stack>
           </Stack>
         </Container> */}
+        <Container>
+        <Stack
+  direction={{ xs: 'column', sm: 'row' }}
+  alignItems="center"
+  // justifyContent="space-between"
+  spacing={{ xs: 1.5, sm: 1, md: 3 }}
+>
+  <FooterLink to={'/TermsOfUse'} component={RouterLink} underline="none">
+                          TermsOfUse
+                        </FooterLink>
+
+       <FooterLink to={'/Refund'} component={RouterLink} underline="none">
+   Refund & Cancellation
+  </FooterLink>
+       <FooterLink to={'/PrivacyPolicy'} component={RouterLink} underline="none">
+  Privacy Policy
+  </FooterLink>
+</Stack>
+          </Container>
+
       </Box>
     </>
   );

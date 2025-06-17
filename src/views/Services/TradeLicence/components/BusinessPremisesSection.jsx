@@ -6,9 +6,13 @@ import Factory from 'utils/Factory';
 import { useDispatch } from 'react-redux';
 import { openSnackbar } from 'store/slices/snackbar';
 import { indian_States_And_UTs } from 'utils/indian_States_And_UT';
+import { useSearchParams } from 'react-router-dom';
 import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
+
 import AdditionalPlaceOfBusiness from './AdditionalPlaceOfBusiness';
-const BusinessPremisesSection = () => {
+const BusinessPremisesSection = ({taskId}) => {
+  const [searchParams] = useSearchParams();
+  const service_id = searchParams.get('service_id');
   const [businessPremises, setBusinessPremises] = useState({
     id: null,
     additional_space: 'no'
@@ -115,8 +119,8 @@ const BusinessPremisesSection = () => {
     onSubmit: async (values) => {
       let url = businessPremises.id ? `/tradelicense/business-location/${businessPremises.id}/` : `/tradelicense/business-location/`;
       let formData = new FormData();
-      formData.append('service_request', 25);
-      formData.append('service_task', 14);
+      formData.append('service_request', service_id);
+      formData.append('service_task', taskId);
       formData.append(
         'address',
         JSON.stringify({
@@ -173,7 +177,7 @@ const BusinessPremisesSection = () => {
   });
 
   const getBusinessPremises = async () => {
-    const url = `/tradelicense/business-location/by-request-or-task?service_request_id=25`;
+    const url = `/tradelicense/business-location/by-request-or-task?service_request_id=${service_id}`;
     const { res } = await Factory('get', url);
     if (res.status_cd === 0 && res.data) {
       const data = res.data;

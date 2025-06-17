@@ -1,15 +1,79 @@
-import React from 'react';
-import { Box } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { Box, CircularProgress } from '@mui/material';
+import { useSearchParams } from 'react-router-dom';
+import Factory from 'utils/Factory';
+
+import ApplicantDetails from './ApplicantDetails';
 import BusinessIdentityStructureSection from './BusinessIdentityStructureSection';
 import PromoterSignatorySection from './PromoterSignatorySection';
 import BusinessPremisesSection from './BusinessPremisesSection';
 
-const StepOne = ({}) => {
+const StepOne = () => {
+  const [searchParams] = useSearchParams();
+  const service_id = searchParams.get('service_id');
+
+  const [taskIds, setTaskIds] = useState({
+    applicantDetailsTaskId: null,
+    businessIdentityTaskId: null,
+    promoterSignatoryTaskId: null,
+    businessPremisesTaskId: null
+  });
+
+  const [loading, setLoading] = useState(true);
+
+  const fetchTaskIds = async () => {
+    const url = `/tradelicense/service-request-section-data?service_request_id=${service_id}&section=applicant_and_business_info`;
+    const { res } = await Factory('get', url);
+
+    if (res.status_cd === 0 && res.data?.tasks) {
+      const taskData = res.data.tasks;
+      console.log('Response Data:', res.data);
+      console.log('Task Data:', res.data.tasks);
+
+      setTaskIds({
+        applicantDetailsTaskId:res.data.tasks['Applicant Details']?.task_id || null,
+        businessIdentityTaskId: res.data.tasks['Business Identity']?.task_id || null,
+        promoterSignatoryTaskId: res.data.tasks['Signatory Details']?.task_id || null,
+        businessPremisesTaskId:res.data.tasks['Business Location']?.task_id || null
+      });
+        console.log('Task IDs:', {
+        applicantDetailsTaskId:res.data.tasks['Applicant Details']?.task_id ,
+        businessIdentityTaskId: res.data.tasks['Business Identity']?.task_id ,
+        promoterSignatoryTaskId: res.data.tasks['Signatory Details']?.task_id ,
+        businessPremisesTaskId:res.data.tasks['Business Location']?.task_id ,
+      });
+      console.log('Task dxcfvgbhjkIDs:', taskIds.businessIdentityTaskId);
+    }
+
+    setLoading(false);
+  };
+
+  // useEffect(() => {
+  //   if (service_id) {
+  //     fetchTaskIds();
+  //   }
+  // }, [service_id]);
+    useEffect(() => {
+      fetchTaskIds();
+    }, []);
+
+  if (loading) {
+    return (
+      <Box sx={{ textAlign: 'center', py: 4 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   return (
     <Box>
-      <BusinessIdentityStructureSection />
-      <PromoterSignatorySection />
-      <BusinessPremisesSection />
+<BusinessIdentityStructureSection 
+  taskId={taskIds.businessIdentityTaskId} 
+  applicantTaskId={taskIds.applicantDetailsTaskId} 
+/>      {/* <ApplicantDetails taskId={taskIds.applicantDetailsTaskId} /> */}
+      {/* <BusinessIdentityStructureSection taskId={taskIds.businessIdentityTaskId} /> */}
+      <PromoterSignatorySection taskId={taskIds.promoterSignatoryTaskId} />
+      <BusinessPremisesSection taskId={taskIds.businessPremisesTaskId} />
     </Box>
   );
 };

@@ -3,6 +3,8 @@ import { Card, Typography, Box, Paper } from '@mui/material';
 import StepOne from './components/StepOne';
 import StepTwo from './components/StepTwo';
 import StepThree from './components/StepThree';
+import { useSearchParams } from 'react-router-dom';
+import Factory from 'utils/Factory';
 const steps = [
   { label: 'Applicant & Business Details', width: 200 },
   { label: 'Documents & Declaration', width: 200 },
@@ -10,11 +12,30 @@ const steps = [
 ];
 
 const LabourLicenceRegistration = () => {
+  const [searchParams] = useSearchParams();
+    const service_id = searchParams.get('service_id');
   const [step, setStep] = React.useState(0);
   const activeStep = step;
   const handleStepClick = (targetStep) => {
     setStep(targetStep);
   };
+  const [taskIds, setTaskIds] = useState({
+    businessregistration: null});
+    const fetchTaskId = async () => {
+    const url = `/labourlicense/service-request-section-data?service_request_id=${service_id}&section=document_related_info`;
+    const { res } = await Factory('get', url);
+
+    if (res.status_cd === 0 && res.data?.task_data) {
+      const taskData = res.data.task_data;
+      setTaskIds({businessregistration: taskData["Business Registration Documents"]?.task_id || null});
+    }
+  };
+
+  useEffect(() => {
+    if (service_id) {
+      fetchTaskId();
+    }
+  }, [service_id]);
 
   return (
     <Card sx={{ minHeight: '100vh', p: { xs: 1, md: 4 } }}>
@@ -67,7 +88,7 @@ const LabourLicenceRegistration = () => {
 
           {step === 0 && <StepOne />}
 
-          {step === 1 && <StepTwo />}
+          {step === 1 && <StepTwo taskId={taskIds.businessregistration}/>}
 
           {step === 2 && <StepThree />}
         </Paper>

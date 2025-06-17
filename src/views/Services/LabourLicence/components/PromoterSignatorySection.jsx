@@ -21,14 +21,17 @@ import * as Yup from 'yup';
 import { useDispatch } from 'react-redux';
 import { openSnackbar } from 'store/slices/snackbar';
 import Factory from 'utils/Factory';
+import { useSearchParams } from 'react-router-dom';
 import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
 
-const PromoterSignatorySection = () => {
+const PromoterSignatorySection = ({ taskId }) => {
+  const [searchParams] = useSearchParams();
+    const service_id = searchParams.get('service_id');
   const dispatch = useDispatch();
   const [saveIndex, setSaveIndex] = useState(null); // <-- index of promoter to save
 
   const getSignatoryDetails = async () => {
-    const url = `/labourlicense/signatory-details/by-request?service_request_id=24`;
+    const url = `/labourlicense/signatory-details/by-request?service_request_id=${service_id}`;
     const { res } = await Factory('get', url);
    const signatorydetailsinfo = res?.data?.signatory_details_info ?? res?.signatory_details_info ?? [];
 
@@ -102,8 +105,8 @@ const PromoterSignatorySection = () => {
 
       try {
         let formData = new FormData();
-        formData.append('service_request', 24);
-        formData.append('service_task', 7);
+        formData.append('service_request', service_id);
+        formData.append('service_task', taskId);
         formData.append('name', promoter.name);
         if (promoter.aadhar_image && typeof promoter.aadhar_image !== 'string') {
           formData.append('aadhar_image', promoter.aadhar_image);
