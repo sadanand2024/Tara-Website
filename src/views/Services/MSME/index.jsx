@@ -419,14 +419,14 @@ const MSMEDashboard = () => {
                     'Has Business Commenced?',
                     'Date of commencement'
                   ]}
-                  task_id={sectionData.tasks['Business Identity']?.task_id}
+                  task_id={sectionData?.tasks?.['Business Identity']?.task_id}
                 />
               </Box>
 
               <Typography color="text.secondary" sx={{ mb: 3, fontSize: 15 }}>
                 Please provide all info as per your government identity documents (PAN, Aadhaar etc.)
               </Typography>
-              <Grid2 container spacing={2} mb={4}>
+              <Grid2 container spacing={2} mb={2}>
                 {/* 1. Organisation type */}
                 <Grid2 size={{ xs: 12, sm: 6, md: 3 }} display="flex" alignItems="center">
                   <Typography
@@ -705,12 +705,12 @@ const MSMEDashboard = () => {
               <Divider sx={{ my: 2 }} />
               {/* Task 2: Business Classification Inputs */}
               <Box display="flex" justifyContent="space-between" alignItems="center">
-                <Typography variant="h4" mb={2} mt={4}>
+                <Typography variant="h4" mb={2} mt={2}>
                   Business Classification Inputs
                 </Typography>
                 <RaiseRequest
                   fields={['Major Activity', 'Nature of Business', 'NIC Codes', 'Number of persons employed']}
-                  task_id={sectionData.tasks['Business Classification Inputs']?.task_id}
+                  task_id={sectionData?.tasks?.['Business Classification Inputs']?.task_id}
                 />
               </Box>
               <Grid2 container spacing={2}>
@@ -1273,7 +1273,7 @@ const FinancialLocationDetails = ({
               'Are you registered under GST?',
               'GST Certificate'
             ]}
-            task_id={sectionData.tasks['Turnover And InvestmentDeclaration']?.task_id}
+            task_id={sectionData?.tasks?.['Turnover And InvestmentDeclaration']?.task_id}
           />
         </Box>
         <Grid2 container spacing={2} mb={2}>
@@ -1421,7 +1421,7 @@ const FinancialLocationDetails = ({
       <Divider sx={{ my: 2 }} />
       {/* Task 4: Registered Address & Units */}
       <form onSubmit={addressFormik.handleSubmit} autoComplete="off">
-        <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={3} mt={2}>
           <Typography variant="h4">Registered Address & Units</Typography>
           <RaiseRequest
             fields={[
@@ -1430,7 +1430,7 @@ const FinancialLocationDetails = ({
               'Official address proof',
               'Location of the enterprise'
             ]}
-            task_id={sectionData.tasks['Registered Address']?.task_id}
+            task_id={sectionData?.tasks?.['Registered Address']?.task_id}
           />
         </Box>
         <Grid2 container spacing={2} mb={2}>
