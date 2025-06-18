@@ -17,6 +17,9 @@ import Factory from 'utils/Factory';
 import { indian_States_And_UTs } from 'utils/indian_States_And_UT';
 import * as Yup from 'yup';
 import { useSearchParams } from 'react-router-dom';
+import RaiseRequest from '../../RaiseRequest';
+import GetActionButtons from '../../FormHelpers';
+
 
 const PrincipleOfBusiness = () => {
    const [searchParams] = useSearchParams();
@@ -316,10 +319,34 @@ const PrincipleOfBusiness = () => {
       <Card sx={{ p: 3 }}>
         <form onSubmit={formik.handleSubmit}>
           <Grid2 container spacing={2}>
-            <Grid2 size={12}>
+            <Grid2>
               <Typography variant="h4" fontWeight={700}>
-                Details of Principal Place of Business
+                Principal  Information
               </Typography>
+            </Grid2>
+            <Grid2 sx={{ flexGrow:1,ml:95 }}>
+              <Box display="flex" justifyContent="flex-end" gap={1}>
+                <RaiseRequest
+                  fields={[
+  'Pincode',
+  'State',
+  'District',
+  'City',
+  'Road / Street / Locality',
+  'Building / Flat No.',
+  'Latitude',
+  'Longitude',
+  'Nature of Possession of Premise',
+  'Address Proof',
+  'Address Proof File',
+  'Rental Agreement or NOC',
+  'Bank Statement or Cancelled Cheque'
+]}
+
+                task_id={prinicipalBusiness.task_id}
+              />
+                
+              </Box>
             </Grid2>
 
             {mainFields.map((field) => (
@@ -333,6 +360,17 @@ const PrincipleOfBusiness = () => {
                 <Button variant="contained" color="primary" type="submit">
                   {prinicipalBusiness.id ? 'Update' : 'Save'}
                 </Button>
+                  <GetActionButtons
+                                            type="put"
+                                            urlEndpoint="principal-place-details"
+                                            recId={prinicipalBusiness.id}
+                                            status={prinicipalBusiness.status}
+                                            data={prinicipalBusiness}
+                                            service_request={service_id}
+                                            task_id={prinicipalBusiness.task_id}
+                                            urlKey="gst"
+                                            urlBool={true}
+                                            />
               </Stack>
             </Grid2>
           </Grid2>

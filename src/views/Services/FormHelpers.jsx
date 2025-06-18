@@ -16,14 +16,16 @@ const GetActionButtons = ({
   filingHelper,
   setReviewStep,
   step,
-  msme = false
+  msme = false,
+  urlKey,
+  urlBool = false
 }) => {
   const [statusData, setStatusData] = useState(false);
-  const user = useSelector((state) => state).accountReducer.user;
+  const user = useSelector((state) => state.accountReducer.user);
   let assignee = data?.assignee || '';
   let rewiewer = data?.reviewer || '';
   let Uid = user.user.id;
-  let service = msme ? 'msme' : 'income_tax_returns';
+  let service = msme ? 'msme' : urlBool ? urlKey : 'income_tax_returns';
 
   useEffect(() => {
     if (status) {
@@ -45,12 +47,13 @@ const GetActionButtons = ({
   const changeStatus = async (changedStatus) => {
     let payload = {};
     if (step === 0) {
+      console.log('msme', msme, urlKey);
       type = 'put';
-      urlEndpoint = msme ? urlEndpoint : `review-filing`;
+      urlEndpoint = msme || urlKey ? urlEndpoint : `review-filing`;
       payload = { approval_status: changedStatus };
     } else if (step === 1) {
       type = 'put';
-      urlEndpoint = msme ? urlEndpoint : `review-filing`;
+      urlEndpoint = msme || urlKey ? urlEndpoint : `review-filing`;
       payload = { filing_status: changedStatus };
     } else if (type === 'put') {
       payload = { status: changedStatus };

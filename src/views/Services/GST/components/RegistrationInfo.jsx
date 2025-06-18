@@ -19,6 +19,9 @@ import Factory from 'utils/Factory';
 import * as Yup from 'yup';
 import { openSnackbar } from 'store/slices/snackbar';
 import { useSearchParams } from 'react-router-dom';
+import RaiseRequest from '../../RaiseRequest';
+import GetActionButtons from '../../FormHelpers';
+
 
 
 
@@ -180,9 +183,20 @@ const RegistrationInfo = () => {
     <Box sx={{ pt: 4 }}>
       <Card variant="outlined">
         <CardContent>
-          <Typography variant="h4" gutterBottom>
-            Registration Info
-          </Typography>
+          <Grid2>
+               <Typography variant="h4" fontWeight={700}>
+                 Registration Information
+               </Typography>
+             </Grid2>
+             <Grid2 sx={{ flexGrow:1,ml:95 }}>
+               <Box display="flex" justifyContent="flex-end" gap={1}>
+                 <RaiseRequest
+                   fields={[]}
+                   task_id={registrationInfo.task_id}
+                 />
+                 
+               </Box>
+             </Grid2>
 
           <form onSubmit={formik.handleSubmit}>
             {questions.map((item, index) => (
@@ -254,8 +268,20 @@ const RegistrationInfo = () => {
             <Grid2 size={{ xs: 12 }}>
               <Stack direction="row" spacing={2} justifyContent="flex-end" mt={3}>
                 <Button variant="contained" color="primary" type="submit">
-                  Save
+                  Save Registration Details
                 </Button>
+                 <GetActionButtons
+                            type="put"
+                            urlEndpoint="registration-info"
+                            recId={registrationInfo.id}
+                            status={registrationInfo.status}
+                            data={registrationInfo}
+                            service_request={service_id}
+                            task_id={registrationInfo.task_id}
+                            urlKey="gst"
+                            urlBool={true}
+                            
+                          />
               </Stack>
             </Grid2>
           </form>

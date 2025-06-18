@@ -20,7 +20,7 @@ import { useSelector } from 'store';
 // ==============================|| MANAGE USERS ||============================== //
 
 export default function ManageUsers() {
-  const user = useSelector((state) => state).accountReducer.user;
+  const user = useSelector((state) => state.accountReducer.user);
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [openAddDialog, setOpenAddDialog] = React.useState(false);
   const [page, setPage] = React.useState(1);
