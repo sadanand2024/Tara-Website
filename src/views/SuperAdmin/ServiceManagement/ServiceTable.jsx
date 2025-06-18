@@ -81,21 +81,24 @@ const ServiceRequests = ({ searchQuery, setUsers, assigned, setSearchQuery }) =>
   }, []);
 
   const filteredRequests = React.useMemo(() => {
+    setPage(1);
     if (!searchQuery) return requests;
-    return requests.filter(
+    const __requests = requests.filter(
       (request) =>
+        request.service_label?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         request.service_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         request.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        request.client_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        request.user?.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         request.source?.toLowerCase().includes(searchQuery.toLowerCase())
     );
+    return __requests;
   }, [requests, searchQuery]);
 
   const paginatedRequests = React.useMemo(() => {
     const start = (page - 1) * rowsPerPage;
     const end = start + rowsPerPage;
-    return requests.slice(start, end);
-  }, [requests, page, rowsPerPage]);
+    return filteredRequests.slice(start, end);
+  }, [filteredRequests, page, rowsPerPage]);
 
   if (loading) {
     return (
@@ -121,11 +124,6 @@ const ServiceRequests = ({ searchQuery, setUsers, assigned, setSearchQuery }) =>
     setRowsPerPage(value);
     setPage(1);
     handleClose();
-  };
-
-  const handleSearch = (event) => {
-    setSearchQuery(event.target.value);
-    setPage(1);
   };
 
   const handleARChange = (row, user, type) => {

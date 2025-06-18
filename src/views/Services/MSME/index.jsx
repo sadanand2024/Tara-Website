@@ -1254,7 +1254,8 @@ const FinancialLocationDetails = ({
   };
 
   useEffect(() => {
-    if (registeredAddressUnitsData?.location_of_plant_or_unit.length > 0) {
+    console.log('registeredAddressUnitsData: ', registeredAddressUnitsData);
+    if (registeredAddressUnitsData?.location_of_plant_or_unit?.length > 0) {
       setPlantUnits(registeredAddressUnitsData.location_of_plant_or_unit);
     }
   }, [registeredAddressUnitsData]);

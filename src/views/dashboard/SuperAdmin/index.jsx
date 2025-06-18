@@ -11,30 +11,30 @@ import dayjs from 'dayjs';
 const summaryCards = [
   {
     label: 'Total Purchases',
-    value: '$9,150',
-    trend: '+10%',
+    value: '₹0',
+    trend: '0%',
     trendType: 'up',
     sub: 'previous 60 Days'
   },
   {
     label: '28 Days Revenue',
-    value: '$4,150',
-    trend: '8.6%',
+    value: '₹0',
+    trend: '0%',
     trendType: 'down',
     sub: 'previous 28 Days'
   },
   {
     label: 'Orders Amount',
-    value: '$28,576',
-    trend: '8.6%',
-    trendType: 'down',
+    value: '₹0',
+    trend: '0%',
+    trendType: 'up',
     sub: 'Last 90 days'
   },
   {
     label: 'Total Orders',
-    value: '6790',
-    trend: '',
-    trendType: '',
+    value: '₹0',
+    trend: '0%',
+    trendType: 'down',
     sub: 'last 60 days'
   }
 ];
