@@ -46,7 +46,8 @@ export default function SimpleTabs() {
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('md')); // Change layout for md and below
 
   const { mode, borderRadius } = useConfig();
-  const [value, setValue] = useState(0);
+  const dispatch = useDispatch();
+  const [value, setValue] = useState(3);
   const [businessDetails, setBusinessDetails] = useState(null);
   const [postType, setPostType] = useState('');
   const [loading, setLoading] = useState(true);

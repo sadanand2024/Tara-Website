@@ -27,14 +27,11 @@ import BulkItems from './BulkItems';
 import MainCard from '../../../ui-component/cards/MainCard';
 
 const InvoiceDetails = ({
-  type,
   invoice_number_format,
   getInvoiceFormat,
   selectedInvoice,
   businessDetailsData,
   customers,
-  open,
-  onClose,
   itemsList,
   getGoodsAndServicesData,
   branches,
@@ -42,7 +39,8 @@ const InvoiceDetails = ({
   gstList,
   getGSTDetails,
   fetchBusinessDetails,
-  get_Customers_Data
+  getCustomersData,
+  getBranchesData
 }) => {
   const invoiceDetailsFields = [
     { name: 'gstin', label: 'GSTIN' },
@@ -123,8 +121,6 @@ const InvoiceDetails = ({
     invoice_date: Yup.string().required('Invoice date is required'),
     place_of_supply: Yup.string().required('Place of supply is required'),
     due_date: Yup.date().required('Due date is required')
-    // order_number: Yup.string().required('Order number is required'),
-    // sales_person: Yup.string().required('Sales Person is required')
   });
   const formik = useFormik({
     initialValues: {
@@ -516,20 +512,6 @@ const InvoiceDetails = ({
   }, [selectedInvoice]);
 
   const { values, setValues, errors, touched, handleSubmit, handleBlur, setFieldValue, resetForm } = formik;
-  // const generateInvoiceNumber = async (newgstin, branch_code) => {
-  //   const url = `/invoicing/invoicing-profiles/${businessDetailsData.id}/update/`;
-  //   let formdata = new FormData();
-  //   formdata.append('gstin', newgstin || 'NA');
-  //   formdata.append('branch_code', branch_code || 'NA');
-  //   const { res } = await Factory('put', url, formdata);
-  //   console.log(res);
-
-  //   if (res.status_cd === 0) {
-  //     getInvoiceFormat();
-  //   } else {
-  //     dispatch(openSnackbar({ message: JSON.stringify(res.data.data), variant: 'error' }));
-  //   }
-  // };
 
   return (
     <MainCard>
@@ -565,6 +547,8 @@ const InvoiceDetails = ({
             gstList={gstList}
             getGSTDetails={getGSTDetails}
             fetch_Business_Details={fetchBusinessDetails}
+            getCustomersData={getCustomersData}
+            getBranchesData={getBranchesData}
           />
         </Grid2>
 
@@ -600,7 +584,6 @@ const InvoiceDetails = ({
             totalDiscount={formik.values.total_discount || 0}
             businessDetailsData={businessDetailsData}
             get_Goods_and_Services_Data={getGoodsAndServicesData}
-            get_Customers_Data={get_Customers_Data}
           />
         </Grid2>
 

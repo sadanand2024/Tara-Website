@@ -44,61 +44,73 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
   const formik = useFormik({
     initialValues: {
       name: '',
-      entity_type: '',
       pan_number: '',
+      entity_type: '',
       gst_registered: 'No',
+      gst_type: '',
+      gstin: 'NA',
+      address_line1: '',
+      address_line2: '',
+      country: 'India',
+      state: '',
+      postal_code: '',
       email: '',
       mobile_number: '',
       opening_balance: 0,
-      branches: [
-        {
-          branch_name: '',
-          gstin: 'NA',
-          gst_type: '',
-          address_line1: '',
-          address_line2: '',
-          country: 'India',
-          state: '',
-          postal_code: ''
-        }
-      ]
+      has_multiple_branches: false,
+      branches: []
     },
     validationSchema: Yup.object({
       name: Yup.string().required('Customer Name is required'),
-      entity_type: Yup.string().required('Entity Type is required'),
       pan_number: Yup.string()
         .matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN format')
         .required('PAN is required'),
-      gst_registered: Yup.string().required('GST Registration status is required'),
+      entity_type: Yup.string().required('Entity Type is required'),
+
+      gst_type: Yup.string().when('gst_registered', {
+        is: 'Yes',
+        then: () => Yup.string().required('GST Type is required'),
+        otherwise: () => Yup.string().oneOf(['NA'], 'GST Type must be "NA" when GST Registered is "No"')
+      }),
+      gstin: Yup.string().when('gst_registered', {
+        is: 'Yes',
+        then: () =>
+          Yup.string()
+            .matches(/^[0-9A-Z]{15}$/, 'Invalid GSTIN, Format must be: 22AAAAA0000A1Z5')
+            .required('GSTIN is required'),
+        otherwise: () => Yup.string().oneOf(['NA'], 'GSTIN must be "NA" when GST Registered is "No"')
+      }),
+      gst_registered: Yup.string().required('GST Registered is required'),
+      address_line1: Yup.string().required('Address Line 1 is required'),
+      address_line2: Yup.string().required('Address Line 2 is required'),
+      country: Yup.string().required('Country is required'),
+      state: Yup.string().required('State is required'),
+      postal_code: Yup.number().typeError('Pincode must be a number').required('Pincode is required'),
       email: Yup.string().email('Invalid email').required('Email is required'),
       mobile_number: Yup.string().required('Mobile number is required'),
       opening_balance: Yup.number().typeError('Opening Balance must be a number').required('Opening Balance is required'),
-      branches: Yup.array().of(
-        Yup.object().shape({
-          branch_name: Yup.string().required('Branch Name is required'),
-          gstin: Yup.string().when('gst_registered', {
-            is: 'Yes',
-            then: () =>
-              Yup.string()
-                .required('GSTIN is required')
-                .matches(/^[0-9A-Z]{15}$/, 'Invalid GSTIN, Format must be: 22AAAAA0000A1Z5'),
-            otherwise: () => Yup.string().oneOf(['NA'], 'GSTIN must be "NA" when GST Registered is "No"')
-          }),
-          gst_type: Yup.string().when('gst_registered', {
-            is: 'Yes',
-            then: () => Yup.string().required('GST Type is required'),
-            otherwise: () => Yup.string().oneOf(['NA'], 'GST Type must be "NA" when GST Registered is "No"')
-          }),
-          address_line1: Yup.string().required('Address Line 1 is required'),
-          postal_code: Yup.number()
-            .typeError('Pincode must be a number')
-            .required('Pincode is required')
-            .min(100000, 'Minimum 6 digits')
-            .max(999999, 'Maximum 6 digits'),
-          state: Yup.string().required('State is required'),
-          country: Yup.string().required('Country is required')
-        })
-      )
+      has_multiple_branches: Yup.boolean().required('Please select if you have multiple branches'),
+      branches: Yup.array().when('has_multiple_branches', {
+        is: true,
+        then: () =>
+          Yup.array()
+            .min(1, 'At least one branch is required')
+            .of(
+              Yup.object().shape({
+                branch_name: Yup.string().required('Branch Name is required'),
+                gstin: Yup.string()
+                  .matches(/^[0-9A-Z]{15}$/, 'Invalid GSTIN, Format must be: 22AAAAA0000A1Z5')
+                  .required('GSTIN is required'),
+                gst_type: Yup.string().required('GST Type is required'),
+                address_line1: Yup.string().required('Address Line 1 is required'),
+                address_line2: Yup.string().optional(),
+                postal_code: Yup.string().required('Pincode is required'),
+                state: Yup.string().required('State is required'),
+                country: Yup.string().required('Country is required')
+              })
+            ),
+        otherwise: () => Yup.array().of(Yup.object().shape({}))
+      })
     }),
     onSubmit: async (values) => {
       if (!businessDetailsData?.id && !businessDetailsData?.invoicing_profile_id) {
@@ -124,18 +136,10 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
       const { res } = await Factory(method, url, postData);
 
       if (res.status_cd === 0) {
-        if (typeof getCustomersData === 'function') {
-          getCustomersData(businessDetailsData.id || businessDetailsData.invoicing_profile_id);
-        }
-        if (typeof setType === 'function') {
-          setType('');
-        }
-        if (typeof resetForm === 'function') {
-          resetForm();
-        }
-        if (typeof handleClose === 'function') {
-          handleClose();
-        }
+        getCustomersData(businessDetailsData.invoicing_profile_id || businessDetailsData.id);
+        setType('');
+        resetForm();
+        handleClose();
         dispatch(
           openSnackbar({
             open: true,
@@ -165,32 +169,28 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
     if (type === 'edit' && selectedCustomer) {
       setValues({
         name: selectedCustomer.name || '',
-        entity_type: selectedCustomer.entity_type || '',
         pan_number: selectedCustomer.pan_number || '',
+        gstin: selectedCustomer.gstin || '',
+        gst_type: selectedCustomer.gst_type || '',
+        address_line1: selectedCustomer.address_line1 || '',
+        address_line2: selectedCustomer.address_line2 || '',
+        country: selectedCustomer.country || 'India',
+        state: selectedCustomer.state || '',
+        postal_code: selectedCustomer.postal_code || '',
+        entity_type: selectedCustomer.entity_type || '',
         gst_registered: selectedCustomer.gst_registered || 'No',
         email: selectedCustomer.email || '',
         mobile_number: selectedCustomer.mobile_number || '',
         opening_balance: selectedCustomer.opening_balance || 0,
-        branches: selectedCustomer.branches || [
-          {
-            branch_name: '',
-            gstin: 'NA',
-            gst_type: '',
-            address_line1: '',
-            address_line2: '',
-            country: 'India',
-            state: '',
-            postal_code: ''
-          }
-        ]
+        branches: selectedCustomer.branches || [],
+        has_multiple_branches: selectedCustomer.has_multiple_branches || false
       });
     }
   }, [type, selectedCustomer]);
-
   const addBranch = () => {
     const newBranch = {
       branch_name: '',
-      gstin: 'NA',
+      gstin: '',
       gst_type: '',
       address_line1: '',
       address_line2: '',
@@ -209,16 +209,14 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
   const renderBranchFields = (branch, index) => (
     <Box key={index} sx={{ mb: 3, p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-        <Typography variant="h6">Branch {index + 1}</Typography>
-        {index > 0 && (
-          <IconButton onClick={() => removeBranch(index)} color="error">
-            <DeleteIcon />
-          </IconButton>
-        )}
+        {/* <Typography variant="h6">Branch {index + 1}</Typography> */}
+        <IconButton onClick={() => removeBranch(index)} color="error">
+          <DeleteIcon />
+        </IconButton>
       </Stack>
       <Grid2 container spacing={2}>
         <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-          <Typography sx={{ mb: 1 }}>Branch Name</Typography>
+          <Typography sx={{ mb: 1 }}>Branch Name/Vertical</Typography>
           <CustomInput
             name={`branches.${index}.branch_name`}
             value={branch.branch_name}
@@ -227,31 +225,29 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
             helperText={touched.branches?.[index]?.branch_name && errors.branches?.[index]?.branch_name}
           />
         </Grid2>
-        {values.gst_registered === 'Yes' && (
-          <>
-            <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-              <Typography sx={{ mb: 1 }}>GSTIN</Typography>
-              <CustomInput
-                name={`branches.${index}.gstin`}
-                value={branch.gstin}
-                onChange={(e) => setFieldValue(`branches.${index}.gstin`, e.target.value.toUpperCase())}
-                error={touched.branches?.[index]?.gstin && Boolean(errors.branches?.[index]?.gstin)}
-                helperText={touched.branches?.[index]?.gstin && errors.branches?.[index]?.gstin}
-              />
-            </Grid2>
-            <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-              <Typography sx={{ mb: 1 }}>GST Type</Typography>
-              <CustomAutocomplete
-                name={`branches.${index}.gst_type`}
-                value={branch.gst_type}
-                onChange={(e, val) => setFieldValue(`branches.${index}.gst_type`, val)}
-                options={gstTypes}
-                error={touched.branches?.[index]?.gst_type && Boolean(errors.branches?.[index]?.gst_type)}
-                helperText={touched.branches?.[index]?.gst_type && errors.branches?.[index]?.gst_type}
-              />
-            </Grid2>
-          </>
-        )}
+
+        <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+          <Typography sx={{ mb: 1 }}>GSTIN</Typography>
+          <CustomInput
+            name={`branches.${index}.gstin`}
+            value={branch.gstin}
+            onChange={(e) => setFieldValue(`branches.${index}.gstin`, e.target.value.toUpperCase())}
+            error={touched.branches?.[index]?.gstin && Boolean(errors.branches?.[index]?.gstin)}
+            helperText={touched.branches?.[index]?.gstin && errors.branches?.[index]?.gstin}
+          />
+        </Grid2>
+        <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+          <Typography sx={{ mb: 1 }}>GST Type</Typography>
+          <CustomAutocomplete
+            name={`branches.${index}.gst_type`}
+            value={branch.gst_type}
+            onChange={(e, val) => setFieldValue(`branches.${index}.gst_type`, val)}
+            options={gstTypes}
+            error={touched.branches?.[index]?.gst_type && Boolean(errors.branches?.[index]?.gst_type)}
+            helperText={touched.branches?.[index]?.gst_type && errors.branches?.[index]?.gst_type}
+          />
+        </Grid2>
+
         <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
           <Typography sx={{ mb: 1 }}>Address Line 1</Typography>
           <CustomInput
@@ -305,7 +301,6 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
       </Grid2>
     </Box>
   );
-
   return (
     <Modal
       maxWidth="md"
@@ -386,9 +381,109 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
               helperText={touched.entity_type && errors.entity_type}
             />
           </Grid2>
+          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+            <FormControl fullWidth>
+              <FormLabel>GST Registered</FormLabel>
+              <RadioGroup
+                row
+                name="gst_registered"
+                value={values.gst_registered}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setFieldValue('gst_registered', value);
+                  if (value === 'No') {
+                    setFieldValue('gstin', 'NA');
+                    setFieldValue('gst_type', '');
+                    formik.setFieldTouched('gstin', false);
+                    formik.setFieldError('gstin', '');
+                  } else {
+                    setFieldValue('gstin', '');
+                  }
+                }}
+              >
+                <FormControlLabel value="Yes" control={<Radio />} label="Yes" />
+                <FormControlLabel value="No" control={<Radio />} label="No" />
+              </RadioGroup>
+            </FormControl>
+          </Grid2>
+          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+            <Typography sx={{ mb: 1 }}>GST Type</Typography>
+            <CustomAutocomplete
+              name="gst_type"
+              value={values.gst_type}
+              onChange={(e, val) => setFieldValue('gst_type', val)}
+              options={gstTypes}
+              error={touched.gst_type && Boolean(errors.gst_type)}
+              helperText={touched.gst_type && errors.gst_type}
+              disabled={values.gst_registered === 'No'}
+            />
+          </Grid2>
 
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-            <Typography sx={{ mb: 1 }}>Email</Typography>
+            <Typography sx={{ mb: 1 }}>GSTIN</Typography>
+            <CustomInput
+              name="gstin"
+              value={values.gstin}
+              onChange={(e) => setFieldValue('gstin', e.target.value)}
+              error={touched.gstin && Boolean(errors.gstin)}
+              helperText={touched.gstin && errors.gstin}
+              disabled={values.gst_registered === 'No'}
+            />
+          </Grid2>
+          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+            <Typography sx={{ mb: 1 }}>Address Line 1</Typography>
+            <CustomInput
+              name="address_line1"
+              value={values.address_line1}
+              onChange={(e) => setFieldValue('address_line1', e.target.value)}
+              error={touched.address_line1 && Boolean(errors.address_line1)}
+              helperText={touched.address_line1 && errors.address_line1}
+            />
+          </Grid2>
+          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+            <Typography sx={{ mb: 1 }}>Address Line 2</Typography>
+            <CustomInput
+              name="address_line2"
+              value={values.address_line2}
+              onChange={(e) => setFieldValue('address_line2', e.target.value)}
+              error={touched.address_line2 && Boolean(errors.address_line2)}
+              helperText={touched.address_line2 && errors.address_line2}
+            />
+          </Grid2>
+          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+            <Typography sx={{ mb: 1 }}>Country</Typography>
+            <CustomAutocomplete
+              name="country"
+              value={values.country}
+              onChange={(e, val) => setFieldValue('country', val)}
+              options={CountriesList}
+              error={touched.country && Boolean(errors.country)}
+              helperText={touched.country && errors.country}
+            />
+          </Grid2>
+          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+            <Typography sx={{ mb: 1 }}>State</Typography>
+            <CustomAutocomplete
+              name="state"
+              value={values.state}
+              onChange={(e, val) => setFieldValue('state', val)}
+              options={indian_States_And_UTs}
+              error={touched.state && Boolean(errors.state)}
+              helperText={touched.state && errors.state}
+            />
+          </Grid2>
+          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+            <Typography sx={{ mb: 1 }}>Pincode</Typography>
+            <CustomInput
+              name="postal_code"
+              value={values.postal_code}
+              onChange={(e) => setFieldValue('postal_code', e.target.value)}
+              error={touched.postal_code && Boolean(errors.postal_code)}
+              helperText={touched.postal_code && errors.postal_code}
+            />
+          </Grid2>
+          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+            <Typography sx={{ mb: 1 }}>Email </Typography>
             <CustomInput
               name="email"
               value={values.email}
@@ -420,43 +515,56 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
             <FormControl fullWidth>
-              <FormLabel>GST Registered</FormLabel>
+              <FormLabel>Do You have Multiple branches ?</FormLabel>
               <RadioGroup
                 row
-                name="gst_registered"
-                value={values.gst_registered}
+                name="has_multiple_branches"
+                value={values.has_multiple_branches}
                 onChange={(e) => {
-                  const value = e.target.value;
-                  setFieldValue('gst_registered', value);
-                  if (value === 'No') {
-                    values.branches.forEach((_, index) => {
-                      setFieldValue(`branches.${index}.gstin`, 'NA');
-                      setFieldValue(`branches.${index}.gst_type`, '');
-                    });
+                  const value = e.target.value === 'true';
+                  setFieldValue('has_multiple_branches', value);
+                  if (!value) {
+                    setFieldValue('branches', []);
+                  } else {
+                    setFieldValue('branches', [
+                      {
+                        branch_name: '',
+                        gstin: '',
+                        gst_type: '',
+                        address_line1: '',
+                        address_line2: '',
+                        country: 'India',
+                        state: '',
+                        postal_code: ''
+                      }
+                    ]);
                   }
                 }}
               >
-                <FormControlLabel value="Yes" control={<Radio />} label="Yes" />
-                <FormControlLabel value="No" control={<Radio />} label="No" />
+                <FormControlLabel value={true} control={<Radio />} label="Yes" />
+                <FormControlLabel value={false} control={<Radio />} label="No" />
               </RadioGroup>
             </FormControl>
           </Grid2>
         </Grid2>
 
-        <Box sx={{ mt: 4 }}>
-          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-            <Typography variant="h5">Branches</Typography>
-            <Button
-              startIcon={<AddIcon />}
-              variant="contained"
-              onClick={addBranch}
-              disabled={values.gst_registered === 'No' && values.branches.length > 0}
-            >
-              Add Branch
-            </Button>
-          </Stack>
-          {values.branches.map((branch, index) => renderBranchFields(branch, index))}
-        </Box>
+        {values.has_multiple_branches === true && (
+          <Box sx={{ mt: 4 }}>
+            <Stack direction="row" justifyContent="flex-end" alignItems="center" sx={{ mb: 2 }}>
+              {/* <Typography variant="h5">Branches</Typography> */}
+              <Button
+                startIcon={<AddIcon />}
+                variant="contained"
+                size="small"
+                onClick={addBranch}
+                disabled={values.has_multiple_branches === false && values.branches.length > 0}
+              >
+                Add Branch
+              </Button>
+            </Stack>
+            {values.branches.map((branch, index) => renderBranchFields(branch, index))}
+          </Box>
+        )}
       </Box>
     </Modal>
   );
