@@ -24,7 +24,6 @@ const LabourLicenceRegistration = () => {
     const fetchTaskId = async () => {
     const url = `/labourlicense/service-request-section-data?service_request_id=${service_id}&section=document_related_info`;
     const { res } = await Factory('get', url);
-
     if (res.status_cd === 0 && res.data?.task_data) {
       const taskData = res.data.task_data;
       setTaskIds({businessregistration: taskData["Business Registration Documents"]?.task_id || null});
@@ -40,10 +39,10 @@ const LabourLicenceRegistration = () => {
   return (
     <Card sx={{ minHeight: '100vh', p: { xs: 1, md: 4 } }}>
       <Typography variant="h3" mb={1}>
-        Labour Licence Registration
+        Labour License Registration
       </Typography>
       <Typography variant="caption" color="text.secondary">
-        Register your business for a Labour Licence as required by your local municipal authority.
+        Register your business for a Labour License as required by your local municipal authority.
       </Typography>
       <Box sx={{ mt: 2 }}>
         <Paper elevation={0} sx={{ bgcolor: '#eef2f6', p: { xs: 2, sm: 4 }, borderRadius: 3, minHeight: 700 }}>

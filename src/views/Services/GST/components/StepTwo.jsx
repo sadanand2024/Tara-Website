@@ -1,44 +1,48 @@
+import React, { useEffect, useState } from 'react';
+
 import {
-    Autocomplete,
-    Box,
-    Button,
-    Card,
-    Checkbox,
-    Paper,
-    Stack,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    TextField,
-    Tooltip,
-    Typography
+  Autocomplete,
+  Box,
+  Button,
+  Card,
+  Checkbox,
+  Paper,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Tooltip,
+  Typography,
+  Grid2
 } from '@mui/material';
 import { useFormik } from 'formik';
-import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
 import { openSnackbar } from 'store/slices/snackbar';
 import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
 import Factory from 'utils/Factory';
 import * as Yup from 'yup';
-
+import RaiseRequest from '../../RaiseRequest';
+import GetActionButtons from '../../FormHelpers';
 
 const StepTwo = () => {
   const [searchParams] = useSearchParams();
   const service_id = searchParams.get('service_id');
   const dispatch = useDispatch();
   const [saveIndex, setSaveIndex] = useState(null);
-    const [promoterTaskId, setPromoterTaskId] = useState( {
-      id: null,
-    task_id: null }); // <-- index of promoter to save
+  const [promoterTaskId, setPromoterTaskId] = useState({
+    id: null,
+    task_id: null
+  }); // <-- index of promoter to save
 
   const getSignatoryDetails = async () => {
     const url = `/gst/service-request-section-data?service_request_id=${service_id}&section=director_promoter_details`;
     const { res } = await Factory('get', url);
-    const data = res?.data?.task_data["Promoter Signatory Details"]?.data;
+    const data = res?.data?.task_data['Promoter Signatory Details']?.data;
     if (res?.data?.task_data && data !== null) {
       const infoList = data?.info_list ?? res?.info_list ?? [];
       // console.log('Promoter Signatory Details:', infoList);
@@ -57,19 +61,20 @@ const StepTwo = () => {
             designation: item.designation || '',
             residential_same_as_aadhaar_address: item.residential_same_as_aadhaar_address === 'Yes',
             id: item.id || '',
-            task_id: res.data?.task_data["Promoter Signatory Details"]?.task_id || null,
+            task_id: res.data?.task_data['Promoter Signatory Details']?.task_id || null
           })) || [];
 
         if (promoters.length) {
           formik.setFieldValue('promoters', promoters);
         }
         setPromoterTaskId({
-          task_id: res.data?.task_data["Promoter Signatory Details"]?.task_id || null,
+          ...data,
+          task_id: res.data?.task_data['Promoter Signatory Details']?.task_id || null
         });
       }
     } else {
       setPromoterTaskId({
-        task_id: res?.data?.task_data["Promoter Signatory Details"]?.task_id || null,
+        task_id: res?.data?.task_data['Promoter Signatory Details']?.task_id || null
       });
     }
   };
@@ -139,9 +144,9 @@ const StepTwo = () => {
         // let url = `/gst/promoter-signatory-details/`;
 
         // const { res } = await Factory( 'post', url, formData);
-         let url = promoter.id ? `/gst/promoter-signatory-details/${promoter.id}/update/` : `/gst/promoter-signatory-details/`;
-        
-                const { res } = await Factory(promoter.id ? 'put' : 'post', url, formData);
+        let url = promoter.id ? `/gst/promoter-signatory-details/${promoter.id}/update/` : `/gst/promoter-signatory-details/`;
+
+        const { res } = await Factory(promoter.id ? 'put' : 'post', url, formData);
 
         if (res.status_cd === 1) {
           dispatch(
@@ -228,7 +233,7 @@ const StepTwo = () => {
     if (res.status_cd === 1) {
       dispatch(
         openSnackbar({
-          open: true, 
+          open: true,
           message: JSON.stringify(res.data.data) || 'Something went wrong',
           variant: 'alert',
           alert: { color: 'error' },
@@ -245,9 +250,30 @@ const StepTwo = () => {
   return (
     <form onSubmit={formik.handleSubmit}>
       <Card sx={{ p: 3, mt: 4 }}>
-        <Typography variant="h5" fontWeight={700} mb={2}>
-          <u>Promoter / Signatory Details</u>
-        </Typography>
+        <Grid2>
+          <Typography variant="h4" fontWeight={700}>
+            <u>Promoter / Signatory Details</u>
+          </Typography>
+        </Grid2>
+        <Grid2 sx={{ flexGrow: 1, ml: 95 }}>
+          <Box display="flex" justifyContent="flex-end" gap={1}>
+            <RaiseRequest
+              fields={[
+                'Full Name',
+                'Aadhaar Card',
+                'PAN Card',
+                'Photograph',
+                'Residential Address',
+                'Email ID',
+                'Mobile Number',
+                'Gender',
+                'Designation',
+                'Is Residential Address Same as Aadhaar Address'
+              ]}
+              task_id={promoterTaskId.task_id}
+            />
+          </Box>
+        </Grid2>
 
         <Box display="flex" alignItems="center" mb={2}>
           <Typography>No. of Promoters/Directors/Managing Partners</Typography>
@@ -397,7 +423,7 @@ const StepTwo = () => {
                     <Autocomplete
                       fullWidth
                       size="small"
-                       sx={{
+                      sx={{
                         minWidth: 150,
                         maxWidth: 150
                       }}
@@ -421,7 +447,7 @@ const StepTwo = () => {
                     <TextField
                       fullWidth
                       size="small"
-                       sx={{
+                      sx={{
                         minWidth: 150,
                         maxWidth: 150
                       }}
@@ -460,8 +486,9 @@ const StepTwo = () => {
                   <TableCell align="center">
                     <Tooltip title="Same as per Aadhaar">
                       <Checkbox
-                        checked={promoter.residential_same_as_aadhaar_address === true || promoter.residential_same_as_aadhaar_address === 'true'}
-
+                        checked={
+                          promoter.residential_same_as_aadhaar_address === true || promoter.residential_same_as_aadhaar_address === 'true'
+                        }
                         onChange={(e) => {
                           const checked = e.target.checked;
                           setFieldValue(`promoters[${idx}].residential_same_as_aadhaar_address`, checked);
@@ -497,6 +524,22 @@ const StepTwo = () => {
             </TableBody>
           </Table>
         </TableContainer>
+        {/* {console.log('Promoter Task ID gst:', promoterTaskId)}; */}
+        <Grid2 size={{ xs: 12 }}>
+        <Stack direction="row" spacing={2} justifyContent="flex-end" mt={3}> 
+          <GetActionButtons
+            type="post"
+            urlEndpoint="/gst/promoter-signatory-details/"
+            recId={promoterTaskId.id}
+            status={promoterTaskId.status}
+            data={promoterTaskId}
+            service_request={service_id}
+            task_id={promoterTaskId.task_id}
+            urlKey="gst"
+            urlBool={true}
+          />
+          </Stack>
+        </Grid2>
       </Card>
     </form>
   );

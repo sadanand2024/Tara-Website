@@ -6,7 +6,8 @@ import { useSearchParams } from 'react-router-dom';
 import { openSnackbar } from 'store/slices/snackbar';
 import Factory from 'utils/Factory';
 import * as Yup from 'yup';
-
+import RaiseRequest from '../../RaiseRequest';
+import GetActionButtons from '../../FormHelpers';
 
 import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
 const BasicBusinessInfo = () => {
@@ -102,9 +103,8 @@ const BasicBusinessInfo = () => {
       const task_id = basicInfo.task_id;
       let url = basicInfo.id ? `/gst/basic-business-info/${basicInfo.id}/` : `/gst/basic-business-info/`;
       let formData = new FormData();
-      formData.append('service_request',service_id);
+      formData.append('service_request', service_id);
       formData.append('service_task', task_id);
-
 
       formData.append('legal_name_of_business', values.legal_name_of_business);
       formData.append('trade_name_of_business', values.trade_name_of_business);
@@ -153,15 +153,14 @@ const BasicBusinessInfo = () => {
       }
     }
   });
-  
 
   const getbasicInfo = async () => {
     // const url = `/gst/basic-business-info/by-service-request/?service_request_id=${service_id}`;
-        const url = `/gst/service-request-section-data?service_request_id=${service_id}&section=business_details`;
-        const { res } = await Factory('get', url);
+    const url = `/gst/service-request-section-data?service_request_id=${service_id}&section=business_details`;
+    const { res } = await Factory('get', url);
 
     if (res.status_cd === 0 && res.data) {
-      const data = res?.data?.task_data["Basic Business Info"]?.data;
+      const data = res?.data?.task_data['Basic Business Info']?.data;
       if (res?.data?.task_data && data !== null) {
         formik.setValues({
           legal_name_of_business: data?.legal_name_of_business || '',
@@ -175,15 +174,15 @@ const BasicBusinessInfo = () => {
           constitution_of_business: data.constitution_of_business || '',
           trade_name_of_business: data.trade_name_of_business || '',
           id: data.id || '',
-          task_id: res?.data?.task_data["Basic Business Info"]?.task_id || null,
+          task_id: res?.data?.task_data['Basic Business Info']?.task_id || null
         });
         setbasicInfo({
-          ...data || {},
-          task_id: res.data?.task_data["Basic Business Info"]?.task_id || null,
+          ...(data || {}),
+          task_id: res.data?.task_data['Basic Business Info']?.task_id || null
         });
-      }else {
+      } else {
         setbasicInfo({
-          task_id: res?.data?.task_data["Basic Business Info"]?.task_id,
+          task_id: res?.data?.task_data['Basic Business Info']?.task_id
         });
       }
     }
@@ -231,7 +230,6 @@ const BasicBusinessInfo = () => {
             </>
           );
         }
-
 
         return (
           <>
@@ -297,16 +295,36 @@ const BasicBusinessInfo = () => {
   useEffect(() => {
     getbasicInfo();
   }, []);
+  // console.log('Service ID:', task_id);
 
   return (
     <Box mt={4}>
       <Card sx={{ p: 3 }}>
         <form onSubmit={handleSubmit}>
           <Grid2 container spacing={2}>
-            <Grid2 size={12}>
-              <Typography variant="h4" fontWeight={700}>
-                Basic Business Information
-              </Typography>
+            <Grid2 container alignItems="center" justifyContent="space-between" mb={2}>
+              <Grid2>
+                <Typography variant="h4" fontWeight={700}>
+                  Basic Business Information
+                </Typography>
+              </Grid2>
+              <Grid2 sx={{ flexGrow: 1, ml: 95 }}>
+                <Box display="flex" justifyContent="flex-end" gap={1}>
+                  <RaiseRequest
+                    fields={[
+                      'Legal Name of the Business',
+                      'Trade Name of the Business',
+                      'PAN of the Business',
+                      'constitution of the Business',
+                      'Date of Commencement of Business',
+                      'Nature Of Business',
+                      'Email Address',
+                      'Mobile Number'
+                    ]}
+                    task_id={basicInfo.task_id}
+                  />
+                </Box>
+              </Grid2>
             </Grid2>
 
             {mainFields.map((field) => (
@@ -335,7 +353,7 @@ const BasicBusinessInfo = () => {
                       name: 'MOA_AOA',
                       type: 'file'
                     },
-                    
+
                     formik
                   )}
                 </Grid2>
@@ -344,8 +362,19 @@ const BasicBusinessInfo = () => {
             <Grid2 size={12}>
               <Stack direction="row" spacing={2} justifyContent="flex-end" mt={3}>
                 <Button variant="contained" color="primary" type="submit">
-                  Save
+                  Save Personal Details
                 </Button>
+                <GetActionButtons
+                  type="put"
+                  urlEndpoint="basic-business-info"
+                  recId={basicInfo.id}
+                  status={basicInfo.status}
+                  data={basicInfo}
+                  service_request={service_id}
+                  task_id={basicInfo.task_id}
+                  urlKey="gst"
+                  urlBool={true}
+                />
               </Stack>
             </Grid2>
           </Grid2>
