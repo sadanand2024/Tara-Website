@@ -41,7 +41,8 @@ const InvoiceDetails = ({
   setInvoiceNumberFormat,
   gstList,
   getGSTDetails,
-  fetchBusinessDetails
+  fetchBusinessDetails,
+  get_Customers_Data
 }) => {
   const invoiceDetailsFields = [
     { name: 'gstin', label: 'GSTIN' },
@@ -599,6 +600,7 @@ const InvoiceDetails = ({
             totalDiscount={formik.values.total_discount || 0}
             businessDetailsData={businessDetailsData}
             get_Goods_and_Services_Data={getGoodsAndServicesData}
+            get_Customers_Data={get_Customers_Data}
           />
         </Grid2>
 

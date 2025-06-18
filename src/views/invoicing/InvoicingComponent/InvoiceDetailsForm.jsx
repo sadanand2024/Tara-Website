@@ -10,7 +10,9 @@ import dayjs from 'dayjs';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
 import AddGSTIN from 'views/application/Business/AddGSTDialog';
+import AddCustomer from 'views/invoicing/InvoiceSettings/Customers/AddCustomer';
 import { IconPlus } from '@tabler/icons-react';
+import { useNavigate } from 'react-router-dom';
 const InvoiceDetailsForm = ({
   formik,
   invoiceDetailsFields,
@@ -20,20 +22,28 @@ const InvoiceDetailsForm = ({
   branches,
   setInvoiceNumberFormat,
   getGSTDetails,
-  fetch_Business_Details
+  fetch_Business_Details,
+  get_Customers_Data
 }) => {
   const [openAddGSTIN, setOpenAddGSTIN] = useState(false);
+  const [openAddCustomer, setOpenAddCustomer] = useState(false);
+  const [type, setType] = useState('add');
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
   const dispatch = useDispatch();
-
+  const navigate = useNavigate();
   const handleOpenAddGSTIN = () => {
     setOpenAddGSTIN(true);
   };
-
+  const handleOpenAddCustomer = () => {
+    setOpenAddCustomer(true);
+  };
   const handleCloseAddGSTIN = () => {
     setOpenAddGSTIN(false);
     fetch_Business_Details();
   };
-
+  const handleCloseAddCustomer = () => {
+    setOpenAddCustomer(false);
+  };
   const termsDropdown = [
     'NET 15',
     'NET 30',
@@ -82,7 +92,7 @@ const InvoiceDetailsForm = ({
   const handleCustomerChange = (newValue) => {
     const selectedCustomer = customers?.find((c) => c.name === newValue);
     if (!selectedCustomer) return;
-
+    console.log(selectedCustomer);
     formik.setFieldValue('customer', newValue);
     formik.setFieldValue('place_of_supply', selectedCustomer.state);
 
@@ -160,10 +170,13 @@ const InvoiceDetailsForm = ({
           }}
           disabled={
             fieldName === 'branch_code' &&
-            (businessDetailsData?.invoice_format?.find(
-              (item) => item.gstin === formik.values.gstin || ('NA' && item.include_branch_code === false)
-            ) ||
-              formik.values.gstin === '')
+            (() => {
+              if (!formik.values.gstin || formik.values.gstin === '') {
+                return true;
+              }
+              const selectedFormat = businessDetailsData?.invoice_format?.find((item) => item.gstin === formik.values.gstin);
+              return selectedFormat ? !selectedFormat.include_branch_code : true;
+            })()
           }
           options={
             fieldName === 'gstin'
@@ -172,7 +185,9 @@ const InvoiceDetailsForm = ({
                 : ['NA']
               : fieldName === 'branch_code'
                 ? branches?.map((item) => item.branch_code || 'NA')
-                : indian_States_And_UTs
+                : fieldName === 'customer'
+                  ? customers?.map((item) => item.name)
+                  : indian_States_And_UTs
           }
           error={formik.touched[fieldName] && Boolean(formik.errors[fieldName])}
           helperText={formik.touched[fieldName] && formik.errors[fieldName]}
@@ -233,7 +248,44 @@ const InvoiceDetailsForm = ({
           options={customers?.map((c) => c.name) || []}
           error={formik.touched[fieldName] && Boolean(formik.errors[fieldName])}
           helperText={formik.touched[fieldName] && formik.errors[fieldName]}
+          ListboxProps={{
+            style: { maxHeight: 250 },
+            component: React.forwardRef(function CustomListboxComponent(props, ref) {
+              const { children, ...rest } = props;
+              return (
+                <ul ref={ref} {...rest}>
+                  {children}
+                  <li style={{ padding: '8px 16px' }}>
+                    <Button
+                      startIcon={<IconPlus />}
+                      variant="contained"
+                      fullWidth
+                      size="small"
+                      sx={{
+                        bgcolor: 'primary.main',
+                        '&:hover': {
+                          bgcolor: 'primary.dark'
+                        }
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleOpenAddCustomer();
+                      }}
+                    >
+                      Add Customer
+                    </Button>
+                  </li>
+                </ul>
+              );
+            })
+          }}
         />
+      );
+    } else if (fieldName === 'invoice_number' && formik.values.invoice_number === 'No Invoice Format found for the provided profile.') {
+      return (
+        <Button variant="contained" color="primary" onClick={() => navigate('/app/invoice/settings?tab=5&from=invoice')}>
+          <Typography color="white">Configure Invoice Format</Typography>
+        </Button>
       );
     } else {
       return (
@@ -257,6 +309,15 @@ const InvoiceDetailsForm = ({
         setOpen={setOpenAddGSTIN}
         getGSTDetails={getGSTDetails}
         fetchBusinessDetails={fetch_Business_Details}
+      />
+      <AddCustomer
+        open={openAddCustomer}
+        handleClose={handleCloseAddCustomer}
+        getCustomersData={get_Customers_Data}
+        businessDetailsData={businessDetailsData}
+        type={type}
+        setType={setType}
+        selectedCustomer={selectedCustomer}
       />
       {invoiceDetailsFields.map((item) => (
         <Grid2 size={{ xs: 12, sm: 6, md: 4 }} key={item.name}>

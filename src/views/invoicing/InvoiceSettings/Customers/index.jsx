@@ -33,7 +33,14 @@ export default function CustomersComponent({ getCustomersData, customers, busine
             </Button>
           </Stack>
 
-          <AddCustomer open={open} handleClose={handleClose} getCustomersData={getCustomersData} businessDetailsData={businessDetails} />
+          <AddCustomer
+            type={type}
+            setType={setType}
+            open={open}
+            handleClose={handleClose}
+            getCustomersData={getCustomersData}
+            businessDetailsData={businessDetails}
+          />
         </Grid2>
 
         {/* Customer List Section */}
