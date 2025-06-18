@@ -65,6 +65,7 @@ const GstRegistration = Loadable(lazy(() => import('views/Services/GST')));
 const UserManagement = Loadable(lazy(() => import('views/SuperAdmin/UserManagement')));
 const NewRequests = Loadable(lazy(() => import('views/SuperAdmin/ServiceManagement/NewRequests')));
 const TaskManagement = Loadable(lazy(() => import('views/SuperAdmin/ServiceManagement/TaskManagement')));
+const ServiceSummary = Loadable(lazy(() => import('views/SuperAdmin/ServiceManagement/ServiceSummary')));
 // ==============================|| MAIN ROUTING ||============================== //
 
 const MainRoutes = {
@@ -132,7 +133,7 @@ const MainRoutes = {
       path: '/app/task-management/msme-registration',
       element: <MSMEDashboard />
     },
-   
+
     {
       path: '/app/my-services/msme-registration',
       element: <MSMEDashboard />
@@ -153,15 +154,14 @@ const MainRoutes = {
       path: '/app/my-services/labour-license',
       element: <LabourLicence />
     },
-     {
+    {
       path: '/app/my-services/registration',
 
       element: <GstRegistration />
     },
-     {
+    {
       path: '/app/task-management/registration',
-      element: <GstRegistration/>
-    
+      element: <GstRegistration />
     },
     {
       path: '/app/users',
@@ -179,6 +179,10 @@ const MainRoutes = {
     {
       path: '/app/task-management',
       element: <TaskManagement />
+    },
+    {
+      path: '/app/service-summary',
+      element: <ServiceSummary />
     },
     {
       path: '/app/manage-tasks',

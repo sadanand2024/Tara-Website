@@ -2,20 +2,17 @@ import React, { useEffect } from 'react';
 
 // material-ui
 import MainCard from 'ui-component/cards/MainCard';
-import Grid from '@mui/material/Grid2';
 import InputAdornment from '@mui/material/InputAdornment';
 import OutlinedInput from '@mui/material/OutlinedInput';
-import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 import { useSnackbar } from 'notistack';
-import Factory from 'utils/Factory';
 import ServiceRequests from './ServiceTable';
 import { useSelector } from 'store';
-import { gridSpacing } from 'store/constant';
-
+import { Button } from '@mui/material';
 import { IconSearch } from '@tabler/icons-react';
+import { IconPlus } from '@tabler/icons-react';
 
 export default function NewRequests() {
   const { enqueueSnackbar } = useSnackbar();
@@ -30,7 +27,6 @@ export default function NewRequests() {
 
   const handleSearch = (event) => {
     setSearchQuery(event.target.value);
-    setPage(1);
   };
 
   const handleCloseSnackbar = (event, reason) => {
@@ -46,10 +42,10 @@ export default function NewRequests() {
         title="Service Requests"
         secondary={
           <Stack direction="row" spacing={2}>
-            {/* <Button variant="contained" startIcon={<AddIcon />} size="small">
-                  Add Servies
-                </Button>
-                <Button variant="contained" startIcon={<AddIcon />} size="small">
+            <Button variant="contained" startIcon={<IconPlus stroke={1.5} size="16px" />} size="small">
+              New Request
+            </Button>
+            {/*<Button variant="contained" startIcon={<AddIcon />} size="small">
                   Bulk Assign
                 </Button> */}
             <OutlinedInput
