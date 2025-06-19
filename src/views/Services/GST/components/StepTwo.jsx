@@ -114,7 +114,7 @@ const StepTwo = () => {
     }),
     onSubmit: async (values) => {
       const task_id = promoterTaskId.task_id;
-      console.log('Task ID:', task_id);
+     
       if (saveIndex === null) return; // No promoter to save
 
       const promoter = values.promoters[saveIndex];

@@ -76,6 +76,7 @@ const StepThree = () => {
           {reviewSteps.map((label, idx) => (
             <Step key={label}>
               <StepLabel>{label}</StepLabel>
+            
               <StepContent>
                 {/* Step 1: Draft GST Computation */}
                 {idx === 0 && (
@@ -108,8 +109,10 @@ const StepThree = () => {
                                 draft_filing_certificate: e.target.files[0] || null
                               }
                             }));
-                            console.log(reviewAndFiling.task_id);
+                            
                             const task_id = reviewAndFiling.task_id;
+                            console.log(task_id)
+                            
 
                             let type = reviewAndFiling?.data?.id ? 'put' : 'post';
                             let urlEndpoint = reviewAndFiling?.data?.id
@@ -126,7 +129,16 @@ const StepThree = () => {
 
                             const res = await Factory(type, urlEndpoint, formData, {});
                             if (res?.res?.status_cd === 0) {
+                              console.log('API response:', res.res);
                               
+                            setReviewAndFiling((prev) => ({
+                              ...prev,
+                              task_id: reviewAndFiling?.task_id || null,
+                              data: {
+                                ...res.res,
+                                draft_filing_certificate: e.target.files[0] || null
+                              }
+                            }))                              
                               enqueueSnackbar('Draft TradeLicence computation saved successfully!', {
                                 variant: 'success',
                                 anchorOrigin: { vertical: 'top', horizontal: 'right' }

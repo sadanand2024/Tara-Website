@@ -45,7 +45,7 @@ const StepThree = () => {
             task_id: reviewSection?.task_id || null,
             data: reviewSection?.data || {}
           });
-          console.log('Review & Filing Certificate Data:', reviewAndFiling);
+          
         } else {
           enqueueSnackbar('Failed to fetch Review & Filing Certificate data.', {
             variant: 'error',
@@ -100,14 +100,15 @@ const StepThree = () => {
                           type="file"
                           hidden
                           onChange={async (e) => {
-                            setReviewAndFiling((prev) => ({
-                              ...prev,
-                              task_id: reviewAndFiling?.task_id || null,
-                              data: {
-                                ...prev.data,
-                                draft_filing_certificate: e.target.files[0] || null
-                              }
-                            }));
+                              setReviewAndFiling((prev) => ({
+                                ...prev,
+                                task_id: reviewAndFiling?.task_id || null,
+                                data: {
+                                  ...prev.data,
+                                  draft_filing_certificate: e.target.files[0] || null
+                                }
+                              }))
+
                             const task_id = reviewAndFiling.task_id;
 
                             let type = reviewAndFiling?.data?.id ? 'put' : 'post';
@@ -125,7 +126,14 @@ const StepThree = () => {
 
                             const res = await Factory(type, urlEndpoint, formData, {});
                             if (res?.res?.status_cd === 0) {
-                              
+                              setReviewAndFiling((prev) => ({
+                                ...prev,
+                                task_id: reviewAndFiling?.task_id || null,
+                                data: {
+                                  ...res.res,
+                                  draft_filing_certificate: e.target.files[0] || null
+                                }
+                            }));
                               enqueueSnackbar('Draft GST computation saved successfully!', {
                                 variant: 'success',
                                 anchorOrigin: { vertical: 'top', horizontal: 'right' }
@@ -136,11 +144,12 @@ const StepThree = () => {
                                 anchorOrigin: { vertical: 'top', horizontal: 'right' }
                               });
                             }
+
                           }}
                         />
                         Upload
                       </Button>
-                      {console.log('Draft Filing Certificate:', reviewAndFiling?.data?.draft_filing_certificate)}
+                      {/* {console.log('Draft Filing Certificate:', reviewAndFiling?.data?.draft_filing_certificate)} */}
                       {reviewAndFiling?.data?.draft_filing_certificate && (
                         <Button
                           variant="outlined"
@@ -157,8 +166,7 @@ const StepThree = () => {
                         </Button>
                       )}
                     </Stack>
-                    {/* {console.log(reviewAndFiling?.data?.task_id)}; */}
-                    {console.log('Promoter Task IDs :', reviewAndFiling?.data?.id)}
+                  
                     <Box display="flex" justifyContent="flex-start" gap={1}>
                       <GetActionButtons
                         type="put"
@@ -296,15 +304,18 @@ const StepThree = () => {
                             viewFile(reviewAndFiling?.data?.review_certificate);
                           }
                         }}
+                         startIcon={
+                            <DownloadIcon sx={{ width: { xs: 24, md: 24 }, height: { xs: 24, md: 24 } }} />
+                          }
                       >
                         Download
-                        <IconButton
+                        {/* <IconButton
                           size="small"
                           color="secondary"
                           sx={{ alignSelf: 'center', '&:hover': { backgroundColor: 'transparent' } }}
                         >
                           <DownloadIcon sx={{ width: { xs: 24, md: 24 }, height: { xs: 24, md: 24 } }} />
-                        </IconButton>
+                        </IconButton> */}
                       </Button>
                     </Stack>
                   </Box>
