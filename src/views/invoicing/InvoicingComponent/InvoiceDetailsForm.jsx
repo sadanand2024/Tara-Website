@@ -11,6 +11,7 @@ import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
 import AddGSTIN from 'views/application/Business/AddGSTDialog';
 import AddCustomer from 'views/invoicing/InvoiceSettings/Customers/AddCustomer';
+import AddBranch from 'views/invoicing/InvoiceSettings/BranchesInfo/AddBranchDialog';
 import { IconPlus } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
 const InvoiceDetailsForm = ({
@@ -23,10 +24,12 @@ const InvoiceDetailsForm = ({
   setInvoiceNumberFormat,
   getGSTDetails,
   fetch_Business_Details,
-  get_Customers_Data
+  getCustomersData,
+  getBranchesData
 }) => {
   const [openAddGSTIN, setOpenAddGSTIN] = useState(false);
   const [openAddCustomer, setOpenAddCustomer] = useState(false);
+  const [openAddBranch, setOpenAddBranch] = useState(false);
   const [type, setType] = useState('add');
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const dispatch = useDispatch();
@@ -37,12 +40,18 @@ const InvoiceDetailsForm = ({
   const handleOpenAddCustomer = () => {
     setOpenAddCustomer(true);
   };
+  const handleOpenAddBranch = () => {
+    setOpenAddBranch(true);
+  };
   const handleCloseAddGSTIN = () => {
     setOpenAddGSTIN(false);
     fetch_Business_Details();
   };
   const handleCloseAddCustomer = () => {
     setOpenAddCustomer(false);
+  };
+  const handleCloseAddBranch = () => {
+    setOpenAddBranch(false);
   };
   const termsDropdown = [
     'NET 15',
@@ -113,7 +122,7 @@ const InvoiceDetailsForm = ({
       formik.setFieldValue('shipping_address.postal_code', selectedCustomer.postal_code);
     }
   };
-
+  console.log(businessDetailsData);
   const renderField = (item) => {
     const fieldName = item.name;
     const value = formik.values[fieldName];
@@ -146,8 +155,10 @@ const InvoiceDetailsForm = ({
           onChange={(_, val) => {
             if (fieldName === 'gstin') {
               formik.setFieldValue('gstin', val || 'NA');
-              if (businessDetailsData?.invoice_format?.find((item) => item.gstin === val || ('NA' && item.include_branch_code === false))) {
-                getInvoiceFormat(val, 'NA');
+              let selectedGSTIN = businessDetailsData?.invoice_format?.find((item) => item.gstin === val || 'NA');
+              // console.log(selectedGSTIN.gstin, val);
+              if (selectedGSTIN.include_branch_code === false) {
+                // getInvoiceFormat(val, 'NA');
                 formik.setFieldValue('branch_code', '');
                 formik.setFieldValue('invoice_number', '');
                 setInvoiceNumberFormat('');
@@ -157,13 +168,14 @@ const InvoiceDetailsForm = ({
                 setInvoiceNumberFormat('');
               }
             } else if (fieldName === 'branch_code') {
-              formik.setFieldValue('branch_code', val || '');
+              let branch = branches?.find((item) => item.branch_name === val);
+              formik.setFieldValue('branch_code', branch?.branch_code || '');
               if (
                 businessDetailsData?.invoice_format?.find(
                   (item) => item.gstin === formik.values.gstin || ('NA' && item.include_branch_code === true)
                 )
               ) {
-                getInvoiceFormat(formik.values.gstin, val);
+                getInvoiceFormat(formik.values.gstin, branch?.branch_code || '');
               }
             }
             formik.setFieldValue(fieldName, val);
@@ -184,7 +196,7 @@ const InvoiceDetailsForm = ({
                 ? businessDetailsData.gst_details.map((item) => item.gstin || 'NA')
                 : ['NA']
               : fieldName === 'branch_code'
-                ? branches?.map((item) => item.branch_code || 'NA')
+                ? branches?.map((item) => item.branch_name || 'NA')
                 : fieldName === 'customer'
                   ? customers?.map((item) => item.name)
                   : indian_States_And_UTs
@@ -224,7 +236,39 @@ const InvoiceDetailsForm = ({
                     );
                   })
                 }
-              : undefined
+              : fieldName === 'branch_code'
+                ? {
+                    style: { maxHeight: 250 },
+                    component: React.forwardRef(function CustomListboxComponent(props, ref) {
+                      const { children, ...rest } = props;
+                      return (
+                        <ul ref={ref} {...rest}>
+                          {children}
+                          <li style={{ padding: '8px 16px' }}>
+                            <Button
+                              startIcon={<IconPlus />}
+                              variant="contained"
+                              fullWidth
+                              size="small"
+                              sx={{
+                                bgcolor: 'primary.main',
+                                '&:hover': {
+                                  bgcolor: 'primary.dark'
+                                }
+                              }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleOpenAddBranch();
+                              }}
+                            >
+                              Add Branch
+                            </Button>
+                          </li>
+                        </ul>
+                      );
+                    })
+                  }
+                : undefined
           }
         />
       );
@@ -313,14 +357,15 @@ const InvoiceDetailsForm = ({
       <AddCustomer
         open={openAddCustomer}
         handleClose={handleCloseAddCustomer}
-        getCustomersData={get_Customers_Data}
+        getCustomersData={getCustomersData}
         businessDetailsData={businessDetailsData}
         type={type}
         setType={setType}
         selectedCustomer={selectedCustomer}
       />
+      <AddBranch open={openAddBranch} handleClose={handleCloseAddBranch} getBranchesData={getBranchesData} />
       {invoiceDetailsFields.map((item) => (
-        <Grid2 size={{ xs: 12, sm: 6, md: 4 }} key={item.name}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 3 }} key={item.name}>
           <Typography sx={{ mb: 1 }}>{item.label}</Typography>
           {renderField(item)}
         </Grid2>

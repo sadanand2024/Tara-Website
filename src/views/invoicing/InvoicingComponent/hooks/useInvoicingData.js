@@ -162,6 +162,7 @@ export const useInvoicingData = () => {
     gstList,
     getGSTDetails,
     fetchBusinessDetails,
-    getCustomersData
+    getCustomersData,
+    getBranchesData
   };
 };

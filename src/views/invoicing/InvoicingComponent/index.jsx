@@ -19,7 +19,8 @@ const InvoicingComponent = () => {
     branches,
     setInvoiceNumberFormat,
     fetchBusinessDetails,
-    getCustomersData
+    getCustomersData,
+    getBranchesData
   } = useInvoicingData();
 
   return (
@@ -52,6 +53,7 @@ const InvoicingComponent = () => {
         setInvoiceNumberFormat={setInvoiceNumberFormat}
         fetchBusinessDetails={fetchBusinessDetails}
         getCustomersData={getCustomersData}
+        getBranchesData={getBranchesData}
       />
     </MainCard>
   );
