@@ -8,6 +8,8 @@ import Factory from 'utils/Factory';
 import { useSearchParams } from 'react-router-dom';
 import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
 import ApplicantDetails from './ApplicantDetails';
+import RaiseRequest from '../../RaiseRequest';
+import GetActionButtons from '../../FormHelpers';
 const typeOfBusinessOptions = [
   'Proprietorship',
   'Partnership',
@@ -53,11 +55,14 @@ const fields = [
   }
 ];
 const BusinessIdentityStructureSection = ({taskId, applicantTaskId}) => {
-  console.log('taskxdcfghjId',  applicantTaskId);
+
   const [searchParams] = useSearchParams();
   const service_id = searchParams.get('service_id');
   const dispatch = useDispatch();
   const [businessIdentityposttype, setBusinessIdentityposttype] = useState('post');
+  const [businessInfo, setbusinessInfo] = useState({
+    task_id: null
+  });
 
   const formik = useFormik({
     initialValues: {
@@ -187,9 +192,12 @@ const BusinessIdentityStructureSection = ({taskId, applicantTaskId}) => {
         legal_name_of_business: res.data.legal_name_of_business || '',
         nature_of_business: res.data.nature_of_business || '',
         business_pan: res.data.business_pan || '',
+        task_id:res.data.task_id || '',
         id: res.data.id || ''
       };
       setValues(responseData);
+      setbusinessInfo(res.data);
+    
       setBusinessIdentityposttype('put');
     }
     if (res.status_cd === 1) {
@@ -211,9 +219,31 @@ const BusinessIdentityStructureSection = ({taskId, applicantTaskId}) => {
   return (
     <Box>
       <Card sx={{ p: 3 }}>
-        <Typography variant="h5" fontWeight={700} mb={2}>
-          <span style={{ textDecoration: 'underline' }}>Business Identity & Structure</span>
-        </Typography>
+      <Grid2 container alignItems="center" justifyContent="space-between" mb={2}>
+  <Grid2>
+    <Typography variant="h4" fontWeight={700}>
+      <span style={{ textDecoration: 'underline' }}>Business Identity & Structure</span>
+    </Typography>
+  </Grid2>
+  <Grid2 sx={{ flexGrow: 1, ml: 95 }}>
+    <Box display="flex" justifyContent="flex-end" gap={1}>
+     
+      <RaiseRequest
+        fields={[
+          'Type of business',
+          'legal name of business',
+          'nature of business',
+          'business pan',
+        
+        ]}
+       
+        task_id={taskId}
+      />
+    </Box>
+  </Grid2>
+</Grid2>
+
+
         <form onSubmit={handleSubmit}>
           <Grid2 container spacing={2}>
             {fields.map((field) => (
@@ -229,6 +259,18 @@ const BusinessIdentityStructureSection = ({taskId, applicantTaskId}) => {
             <Button variant="contained" color="primary" type="submit">
               Save
             </Button>
+          
+            <GetActionButtons
+                              type="put"
+                              urlEndpoint="business-identity"
+                              recId={businessInfo.id}
+                              status={businessInfo.status}
+                              data={businessInfo}
+                              service_request={service_id}
+                              task_id={taskId}
+                              urlKey="tradelicense"
+                              urlBool={true}
+                            />
           </Stack>
         </form>
       </Card>

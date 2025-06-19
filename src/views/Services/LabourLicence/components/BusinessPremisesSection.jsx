@@ -9,6 +9,8 @@ import { indian_States_And_UTs } from 'utils/indian_States_And_UT';
 import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
 import AdditionalPlaceOfBusiness from './AdditionalPlaceOfBusiness';
 import { useSearchParams } from 'react-router-dom';
+import RaiseRequest from '../../RaiseRequest';
+import GetActionButtons from '../../FormHelpers';
 const BusinessPremisesSection = ({ taskId }) => {
   const [searchParams] = useSearchParams();
     const service_id = searchParams.get('service_id');
@@ -261,14 +263,46 @@ const BusinessPremisesSection = ({ taskId }) => {
       <Card sx={{ p: 3 }}>
         <form onSubmit={handleSubmit}>
           <Grid2 container spacing={2}>
-            <Grid2 size={12}>
+            {/* <Grid2 size={12}>
               <Typography variant="h4" fontWeight={700}>
                 Business premises, location & proofs
               </Typography>
               <Typography variant="subtitle1" color="text.secondary" fontWeight={700} mt={2}>
                 Principal place of business
               </Typography>
-            </Grid2>
+            </Grid2> */}
+                      <Grid2 container alignItems="center" justifyContent="space-between" mb={2}>
+      <Grid2>
+    <Typography variant="h4" fontWeight={700}>
+      <span style={{ textDecoration: 'underline' }}>Business premises, location & proofs</span>
+    </Typography>
+     
+  </Grid2>
+  <Grid2 sx={{ flexGrow: 1, ml: 95 }}>
+    <Box display="flex" justifyContent="flex-end" gap={1}>
+     
+      <RaiseRequest
+        fields={[
+         'Address Line 1',
+  'Address Line 2',
+  'City',
+  'District',
+  'State',
+  'Pincode',
+  'Nature of possession',
+  'Address proof',
+  'Rental agreement',
+  'Bank statement',
+  'Workplace',
+  'Additional space required'
+        
+        ]}
+       
+        task_id={taskId}
+      />
+    </Box>
+  </Grid2>
+</Grid2>
 
             {mainFields.map((field) => (
               <Grid2 size={{ xs: 12, sm: 6, md: 4 }} key={field.name}>
@@ -333,6 +367,18 @@ const BusinessPremisesSection = ({ taskId }) => {
                 <Button variant="contained" color="primary" type="submit">
                   Save
                 </Button>
+               
+                 <GetActionButtons
+                                              type="put"
+                                              urlEndpoint="business-location"
+                                              recId={businessPremises.id}
+                                              status={businessPremises.status}
+                                              data={businessPremises}
+                                              service_request={service_id}
+                                              task_id={taskId}
+                                              urlKey="labourlicense"
+                                              urlBool={true}
+                                            />
               </Stack>
             </Grid2>
           </Grid2>

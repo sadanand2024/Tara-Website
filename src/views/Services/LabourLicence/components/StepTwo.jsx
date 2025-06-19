@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect,useState } from 'react';
 import { Box, Typography, Button, Grid2, Card, Stack } from '@mui/material';
 import IconSave from '@mui/icons-material/Save';
 import { useFormik } from 'formik';
@@ -8,9 +8,14 @@ import { useDispatch } from 'react-redux';
 import { openSnackbar } from 'store/slices/snackbar';
 import Factory from 'utils/Factory';
 import { useSearchParams } from 'react-router-dom';
+import RaiseRequest from '../../RaiseRequest';
+import GetActionButtons from '../../FormHelpers';
 const StepTwo = ({taskId}) => {
   const [searchParams] = useSearchParams();
   const service_id = searchParams.get('service_id');
+   const [businessDocument, setbusinessDocument] = useState({
+         task_id: null
+      });
   const dispatch = useDispatch();
   const formik = useFormik({
     initialValues: {
@@ -27,7 +32,7 @@ const StepTwo = ({taskId}) => {
       memorandum_of_articles: Yup.mixed().required('MOA is required')
     }),
     onSubmit: async (values) => {
-      console.log(values);
+    
       let url = values.id ? `/labourlicense/registration-documents/${values.id}/` : `/labourlicense/registration-documents/`;
       const formData = new FormData();
       formData.append('service_request', service_id);
@@ -76,6 +81,7 @@ const StepTwo = ({taskId}) => {
     const { res } = await Factory('get', url);
     if (res.status_cd === 0) {
       formik.setValues(res.data);
+       setbusinessDocument(res.data);
     }
   };
   useEffect(() => {
@@ -85,10 +91,28 @@ const StepTwo = ({taskId}) => {
     <Card sx={{ p: 3 }}>
       <form autoComplete="off">
         {/* Task 2: Business Registration Documents */}
-        <Box mb={3}>
-          <Typography variant="h4" mb={1}>
-            Business Registration Documents
-          </Typography>
+        
+          <Box mb={3} mt={4}>
+          <Grid2 container alignItems="center" justifyContent="space-between" mb={2}>
+                   <Grid2>
+                   <Typography variant="h4" fontWeight={700}>
+                      <span style={{ textDecoration: 'underline' }}>Business Registration Documents</span>
+                    </Typography>
+                </Grid2>
+               
+                  <Box display="flex" justifyContent="flex-end" gap={1}>
+                    
+                      <RaiseRequest
+                        fields={[
+                          'Certificate of Incorporation',
+                          'Authorization Letter',
+                          'Local Language Name Board Photo (Business)',
+                          'Memorandum of Articles']}
+                      task_id={taskId}
+                      />
+                    </Box>
+                 
+                </Grid2>
           <Grid2 container spacing={2} alignItems="center">
             {/* 1. Incorporation certificate / Partnership deed */}
             <Grid2 size={{ sm: 6, md: 6 }}>
@@ -154,6 +178,17 @@ const StepTwo = ({taskId}) => {
           <Button size="medium" variant="contained" color="primary" onClick={formik.handleSubmit}>
             Save & Continue
           </Button>
+           <GetActionButtons
+                                        type="put"
+                                        urlEndpoint="registration-documents"
+                                        recId={businessDocument.id}
+                                        status={businessDocument.status}
+                                        data={businessDocument}
+                                        service_request={service_id}
+                                        task_id={taskId}
+                                        urlKey="labourlicense"
+                                        urlBool={true}
+                                      />
         </Stack>
       </form>
     </Card>

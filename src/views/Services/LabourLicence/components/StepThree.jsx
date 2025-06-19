@@ -1,164 +1,323 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, TextField, Button, Stepper, Step, StepLabel, StepContent, MenuItem } from '@mui/material';
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
-import { useDispatch } from 'react-redux';
-import { openSnackbar } from 'store/slices/snackbar';
+import { Box, Typography, Button, Stepper, Step, StepLabel, StepContent, Stack, IconButton, CircularProgress } from '@mui/material';
+import { enqueueSnackbar } from 'notistack';
 import Factory from 'utils/Factory';
+import DownloadIcon from '@mui/icons-material/Download';
+import GetActionButtons from '../../FormHelpers';
+import { useSearchParams } from 'react-router-dom';
 
 const StepThree = () => {
-  const dispatch = useDispatch();
-  const [verticalStep, setVerticalStep] = useState(0);
-  const formik = useFormik({
-    initialValues: {
-      id: '',
-      review_certificate: '',
-      filing_status: '',
-      approval_status: ''
-    },
-    validationSchema: Yup.object({
-      review_certificate: Yup.string().required('Review status is required'),
-      filing_status: Yup.string().required('Filing status is required'),
-      approval_status: Yup.string().required('Approval status is required')
-    }),
-    onSubmit: async (values) => {
-      let url = values.id ? `/labourlicense/review-filing/${values.id}/` : `/labourlicense/review-filing/`;
-      let formData = new FormData();
-      formData.append('service_request', 24);
-      formData.append('service_task', 10);
-      formData.append('review_certificate', values.review_certificate);
-      formData.append('filing_status', values.filing_status);
-      formData.append('approval_status', values.approval_status);
-
-      const { res } = await Factory(values.id ? 'put' : 'post', url, formData);
-      if (res.status_cd === 0) {
-        dispatch(
-          openSnackbar({
-            open: true,
-            message: values.id ? 'Review, Filing & Certificate updated successfully' : 'Review, Filing & Certificate saved successfully',
-            variant: 'alert',
-            alert: { color: 'success' },
-            close: false
-          })
-        );
-        getReviewFiling();
-      } else {
-        dispatch(
-          openSnackbar({
-            open: true,
-            message: 'Review, Filing & Certificate not saved',
-            variant: 'alert',
-            alert: { color: 'error' },
-            close: false
-          })
-        );
-      }
-    }
+  const [searchParams] = useSearchParams();
+  const [reviewAndFiling, setReviewAndFiling] = useState({
+    task_id: null,
+    draft_filing_certificate: null
   });
-  const getReviewFiling = async () => {
-    const url = `/labourlicense/review-filing/by-request-or-task?service_request_id=24`;
-    const { res } = await Factory('get', url);
-    if (res.status_cd === 0) {
-      formik.setValues(res.data);
+  const service_id = searchParams.get('service_id');
+  const [reviewStep, setReviewStep] = useState(0);
+  const [loadingStep4, setLoadingStep4] = useState(false);
+
+  const reviewSteps = ['Draft TradeLicence Computation', 'Upload Filed Acknowledgement', 'Download Filed Acknowledgement'];
+
+  const viewFile = async (url) => {
+    const response = await Factory('get', `/docwallet/generate_presigned_url?url=${url}`, {}, {});
+    if (response.res.status_cd === 0) {
+      let url = response.res.data.url;
+      window.open(url, '_blank');
     }
   };
+
+  // Fetch data from API
   useEffect(() => {
-    getReviewFiling();
-  }, []);
+    const fetchReviewAndFilingData = async () => {
+      try {
+        setLoadingStep4(true);
+        const res = await Factory(
+          'get',
+          `/labourlicense/service-request-section-data?service_request_id=${service_id}&section=review`,
+        );
+
+        if (res?.res?.status_cd === 0) {
+          const taskData = res?.res?.data?.task_data;
+          const reviewSection = taskData?.['Review Filing Certificate'];
+
+          setReviewAndFiling({
+            ...reviewSection,
+            task_id: reviewSection?.task_id || null,
+            data: reviewSection?.data || {}
+          });
+        
+        } else {
+          enqueueSnackbar('Failed to fetch Review & Filing Certificate data.', {
+            variant: 'error',
+            anchorOrigin: { vertical: 'top', horizontal: 'right' }
+          });
+        }
+      } catch (error) {
+        enqueueSnackbar('Something went wrong while fetching the data.', {
+          variant: 'error',
+          anchorOrigin: { vertical: 'top', horizontal: 'right' }
+        });
+      } finally {
+        setLoadingStep4(false);
+      }
+    };
+
+    fetchReviewAndFilingData();
+  }, [service_id, setReviewAndFiling]);
+
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 10 }}>
-      <form autoComplete="off">
-        <Typography variant="h4" mb={3}>
-          Review, Filing & Certificate
-        </Typography>
-        <Stepper orientation="vertical" activeStep={verticalStep} sx={{ background: 'transparent' }}>
-          {/* Step 1: Review */}
-          <Step>
-            <StepLabel>Review</StepLabel>
-            <StepContent>
-              <TextField
-                select
-                fullWidth
-                size="small"
-                label="Review"
-                name="review_certificate"
-                value={formik.values.review_certificate || ''}
-                onChange={formik.handleChange}
-                sx={{ mr: 2, mb: 2 }}
-              >
-                <MenuItem value="in_progress">In progress</MenuItem>
-                <MenuItem value="re_submission">Re-submission</MenuItem>
-                <MenuItem value="done">Done</MenuItem>
-              </TextField>
-              <Button variant="contained" size="small" color="primary" onClick={() => setVerticalStep(1)} sx={{ mt: 1 }}>
-                Next
-              </Button>
-            </StepContent>
-          </Step>
-          {/* Step 2: Filing */}
-          <Step>
-            <StepLabel>Filing</StepLabel>
-            <StepContent>
-              <TextField
-                select
-                fullWidth
-                size="small"
-                label="Filing"
-                name="filing_status"
-                value={formik.values.filing_status || ''}
-                onChange={formik.handleChange}
-                sx={{ mr: 2, mb: 2 }}
-              >
-                <MenuItem value="in_progress">In progress</MenuItem>
-                <MenuItem value="resubmission">Resubmission</MenuItem>
-                <MenuItem value="filed">Filed</MenuItem>
-              </TextField>
-              <Button variant="contained" size="small" color="primary" onClick={() => setVerticalStep(2)} sx={{ mt: 1 }}>
-                Next
-              </Button>
-            </StepContent>
-          </Step>
-          {/* Step 3: Approval */}
-          <Step>
-            <StepLabel>Approval</StepLabel>
-            <StepContent>
-              <TextField
-                select
-                fullWidth
-                size="small"
-                label="Approval"
-                name="approval_status"
-                value={formik.values.approval_status || ''}
-                onChange={formik.handleChange}
-                sx={{ mr: 2, mb: 2 }}
-              >
-                <MenuItem value="pending">Pending</MenuItem>
-                <MenuItem value="resubmission">Resubmission</MenuItem>
-                <MenuItem value="reject">Reject</MenuItem>
-                <MenuItem value="approval">Approval</MenuItem>
-              </TextField>
-              <Button variant="contained" size="small" color="primary" onClick={() => setVerticalStep(3)} sx={{ mt: 1 }}>
-                Next
-              </Button>
-            </StepContent>
-          </Step>
-          {/* Step 4: Certificate */}
-          <Step>
-            <StepLabel>Certificate</StepLabel>
-            <StepContent>
-              <Button
-                variant="contained"
-                size="small"
-                color="primary"
-                disabled={formik.values.approval_status !== 'approval'}
-                sx={{ mt: 2, mb: 2 }}
-              >
-                Download
-              </Button>
-            </StepContent>
-          </Step>
+    <Box>
+      {loadingStep4 ? (
+        <Box display="flex" justifyContent="center" alignItems="center" height="40vh" bgcolor="white">
+          <CircularProgress />
+        </Box>
+      ) : (
+        <Stepper activeStep={reviewStep} orientation="vertical" sx={{ mb: 4 }}>
+          {reviewSteps.map((label, idx) => (
+            <Step key={label}>
+              <StepLabel>{label}</StepLabel>
+              <StepContent>
+                {/* Step 1: Draft GST Computation */}
+                {idx === 0 && (
+                  <Box
+                    sx={{
+                      p: 4,
+                      pr: 10,
+                      boxShadow: '0px 0px 10px 0px rgba(66, 66, 66, 0.1)',
+                      bgcolor: 'white',
+                      width: 'fit-content',
+                      borderRadius: 2,
+                      mb: 1
+                    }}
+                  >
+                    <Typography variant="h5" mb={3} sx={{ textDecoration: 'underline' }}>
+                      Draft LabourLicence Computation
+                    </Typography>
+                    <Stack direction="row" spacing={2} mb={3}>
+                      <Button variant="contained" size="small" onClick={() => document.getElementById('draftGstComputationInput').click()}>
+                        <input
+                          id="draftGstComputationInput"
+                          type="file"
+                          hidden
+                          onChange={async (e) => {
+                            setReviewAndFiling((prev) => ({
+                              ...prev,
+                              task_id: reviewAndFiling?.task_id || null,
+                              data: {
+                                ...prev.data,
+                                draft_filing_certificate: e.target.files[0] || null
+                              }
+                            }));
+                        
+                            const task_id = reviewAndFiling.task_id;
+
+                            let type = reviewAndFiling?.data?.id ? 'put' : 'post';
+                            let urlEndpoint = reviewAndFiling?.data?.id
+                              ? `/labourlicense/review-filing/${reviewAndFiling?.data?.id}/`
+                              : '/labourlicense/review-filing/';
+
+                            const formData = new FormData();
+                            formData.append('service_request', service_id);
+                            formData.append('service_task', task_id);
+                            formData.append('draft_filing_certificate', e.target.files[0]);
+                            formData.append('approval_status', 'pending');
+                            formData.append('filing_status', 'in progress');
+                            formData.append('status', 'in progress');
+
+                            const res = await Factory(type, urlEndpoint, formData, {});
+                            if (res?.res?.status_cd === 0) {
+                              
+                              enqueueSnackbar('Draft labourLicence computation saved successfully!', {
+                                variant: 'success',
+                                anchorOrigin: { vertical: 'top', horizontal: 'right' }
+                              });
+                            } else {
+                              enqueueSnackbar('Error saving draft Labour computation.', {
+                                variant: 'error',
+                                anchorOrigin: { vertical: 'top', horizontal: 'right' }
+                              });
+                            }
+                          }}
+                        />
+                        Upload
+                      </Button>
+                     
+                      {reviewAndFiling?.data?.draft_filing_certificate && (
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          onClick={() => {
+                            if (reviewAndFiling?.data?.draft_filing_certificate instanceof File) {
+                              window.open(URL.createObjectURL(reviewAndFiling?.data?.draft_filing_certificate), '_blank');
+                            } else if (typeof reviewAndFiling?.data?.draft_filing_certificate === 'string') {
+                              viewFile(reviewAndFiling?.data?.draft_filing_certificate);
+                            }
+                          }}
+                        >
+                          View
+                        </Button>
+                      )}
+                    </Stack>
+                  
+                    <Box display="flex" justifyContent="flex-start" gap={1}>
+                      <GetActionButtons
+                        type="put"
+                        urlEndpoint="review-filing"
+                        recId={reviewAndFiling?.data?.id}
+                        status={reviewAndFiling?.data?.approval_status}
+                        data={reviewAndFiling}
+                        service_request={service_id}
+                        task_id={reviewAndFiling.task_id}
+                        urlKey="labourlicense"
+                        urlBool={true}
+                        filingHelper={true}
+                        step={reviewStep}
+                        setReviewStep={setReviewStep}
+                      />
+                    </Box>
+                  </Box>
+                )}
+
+                {/* Step 2: Upload Filed Acknowledgement */}
+                {idx === 1 && (
+                  <Box
+                    sx={{
+                      p: 4,
+                      pr: 10,
+                      boxShadow: '0px 0px 10px 0px rgba(66, 66, 66, 0.1)',
+                      bgcolor: 'white',
+                      width: 'fit-content',
+                      borderRadius: 2,
+                      mb: 1
+                    }}
+                  >
+                    <Typography variant="h5" mb={3} sx={{ textDecoration: 'underline' }}>
+                      Upload Filed Acknowledgement
+                    </Typography>
+                    <Stack direction="row" spacing={2} mb={3}>
+                      <Button variant="contained" size="small" onClick={() => document.getElementById('filedAcknowledgementInput').click()}>
+                        <input
+                          id="filedAcknowledgementInput"
+                          type="file"
+                          hidden
+                          onChange={async (e) => {
+                            setReviewAndFiling((prev) => ({
+                              ...prev,
+                              task_id: reviewAndFiling?.task_id || null,
+                              data: {
+                                ...prev.data,
+                                review_certificate: e.target.files[0] || null
+                              }
+                            }));
+                            let type = reviewAndFiling?.data?.id ? 'put' : 'post';
+                            let urlEndpoint = reviewAndFiling?.data?.id
+                              ? `/labourlicense/review-filing/${reviewAndFiling?.data?.id}/`
+                              : '/labourlicense/review-filing/';
+
+                            const formData = new FormData();
+                            formData.append('service_request', service_id);
+                            formData.append('service_task', reviewAndFiling.task_id);
+                            formData.append('review_certificate', e.target.files[0]);
+                            formData.append('filing_status', 'in progress');
+                            formData.append('status', 'in progress');
+
+                            const res = await Factory(type, urlEndpoint, formData, {});
+                            if (res?.res?.status_cd === 0) {
+                              setReviewAndFiling({ ...reviewAndFiling, data: { ...res.res.data } });
+                              enqueueSnackbar('Filed acknowledgement saved successfully!', {
+                                variant: 'success',
+                                anchorOrigin: { vertical: 'top', horizontal: 'right' }
+                              });
+                            } else {
+                              enqueueSnackbar('Error saving filed acknowledgement.', {
+                                variant: 'error',
+                                anchorOrigin: { vertical: 'top', horizontal: 'right' }
+                              });
+                            }
+                          }}
+                        />
+                        Upload
+                      </Button>
+                      {reviewAndFiling?.data?.review_certificate && (
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          onClick={() => {
+                            if (reviewAndFiling?.data?.review_certificate instanceof File) {
+                              window.open(URL.createObjectURL(reviewAndFiling?.data?.review_certificate), '_blank');
+                            } else if (typeof reviewAndFiling?.data?.review_certificate === 'string') {
+                              viewFile(reviewAndFiling?.data?.review_certificate);
+                            }
+                          }}
+                        >
+                          View
+                        </Button>
+                      )}
+                    </Stack>
+                    <Box display="flex" justifyContent="flex-start" gap={1}>
+                      <GetActionButtons
+                        type="put"
+                        data={reviewAndFiling}
+                        status={reviewAndFiling?.data?.filing_status}
+                        urlEndpoint="review-filing"
+                        recId={reviewAndFiling?.data?.id}
+                        task_id={reviewAndFiling?.task_id}
+                        service_request={service_id}
+                        filingHelper={true}
+                        setReviewStep={setReviewStep}
+                        urlKey="labourlicense"
+                        urlBool={true}
+                        step={reviewStep}
+                      />
+                    </Box>
+                  </Box>
+                )}
+                {idx === 2 && (
+                  <Box
+                    sx={{
+                      p: 4,
+                      pr: 8,
+                      boxShadow: '0px 0px 10px 0px rgba(66, 66, 66, 0.1)',
+                      bgcolor: 'white',
+                      width: 'fit-content',
+                      borderRadius: 2,
+                      mb: 1
+                    }}
+                  >
+                    <Stack direction="column" spacing={1}>
+                      <Typography variant="h5" mb={3} sx={{ textDecoration: 'underline' }}>
+                        Download Filed Acknowledgement
+                      </Typography>
+                      <Button
+                        variant="outlined"
+                        color="secondary"
+                        onClick={() => {
+                          if (reviewAndFiling?.data?.review_certificate) {
+                            viewFile(reviewAndFiling?.data?.review_certificate);
+                          }
+                        }}
+                        startIcon={
+                            <DownloadIcon sx={{ width: { xs: 24, md: 24 }, height: { xs: 24, md: 24 } }} />
+                          }
+                      >
+                        Download
+                        {/* <IconButton
+                          size="small"
+                          color="secondary"
+                          sx={{ alignSelf: 'center', '&:hover': { backgroundColor: 'transparent' } }}
+                        >
+                        
+                          <DownloadIcon sx={{ width: { xs: 24, md: 24 }, height: { xs: 24, md: 24 } }} />
+                        </IconButton> */}
+                      </Button>
+                    </Stack>
+                  </Box>
+                )}
+              </StepContent>
+            </Step>
+          ))}
         </Stepper>
-      </form>
+      )}
     </Box>
   );
 };

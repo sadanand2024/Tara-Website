@@ -14,7 +14,8 @@ import {
   Stack,
   Tooltip,
   TextField,
-  Card
+  Card,
+  Grid2
 } from '@mui/material';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
@@ -23,12 +24,18 @@ import { openSnackbar } from 'store/slices/snackbar';
 import Factory from 'utils/Factory';
 import { useSearchParams } from 'react-router-dom';
 import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
+import RaiseRequest from '../../RaiseRequest';
+import GetActionButtons from '../../FormHelpers';
 
 const PromoterSignatorySection = ({ taskId }) => {
   const [searchParams] = useSearchParams();
     const service_id = searchParams.get('service_id');
   const dispatch = useDispatch();
   const [saveIndex, setSaveIndex] = useState(null); // <-- index of promoter to save
+    const [promoterTaskId, setPromoterTaskId] = useState({
+            id: null,
+            task_id: null
+          }); 
 
   const getSignatoryDetails = async () => {
     const url = `/labourlicense/signatory-details/by-request?service_request_id=${service_id}`;
@@ -54,6 +61,7 @@ const PromoterSignatorySection = ({ taskId }) => {
       if (promoters.length) {
         formik.setFieldValue('promoters', promoters);
       }
+        setPromoterTaskId(res.data);
     }
 
     if (res.status_cd === 1) {
@@ -227,9 +235,30 @@ const PromoterSignatorySection = ({ taskId }) => {
   return (
     <form onSubmit={formik.handleSubmit}>
       <Card sx={{ p: 3, mt: 4 }}>
+        <Grid2> 
         <Typography variant="h5" fontWeight={700} mb={2}>
           <u>Promoter / Signatory Details</u>
         </Typography>
+        </Grid2>
+         <Grid2 sx={{ flexGrow: 1, ml: 95 }}>
+                  <Box display="flex" justifyContent="flex-end" gap={1}>
+                    <RaiseRequest
+                      fields={[
+                        'Full Name',
+                        'Aadhaar Card',
+                        'PAN Card',
+                        'Photograph',
+                        'Residential Address',
+                        'Email ID',
+                        'Mobile Number',
+                        'Gender',
+                        'Designation',
+                        'Is Residential Address Same as Aadhaar Address'
+                      ]}
+                      task_id={taskId}
+                    />
+                  </Box>
+                </Grid2>
 
         <Box display="flex" alignItems="center" mb={2}>
           <Typography>No. of Promoters/Directors/Managing Partners</Typography>
@@ -374,7 +403,7 @@ const PromoterSignatorySection = ({ taskId }) => {
                         fullWidth
                         size="small"
                         label="Address"
-                         sx={{
+                        sx={{
                         minWidth: 150,
                         maxWidth: 150
                       }}
@@ -427,6 +456,22 @@ const PromoterSignatorySection = ({ taskId }) => {
             </TableBody>
           </Table>
         </TableContainer>
+        <Grid2 size={{ xs: 12 }}>
+          
+                <Stack direction="row" spacing={2} justifyContent="flex-end" mt={3}> 
+                  <GetActionButtons
+                    type="post"
+                    urlEndpoint="/labourlicense/signatory-details/"
+                    recId={promoterTaskId.id}
+                    status={promoterTaskId.status}
+                    data={promoterTaskId}
+                    service_request={service_id}
+                    task_id={taskId}
+                    urlKey="labourlicense"
+                    urlBool={true}
+                  />
+                  </Stack>
+                </Grid2>
       </Card>
     </form>
   );

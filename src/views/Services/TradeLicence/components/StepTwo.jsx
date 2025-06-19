@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect,useState } from 'react';
 import { Box, Typography, Button, Grid2 } from '@mui/material';
 import IconSave from '@mui/icons-material/Save';
 import { useFormik } from 'formik';
@@ -9,11 +9,16 @@ import { Autocomplete, TextField } from '@mui/material';
 import { openSnackbar } from 'store/slices/snackbar';
 import Factory from 'utils/Factory';
 import { useSearchParams } from 'react-router-dom';
+import RaiseRequest from '../../RaiseRequest';
+import GetActionButtons from '../../FormHelpers';
 import BusinessRegistrationDocumenst from './BusinessRegistrationDocumenst';
 const StepTwo = ({taskId,tradelicencedetailsTaskId}) => {
-  console.log('tradeLicencedetailsTaskId', tradelicencedetailsTaskId);
+
   const [searchParams] = useSearchParams();
   const service_id = searchParams.get('service_id');
+   const [tradeLicense, settradeLicense] = useState({
+       task_id: null
+    });
   
   const dispatch = useDispatch();
 
@@ -50,6 +55,7 @@ const StepTwo = ({taskId,tradelicencedetailsTaskId}) => {
       formData.append('service_task', tradelicencedetailsTaskId);
       formData.append('apply_new_license', values.apply_new_license?.value);
       formData.append('trade_license_number', values.trade_license_number);
+      formData.append('status', 'in progress');
       if (values.trade_license_file && typeof values.trade_license_file !== 'string') {
         formData.append('trade_license_file', values.trade_license_file);
       }
@@ -92,6 +98,7 @@ const StepTwo = ({taskId,tradelicencedetailsTaskId}) => {
         trade_license_file: res.data.trade_license_file
       };
       setValues(formattedData);
+    settradeLicense(res.data);
     }
   };
   useEffect(() => {
@@ -102,9 +109,28 @@ const StepTwo = ({taskId,tradelicencedetailsTaskId}) => {
     <>
       <form autoComplete="off" onSubmit={handleSubmit}>
         <Box mb={3}>
-          <Typography variant="h4" mb={1}>
-            Trade licence Declaration
-          </Typography>
+          <Grid2 container alignItems="center" justifyContent="space-between" mb={2}>
+          <Grid2>
+            <Typography variant="h4" fontWeight={700}>
+              <span style={{ textDecoration: 'underline' }}>Trade licence Declaration</span>
+            </Typography>
+          </Grid2>
+          <Grid2 sx={{ flexGrow: 1, ml: 95 }}>
+            <Box display="flex" justifyContent="flex-end" gap={1}>
+            
+              <RaiseRequest
+                fields={[
+                  'apply_new_license',
+                ' trade_license_number',
+                'trade_license_file'
+                
+                ]}
+              
+                task_id={taskId}
+              />
+            </Box>
+          </Grid2>
+        </Grid2>
           <Grid2 container spacing={2} alignItems="center">
             <Grid2 size={{ sm: 3, md: 3, xs: 12 }}>
               <Typography>Apply for a new Trade Licence</Typography>
@@ -161,10 +187,21 @@ const StepTwo = ({taskId,tradelicencedetailsTaskId}) => {
             )}
           </Grid2>
         </Box>
-        <Box display="flex" justifyContent="flex-end" mt={2}>
+        <Box display="flex" justifyContent="flex-end" mt={2} gap={2}>
           <Button size="medium" variant="contained" color="primary" type="submit">
             Save
           </Button>
+          <GetActionButtons
+                    type="put"
+                    urlEndpoint="trade-license-exist"
+                    recId={tradeLicense.id}
+                                        status={tradeLicense.status}
+                                        data={tradeLicense}
+                                        service_request={service_id}
+                                        task_id={taskId}
+                                        urlKey="tradelicense"
+                                        urlBool={true}
+                                      />
         </Box>
       </form>
       <BusinessRegistrationDocumenst taskId={taskId}/>

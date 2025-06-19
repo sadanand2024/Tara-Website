@@ -10,6 +10,9 @@ import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DownloadIcon from '@mui/icons-material/Download';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import RaiseRequest from '../../RaiseRequest';
+import GetActionButtons from '../../FormHelpers';
+
 const typeOfBusinessOptions = [
   'Proprietorship',
   'Partnership',
@@ -69,6 +72,9 @@ const BusinessIdentityStructureSection = ({ taskId }) => {
   const service_id = searchParams.get('service_id');
   const dispatch = useDispatch();
   const [businessIdentityposttype, setBusinessIdentityposttype] = useState('post');
+   const [businessInfo, setBusinessInfo] = useState({
+       taskId: null
+    });
 
   const formik = useFormik({
     initialValues: {
@@ -133,6 +139,8 @@ const BusinessIdentityStructureSection = ({ taskId }) => {
           })
         );
         getBusinessIdentity();
+            
+
       }
     }
   });
@@ -205,6 +213,7 @@ const BusinessIdentityStructureSection = ({ taskId }) => {
     const { res } = await Factory('get', url);
     if (res.status_cd === 0) {
       // Map API response to form fields
+  
       const responseData = {
         id: res.data.id || '',
         service_type: res.data.service_type || '',
@@ -221,6 +230,7 @@ const BusinessIdentityStructureSection = ({ taskId }) => {
         reviewer: res.data.reviewer || ''
       };
       setValues(responseData);
+      setBusinessInfo(res?.data);
       setBusinessIdentityposttype('put');
     }
     if (res.status_cd === 1) {
@@ -238,13 +248,37 @@ const BusinessIdentityStructureSection = ({ taskId }) => {
   };
   useEffect(() => {
     getBusinessIdentity();
+   
+
   }, []);
 
   return (
     <Card sx={{ p: 3 }}>
-      <Typography variant="h5" fontWeight={700} mb={2}>
-        <span style={{ textDecoration: 'underline' }}>Business Identity & Structure</span>
-      </Typography>
+      <Grid2 container alignItems="center" justifyContent="space-between" mb={2}>
+  <Grid2>
+    <Typography variant="h4" fontWeight={700}>
+      <span style={{ textDecoration: 'underline' }}>Business Identity & Structure</span>
+    </Typography>
+  </Grid2>
+  <Grid2 sx={{ flexGrow: 1, ml: 95 }}>
+    <Box display="flex" justifyContent="flex-end" gap={1}>
+    
+      <RaiseRequest
+        fields={[
+          'Type of business',
+        'Category of establishment',
+            'Legal name of business',
+        'Nature of business',
+          'Business PAN',
+        'Date of commencement'
+        
+        ]}
+      
+        task_id={taskId}
+      />
+    </Box>
+  </Grid2>
+</Grid2>
       <form onSubmit={handleSubmit}>
         <Grid2 container spacing={2}>
           {fields.map((field) => (
@@ -260,6 +294,20 @@ const BusinessIdentityStructureSection = ({ taskId }) => {
           <Button variant="contained" color="primary" type="submit">
             Save
           </Button>
+         
+          
+          <GetActionButtons
+                              type="put"
+                              urlEndpoint="business-identity"
+                              recId={businessInfo.id}
+                              status={businessInfo.status}
+                              data={businessInfo}
+                              service_request={service_id}
+                              task_id={taskId}
+                              urlKey="labourlicense"
+                              urlBool={true}
+                            />
+                                    
         </Stack>
       </form>
     </Card>

@@ -27,8 +27,7 @@ const StepOne = () => {
 
     if (res.status_cd === 0 && res.data?.tasks) {
       const taskData = res.data.tasks;
-      console.log('Response Data:', res.data);
-      console.log('Task Data:', res.data.tasks);
+  
 
       setTaskIds({
         applicantDetailsTaskId:res.data.tasks['Applicant Details']?.task_id || null,
@@ -36,13 +35,8 @@ const StepOne = () => {
         promoterSignatoryTaskId: res.data.tasks['Signatory Details']?.task_id || null,
         businessPremisesTaskId:res.data.tasks['Business Location']?.task_id || null
       });
-        console.log('Task IDs:', {
-        applicantDetailsTaskId:res.data.tasks['Applicant Details']?.task_id ,
-        businessIdentityTaskId: res.data.tasks['Business Identity']?.task_id ,
-        promoterSignatoryTaskId: res.data.tasks['Signatory Details']?.task_id ,
-        businessPremisesTaskId:res.data.tasks['Business Location']?.task_id ,
-      });
-      console.log('Task dxcfvgbhjkIDs:', taskIds.businessIdentityTaskId);
+       
+     
     }
 
     setLoading(false);
