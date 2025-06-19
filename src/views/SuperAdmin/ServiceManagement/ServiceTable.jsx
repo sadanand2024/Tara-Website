@@ -80,8 +80,11 @@ const ServiceRequests = ({ searchQuery, setUsers, assigned, setSearchQuery }) =>
     getData();
   }, []);
 
-  const filteredRequests = React.useMemo(() => {
+  useEffect(() => {
     setPage(1);
+  }, [searchQuery]);
+
+  const filteredRequests = React.useMemo(() => {
     if (!searchQuery) return requests;
     const __requests = requests.filter(
       (request) =>
