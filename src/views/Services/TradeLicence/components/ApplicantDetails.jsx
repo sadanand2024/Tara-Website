@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect,useState} from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { Typography, TextField, Grid2, Button, FormControlLabel, Checkbox, Card, Stack } from '@mui/material';
@@ -8,6 +8,9 @@ import { useDispatch } from 'react-redux';
 import { openSnackbar } from 'store/slices/snackbar';
 import { useSearchParams } from 'react-router-dom';
 import Autocomplete from '@mui/material/Autocomplete';
+import  Box  from '@mui/material/Box';
+import RaiseRequest from '../../RaiseRequest';
+import GetActionButtons from '../../FormHelpers';
 const DESIGNATION_CHOICES = [
   { value: 'partner', label: 'Partner' },
   { value: 'director', label: 'Director' },
@@ -58,6 +61,9 @@ const ApplicantDetails = ({applicantTaskId}) => {
 
    const [searchParams] = useSearchParams();
     const service_id = searchParams.get('service_id');
+    const [applicantInfo, setapplicantInfo] = useState({
+         task_id: null
+      });
   const dispatch = useDispatch();
   const formik = useFormik({
     initialValues: {
@@ -100,7 +106,7 @@ const ApplicantDetails = ({applicantTaskId}) => {
     }),
     onSubmit: async (values) => {
       let formData = new FormData();
-      // console.log('taskid', taskId);
+     
       formData.append('service_request',service_id);
       formData.append('service_task',applicantTaskId);
       formData.append('name', values.name);
@@ -220,6 +226,7 @@ const ApplicantDetails = ({applicantTaskId}) => {
         pan_image: res.data.pan_image ? res.data.pan_image : '',
         passport_photo: res.data.passport_photo ? res.data.passport_photo : ''
       });
+       setapplicantInfo(res.data);
     }
   };
   useEffect(() => {
@@ -228,9 +235,34 @@ const ApplicantDetails = ({applicantTaskId}) => {
   const { values, handleChange, handleBlur, setFieldValue, touched, errors, handleSubmit, setValues } = formik;
   return (
     <Card sx={{ p: 3, mt: 3 }}>
-      <Typography variant="h5" fontWeight={700} mb={2}>
-        <span style={{ textDecoration: 'underline' }}>Applicant Details</span>
-      </Typography>
+        <Grid2 container alignItems="center" justifyContent="space-between" mb={2}>
+       <Grid2>
+         <Typography variant="h4" fontWeight={700}>
+           <span style={{ textDecoration: 'underline' }}>Applicant Details</span>
+         </Typography>
+       </Grid2>
+       <Grid2 sx={{ flexGrow: 1, ml: 95 }}>
+         <Box display="flex" justifyContent="flex-end" gap={1}>
+          
+           <RaiseRequest
+             fields={[
+               'name',
+              'designation',
+              'mobile_number',
+            'email',
+              'aadhaar_image',
+             'pan_image',
+              'passport_photo',
+              'address',
+                'residential_address'
+             
+             ]}
+            
+             task_id={applicantTaskId}
+           />
+         </Box>
+       </Grid2>
+     </Grid2>
       <form onSubmit={handleSubmit}>
         <Grid2 container spacing={2}>
           {fields.map((field) => (
@@ -271,6 +303,17 @@ const ApplicantDetails = ({applicantTaskId}) => {
           <Button variant="contained" color="primary" type="submit">
             Save
           </Button>
+          <GetActionButtons
+                                        type="put"
+                                        urlEndpoint="applicant-details"
+                                        recId={applicantInfo.id}
+                                        status={applicantInfo.status}
+                                        data={applicantInfo}
+                                        service_request={service_id}
+                                        task_id={applicantTaskId}
+                                        urlKey="tradelicense"
+                                        urlBool={true}
+                                      />
         </Stack>
       </form>
     </Card>

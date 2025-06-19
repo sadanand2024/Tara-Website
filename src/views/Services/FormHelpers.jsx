@@ -18,7 +18,7 @@ const GetActionButtons = ({
   step,
   msme = false,
   urlKey,
-  urlBool = false
+  urlBool = false,
 }) => {
   const [statusData, setStatusData] = useState(false);
   const user = useSelector((state) => state.accountReducer.user);
@@ -47,7 +47,6 @@ const GetActionButtons = ({
   const changeStatus = async (changedStatus) => {
     let payload = {};
     if (step === 0) {
-      console.log('msme', msme, urlKey);
       type = 'put';
       urlEndpoint = msme || urlKey ? urlEndpoint : `review-filing`;
       payload = { approval_status: changedStatus };

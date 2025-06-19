@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect,useState } from 'react';
 import { Box, Typography, Button, Grid2 } from '@mui/material';
 import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
 import { useFormik } from 'formik';
@@ -7,10 +7,15 @@ import Factory from 'utils/Factory';
 import { useDispatch } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
 import { openSnackbar } from 'store/slices/snackbar';
+import RaiseRequest from '../../RaiseRequest';
+import GetActionButtons from '../../FormHelpers';
 
 const BusinessRegistrationDocumenst = ({taskId}) => {
   const [searchParams] = useSearchParams();
   const service_id = searchParams.get('service_id');
+   const [businessDocument, setbusinessDocument] = useState({
+       task_id: null
+    });
   const dispatch = useDispatch();
   const formik = useFormik({
     initialValues: {
@@ -81,6 +86,7 @@ const BusinessRegistrationDocumenst = ({taskId}) => {
         property_tax_receipt: res.data.property_tax_receipt || null,
         rental_agreement: res.data.rental_agreement || null
       });
+      setbusinessDocument(res.data);
     }
   };
 
@@ -94,9 +100,26 @@ const BusinessRegistrationDocumenst = ({taskId}) => {
     <Box>
       <form autoComplete="off" onSubmit={handleSubmit}>
         <Box mb={3} mt={4}>
-          <Typography variant="h4" mb={1}>
-            Business Registration Documents
-          </Typography>
+          <Grid2 container alignItems="center" justifyContent="space-between" mb={2}>
+                   <Grid2>
+                   <Typography variant="h4" fontWeight={700}>
+                      <span style={{ textDecoration: 'underline' }}>Business Registration Documents</span>
+                    </Typography>
+                </Grid2>
+                  <Grid2 sx={{ flexGrow: 1, ml: 95 }}>
+                  <Box display="flex" justifyContent="flex-end" gap={1}>
+                    
+                      <RaiseRequest
+                        fields={[
+                          'Incorporation certificate',
+                            'Photo of premises',
+                          'Property tax receipt',
+                            'Rental agreement']}
+                      task_id={taskId}
+                      />
+                    </Box>
+                  </Grid2>
+                </Grid2>
           <Grid2 container spacing={2} alignItems="center">
             {/* 1. Incorporation certificate */}
             <Grid2 size={{ sm: 6, md: 6 }}>
@@ -156,10 +179,22 @@ const BusinessRegistrationDocumenst = ({taskId}) => {
             </Grid2>
           </Grid2>
         </Box>
-        <Box display="flex" justifyContent="flex-end" mt={2}>
+        <Box display="flex" justifyContent="flex-end" mt={2} gap={2}>
           <Button size="medium" variant="contained" color="primary" type="submit">
             Save
           </Button>
+      
+           <GetActionButtons
+                                        type="put"
+                                        urlEndpoint="business-documents"
+                                        recId={businessDocument.id}
+                                        status={businessDocument.status}
+                                        data={businessDocument}
+                                        service_request={service_id}
+                                        task_id={taskId}
+                                        urlKey="tradelicense"
+                                        urlBool={true}
+                                      />
         </Box>
       </form>
     </Box>

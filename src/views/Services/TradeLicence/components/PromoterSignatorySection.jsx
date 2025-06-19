@@ -14,7 +14,8 @@ import {
   Stack,
   Tooltip,
   TextField,
-  Card
+  Card,
+  Grid2
 } from '@mui/material';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
@@ -22,11 +23,18 @@ import { useDispatch } from 'react-redux';
 import { openSnackbar } from 'store/slices/snackbar';
 import Factory from 'utils/Factory';
 import { useSearchParams } from 'react-router-dom';
+import RaiseRequest from '../../RaiseRequest';
+import GetActionButtons from '../../FormHelpers';
+
 import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
 
 const PromoterSignatorySection = ({ taskId }) => {
    const [searchParams] = useSearchParams();
       const service_id = searchParams.get('service_id');
+      const [promoterTaskId, setPromoterTaskId] = useState({
+          id: null,
+          task_id: null
+        }); 
   const dispatch = useDispatch();
   const [saveIndex, setSaveIndex] = useState(null); // <-- index of promoter to save
 
@@ -34,9 +42,9 @@ const PromoterSignatorySection = ({ taskId }) => {
     const url = `/tradelicense/signatory-details/by-request-or-task?service_request_id=${service_id}`;
     const { res } = await Factory('get', url);
 
-    console.log(res);
-       const signatoryinfo = res?.data?.signatory_info ?? res?.signatory_info ?? [];
-           if (res.status_cd === 0 && Array.isArray(signatoryinfo)) {
+    
+      const signatoryinfo = res?.data?.signatory_info ?? res?.signatory_info ?? [];
+      if (res.status_cd === 0 && Array.isArray(signatoryinfo)) {
 
 
     // if (res.status_cd === 0) {
@@ -57,6 +65,8 @@ const PromoterSignatorySection = ({ taskId }) => {
       if (promoters.length) {
         formik.setFieldValue('promoters', promoters);
       }
+       
+         setPromoterTaskId(res.data);
     }
 
     if (res.status_cd === 1) {
@@ -230,9 +240,30 @@ const PromoterSignatorySection = ({ taskId }) => {
   return (
     <form onSubmit={formik.handleSubmit}>
       <Card sx={{ p: 3, mt: 4 }}>
+        <Grid2> 
         <Typography variant="h5" fontWeight={700} mb={2}>
           <u>Promoter / Signatory Details</u>
         </Typography>
+        </Grid2>
+         <Grid2 sx={{ flexGrow: 1, ml: 95 }}>
+                  <Box display="flex" justifyContent="flex-end" gap={1}>
+                    <RaiseRequest
+                      fields={[
+                        'Full Name',
+                        'Aadhaar Card',
+                        'PAN Card',
+                        'Photograph',
+                        'Residential Address',
+                        'Email ID',
+                        'Mobile Number',
+                        'Gender',
+                        'Designation',
+                        'Is Residential Address Same as Aadhaar Address'
+                      ]}
+                      task_id={taskId}
+                    />
+                  </Box>
+                </Grid2>
 
         <Box display="flex" alignItems="center" mb={2}>
           <Typography>No. of Promoters/Directors/Managing Partners</Typography>
@@ -425,6 +456,22 @@ const PromoterSignatorySection = ({ taskId }) => {
             </TableBody>
           </Table>
         </TableContainer>
+         <Grid2 size={{ xs: 12 }}>
+          
+                <Stack direction="row" spacing={2} justifyContent="flex-end" mt={3}> 
+                  <GetActionButtons
+                    type="post"
+                    urlEndpoint="/tradelicense/signatory-details/"
+                    recId={promoterTaskId.id}
+                    status={promoterTaskId.status}
+                    data={promoterTaskId}
+                    service_request={service_id}
+                    task_id={taskId}
+                    urlKey="tradelicense"
+                    urlBool={true}
+                  />
+                  </Stack>
+                </Grid2>
       </Card>
     </form>
   );

@@ -8,6 +8,9 @@ import { openSnackbar } from 'store/slices/snackbar';
 import { indian_States_And_UTs } from 'utils/indian_States_And_UT';
 import { useSearchParams } from 'react-router-dom';
 import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
+import RaiseRequest from '../../RaiseRequest';
+import GetActionButtons from '../../FormHelpers';
+
 
 import AdditionalPlaceOfBusiness from './AdditionalPlaceOfBusiness';
 const BusinessPremisesSection = ({taskId}) => {
@@ -200,6 +203,7 @@ const BusinessPremisesSection = ({taskId}) => {
       };
 
       formik.setValues(formValues);
+      //  setbusinessPremises(res.data);
       setBusinessPremises({
         ...data,
         additional_space: data.additional_space || 'no'
@@ -287,11 +291,40 @@ const BusinessPremisesSection = ({taskId}) => {
       <Card sx={{ p: 3, mt: 4 }}>
         <form onSubmit={handleSubmit}>
           <Grid2 container spacing={2}>
-            <Grid2 size={12}>
-              <Typography variant="h4" fontWeight={700} mb={0}>
-                Business premises, location & proofs
-              </Typography>
-            </Grid2>
+            <Grid2 container alignItems="center" justifyContent="space-between" mb={2}>
+      <Grid2>
+    <Typography variant="h4" fontWeight={700}>
+      <span style={{ textDecoration: 'underline' }}>Business premises, location & proofs</span>
+    </Typography>
+  </Grid2>
+  <Grid2 sx={{ flexGrow: 1, ml: 95 }}>
+    <Box display="flex" justifyContent="flex-end" gap={1}>
+     
+      <RaiseRequest
+        fields={[
+                    'addressLine1',
+  'addressLine2',
+  'city',
+  'district',
+  'state',
+  'pincode',
+  'nature_of_possession',
+  'trade_area',
+  'road_type',
+  'address_proof',
+  'rental_agreement',
+  'bankStatement',
+  'additional_space',
+  'trade_premises',
+  'trade_description'
+        
+        ]}
+       
+        task_id={taskId}
+      />
+    </Box>
+  </Grid2>
+</Grid2>
             {[
               { label: 'Trade Premises', name: 'trade_premises', type: 'text' },
               { label: 'Trade Description', name: 'trade_description', type: 'text' }
@@ -351,6 +384,18 @@ const BusinessPremisesSection = ({taskId}) => {
                 <Button variant="contained" color="primary" type="submit">
                   Save
                 </Button>
+            
+                <GetActionButtons
+                                              type="put"
+                                              urlEndpoint="business-location"
+                                              recId={businessPremises.id}
+                                              status={businessPremises.status}
+                                              data={businessPremises}
+                                              service_request={service_id}
+                                              task_id={taskId}
+                                              urlKey="tradelicense"
+                                              urlBool={true}
+                                            />
               </Stack>
             </Grid2>
           </Grid2>
