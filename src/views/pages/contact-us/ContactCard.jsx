@@ -17,8 +17,11 @@ import Typography from '@mui/material/Typography';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import axios from 'axios';
+import { useDispatch } from 'store';
+import { openSnackbar } from 'store/slices/snackbar';
 // third party
 import { PatternFormat } from 'react-number-format';
+import FormHelperText from '@mui/material/FormHelperText';
 
 // project imports
 import AnimateButton from 'ui-component/extended/AnimateButton';
@@ -27,6 +30,7 @@ import { gridSpacing } from 'store/constant';
 
 // assets
 import mailImg from 'assets/images/landing/widget-mail.svg';
+let baseURL = import.meta.env.VITE_APP_BASE_URL;
 
 // select options
 const currencies = [
@@ -66,7 +70,7 @@ export default function ContactCard() {
   const handleChange = (event) => {
     setBudget(Number(event.target?.value));
   };
-
+  const dispatch = useDispatch();
   const [size, setSize] = React.useState(1);
   const handleChange1 = (event) => {
     setSize(Number(event.target?.value));
@@ -135,35 +139,39 @@ export default function ContactCard() {
                   last_name: Yup.string().required('Last name is required'),
                   email: Yup.string().email('Invalid email address').required('Email is required'),
                   mobile_number: Yup.string().required('Phone number is required'),
-                  message: Yup.string()
-                    .required('Message is required')
-                    .min(30, 'Please enter at least 30 characters')
-                    .max(200, 'Maximum 200 characters allowed')
+                  message: Yup.string().required('Message is required')
                 })}
-                onSubmit={(values, { setSubmitting, resetForm }) => {
-                  // Handle form submission here
-                  console.log('Form submitted:', values);
-                  const apiUrl = `${import.meta.env.VITE_APP_BASE_URL}/user_management/contact`;
-                  axios
-                    .post(apiUrl, values)
-                    .then((response) => {
-                      enqueueSnackbar('Thank you for contacting us!', {
-                        variant: 'success',
-                        anchorOrigin: { vertical: 'top', horizontal: 'right' },
-                        autoHideDuration: 3000
-                      });
-                    })
-                    .catch((error) => {
-                      enqueueSnackbar('Error submitting form!', {
-                        variant: 'error',
-                        anchorOrigin: { vertical: 'top', horizontal: 'right' },
-                        autoHideDuration: 3000
-                      });
-                    })
-                    .finally(() => {
-                      setSubmitting(false);
+                onSubmit={async (values, { setSubmitting, resetForm }) => {
+                  try {
+                    const response = await axios.post(`${baseURL}/user_management/contact`, values);
+
+                    if (response.status === 201) {
+                      dispatch(
+                        openSnackbar({
+                          open: true,
+                          message: response.data.message || 'Thank you for contacting us!',
+                          variant: 'alert',
+                          alert: { color: 'success' },
+                          close: false
+                        })
+                      );
                       resetForm();
-                    });
+                    }
+                  } catch (error) {
+                    // console.error('Submission error:', error.response?.data || error.message);
+
+                    dispatch(
+                      openSnackbar({
+                        open: true,
+                        message: JSON.stringify(error.response?.data) || JSON.stringify(error.message) || 'Error submitting form!',
+                        variant: 'alert',
+                        alert: { color: 'error' },
+                        close: false
+                      })
+                    );
+                  } finally {
+                    setSubmitting(false);
+                  }
                 }}
               >
                 {({ errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values }) => (
@@ -246,13 +254,7 @@ export default function ContactCard() {
                             fullWidth
                             rows={4}
                             error={Boolean(touched.message && errors.message)}
-                            helperText={
-                              touched.message && errors.message
-                                ? errors.message
-                                : `${values.message.length}/200 characters` +
-                                  (values.message.length > 0 && values.message.length < 30 ? ' (minimum 30 characters)' : '')
-                            }
-                            inputProps={{ maxLength: 200 }}
+                            helperText={touched.message && errors.message ? errors.message : ''}
                           />
                         </FormControl>
                       </Grid>
@@ -261,11 +263,11 @@ export default function ContactCard() {
                           <Grid size={{ sm: 'grow' }}>
                             <Typography align="left" variant="body2">
                               By submitting this, you agree to the
-                              <Typography variant="subtitle1" component={Link} to="#" color="primary" sx={{ mx: 0.5 }}>
+                              <Typography variant="subtitle1" component={Link} to="/PrivacyPolicy" color="primary" sx={{ mx: 0.5 }}>
                                 Privacy Policy
                               </Typography>
                               and
-                              <Typography variant="subtitle1" component={Link} to="#" color="primary" sx={{ ml: 0.5 }}>
+                              <Typography variant="subtitle1" component={Link} to="/TermsOfUse" color="primary" sx={{ ml: 0.5 }}>
                                 Cookie Policy
                               </Typography>
                             </Typography>

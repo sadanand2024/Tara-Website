@@ -109,7 +109,7 @@ export default function BranchesInfo({ handleBack, handleNext, fetchBusinessDeta
       <Grid2 size={{ xs: 12 }}>
         <Stack direction="row" justifyContent="space-between" alignItems="center">
           <Typography variant="h4">Branches Info</Typography>
-          <Button startIcon={<IconPlus size={16} />} variant="contained" color="primary" onClick={handleOpenDialog}>
+          <Button size="small" startIcon={<IconPlus size={16} />} variant="contained" color="primary" onClick={handleOpenDialog}>
             Add Branch
           </Button>
         </Stack>
@@ -161,27 +161,43 @@ export default function BranchesInfo({ handleBack, handleNext, fetchBusinessDeta
             </Table>
           </TableContainer>
         </Card>
-        {branches.length > 0 && (
-          <Stack direction="row" justifyContent="center" sx={{ py: 2 }}>
-            <Pagination count={Math.ceil(branches.length / rowsPerPage)} page={currentPage} onChange={handlePageChange} />
-          </Stack>
-        )}
 
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Button
             variant="outlined"
             startIcon={<ArrowBackIcon />}
             onClick={() => {
               navigate('/app/invoice');
             }}
+            size="small"
           >
             Back to Dashboard
           </Button>
+
+          {branches.length === 0 && (
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                py: 3,
+                width: '100%',
+                color: 'text.secondary'
+              }}
+            >
+              No branches added yet
+            </Box>
+          )}
+          {branches.length > 0 && (
+            <Stack direction="row" justifyContent="center" sx={{ py: 2 }}>
+              <Pagination count={Math.ceil(branches.length / rowsPerPage)} page={currentPage} onChange={handlePageChange} />
+            </Stack>
+          )}
           <Stack direction="row" spacing={2}>
-            <Button variant="outlined" onClick={handleBack}>
+            <Button variant="outlined" size="small" onClick={handleBack}>
               Back
             </Button>
-            <Button variant="contained" onClick={handleNext}>
+            <Button variant="contained" size="small" onClick={handleNext}>
               Next
             </Button>
           </Stack>
