@@ -368,17 +368,17 @@ const BusinessPremisesSection = ({ taskId }) => {
                   Save
                 </Button>
                
-                 <GetActionButtons
-                                              type="put"
-                                              urlEndpoint="business-location"
-                                              recId={businessPremises.id}
-                                              status={businessPremises.status}
-                                              data={businessPremises}
-                                              service_request={service_id}
-                                              task_id={taskId}
-                                              urlKey="labourlicense"
-                                              urlBool={true}
-                                            />
+                                    <GetActionButtons
+                                      type="put"
+                                      urlEndpoint="business-location"
+                                      recId={businessPremises.id}
+                                      status={businessPremises.status}
+                                      data={businessPremises}
+                                      service_request={service_id}
+                                      task_id={taskId}
+                                      urlKey="labourlicense"
+                                      urlBool={true}
+                                    />
               </Stack>
             </Grid2>
           </Grid2>

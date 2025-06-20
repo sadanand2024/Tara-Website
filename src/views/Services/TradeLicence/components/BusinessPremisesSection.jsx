@@ -10,8 +10,6 @@ import { useSearchParams } from 'react-router-dom';
 import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
 import RaiseRequest from '../../RaiseRequest';
 import GetActionButtons from '../../FormHelpers';
-
-
 import AdditionalPlaceOfBusiness from './AdditionalPlaceOfBusiness';
 const BusinessPremisesSection = ({taskId}) => {
   const [searchParams] = useSearchParams();
@@ -100,7 +98,7 @@ const BusinessPremisesSection = ({taskId}) => {
       address_proof: null,
       rental_agreement: null,
       bankStatement: null,
-      additional_space: 'no',
+      additional_space: businessPremises?.additional_space || '',
       trade_premises: '',
       trade_description: ''
     },
@@ -117,7 +115,7 @@ const BusinessPremisesSection = ({taskId}) => {
       address_proof: Yup.mixed().required('Address proof is required'),
       rental_agreement: Yup.mixed().required('Rental Agreement/NOC is required'),
       // bankStatement: Yup.mixed().required('Bank Statement/Cancelled Cheque is required'),
-      additional_space: Yup.string().required('Please select if you have additional space')
+      // additional_space: Yup.string().required('Please select if you have additional space')
     }),
     onSubmit: async (values) => {
       let url = businessPremises.id ? `/tradelicense/business-location/${businessPremises.id}/` : `/tradelicense/business-location/`;
@@ -136,7 +134,8 @@ const BusinessPremisesSection = ({taskId}) => {
         })
       );
       formData.append('nature_of_possession', values.nature_of_possession);
-      formData.append('additional_space', values.additional_space);
+      formData.append('business_locations', businessPremises.id);
+      // formData.append('additional_space', values.additional_space);
       formData.append('trade_area', values.trade_area);
       formData.append('road_type', values.road_type);
       formData.append('status', 'in progress');
@@ -199,14 +198,14 @@ const BusinessPremisesSection = ({taskId}) => {
         address_proof: data.address_proof || null,
         rental_agreement: data.rental_agreement || null,
         bankStatement: data.bank_statement || null,
-        additional_space: data.additional_space || 'no'
+        // additional_space: data.additional_space || null,
       };
 
       formik.setValues(formValues);
       //  setbusinessPremises(res.data);
       setBusinessPremises({
         ...data,
-        additional_space: data.additional_space || 'no'
+        // additional_space: data.additional_space || 'no'
       });
     }
   };
@@ -299,27 +298,27 @@ const BusinessPremisesSection = ({taskId}) => {
   </Grid2>
   <Grid2 sx={{ flexGrow: 1, ml: 95 }}>
     <Box display="flex" justifyContent="flex-end" gap={1}>
-     
+    
       <RaiseRequest
         fields={[
                     'addressLine1',
-  'addressLine2',
-  'city',
-  'district',
-  'state',
-  'pincode',
-  'nature_of_possession',
-  'trade_area',
-  'road_type',
-  'address_proof',
-  'rental_agreement',
-  'bankStatement',
-  'additional_space',
-  'trade_premises',
-  'trade_description'
+                    'addressLine2',
+                    'city',
+                    'district',
+                    'state',
+                    'pincode',
+                    'nature_of_possession',
+                    'trade_area',
+                    'road_type',
+                    'address_proof',
+                    'rental_agreement',
+                    'bankStatement',
+                    'additional_space',
+                    'trade_premises',
+                    'trade_description'
         
         ]}
-       
+      
         task_id={taskId}
       />
     </Box>
@@ -347,7 +346,7 @@ const BusinessPremisesSection = ({taskId}) => {
             <Grid2 size={12}>
               <br />
             </Grid2>
-            <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+            {/* <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
               <Box display="flex" alignItems="center" gap={2}>
                 <Typography>Additional place of business?</Typography>
                 <FormGroup row>
@@ -377,7 +376,7 @@ const BusinessPremisesSection = ({taskId}) => {
                   />
                 </FormGroup>
               </Box>
-            </Grid2>
+            </Grid2> */}
 
             <Grid2 size={12} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
               <Stack direction="row" spacing={2}>
@@ -386,22 +385,22 @@ const BusinessPremisesSection = ({taskId}) => {
                 </Button>
             
                 <GetActionButtons
-                                              type="put"
-                                              urlEndpoint="business-location"
-                                              recId={businessPremises.id}
-                                              status={businessPremises.status}
-                                              data={businessPremises}
-                                              service_request={service_id}
-                                              task_id={taskId}
-                                              urlKey="tradelicense"
-                                              urlBool={true}
-                                            />
+                  type="put"
+                  urlEndpoint="business-location"
+                  recId={businessPremises.id}
+                  status={businessPremises.status}
+                  data={businessPremises}
+                  service_request={service_id}
+                  task_id={taskId}
+                  urlKey="tradelicense"
+                  urlBool={true}
+                />
               </Stack>
             </Grid2>
           </Grid2>
         </form>
       </Card>
-      {values.additional_space === 'yes' && <AdditionalPlaceOfBusiness businessPremises={businessPremises} />}
+       <AdditionalPlaceOfBusiness businessPremises={businessPremises} />
     </>
   );
 };
