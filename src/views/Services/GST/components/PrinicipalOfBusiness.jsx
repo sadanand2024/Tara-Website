@@ -162,7 +162,7 @@ const PrincipleOfBusiness = () => {
         }
 
         const { res } = await Factory(prinicipalBusiness.id ? 'put' : 'post', url, formData);
-        // console.log('API Response:', res);
+        
         
         if (res.status_cd === 1) {
           dispatch(

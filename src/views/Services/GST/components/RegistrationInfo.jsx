@@ -142,11 +142,11 @@ const RegistrationInfo = () => {
     const url = `/gst/service-request-section-data?service_request_id=${service_id}&section=business_details`;
     const { res } = await Factory('get', url);
     
-    // console.log(res.data , res.status_cd);
+
     if (res.status_cd === 0 && res.data) {
       const data = res?.data?.task_data["Registration Info"]?.data;
       // const data = res.data;
-      // console.log(data);
+     
       if (res?.data?.task_data && data !== null) {
       formik.setValues({
         is_this_voluntary_registration: data.is_this_voluntary_registration || '',

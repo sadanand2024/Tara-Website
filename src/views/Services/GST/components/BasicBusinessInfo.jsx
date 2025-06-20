@@ -295,7 +295,7 @@ const BasicBusinessInfo = () => {
   useEffect(() => {
     getbasicInfo();
   }, []);
-  // console.log('Service ID:', task_id);
+  
 
   return (
     <Box mt={4}>

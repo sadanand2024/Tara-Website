@@ -59,10 +59,10 @@ const fields = [
 
 const ApplicantDetails = ({applicantTaskId}) => {
 
-   const [searchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
     const service_id = searchParams.get('service_id');
     const [applicantInfo, setapplicantInfo] = useState({
-         task_id: null
+        task_id: null
       });
   const dispatch = useDispatch();
   const formik = useFormik({
@@ -97,16 +97,18 @@ const ApplicantDetails = ({applicantTaskId}) => {
 
       pan_image: Yup.mixed().required('PAN Image is required'),
       passport_photo: Yup.mixed().required('Passport Photo is required'), 
-      address: Yup.string().when('residential_address', {
-        is: 'no',
-        then: Yup.string().required('Address is required when residential address is not same as Aadhaar')
-      }),
+      address: Yup.string()
+    .when('residential_address', {
+      is: 'no',
+      then: (schema) => schema.required('Address is required when residential is not same'),
+      otherwise: (schema) => schema.notRequired(),
+    }),
       residential_address: Yup.string().oneOf(['yes', 'no'], 'Residential address must be either yes or no')
       
     }),
     onSubmit: async (values) => {
       let formData = new FormData();
-     
+    
       formData.append('service_request',service_id);
       formData.append('service_task',applicantTaskId);
       formData.append('name', values.name);
@@ -204,6 +206,7 @@ const ApplicantDetails = ({applicantTaskId}) => {
     }
   };
   const handleCheckboxChange = (event) => {
+    console.log(event.target.checked)
     setFieldValue('residential_address', event.target.checked ? 'yes' : 'no');
     if (event.target.checked) {
       setFieldValue('address', '');
@@ -226,7 +229,7 @@ const ApplicantDetails = ({applicantTaskId}) => {
         pan_image: res.data.pan_image ? res.data.pan_image : '',
         passport_photo: res.data.passport_photo ? res.data.passport_photo : ''
       });
-       setapplicantInfo(res.data);
+      setapplicantInfo(res.data);
     }
   };
   useEffect(() => {
@@ -236,13 +239,13 @@ const ApplicantDetails = ({applicantTaskId}) => {
   return (
     <Card sx={{ p: 3, mt: 3 }}>
         <Grid2 container alignItems="center" justifyContent="space-between" mb={2}>
-       <Grid2>
-         <Typography variant="h4" fontWeight={700}>
-           <span style={{ textDecoration: 'underline' }}>Applicant Details</span>
-         </Typography>
-       </Grid2>
-       <Grid2 sx={{ flexGrow: 1, ml: 95 }}>
-         <Box display="flex" justifyContent="flex-end" gap={1}>
+      <Grid2>
+        <Typography variant="h4" fontWeight={700}>
+          <span style={{ textDecoration: 'underline' }}>Applicant Details</span>
+        </Typography>
+      </Grid2>
+      <Grid2 sx={{ flexGrow: 1, ml: 95 }}>
+        <Box display="flex" justifyContent="flex-end" gap={1}>
           
            <RaiseRequest
              fields={[
