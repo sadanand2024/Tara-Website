@@ -71,6 +71,7 @@ const businessIdentityInitialValues = {
 };
 
 const businessClassificationInitialValues = {
+  id: null,
   major_activity: '',
   nature_of_business: '',
   nic_codes: {
@@ -118,10 +119,13 @@ const addressInitialValues = {
   location_of_plant_or_unit: []
 };
 const reviewFilingCertificateInitialValues = {
-  reviewStatus: 'in_progress',
-  reviewComment: '',
-  filingStatus: 'in_progress',
-  certificateUploaded: false
+  id: null,
+  review_certificate: null,
+  review_certificate_status: null,
+  draft_income_file: null,
+  filing_status: '',
+  approval_status: '',
+  status: ''
 };
 
 const viewFile = async (url) => {
@@ -186,7 +190,10 @@ const MSMEDashboard = () => {
 
       const response = await Factory(type, url, formData);
       if (response.res.status_cd === 0) {
-        setBusinessIdentityData(response.res);
+        if (type === 'post') {
+          setBusinessIdentityData(response.res);
+          businessIdentityFormik.setValues(response.res);
+        }
         enqueueSnackbar('Business Identity Saved', { variant: 'success', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
       } else {
         enqueueSnackbar('Failed to save business identity', { variant: 'error', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
@@ -210,7 +217,10 @@ const MSMEDashboard = () => {
       __postValues.status = 'in progress';
       const response = await Factory(type, url, __postValues);
       if (response.res.status_cd === 0) {
-        setBusinessClassificationData(response.res);
+        if (type === 'post') {
+          setBusinessClassificationData(response.res);
+          businessClassificationFormik.setValues(response.res);
+        }
         enqueueSnackbar('Business Classification Inputs Saved', {
           variant: 'success',
           anchorOrigin: { vertical: 'top', horizontal: 'right' }
@@ -254,7 +264,10 @@ const MSMEDashboard = () => {
 
       const response = await Factory(type, url, formData);
       if (response.res.status_cd === 0) {
-        setTurnoverInvestmentDeclarationData(response.res);
+        if (type === 'post') {
+          setTurnoverInvestmentDeclarationData(response.res);
+          turnoverFormik.setValues(response.res);
+        }
         enqueueSnackbar('Turnover & Investment Declaration Saved', {
           variant: 'success',
           anchorOrigin: { vertical: 'top', horizontal: 'right' }
@@ -275,8 +288,8 @@ const MSMEDashboard = () => {
     onSubmit: async (values) => {
       let url = '/msme/registration-address-details/';
       let type = 'post';
-      if (values.id !== null) {
-        url = url + values.id + '/';
+      if (registeredAddressUnitsData?.id !== null) {
+        url = url + registeredAddressUnitsData?.id + '/';
         type = 'put';
       }
       const formData = new FormData();
@@ -298,7 +311,10 @@ const MSMEDashboard = () => {
 
       const response = await Factory(type, url, formData);
       if (response.res.status_cd === 0) {
-        setRegisteredAddressUnitsData(response.res);
+        if (type === 'post') {
+          setRegisteredAddressUnitsData(response.res);
+          addressFormik.setValues(response.res);
+        }
         enqueueSnackbar('Registered Address & Units Saved', {
           variant: 'success',
           anchorOrigin: { vertical: 'top', horizontal: 'right' }
@@ -312,18 +328,6 @@ const MSMEDashboard = () => {
     }
   });
 
-  // 5. Review, Filing & Certificate Formik
-  const reviewFormik = useFormik({
-    initialValues: reviewFilingCertificateData,
-    validationSchema: Yup.object({
-      reviewStatus: Yup.string().required('Required'),
-      filingStatus: Yup.string().required('Required')
-    }),
-    onSubmit: (values) => {
-      console.log('Review, Filing & Certificate Saved', values);
-    }
-  });
-
   // Pass activeStep to stepper
   const activeStep = step;
 
@@ -331,15 +335,6 @@ const MSMEDashboard = () => {
   const handleStepClick = (targetStep) => {
     if (targetStep <= step + 1) setStep(targetStep);
   };
-
-  // Handlers for vertical stepper progression
-  // const handleProceedToFile = () => {
-  //   reviewFormik.setFieldValue('filingStatus', 'in_progress');
-  //   reviewFormik.setFieldValue('certificateUploaded', false);
-  // };
-  // const handleUploadCertificate = () => {
-  //   reviewFormik.setFieldValue('certificateUploaded', true);
-  // };
 
   // State for plant/unit not applicable checkbox
   const [plantNotApplicable, setPlantNotApplicable] = useState(false);
@@ -447,15 +442,15 @@ const MSMEDashboard = () => {
                     fullWidth
                     size="small"
                     options={entityTypes}
-                    value={businessIdentityFormik.values.organisation_type}
-                    onChange={(e, value) => businessIdentityFormik.setFieldValue('organisation_type', value)}
+                    value={businessIdentityFormik?.values?.organisation_type}
+                    onChange={(e, value) => businessIdentityFormik?.setFieldValue('organisation_type', value)}
                     renderInput={(params) => (
                       <TextField
                         {...params}
                         label="Organisation Type"
-                        error={businessIdentityFormik.errors.organisation_type && businessIdentityFormik.touched.organisation_type}
-                        touched={businessIdentityFormik.touched.organisation_type}
-                        onBlur={() => businessIdentityFormik.setFieldTouched('organisation_type', true)}
+                        error={businessIdentityFormik?.errors?.organisation_type && businessIdentityFormik?.touched?.organisation_type}
+                        touched={businessIdentityFormik?.touched?.organisation_type}
+                        onBlur={() => businessIdentityFormik?.setFieldTouched('organisation_type', true)}
                       />
                     )}
                   />
@@ -476,11 +471,11 @@ const MSMEDashboard = () => {
                   <TextField
                     fullWidth
                     size="small"
-                    value={businessIdentityFormik.values.business_name}
-                    onChange={(e) => businessIdentityFormik.setFieldValue('business_name', e.target.value)}
-                    error={businessIdentityFormik.errors.business_name && businessIdentityFormik.touched.business_name}
-                    touched={businessIdentityFormik.touched.business_name}
-                    onBlur={() => businessIdentityFormik.setFieldTouched('business_name', true)}
+                    value={businessIdentityFormik?.values?.business_name}
+                    onChange={(e) => businessIdentityFormik?.setFieldValue('business_name', e.target.value)}
+                    error={businessIdentityFormik?.errors?.business_name && businessIdentityFormik?.touched?.business_name}
+                    touched={businessIdentityFormik?.touched?.business_name}
+                    onBlur={() => businessIdentityFormik?.setFieldTouched('business_name', true)}
                   />
                 </Grid2>
                 {/* 3. PAN of Business & COI */}
@@ -489,7 +484,7 @@ const MSMEDashboard = () => {
                     varient="subtitle1"
                     sx={{
                       color:
-                        businessIdentityFormik.errors.pan_of_business_or_COI && businessIdentityFormik.touched.pan_of_business_or_COI
+                        businessIdentityFormik?.errors?.pan_of_business_or_COI && businessIdentityFormik?.touched?.pan_of_business_or_COI
                           ? 'red'
                           : 'inherit'
                     }}
@@ -507,22 +502,24 @@ const MSMEDashboard = () => {
                       id="coiInput"
                       type="file"
                       hidden
-                      onChange={(e) => businessIdentityFormik.setFieldValue('pan_of_business_or_COI', e.target.files[0])}
-                      onBlur={() => businessIdentityFormik.setFieldTouched('pan_of_business_or_COI', true)}
-                      error={businessIdentityFormik.errors.pan_of_business_or_COI && businessIdentityFormik.touched.pan_of_business_or_COI}
-                      touched={businessIdentityFormik.touched.pan_of_business_or_COI}
+                      onChange={(e) => businessIdentityFormik?.setFieldValue('pan_of_business_or_COI', e.target.files[0])}
+                      onBlur={() => businessIdentityFormik?.setFieldTouched('pan_of_business_or_COI', true)}
+                      error={
+                        businessIdentityFormik?.errors?.pan_of_business_or_COI && businessIdentityFormik?.touched?.pan_of_business_or_COI
+                      }
+                      touched={businessIdentityFormik?.touched?.pan_of_business_or_COI}
                     />
-                    {businessIdentityFormik.values.pan_of_business_or_COI && (
+                    {businessIdentityFormik?.values?.pan_of_business_or_COI && (
                       <Button
                         fullWidth
                         size="small"
                         variant="outlined"
                         onClick={() => {
-                          if (businessIdentityFormik.values.pan_of_business_or_COI instanceof File) {
-                            const url = URL.createObjectURL(businessIdentityFormik.values.pan_of_business_or_COI);
+                          if (businessIdentityFormik?.values?.pan_of_business_or_COI instanceof File) {
+                            const url = URL.createObjectURL(businessIdentityFormik?.values?.pan_of_business_or_COI);
                             window.open(url, '_blank');
                           } else {
-                            viewFile(businessIdentityFormik.values.pan_of_business_or_COI);
+                            viewFile(businessIdentityFormik?.values?.pan_of_business_or_COI);
                           }
                         }}
                       >
@@ -555,22 +552,22 @@ const MSMEDashboard = () => {
                       id="aadhaarInput"
                       type="file"
                       hidden
-                      onChange={(e) => businessIdentityFormik.setFieldValue('aadhar_of_signatory', e.target.files[0])}
-                      onBlur={() => businessIdentityFormik.setFieldTouched('aadhar_of_signatory', true)}
-                      error={businessIdentityFormik.errors.aadhar_of_signatory && businessIdentityFormik.touched.aadhar_of_signatory}
-                      touched={businessIdentityFormik.touched.aadhar_of_signatory}
+                      onChange={(e) => businessIdentityFormik?.setFieldValue('aadhar_of_signatory', e.target.files[0])}
+                      onBlur={() => businessIdentityFormik?.setFieldTouched('aadhar_of_signatory', true)}
+                      error={businessIdentityFormik?.errors?.aadhar_of_signatory && businessIdentityFormik?.touched?.aadhar_of_signatory}
+                      touched={businessIdentityFormik?.touched?.aadhar_of_signatory}
                     />
-                    {businessIdentityFormik.values.aadhar_of_signatory && (
+                    {businessIdentityFormik?.values?.aadhar_of_signatory && (
                       <Button
                         fullWidth
                         size="small"
                         variant="outlined"
                         onClick={() => {
-                          if (businessIdentityFormik.values.aadhar_of_signatory instanceof File) {
-                            const url = URL.createObjectURL(businessIdentityFormik.values.aadhar_of_signatory);
+                          if (businessIdentityFormik?.values?.aadhar_of_signatory instanceof File) {
+                            const url = URL.createObjectURL(businessIdentityFormik?.values?.aadhar_of_signatory);
                             window.open(url, '_blank');
                           } else {
-                            viewFile(businessIdentityFormik.values.aadhar_of_signatory);
+                            viewFile(businessIdentityFormik?.values?.aadhar_of_signatory);
                           }
                         }}
                       >
@@ -584,7 +581,8 @@ const MSMEDashboard = () => {
                   <Typography
                     varient="subtitle1"
                     sx={{
-                      color: businessIdentityFormik.errors.mobile_number && businessIdentityFormik.touched.mobile_number ? 'red' : 'inherit'
+                      color:
+                        businessIdentityFormik?.errors?.mobile_number && businessIdentityFormik?.touched?.mobile_number ? 'red' : 'inherit'
                     }}
                   >
                     Mobile Number
@@ -595,11 +593,11 @@ const MSMEDashboard = () => {
                   <TextField
                     fullWidth
                     size="small"
-                    value={businessIdentityFormik.values.mobile_number}
-                    onChange={(e) => businessIdentityFormik.setFieldValue('mobile_number', e.target.value)}
-                    error={businessIdentityFormik.errors.mobile_number && businessIdentityFormik.touched.mobile_number}
-                    touched={businessIdentityFormik.touched.mobile_number}
-                    onBlur={() => businessIdentityFormik.setFieldTouched('mobile_number', true)}
+                    value={businessIdentityFormik?.values?.mobile_number}
+                    onChange={(e) => businessIdentityFormik?.setFieldValue('mobile_number', e.target.value)}
+                    error={businessIdentityFormik?.errors?.mobile_number && businessIdentityFormik?.touched?.mobile_number}
+                    touched={businessIdentityFormik?.touched?.mobile_number}
+                    onBlur={() => businessIdentityFormik?.setFieldTouched('mobile_number', true)}
                   />
                 </Grid2>
                 {/* 6. Email ID */}
@@ -607,7 +605,7 @@ const MSMEDashboard = () => {
                   <Typography
                     varient="subtitle1"
                     sx={{
-                      color: businessIdentityFormik.errors.email_id && businessIdentityFormik.touched.email_id ? 'red' : 'inherit'
+                      color: businessIdentityFormik?.errors?.email_id && businessIdentityFormik?.touched?.email_id ? 'red' : 'inherit'
                     }}
                   >
                     Email ID
@@ -618,11 +616,11 @@ const MSMEDashboard = () => {
                   <TextField
                     fullWidth
                     size="small"
-                    value={businessIdentityFormik.values.email_id}
-                    onChange={(e) => businessIdentityFormik.setFieldValue('email_id', e.target.value)}
-                    error={businessIdentityFormik.errors.email_id && businessIdentityFormik.touched.email_id}
-                    touched={businessIdentityFormik.touched.email_id}
-                    onBlur={() => businessIdentityFormik.setFieldTouched('email_id', true)}
+                    value={businessIdentityFormik?.values?.email_id}
+                    onChange={(e) => businessIdentityFormik?.setFieldValue('email_id', e.target.value)}
+                    error={businessIdentityFormik?.errors?.email_id && businessIdentityFormik?.touched?.email_id}
+                    touched={businessIdentityFormik?.touched?.email_id}
+                    onBlur={() => businessIdentityFormik?.setFieldTouched('email_id', true)}
                   />
                 </Grid2>
                 {/* 7. UAM Registered */}
@@ -633,19 +631,19 @@ const MSMEDashboard = () => {
                   <Stack direction="row" alignItems="center" spacing={2}>
                     <RadioGroup
                       row
-                      value={businessIdentityFormik.values.Are_you_previously_registered_UAM}
+                      value={businessIdentityFormik?.values?.Are_you_previously_registered_UAM}
                       sx={{ width: '40%' }}
-                      onChange={(e) => businessIdentityFormik.setFieldValue('Are_you_previously_registered_UAM', e.target.value)}
+                      onChange={(e) => businessIdentityFormik?.setFieldValue('Are_you_previously_registered_UAM', e.target.value)}
                     >
                       <FormControlLabel value="yes" control={<Radio color="primary" />} label="Yes" />
                       <FormControlLabel value="no" control={<Radio color="primary" />} label="No" />
                     </RadioGroup>
-                    {businessIdentityFormik.values.Are_you_previously_registered_UAM === 'yes' && (
+                    {businessIdentityFormik?.values?.Are_you_previously_registered_UAM === 'yes' && (
                       <TextField
                         size="small"
                         fullWidth
-                        value={businessIdentityFormik.values.UAM_number}
-                        onChange={(e) => businessIdentityFormik.setFieldValue('UAM_number', e.target.value)}
+                        value={businessIdentityFormik?.values?.UAM_number}
+                        onChange={(e) => businessIdentityFormik?.setFieldValue('UAM_number', e.target.value)}
                         label="Enter UAM"
                       />
                     )}
@@ -656,9 +654,9 @@ const MSMEDashboard = () => {
                   <Typography varient="subtitle1">Has Business Commenced?</Typography>
                   <RadioGroup
                     row
-                    value={businessIdentityFormik.values.has_business_commenced}
+                    value={businessIdentityFormik?.values?.has_business_commenced}
                     sx={{ width: '40%' }}
-                    onChange={(e) => businessIdentityFormik.setFieldValue('has_business_commenced', e.target.value)}
+                    onChange={(e) => businessIdentityFormik?.setFieldValue('has_business_commenced', e.target.value)}
                   >
                     <FormControlLabel value="yes" control={<Radio color="primary" />} label="Yes" />
                     <FormControlLabel value="no" control={<Radio color="primary" />} label="No" />
@@ -670,12 +668,14 @@ const MSMEDashboard = () => {
                       <TextField
                         size="small"
                         fullWidth
-                        value={businessIdentityFormik.values.date_of_commencement}
-                        onChange={(e) => businessIdentityFormik.setFieldValue('date_of_commencement', e.target.value)}
+                        value={businessIdentityFormik?.values?.date_of_commencement}
+                        onChange={(e) => businessIdentityFormik?.setFieldValue('date_of_commencement', e.target.value)}
                         type="date"
-                        error={businessIdentityFormik.errors.date_of_commencement && businessIdentityFormik.touched.date_of_commencement}
-                        touched={businessIdentityFormik.touched.date_of_commencement}
-                        onBlur={() => businessIdentityFormik.setFieldTouched('date_of_commencement', true)}
+                        error={
+                          businessIdentityFormik?.errors?.date_of_commencement && businessIdentityFormik?.touched?.date_of_commencement
+                        }
+                        touched={businessIdentityFormik?.touched?.date_of_commencement}
+                        onBlur={() => businessIdentityFormik?.setFieldTouched('date_of_commencement', true)}
                       />
                     )}
                   </Stack>
@@ -687,7 +687,7 @@ const MSMEDashboard = () => {
                   variant="contained"
                   startIcon={<IconSave />}
                   color="primary"
-                  onClick={businessIdentityFormik.handleSubmit}
+                  onClick={businessIdentityFormik?.handleSubmit}
                 >
                   Save Business Identity
                 </Button>
@@ -939,7 +939,9 @@ const MSMEDashboard = () => {
                                   formData.append('status', 'in progress');
                                   const res = await Factory(type, urlEndpoint, formData, {});
                                   if (res.res.status_cd === 0) {
-                                    setReviewFilingCertificateData({ ...reviewFilingCertificateData, data: { ...res.res.data } });
+                                    console.log('reviewStep: ', reviewFilingCertificateData);
+                                    console.log('reviewStep: ', res.res);
+                                    setReviewFilingCertificateData({ ...reviewFilingCertificateData, ...res.res });
                                     enqueueSnackbar('Draft income tax computation saved successfully!', {
                                       variant: 'success',
                                       anchorOrigin: { vertical: 'top', horizontal: 'right' }
@@ -970,7 +972,6 @@ const MSMEDashboard = () => {
                               </Button>
                             )}
                           </Stack>
-                          {console.log('reviewFilingCertificateData: ', reviewFilingCertificateData)}
                           <Box display="flex" justifyContent="flex-start" gap={1}>
                             <GetActionButtons
                               type="put"
@@ -1093,8 +1094,8 @@ const MSMEDashboard = () => {
                               variant="outlined"
                               color="secondary"
                               onClick={() => {
-                                if (reviewAndFiling?.data?.review_certificate) {
-                                  viewFile(reviewAndFiling?.data?.review_certificate);
+                                if (reviewFilingCertificateData?.review_certificate) {
+                                  viewFile(reviewFilingCertificateData?.review_certificate);
                                 }
                               }}
                             >
@@ -1237,8 +1238,7 @@ const FinancialLocationDetails = ({
       url = url + data.id + '/';
       type = 'put';
     }
-    delete data.id;
-    __data.registered_address = registeredAddressUnitsData.id;
+    __data.registered_address = registeredAddressUnitsData?.id;
     __data.unit_details = data.unit_details;
     const response = await Factory(type, url, __data);
     if (response.res.status_cd === 0) {
@@ -1254,7 +1254,6 @@ const FinancialLocationDetails = ({
   };
 
   useEffect(() => {
-    console.log('registeredAddressUnitsData: ', registeredAddressUnitsData);
     if (registeredAddressUnitsData?.location_of_plant_or_unit?.length > 0) {
       setPlantUnits(registeredAddressUnitsData.location_of_plant_or_unit);
     }
@@ -1447,7 +1446,7 @@ const FinancialLocationDetails = ({
                   size="small"
                   label="Flat/Door/Block No"
                   name="flat"
-                  value={addressFormik.values.official_address_of_enterprise.flat}
+                  value={addressFormik?.values?.official_address_of_enterprise?.flat}
                   onChange={(e) => {
                     addressFormik.setFieldValue('official_address_of_enterprise.flat', e.target.value);
                   }}
@@ -1459,7 +1458,7 @@ const FinancialLocationDetails = ({
                   size="small"
                   label="Name of Premise/Building"
                   name="building"
-                  value={addressFormik.values.official_address_of_enterprise.building}
+                  value={addressFormik?.values?.official_address_of_enterprise?.building}
                   onChange={(e) => {
                     addressFormik.setFieldValue('official_address_of_enterprise.building', e.target.value);
                   }}
@@ -1471,7 +1470,7 @@ const FinancialLocationDetails = ({
                   size="small"
                   label="Road/Street/Lane"
                   name="street"
-                  value={addressFormik.values.official_address_of_enterprise.street}
+                  value={addressFormik?.values?.official_address_of_enterprise?.street}
                   onChange={(e) => {
                     addressFormik.setFieldValue('official_address_of_enterprise.street', e.target.value);
                   }}
@@ -1483,7 +1482,7 @@ const FinancialLocationDetails = ({
                   size="small"
                   label="Village/Town"
                   name="village"
-                  value={addressFormik.values.official_address_of_enterprise.village}
+                  value={addressFormik?.values?.official_address_of_enterprise?.village}
                   onChange={(e) => {
                     addressFormik.setFieldValue('official_address_of_enterprise.village', e.target.value);
                   }}
@@ -1495,7 +1494,7 @@ const FinancialLocationDetails = ({
                   size="small"
                   label="City"
                   name="city"
-                  value={addressFormik.values.official_address_of_enterprise.city}
+                  value={addressFormik?.values?.official_address_of_enterprise?.city}
                   onChange={(e) => {
                     addressFormik.setFieldValue('official_address_of_enterprise.city', e.target.value);
                   }}
@@ -1507,7 +1506,7 @@ const FinancialLocationDetails = ({
                   size="small"
                   label="District"
                   name="district"
-                  value={addressFormik.values.official_address_of_enterprise.district}
+                  value={addressFormik?.values?.official_address_of_enterprise?.district}
                   onChange={(e) => {
                     addressFormik.setFieldValue('official_address_of_enterprise.district', e.target.value);
                   }}
@@ -1519,7 +1518,7 @@ const FinancialLocationDetails = ({
                   size="small"
                   label="State"
                   name="state"
-                  value={addressFormik.values.official_address_of_enterprise.state}
+                  value={addressFormik?.values?.official_address_of_enterprise?.state}
                   onChange={(e) => {
                     addressFormik.setFieldValue('official_address_of_enterprise.state', e.target.value);
                   }}
@@ -1531,7 +1530,7 @@ const FinancialLocationDetails = ({
                   size="small"
                   label="Pin Code"
                   name="pin"
-                  value={addressFormik.values.official_address_of_enterprise.pin}
+                  value={addressFormik?.values?.official_address_of_enterprise?.pin}
                   onChange={(e) => {
                     addressFormik.setFieldValue('official_address_of_enterprise.pin', e.target.value);
                   }}
@@ -1543,7 +1542,7 @@ const FinancialLocationDetails = ({
                   size="small"
                   label="Latitude"
                   name="lat"
-                  value={addressFormik.values.official_address_of_enterprise.lat}
+                  value={addressFormik?.values?.official_address_of_enterprise?.lat}
                   onChange={(e) => {
                     addressFormik.setFieldValue('official_address_of_enterprise.lat', e.target.value);
                   }}
@@ -1555,7 +1554,7 @@ const FinancialLocationDetails = ({
                   size="small"
                   label="Longitude"
                   name="lng"
-                  value={addressFormik.values.official_address_of_enterprise.lng}
+                  value={addressFormik?.values?.official_address_of_enterprise?.lng}
                   onChange={(e) => {
                     addressFormik.setFieldValue('official_address_of_enterprise.lng', e.target.value);
                   }}
@@ -1580,17 +1579,17 @@ const FinancialLocationDetails = ({
                 }}
               />
             </Button>
-            {addressFormik.values.bank_statement_or_cancelled_cheque && (
+            {addressFormik?.values?.bank_statement_or_cancelled_cheque && (
               <Button
                 variant="outlined"
                 size="small"
                 sx={{ ml: 2, textTransform: 'none', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis' }}
                 onClick={() => {
-                  if (addressFormik.values.bank_statement_or_cancelled_cheque instanceof File) {
-                    const url = URL.createObjectURL(addressFormik.values.bank_statement_or_cancelled_cheque);
+                  if (addressFormik?.values?.bank_statement_or_cancelled_cheque instanceof File) {
+                    const url = URL.createObjectURL(addressFormik?.values?.bank_statement_or_cancelled_cheque);
                     window.open(url, '_blank');
                   } else {
-                    viewFile(addressFormik.values.bank_statement_or_cancelled_cheque);
+                    viewFile(addressFormik?.values?.bank_statement_or_cancelled_cheque);
                   }
                 }}
               >
@@ -1615,17 +1614,17 @@ const FinancialLocationDetails = ({
                 }}
               />
             </Button>
-            {addressFormik.values.official_address_of_proof && (
+            {addressFormik?.values?.official_address_of_proof && (
               <Button
                 variant="outlined"
                 size="small"
                 sx={{ ml: 2, textTransform: 'none', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis' }}
                 onClick={() => {
-                  if (addressFormik.values.official_address_of_proof instanceof File) {
-                    const url = URL.createObjectURL(addressFormik.values.official_address_of_proof);
+                  if (addressFormik?.values?.official_address_of_proof instanceof File) {
+                    const url = URL.createObjectURL(addressFormik?.values?.official_address_of_proof);
                     window.open(url, '_blank');
                   } else {
-                    viewFile(addressFormik.values.official_address_of_proof);
+                    viewFile(addressFormik?.values?.official_address_of_proof);
                   }
                 }}
               >
@@ -1649,12 +1648,12 @@ const FinancialLocationDetails = ({
             control={
               <Checkbox
                 size="small"
-                checked={registeredAddressUnitsData.location_of_plant === 'yes'}
+                checked={registeredAddressUnitsData?.location_of_plant === 'yes'}
                 onChange={async (e) => {
                   let url = '/msme/registration-address-details/';
                   let type = 'post';
-                  if (registeredAddressUnitsData.id !== null) {
-                    url = url + registeredAddressUnitsData.id + '/';
+                  if (registeredAddressUnitsData?.id !== null) {
+                    url = url + registeredAddressUnitsData?.id + '/';
                     type = 'put';
                   }
                   const formData = new FormData();
@@ -1664,7 +1663,7 @@ const FinancialLocationDetails = ({
                   formData.append('location_of_plant', e.target.checked ? 'yes' : 'no');
                   const response = await Factory(type, url, formData);
                   if (response.res.status_cd === 0) {
-                    setRegisteredAddressUnitsData(response.res.data);
+                    setRegisteredAddressUnitsData(response.res);
                   }
                 }}
               />
@@ -1673,7 +1672,7 @@ const FinancialLocationDetails = ({
           />
         </Stack>
 
-        {registeredAddressUnitsData.location_of_plant === 'yes' &&
+        {registeredAddressUnitsData?.location_of_plant === 'yes' &&
           plantUnits.map((unit, idx) => (
             <Box key={idx} sx={{ border: '1px solid #e0e0e0', borderRadius: 2, p: 2, mb: 2, bgcolor: '#f8fafc' }}>
               <Typography variant="subtitle1" mb={2}>
@@ -1814,7 +1813,7 @@ const FinancialLocationDetails = ({
               </Box>
             </Box>
           ))}
-        {registeredAddressUnitsData.location_of_plant === 'yes' && (
+        {registeredAddressUnitsData?.location_of_plant === 'yes' && (
           <Box display="flex" justifyContent="flex-end" mt={2} gap={1}>
             <Button
               size="small"
