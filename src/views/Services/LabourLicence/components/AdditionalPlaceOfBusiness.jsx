@@ -1,62 +1,92 @@
-import React, { useEffect } from 'react';
+import {
+  Autocomplete,
+  Box,
+  Button,
+  Card,
+  FormControlLabel,
+  FormGroup,
+  Grid as Grid2,
+  Radio,
+  Stack,
+  TextField,
+  Typography
+} from '@mui/material';
 import { useFormik } from 'formik';
-import * as Yup from 'yup';
+import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { openSnackbar } from 'store/slices/snackbar';
+import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
 import Factory from 'utils/Factory';
 import { indian_States_And_UTs } from 'utils/indian_States_And_UT';
-import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
-import { Autocomplete, Button, Card, Grid2, Stack, TextField, Typography } from '@mui/material';
+import * as Yup from 'yup';
 
-export default function AdditionalPlaceOfBusiness({ businessPremises }) {
+const additionalFields = [
+  {
+    label: 'Address Line 1',
+    name: 'addressLine1',
+    type: 'text'
+  },
+  {
+    label: 'Address Line 2',
+    name: 'addressLine2',
+    type: 'text'
+  },
+  {
+    label: 'City',
+    name: 'city',
+    type: 'text'
+  },
+  {
+    label: 'District',
+    name: 'district',
+    type: 'text'
+  },
+  {
+    label: 'State',
+    name: 'state',
+    type: 'text'
+  },
+  {
+    label: 'Pincode',
+    name: 'pincode',
+    type: 'text'
+  },
+  {
+    label: 'Nature of possession',
+    name: 'nature_of_possession',
+    type: 'text'
+  },
+  {
+    label: 'Address proof (Additional)',
+    name: 'address_proof_additional',
+    type: 'file'
+  },
+  {
+    label: 'Rental Agreement/NOC (Additional)',
+    name: 'rental_agreement_additional',
+    type: 'file'
+  }
+];
+
+const AdditionalPlaceOfBusiness = ({ businessPremises }) => {
   const dispatch = useDispatch();
-  let additionalFields = [
-    {
-      label: 'Address Line 1',
-      name: 'addressLine1',
-      type: 'text'
-    },
-    {
-      label: 'Address Line 2',
-      name: 'addressLine2',
-      type: 'text'
-    },
-    {
-      label: 'City',
-      name: 'city',
-      type: 'text'
-    },
-    {
-      label: 'District',
-      name: 'district',
-      type: 'text'
-    },
-    {
-      label: 'State',
-      name: 'state',
-      type: 'text'
-    },
-    {
-      label: 'Pincode',
-      name: 'pincode',
-      type: 'text'
-    },
-    {
-      label: 'Nature of possession',
-      name: 'nature_of_possession',
-      type: 'text'
-    },
-    {
-      label: 'Address proof (Additional)',
-      name: 'address_proof_additional',
-      type: 'file'
-    },
-    {
-      label: 'Rental Agreement/NOC (Additional)',
-      name: 'rental_agreement_additional',
-      type: 'file'
-    }
-  ];
+  const [additionalSpace, setAdditionalSpace] = useState(businessPremises?.additional_space || null);
+
+    const clearFormFields = () => {
+    setValues({
+      addressLine1: '',
+      addressLine2: '',
+      city: '',
+      district: '',
+      state: '',
+      pincode: '',
+      nature_of_possession: '',
+      address_proof_additional: null,
+      rental_agreement_additional: null,
+      id: null
+    });
+  };
+
   const formik = useFormik({
     initialValues: {
       addressLine1: '',
@@ -67,7 +97,8 @@ export default function AdditionalPlaceOfBusiness({ businessPremises }) {
       pincode: '',
       nature_of_possession: '',
       address_proof_additional: null,
-      rental_agreement_additional: null
+      rental_agreement_additional: null,
+      id: null
     },
     validationSchema: Yup.object({
       addressLine1: Yup.string().required('Address Line 1 is required'),
@@ -80,8 +111,8 @@ export default function AdditionalPlaceOfBusiness({ businessPremises }) {
       rental_agreement_additional: Yup.mixed().required('Rental Agreement/NOC is required')
     }),
     onSubmit: async (values) => {
-      let url = values.id ? `/labourlicense/additional-space/${values.id}/` : `/labourlicense/additional-space/`;
-      let formData = new FormData();
+      const url = values.id ? `/labourlicense/additional-space/${values.id}/` : `/labourlicense/additional-space/`;
+      const formData = new FormData();
       formData.append('business_location_proofs', businessPremises.id);
       formData.append(
         'address',
@@ -114,32 +145,12 @@ export default function AdditionalPlaceOfBusiness({ businessPremises }) {
             close: false
           })
         );
-        const getAdditionalPremises = async () => {
-          if (!businessPremises?.id) return;
-          const url = `/labourlicense/additional-space/view?business_location_proofs=${businessPremises.id}`;
-          const { res } = await Factory('get', url);
-          if (res.status_cd === 0 && res.data) {
-            setValues({
-              addressLine1: res.data[0].address.address_line1 || '',
-              addressLine2: res.data[0].address.address_line2 || '',
-              city: res.data[0].address.city || '',
-              district: res.data[0].address.district || '',
-              state: res.data[0].address.state || '',
-              pincode: res.data[0].address.pincode || '',
-              nature_of_possession: res.data[0].nature_of_possession || '',
-              address_proof_additional: res.data[0].address_proof || null,
-              rental_agreement_additional: res.data[0].rental_agreement || null,
-              id: res.data[0].id
-            });
-          }
-        };
-        getAdditionalPremises();
-      }
-      if (res.status_cd === 1) {
+        fetchData();
+      } else {
         dispatch(
           openSnackbar({
             open: true,
-            message: JSON.stringify(res.data.data) || 'Something went wrong',
+            message: JSON.stringify(res.data?.data || 'Something went wrong'),
             variant: 'alert',
             alert: { color: 'error' },
             close: false
@@ -148,6 +159,60 @@ export default function AdditionalPlaceOfBusiness({ businessPremises }) {
       }
     }
   });
+
+  const {
+    values,
+    setValues,
+    setFieldValue,
+    handleChange,
+    errors,
+    touched,
+    handleSubmit,
+    handleBlur
+  } = formik;
+
+  useEffect(() => {
+    fetchData();
+  }, [businessPremises?.id, additionalSpace]);
+
+
+    const fetchData = async () => {
+      if (businessPremises?.id && additionalSpace === 'yes') {
+        const url = `/labourlicense/additional-space/view?business_location_proofs=${businessPremises.id}`;
+        const { res } = await Factory('get', url);
+        if (res.status_cd === 0 && res.data) {
+          setValues({
+            addressLine1: res?.data[0]?.address?.address_line1 || '',
+            addressLine2: res?.data[0]?.address?.address_line2 || '',
+            city: res?.data[0]?.address?.city || '',
+            district: res?.data[0]?.address?.district || '',
+            state: res?.data[0]?.address?.state || '',
+            pincode: res?.data[0]?.address?.pincode || '',
+            nature_of_possession: res?.data[0]?.nature_of_possession || '',
+            address_proof_additional: res?.data[0]?.address_proof || null,
+            rental_agreement_additional: res?.data[0]?.rental_agreement || null,
+            id: res?.data[0]?.id
+          });
+        }
+      }
+    };
+
+  useEffect(() => {
+    const fetchAdditionalSpace = async () => {
+      if (!businessPremises?.service_request) return;
+
+      const url = `/labourlicense/business-location/by-request-or-task?service_request_id=${businessPremises.service_request}`;
+      const { res } = await Factory('get', url);
+
+      if (res.status_cd === 0 && res.data) {
+        const data = res.data;
+        setAdditionalSpace(data.additional_space || null);
+      }
+    };
+
+    fetchAdditionalSpace();
+  }, [businessPremises?.service_request]);
+
   const renderField = (field) => {
     switch (field.type) {
       case 'text':
@@ -209,60 +274,171 @@ export default function AdditionalPlaceOfBusiness({ businessPremises }) {
         return null;
     }
   };
-  const { values, setValues, setFieldValue, handleChange, errors, touched, handleSubmit, handleBlur } = formik;
-  useEffect(() => {
-    const getAdditionalPremises = async () => {
-      if (!businessPremises?.id) return; // Don't fetch if we don't have the main business location ID
 
-      const url = `/labourlicense/additional-space/view?business_location_proofs=${businessPremises.id}`;
-      const { res } = await Factory('get', url);
-      if (res.status_cd === 0 && res.data) {
-        setValues({
-          addressLine1: res.data[0].address.address_line1 || '',
-          addressLine2: res.data[0].address.address_line2 || '',
-          city: res.data[0].address.city || '',
-          district: res.data[0].address.district || '',
-          state: res.data[0].address.state || '',
-          pincode: res.data[0].address.pincode || '',
-          nature_of_possession: res.data[0].nature_of_possession || '',
-          address_proof_additional: res.data[0].address_proof || null,
-          rental_agreement_additional: res.data[0].rental_agreement || null,
-          id: res.data[0].id
-        });
-      }
-    };
-
-    if (businessPremises?.additional_space === 'yes') {
-      getAdditionalPremises();
-    }
-  }, [businessPremises?.additional_space, businessPremises?.id]);
   return (
-    <Card sx={{ p: 3, mt: 4 }}>
-      <Typography variant="h6">Additional Place of Business</Typography>
+    <Card sx={{ p: 3, mt: 3 }}>
+      <Grid2 container spacing={2}>
+      <Grid2 item xs={12}>
+          <Box display="flex" alignItems="center" gap={2}>
+            <Typography fontWeight={600}>Additional place of business?</Typography>
+          <FormGroup row>
+          <FormControlLabel
+    label="Yes"
+    control={
+      <Radio
+        checked={additionalSpace === 'yes'}
+        onChange={async () => {
+          setAdditionalSpace('yes');
 
-      {businessPremises?.additional_space === 'yes' && (
-        <Grid2 size={12} mt={2}>
-          <Typography variant="h4" fontWeight={700} mb={0}>
-            Additional place of business
-          </Typography>
-          <Grid2 container spacing={2}>
-            {additionalFields.map((field) =>
-              field.name !== 'bankStatement' ? (
-                <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4 }}>
-                  {renderField(field)}
-                </Grid2>
-              ) : null
-            )}
-          </Grid2>
-          <Grid2 size={12} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <Stack direction="row" spacing={2} sx={{ mt: 3, justifyContent: 'flex-end' }}>
-              <Button variant="contained" color="primary" onClick={handleSubmit}>
-                Save
-              </Button>
-            </Stack>
-          </Grid2>
+          const url = businessPremises.id
+            ? `/labourlicense/business-location/${businessPremises.id}/`
+            : `/labourlicense/business-location/`;
+
+          const method = businessPremises.id ? 'put' : 'post';
+
+          const payload = {
+            // ...businessPremises,
+            additional_space: 'yes',
+             workplace: values.workplace || ''
+          };
+
+          const { res } = await Factory(method, url, payload);
+
+          if (res.status_cd === 0) {
+            dispatch(
+              openSnackbar({
+                open: true,
+                message: 'Updated additional space to Yes',
+                variant: 'alert',
+                alert: { color: 'success' },
+                close: false
+              })
+            );
+          }
+        }}
+      />
+    }
+  />
+ 
+  <FormControlLabel
+  label="No"
+  control={
+    <Radio
+      checked={additionalSpace === 'no'}
+      onChange={async () => {
+        // Step 1: Delete additional space if it exists
+        if (values.id) {
+          const deleteUrl = `/labourlicense/additional-space/${values.id}/`;
+          const deleteRes = await Factory('delete', deleteUrl);
+          if (deleteRes.res.status_cd === 0) {
+            dispatch(
+              openSnackbar({
+                open: true,
+                message: 'Additional Place of Business deleted successfully',
+                variant: 'alert',
+                alert: { color: 'success' },
+                close: false
+              })
+            );
+          } else {
+            dispatch(
+              openSnackbar({
+                open: true,
+                message: 'Failed to delete additional space',
+                variant: 'alert',
+                alert: { color: 'error' },
+                close: false
+              })
+            );
+            return;
+          }
+        }
+
+        // Step 2: Update the business location to set additional_space: 'no'
+        setAdditionalSpace('no');
+
+        const url = businessPremises.id
+          ? `/labourlicense/business-location/${businessPremises.id}/`
+          : `/labourlicense/business-location/`;
+
+        const method = businessPremises.id ? 'put' : 'post';
+
+        const payload = {
+          additional_space: 'no'
+        };
+
+        const { res } = await Factory(method, url, payload);
+
+        if (res.status_cd === 0) {
+          dispatch(
+            openSnackbar({
+              open: true,
+              message: 'Updated additional space to No',
+              variant: 'alert',
+              alert: { color: 'success' },
+              close: false
+            })
+          );
+          clearFormFields();
+          fetchData();
+        }
+      }}
+    />
+  }
+/>
+</FormGroup>
+          </Box>
         </Grid2>
-      )}
+      
+        {additionalSpace === 'yes' && (
+          
+          <Grid2 item xs={12}>
+            <form onSubmit={handleSubmit}>
+
+              {businessPremises.additional_space === 'yes' && (
+              <Grid2  item xs={12} sm={6} md={4} sx={{mt:1}}>
+                {console.log("he;ll0")}
+                <Autocomplete
+                  size="small"
+                  fullWidth
+                  options={['Office', 'Godown', 'Warehouse']}
+                  value={values.workplace || ''}
+                  onChange={(_, value) => setFieldValue('workplace', value)}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Workplace"
+                      error={touched.workplace && Boolean(errors.workplace)}
+                      helperText={touched.workplace && errors.workplace}
+                    />
+                  )}
+                />
+              </Grid2>
+            )} 
+              
+              <Grid2 container spacing={2}>
+                
+
+                {additionalFields.map((field) => (
+                  <Grid2 key={field.name} item xs={12} sm={6} md={4} sx={{mt:1}}>
+                    
+                    {renderField(field)}
+                  </Grid2>
+                ))}
+              </Grid2>
+            
+
+              <Stack direction="row" spacing={2} sx={{ mt: 3, justifyContent: 'flex-end' }}>
+                <Button variant="contained" color="primary" type="submit">
+                  Save
+                </Button>
+              </Stack>
+            </form>
+          </Grid2>
+        )}
+      </Grid2>
     </Card>
   );
-}
+};
+
+export default AdditionalPlaceOfBusiness;

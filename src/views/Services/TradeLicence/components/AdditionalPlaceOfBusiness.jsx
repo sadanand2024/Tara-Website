@@ -1,24 +1,24 @@
-import { useState, useEffect } from 'react';
 import {
-  Card,
-  Typography,
-  Box,
-  FormGroup,
-  FormControlLabel,
-  Radio,
-  Grid as Grid2,
   Autocomplete,
-  TextField,
+  Box,
   Button,
-  Stack
+  Card,
+  FormControlLabel,
+  FormGroup,
+  Grid as Grid2,
+  Radio,
+  Stack,
+  TextField,
+  Typography
 } from '@mui/material';
 import { useFormik } from 'formik';
-import * as Yup from 'yup';
-import Factory from 'utils/Factory';
+import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { openSnackbar } from 'store/slices/snackbar';
 import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
+import Factory from 'utils/Factory';
 import { indian_States_And_UTs } from 'utils/indian_States_And_UT';
+import * as Yup from 'yup';
 
 const additionalFields = [
   { label: 'Address Line 1', name: 'addressLine1', type: 'text' },
@@ -98,6 +98,7 @@ const AdditionalPlaceOfBusiness = ({ businessPremises }) => {
             close: false
           })
         );
+        fetchData();
       } else {
         dispatch(
           openSnackbar({
@@ -123,31 +124,50 @@ const AdditionalPlaceOfBusiness = ({ businessPremises }) => {
     handleBlur
   } = formik;
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (businessPremises?.id && additionalSpace === 'yes') {
-        const url = `/tradelicense/additional-space/${businessPremises.id}/`;
-        const { res } = await Factory('get', url);
-        if (res.status_cd === 0 && res.data) {
-          setValues({
-            addressLine1: res.data.address.address_line1 || '',
-            addressLine2: res.data.address.address_line2 || '',
-            city: res.data.address.city || '',
-            district: res.data.address.district || '',
-            state: res.data.address.state || '',
-            pincode: res.data.address.pincode || '',
-            nature_of_possession: res.data.nature_of_possession || '',
-            trade_area: res.data.trade_area || '',
-            road_type: res.data.road_type || '',
-            address_proof_additional: res.data.address_proof || null,
-            rental_agreement_additional: res.data.rental_agreement || null,
-            id: res.data.id
-          });
-        }
+  const clearFormFields = () => {
+    setValues({
+      addressLine1: '',
+      addressLine2: '',
+      city: '',
+      district: '',
+      state: '',
+      pincode: '',
+      nature_of_possession: '',
+      trade_area: '',
+      road_type: '',
+      address_proof_additional: null,
+      rental_agreement_additional: null,
+      id: null
+    });
+  };
+
+  const fetchData = async () => {
+    if (businessPremises?.id && additionalSpace === 'yes') {
+      const url = `/tradelicense/additional-space/${businessPremises.id}/`;
+      const { res } = await Factory('get', url);
+      if (res.status_cd === 0 && res.data) {
+        setValues({
+          addressLine1: res.data.address.address_line1 || '',
+          addressLine2: res.data.address.address_line2 || '',
+          city: res.data.address.city || '',
+          district: res.data.address.district || '',
+          state: res.data.address.state || '',
+          pincode: res.data.address.pincode || '',
+          nature_of_possession: res.data.nature_of_possession || '',
+          trade_area: res.data.trade_area || '',
+          road_type: res.data.road_type || '',
+          address_proof_additional: res.data.address_proof || null,
+          rental_agreement_additional: res.data.rental_agreement || null,
+          id: res.data.id
+        });
       }
-    };
+    }
+  };
+
+  useEffect(() => {
     fetchData();
   }, [businessPremises?.id, additionalSpace]);
+
   useEffect(() => {
   const fetchAdditionalSpace = async () => {
     if (!businessPremises?.service_request) return;
@@ -271,6 +291,7 @@ const AdditionalPlaceOfBusiness = ({ businessPremises }) => {
                 close: false
               })
             );
+            fetchData();
           }
         }}
       />
@@ -285,7 +306,7 @@ const AdditionalPlaceOfBusiness = ({ businessPremises }) => {
       onChange={async () => {
         // Step 1: Delete additional space if it exists
         if (values.id) {
-          const deleteUrl = `/tradelicense/additional-space/${businessPremises.id}/`;
+          const deleteUrl = `/tradelicense/additional-space/${values.id}/`;
           const deleteRes = await Factory('delete', deleteUrl);
           if (deleteRes.res.status_cd === 0) {
             dispatch(
@@ -336,6 +357,8 @@ const AdditionalPlaceOfBusiness = ({ businessPremises }) => {
               close: false
             })
           );
+          clearFormFields();
+          fetchData()
         }
       }}
     />
