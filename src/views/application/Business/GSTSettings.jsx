@@ -21,11 +21,12 @@ import { useSelector, useDispatch } from 'store';
 import Factory from 'utils/Factory';
 import { openSnackbar } from 'store/slices/snackbar';
 import DownloadIcon from '@mui/icons-material/Download';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import DeleteConfirmationDialog from 'utils/DeleteConfirmationDialog';
-
+import { Pagination } from '@mui/material';
 import AddGSTDialog from './AddGSTDialog';
-
-const GSTSettings = () => {
+import { useNavigate } from 'react-router-dom';
+const GSTSettings = ({ from, handleBack, handleNext }) => {
   const [gstList, setGstList] = useState([]);
   const [open, setOpen] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
@@ -34,10 +35,19 @@ const GSTSettings = () => {
   const [selectedGST, setSelectedGST] = useState(null);
   const user = useSelector((state) => state.accountReducer.user);
   const dispatch = useDispatch();
+  const [currentPage, setCurrentPage] = useState(1);
+  const rowsPerPage = 8;
+  const [paginatedData, setPaginatedData] = useState([]);
+  const navigate = useNavigate();
+  const handlePageChange = (event, value) => {
+    setCurrentPage(value);
+  };
 
+  useEffect(() => {
+    setPaginatedData(gstList.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage));
+  }, [currentPage, gstList]);
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
-    resetForm();
     setOpen(false);
     setSelectedGST(null);
   };
@@ -150,7 +160,7 @@ const GSTSettings = () => {
         <Typography variant="h4" color="text.primary" gutterBottom>
           GST Settings
         </Typography>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={handleOpen}>
+        <Button variant="contained" startIcon={<AddIcon />} onClick={handleOpen} size="small">
           Add GST
         </Button>
       </Box>
@@ -188,7 +198,7 @@ const GSTSettings = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {gstList.map((row, idx) => (
+              {paginatedData.map((row, idx) => (
                 <TableRow key={idx} hover>
                   <TableCell>{row.gstin}</TableCell>
                   <TableCell>{row.trade_name}</TableCell>
@@ -219,27 +229,48 @@ const GSTSettings = () => {
                   </TableCell>
                 </TableRow>
               ))}
-              {gstList.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={7} align="center" sx={{ py: 3 }}>
-                    No GST records added yet
-                  </TableCell>
-                </TableRow>
-              )}
             </TableBody>
           </Table>
         </TableContainer>
       </Card>
-
+      {from === 'invoice' && (
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Button
+            variant="outlined"
+            startIcon={<ArrowBackIcon />}
+            onClick={() => {
+              navigate('/app/invoice');
+            }}
+            size="small"
+          >
+            Back To Dashboard
+          </Button>
+          {paginatedData.length === 0 && (
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                py: 3,
+                width: '100%',
+                color: 'text.secondary'
+              }}
+            >
+              No GST records added yet
+            </Box>
+          )}
+          <Stack direction="row" spacing={2}>
+            <Button variant="outlined" onClick={handleBack}>
+              Back
+            </Button>
+            <Button variant="contained" onClick={handleNext}>
+              Next
+            </Button>
+          </Stack>
+        </Box>
+      )}
       {/* Add/Edit GST Dialog */}
-      <AddGSTDialog
-        open={open}
-        setOpen={setOpen}
-        fetch_Business_Details={fetchGSTList}
-        selectedGST={selectedGST}
-        setSelectedGST={setSelectedGST}
-        handleClose={handleClose}
-      />
+      <AddGSTDialog open={open} selectedGST={selectedGST} handleClose={handleClose} />
 
       <DeleteConfirmationDialog
         open={deleteDialogOpen}
@@ -249,6 +280,11 @@ const GSTSettings = () => {
         message="Are you sure you want to delete this GST details? This action cannot be undone."
         itemName={deleteIndex !== null ? `GST Number: ${gstList[deleteIndex]?.gstin}` : ''}
       />
+      {paginatedData.length > 0 && (
+        <Stack direction="row" justifyContent="center" sx={{ py: 2 }}>
+          <Pagination count={Math.ceil(gstList.length / rowsPerPage)} page={currentPage} onChange={handlePageChange} />
+        </Stack>
+      )}
     </Box>
   );
 };

@@ -12,6 +12,7 @@ import CustomInput from 'utils/CustomInput';
 import CustomAutocomplete from 'utils/CustomAutocomplete';
 import { IconPlus } from '@tabler/icons-react';
 import { IconTrash } from '@tabler/icons-react';
+import { Description } from '@mui/icons-material';
 let baseURL = import.meta.env.VITE_APP_BASE_URL;
 
 import InvoiceDetailsForm from './InvoiceDetailsForm';
@@ -19,7 +20,7 @@ import BillingShippingForm from './BillingShippingForm';
 import ItemDetailsAndNotes from './ItemDetailsAndNotes';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
-import { Typography, Stack } from '@mui/material';
+import { Typography, Stack, alpha, useTheme } from '@mui/material';
 import dayjs from 'dayjs';
 import Factory from 'utils/Factory';
 import BulkItems from './BulkItems';
@@ -42,10 +43,12 @@ const InvoiceDetails = ({
   getCustomersData,
   getBranchesData
 }) => {
+  const theme = useTheme();
   const invoiceDetailsFields = [
     { name: 'gstin', label: 'GSTIN' },
     { name: 'branch_code', label: 'Branch' },
     { name: 'customer', label: 'Customer Name' },
+    { name: 'customer_branch', label: 'Customer Branch' },
     { name: 'customer_gstin', label: 'Customer GSTIN' },
     { name: 'customer_pan', label: 'Customer PAN' },
     { name: 'place_of_supply', label: 'Place of Supply' },
@@ -114,6 +117,7 @@ const InvoiceDetails = ({
       otherwise: (schema) => schema.notRequired()
     }),
     customer: Yup.string().required('Customer name is required'),
+    customer_branch: Yup.string().required('Customer branch is required'),
     customer_gstin: Yup.string().required('Customer GSTIN is required'),
     customer_pan: Yup.string().required('Customer PAN is required'),
     terms: Yup.string().required('Terms are required'),
@@ -127,6 +131,7 @@ const InvoiceDetails = ({
       gstin: '',
       branch_code: '',
       customer: '',
+      customer_branch: '',
       place_of_supply: '',
       invoice_number: '',
       invoice_date: '',
@@ -495,6 +500,7 @@ const InvoiceDetails = ({
             : false,
         customer_gstin: selectedInvoice.customer_gstin,
         customer_pan: selectedInvoice.customer_pan,
+        customer_branch: selectedInvoice.customer_branch,
         // not_applicablefor_shipping:
         //   selectedInvoice.billing_address &&
         //   selectedInvoice.shipping_address.address_line1 === 'NA' &&
@@ -531,8 +537,28 @@ const InvoiceDetails = ({
           formik.handleSubmit();
         }}
       >
-        <Box sx={{ mb: 2 }}>
-          <Typography variant="h4">Invoice Details</Typography>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2,
+            mb: 2,
+            p: 1.5,
+            backgroundColor: alpha(theme.palette.primary.main, 0.05),
+            borderRadius: 2,
+            border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`
+          }}
+        >
+          <Description sx={{ color: theme.palette.primary.main, fontSize: 24, mb: 1 }} />
+          <Typography
+            variant="h5"
+            sx={{
+              fontWeight: 600,
+              color: theme.palette.primary.main
+            }}
+          >
+            Invoice Details
+          </Typography>
         </Box>
 
         <Grid2 container spacing={2} sx={{ mb: 4, mt: 4 }}>
@@ -587,7 +613,7 @@ const InvoiceDetails = ({
           />
         </Grid2>
 
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 6, gap: 2 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
           <Button
             variant="outlined"
             color="error"

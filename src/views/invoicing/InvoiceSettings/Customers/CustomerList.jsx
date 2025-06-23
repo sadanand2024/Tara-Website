@@ -10,6 +10,7 @@ import {
   Pagination,
   Stack,
   Typography,
+  Button,
   Box,
   Card
 } from '@mui/material';
@@ -21,13 +22,26 @@ import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
 import DeleteDialog from 'ui-component/extended/DeleteDialog'; // adjust path accordingly
 import { IconButton, Tooltip } from '@mui/material'; // Add these if not already
 import { Edit, Delete } from '@mui/icons-material';
-const CustomerList = ({ type, open, handleOpen, handleClose, setType, businessDetailsData, getCustomersData, customersListData }) => {
+import { useNavigate } from 'react-router-dom';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+const CustomerList = ({
+  type,
+  open,
+  handleOpen,
+  handleClose,
+  setType,
+  businessDetailsData,
+  getCustomersData,
+  customersListData,
+  handleBack,
+  handleNext
+}) => {
   const [customers, setCustomers] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
-
+  const navigate = useNavigate();
   const handleOpenDeleteDialog = (row) => {
     setSelectedRow(row);
     setOpenDeleteDialog(true);
@@ -154,11 +168,32 @@ const CustomerList = ({ type, open, handleOpen, handleClose, setType, businessDe
           selectedCustomer={selectedCustomer}
         />
       </Card>
-      {customers.length > 0 && (
-        <Stack direction="row" justifyContent="center" sx={{ py: 2 }}>
-          <Pagination count={Math.ceil(customers.length / rowsPerPage)} page={currentPage} onChange={handlePageChange} />
+
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Button
+          variant="outlined"
+          startIcon={<ArrowBackIcon />}
+          onClick={() => {
+            navigate('/app/invoice');
+          }}
+          size="small"
+        >
+          Back to Dashboard
+        </Button>
+        {customers.length > 0 && (
+          <Stack direction="row" justifyContent="center" sx={{ py: 2 }}>
+            <Pagination count={Math.ceil(customers.length / rowsPerPage)} page={currentPage} onChange={handlePageChange} />
+          </Stack>
+        )}
+        <Stack direction="row" spacing={2}>
+          <Button variant="outlined" size="small" onClick={handleBack}>
+            Back
+          </Button>
+          <Button variant="contained" size="small" onClick={handleNext}>
+            Next
+          </Button>
         </Stack>
-      )}
+      </Box>
     </>
   );
 };

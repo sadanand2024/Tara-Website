@@ -47,7 +47,7 @@ export default function SimpleTabs() {
 
   const { mode, borderRadius } = useConfig();
   const dispatch = useDispatch();
-  const [value, setValue] = useState(3);
+  const [value, setValue] = useState(5);
   const [businessDetails, setBusinessDetails] = useState(null);
   const [postType, setPostType] = useState('');
   const [loading, setLoading] = useState(true);
@@ -66,7 +66,7 @@ export default function SimpleTabs() {
   };
 
   const handleNext = () => {
-    if (value < 4) setValue((prev) => prev + 1);
+    if (value < 5) setValue((prev) => prev + 1);
   };
 
   const handleBack = () => {
@@ -280,7 +280,14 @@ export default function SimpleTabs() {
               />
             </TabPanel>
             <TabPanel value={value} index={1}>
-              <GSTSettings user={user} tabChange={handleChange} tabval={value} />
+              <GSTSettings
+                user={user}
+                tabChange={handleChange}
+                tabval={value}
+                from="invoice"
+                handleBack={handleBack}
+                handleNext={handleNext}
+              />
             </TabPanel>
             <TabPanel value={value} index={2}>
               <BranchesInfo

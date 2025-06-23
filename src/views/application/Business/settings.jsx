@@ -109,7 +109,7 @@ const tabsOption = [
 export default function Profile2() {
   const { mode, borderRadius } = useConfig();
   const [value, setValue] = React.useState(0);
-  const user = useSelector((state) => state).accountReducer.user;
+  const user = useSelector((state) => state.accountReducer.user);
   const [searchParams] = useSearchParams();
   const tabvalue = searchParams.get('tabvalue');
 

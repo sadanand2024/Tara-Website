@@ -162,7 +162,7 @@ const fields_lut = [
     type: 'file'
   }
 ];
-const AddGSTDialog = ({ open, setOpen, getGSTDetails, selectedGST, setSelectedGST, fetch_Business_Details, handleClose }) => {
+const AddGSTDialog = ({ open, selectedGST, handleClose }) => {
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
   const user = useSelector((state) => state.accountReducer.user);

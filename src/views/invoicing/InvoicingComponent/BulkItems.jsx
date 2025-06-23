@@ -10,7 +10,7 @@ import {
   TextField,
   IconButton,
   DialogActions,
-  Grid,
+  Grid2,
   List,
   ListItem,
   ListItemText,
@@ -153,10 +153,18 @@ const BulkItems = ({
       <Divider sx={{ mb: 2 }} />
 
       <DialogContent>
-        <Grid container spacing={3}>
+        <Grid2 container spacing={3}>
           {/* Search and Select Items */}
-          <Grid item xs={12} sm={6}>
-            <TextField label="Search Items" value={searchTerm} onChange={handleSearchChange} fullWidth variant="outlined" sx={{ mb: 2 }} />
+          <Grid2 size={{ xs: 12, sm: 6 }}>
+            <TextField
+              size="small"
+              label="Search Items"
+              value={searchTerm}
+              onChange={handleSearchChange}
+              fullWidth
+              variant="outlined"
+              sx={{ mb: 2 }}
+            />
             <List
               sx={{
                 maxHeight: '400px',
@@ -191,10 +199,10 @@ const BulkItems = ({
                 </ListItem>
               ))}
             </List>
-          </Grid>
+          </Grid2>
 
           {/* Display selected items with quantity control */}
-          <Grid item xs={12} sm={6}>
+          <Grid2 size={{ xs: 12, sm: 6 }}>
             <Typography variant="h5" gutterBottom>
               Selected Items: {selectedItems.length}
             </Typography>
@@ -219,6 +227,7 @@ const BulkItems = ({
                     </IconButton>
 
                     <TextField
+                      size="small"
                       name={item.name}
                       value={item.quantity}
                       type="text"
@@ -240,8 +249,8 @@ const BulkItems = ({
                 No items selected
               </Typography>
             )}
-          </Grid>
-        </Grid>
+          </Grid2>
+        </Grid2>
       </DialogContent>
 
       <DialogActions sx={{ display: 'flex', justifyContent: 'center' }}>

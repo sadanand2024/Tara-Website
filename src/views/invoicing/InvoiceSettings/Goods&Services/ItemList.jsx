@@ -12,6 +12,7 @@ import {
   Typography,
   CircularProgress,
   Box,
+  Button,
   Card
 } from '@mui/material';
 import Factory from 'utils/Factory';
@@ -22,7 +23,20 @@ import { openSnackbar } from '../../../../store/slices/snackbar';
 import DeleteDialog from 'ui-component/extended/DeleteDialog'; // adjust path accordingly
 import { IconButton, Tooltip } from '@mui/material'; // Add these if not already
 import { Edit, Delete } from '@mui/icons-material';
-const ItemList = ({ type, setType, handleClose, handleOpen, open, businessDetailsData, itemsData, get_Goods_and_Services_Data }) => {
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { useNavigate } from 'react-router-dom';
+const ItemList = ({
+  type,
+  setType,
+  handleClose,
+  handleOpen,
+  open,
+  businessDetailsData,
+  itemsData,
+  get_Goods_and_Services_Data,
+  handleBack,
+  handleNext
+}) => {
   const dispatch = useDispatch();
   const [itemsList, setItemsList] = useState([]);
   const [selectedItem, setSelectedItem] = useState(null);
@@ -31,7 +45,7 @@ const ItemList = ({ type, setType, handleClose, handleOpen, open, businessDetail
   const rowsPerPage = 8;
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
-
+  const navigate = useNavigate();
   const handleOpenDeleteDialog = (row) => {
     setSelectedRow(row);
     setOpenDeleteDialog(true);
@@ -113,7 +127,7 @@ const ItemList = ({ type, setType, handleClose, handleOpen, open, businessDetail
         <TableContainer>
           <Table size="small">
             <TableHead>
-              <TableRow sx={{ bgcolor: 'grey.100' }}>
+              <TableRow>
                 <TableCell>Name</TableCell>
                 <TableCell>Type</TableCell>
                 <TableCell>SKU</TableCell>
@@ -183,11 +197,31 @@ const ItemList = ({ type, setType, handleClose, handleOpen, open, businessDetail
         </TableContainer>
       </Card>
 
-      {itemsList.length > 0 && (
-        <Stack direction="row" justifyContent="center" sx={{ py: 2 }}>
-          <Pagination count={Math.ceil(itemsList.length / rowsPerPage)} page={currentPage} onChange={handlePageChange} color="primary" />
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Button
+          variant="outlined"
+          startIcon={<ArrowBackIcon />}
+          onClick={() => {
+            navigate('/app/invoice');
+          }}
+          size="small"
+        >
+          Back To Dashboard
+        </Button>
+        {itemsList.length > 0 && (
+          <Stack direction="row" justifyContent="center" sx={{ py: 2 }}>
+            <Pagination count={Math.ceil(itemsList.length / rowsPerPage)} page={currentPage} onChange={handlePageChange} color="primary" />
+          </Stack>
+        )}
+        <Stack direction="row" spacing={2}>
+          <Button variant="outlined" onClick={handleBack} size="small">
+            Back
+          </Button>
+          <Button variant="contained" onClick={handleNext} size="small">
+            Next
+          </Button>
         </Stack>
-      )}
+      </Box>
 
       <AddItem
         businessDetailsData={businessDetailsData}

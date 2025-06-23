@@ -122,7 +122,7 @@ const InvoiceDetailsForm = ({
       formik.setFieldValue('shipping_address.postal_code', selectedCustomer.postal_code);
     }
   };
-  console.log(businessDetailsData);
+  // console.log(businessDetailsData);
   const renderField = (item) => {
     const fieldName = item.name;
     const value = formik.values[fieldName];
@@ -147,22 +147,22 @@ const InvoiceDetailsForm = ({
           helperText={formik.touched[fieldName] && formik.errors[fieldName]}
         />
       );
-    } else if (['place_of_supply', 'state', 'gstin', 'branch_code'].includes(fieldName)) {
+    } else if (['place_of_supply', 'state', 'gstin', 'branch_code', 'customer_branch'].includes(fieldName)) {
       return (
         <CustomAutocomplete
           name={fieldName}
           value={value || ''}
           onChange={(_, val) => {
             if (fieldName === 'gstin') {
-              formik.setFieldValue('gstin', val || 'NA');
-              let selectedGSTIN = businessDetailsData?.invoice_format?.find((item) => item.gstin === val || 'NA');
-              // console.log(selectedGSTIN.gstin, val);
-              if (selectedGSTIN.include_branch_code === false) {
-                // getInvoiceFormat(val, 'NA');
+              const gstinValue = val || 'NA';
+              formik.setFieldValue('gstin', gstinValue);
+              let selectedGSTIN = businessDetailsData?.invoice_format?.find((item) => item.gstin === gstinValue);
+              if (selectedGSTIN && selectedGSTIN.include_branch_code === false) {
+                getInvoiceFormat(gstinValue, 'NA');
                 formik.setFieldValue('branch_code', '');
                 formik.setFieldValue('invoice_number', '');
                 setInvoiceNumberFormat('');
-              } else {
+              } else if (selectedGSTIN) {
                 formik.setFieldValue('branch_code', '');
                 formik.setFieldValue('invoice_number', '');
                 setInvoiceNumberFormat('');
@@ -177,6 +177,8 @@ const InvoiceDetailsForm = ({
               ) {
                 getInvoiceFormat(formik.values.gstin, branch?.branch_code || '');
               }
+            } else if (fieldName === 'customer_branch') {
+              formik.setFieldValue('customer_branch', val || '');
             }
             formik.setFieldValue(fieldName, val);
           }}
@@ -199,7 +201,12 @@ const InvoiceDetailsForm = ({
                 ? branches?.map((item) => item.branch_name || 'NA')
                 : fieldName === 'customer'
                   ? customers?.map((item) => item.name)
-                  : indian_States_And_UTs
+                  : fieldName === 'customer_branch'
+                    ? customers
+                        ?.find((item) => item.name === formik.values.customer)
+                        ?.branches?.map((item) => item.branch_name)
+                        .filter(Boolean) || []
+                    : indian_States_And_UTs
           }
           error={formik.touched[fieldName] && Boolean(formik.errors[fieldName])}
           helperText={formik.touched[fieldName] && formik.errors[fieldName]}
@@ -346,6 +353,12 @@ const InvoiceDetailsForm = ({
   };
   return (
     <Grid2 container spacing={2}>
+      {invoiceDetailsFields.map((item) => (
+        <Grid2 size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={item.name}>
+          <Typography sx={{ mb: 1 }}>{item.label}</Typography>
+          {renderField(item)}
+        </Grid2>
+      ))}
       <AddGSTIN
         open={openAddGSTIN}
         handleClose={handleCloseAddGSTIN}
@@ -364,12 +377,6 @@ const InvoiceDetailsForm = ({
         selectedCustomer={selectedCustomer}
       />
       <AddBranch open={openAddBranch} handleClose={handleCloseAddBranch} getBranchesData={getBranchesData} />
-      {invoiceDetailsFields.map((item) => (
-        <Grid2 size={{ xs: 12, sm: 6, md: 3 }} key={item.name}>
-          <Typography sx={{ mb: 1 }}>{item.label}</Typography>
-          {renderField(item)}
-        </Grid2>
-      ))}
     </Grid2>
   );
 };
