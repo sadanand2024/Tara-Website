@@ -98,12 +98,12 @@ const BusinessPremisesSection = ({ taskId }) => {
       address_proof: Yup.mixed().required('Address proof is required'),
       rental_agreement: Yup.mixed().required('Rental Agreement/NOC is required'),
       bankStatement: Yup.mixed().required('Bank Statement/Cancelled Cheque is required'),
-      additional_space: Yup.string().required('Please select if you have additional space'),
-      workplace: Yup.string().when('additional_space', {
-        is: (val) => val === 'yes',
-        then: () => Yup.string().required('Workplace is required'),
-        otherwise: () => Yup.string().notRequired()
-      })
+      // additional_space: Yup.string().required('Please select if you have additional space'),
+      // workplace: Yup.string().when('additional_space', {
+      //   is: (val) => val === 'yes',
+      //   then: () => Yup.string().required('Workplace is required'),
+      //   otherwise: () => Yup.string().notRequired()
+      // })
     }),
     onSubmit: async (values) => {
       let url = businessPremises.id ? `/labourlicense/business-location/${businessPremises.id}/` : `/labourlicense/business-location/`;
@@ -122,8 +122,8 @@ const BusinessPremisesSection = ({ taskId }) => {
         })
       );
       formData.append('nature_of_possession', values.nature_of_possession);
-      formData.append('additional_space', values.additional_space);
-      formData.append('workplace', values.workplace);
+      // formData.append('additional_space', values.additional_space);
+      // formData.append('workplace', values.workplace);
       formData.append('status', 'in progress');
 
       if (values.address_proof && typeof values.address_proof !== 'string') {
@@ -179,12 +179,12 @@ const BusinessPremisesSection = ({ taskId }) => {
         address_proof: data.address_proof || null,
         rental_agreement: data.rental_agreement || null,
         bankStatement: data.bank_statement || null,
-        additional_space: data.additional_space || 'no',
-        workplace: data.workplace && data.workplace !== 'null' ? data.workplace : ''
+        // additional_space: data.additional_space || 'no',
+        // workplace: data.workplace && data.workplace !== 'null' ? data.workplace : ''
       });
       setBusinessPremises({
         ...data,
-        additional_space: data.additional_space || 'no'
+        // additional_space: data.additional_space || 'no'
       });
     }
   };
@@ -297,7 +297,7 @@ const BusinessPremisesSection = ({ taskId }) => {
   'Additional space required'
         
         ]}
-       
+      
         task_id={taskId}
       />
     </Box>
@@ -310,7 +310,7 @@ const BusinessPremisesSection = ({ taskId }) => {
               </Grid2>
             ))}
 
-            <Grid2 size={12}>
+            {/* <Grid2 size={12}>
               <Box display="flex" alignItems="center" mt={2}>
                 <Typography sx={{ mr: 2 }}>Additional place of business?</Typography>
                 <FormGroup row>
@@ -360,36 +360,34 @@ const BusinessPremisesSection = ({ taskId }) => {
                   )}
                 />
               </Grid2>
-            )}
+            )} */}
 
             <Grid2 size={12}>
               <Stack direction="row" spacing={2} justifyContent="flex-end" mt={3}>
                 <Button variant="contained" color="primary" type="submit">
                   Save
                 </Button>
-               
-                 <GetActionButtons
-                                              type="put"
-                                              urlEndpoint="business-location"
-                                              recId={businessPremises.id}
-                                              status={businessPremises.status}
-                                              data={businessPremises}
-                                              service_request={service_id}
-                                              task_id={taskId}
-                                              urlKey="labourlicense"
-                                              urlBool={true}
-                                            />
+              
+                                    <GetActionButtons
+                                      type="put"
+                                      urlEndpoint="business-location"
+                                      recId={businessPremises.id}
+                                      status={businessPremises.status}
+                                      data={businessPremises}
+                                      service_request={service_id}
+                                      task_id={taskId}
+                                      urlKey="labourlicense"
+                                      urlBool={true}
+                                    />
               </Stack>
             </Grid2>
           </Grid2>
         </form>
       </Card>
 
-      {businessPremises.additional_space === 'yes' && (
         <Box mt={4}>
           <AdditionalPlaceOfBusiness businessPremises={businessPremises} />
         </Box>
-      )}
     </Box>
   );
 };

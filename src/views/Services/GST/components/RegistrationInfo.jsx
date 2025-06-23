@@ -84,6 +84,7 @@ const RegistrationInfo = () => {
         const formData = new FormData();
         formData.append('service_request',service_id);
         formData.append('service_task', task_id);
+        formData.append('status', 'in progress');
 
         // Map your form values to formData keys (adjust keys as per your API)
         formData.append('is_this_voluntary_registration', values.is_this_voluntary_registration);
@@ -146,7 +147,7 @@ const RegistrationInfo = () => {
     if (res.status_cd === 0 && res.data) {
       const data = res?.data?.task_data["Registration Info"]?.data;
       // const data = res.data;
-     
+    
       if (res?.data?.task_data && data !== null) {
       formik.setValues({
         is_this_voluntary_registration: data.is_this_voluntary_registration || '',

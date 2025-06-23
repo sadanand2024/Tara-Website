@@ -105,6 +105,7 @@ const BasicBusinessInfo = () => {
       let formData = new FormData();
       formData.append('service_request', service_id);
       formData.append('service_task', task_id);
+      formData.append('status', 'in progress');
 
       formData.append('legal_name_of_business', values.legal_name_of_business);
       formData.append('trade_name_of_business', values.trade_name_of_business);
