@@ -43,6 +43,7 @@ export default function Dashboard() {
     if (response.res.status_cd === 0) {
       let data = { ...user };
       data.active_context = response.res.data.active_context;
+      data.all_contexts = response.res.data.all_contexts;
       data.module_subscriptions = response.res.data.module_subscriptions;
       data.user_role = response.res.data.user_role;
       localStorage.setItem('user', JSON.stringify(data));
@@ -69,11 +70,12 @@ export default function Dashboard() {
     const response = await Factory('post', '/user_management/select-context', kycData, {});
     if (response.res.status_cd === 0) {
       switchContext(response.res.context_id);
-      if (selected === 'personal') {
-        navigate('/dashboard/personal');
-      } else {
-        navigate('/dashboard/business');
-      }
+      // if (selected === 'personal') {
+      //   console.log('personal');
+      //   navigate('/dashboard/personal');
+      // } else {
+      //   navigate('/dashboard/business');
+      // }
     } else {
       snackbar.error('Something went wrong');
     }

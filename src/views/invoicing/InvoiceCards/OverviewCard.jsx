@@ -25,6 +25,7 @@ let baseURL = import.meta.env.VITE_APP_BASE_URL;
 import { indianCurrency } from 'utils/CurrencyToggle';
 import { ThemeMode } from 'config';
 
+const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const titles = {
   total_revenue: 'Total Revenue',
   today_revenue: "Today's Revenue",
@@ -52,6 +53,7 @@ export default function OverviewCard({ invoicing_profile_data, businessId, open,
   const [invoicesList, setInvoicesList] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 5;
+  const [month, setMonth] = useState(new Date().getMonth() + 1);
 
   const totalPages = Math.ceil(invoicesList.length / rowsPerPage);
   const paginatedData = invoicesList.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
@@ -149,7 +151,7 @@ export default function OverviewCard({ invoicing_profile_data, businessId, open,
 
     setLoading(true);
     try {
-      const url = `/invoicing/invoice-retrieve?invoicing_profile_id=${invoicing_profile_data.invoicing_profile_id}&financial_year=${financialYear}`;
+      const url = `/invoicing/invoice-retrieve?invoicing_profile_id=${invoicing_profile_data.invoicing_profile_id}&financial_year=${financialYear}&month=${month}`;
       const { res } = await Factory('get', url, {});
 
       if (res.status_cd === 0) {
@@ -383,11 +385,11 @@ export default function OverviewCard({ invoicing_profile_data, businessId, open,
 
   // Fetch data when financial year changes
   useEffect(() => {
-    if (invoicing_profile_data?.invoicing_profile_id && financialYear) {
+    if (invoicing_profile_data?.invoicing_profile_id && financialYear && month) {
       getInvoices();
       getDashboardData();
     }
-  }, [financialYear, invoicing_profile_data?.invoicing_profile_id]);
+  }, [financialYear, invoicing_profile_data?.invoicing_profile_id, month]);
 
   return (
     <Box>
@@ -423,30 +425,39 @@ export default function OverviewCard({ invoicing_profile_data, businessId, open,
               </Typography>
             )}
           </Grid2>
-          <Grid2 size={{ xs: 6 }} sx={{ textAlign: 'right' }}>
-            <Button
-              variant="outlined"
-              color="secondary"
-              startIcon={<IconReload size={16} />}
-              sx={{ minWidth: 78, mr: 1 }}
-              onClick={() => {
-                getInvoices();
-                setTitle('Over All Financial Year Invoices');
-              }}
-            >
-              Reset
-            </Button>
-            <Button
-              variant="outlined"
-              color="secondary"
-              startIcon={<IconFilter size={16} />}
-              sx={{ minWidth: 78 }}
-              onClick={() => {
-                setFilterDialog(true);
-              }}
-            >
-              Filter
-            </Button>
+          <Grid2 size={{ xs: 6 }} sx={{ textAlign: 'right', display: 'flex', justifyContent: 'flex-end' }}>
+            <Stack direction="row" spacing={2}>
+              <Autocomplete
+                options={months}
+                value={months[month - 1]}
+                onChange={(e, val) => setMonth(val ? months.indexOf(val) + 1 : null)}
+                disableClearable
+                renderInput={(params) => <TextField {...params} variant="outlined" label="Month" size="small" sx={{ width: 200 }} />}
+              />
+              <Button
+                variant="outlined"
+                color="secondary"
+                startIcon={<IconReload size={16} />}
+                sx={{ minWidth: 78, mr: 1 }}
+                onClick={() => {
+                  getInvoices();
+                  setTitle('Over All Financial Year Invoices');
+                }}
+              >
+                Reset
+              </Button>
+              <Button
+                variant="outlined"
+                color="secondary"
+                startIcon={<IconFilter size={16} />}
+                sx={{ minWidth: 78 }}
+                onClick={() => {
+                  setFilterDialog(true);
+                }}
+              >
+                Filter
+              </Button>
+            </Stack>
           </Grid2>
         </Grid2>
       </Box>
