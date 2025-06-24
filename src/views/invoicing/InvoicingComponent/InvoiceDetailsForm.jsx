@@ -98,28 +98,50 @@ const InvoiceDetailsForm = ({
     formik.setFieldValue('terms', newValue);
   };
 
-  const handleCustomerChange = (newValue) => {
-    const selectedCustomer = customers?.find((c) => c.name === newValue);
+  const handleCustomerBranchChange = (newValue) => {
+    const selectedCustomer = customers?.find((c) => c.name === formik.values.customer);
     if (!selectedCustomer) return;
-    console.log(selectedCustomer);
-    formik.setFieldValue('customer', newValue);
+    let customerBranches = [];
+
+    if (selectedCustomer) {
+      // If GST registered, add Head Office first
+      if (selectedCustomer.gst_registered === 'Yes') {
+        const headOffice = {
+          branch_name: 'Head Office',
+          gstin: selectedCustomer.gstin,
+          gst_type: selectedCustomer.gst_type,
+          address_line1: selectedCustomer.address_line1,
+          address_line2: selectedCustomer.address_line2,
+          country: selectedCustomer.country,
+          state: selectedCustomer.state,
+          postal_code: selectedCustomer.postal_code
+        };
+        customerBranches.push(headOffice);
+      }
+
+      // Add all real branches (if any)
+      const otherBranches = selectedCustomer.branches || [];
+      customerBranches.push(...otherBranches);
+    }
+    let selectedBranch = customerBranches.find((item) => item.branch_name === newValue);
+    console.log(selectedBranch);
+    formik.setFieldValue('customer_branch', newValue || '');
     formik.setFieldValue('place_of_supply', selectedCustomer.state);
 
     // Always update billing address
-    formik.setFieldValue('billing_address.address_line1', selectedCustomer.address_line1);
-    formik.setFieldValue('billing_address.address_line2', selectedCustomer.address_line2);
-    formik.setFieldValue('billing_address.state', selectedCustomer.state);
-    formik.setFieldValue('billing_address.country', selectedCustomer.country);
-    formik.setFieldValue('billing_address.postal_code', selectedCustomer.postal_code);
-    formik.setFieldValue('customer_gstin', selectedCustomer.gstin);
-    formik.setFieldValue('customer_pan', selectedCustomer.pan_number);
+    formik.setFieldValue('billing_address.address_line1', selectedBranch.address_line1);
+    formik.setFieldValue('billing_address.address_line2', selectedBranch.address_line2);
+    formik.setFieldValue('billing_address.state', selectedBranch.state);
+    formik.setFieldValue('billing_address.country', selectedBranch.country);
+    formik.setFieldValue('billing_address.postal_code', selectedBranch.postal_code);
+    formik.setFieldValue('customer_gstin', selectedBranch.gstin);
     // Conditionally update shipping address if "same_address" is true
     if (formik.values.same_address) {
-      formik.setFieldValue('shipping_address.address_line1', selectedCustomer.address_line1);
-      formik.setFieldValue('shipping_address.address_line2', selectedCustomer.address_line2);
-      formik.setFieldValue('shipping_address.state', selectedCustomer.state);
-      formik.setFieldValue('shipping_address.country', selectedCustomer.country);
-      formik.setFieldValue('shipping_address.postal_code', selectedCustomer.postal_code);
+      formik.setFieldValue('shipping_address.address_line1', selectedBranch.address_line1);
+      formik.setFieldValue('shipping_address.address_line2', selectedBranch.address_line2);
+      formik.setFieldValue('shipping_address.state', selectedBranch.state);
+      formik.setFieldValue('shipping_address.country', selectedBranch.country);
+      formik.setFieldValue('shipping_address.postal_code', selectedBranch.postal_code);
     }
   };
   // console.log(businessDetailsData);
@@ -148,6 +170,46 @@ const InvoiceDetailsForm = ({
         />
       );
     } else if (['place_of_supply', 'state', 'gstin', 'branch_code', 'customer_branch'].includes(fieldName)) {
+      let computedOptions = [];
+
+      if (fieldName === 'gstin') {
+        computedOptions =
+          businessDetailsData?.gst_details?.length > 0 ? businessDetailsData.gst_details.map((item) => item.gstin || 'NA') : ['NA'];
+      } else if (fieldName === 'branch_code') {
+        computedOptions = branches?.map((item) => item.branch_name || 'NA') || [];
+      } else if (fieldName === 'customer') {
+        computedOptions = customers?.map((item) => item.name) || [];
+      } else if (fieldName === 'customer_branch') {
+        const selectedCustomer = customers?.find((item) => item.name === formik.values.customer);
+
+        let customerBranches = [];
+
+        if (selectedCustomer) {
+          // If GST registered, add Head Office first
+          if (selectedCustomer.gst_registered === 'Yes') {
+            const headOffice = {
+              branch_name: 'Head Office',
+              gstin: selectedCustomer.gstin,
+              gst_type: selectedCustomer.gst_type,
+              address_line1: selectedCustomer.address_line1,
+              address_line2: selectedCustomer.address_line2,
+              country: selectedCustomer.country,
+              state: selectedCustomer.state,
+              postal_code: selectedCustomer.postal_code
+            };
+            customerBranches.push(headOffice);
+          }
+
+          // Add all real branches (if any)
+          const otherBranches = selectedCustomer.branches || [];
+          customerBranches.push(...otherBranches);
+        }
+
+        // Set options to array of branch names
+        computedOptions = customerBranches.map((item) => item.branch_name).filter(Boolean);
+      } else {
+        computedOptions = indian_States_And_UTs;
+      }
       return (
         <CustomAutocomplete
           name={fieldName}
@@ -178,7 +240,7 @@ const InvoiceDetailsForm = ({
                 getInvoiceFormat(formik.values.gstin, branch?.branch_code || '');
               }
             } else if (fieldName === 'customer_branch') {
-              formik.setFieldValue('customer_branch', val || '');
+              handleCustomerBranchChange(val);
             }
             formik.setFieldValue(fieldName, val);
           }}
@@ -192,22 +254,7 @@ const InvoiceDetailsForm = ({
               return selectedFormat ? !selectedFormat.include_branch_code : true;
             })()
           }
-          options={
-            fieldName === 'gstin'
-              ? businessDetailsData?.gst_details?.length > 0
-                ? businessDetailsData.gst_details.map((item) => item.gstin || 'NA')
-                : ['NA']
-              : fieldName === 'branch_code'
-                ? branches?.map((item) => item.branch_name || 'NA')
-                : fieldName === 'customer'
-                  ? customers?.map((item) => item.name)
-                  : fieldName === 'customer_branch'
-                    ? customers
-                        ?.find((item) => item.name === formik.values.customer)
-                        ?.branches?.map((item) => item.branch_name)
-                        .filter(Boolean) || []
-                    : indian_States_And_UTs
-          }
+          options={computedOptions}
           error={formik.touched[fieldName] && Boolean(formik.errors[fieldName])}
           helperText={formik.touched[fieldName] && formik.errors[fieldName]}
           ListboxProps={
@@ -295,7 +342,13 @@ const InvoiceDetailsForm = ({
         <CustomAutocomplete
           name={fieldName}
           value={value || ''}
-          onChange={(_, val) => handleCustomerChange(val)}
+          onChange={(_, val) => {
+            formik.setFieldValue('customer_branch', '');
+            formik.setFieldValue('customer_gstin', '');
+            formik.setFieldValue('customer', val);
+            let selectedCustomer = customers?.find((c) => c.name === val);
+            formik.setFieldValue('customer_pan', selectedCustomer.pan_number);
+          }}
           options={customers?.map((c) => c.name) || []}
           error={formik.touched[fieldName] && Boolean(formik.errors[fieldName])}
           helperText={formik.touched[fieldName] && formik.errors[fieldName]}

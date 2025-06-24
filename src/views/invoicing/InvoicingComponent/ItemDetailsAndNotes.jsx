@@ -175,6 +175,31 @@ const ItemDetailsAndNotes = ({
                           {option}
                         </li>
                       )}
+                      noOptionsText={
+                        <Box sx={{ p: 2, textAlign: 'center' }}>
+                          <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
+                            No Results found
+                          </Typography>
+                          <Button
+                            variant="contained"
+                            fullWidth
+                            size="small"
+                            sx={{
+                              bgcolor: 'primary.main',
+                              '&:hover': {
+                                bgcolor: 'primary.dark'
+                              }
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpenAddItem();
+                            }}
+                            startIcon={<IconPlus size={18} />}
+                          >
+                            Add New Item
+                          </Button>
+                        </Box>
+                      }
                       ListboxProps={{
                         style: { maxHeight: 250 },
                         component: React.forwardRef(function CustomListboxComponent(props, ref) {
@@ -182,26 +207,28 @@ const ItemDetailsAndNotes = ({
                           return (
                             <ul ref={ref} {...rest}>
                               {children}
-                              <li style={{ padding: '8px 16px' }}>
-                                <Button
-                                  variant="contained"
-                                  fullWidth
-                                  size="small"
-                                  sx={{
-                                    bgcolor: 'primary.main',
-                                    '&:hover': {
-                                      bgcolor: 'primary.dark'
-                                    }
-                                  }}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleOpenAddItem();
-                                  }}
-                                  startIcon={<IconPlus size={18} />}
-                                >
-                                  Add New Item
-                                </Button>
-                              </li>
+                              {children && children.length > 0 && (
+                                <li style={{ padding: '8px 16px' }}>
+                                  <Button
+                                    variant="contained"
+                                    fullWidth
+                                    size="small"
+                                    sx={{
+                                      bgcolor: 'primary.main',
+                                      '&:hover': {
+                                        bgcolor: 'primary.dark'
+                                      }
+                                    }}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleOpenAddItem();
+                                    }}
+                                    startIcon={<IconPlus size={18} />}
+                                  >
+                                    Add New Item
+                                  </Button>
+                                </li>
+                              )}
                             </ul>
                           );
                         })

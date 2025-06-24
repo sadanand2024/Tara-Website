@@ -331,5 +331,3 @@ export default function SimpleTabs() {
     </Card>
   );
 }
-
-TabPanel.propTypes = { children: PropTypes.any, value: PropTypes.any, index: PropTypes.any, other: PropTypes.any };

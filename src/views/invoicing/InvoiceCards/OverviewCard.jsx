@@ -8,7 +8,7 @@ import Typography from '@mui/material/Typography';
 import FilterDialog from './FilterDialog';
 import YearlyStats from './YearlyStats';
 import OverallStats from './OverallStats';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Snackbar, Pagination, Grid2 } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Snackbar, Pagination, Grid2, alpha } from '@mui/material';
 import ActionCell from '../../../ui-component/extended/ActionCell';
 import Factory from 'utils/Factory';
 import { useState, useEffect } from 'react';
@@ -19,8 +19,8 @@ import { openSnackbar } from 'store/slices/snackbar';
 // @project
 import MainCard from '../../../ui-component/cards/MainCard';
 // @assets
-import { IconArrowUp, IconFilter, IconReload, IconAlertCircle } from '@tabler/icons-react';
-import { Autocomplete, Box, Button, FormHelperText, InputLabel, TextField, Avatar } from '@mui/material';
+import { IconChartBar, IconFilter, IconReload, IconAlertCircle } from '@tabler/icons-react';
+import { Autocomplete, Box, Button, FormHelperText, InputLabel, TextField, Avatar, Card } from '@mui/material';
 let baseURL = import.meta.env.VITE_APP_BASE_URL;
 import { indianCurrency } from 'utils/CurrencyToggle';
 import { ThemeMode } from 'config';
@@ -417,153 +417,177 @@ export default function OverviewCard({ invoicing_profile_data, businessId, open,
 
       <Box sx={{ mb: 1 }}>
         <Grid2 container>
-          <Grid2 size={{ xs: 6 }}>
-            <Typography variant="h4">{title}</Typography>
-            {!['Over due', 'Due today', 'Due with in 30 days', 'Total Receivable', 'Bad Debt'].includes(title) && (
-              <Typography variant="subtitle1" color="grey.700">
-                FY: {financialYear}
-              </Typography>
-            )}
-          </Grid2>
-          <Grid2 size={{ xs: 6 }} sx={{ textAlign: 'right', display: 'flex', justifyContent: 'flex-end' }}>
-            <Stack direction="row" spacing={2}>
-              <Autocomplete
-                options={months}
-                value={months[month - 1]}
-                onChange={(e, val) => setMonth(val ? months.indexOf(val) + 1 : null)}
-                disableClearable
-                renderInput={(params) => <TextField {...params} variant="outlined" label="Month" size="small" sx={{ width: 200 }} />}
-              />
-              <Button
-                variant="outlined"
-                color="secondary"
-                startIcon={<IconReload size={16} />}
-                sx={{ minWidth: 78, mr: 1 }}
-                onClick={() => {
-                  getInvoices();
-                  setTitle('Over All Financial Year Invoices');
-                }}
-              >
-                Reset
-              </Button>
-              <Button
-                variant="outlined"
-                color="secondary"
-                startIcon={<IconFilter size={16} />}
-                sx={{ minWidth: 78 }}
-                onClick={() => {
-                  setFilterDialog(true);
-                }}
-              >
-                Filter
-              </Button>
-            </Stack>
+          <Grid2
+            size={{ xs: 12 }}
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 2,
+              mb: 2,
+              p: 1.5,
+              backgroundColor: alpha(theme.palette.primary.main, 0.05),
+              borderRadius: 2,
+              border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`
+            }}
+          >
+            <Grid2 size={{ xs: 6 }}>
+              <Typography variant="h4">{title}</Typography>
+              {!['Over due', 'Due today', 'Due with in 30 days', 'Total Receivable', 'Bad Debt'].includes(title) && (
+                <Typography variant="subtitle1" color="grey.700">
+                  FY: {financialYear}
+                </Typography>
+              )}
+            </Grid2>
+            <Grid2 size={{ xs: 6 }} sx={{ textAlign: 'right', display: 'flex', justifyContent: 'flex-end' }}>
+              <Stack direction="row" spacing={2}>
+                <Autocomplete
+                  options={months}
+                  value={months[month - 1]}
+                  onChange={(e, val) => setMonth(val ? months.indexOf(val) + 1 : null)}
+                  disableClearable
+                  renderInput={(params) => <TextField {...params} variant="outlined" label="Month" size="small" sx={{ width: 200 }} />}
+                />
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  startIcon={<IconReload size={16} />}
+                  sx={{ minWidth: 78, mr: 1 }}
+                  onClick={() => {
+                    getInvoices();
+                    setTitle('Over All Financial Year Invoices');
+                  }}
+                >
+                  Reset
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  startIcon={<IconFilter size={16} />}
+                  sx={{ minWidth: 78 }}
+                  onClick={() => {
+                    setFilterDialog(true);
+                  }}
+                >
+                  Filter
+                </Button>
+              </Stack>
+            </Grid2>
           </Grid2>
         </Grid2>
       </Box>
+
       <Grid2 sx={{ mt: 3 }}>
-        <TableContainer
-          component={Paper}
+        <Card
+          elevation={2}
           sx={{
-            width: '100%',
-            borderRadius: 2,
-            boxShadow: 1,
-            overflowX: 'auto'
+            mb: 2,
+            '& .MuiTableContainer-root': {
+              borderRadius: 0
+            },
+            '& .MuiTableCell-root': {
+              color: 'text.primary'
+            },
+            '& .MuiTableHead-root .MuiTableCell-root': {
+              py: 1,
+              backgroundColor: 'primary.main',
+              color: '#fff'
+            }
           }}
         >
-          <Table size="small">
-            <TableHead>
-              <TableRow sx={{ bgcolor: 'grey.100' }}>
-                <TableCell>Date</TableCell>
-                <TableCell>Invoice Number</TableCell>
-                <TableCell>Customer</TableCell>
-                <TableCell>Payment Status</TableCell>
-                <TableCell>Invoice Status</TableCell>
-                <TableCell>Due Date</TableCell>
-                <TableCell>Amount</TableCell>
-                <TableCell>Balance Due</TableCell>
-                <TableCell align="center">Action</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {paginatedData.length > 0 ? (
-                paginatedData.map((invoice, index) => (
-                  <TableRow
-                    key={index}
-                    sx={{
-                      bgcolor: 'background.paper',
-                      borderRadius: 2,
-                      boxShadow: theme.customShadows.z1,
-                      '&:hover': {
-                        boxShadow: theme.customShadows.z4
-                      }
-                    }}
-                  >
-                    <TableCell>{invoice.invoice_date}</TableCell>
-                    <TableCell>{invoice.invoice_number}</TableCell>
-                    <TableCell>{invoice.customer}</TableCell>
-                    <TableCell>
-                      <Chip
-                        size="small"
-                        variant="outlined"
-                        label={invoice.payment_status}
-                        color={invoice.payment_status === 'Pending' || invoice.payment_status === 'Overdue' ? 'warning' : 'success'}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        size="small"
-                        variant="outlined"
-                        label={invoice.invoice_status}
-                        color={invoice.invoice_status === 'Approved' ? 'success' : 'warning'}
-                      />
-                    </TableCell>
-                    <TableCell>{invoice.due_date}</TableCell>
-                    <TableCell>
-                      {indianCurrency}&nbsp;{invoice.total_amount}
-                    </TableCell>
-                    <TableCell>
-                      {indianCurrency}&nbsp;{invoice.balance_due}
-                    </TableCell>
-                    <TableCell align="center">
-                      {invoice?.id && (
-                        <ActionCell
-                          fromComponent="invoice"
-                          row={invoice}
-                          onEdit={() => navigate(`/app/invoice/editInvoice?id=${invoice.id}`)}
-                          onDelete={() => handleDelete(invoice.id)}
-                          onRecordPayment={() => navigate(`/app/invoice/recordpayment?id=${invoice.id}`)}
-                          onPaymentHistory={() => navigate(`/app/invoice/paymenthistory?id=${invoice.id}`)}
-                          onDownload={() => downloadInvoice(invoice.id)}
-                          onApprove={() => handleApprove(invoice.id)}
-                          onWriteOff={() => handleWriteOff(invoice.id)}
-                          deleteDialogData={{
-                            title: 'Delete record',
-                            heading: 'Are you sure you want to delete this record?',
-                            description: 'This action will permanently remove this record from the list.',
-                            successMessage: 'Record has been deleted.'
-                          }}
+          <TableContainer>
+            <Table size="small">
+              <TableHead>
+                <TableRow sx={{ bgcolor: 'primary.main', color: 'white' }}>
+                  <TableCell>Date</TableCell>
+                  <TableCell>Invoice Number</TableCell>
+                  <TableCell>Customer</TableCell>
+                  <TableCell>Payment Status</TableCell>
+                  <TableCell>Invoice Status</TableCell>
+                  <TableCell>Due Date</TableCell>
+                  <TableCell>Amount</TableCell>
+                  <TableCell>Balance Due</TableCell>
+                  <TableCell align="center">Action</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {paginatedData.length > 0 ? (
+                  paginatedData.map((invoice, index) => (
+                    <TableRow
+                      key={index}
+                      sx={{
+                        bgcolor: 'background.paper',
+                        borderRadius: 2,
+                        boxShadow: theme.customShadows.z1,
+                        '&:hover': {
+                          boxShadow: theme.customShadows.z4
+                        }
+                      }}
+                    >
+                      <TableCell>{invoice.invoice_date}</TableCell>
+                      <TableCell>{invoice.invoice_number}</TableCell>
+                      <TableCell>{invoice.customer}</TableCell>
+                      <TableCell>
+                        <Chip
+                          size="small"
+                          variant="outlined"
+                          label={invoice.payment_status}
+                          color={invoice.payment_status === 'Pending' || invoice.payment_status === 'Overdue' ? 'warning' : 'success'}
                         />
-                      )}
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          size="small"
+                          variant="outlined"
+                          label={invoice.invoice_status}
+                          color={invoice.invoice_status === 'Approved' ? 'success' : 'warning'}
+                        />
+                      </TableCell>
+                      <TableCell>{invoice.due_date}</TableCell>
+                      <TableCell>
+                        {indianCurrency}&nbsp;{invoice.total_amount}
+                      </TableCell>
+                      <TableCell>
+                        {indianCurrency}&nbsp;{invoice.balance_due}
+                      </TableCell>
+                      <TableCell align="center">
+                        {invoice?.id && (
+                          <ActionCell
+                            fromComponent="invoice"
+                            row={invoice}
+                            onEdit={() => navigate(`/app/invoice/editInvoice?id=${invoice.id}`)}
+                            onDelete={() => handleDelete(invoice.id)}
+                            onRecordPayment={() => navigate(`/app/invoice/recordpayment?id=${invoice.id}`)}
+                            onPaymentHistory={() => navigate(`/app/invoice/paymenthistory?id=${invoice.id}`)}
+                            onDownload={() => downloadInvoice(invoice.id)}
+                            onApprove={() => handleApprove(invoice.id)}
+                            onWriteOff={() => handleWriteOff(invoice.id)}
+                            deleteDialogData={{
+                              title: 'Delete record',
+                              heading: 'Are you sure you want to delete this record?',
+                              description: 'This action will permanently remove this record from the list.',
+                              successMessage: 'Record has been deleted.'
+                            }}
+                          />
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={9}>
+                      <Stack alignItems="center" py={5}>
+                        <IconAlertCircle color="warning" size={32} />
+                        <Typography variant="subtitle1" color="text.secondary" mt={1}>
+                          No invoices found for the selected filter
+                        </Typography>
+                      </Stack>
                     </TableCell>
                   </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={9}>
-                    <Stack alignItems="center" py={5}>
-                      <IconAlertCircle color="warning" size={32} />
-                      <Typography variant="subtitle1" color="text.secondary" mt={1}>
-                        No invoices found for the selected filter
-                      </Typography>
-                    </Stack>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Card>
         {invoicesList.length > 0 && (
           <Stack direction="row" justifyContent="center" alignItems="center" sx={{ px: { xs: 0.5, sm: 2.5 }, py: 1.5 }}>
             <Pagination count={totalPages} page={currentPage} onChange={handlePageChange} color="primary" />
