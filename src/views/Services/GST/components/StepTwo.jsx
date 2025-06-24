@@ -168,6 +168,16 @@ const StepTwo = () => {
               close: false
             })
           );
+                  try {
+        const reviewFormData = new FormData();
+        reviewFormData.append('service_request', service_id);
+        reviewFormData.append('service_task', task_id);
+        reviewFormData.append('status', 'in progress');
+
+        await Factory('post', '/gst/promoter-signatory-details/', reviewFormData);
+      } catch (err) {
+        // console.error('Review status API error:', err);
+      }
           getSignatoryDetails();
         }
       } catch (error) {

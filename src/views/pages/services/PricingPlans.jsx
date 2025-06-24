@@ -45,12 +45,13 @@ const PricingPlans = ({ data }) => {
         </Typography>
 
         {/* Responsive Plans Grid */}
-        <Grid container spacing={{ xs: 2, md: 5 }} justifyContent="center" sx={{  mt:{xs:0,lg:5}}}>
+        <Grid container spacing={{ xs: 2, md: 10 }} justifyContent="center" sx={{  mt:{xs:0,lg:5}}}>
           {data.plans?.map((plan, idx) => (
-            <Grid item xs={12} sm={6} md={4} lg={3} key={idx}>
+            <Grid item xs={12} sm={6} md={4} lg={4} key={idx}>
               <Card
                 elevation={3}
                 sx={{
+                  width:'350px',
                   height: '100%',
                   display: 'flex',
                   flexDirection: 'column',
@@ -61,12 +62,54 @@ const PricingPlans = ({ data }) => {
                   paddingRight: '16px',
                   paddingBottom: '2px',
                   paddingLeft: '16px',
-                  background: '#FFFFFF'
+                  background: '#FFFFFF',
+                  position: 'relative'
                 }}
               >
                 <CardHeader
                   title={plan.name}
-                  subheader={plan.bestFor}
+                  subheader={
+                    <Box>
+                      {Array.isArray(plan.bestFor) ? 
+                        plan.bestFor.map((item, index) => (
+                          index === 0 ? (
+                            <Typography
+                              key={index}
+                              sx={{
+                                fontSize: '15px', // Adjusted from '38px' for better mobile scaling
+                                lineHeight: '1.4',
+                                fontFamily: 'Inter',
+                                color: '#1F242E',
+                                mb: 1.5,
+                                fontWeight: 500
+                              }}
+                            >
+                              {item}
+                            </Typography>
+                          ) : (
+                            <Typography
+                              key={index}
+                              component="li"
+                              sx={{
+                                fontSize: '14px',
+                                lineHeight: '1.8',
+                                letterSpacing: '0px',
+                                fontFamily: 'Inter',
+                                color: '#1F242E',
+                                mb: 0.5,
+                                textAlign: 'left',
+                                fontWeight: 200,
+                                listStylePosition: 'inside'
+                              }}
+                            >
+                              {item}
+                            </Typography>
+                          )
+                        ))
+                        : plan.bestFor
+                      }
+                    </Box>
+                  }
                   titleTypographyProps={{
                     variant: 'h6',
                     fontWeight: 800,
@@ -79,31 +122,30 @@ const PricingPlans = ({ data }) => {
                     whiteSpace: 'nowrap'
                   }}
                   subheaderTypographyProps={{
-                    fontSize: '16px',
+                    fontSize: '15px',
                     lineHeight: '100%',
                     letterSpacing: '0px',
                     fontFamily: 'Inter',
                     color: '#1F242E',
-                    mt:{xs:0,lg:1.5},
-                    textAlign: 'left',
-                    whiteSpace: 'normal'
+                    mt:{xs:0,lg:1},
+                    textAlign: 'left'
                   }}
                   sx={{
                     background: '#FFFFFF',
                     py: { xs: 1.5, sm: 2 },
                     mt:{xs:0,lg:-5},
-                    
                   }}
                 />
-                <CardContent
+                <Box
                   sx={{
-                    flexGrow: 1,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'flex-start',
-                    py: { xs: 1.5, sm: 2 },
+                    position: 'absolute',
+                    bottom: '60px',
+                    left: 0,
                     width: '100%',
-                    padding: '0 16px'
+                    px: 2,
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center'
                   }}
                 >
                   <Typography
@@ -115,8 +157,8 @@ const PricingPlans = ({ data }) => {
                       letterSpacing: '0px',
                       fontFamily: 'Inter',
                       color: '#001033',
-                      mb: 1.5,
-                      textAlign: 'left',
+                      mb:8,
+                      textAlign: 'center',
                       whiteSpace: 'nowrap',
                       overflow: 'hidden',
                       textOverflow: 'clip'
@@ -124,6 +166,19 @@ const PricingPlans = ({ data }) => {
                   >
                     {plan.price}
                   </Typography>
+                </Box>
+                <CardContent
+                  sx={{
+                    flexGrow: 1,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'flex-start',
+                    py: { xs: 1.5, sm: 2 },
+                    width: '100%',
+                    padding: '0 16px',
+                    minHeight: '30px',
+                  }}
+                >
                   {plan.features && (
                     <Box sx={{ width: '100%', mt: 1.5, flexGrow: 1 }}>
                       {plan.features.map((feature, featureIdx) => (
@@ -143,10 +198,13 @@ const PricingPlans = ({ data }) => {
                     </Box>
                   )}
                 </CardContent>
-                <CardActions sx={{ p:0.1, mt: 'auto', justifyContent: {
-      xs: 'center',  // center on mobile
-      sm: 'flex-start'  // left-aligned on tablet and above
-    }, padding: '0 16px 28px 16px' }}>
+                <CardActions
+                  sx={{
+                    mt:5,
+                    justifyContent: 'center',
+                    padding: '0 16px 28px 16px'
+                  }}
+                >
                   <Button
                     fullWidth
                     variant="contained"
@@ -162,6 +220,7 @@ const PricingPlans = ({ data }) => {
                       paddingLeft: '20px',
                       bgcolor: '#0042D1',
                       color: '#FFFFFF',
+                      mt: 2,
                       '&:hover': {
                         bgcolor: '#0035A8'
                       }

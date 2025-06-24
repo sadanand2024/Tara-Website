@@ -212,6 +212,7 @@ const PrincipleOfBusiness = () => {
       if (res?.data?.task_data && data !== null) {
       formik.setValues({
         pincode: data.principal_place?.pincode || '',
+        name_1:data.profg?.name_1||'',
         state: data.principal_place?.state || '',
         district: data.principal_place?.district || '',
         city: data.principal_place?.city || '',
@@ -358,7 +359,8 @@ const PrincipleOfBusiness = () => {
             <Grid2 size={12}>
               <Stack direction="row" spacing={2} justifyContent="flex-end" mt={3}>
                 <Button variant="contained" color="primary" type="submit">
-                  {prinicipalBusiness.id ? 'Update' : 'Save'}
+                  {/* {prinicipalBusiness.id ? 'Update' : 'Save'} */}
+                  Save PrincipalInfo
                 </Button>
                   <GetActionButtons
                                             type="put"

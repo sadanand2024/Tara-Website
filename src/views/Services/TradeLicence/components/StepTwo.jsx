@@ -12,7 +12,7 @@ import { useSearchParams } from 'react-router-dom';
 import RaiseRequest from '../../RaiseRequest';
 import GetActionButtons from '../../FormHelpers';
 import BusinessRegistrationDocumenst from './BusinessRegistrationDocumenst';
-const StepTwo = ({taskId,tradelicencedetailsTaskId}) => {
+const StepTwo = ({taskId,tradelicencedetailsTaskId, step, setStep}) => {
 
   const [searchParams] = useSearchParams();
   const service_id = searchParams.get('service_id');
@@ -71,6 +71,7 @@ const StepTwo = ({taskId,tradelicencedetailsTaskId}) => {
           })
         );
         getTradeLicenseDeclaration();
+        
       } else {
         dispatch(
           openSnackbar({
@@ -205,7 +206,17 @@ const StepTwo = ({taskId,tradelicencedetailsTaskId}) => {
         </Box>
       </form>
       <BusinessRegistrationDocumenst taskId={taskId}/>
+        <Box display="flex" justifyContent="space-between" mt={2}>
+        <Button variant="outlined" onClick={() => setStep(step - 1)}>
+          Back
+        </Button>
+        <Button variant="contained" color="primary"  onClick={() => setStep(step + 1)}>
+          Continue
+        </Button>
+        </Box>
+      
     </>
+    
   
   );
 };

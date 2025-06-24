@@ -43,10 +43,61 @@ const servicesData = {
         pricing: {
           title: 'Choose a Plan That Fits Your Income Profile',
           plans: [
-            { name: 'ITR-1 / ITR-2', bestFor: 'Salaried / House Property Income', price: '₹499 – ₹799' },
-            { name: 'ITR-3 / ITR-4', bestFor: 'Freelancers / Professionals / Traders', price: '₹999 – ₹1,499' },
-            { name: 'ITR-5 / ITR-6', bestFor: 'Partnership Firms / Companies', price: '₹2,499 – ₹4,999' },
-            { name: 'NRI / Capital Gains ITR', bestFor: 'NRI, Share Sale, Crypto, Property Sale', price: '₹1,999 – ₹3,999' }
+            { name: ' Basic Salary Package', bestFor: [
+              'Best For:',
+              'Individuals with a salary from one or multiple employers',
+              'Income from savings, interest, or fixed deposits',
+              'Agricultural income (non-taxable)'
+    ], price: '₹500/year' },
+            { name: 'Salary + Property Combo', bestFor: [
+  ' Ideal For :',
+  'Salaried individuals with multiple employers',
+  'Rental income from one or more house properties',
+  'Agricultural income',
+  'Other minor sources of income'
+], price: '₹₹999/year' },
+            { name: 'Small Business & Freelancers',
+              bestFor: [
+  'Designed For:',
+  'Freelancers, consultants, and sole proprietors (non-audit)',
+  'Individuals with business income ( balance sheet/P&L)',
+  'Salary and house property income combinations',
+  'Agricultural and miscellaneous income'
+], price: '₹2,499/year' },
+            { name: 'Capital Gains Advantage', bestFor: [
+  'Suitable For:',
+  'Individuals with short-and long-term capital gains(stocks)',
+  'Business & professional income (non-audit cases)',
+  'Salary, rental, and other income sources',
+  'Agricultural and interest income'
+], price: '₹2,999/year' },
+ { name: 'Traders & Speculators',bestFor: [
+  'Tailored For:',
+  'F&O traders (non-audit cases)',
+  'Intraday/speculative market participants',
+  'Capital gains from shares or real estate',
+  'Salary, house property, and other income',
+  'Business/professional income without audit',
+  // 'Agricultural income'
+], price: '₹4,499/year' },
+{ name: 'Global Assets & Crypto',bestFor: [
+  'Ideal For:',
+  'NRIs with Indian income sources',
+  'Crypto investors and traders',
+  'Individuals with salary,rental,capital gains,and business',
+  'Speculative and F&O income (non-audit)',
+  'Agriculture and other passive incomes'
+], price: '₹4,999/year' },
+{ name: 'Foreign Income & RSU', bestFor: [
+  'Perfect For :',
+  'Residents earning income abroad (foreign salary)',
+  'DTAA relief and foreign tax credit claims',
+  'RSU/ESOP taxation',
+  'Salary, house property, capital gains, and business income',
+  'Crypto and F&O income',
+  // 'Agriculture and miscellaneous income sources'
+], price: '₹6,499/year' },
+
           ],
           note: '*Pricing includes expert review, computation, online filing, and acknowledgment download.'
         },
@@ -167,7 +218,7 @@ const servicesData = {
           title: 'Flat Pricing for Peace of Mind',
           plans: [
             { name: 'Basic (143(1), 245)', bestFor: 'Clarification/response filing', price: '₹999' },
-            { name: 'Moderate (139(9), 26AS/AIS mismatch)', bestFor: 'Defective return, reconciliation', price: '₹1,499' },
+            { name: 'Moderate (139(9),26AS/AIS mismatch)', bestFor: 'Defective return, reconciliation', price: '₹1,499' },
             { name: 'Scrutiny (143(2), 148)', bestFor: 'Drafting & representation support', price: '₹2,999 – ₹4,999' }
           ],
           note: '*Final price depends on complexity. Includes consultation, drafting, filing response, and support.'

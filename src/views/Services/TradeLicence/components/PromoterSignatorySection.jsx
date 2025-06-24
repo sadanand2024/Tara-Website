@@ -161,6 +161,17 @@ const PromoterSignatorySection = ({ taskId }) => {
               close: false
             })
           );
+           try {
+                  const reviewFormData = new FormData();
+                  reviewFormData.append('service_request', service_id);
+                  reviewFormData.append('service_task', taskId);
+                  reviewFormData.append('status', 'in progress');
+          
+                  await Factory('post', '/tradelicense/signatory-details/', reviewFormData);
+                  // console.log('Review status submitted successfully.');
+                } catch (err) {
+                  // console.error('Review status API error:', err);
+                }
           getSignatoryDetails();
         }
       } catch (error) {
@@ -456,7 +467,7 @@ const PromoterSignatorySection = ({ taskId }) => {
             </TableBody>
           </Table>
         </TableContainer>
-         <Grid2 size={{ xs: 12 }}>
+        <Grid2 size={{ xs: 12 }}>
           
                 <Stack direction="row" spacing={2} justifyContent="flex-end" mt={3}> 
                   <GetActionButtons

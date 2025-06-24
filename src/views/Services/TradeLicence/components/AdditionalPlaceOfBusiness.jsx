@@ -19,6 +19,8 @@ import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
 import Factory from 'utils/Factory';
 import { indian_States_And_UTs } from 'utils/indian_States_And_UT';
 import * as Yup from 'yup';
+import GetActionButtons from '../../FormHelpers';
+
 
 const additionalFields = [
   { label: 'Address Line 1', name: 'addressLine1', type: 'text' },
@@ -32,7 +34,9 @@ const additionalFields = [
   { label: 'Rental Agreement/NOC (Additional)', name: 'rental_agreement_additional', type: 'file' }
 ];
 
-const AdditionalPlaceOfBusiness = ({ businessPremises }) => {
+const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, taskId = null }) => {
+    const service_id = businessPremises?.service_request;
+
   const dispatch = useDispatch();
   const [additionalSpace, setAdditionalSpace] = useState(businessPremises?.additional_space || null);
 
@@ -254,6 +258,7 @@ const AdditionalPlaceOfBusiness = ({ businessPremises }) => {
   };
 
   return (
+    <Box>  
     <Card sx={{ p: 3, mt: 3 }}>
       <Grid2 container spacing={2}>
         <Grid2 item xs={12}>
@@ -291,6 +296,11 @@ const AdditionalPlaceOfBusiness = ({ businessPremises }) => {
                 close: false
               })
             );
+             setBusinessPremises((prev) => ({
+      ...prev,
+      additional_space: 'yes',
+      status: 'in progress'
+    }));
             fetchData();
           }
         }}
@@ -357,6 +367,11 @@ const AdditionalPlaceOfBusiness = ({ businessPremises }) => {
               close: false
             })
           );
+           setBusinessPremises((prev) => ({
+    ...prev,
+    additional_space: 'no',
+    status: 'in progress'
+  }));
           clearFormFields();
           fetchData()
         }
@@ -388,6 +403,22 @@ const AdditionalPlaceOfBusiness = ({ businessPremises }) => {
         )}
       </Grid2>
     </Card>
+     <Box mt={2} display="flex" justifyContent="flex-end">
+
+           <GetActionButtons
+                  type="put"
+                  urlEndpoint="business-location"
+                  recId={businessPremises.id}
+                  status={businessPremises.status}
+                  data={businessPremises}
+                  service_request={service_id}
+                  task_id={taskId}
+                  urlKey="tradelicense"
+                  urlBool={true}
+                />
+     
+    </Box>
+     </Box>
   );
 };
 
