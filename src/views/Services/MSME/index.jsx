@@ -177,9 +177,10 @@ const MSMEDashboard = () => {
       const formData = new FormData();
       formData.append('service_request', service_id);
       formData.append('service_task', sectionData.tasks['Business Identity'].task_id);
-      formData.append('status', 'in progress');
       Object.entries(values).forEach(([key, value]) => {
-        if (key === 'pan_of_business_or_COI' || key === 'aadhar_of_signatory') {
+        if (key === 'status') {
+          formData.append(key, 'in progress');
+        } else if (key === 'pan_of_business_or_COI' || key === 'aadhar_of_signatory') {
           if (value instanceof File) {
             formData.append(key, value);
           }
@@ -192,7 +193,9 @@ const MSMEDashboard = () => {
       if (response.res.status_cd === 0) {
         if (type === 'post') {
           setBusinessIdentityData(response.res);
-          businessIdentityFormik.setValues(response.res);
+          businessIdentityFormik.setValues(response.res.data);
+        } else {
+          setBusinessIdentityData(response.res.data);
         }
         enqueueSnackbar('Business Identity Saved', { variant: 'success', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
       } else {
@@ -220,6 +223,8 @@ const MSMEDashboard = () => {
         if (type === 'post') {
           setBusinessClassificationData(response.res);
           businessClassificationFormik.setValues(response.res);
+        } else {
+          setBusinessClassificationData(response.res.data);
         }
         enqueueSnackbar('Business Classification Inputs Saved', {
           variant: 'success',
@@ -248,10 +253,11 @@ const MSMEDashboard = () => {
       const formData = new FormData();
       formData.append('service_request', service_id);
       formData.append('service_task', sectionData.tasks['Turnover And InvestmentDeclaration'].task_id);
-      formData.append('status', 'in progress');
 
       Object.entries(values).forEach(([key, value]) => {
-        if (key === 'gst_certificate') {
+        if (key === 'status') {
+          formData.append(key, 'in progress');
+        } else if (key === 'gst_certificate') {
           if (value instanceof File) {
             formData.append(key, value);
           }
@@ -267,6 +273,8 @@ const MSMEDashboard = () => {
         if (type === 'post') {
           setTurnoverInvestmentDeclarationData(response.res);
           turnoverFormik.setValues(response.res);
+        } else {
+          setTurnoverInvestmentDeclarationData(response.res.data);
         }
         enqueueSnackbar('Turnover & Investment Declaration Saved', {
           variant: 'success',
@@ -295,10 +303,11 @@ const MSMEDashboard = () => {
       const formData = new FormData();
       formData.append('service_request', service_id);
       formData.append('service_task', sectionData.tasks['Registered Address'].task_id);
-      formData.append('status', 'in progress');
 
       Object.entries(values).forEach(([key, value]) => {
-        if (key === 'official_address_of_enterprise') {
+        if (key === 'status') {
+          formData.append(key, 'in progress');
+        } else if (key === 'official_address_of_enterprise') {
           formData.append(key, JSON.stringify(value));
         } else if (key === 'bank_statement_or_cancelled_cheque' || key === 'official_address_of_proof') {
           if (value instanceof File) {
@@ -314,6 +323,8 @@ const MSMEDashboard = () => {
         if (type === 'post') {
           setRegisteredAddressUnitsData(response.res);
           addressFormik.setValues(response.res);
+        } else {
+          setRegisteredAddressUnitsData(response.res.data);
         }
         enqueueSnackbar('Registered Address & Units Saved', {
           variant: 'success',
@@ -380,6 +391,10 @@ const MSMEDashboard = () => {
   useEffect(() => {
     if (step === 0 || step === 1 || step === 2) getStepData(step);
   }, [step]);
+
+  useEffect(() => {
+    console.log(businessIdentityData);
+  }, [businessIdentityData.status]);
 
   return (
     <Card sx={{ minHeight: '100vh', p: { xs: 1, md: 4 } }}>
@@ -694,12 +709,19 @@ const MSMEDashboard = () => {
                 <GetActionButtons
                   type="put"
                   data={sectionData?.tasks?.['Business Identity']}
-                  status={sectionData?.tasks?.['Business Identity']?.data?.status}
+                  status={businessIdentityData?.status}
                   urlEndpoint={`business-identity`}
                   recId={sectionData?.tasks?.['Business Identity']?.data?.id}
                   task_id={sectionData?.tasks?.['Business Identity']?.task_id}
                   service_id={service_id}
                   msme={true}
+                  onStatusChange={(newStatus, newData) => {
+                    if (newData) {
+                      setBusinessIdentityData(newData);
+                    } else {
+                      setBusinessIdentityData((prev) => ({ ...prev, status: newStatus }));
+                    }
+                  }}
                 />
               </Box>
               <Divider sx={{ my: 2 }} />
@@ -869,12 +891,20 @@ const MSMEDashboard = () => {
                 <GetActionButtons
                   type="put"
                   data={sectionData?.tasks?.['Business Classification Inputs']}
-                  status={sectionData?.tasks?.['Business Classification Inputs']?.data?.status}
+                  status={businessClassificationData?.status}
                   urlEndpoint={`business-classification`}
                   recId={sectionData?.tasks?.['Business Classification Inputs']?.data?.id}
                   task_id={sectionData?.tasks?.['Business Classification Inputs']?.task_id}
                   service_id={service_id}
                   msme={true}
+                  onStatusChange={(newStatus, newData) => {
+                    console.log(newStatus, newData);
+                    if (newData) {
+                      setBusinessClassificationData(newData);
+                    } else {
+                      setBusinessClassificationData((prev) => ({ ...prev, status: newStatus }));
+                    }
+                  }}
                 />
               </Box>
             </>
@@ -892,6 +922,8 @@ const MSMEDashboard = () => {
                 setRegisteredAddressUnitsData={setRegisteredAddressUnitsData}
                 service_id={service_id}
                 sectionData={sectionData}
+                turnoverInvestmentDeclarationData={turnoverInvestmentDeclarationData}
+                setTurnoverInvestmentDeclarationData={setTurnoverInvestmentDeclarationData}
               />
             </>
           )}
@@ -976,7 +1008,7 @@ const MSMEDashboard = () => {
                             <GetActionButtons
                               type="put"
                               data={sectionData?.tasks?.['Review Filing Certificate']}
-                              status={sectionData?.tasks?.['Review Filing Certificate']?.data?.approval_status}
+                              status={reviewFilingCertificateData?.approval_status}
                               urlEndpoint={`review-filing-certificate`}
                               recId={reviewFilingCertificateData?.id}
                               task_id={sectionData?.tasks?.['Review Filing Certificate']?.task_id}
@@ -984,6 +1016,13 @@ const MSMEDashboard = () => {
                               filingHelper={true}
                               setReviewStep={setReviewStep}
                               msme={true}
+                              onStatusChange={(newStatus, newData) => {
+                                if (newData) {
+                                  setReviewFilingCertificateData(newData);
+                                } else {
+                                  setReviewFilingCertificateData((prev) => ({ ...prev, approval_status: newStatus }));
+                                }
+                              }}
                             />
                           </Box>
                         </Box>
@@ -1062,7 +1101,7 @@ const MSMEDashboard = () => {
                             <GetActionButtons
                               type="put"
                               data={sectionData?.tasks?.['Review Filing Certificate']}
-                              status={sectionData?.tasks?.['Review Filing Certificate']?.data?.filing_status}
+                              status={reviewFilingCertificateData?.filing_status}
                               urlEndpoint={`review-filing-certificate`}
                               recId={reviewFilingCertificateData?.id}
                               task_id={sectionData?.tasks?.['Review Filing Certificate']?.task_id}
@@ -1070,6 +1109,13 @@ const MSMEDashboard = () => {
                               setReviewStep={setReviewStep}
                               msme={true}
                               filingHelper={true}
+                              onStatusChange={(newStatus, newData) => {
+                                if (newData) {
+                                  setReviewFilingCertificateData(newData);
+                                } else {
+                                  setReviewFilingCertificateData((prev) => ({ ...prev, filing_status: newStatus }));
+                                }
+                              }}
                             />
                           </Box>
                         </Box>
@@ -1197,7 +1243,9 @@ const FinancialLocationDetails = ({
   registeredAddressUnitsData,
   setRegisteredAddressUnitsData,
   service_id,
-  sectionData
+  sectionData,
+  turnoverInvestmentDeclarationData,
+  setTurnoverInvestmentDeclarationData
 }) => {
   const { enqueueSnackbar } = useSnackbar();
   const [plantUnits, setPlantUnits] = React.useState([
@@ -1229,7 +1277,6 @@ const FinancialLocationDetails = ({
     state: Yup.string().required('Required'),
     pin: Yup.string().required('Required')
   });
-
   const savePlantUnits = async (data, idx) => {
     let url = '/msme/location-of-plant-or-unit/';
     let type = 'post';
@@ -1242,9 +1289,13 @@ const FinancialLocationDetails = ({
     __data.unit_details = data.unit_details;
     const response = await Factory(type, url, __data);
     if (response.res.status_cd === 0) {
+      setRegisteredAddressUnitsData((prev) => ({ ...prev, status: 'in progress' }));
+      let __plantUnits = [...plantUnits];
       if (type === 'post') {
-        let __plantUnits = [...plantUnits];
         __plantUnits[idx] = response.res;
+        setPlantUnits(__plantUnits);
+      } else {
+        __plantUnits[idx] = response.res.data;
         setPlantUnits(__plantUnits);
       }
       enqueueSnackbar('Plant Unit Details Saved', { variant: 'success', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
@@ -1409,12 +1460,19 @@ const FinancialLocationDetails = ({
           <GetActionButtons
             type="put"
             data={sectionData?.tasks?.['Turnover And InvestmentDeclaration']}
-            status={sectionData?.tasks?.['Turnover And InvestmentDeclaration']?.data?.status}
+            status={turnoverInvestmentDeclarationData?.status}
             urlEndpoint={`turnover-details`}
             recId={sectionData?.tasks?.['Turnover And InvestmentDeclaration']?.data?.id}
             task_id={sectionData?.tasks?.['Turnover And InvestmentDeclaration']?.task_id}
             service_id={service_id}
             msme={true}
+            onStatusChange={(newStatus, newData) => {
+              if (newData) {
+                setTurnoverInvestmentDeclarationData(newData);
+              } else {
+                setTurnoverInvestmentDeclarationData((prev) => ({ ...prev, status: newStatus }));
+              }
+            }}
           />
         </Box>
       </form>
@@ -1663,7 +1721,7 @@ const FinancialLocationDetails = ({
                   formData.append('location_of_plant', e.target.checked ? 'yes' : 'no');
                   const response = await Factory(type, url, formData);
                   if (response.res.status_cd === 0) {
-                    setRegisteredAddressUnitsData(response.res);
+                    setRegisteredAddressUnitsData(response.res.data);
                   }
                 }}
               />
@@ -1844,12 +1902,19 @@ const FinancialLocationDetails = ({
             <GetActionButtons
               type="put"
               data={sectionData?.tasks?.['Registered Address']}
-              status={sectionData?.tasks?.['Registered Address']?.data?.status}
+              status={registeredAddressUnitsData?.status}
               urlEndpoint={`registration-address-details`}
               recId={sectionData?.tasks?.['Registered Address']?.data?.id}
               task_id={sectionData?.tasks?.['Registered Address']?.task_id}
               service_id={service_id}
               msme={true}
+              onStatusChange={(newStatus, newData) => {
+                if (newData) {
+                  setRegisteredAddressUnitsData(newData);
+                } else {
+                  setRegisteredAddressUnitsData((prev) => ({ ...prev, status: newStatus }));
+                }
+              }}
             />
           </Box>
         )}

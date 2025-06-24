@@ -19,6 +19,7 @@ const GetActionButtons = ({
   msme = false,
   urlKey,
   urlBool = false,
+  onStatusChange
 }) => {
   const [statusData, setStatusData] = useState(false);
   const user = useSelector((state) => state.accountReducer.user);
@@ -68,6 +69,9 @@ const GetActionButtons = ({
     if (response.res.status_cd === 0) {
       enqueueSnackbar('Status updated successfully', { anchorOrigin: { vertical: 'top', horizontal: 'right' }, variant: 'success' });
       setStatusData(changedStatus);
+      if (onStatusChange) {
+        onStatusChange(changedStatus, response.res.data || null);
+      }
       if (step === 0 && changedStatus === 'approved') {
         setReviewStep(1);
       }
