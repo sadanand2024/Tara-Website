@@ -71,7 +71,7 @@ const BerryDialog = ({
 
       {/* Content */}
 
-      <DialogContent dividers sx={{ pt: 1 }}>
+      <DialogContent dividers sx={{ pt: 0 }}>
         {children}
       </DialogContent>
 
