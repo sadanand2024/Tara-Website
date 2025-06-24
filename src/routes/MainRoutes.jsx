@@ -60,6 +60,8 @@ const MSMEDashboard = Loadable(lazy(() => import('views/Services/MSME')));
 const TradeLicence = Loadable(lazy(() => import('views/Services/TradeLicence')));
 const LabourLicence = Loadable(lazy(() => import('views/Services/LabourLicence')));
 const GstRegistration = Loadable(lazy(() => import('views/Services/GST')));
+const CompanyIncorporation = Loadable(lazy(() => import('views/Services/CompanyIncorporation')));
+
 
 //Admin Panel
 const UserManagement = Loadable(lazy(() => import('views/SuperAdmin/UserManagement')));
@@ -162,6 +164,19 @@ const MainRoutes = {
     {
       path: '/app/task-management/registration',
       element: <GstRegistration />
+    },
+      {
+      path: '/app/my-services/private-limited',
+
+      element: <CompanyIncorporation />
+    },
+     
+    
+    {
+      path: '/app/task-management/private-limited',
+    
+
+      element: <CompanyIncorporation/>
     },
     {
       path: '/app/users',
