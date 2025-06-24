@@ -170,7 +170,7 @@ export default function Services() {
       tasks: '0 Pending',
       docs: '0 uploaded',
       icon: <DescriptionIcon color="primary" sx={{ fontSize: 40 }} />,
-      href: '/app/my-services/msme-dashboard'
+      href: '/app/my-services/company-incorporation'
     },
     {
       title: 'Labour Licence - FY: 2024-25 (Business)',
