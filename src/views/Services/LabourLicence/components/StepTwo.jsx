@@ -10,7 +10,7 @@ import Factory from 'utils/Factory';
 import { useSearchParams } from 'react-router-dom';
 import RaiseRequest from '../../RaiseRequest';
 import GetActionButtons from '../../FormHelpers';
-const StepTwo = ({taskId}) => {
+const StepTwo = ({taskId, step, setStep}) => {
   const [searchParams] = useSearchParams();
   const service_id = searchParams.get('service_id');
    const [businessDocument, setbusinessDocument] = useState({
@@ -88,6 +88,7 @@ const StepTwo = ({taskId}) => {
     getRegistrationDocuments();
   }, []);
   return (
+    <>
     <Card sx={{ p: 3 }}>
       <form autoComplete="off">
         {/* Task 2: Business Registration Documents */}
@@ -118,7 +119,7 @@ const StepTwo = ({taskId}) => {
             <Grid2 size={{ sm: 6, md: 6 }}>
               <Typography>Incorporation certificate / Partnership deed</Typography>
             </Grid2>
-            <Grid2 size={{ sm: 6, md: 6 }}>
+            <Grid2 size={{ sm: 6, md: 3 }} sx={{ ml: 15 }}>
               <RenderFileUpload
                 label="Incorporation certificate / Partnership deed"
                 fieldName="certificate_of_incorporation"
@@ -132,7 +133,7 @@ const StepTwo = ({taskId}) => {
             <Grid2 size={{ sm: 6, md: 6 }}>
               <Typography>Letter of Authorisation / Board resolution</Typography>
             </Grid2>
-            <Grid2 size={{ sm: 6, md: 6 }}>
+            <Grid2 size={{ sm: 6, md: 3 }}  sx={{ ml: 15 }}>
               <RenderFileUpload
                 label="Letter of Authorisation / Board resolution"
                 fieldName="authorization_letter"
@@ -146,7 +147,7 @@ const StepTwo = ({taskId}) => {
             <Grid2 size={{ sm: 6, md: 6 }}>
               <Typography>Local language name board photo of business</Typography>
             </Grid2>
-            <Grid2 size={{ sm: 6, md: 6 }}>
+            <Grid2 size={{ sm: 6, md: 3 }} sx={{ ml: 15 }}>
               <RenderFileUpload
                 label="Local language name board photo of business"
                 fieldName="local_language_name_board_photo_business"
@@ -162,7 +163,7 @@ const StepTwo = ({taskId}) => {
                 Memorandum of Articles (MOA) <span style={{ fontSize: 12, color: '#888' }}>(in case of companies)</span>
               </Typography>
             </Grid2>
-            <Grid2 size={{ sm: 6, md: 6 }}>
+            <Grid2 size={{ sm: 6, md: 3 }} sx={{ ml: 15 }}>
               <RenderFileUpload
                 label="Memorandum of Articles (MOA)"
                 fieldName="memorandum_of_articles"
@@ -191,7 +192,19 @@ const StepTwo = ({taskId}) => {
                                       />
         </Stack>
       </form>
+      
     </Card>
+    <Box display="flex" justifyContent="space-between" mt={2}>
+  <Button variant="outlined" onClick={() => setStep(step - 1)}>
+    Back
+  </Button>
+  <Button variant="contained" color="primary"  onClick={() => setStep(step + 1)}>
+    Continue
+  </Button>
+</Box>
+    
+</>
+    
   );
 };
 

@@ -91,16 +91,18 @@ const [searchParams] = useSearchParams();
             ))}
           </Box>
 
-          {step === 0 && <StepOne />}
+          {step === 0 && <StepOne  step={step} setStep={setStep}/>}
 
 {step === 1 && (
   <StepTwo
     taskId={taskIds.businessdocumentdetails}
     tradelicencedetailsTaskId={taskIds.tradelicencedetails}
+    step={step}
+          setStep={setStep}
   />
 )}
 
-          {step === 2 && <StepThree />}
+          {step === 2 && <StepThree step={step} setStep={setStep} />}
         </Paper>
       </Box>
     </Card>

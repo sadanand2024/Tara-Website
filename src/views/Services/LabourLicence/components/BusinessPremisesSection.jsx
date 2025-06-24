@@ -367,7 +367,7 @@ const BusinessPremisesSection = ({ taskId }) => {
                 <Button variant="contained" color="primary" type="submit">
                   Save
                 </Button>
-              
+{/*               
                                     <GetActionButtons
                                       type="put"
                                       urlEndpoint="business-location"
@@ -378,7 +378,7 @@ const BusinessPremisesSection = ({ taskId }) => {
                                       task_id={taskId}
                                       urlKey="labourlicense"
                                       urlBool={true}
-                                    />
+                                    /> */}
               </Stack>
             </Grid2>
           </Grid2>
@@ -386,7 +386,10 @@ const BusinessPremisesSection = ({ taskId }) => {
       </Card>
 
         <Box mt={4}>
-          <AdditionalPlaceOfBusiness businessPremises={businessPremises} />
+          <AdditionalPlaceOfBusiness 
+           businessPremises={businessPremises}
+           setBusinessPremises={setBusinessPremises} // ✅ Pass this down
+           taskId={taskId} />
         </Box>
     </Box>
   );

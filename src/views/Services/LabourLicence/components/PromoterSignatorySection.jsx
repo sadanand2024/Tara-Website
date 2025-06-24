@@ -40,7 +40,7 @@ const PromoterSignatorySection = ({ taskId }) => {
   const getSignatoryDetails = async () => {
     const url = `/labourlicense/signatory-details/by-request?service_request_id=${service_id}`;
     const { res } = await Factory('get', url);
-   const signatorydetailsinfo = res?.data?.signatory_details_info ?? res?.signatory_details_info ?? [];
+    const signatorydetailsinfo = res?.data?.signatory_details_info ?? res?.signatory_details_info ?? [];
 
         if (res.status_cd === 0 && Array.isArray(signatorydetailsinfo)) {
 
@@ -155,7 +155,19 @@ const PromoterSignatorySection = ({ taskId }) => {
               close: false
             })
           );
+            try {
+        const reviewFormData = new FormData();
+        reviewFormData.append('service_request', service_id);
+        reviewFormData.append('service_task', taskId);
+        reviewFormData.append('status', 'in progress');
+
+        await Factory('post', '/labourlicense/signatory-details/', reviewFormData);
+        // console.log('Review status submitted successfully.');
+      } catch (err) {
+        // console.error('Review status API error:', err);
+      }
           getSignatoryDetails();
+
         }
       } catch (error) {
         dispatch(
@@ -240,7 +252,7 @@ const PromoterSignatorySection = ({ taskId }) => {
           <u>Promoter / Signatory Details</u>
         </Typography>
         </Grid2>
-         <Grid2 sx={{ flexGrow: 1, ml: 95 }}>
+        <Grid2 sx={{ flexGrow: 1, ml: 95 }}>
                   <Box display="flex" justifyContent="flex-end" gap={1}>
                     <RaiseRequest
                       fields={[
@@ -303,7 +315,7 @@ const PromoterSignatorySection = ({ taskId }) => {
                     <TextField
                       fullWidth
                       size="small"
-                       sx={{
+                      sx={{
                         minWidth: 150,
                         maxWidth: 150
                       }}
@@ -323,7 +335,7 @@ const PromoterSignatorySection = ({ taskId }) => {
                       label="Aadhaar"
                       fieldName={`promoters[${idx}].aadhar_image`}
                       file={promoter.aadhar_image}
-                       
+                      
                       setFieldValue={setFieldValue}
                       touched={touched.promoters?.[idx]?.aadhar_image}
                       errors={errors.promoters?.[idx]?.aadhar_image}
@@ -360,7 +372,7 @@ const PromoterSignatorySection = ({ taskId }) => {
                       fullWidth
                       size="small"
                       label="Mobile"
-                       sx={{
+                      sx={{
                         minWidth: 150,
                         maxWidth: 150
                       }}

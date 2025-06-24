@@ -125,7 +125,7 @@ const BusinessRegistrationDocumenst = ({taskId}) => {
             <Grid2 size={{ sm: 6, md: 6 }}>
               <Typography>Incorporation certificate</Typography>
             </Grid2>
-            <Grid2 size={{ sm:6, md:4 }} sx={{ ml: 15 }}>
+            <Grid2 size={{ sm:6, md: 3 }} sx={{ ml: 15 }}>
               <RenderFileUpload
                 label="Incorporation certificate"
                 fieldName="incorporation_certificate"
@@ -139,7 +139,7 @@ const BusinessRegistrationDocumenst = ({taskId}) => {
             <Grid2 size={{ sm: 6, md: 6 }}>
               <Typography>Photo of premises</Typography>
             </Grid2>
-            <Grid2 size={{ sm: 6, md: 4 }} sx={{ ml: 15 }}>
+            <Grid2 size={{ sm: 6, md: 3 }} sx={{ ml: 15 }}>
               <RenderFileUpload
                 label="Photo of premises"
                 fieldName="photo_of_premises"
@@ -153,7 +153,7 @@ const BusinessRegistrationDocumenst = ({taskId}) => {
             <Grid2 size={{ sm: 6, md: 6 }}>
               <Typography>Property tax receipt</Typography>
             </Grid2>
-            <Grid2 size={{ sm: 6, md: 4 }} sx={{ ml: 15 }}>
+            <Grid2 size={{ sm: 6, md: 3 }} sx={{ ml: 15 }}>
               <RenderFileUpload
                 label="Property tax receipt"
                 fieldName="property_tax_receipt"
@@ -167,7 +167,7 @@ const BusinessRegistrationDocumenst = ({taskId}) => {
             <Grid2 size={{ sm: 6, md: 6 }}>
               <Typography>Rental agreement</Typography>
             </Grid2>
-            <Grid2 size={{ sm: 6, md: 4  }} sx={{ ml: 15 }}>
+            <Grid2 size={{ sm: 6, md: 3  }} sx={{ ml: 15 }}>
               <RenderFileUpload
                 label="Rental agreement"
                 fieldName="rental_agreement"

@@ -17,6 +17,7 @@ import { useDispatch } from 'react-redux';
 import { openSnackbar } from 'store/slices/snackbar';
 import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
 import Factory from 'utils/Factory';
+import GetActionButtons from '../../FormHelpers';
 import { indian_States_And_UTs } from 'utils/indian_States_And_UT';
 import * as Yup from 'yup';
 
@@ -68,9 +69,14 @@ const additionalFields = [
   }
 ];
 
-const AdditionalPlaceOfBusiness = ({ businessPremises }) => {
+const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, taskId }) => {
   const dispatch = useDispatch();
+  const service_id = businessPremises?.service_request;
+
+  
+
   const [additionalSpace, setAdditionalSpace] = useState(businessPremises?.additional_space || null);
+  const [workplace, seWorkPlace] = useState(businessPremises?.workplace || null);
 
     const clearFormFields = () => {
     setValues({
@@ -83,7 +89,8 @@ const AdditionalPlaceOfBusiness = ({ businessPremises }) => {
       nature_of_possession: '',
       address_proof_additional: null,
       rental_agreement_additional: null,
-      id: null
+      id: null,
+      workplace:'',
     });
   };
 
@@ -98,7 +105,8 @@ const AdditionalPlaceOfBusiness = ({ businessPremises }) => {
       nature_of_possession: '',
       address_proof_additional: null,
       rental_agreement_additional: null,
-      id: null
+      id: null,
+      workplace:''
     },
     validationSchema: Yup.object({
       addressLine1: Yup.string().required('Address Line 1 is required'),
@@ -197,7 +205,6 @@ const AdditionalPlaceOfBusiness = ({ businessPremises }) => {
       }
     };
 
-  useEffect(() => {
     const fetchAdditionalSpace = async () => {
       if (!businessPremises?.service_request) return;
 
@@ -207,9 +214,13 @@ const AdditionalPlaceOfBusiness = ({ businessPremises }) => {
       if (res.status_cd === 0 && res.data) {
         const data = res.data;
         setAdditionalSpace(data.additional_space || null);
+        seWorkPlace(data?.workplace || null);
+
+
       }
     };
 
+  useEffect(() => {
     fetchAdditionalSpace();
   }, [businessPremises?.service_request]);
 
@@ -276,6 +287,7 @@ const AdditionalPlaceOfBusiness = ({ businessPremises }) => {
   };
 
   return (
+    <Box>
     <Card sx={{ p: 3, mt: 3 }}>
       <Grid2 container spacing={2}>
       <Grid2 item xs={12}>
@@ -299,7 +311,8 @@ const AdditionalPlaceOfBusiness = ({ businessPremises }) => {
           const payload = {
             // ...businessPremises,
             additional_space: 'yes',
-             workplace: values.workplace || ''
+             workplace: values.workplace || '',
+             status: 'in progress'
           };
 
           const { res } = await Factory(method, url, payload);
@@ -314,6 +327,12 @@ const AdditionalPlaceOfBusiness = ({ businessPremises }) => {
                 close: false
               })
             );
+             setBusinessPremises((prev) => ({
+    ...prev,
+    additional_space: 'yes',
+    workplace: values.workplace || '',
+    status: 'in progress'
+  }));
           }
         }}
       />
@@ -364,7 +383,8 @@ const AdditionalPlaceOfBusiness = ({ businessPremises }) => {
         const method = businessPremises.id ? 'put' : 'post';
 
         const payload = {
-          additional_space: 'no'
+          additional_space: 'no',
+          status: 'in progress'
         };
 
         const { res } = await Factory(method, url, payload);
@@ -379,7 +399,14 @@ const AdditionalPlaceOfBusiness = ({ businessPremises }) => {
               close: false
             })
           );
+            setBusinessPremises((prev) => ({
+    ...prev,
+    additional_space: 'no',
+    workplace: null,
+    status: 'in progress'
+  }));
           clearFormFields();
+          seWorkPlace(null);
           fetchData();
         }
       }}
@@ -389,33 +416,76 @@ const AdditionalPlaceOfBusiness = ({ businessPremises }) => {
 </FormGroup>
           </Box>
         </Grid2>
-      
+        {console.log(additionalSpace)}
         {additionalSpace === 'yes' && (
           
           <Grid2 item xs={12}>
             <form onSubmit={handleSubmit}>
 
-              {businessPremises.additional_space === 'yes' && (
-              <Grid2  item xs={12} sm={6} md={4} sx={{mt:1}}>
-                {console.log("he;ll0")}
-                <Autocomplete
-                  size="small"
-                  fullWidth
-                  options={['Office', 'Godown', 'Warehouse']}
-                  value={values.workplace || ''}
-                  onChange={(_, value) => setFieldValue('workplace', value)}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="Workplace"
-                      error={touched.workplace && Boolean(errors.workplace)}
-                      helperText={touched.workplace && errors.workplace}
-                    />
-                  )}
-                />
-              </Grid2>
-            )} 
-              
+          {additionalSpace === 'yes' && (
+            <Grid2 item xs={12} sm={6} md={4} sx={{ mt: 1 }}>
+              <Autocomplete
+                size="small"
+                fullWidth
+                options={['Office', 'Godown', 'Warehouse']}
+                value={values.workplace || workplace || ''}
+                onChange={async (_, value) => {
+                  setFieldValue('workplace', value);
+                  seWorkPlace(value);
+
+
+                  if (value && businessPremises?.id) {
+                    const url = `/labourlicense/business-location/${businessPremises.id}/`;
+                    const payload = {
+                      additional_space: 'yes',
+                      workplace: value
+                    };
+
+                    const { res } = await Factory('put', url, payload);
+
+                    if (res.status_cd === 0) {
+                      dispatch(
+                        openSnackbar({
+                          open: true,
+                          message: 'Workplace updated successfully!',
+                          variant: 'alert',
+                          alert: { color: 'success' },
+                          close: false
+                        })
+                      );
+                       setBusinessPremises((prev) => ({
+    ...prev,
+    workplace: value,
+    additional_space: 'yes',
+    status: 'in progress'
+  }));
+
+                    fetchAdditionalSpace();
+                    } else {
+                      dispatch(
+                        openSnackbar({
+                          open: true,
+                          message: 'Failed to update workplace',
+                          variant: 'alert',
+                          alert: { color: 'error' },
+                          close: false
+                        })
+                      );
+                    }
+                  }
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Workplace"
+                    error={touched.workplace && Boolean(errors.workplace)}
+                    helperText={touched.workplace && errors.workplace}
+                  />
+                )}
+              />
+            </Grid2>
+          )}
+
               <Grid2 container spacing={2}>
                 
 
@@ -432,12 +502,27 @@ const AdditionalPlaceOfBusiness = ({ businessPremises }) => {
                 <Button variant="contained" color="primary" type="submit">
                   Save
                 </Button>
+                
               </Stack>
             </form>
           </Grid2>
         )}
       </Grid2>
     </Card>
+     <Box mt={2} display="flex" justifyContent="flex-end">
+      <GetActionButtons
+        type="put"
+        urlEndpoint="business-location"
+        recId={businessPremises.id}
+        status={businessPremises.status}
+        data={businessPremises}
+        service_request={service_id}
+        task_id={taskId}
+        urlKey="labourlicense"
+        urlBool={true}
+      />
+    </Box>
+    </Box>
   );
 };
 

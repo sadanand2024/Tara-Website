@@ -6,7 +6,7 @@ import DownloadIcon from '@mui/icons-material/Download';
 import GetActionButtons from '../../FormHelpers';
 import { useSearchParams } from 'react-router-dom';
 
-const StepThree = () => {
+const StepThree = ({step, setStep}) => {
   const [searchParams] = useSearchParams();
   const [reviewAndFiling, setReviewAndFiling] = useState({
     task_id: null,
@@ -141,7 +141,7 @@ const StepThree = () => {
                         />
                         Upload
                       </Button>
-                     
+                    
                       {reviewAndFiling?.data?.draft_filing_certificate && (
                         <Button
                           variant="outlined"
@@ -318,7 +318,16 @@ const StepThree = () => {
           ))}
         </Stepper>
       )}
+      <Box display="flex" justifyContent="space-between" mt={2}>
+        <Button variant="outlined" onClick={() => setStep(step - 1)}>
+          Back
+        </Button>
+        {/* <Button variant="contained" color="primary"  onClick={() => setStep(step + 1)}>
+          Continue
+        </Button> */}
+      </Box>
     </Box>
+    
   );
 };
 

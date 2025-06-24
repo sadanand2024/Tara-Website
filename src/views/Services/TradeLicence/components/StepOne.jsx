@@ -2,13 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { Box, CircularProgress } from '@mui/material';
 import { useSearchParams } from 'react-router-dom';
 import Factory from 'utils/Factory';
+import {Button} from '@mui/material';
 
 import ApplicantDetails from './ApplicantDetails';
 import BusinessIdentityStructureSection from './BusinessIdentityStructureSection';
 import PromoterSignatorySection from './PromoterSignatorySection';
 import BusinessPremisesSection from './BusinessPremisesSection';
 
-const StepOne = () => {
+const StepOne = ({step, setStep}) => {
   const [searchParams] = useSearchParams();
   const service_id = searchParams.get('service_id');
 
@@ -68,6 +69,11 @@ const StepOne = () => {
       {/* <BusinessIdentityStructureSection taskId={taskIds.businessIdentityTaskId} /> */}
       <PromoterSignatorySection taskId={taskIds.promoterSignatoryTaskId} />
       <BusinessPremisesSection taskId={taskIds.businessPremisesTaskId} />
+        <Box display="flex" justifyContent="flex-end" mt={3}>
+      <Button variant="contained" color="primary" onClick={() => setStep(step + 1)}>
+        Continue
+      </Button>
+    </Box>
     </Box>
   );
 };
