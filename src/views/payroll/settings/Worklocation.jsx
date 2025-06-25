@@ -184,8 +184,8 @@ function Worklocation() {
               }}
             >
               <Table size="small">
-                <TableHead>
-                  <TableRow sx={{ bgcolor: 'grey.100' }}>
+                <TableHead sx={{ backgroundColor: 'primary.main', '& .MuiTableCell-root': { color: '#fff' } }}>
+                  <TableRow>
                     {['S No', 'Name', 'Address', 'State', 'No of Employees', 'Actions'].map((header, idx) => (
                       <TableCell
                         key={idx}

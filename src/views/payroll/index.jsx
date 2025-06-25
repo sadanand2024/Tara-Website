@@ -138,7 +138,7 @@ const PayrollDashboard = () => {
 
     if (res?.status_cd === 0) {
       if (res.data.payroll_setup === false) {
-        navigate('/app/payroll/settings');
+        navigate('/app/payroll/settings?payroll_setup=false');
         setLoading(false);
       } else {
         setBusinessDetails(res?.data);

@@ -363,11 +363,10 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
                   <Grid2 size={{ xs: 6 }}>
                     <Grid2 container direction="column" spacing={2}>
                       <Grid2>
-                        <Typography variant="body1" sx={{ mb: 0.5 }}>
-                          Name
-                        </Typography>
+                        <Typography variant="subtitle1">Name</Typography>
                         <TextField
                           fullWidth
+                          size="small"
                           value={values.component_name}
                           onChange={(e) => setFieldValue('component_name', e.target.value)}
                           onBlur={handleBlur}
@@ -379,6 +378,11 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
                             values.component_name === 'HRA' ||
                             values.component_name === 'Basic'
                           }
+                          sx={{
+                            '& .MuiInputBase-input': {
+                              color: 'grey.600'
+                            }
+                          }}
                         />
                       </Grid2>
                       {values.component_name !== 'Commission' && values.component_name !== 'Bonus' && (
@@ -446,11 +450,12 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
                             )}
                           </FormGroup>
                           <Grid2>
-                            <Typography sx={{ mb: 0.5 }}>
+                            <Typography variant="subtitle1" sx={{ mb: 0.5 }}>
                               {values.calculation_type.type === 'Flat Amount' ? 'Enter Amount ' : 'Enter Percentage'}
                             </Typography>
                             <TextField
                               fullWidth
+                              size="small"
                               value={values.calculation_type.value}
                               onChange={(e) => {
                                 // Allow only numbers and one decimal point
@@ -496,7 +501,7 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
                   <Grid2 size={{ xs: 6 }}>
                     <Grid2 container direction="column" spacing={2}>
                       <Grid2>
-                        <Typography variant="body1" sx={{ mb: 0.5 }}>
+                        <Typography variant="subtitle1" sx={{ mb: 0.5 }}>
                           Type
                         </Typography>
 
@@ -507,7 +512,7 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
                           options={['Fixed', 'Variable']}
                           error={touched.component_type && Boolean(errors.component_type)}
                           helperText={touched.component_type && errors.component_type}
-                          sx={{ width: '100%' }}
+                          sx={{ width: '100%', '& .MuiInputBase-input': { color: 'grey.600' } }}
                           disabled={
                             values.component_name === 'Basic' ||
                             values.component_name === 'HRA' ||

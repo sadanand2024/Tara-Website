@@ -76,6 +76,7 @@ const AnalyticsOverview = () => {
           <Stack direction="row" spacing={2}>
             <Button
               variant="contained"
+              size="small"
               onClick={() => {
                 setType('add');
                 navigate(`/app/invoice/generateInvoice`);
@@ -92,6 +93,7 @@ const AnalyticsOverview = () => {
             </Button>
             <Button
               variant="outlined"
+              size="small"
               onClick={() => navigate('/app/invoice/settings')}
               startIcon={<IconSettings2 size={18} />}
               sx={{

@@ -151,8 +151,8 @@ function Departments() {
 
         <TableContainer component={Paper} sx={{ width: '100%', borderRadius: 2, boxShadow: 1, overflowX: 'auto' }}>
           <Table size="small">
-            <TableHead>
-              <TableRow sx={{ bgcolor: 'grey.100' }}>
+            <TableHead sx={{ backgroundColor: 'primary.main', '& .MuiTableCell-root': { color: '#fff' } }}>
+              <TableRow>
                 {['S No', 'Department Name', 'Department Code', 'Description', 'No of Employees', 'Actions'].map((header, idx) => (
                   <TableCell
                     key={idx}

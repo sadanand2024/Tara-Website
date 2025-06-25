@@ -108,12 +108,11 @@ function ESIComponent({ handleNext, handleBack }) {
   const renderFields = (fields) => {
     return fields.map((field) => (
       <Grid2 key={field.name} size={{ xs: 12 }}>
-        <div style={{ paddingBottom: '5px' }}>
-          <label>{field.label}</label>
-        </div>
+        <Typography variant="subtitle1">{field.label}</Typography>
         <Box sx={{ display: 'flex' }}>
           <TextField
             fullWidth
+            size="small"
             name={field.name}
             value={values[field.name]}
             onChange={handleChange}
@@ -121,6 +120,12 @@ function ESIComponent({ handleNext, handleBack }) {
             error={touched[field.name] && Boolean(errors[field.name])}
             helperText={touched[field.name] && errors[field.name]}
             disabled={field.name !== 'esi_number'}
+            sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
           />
           {field.name !== 'esi_number' && (
             <Typography variant="subtitle2" sx={{ whiteSpace: 'nowrap', ml: 1 }} alignContent="center">
@@ -225,6 +230,7 @@ function ESIComponent({ handleNext, handleBack }) {
                           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
                             <Button
                               variant="outlined"
+                              size="small"
                               startIcon={<ArrowBackIcon />}
                               onClick={() => {
                                 router.back();
@@ -250,7 +256,7 @@ function ESIComponent({ handleNext, handleBack }) {
                           </Typography>
                         </Box>
                         <Grid2 container justifyContent="center" mt={2}>
-                          <Button variant="contained" startIcon={<IconPlus size={16} />} onClick={handleOpen}>
+                          <Button size="small" variant="contained" startIcon={<IconPlus size={16} />} onClick={handleOpen}>
                             Enable ESI
                           </Button>
                         </Grid2>
@@ -275,6 +281,7 @@ function ESIComponent({ handleNext, handleBack }) {
                 <Stack direction="row" sx={{ width: 1, justifyContent: 'space-between', gap: 2 }}>
                   <Button
                     variant="outlined"
+                    size="small"
                     color="error"
                     onClick={() => {
                       resetForm();
@@ -283,7 +290,7 @@ function ESIComponent({ handleNext, handleBack }) {
                   >
                     Cancel
                   </Button>
-                  <Button type="submit" variant="contained" onClick={handleSubmit}>
+                  <Button size="small" type="submit" variant="contained" onClick={handleSubmit}>
                     Save
                   </Button>
                 </Stack>

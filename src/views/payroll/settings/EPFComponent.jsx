@@ -179,6 +179,7 @@ function EpfComponent({ handleNext }) {
                         <Button
                           variant="contained"
                           type="button"
+                          size="small"
                           startIcon={epfData ? <IconEdit size={16} /> : <IconPlus size={16} />}
                           onClick={() => {
                             setPostType('put');
@@ -349,6 +350,7 @@ function EpfComponent({ handleNext }) {
               <Stack direction="row" sx={{ width: 1, justifyContent: 'space-between', gap: 2 }}>
                 <Button
                   variant="outlined"
+                  size="small"
                   color="error"
                   onClick={() => {
                     resetForm();
@@ -361,6 +363,7 @@ function EpfComponent({ handleNext }) {
                 {/* Save Button */}
                 <Button
                   type="submit"
+                  size="small"
                   variant="contained"
                   onClick={handleSubmit}
                   disabled={loading} // Disable button while loading
@@ -376,7 +379,7 @@ function EpfComponent({ handleNext }) {
                   <Grid2 size={{ xs: 12 }} key={field.name}>
                     {field.name === 'employee_contribution_rate' || field.name === 'employer_contribution_rate' ? (
                       <Box style={{ paddingBottom: '5px' }}>
-                        <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
+                        <Typography variant="subtitle1" sx={{ mb: 0.5 }}>
                           {field.label}
                         </Typography>
                         <CustomAutocomplete
@@ -386,21 +389,23 @@ function EpfComponent({ handleNext }) {
                           options={employeeContributionRates}
                           error={touched[field.name] && Boolean(errors[field.name])}
                           helperText={touched[field.name] && errors[field.name]}
-                          sx={{ width: '100%' }}
+                          sx={{ width: '100%', '& .MuiInputBase-input': { color: 'grey.600' } }}
                         />
                       </Box>
                     ) : (
                       <Box>
-                        <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
+                        <Typography variant="subtitle1" sx={{ mb: 0.5 }}>
                           {field.label}
                         </Typography>
                         <TextField
+                          size="small"
                           fullWidth
                           name={field.name}
                           value={values[field.name]}
                           onChange={(e) => setFieldValue(field.name, e.target.value)}
                           error={touched[field.name] && Boolean(errors[field.name])}
                           helperText={touched[field.name] && errors[field.name]}
+                          sx={{ width: '100%', '& .MuiInputBase-input': { color: 'grey.600' } }}
                         />
                       </Box>
                     )}

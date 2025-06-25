@@ -68,19 +68,19 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
       entity_type: Yup.string().required('Entity Type is required'),
 
       gst_type: Yup.string().when('gst_registered', {
-        is: 'Yes',
+        is: true,
         then: () => Yup.string().required('GST Type is required'),
         otherwise: () => Yup.string().oneOf(['NA'], 'GST Type must be "NA" when GST Registered is "No"')
       }),
       gstin: Yup.string().when('gst_registered', {
-        is: 'Yes',
+        is: true,
         then: () =>
           Yup.string()
             .matches(/^[0-9A-Z]{15}$/, 'Invalid GSTIN, Format must be: 22AAAAA0000A1Z5')
             .required('GSTIN is required'),
         otherwise: () => Yup.string().oneOf(['NA'], 'GSTIN must be "NA" when GST Registered is "No"')
       }),
-      gst_registered: Yup.string().required('GST Registered is required'),
+      gst_registered: Yup.boolean().required('GST Registered is required'),
       address_line1: Yup.string().required('Address Line 1 is required'),
       address_line2: Yup.string().required('Address Line 2 is required'),
       country: Yup.string().required('Country is required'),
@@ -178,7 +178,7 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
         state: selectedCustomer.state || '',
         postal_code: selectedCustomer.postal_code || '',
         entity_type: selectedCustomer.entity_type || '',
-        gst_registered: selectedCustomer.gst_registered || 'No',
+        gst_registered: selectedCustomer.gst_registered || false,
         email: selectedCustomer.email || '',
         mobile_number: selectedCustomer.mobile_number || '',
         opening_balance: selectedCustomer.opening_balance || 0,
@@ -391,7 +391,7 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
                 onChange={(e) => {
                   const value = e.target.value;
                   setFieldValue('gst_registered', value);
-                  if (value === 'No') {
+                  if (value === false) {
                     setFieldValue('gstin', 'NA');
                     setFieldValue('gst_type', '');
                     formik.setFieldTouched('gstin', false);
@@ -401,8 +401,8 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
                   }
                 }}
               >
-                <FormControlLabel value="Yes" control={<Radio />} label="Yes" />
-                <FormControlLabel value="No" control={<Radio />} label="No" />
+                <FormControlLabel value={true} control={<Radio />} label="Yes" />
+                <FormControlLabel value={false} control={<Radio />} label="No" />
               </RadioGroup>
             </FormControl>
           </Grid2>
@@ -415,7 +415,7 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
               options={gstTypes}
               error={touched.gst_type && Boolean(errors.gst_type)}
               helperText={touched.gst_type && errors.gst_type}
-              disabled={values.gst_registered === 'No'}
+              disabled={values.gst_registered === false}
             />
           </Grid2>
 
@@ -427,7 +427,7 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
               onChange={(e) => setFieldValue('gstin', e.target.value)}
               error={touched.gstin && Boolean(errors.gstin)}
               helperText={touched.gstin && errors.gstin}
-              disabled={values.gst_registered === 'No'}
+              disabled={values.gst_registered === false}
             />
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
@@ -521,7 +521,7 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
                 name="has_multiple_branches"
                 value={values.has_multiple_branches}
                 onChange={(e) => {
-                  const value = e.target.value === 'true';
+                  const value = e.target.value === 'true' ? true : false;
                   setFieldValue('has_multiple_branches', value);
                   if (!value) {
                     setFieldValue('branches', []);

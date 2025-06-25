@@ -38,7 +38,8 @@ import TDSAndIncomeTax from './TDSAndIncomeTax';
 import PayrollCompliance from './PayrollCompliance';
 import Licenses from './Licenses';
 import DSCRegister from './DSCRegister';
-
+import SettingsIcon from '@mui/icons-material/Settings';
+import { useTheme } from '@mui/material/styles';
 // tabs
 function TabPanel({ children, value, index, ...other }) {
   return (
@@ -107,6 +108,7 @@ const tabsOption = [
 // ==============================|| PROFILE 2 ||============================== //
 
 export default function Profile2() {
+  const theme = useTheme();
   const { mode, borderRadius } = useConfig();
   const [value, setValue] = React.useState(0);
   const user = useSelector((state) => state.accountReducer.user);
@@ -126,7 +128,11 @@ export default function Profile2() {
   return (
     <Grid container spacing={gridSpacing}>
       <Grid size={12}>
-        <MainCard title="Business Settings" content={false}>
+        <MainCard
+          title="Business Settings"
+          icon={<SettingsIcon sx={{ color: theme.palette.primary.main, fontSize: 24 }} />}
+          content={false}
+        >
           <Grid container spacing={gridSpacing}>
             <Grid size={{ xs: 12, lg: 3 }}>
               <CardContent>
