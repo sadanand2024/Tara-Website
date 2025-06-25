@@ -11,6 +11,7 @@ const PayrollDashboard = Loadable(lazy(() => import('views/payroll'))); // ✅ w
 const EmployeeDashboard = Loadable(lazy(() => import('views/payroll/EmployeeDashboard')));
 const PayrollWorkflows = Loadable(lazy(() => import('views/payroll/PayrollWorkflows')));
 const PayrollSettings = Loadable(lazy(() => import('views/payroll/settings')));
+const PayrollSettingsLayout = Loadable(lazy(() => import('views/payroll/settings')));
 const OrganizationDetails = Loadable(lazy(() => import('views/payroll/settings/Organizationdetails')));
 const WorkLocation = Loadable(lazy(() => import('views/payroll/settings/Worklocation')));
 const Departments = Loadable(lazy(() => import('views/payroll/settings/Departments')));
@@ -226,55 +227,19 @@ const MainRoutes = {
     },
     {
       path: '/app/payroll/settings',
-      element: <PayrollSettings />
+      element: <PayrollSettingsLayout />
     },
     {
-      path: '/payroll/settings/organization-details',
-      element: <OrganizationDetails />
+      path: '/app/payroll/settings/*',
+      element: <PayrollSettingsLayout />
     },
     {
-      path: '/payroll/settings/work-location',
-      element: <WorkLocation />
-    },
-    {
-      path: '/payroll/settings/departments',
-      element: <Departments />
-    },
-    {
-      path: '/payroll/settings/designations',
-      element: <Designations />
-    },
-    {
-      path: '/payroll/settings/statutory-components',
-      element: <StatuitoryComponents />
-    },
-    {
-      path: '/payroll/settings/salary-components',
-      element: <SalaryComponents />
-    },
-    {
-      path: '/payroll/settings/salary-template-list',
-      element: <SalaryTemplateList />
+      path: '/payroll/settings/*',
+      element: <PayrollSettingsLayout />
     },
     {
       path: '/payroll/settings/salary-template',
       element: <SalaryTemplate />
-    },
-    {
-      path: '/payroll/settings/pay-schedule',
-      element: <PaySchedule />
-    },
-    {
-      path: '/payroll/settings/leave-attendance',
-      element: <LeaveAttendance />
-    },
-    // {
-    //   path: '/payroll/settings/business-profile',
-    //   element: <BusinessProfileSetup />
-    // },
-    {
-      path: '/payroll/settings/employee-master',
-      element: <EmployeeMaster />
     },
     {
       path: '/payroll/settings/add-employee',

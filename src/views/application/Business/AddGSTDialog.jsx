@@ -26,15 +26,15 @@ const validationSchema = Yup.object().shape({
     .matches(/^[1-9][0-9]{5}$/, 'Invalid pincode format'),
   branch_name: Yup.string(),
   authorized_signatory_pan: Yup.string().matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN format'),
-  is_composition_scheme: Yup.string().oneOf(['yes', 'no']).required('Composition Scheme is required'),
+  is_composition_scheme: Yup.boolean().required('Composition Scheme is required'),
   composition_scheme_percent: Yup.string().when('is_composition_scheme', {
-    is: (val) => val === 'yes',
+    is: (val) => val === true,
     then: () => Yup.string().required('Composition Scheme Percentage is required'),
     otherwise: () => Yup.string().notRequired()
   }),
-  is_export_sez: Yup.string().oneOf(['yes', 'no']).required('Export/SEZ is required'),
+  is_export_sez: Yup.boolean().required('Export/SEZ is required'),
   lut_reg_no: Yup.string().when('is_export_sez', {
-    is: 'yes',
+    is: true,
     then: (schema) =>
       schema
         .required('LUT Reg. No is required')
@@ -43,17 +43,17 @@ const validationSchema = Yup.object().shape({
     otherwise: (schema) => schema.notRequired()
   }),
   dob: Yup.string().when('is_export_sez', {
-    is: (val) => val === 'yes',
+    is: (val) => val === true,
     then: () => Yup.string().required('Date of registration is required'),
     otherwise: () => Yup.string().notRequired()
   }),
   financial_year: Yup.string().when('is_export_sez', {
-    is: (val) => val === 'yes',
+    is: (val) => val === true,
     then: () => Yup.string().required('Financial Year is required'),
     otherwise: () => Yup.string().notRequired()
   }),
   lut_letter: Yup.string().when('is_export_sez', {
-    is: (val) => val === 'yes',
+    is: (val) => val === true,
     then: () => Yup.string().required('LUT Letter is required'),
     otherwise: () => Yup.string().notRequired()
   })
@@ -339,6 +339,7 @@ const AddGSTDialog = ({ open, selectedGST, handleClose }) => {
       setValues(selectedGST);
     }
   }, [selectedGST]);
+  console.log(errors);
   return (
     <Modal
       open={open}
@@ -384,12 +385,12 @@ const AddGSTDialog = ({ open, selectedGST, handleClose }) => {
               <FormControlLabel
                 control={
                   <Switch
-                    checked={values.is_composition_scheme === 'yes'}
+                    checked={values.is_composition_scheme === true}
                     onChange={(e) => {
                       if (e.target.checked === false) {
                         setFieldValue('composition_scheme_percent', '');
                       }
-                      setFieldValue('is_composition_scheme', e.target.checked ? 'yes' : 'no');
+                      setFieldValue('is_composition_scheme', e.target.checked ? true : false);
                     }}
                     name="is_composition_scheme"
                   />
@@ -401,7 +402,7 @@ const AddGSTDialog = ({ open, selectedGST, handleClose }) => {
             </Grid2>
 
             <Grid2 size={{ xs: 12 }}>
-              {values.is_composition_scheme === 'yes' && (
+              {values.is_composition_scheme === true && (
                 <Grid2 size={{ xs: 12 }}>
                   <Typography variant="body2" sx={{ mb: 1 }}>
                     Composition Scheme %
@@ -425,14 +426,14 @@ const AddGSTDialog = ({ open, selectedGST, handleClose }) => {
               <FormControlLabel
                 control={
                   <Switch
-                    checked={values.is_export_sez === 'yes'}
+                    checked={values.is_export_sez === true}
                     onChange={(e) => {
                       if (e.target.checked === false) {
                         setFieldValue('lut_reg_no', '');
                         setFieldValue('dob', '');
                         setFieldValue('financial_year', '');
                       }
-                      setFieldValue('is_export_sez', e.target.checked ? 'yes' : 'no');
+                      setFieldValue('is_export_sez', e.target.checked ? true : false);
                     }}
                     name="is_export_sez"
                   />
@@ -446,7 +447,7 @@ const AddGSTDialog = ({ open, selectedGST, handleClose }) => {
         </Box>
 
         {/* LUT Details Group */}
-        {values.is_export_sez === 'yes' && (
+        {values.is_export_sez === true && (
           <Box mb={2}>
             <Typography variant="subtitle1" fontWeight={600} gutterBottom color="text.primary">
               LUT Details

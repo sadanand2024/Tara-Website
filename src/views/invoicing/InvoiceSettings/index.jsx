@@ -47,7 +47,7 @@ export default function SimpleTabs() {
 
   const { mode, borderRadius } = useConfig();
   const dispatch = useDispatch();
-  const [value, setValue] = useState(5);
+  const [value, setValue] = useState(0);
   const [businessDetails, setBusinessDetails] = useState(null);
   const [postType, setPostType] = useState('');
   const [loading, setLoading] = useState(true);

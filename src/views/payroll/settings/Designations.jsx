@@ -132,9 +132,9 @@ function Designations() {
         </Grid2>
 
         <TableContainer component={Paper} sx={{ width: '100%', borderRadius: 2, boxShadow: 1, overflowX: 'auto' }}>
-          <Table>
-            <TableHead>
-              <TableRow sx={{ bgcolor: 'grey.100' }}>
+          <Table size="small">
+            <TableHead sx={{ backgroundColor: 'primary.main', '& .MuiTableCell-root': { color: '#fff' } }}>
+              <TableRow>
                 {['S No', 'Designation Name', 'No of Employees', 'Actions'].map((header, idx) => (
                   <TableCell
                     key={idx}
@@ -166,10 +166,10 @@ function Designations() {
                     <TableCell align="center">{designation.employee_count || 0}</TableCell>
                     <TableCell align="center" sx={{ width: '120px' }}>
                       <Box display="flex" justifyContent="center" alignItems="center" gap={1} sx={{ width: '100%' }}>
-                        <IconButton color="primary" onClick={() => handleEdit(designation)}>
+                        <IconButton size="small" color="primary" onClick={() => handleEdit(designation)}>
                           <Edit />
                         </IconButton>
-                        <IconButton color="error" onClick={() => handleOpenDeleteDialog(designation)}>
+                        <IconButton size="small" color="error" onClick={() => handleOpenDeleteDialog(designation)}>
                           <Delete />
                         </IconButton>
                       </Box>

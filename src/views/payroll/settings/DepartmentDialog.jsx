@@ -117,7 +117,9 @@ export default function DepartmentDialog({ open, handleClose, fetchDepartments, 
         <Grid2 container spacing={3}>
           {departmentFields.map((field) => (
             <Grid2 key={field.name} size={{ xs: 12 }}>
-              <Typography gutterBottom>{field.label}</Typography>
+              <Typography variant="subtitle1" gutterBottom>
+                {field.label}
+              </Typography>
               <CustomInput
                 fullWidth
                 name={field.name}
@@ -128,6 +130,12 @@ export default function DepartmentDialog({ open, handleClose, fetchDepartments, 
                 onBlur={handleBlur}
                 error={touched[field.name] && Boolean(errors[field.name])}
                 helperText={touched[field.name] && errors[field.name]}
+                sx={{
+                  width: '100%',
+                  '& .MuiInputBase-input': {
+                    color: 'grey.600'
+                  }
+                }}
               />
             </Grid2>
           ))}

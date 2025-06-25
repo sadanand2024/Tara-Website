@@ -88,7 +88,9 @@ const AddBranchDialog = ({ open, handleClose, setBranches, user, selectedBranch 
       <Box component="form" onSubmit={handleSubmit} sx={{ p: 2 }}>
         <Grid2 container spacing={2}>
           <Grid2 size={{ xs: 12, sm: 6 }}>
-            <Typography sx={{ mb: 1 }}>Branch Name</Typography>
+            <Typography variant="subtitle1" sx={{ mb: 1 }}>
+              Branch Name
+            </Typography>
             <TextField
               fullWidth
               size="small"
@@ -96,10 +98,17 @@ const AddBranchDialog = ({ open, handleClose, setBranches, user, selectedBranch 
               onChange={(e) => setFieldValue('branch_name', e.target.value)}
               error={touched.branch_name && Boolean(errors.branch_name)}
               helperText={touched.branch_name && errors.branch_name}
+              sx={{
+                '& .MuiInputBase-input': {
+                  color: 'text.disabled'
+                }
+              }}
             />
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 6 }}>
-            <Typography sx={{ mb: 1 }}>Branch Code</Typography>
+            <Typography variant="subtitle1" sx={{ mb: 1 }}>
+              Branch Code
+            </Typography>
             <TextField
               fullWidth
               size="small"
@@ -107,6 +116,11 @@ const AddBranchDialog = ({ open, handleClose, setBranches, user, selectedBranch 
               onChange={(e) => setFieldValue('branch_code', e.target.value)}
               error={touched.branch_code && Boolean(errors.branch_code)}
               helperText={touched.branch_code && errors.branch_code}
+              sx={{
+                '& .MuiInputBase-input': {
+                  color: 'text.disabled'
+                }
+              }}
             />
           </Grid2>
         </Grid2>
