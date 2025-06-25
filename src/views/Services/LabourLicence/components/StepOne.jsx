@@ -5,6 +5,8 @@ import Factory from 'utils/Factory';
 import BusinessIdentityStructureSection from './BusinessIdentityStructureSection';
 import PromoterSignatorySection from './PromoterSignatorySection';
 import BusinessPremisesSection from './BusinessPremisesSection';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+
 
 const StepOne = ({step, setStep}) => {
   const [searchParams] = useSearchParams();
@@ -40,8 +42,8 @@ const StepOne = ({step, setStep}) => {
       <PromoterSignatorySection taskId={taskIds.promoterSignatoryTaskId} />
       <BusinessPremisesSection taskId={taskIds.businessPremisesTaskId} />
 
-       <Box display="flex" justifyContent="flex-end" mt={3}>
-      <Button variant="contained" color="primary" onClick={() => setStep(step + 1)}>
+      <Box display="flex" justifyContent="flex-end" mt={-4.5}>
+      <Button variant="contained" size="small" color="primary" onClick={() => setStep(step + 1)} endIcon={<ArrowForwardIcon />}>
         Continue
       </Button>
     </Box>

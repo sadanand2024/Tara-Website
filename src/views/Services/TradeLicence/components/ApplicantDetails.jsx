@@ -172,7 +172,7 @@ const ApplicantDetails = ({applicantTaskId}) => {
           />
         );
         case 'autocomplete':
-  return (
+        return (
     <Autocomplete
       fullWidth
       size="small"
@@ -247,25 +247,24 @@ const ApplicantDetails = ({applicantTaskId}) => {
       <Grid2 sx={{ flexGrow: 1, ml: 95 }}>
         <Box display="flex" justifyContent="flex-end" gap={1}>
           
-           <RaiseRequest
-             fields={[
-               'name',
-              'designation',
-              'mobile_number',
-            'email',
-              'aadhaar_image',
-             'pan_image',
-              'passport_photo',
-              'address',
-                'residential_address'
-             
-             ]}
+          <RaiseRequest
+            fields={[
+              'Name',
+              'Designation',
+              'Mobile Number',
+              'Email',
+              'Aadhaar Image',
+              'Pan Image',
+              'Passport Photo',
+              'Address',
+              'Residential_Address'
+            ]}
             
-             task_id={applicantTaskId}
-           />
-         </Box>
-       </Grid2>
-     </Grid2>
+            task_id={applicantTaskId}
+          />
+        </Box>
+      </Grid2>
+    </Grid2>
       <form onSubmit={handleSubmit}>
         <Grid2 container spacing={2}>
           {fields.map((field) => (
@@ -302,7 +301,7 @@ const ApplicantDetails = ({applicantTaskId}) => {
             )}
           </Grid2>
         </Grid2>
-        <Stack direction="row" spacing={2} sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
+        <Stack direction="row" spacing={1} sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
           <Button variant="contained" color="primary" type="submit">
             Save
           </Button>

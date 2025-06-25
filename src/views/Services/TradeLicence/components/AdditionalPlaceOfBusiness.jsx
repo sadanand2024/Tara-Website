@@ -103,6 +103,10 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
           })
         );
         fetchData();
+        setBusinessPremises((prev) => ({
+      ...prev,
+      status: 'in progress'
+    }));
       } else {
         dispatch(
           openSnackbar({
@@ -296,7 +300,7 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
                 close: false
               })
             );
-             setBusinessPremises((prev) => ({
+            setBusinessPremises((prev) => ({
       ...prev,
       additional_space: 'yes',
       status: 'in progress'
@@ -367,10 +371,10 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
               close: false
             })
           );
-           setBusinessPremises((prev) => ({
-    ...prev,
-    additional_space: 'no',
-    status: 'in progress'
+          setBusinessPremises((prev) => ({
+              ...prev,
+              additional_space: 'no',
+              status: 'in progress'
   }));
           clearFormFields();
           fetchData()
@@ -403,9 +407,9 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
         )}
       </Grid2>
     </Card>
-     <Box mt={2} display="flex" justifyContent="flex-end">
-
-           <GetActionButtons
+    <Box mt={2} display="flex" justifyContent="flex-end">
+  <Stack direction="row" spacing={1} justifyContent="flex-end" mt={3} sx={{mr:14}}> 
+        <GetActionButtons
                   type="put"
                   urlEndpoint="business-location"
                   recId={businessPremises.id}
@@ -416,9 +420,10 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
                   urlKey="tradelicense"
                   urlBool={true}
                 />
-     
+</Stack>
+  
     </Box>
-     </Box>
+  </Box>
   );
 };
 

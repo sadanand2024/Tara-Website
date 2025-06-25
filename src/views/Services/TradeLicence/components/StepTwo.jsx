@@ -1,7 +1,11 @@
 import React, { useEffect,useState } from 'react';
-import { Box, Typography, Button, Grid2 } from '@mui/material';
+import { Box, Typography, Button, Grid2,Card } from '@mui/material';
 import IconSave from '@mui/icons-material/Save';
 import { useFormik } from 'formik';
+
+
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import * as Yup from 'yup';
 import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
 import { useDispatch } from 'react-redux';
@@ -48,7 +52,7 @@ const StepTwo = ({taskId,tradelicencedetailsTaskId, step, setStep}) => {
       })
     }),
     onSubmit: async (values) => {
-      console.log(values);
+      // console.log(values);
       let url = values.id ? `/tradelicense/trade-license-exist/${values.id}/` : `/tradelicense/trade-license-exist/`;
       const formData = new FormData();
       formData.append('service_request', service_id);
@@ -108,6 +112,7 @@ const StepTwo = ({taskId,tradelicencedetailsTaskId, step, setStep}) => {
   const { values, setValues, setFieldValue, handleChange, errors, touched, handleSubmit, handleBlur } = formik;
   return (
     <>
+    <Card sx={{ p: 3, mt: 4 }}>
       <form autoComplete="off" onSubmit={handleSubmit}>
         <Box mb={3}>
           <Grid2 container alignItems="center" justifyContent="space-between" mb={2}>
@@ -121,9 +126,9 @@ const StepTwo = ({taskId,tradelicencedetailsTaskId, step, setStep}) => {
             
               <RaiseRequest
                 fields={[
-                  'apply_new_license',
-                ' trade_license_number',
-                'trade_license_file'
+                  'Apply new license',
+                'Trade license number',
+                'Trade license file'
                 
                 ]}
               
@@ -188,10 +193,11 @@ const StepTwo = ({taskId,tradelicencedetailsTaskId, step, setStep}) => {
             )}
           </Grid2>
         </Box>
-        <Box display="flex" justifyContent="flex-end" mt={2} gap={2}>
+        <Box display="flex" justifyContent="flex-end" mt={2} gap={1}>
           <Button size="medium" variant="contained" color="primary" type="submit">
             Save
           </Button>
+          
           <GetActionButtons
                     type="put"
                     urlEndpoint="trade-license-exist"
@@ -205,12 +211,13 @@ const StepTwo = ({taskId,tradelicencedetailsTaskId, step, setStep}) => {
                                       />
         </Box>
       </form>
+       </Card>
       <BusinessRegistrationDocumenst taskId={taskId}/>
         <Box display="flex" justifyContent="space-between" mt={2}>
-        <Button variant="outlined" onClick={() => setStep(step - 1)}>
+        <Button variant="outlined"size="small" onClick={() => setStep(step - 1)}  startIcon={<ArrowBackIcon />}>
           Back
         </Button>
-        <Button variant="contained" color="primary"  onClick={() => setStep(step + 1)}>
+      <Button variant="contained" size="small" color="primary" onClick={() => setStep(step + 1)} endIcon={<ArrowForwardIcon />}>
           Continue
         </Button>
         </Box>

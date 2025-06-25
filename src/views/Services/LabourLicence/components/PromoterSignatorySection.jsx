@@ -470,7 +470,7 @@ const PromoterSignatorySection = ({ taskId }) => {
         </TableContainer>
         <Grid2 size={{ xs: 12 }}>
           
-                <Stack direction="row" spacing={2} justifyContent="flex-end" mt={3}> 
+                <Stack direction="row" spacing={1} justifyContent="flex-end" mt={3}> 
                   <GetActionButtons
                     type="post"
                     urlEndpoint="/labourlicense/signatory-details/"

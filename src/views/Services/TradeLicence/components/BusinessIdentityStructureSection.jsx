@@ -255,7 +255,7 @@ const BusinessIdentityStructureSection = ({taskId, applicantTaskId}) => {
               </Grid2>
             ))}
           </Grid2>
-          <Stack direction="row" spacing={2} sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
+          <Stack direction="row" spacing={1} sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
             <Button variant="contained" color="primary" type="submit">
               Save
             </Button>

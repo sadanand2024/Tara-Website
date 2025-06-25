@@ -28,8 +28,10 @@ import Factory from 'utils/Factory';
 import * as Yup from 'yup';
 import RaiseRequest from '../../RaiseRequest';
 import GetActionButtons from '../../FormHelpers';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
-const StepTwo = () => {
+const StepTwo = ({ step, setStep}) => {
   const [searchParams] = useSearchParams();
   const service_id = searchParams.get('service_id');
   const dispatch = useDispatch();
@@ -551,7 +553,16 @@ const StepTwo = () => {
           </Stack>
         </Grid2>
       </Card>
+       <Box display="flex" justifyContent="space-between" mt={2}>
+        <Button variant="outlined" size="small" onClick={() => setStep(step - 1)} startIcon={<ArrowBackIcon />}>
+          Back
+        </Button>
+        <Button variant="contained" color="primary"  size="small" onClick={() => setStep(step + 1)} endIcon={<ArrowForwardIcon />}>
+          Continue
+        </Button>
+      </Box>
     </form>
+    
   );
 };
 

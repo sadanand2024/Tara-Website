@@ -361,9 +361,9 @@ const BasicBusinessInfo = () => {
               </>
             )}
             <Grid2 size={12}>
-              <Stack direction="row" spacing={2} justifyContent="flex-end" mt={3}>
+              <Stack direction="row" spacing={1} justifyContent="flex-end" mt={3}>
                 <Button variant="contained" color="primary" type="submit">
-                  Save Personal Details
+                  Save
                 </Button>
                 <GetActionButtons
                   type="put"
