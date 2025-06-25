@@ -8,6 +8,8 @@ import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+
 const PAYROLL_STEPS = [
   { nameKey: 'Business profile', path: '/payroll/settings/organization-details', dataKey: 'organisation_details' },
   { nameKey: 'Set up Work Location', path: '/payroll/settings/work-location', dataKey: 'work_locations' },
@@ -275,9 +277,28 @@ const PayrollSetup = () => {
         </Grid2>
         <Grid2 size={{ xs: 12 }}></Grid2>
       </Grid2>
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-        <Button startIcon={<ArrowBackIcon />} variant="contained" onClick={() => navigate('/app/payroll')}>
-          Back to payroll dashboard
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+        <Button
+          startIcon={<ArrowBackIcon />}
+          variant="contained"
+          onClick={() => navigate('/app/payroll')}
+          sx={{
+            background: 'linear-gradient(45deg, #3b82f6 0%, #1d4ed8 100%)',
+            borderRadius: 2,
+            px: 3,
+            py: 1,
+            fontSize: '0.9rem',
+            fontWeight: 500,
+            boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)',
+            '&:hover': {
+              background: 'linear-gradient(45deg, #2563eb 0%, #1e40af 100%)',
+              boxShadow: '0 6px 16px rgba(59, 130, 246, 0.4)',
+              transform: 'translateY(-1px)'
+            },
+            transition: 'all 0.2s ease'
+          }}
+        >
+          Back to Payroll Dashboard
         </Button>
       </Box>
     </Box>
@@ -353,15 +374,25 @@ const StepItem = React.memo(({ step, index, onClick, onMarkStatutoryComplete, ma
         </Stack>
       ) : (
         <Button
-          variant="outlined"
-          sx={{
-            color: '#4A90E2',
-            fontWeight: 400,
-            border: '1px solid #4A90E2'
-          }}
+          variant="contained"
+          startIcon={<PlayArrowIcon />}
+          size="small"
           onClick={onClick}
+          sx={{
+            background: 'linear-gradient(45deg, #3b82f6 0%, #1d4ed8 100%)',
+            borderRadius: 1.5,
+            px: 2,
+            py: 0.5,
+            fontWeight: 500,
+            fontSize: '0.8rem',
+            boxShadow: '0 2px 8px rgba(59, 130, 246, 0.25)',
+            '&:hover': {
+              background: 'linear-gradient(45deg, #2563eb 0%, #1e40af 100%)',
+              boxShadow: '0 3px 12px rgba(59, 130, 246, 0.35)'
+            }
+          }}
         >
-          Complete Now
+          Start
         </Button>
       )}
       {/* Show Mark as Complete only for Statutory Components step when not completed */}

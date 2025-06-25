@@ -48,7 +48,7 @@ const InvoiceDetails = ({
     { name: 'gstin', label: 'GSTIN' },
     { name: 'branch_code', label: 'Branch' },
     { name: 'customer', label: 'Customer Name' },
-    { name: 'customer_branch', label: 'Customer Branch' },
+    { name: 'customer_branch', label: 'Customer Branch/Vertical' },
     { name: 'customer_gstin', label: 'Customer GSTIN' },
     { name: 'customer_pan', label: 'Customer PAN' },
     { name: 'place_of_supply', label: 'Place of Supply' },
@@ -124,7 +124,72 @@ const InvoiceDetails = ({
     invoice_number: Yup.string().required('Invoice number is required'),
     invoice_date: Yup.string().required('Invoice date is required'),
     place_of_supply: Yup.string().required('Place of supply is required'),
-    due_date: Yup.date().required('Due date is required')
+    due_date: Yup.date().required('Due date is required'),
+
+    // Billing Address Validation (Always Required)
+    billing_address: Yup.object({
+      address_line1: Yup.string().required('Billing Address Line 1 is required'),
+      address_line2: Yup.string().optional(),
+      country: Yup.string().required('Billing Country is required'),
+      state: Yup.string().required('Billing State is required'),
+      postal_code: Yup.string()
+        .required('Billing Pincode is required')
+        .matches(/^[1-9][0-9]{5}$/, 'Invalid billing pincode format (6 digits)')
+    }),
+
+    // Shipping Address Validation (Conditional)
+    shipping_address: Yup.object({
+      address_line1: Yup.string().when('not_applicablefor_shipping', {
+        is: true,
+        then: (schema) => schema.oneOf(['NA'], 'Must be NA when shipping is not applicable'),
+        otherwise: (schema) =>
+          schema.when('same_address', {
+            is: true,
+            then: (schema) => schema.required('Shipping Address Line 1 is required'),
+            otherwise: (schema) => schema.optional()
+          })
+      }),
+      address_line2: Yup.string().when('not_applicablefor_shipping', {
+        is: true,
+        then: (schema) => schema.oneOf(['NA'], 'Must be NA when shipping is not applicable'),
+        otherwise: (schema) => schema.optional()
+      }),
+      country: Yup.string().when('not_applicablefor_shipping', {
+        is: true,
+        then: (schema) => schema.oneOf(['NA'], 'Must be NA when shipping is not applicable'),
+        otherwise: (schema) =>
+          schema.when('same_address', {
+            is: true,
+            then: (schema) => schema.required('Shipping Country is required'),
+            otherwise: (schema) => schema.optional()
+          })
+      }),
+      state: Yup.string().when('not_applicablefor_shipping', {
+        is: true,
+        then: (schema) => schema.oneOf(['NA'], 'Must be NA when shipping is not applicable'),
+        otherwise: (schema) =>
+          schema.when('same_address', {
+            is: true,
+            then: (schema) => schema.required('Shipping State is required'),
+            otherwise: (schema) => schema.optional()
+          })
+      }),
+      postal_code: Yup.string().when('not_applicablefor_shipping', {
+        is: true,
+        then: (schema) => schema.oneOf(['NA'], 'Must be NA when shipping is not applicable'),
+        otherwise: (schema) =>
+          schema.when('same_address', {
+            is: true,
+            then: (schema) =>
+              schema.required('Shipping Pincode is required').matches(/^[1-9][0-9]{5}$/, 'Invalid shipping pincode format (6 digits)'),
+            otherwise: (schema) => schema.optional()
+          })
+      })
+    }),
+
+    // Checkbox validations
+    same_address: Yup.boolean(),
+    not_applicablefor_shipping: Yup.boolean()
   });
   const formik = useFormik({
     initialValues: {
