@@ -6,6 +6,8 @@ import DownloadIcon from '@mui/icons-material/Download';
 import GetActionButtons from '../../FormHelpers';
 import { useSearchParams } from 'react-router-dom';
 
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+
 const StepThree = ({step, setStep}) => {
   const [searchParams] = useSearchParams();
   const [reviewAndFiling, setReviewAndFiling] = useState({
@@ -318,8 +320,8 @@ const StepThree = ({step, setStep}) => {
           ))}
         </Stepper>
       )}
-      <Box display="flex" justifyContent="space-between" mt={2}>
-        <Button variant="outlined" onClick={() => setStep(step - 1)}>
+      <Box display="flex" justifyContent="flex-end" mt={2}>
+        <Button variant="outlined" size="small" onClick={() => setStep(step - 1)} startIcon={<ArrowBackIcon />}> 
           Back
         </Button>
         {/* <Button variant="contained" color="primary"  onClick={() => setStep(step + 1)}>

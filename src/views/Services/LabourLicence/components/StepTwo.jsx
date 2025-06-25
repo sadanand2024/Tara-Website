@@ -3,6 +3,8 @@ import { Box, Typography, Button, Grid2, Card, Stack } from '@mui/material';
 import IconSave from '@mui/icons-material/Save';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
 import { useDispatch } from 'react-redux';
 import { openSnackbar } from 'store/slices/snackbar';
@@ -175,9 +177,9 @@ const StepTwo = ({taskId, step, setStep}) => {
             </Grid2>
           </Grid2>
         </Box>
-        <Stack direction="row" spacing={2} sx={{ mt: 3, justifyContent: 'flex-end' }}>
+        <Stack direction="row" spacing={1} sx={{ mt: 3, justifyContent: 'flex-end' }}>
           <Button size="medium" variant="contained" color="primary" onClick={formik.handleSubmit}>
-            Save & Continue
+            Save
           </Button>
            <GetActionButtons
                                         type="put"
@@ -195,10 +197,10 @@ const StepTwo = ({taskId, step, setStep}) => {
       
     </Card>
     <Box display="flex" justifyContent="space-between" mt={2}>
-  <Button variant="outlined" onClick={() => setStep(step - 1)}>
+  <Button variant="outlined" size="small" onClick={() => setStep(step - 1)} startIcon={<ArrowBackIcon />}>
     Back
   </Button>
-  <Button variant="contained" color="primary"  onClick={() => setStep(step + 1)}>
+  <Button variant="contained"  size="small" color="primary"  onClick={() => setStep(step + 1)} endIcon={<ArrowForwardIcon />}>
     Continue
   </Button>
 </Box>

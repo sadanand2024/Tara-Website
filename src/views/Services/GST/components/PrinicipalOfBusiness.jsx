@@ -357,12 +357,12 @@ const PrincipleOfBusiness = () => {
             ))}
 
             <Grid2 size={12}>
-              <Stack direction="row" spacing={2} justifyContent="flex-end" mt={3}>
+              <Stack direction="row" spacing={1} justifyContent="flex-end" mt={3}>
                 <Button variant="contained" color="primary" type="submit">
                   {/* {prinicipalBusiness.id ? 'Update' : 'Save'} */}
-                  Save PrincipalInfo
+                  Save
                 </Button>
-                  <GetActionButtons
+                                        <GetActionButtons
                                             type="put"
                                             urlEndpoint="principal-place-details"
                                             recId={prinicipalBusiness.id}

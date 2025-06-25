@@ -65,11 +65,13 @@ const GstRegistration = () => {
             ))}
           </Box>
 
-          {step === 0 && <StepOne />}
+          {step === 0 && <StepOne  step={step} setStep={setStep} />}
 
-          {step === 1 && <StepTwo />}
+          {step === 1 && <StepTwo  step={step}
+          setStep={setStep}/>}
 
-          {step === 2 && <StepThree />}
+          {step === 2 && <StepThree  step={step}
+          setStep={setStep}/>}
         </Paper>
       </Box>
       

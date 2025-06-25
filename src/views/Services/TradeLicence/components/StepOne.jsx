@@ -3,6 +3,7 @@ import { Box, CircularProgress } from '@mui/material';
 import { useSearchParams } from 'react-router-dom';
 import Factory from 'utils/Factory';
 import {Button} from '@mui/material';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 
 import ApplicantDetails from './ApplicantDetails';
 import BusinessIdentityStructureSection from './BusinessIdentityStructureSection';
@@ -61,6 +62,7 @@ const StepOne = ({step, setStep}) => {
   }
 
   return (
+    <Box> 
     <Box>
 <BusinessIdentityStructureSection 
   taskId={taskIds.businessIdentityTaskId} 
@@ -69,13 +71,19 @@ const StepOne = ({step, setStep}) => {
       {/* <BusinessIdentityStructureSection taskId={taskIds.businessIdentityTaskId} /> */}
       <PromoterSignatorySection taskId={taskIds.promoterSignatoryTaskId} />
       <BusinessPremisesSection taskId={taskIds.businessPremisesTaskId} />
-        <Box display="flex" justifyContent="flex-end" mt={3}>
-      <Button variant="contained" color="primary" onClick={() => setStep(step + 1)}>
+       
+    </Box>
+    
+  
+     <Box display="flex" justifyContent="flex-end" mt={-4.5}>
+      <Button variant="contained"  size="small" color="primary" onClick={() => setStep(step + 1)} endIcon={<ArrowForwardIcon />}>
         Continue
       </Button>
     </Box>
-    </Box>
+    </Box> 
   );
+  
 };
+
 
 export default StepOne;

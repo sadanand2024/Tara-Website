@@ -88,8 +88,8 @@ const LabourLicenceRegistration = () => {
           {step === 0 &&  <StepOne step={step} setStep={setStep} />}
 
           {step === 1 && <StepTwo taskId={taskIds.businessregistration}
-           step={step}
-    setStep={setStep}/>}
+          step={step}
+          setStep={setStep}/>}
 
           {step === 2 && <StepThree step={step} setStep={setStep} />}
         </Paper>

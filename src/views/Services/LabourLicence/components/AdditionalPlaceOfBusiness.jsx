@@ -154,6 +154,10 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
           })
         );
         fetchData();
+        setBusinessPremises((prev) => ({
+      ...prev,
+      status: 'in progress'
+    }));
       } else {
         dispatch(
           openSnackbar({
@@ -509,7 +513,9 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
         )}
       </Grid2>
     </Card>
-     <Box mt={2} display="flex" justifyContent="flex-end">
+     <Box mt={2} display="flex" justifyContent="flex-end" sx={{mr:15}}>
+                      <Stack direction="row" spacing={1} justifyContent="flex-end" mt={3}> 
+      
       <GetActionButtons
         type="put"
         urlEndpoint="business-location"
@@ -521,6 +527,7 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
         urlKey="labourlicense"
         urlBool={true}
       />
+      </Stack>
     </Box>
     </Box>
   );

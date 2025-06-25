@@ -56,8 +56,8 @@ const FileUploadButtons = ({ fieldName, file, setFieldValue, label }) => {
                               window.open(URL.createObjectURL(file), '_blank');
                             } else if (typeof file === 'string') {
                               viewFile(file);
-                            }
-                          }}
+                          }
+                        }}
         >
           View
         </Button>

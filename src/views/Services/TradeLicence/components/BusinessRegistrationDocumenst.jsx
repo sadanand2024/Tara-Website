@@ -1,5 +1,5 @@
 import { useEffect,useState } from 'react';
-import { Box, Typography, Button, Grid2 } from '@mui/material';
+import { Box, Typography, Button, Grid2,Card } from '@mui/material';
 import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
@@ -13,8 +13,8 @@ import GetActionButtons from '../../FormHelpers';
 const BusinessRegistrationDocumenst = ({taskId}) => {
   const [searchParams] = useSearchParams();
   const service_id = searchParams.get('service_id');
-   const [businessDocument, setbusinessDocument] = useState({
-       task_id: null
+  const [businessDocument, setbusinessDocument] = useState({
+      task_id: null
     });
   const dispatch = useDispatch();
   const formik = useFormik({
@@ -97,12 +97,13 @@ const BusinessRegistrationDocumenst = ({taskId}) => {
 
   const { values, setValues, setFieldValue, handleChange, errors, touched, handleSubmit, handleBlur } = formik;
   return (
+      <Card sx={{ p: 3, mt: 4 }}>   
     <Box>
       <form autoComplete="off" onSubmit={handleSubmit}>
         <Box mb={3} mt={4}>
           <Grid2 container alignItems="center" justifyContent="space-between" mb={2}>
-                   <Grid2>
-                   <Typography variant="h4" fontWeight={700}>
+                  <Grid2>
+                <Typography variant="h4" fontWeight={700}>
                       <span style={{ textDecoration: 'underline' }}>Business Registration Documents</span>
                     </Typography>
                 </Grid2>
@@ -179,12 +180,12 @@ const BusinessRegistrationDocumenst = ({taskId}) => {
             </Grid2>
           </Grid2>
         </Box>
-        <Box display="flex" justifyContent="flex-end" mt={2} gap={2}>
+        <Box display="flex" justifyContent="flex-end" mt={2} gap={1}>
           <Button size="medium" variant="contained" color="primary" type="submit">
             Save
           </Button>
       
-           <GetActionButtons
+                        <GetActionButtons
                                         type="put"
                                         urlEndpoint="business-documents"
                                         recId={businessDocument.id}
@@ -198,6 +199,7 @@ const BusinessRegistrationDocumenst = ({taskId}) => {
         </Box>
       </form>
     </Box>
+    </Card>
   );
 };
 
