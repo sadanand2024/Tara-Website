@@ -6,7 +6,7 @@ import { useSearchParams } from 'react-router-dom';
 import RenderDialog from './RenderDialog';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
-export default function SalaryRevisions({ employeeMasterData, from, openDialog, fields, setOpenDialog }) {
+export default function SalaryRevisions({ employeeMasterData, from, openDialog, fields, setOpenDialog, handleBack, handleNext }) {
   const dispatch = useDispatch();
   const headerData = ['Employee ID', 'Employee Name', 'Department', 'Designation', 'Previous CTC', 'Last Revision', 'Revised CTC'];
   const body_keys = ['associate_id', 'employee_name', 'department', 'designation', 'previous_ctc', 'revision_date', 'current_ctc'];
@@ -110,6 +110,8 @@ export default function SalaryRevisions({ employeeMasterData, from, openDialog, 
         setSelectedRecord={setSelectedRecord}
         loading={loading}
         setLoading={setLoading}
+        handleBack={handleBack}
+        handleNext={handleNext}
       />
       <RenderDialog
         from={from}

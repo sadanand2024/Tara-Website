@@ -7,7 +7,17 @@ import RenderDialog from './RenderDialog';
 import { months } from 'utils/MonthsList';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
-export default function Attendance({ attendanceData, fetchAttendance, employeeMasterData, from, openDialog, fields, setOpenDialog }) {
+export default function Attendance({
+  attendanceData,
+  fetchAttendance,
+  employeeMasterData,
+  from,
+  openDialog,
+  fields,
+  setOpenDialog,
+  handleBack,
+  handleNext
+}) {
   const headerData = [
     'Employee ID',
     'Employee Name',
@@ -130,6 +140,8 @@ export default function Attendance({ attendanceData, fetchAttendance, employeeMa
         loading={loading}
         from={from}
         setLoading={setLoading}
+        handleBack={handleBack}
+        handleNext={handleNext}
       />
       <RenderDialog
         from={from}

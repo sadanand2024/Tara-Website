@@ -32,7 +32,9 @@ const RenderTable = ({
   handleDelete,
   openDialog,
   handleCloseDialog,
-  from
+  from,
+  handleBack,
+  handleNext
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [payrollId, setPayrollId] = useState(null);
@@ -152,33 +154,37 @@ const RenderTable = ({
           />
         </TableContainer>
       )}
-      {safeTableData.length > 0 && (
-        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mt: 2 }}>
-          <Button startIcon={<ArrowBackIcon />} variant="outlined" color="primary" onClick={() => navigate('/app/payroll')}>
-            Back to dashboard
-          </Button>
-          <Pagination
-            count={Math.ceil(safeTableData.length / rowsPerPage)}
-            page={currentPage}
-            onChange={handlePageChange}
-            shape="rounded"
-            color="primary"
-          />
-          {/* <Box display="flex" gap={1}>
-            <Button
-              startIcon={<ArrowBackIcon />}
-              variant="outlined"
+
+      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mt: 2 }}>
+        <Button startIcon={<ArrowBackIcon />} variant="outlined" color="primary" onClick={() => navigate('/app/payroll')}>
+          Back to dashboard
+        </Button>
+        <Box display="flex" gap={1}>
+          {safeTableData.length > 0 && (
+            <Pagination
+              count={Math.ceil(safeTableData.length / rowsPerPage)}
+              page={currentPage}
+              onChange={handlePageChange}
+              shape="rounded"
               color="primary"
-              onClick={() => handlePageChange(null, currentPage - 1)}
-            >
-              Back
+            />
+          )}
+        </Box>
+        <Box display="flex" gap={1}>
+          <Button startIcon={<ArrowBackIcon />} variant="outlined" color="primary" onClick={() => handleBack()}>
+            Back
+          </Button>
+          {from === 'Tds' ? (
+            <Button variant="contained" color="primary" onClick={() => navigate('/app/payroll')}>
+              Proceed to Payroll
             </Button>
-            <Button variant="contained" color="primary" onClick={() => handlePageChange(null, currentPage + 1)}>
+          ) : (
+            <Button variant="contained" color="primary" onClick={() => handleNext()}>
               Next
             </Button>
-          </Box> */}
-        </Stack>
-      )}
+          )}
+        </Box>
+      </Stack>
     </Stack>
   );
 };

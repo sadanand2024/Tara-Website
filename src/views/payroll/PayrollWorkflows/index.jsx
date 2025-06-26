@@ -284,6 +284,8 @@ const PayrollWorkflows = ({ type }) => {
             employeeMasterData={employeeMasterData}
             fetchAttendance={tab.label === 'Attendance' ? getAttandanceData : undefined}
             attendanceData={tab.label === 'Attendance' ? attendanceData : undefined}
+            handleBack={() => setActiveTab((prev) => prev - 1)}
+            handleNext={() => setActiveTab((prev) => prev + 1)}
           />
         </TabPanel>
       ))}

@@ -7,7 +7,7 @@ import RenderDialog from './RenderDialog';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
 
-export default function BonusAndIncentives({ employeeMasterData, from, openDialog, fields, setOpenDialog }) {
+export default function BonusAndIncentives({ employeeMasterData, from, openDialog, fields, setOpenDialog, handleBack, handleNext }) {
   const headerData = ['Employee ID', 'Employee Name', 'Department', 'Designation', 'Type', 'Amount', 'Month', 'Financial Year'];
 
   const body_keys = [
@@ -130,6 +130,8 @@ export default function BonusAndIncentives({ employeeMasterData, from, openDialo
         loading={loading}
         from={from}
         setLoading={setLoading}
+        handleBack={handleBack}
+        handleNext={handleNext}
       />
       <RenderDialog
         from={from}
