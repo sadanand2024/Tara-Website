@@ -81,6 +81,7 @@ export default function HolidayManagementDialog({ open, handleClose, selectedRec
             close: false
           })
         );
+        resetForm();
         handleClose();
         fetchHolidayManagementData(); // Assuming getESI_Details is a function to fetch department details
       } else {
@@ -93,6 +94,7 @@ export default function HolidayManagementDialog({ open, handleClose, selectedRec
             close: false
           })
         );
+        resetForm();
       }
     }
   });

@@ -69,7 +69,7 @@ export default function BusinessProfileComponnet({ businessDetails = {}, postTyp
     entityType: Yup.string().required('Business Type is required'),
     gst_registered: Yup.string().required('GST Registration status is required'),
     gstin: Yup.string().when('gst_registered', {
-      is: 'Yes',
+      is: true,
       then: () => Yup.string().required('GSTIN is required'),
       otherwise: () => Yup.string().oneOf(['NA'], 'GSTIN must be "NA" when GST Registered is "No"') // Ensure "NA" for "No"
     }),
@@ -194,7 +194,7 @@ export default function BusinessProfileComponnet({ businessDetails = {}, postTyp
         registrationNumber: businessDetails.registrationNumber || '',
         entityType: businessDetails.entityType || '',
         // gst_registered: Array.isArray(businessDetails?.gst_details) && businessDetails.gst_details.length > 0 ? 'Yes' : 'No',
-        gst_registered: businessDetails.gst_registered === true ? 'Yes' : 'No',
+        gst_registered: businessDetails.gst_registered === true ? true : false,
         // gstin:
         //   businessDetails?.gst_details?.length !== 0 && businessDetails.gstin === 'NA'
         //     ? ''
@@ -338,17 +338,17 @@ export default function BusinessProfileComponnet({ businessDetails = {}, postTyp
                         setFieldValue('gst_registered', value);
 
                         // Handle conditional logic for GSTIN field
-                        if (value === 'No') {
+                        if (value === false) {
                           setFieldValue('gstin', 'NA');
                           formik.setFieldTouched('gstin', false);
                           formik.setFieldError('gstin', '');
-                        } else if (value === 'Yes') {
+                        } else if (value === true) {
                           setFieldValue('gstin', '');
                         }
                       }}
                     >
-                      <FormControlLabel value="Yes" control={<Radio />} label="Yes" />
-                      <FormControlLabel value="No" control={<Radio />} label="No" />
+                      <FormControlLabel value={true} control={<Radio />} label="Yes" />
+                      <FormControlLabel value={false} control={<Radio />} label="No" />
                     </RadioGroup>
                     {touched.gst_registered && errors.gst_registered && (
                       <Typography variant="caption" color="error">

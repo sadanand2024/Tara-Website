@@ -136,7 +136,7 @@ function StepperComponent() {
 
               <Stack direction="row" justifyContent="space-between" mt={4}>
                 <Stack direction="row" spacing={2}>
-                  <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigate(-1)}>
+                  <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigate('/app/payroll')}>
                     Back to Dashboard
                   </Button>
                   <Button variant="contained" onClick={handleBack} disabled={activeStep === 0}>

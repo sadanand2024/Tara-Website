@@ -59,27 +59,11 @@ const LeaveAttendance = ({ type }) => {
 
       {/* Render Content Based on Active Tab */}
       <TabPanel value={activeTab} index={0}>
-        <HolidayManagement handleNext={handleNext} />
+        <HolidayManagement handleBack={handleBack} handleNext={handleNext} />
       </TabPanel>
       <TabPanel value={activeTab} index={1}>
-        <LeaveManagement handleNext={handleNext} />
+        <LeaveManagement handleBack={handleBack} handleNext={handleNext} />
       </TabPanel>
-
-      {/* Navigation Buttons */}
-      <Stack direction="row" spacing={2} sx={{ mt: 3, justifyContent: 'space-between', alignItems: 'center' }}>
-        <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigate(-1)}>
-          Back to Dashboard
-        </Button>
-
-        <Stack direction="row" spacing={2}>
-          <Button variant="outlined" onClick={handleBack} disabled={activeTab === 0}>
-            Back
-          </Button>
-          <Button variant="contained" onClick={handleNext} disabled={activeTab === tabLabels.length - 1}>
-            Next
-          </Button>
-        </Stack>
-      </Stack>
     </MainCard>
   );
 };

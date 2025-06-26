@@ -56,17 +56,20 @@ const MainCard = forwardRef(function MainCard(
       {/* card header and action */}
       {!darkTitle && title && (
         <CardHeader
-          sx={{
-            ...headerStyle,
-            ...headerSX,
-            m: 2,
-            backgroundColor: alpha(theme.palette.primary.main, 0.05),
-            borderRadius: 2,
-            border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`
-          }}
-          avatar={icon}
+          // sx={{
+          //   ...headerStyle,
+          //   ...headerSX,
+          //   m: 2,
+          //   backgroundColor: alpha(theme.palette.primary.main, 0.05),
+          //   borderRadius: 2,
+          //   border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`
+          // }}
+          // avatar={icon}
           title={title}
           action={secondary}
+          sx={{
+            padding: 2
+          }}
         />
       )}
       {darkTitle && title && (
