@@ -93,7 +93,7 @@ const StepThree = ({step, setStep}) => {
                       mb: 1
                     }}
                   >
-                    <Typography variant="h5" mb={3} sx={{ textDecoration: 'underline' }}>
+                    <Typography variant="subtitle1" mb={3} sx={{ textDecoration: 'underline' }}>
                       Draft TradeLicence Computation
                     </Typography>
                     <Stack direction="row" spacing={2} mb={3}>
@@ -206,7 +206,7 @@ const StepThree = ({step, setStep}) => {
                       mb: 1
                     }}
                   >
-                    <Typography variant="h5" mb={3} sx={{ textDecoration: 'underline' }}>
+                    <Typography variant="subtitle1" mb={3} sx={{ textDecoration: 'underline' }}>
                       Upload Filed Acknowledgement
                     </Typography>
                     <Stack direction="row" spacing={2} mb={3}>
@@ -302,7 +302,7 @@ const StepThree = ({step, setStep}) => {
                     }}
                   >
                     <Stack direction="column" spacing={1}>
-                      <Typography variant="h5" mb={3} sx={{ textDecoration: 'underline' }}>
+                      <Typography variant="subtitle1" mb={3} sx={{ textDecoration: 'underline' }}>
                         Download Filed Acknowledgement
                       </Typography>
                     <Button

@@ -97,12 +97,12 @@ const StepTwo = ({taskId, step, setStep}) => {
         
           <Box mb={3} mt={4}>
           <Grid2 container alignItems="center" justifyContent="space-between" mb={2}>
-                   <Grid2>
-                   <Typography variant="h4" fontWeight={700}>
+                  <Grid2>
+                  <Typography variant="h4" fontWeight={700}>
                       <span style={{ textDecoration: 'underline' }}>Business Registration Documents</span>
                     </Typography>
                 </Grid2>
-               
+              
                   <Box display="flex" justifyContent="flex-end" gap={1}>
                     
                       <RaiseRequest
@@ -114,12 +114,12 @@ const StepTwo = ({taskId, step, setStep}) => {
                       task_id={taskId}
                       />
                     </Box>
-                 
+                
                 </Grid2>
           <Grid2 container spacing={2} alignItems="center">
             {/* 1. Incorporation certificate / Partnership deed */}
             <Grid2 size={{ sm: 6, md: 6 }}>
-              <Typography>Incorporation certificate / Partnership deed</Typography>
+              <Typography variant="subtitle1">Incorporation certificate / Partnership deed</Typography>
             </Grid2>
             <Grid2 size={{ sm: 6, md: 3 }} sx={{ ml: 15 }}>
               <RenderFileUpload
@@ -133,7 +133,7 @@ const StepTwo = ({taskId, step, setStep}) => {
             </Grid2>
             {/* 2. Letter of Authorisation / Board resolution */}
             <Grid2 size={{ sm: 6, md: 6 }}>
-              <Typography>Letter of Authorisation / Board resolution</Typography>
+              <Typography variant="subtitle1">Letter of Authorisation / Board resolution</Typography>
             </Grid2>
             <Grid2 size={{ sm: 6, md: 3 }}  sx={{ ml: 15 }}>
               <RenderFileUpload
@@ -147,7 +147,7 @@ const StepTwo = ({taskId, step, setStep}) => {
             </Grid2>
             {/* 3. Local language name board photo of business */}
             <Grid2 size={{ sm: 6, md: 6 }}>
-              <Typography>Local language name board photo of business</Typography>
+              <Typography variant="subtitle1">Local language name board photo of business</Typography>
             </Grid2>
             <Grid2 size={{ sm: 6, md: 3 }} sx={{ ml: 15 }}>
               <RenderFileUpload
@@ -161,7 +161,7 @@ const StepTwo = ({taskId, step, setStep}) => {
             </Grid2>
             {/* 4. Memorandum of Articles (MOA) */}
             <Grid2 size={{ sm: 6, md: 6 }}>
-              <Typography>
+              <Typography variant="subtitle1">
                 Memorandum of Articles (MOA) <span style={{ fontSize: 12, color: '#888' }}>(in case of companies)</span>
               </Typography>
             </Grid2>

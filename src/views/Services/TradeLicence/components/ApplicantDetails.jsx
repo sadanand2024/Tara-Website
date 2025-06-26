@@ -163,12 +163,18 @@ const ApplicantDetails = ({applicantTaskId}) => {
             fullWidth
             size="small"
             name={field.name}
-            type={field.name === 'mobile_number' ? 'number' : 'text'}
+            // type={field.name === 'mobile_number' ? 'number' : 'text'}
             value={values[field.name]}
             onChange={handleChange}
             onBlur={handleBlur}
             error={touched[field.name] && Boolean(errors[field.name])}
             helperText={touched[field.name] && errors[field.name]}
+            sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
           />
         );
         case 'autocomplete':
@@ -186,6 +192,12 @@ const ApplicantDetails = ({applicantTaskId}) => {
           onChange={handleChange}
           error={touched[field.name] && Boolean(errors[field.name])}
           helperText={touched[field.name] && errors[field.name]}
+          sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
         />
       )}
     />
@@ -269,7 +281,7 @@ const ApplicantDetails = ({applicantTaskId}) => {
         <Grid2 container spacing={2}>
           {fields.map((field) => (
             <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4 }}>
-              <Typography color="text.secondary" fontWeight={500} mb={1}>
+              <Typography variant="subtitle1" mb={1}>
                 {field.label}
               </Typography>
               {renderField(field)}
@@ -297,6 +309,12 @@ const ApplicantDetails = ({applicantTaskId}) => {
                 onBlur={handleBlur}
                 error={touched.address && Boolean(errors.address)}
                 helperText={touched.address && errors.address}
+                sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
               />
             )}
           </Grid2>

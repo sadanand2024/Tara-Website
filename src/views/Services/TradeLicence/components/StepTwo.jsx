@@ -139,7 +139,7 @@ const StepTwo = ({taskId,tradelicencedetailsTaskId, step, setStep}) => {
         </Grid2>
           <Grid2 container spacing={2} alignItems="center">
             <Grid2 size={{ sm: 3, md: 3, xs: 12 }}>
-              <Typography>Apply for a new Trade Licence</Typography>
+              <Typography variant="subtitle1">Apply for a new Trade Licence</Typography>
             </Grid2>
             <Grid2 size={{ sm: 3, md: 3, xs: 12 }}>
               <Autocomplete

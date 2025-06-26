@@ -115,7 +115,9 @@ const PrincipleOfBusiness = () => {
       bank_statement_or_cancelled_cheque: null,
     },
     validationSchema: Yup.object({
-      pincode: Yup.number().required('Pincode is required'),
+     pincode: Yup.string()
+          .matches(/^[1-9][0-9]{5}$/, 'Pincode must be exactly 6 digits')
+          .required('Pincode is required'),
       state: Yup.string().required('State is required'),
       city: Yup.string().required('City is required'),
       district: Yup.string().required('District is required'),
@@ -248,7 +250,7 @@ const PrincipleOfBusiness = () => {
       case 'text':
         return ['nature_of_possession_of_premise', 'address_proof', 'state'].includes(field.name) ? (
           <>
-            <Typography color="text.secondary" fontWeight={500} mb={1}>
+            <Typography variant="subtitle1" mb={1}>
               {field.label}
             </Typography>
             <Autocomplete
@@ -269,13 +271,19 @@ const PrincipleOfBusiness = () => {
                   name={field.name}
                   error={touched[field.name] && Boolean(errors[field.name])}
                   helperText={touched[field.name] && errors[field.name]}
+                sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                 />
               )}
             />
           </>
         ) : (
           <>
-            <Typography color="text.secondary" fontWeight={500} mb={1}>
+            <Typography variant="subtitle1"  mb={1}>
               {field.label}
             </Typography>
             <TextField
@@ -287,13 +295,19 @@ const PrincipleOfBusiness = () => {
               onBlur={handleBlur}
               error={touched[field.name] && Boolean(errors[field.name])}
               helperText={touched[field.name] && errors[field.name]}
+              sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
             />
           </>
         );
       case 'file':
         return (
           <>
-            <Typography color="text.secondary" fontWeight={500} mb={1}>
+            <Typography variant="subtitle1"  mb={1}>
               {field.label}
             </Typography>
             <RenderFileUpload
@@ -303,6 +317,12 @@ const PrincipleOfBusiness = () => {
               setFieldValue={setFieldValue}
               touched={touched[field.name]}
               errors={errors[field.name]}
+              sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
             />
           </>
         );

@@ -86,7 +86,11 @@ const BasicBusinessInfo = () => {
       business_commencement_date: Yup.string().required('business_commencement_date is required'),
       nature_of_business: Yup.string().required('nature_of_business is required'),
       // rental_agreement: Yup.mixed().required('Rental Agreement/NOC is required'),
-      mobile_number: Yup.string().required('mobile_number is required'),
+       mobile_number: Yup.string()
+              .required('Mobile Number is required')
+              .matches(/^[0-9]+$/, 'Mobile Number must be a number')
+              .min(10, 'Mobile Number must be at least 10 digits')
+              .max(10, 'Mobile Number must not exceed 10 digits'),  
       email_address: Yup.string().required('email_address is required'),
       certificate_of_incorporation: Yup.mixed().when('constitution_of_business', {
         is: (val) => ['Foreign Company', 'Private Comapny', 'Public Company', 'One Person Company', 'Section 8 Company'].includes(val),
@@ -194,7 +198,7 @@ const BasicBusinessInfo = () => {
         if (field.name === 'constitution_of_business') {
           return (
             <>
-              <Typography color="text.secondary" fontWeight={500} mb={1}>
+              <Typography variant="subtitle1" mb={1}>
                 {field.label}
               </Typography>
               <Autocomplete
@@ -234,7 +238,7 @@ const BasicBusinessInfo = () => {
 
         return (
           <>
-            <Typography color="text.secondary" fontWeight={500} mb={1}>
+            <Typography variant="subtitle1"  mb={1}>
               {field.label}
             </Typography>
             <TextField
@@ -246,13 +250,19 @@ const BasicBusinessInfo = () => {
               onBlur={handleBlur}
               error={touched[field.name] && Boolean(errors[field.name])}
               helperText={touched[field.name] && errors[field.name]}
+              sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
             />
           </>
         );
       case 'date':
         return (
           <>
-            <Typography color="text.secondary" fontWeight={500} mb={1}>
+            <Typography variant="subtitle1"  mb={1}>
               {field.label}
             </Typography>
             <TextField
@@ -265,6 +275,12 @@ const BasicBusinessInfo = () => {
               onBlur={handleBlur}
               error={touched[field.name] && Boolean(errors[field.name])}
               helperText={touched[field.name] && errors[field.name]}
+              sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
             />
           </>
         );
@@ -272,7 +288,7 @@ const BasicBusinessInfo = () => {
       case 'file':
         return (
           <>
-            <Typography color="text.secondary" fontWeight={500} mb={1}>
+            <Typography variant="subtitle1"  mb={1}>
               {field.label}
             </Typography>
             <RenderFileUpload
@@ -282,6 +298,12 @@ const BasicBusinessInfo = () => {
               setFieldValue={setFieldValue}
               touched={touched[field.name]}
               errors={errors[field.name]}
+              sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
             />
           </>
         );

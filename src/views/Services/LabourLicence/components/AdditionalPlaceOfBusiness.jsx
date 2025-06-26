@@ -113,7 +113,9 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
       addressLine2: Yup.string().required('Address Line 2 is required'),
       city: Yup.string().required('City is required'),
       state: Yup.string().required('State is required'),
-      pincode: Yup.number().required('Pincode is required'),
+      pincode: Yup.string()
+                .matches(/^[1-9][0-9]{5}$/, 'Pincode must be exactly 6 digits')
+                .required('Pincode is required'),
       nature_of_possession: Yup.string().required('Nature of possession is required'),
       address_proof_additional: Yup.mixed().required('Address proof is required'),
       rental_agreement_additional: Yup.mixed().required('Rental Agreement/NOC is required')
@@ -233,7 +235,7 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
       case 'text':
         return field.name === 'state' || field.name === 'nature_of_possession' ? (
           <>
-            <Typography color="text.secondary" fontWeight={500} mb={1}>
+            <Typography variant="subtitle1" mb={1}>
               {field.label}
             </Typography>
             <Autocomplete
@@ -248,13 +250,19 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
                   name={field.name}
                   error={touched[field.name] && Boolean(errors[field.name])}
                   helperText={touched[field.name] && errors[field.name]}
+                  sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                 />
               )}
             />
           </>
         ) : (
           <>
-            <Typography color="text.secondary" fontWeight={500} mb={1}>
+            <Typography variant="subtitle1" mb={1}>
               {field.label}
             </Typography>
             <TextField
@@ -266,13 +274,19 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
               onBlur={handleBlur}
               error={touched[field.name] && Boolean(errors[field.name])}
               helperText={touched[field.name] && errors[field.name]}
+              sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
             />
           </>
         );
       case 'file':
         return (
           <>
-            <Typography color="text.secondary" fontWeight={500} mb={1}>
+            <Typography variant="subtitle1" mb={1}>
               {field.label}
             </Typography>
             <RenderFileUpload
@@ -289,7 +303,6 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
         return null;
     }
   };
-
   return (
     <Box>
     <Card sx={{ p: 3, mt: 3 }}>
@@ -315,8 +328,8 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
           const payload = {
             // ...businessPremises,
             additional_space: 'yes',
-             workplace: values.workplace || '',
-             status: 'in progress'
+            workplace: values.workplace || '',
+            status: 'in progress'
           };
 
           const { res } = await Factory(method, url, payload);
@@ -331,7 +344,7 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
                 close: false
               })
             );
-             setBusinessPremises((prev) => ({
+            setBusinessPremises((prev) => ({
     ...prev,
     additional_space: 'yes',
     workplace: values.workplace || '',
@@ -342,7 +355,7 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
       />
     }
   />
- 
+
   <FormControlLabel
   label="No"
   control={
@@ -457,7 +470,7 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
                           close: false
                         })
                       );
-                       setBusinessPremises((prev) => ({
+                      setBusinessPremises((prev) => ({
     ...prev,
     workplace: value,
     additional_space: 'yes',
