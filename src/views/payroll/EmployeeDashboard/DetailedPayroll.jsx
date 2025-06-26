@@ -119,9 +119,16 @@ const DetailedPayroll = ({ payrollId, month }) => {
     <MainCard title="Detailed Payroll Summary">
       <Stack spacing={3}>
         <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 1 }}>
-          <Table>
-            <TableHead>
-              <TableRow sx={{ bgcolor: 'grey.100' }}>
+          <Table size="small">
+            <TableHead
+              sx={{
+                backgroundColor: 'primary.main',
+                '& .MuiTableCell-root': {
+                  color: '#ffffff !important'
+                }
+              }}
+            >
+              <TableRow>
                 {TABLE_HEADERS.map((header, idx) => (
                   <TableCell key={idx} sx={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>
                     {header}
@@ -176,7 +183,9 @@ const DetailedPayroll = ({ payrollId, month }) => {
                       <Typography
                         variant="body2"
                         sx={{ cursor: 'pointer', color: 'primary.main', textDecoration: 'underline' }}
-                        onClick={() => viewPayslip(item.id, item.month, item.financial_year)}
+                        onClick={() => {
+                          viewPayslip(item.employee, item.month, item.financial_year);
+                        }}
                       >
                         View / Download
                       </Typography>

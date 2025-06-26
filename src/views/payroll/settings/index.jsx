@@ -6,7 +6,6 @@ import PayrollSettingsCenterLayout from './PayrollSettingsCenterLayout';
 const PayrollSettings = () => {
   const [searchParams] = useSearchParams();
   const payrollSetup = searchParams.get('payroll_setup');
-  console.log(payrollSetup);
   return payrollSetup === 'false' ? <PayrollSettingsCenterLayout /> : <PayrollSettingsLayout />;
 };
 

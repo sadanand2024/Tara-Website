@@ -33,7 +33,7 @@ const SalaryComponentTabs = ({ type }) => {
     <MainCard
       title="Salary Components"
       secondary={
-        <Stack direction="row" spacing={2}>
+        <Stack direction="row">
           <Button
             variant="contained"
             onClick={() => {
@@ -46,7 +46,7 @@ const SalaryComponentTabs = ({ type }) => {
         </Stack>
       }
     >
-      <Box sx={{ width: '100%', display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+      <Box sx={{ width: '100%', display: 'flex', justifyContent: 'space-between' }}>
         <Tabs value={activeTab} onChange={handleTabChange} aria-label="Salary Component Tabs">
           {tabLabels.map((label, index) => (
             <Tab key={index} label={label} id={`simple-tab-${index}`} aria-controls={`simple-tabpanel-${index}`} />
@@ -54,7 +54,6 @@ const SalaryComponentTabs = ({ type }) => {
         </Tabs>
       </Box>
 
-      {/* Tab Panels */}
       <TabPanel value={activeTab} index={0}>
         <EarningsComponent handleNext={handleNext} open={open} setOpen={setOpen} postType={postType} setPostType={setPostType} />
       </TabPanel>

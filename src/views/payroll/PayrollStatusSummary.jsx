@@ -62,9 +62,16 @@ export default function PayrollStatusSummary({ payrollId, financialYear, monthWi
               Payroll Status Summary
             </Typography>
             <TableContainer component={Paper} sx={{ boxShadow: 3, borderRadius: 2 }}>
-              <Table>
-                <TableHead>
-                  <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
+              <Table size="small">
+                <TableHead
+                  sx={{
+                    backgroundColor: 'primary.main',
+                    '& .MuiTableCell-root': {
+                      color: '#ffffff !important'
+                    }
+                  }}
+                >
+                  <TableRow>
                     <TableCell sx={{ fontWeight: 'bold', color: '#666', whiteSpace: 'nowrap' }}> </TableCell>
                     {MONTHS.map((month) => (
                       <TableCell key={month} align="center" sx={{ fontWeight: 'bold', color: '#666', whiteSpace: 'nowrap' }}>

@@ -156,9 +156,16 @@ const PayrollSummary = ({ payrollId, month, financialYear }) => {
     <MainCard title="Payroll Summary">
       <Stack spacing={3}>
         <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 1 }}>
-          <Table size="medium">
-            <TableHead>
-              <TableRow sx={{ bgcolor: 'grey.100' }}>
+          <Table size="small">
+            <TableHead
+              sx={{
+                backgroundColor: 'primary.main',
+                '& .MuiTableCell-root': {
+                  color: '#ffffff !important'
+                }
+              }}
+            >
+              <TableRow>
                 {TABLE_HEADERS.map((header, idx) => (
                   <TableCell key={idx} sx={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>
                     {header}

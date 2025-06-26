@@ -118,7 +118,7 @@ export default function WorkLocationDialog({ open, handleClose, fetchWorkLocatio
       return (
         <Grid2 key={field.name} size={{ xs: 12, sm: 6 }}>
           <Typography variant="subtitle1" sx={{ mb: 0.5 }}>
-            {field.label} {field.name !== 'address_line2'}
+            {field.label}
           </Typography>
           <TextField
             size="small"

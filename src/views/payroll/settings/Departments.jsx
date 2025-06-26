@@ -28,7 +28,7 @@ import DeleteDialog from '../../../ui-component/extended/DeleteDialog'; // adjus
 import { IconButton, Tooltip } from '@mui/material'; // Add these if not already
 import { Edit, Delete } from '@mui/icons-material';
 import BulkUploadDialog from 'ui-component/extended/BulkUploadDialog';
-function Departments() {
+function Departments({ handleBack, handleNext }) {
   const [departments, setDepartments] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [postType, setPostType] = useState('');
@@ -110,10 +110,11 @@ function Departments() {
       title="Departments Details"
       secondary={
         <Stack direction="row" spacing={2}>
-          <Button variant="outlined" color="secondary" onClick={() => setOpenBulkDialog(true)}>
+          <Button size="small" variant="outlined" color="secondary" onClick={() => setOpenBulkDialog(true)}>
             Bulk Upload
           </Button>
           <Button
+            size="small"
             variant="contained"
             color="primary"
             onClick={() => {
@@ -136,7 +137,7 @@ function Departments() {
         xlsxTemplateUrl="/payroll/download-template/xlsx?type=department"
         csvTemplateUrl="/payroll/download-template/csv?type=department"
       />
-      <Grid2 container spacing={{ xs: 2, sm: 3 }}>
+      <Grid2 container>
         <Grid2 size={{ xs: 12 }}>
           <DepartmentDialog
             open={openDialog}
@@ -149,9 +150,17 @@ function Departments() {
           />
         </Grid2>
 
-        <TableContainer component={Paper} sx={{ width: '100%', borderRadius: 2, boxShadow: 1, overflowX: 'auto' }}>
+        <TableContainer
+          component={Paper}
+          sx={{
+            width: '100%',
+            borderRadius: 2,
+            boxShadow: 1,
+            overflowX: 'auto'
+          }}
+        >
           <Table size="small">
-            <TableHead sx={{ backgroundColor: 'primary.main', '& .MuiTableCell-root': { color: '#fff' } }}>
+            <TableHead sx={{ backgroundColor: 'primary.main', '& .MuiTableCell-root': { color: '#fff !important' } }}>
               <TableRow>
                 {['S No', 'Department Name', 'Department Code', 'Description', 'No of Employees', 'Actions'].map((header, idx) => (
                   <TableCell
@@ -212,7 +221,11 @@ function Departments() {
 
         {departments.length > 0 && (
           <Grid2 size={12}>
-            <Stack direction="row" justifyContent="center" sx={{ mt: 2 }}>
+            <Stack direction="row" justifyContent="space-between" sx={{ mt: 2 }}>
+              <Button size="small" variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigate('/app/payroll')}>
+                Back to Dashboard
+              </Button>
+
               <Pagination
                 count={Math.ceil(departments.length / rowsPerPage)}
                 page={currentPage}
@@ -220,16 +233,18 @@ function Departments() {
                 shape="rounded"
                 color="primary"
               />
+              <Stack direction="row" spacing={2}>
+                <Button size="small" variant="outlined" startIcon={<ArrowBackIcon />} onClick={handleBack}>
+                  Back
+                </Button>
+                <Button size="small" variant="contained" onClick={handleNext}>
+                  Next
+                </Button>
+              </Stack>
             </Stack>
           </Grid2>
         )}
       </Grid2>
-
-      <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigate(-1)}>
-          Back to Dashboard
-        </Button>
-      </Box>
     </MainCard>
   );
 }

@@ -575,6 +575,11 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
                     value={earning.component_name}
                     onChange={(e, value) => handleComponentChange(value, index)}
                     disabled={earning.component_name === 'Basic'}
+                    sx={{
+                      '& .MuiInputBase-input': {
+                        color: 'grey.600'
+                      }
+                    }}
                   />
                 </TableCell>
                 <TableCell>
