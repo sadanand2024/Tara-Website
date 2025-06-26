@@ -49,79 +49,84 @@ export default function ComplianceSummary() {
   const isSaveDisabled = (item) => !item.filingDate || !item.referenceNumber;
 
   return (
-    <MainCard title="Compliance Summary">
-      <Stack spacing={3}>
-        <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 1 }}>
-          <Table>
-            <TableHead>
-              <TableRow sx={{ bgcolor: 'grey.100' }}>
-                {TABLE_HEADERS.map((header, idx) => (
-                  <TableCell key={idx} sx={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>
-                    {header}
-                  </TableCell>
-                ))}
-                <TableCell sx={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>Action</TableCell>
+    <MainCard>
+      <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 1 }}>
+        <Table size="small">
+          <TableHead
+            sx={{
+              backgroundColor: 'primary.main',
+              '& .MuiTableCell-root': {
+                color: '#ffffff !important'
+              }
+            }}
+          >
+            <TableRow>
+              {TABLE_HEADERS.map((header, idx) => (
+                <TableCell key={idx} sx={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>
+                  {header}
+                </TableCell>
+              ))}
+              <TableCell sx={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>Action</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {data.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={TABLE_HEADERS.length + 1} sx={{ height: 300 }}>
+                  <EmptyDataPlaceholder title="No Compliance Data" subtitle="Start by adding a new compliance record." />
+                </TableCell>
               </TableRow>
-            </TableHead>
-            <TableBody>
-              {data.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={TABLE_HEADERS.length + 1} sx={{ height: 300 }}>
-                    <EmptyDataPlaceholder title="No Compliance Data" subtitle="Start by adding a new compliance record." />
+            ) : (
+              data.map((item, index) => (
+                <TableRow key={index}>
+                  <TableCell>{item.complianceType}</TableCell>
+                  <TableCell>{item.dueDate}</TableCell>
+                  <TableCell>
+                    <Chip
+                      label={item.status}
+                      size="small"
+                      color={item.status === 'Filed' ? 'success' : item.status === 'Pending' ? 'warning' : 'error'}
+                    />
+                    <Box mt={1}>
+                      <Select
+                        value={item.status || ''}
+                        onChange={(e) => handleInputChange(index, 'status', e.target.value)}
+                        displayEmpty
+                        size="small"
+                        sx={{ mt: 0.5, minWidth: 120 }}
+                      >
+                        {['Overdue', 'Pending', 'Filed'].map((status) => (
+                          <MenuItem key={status} value={status}>
+                            {status}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </Box>
+                  </TableCell>
+                  <TableCell>
+                    <CustomDatePicker
+                      views={['year', 'month', 'day']}
+                      value={item.filingDate ? dayjs(item.filingDate) : null}
+                      onChange={(date) => handleInputChange(index, 'filingDate', date?.format('YYYY-MM-DD'))}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <CustomInput
+                      value={item.referenceNumber || ''}
+                      onChange={(e) => handleInputChange(index, 'referenceNumber', e.target.value)}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Button variant="contained" size="small" disabled={isSaveDisabled(item)} onClick={() => handleSave(index)}>
+                      Save
+                    </Button>
                   </TableCell>
                 </TableRow>
-              ) : (
-                data.map((item, index) => (
-                  <TableRow key={index}>
-                    <TableCell>{item.complianceType}</TableCell>
-                    <TableCell>{item.dueDate}</TableCell>
-                    <TableCell>
-                      <Chip
-                        label={item.status}
-                        size="small"
-                        color={item.status === 'Filed' ? 'success' : item.status === 'Pending' ? 'warning' : 'error'}
-                      />
-                      <Box mt={1}>
-                        <Select
-                          value={item.status || ''}
-                          onChange={(e) => handleInputChange(index, 'status', e.target.value)}
-                          displayEmpty
-                          size="small"
-                          sx={{ mt: 0.5, minWidth: 120 }}
-                        >
-                          {['Overdue', 'Pending', 'Filed'].map((status) => (
-                            <MenuItem key={status} value={status}>
-                              {status}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </Box>
-                    </TableCell>
-                    <TableCell>
-                      <CustomDatePicker
-                        views={['year', 'month', 'day']}
-                        value={item.filingDate ? dayjs(item.filingDate) : null}
-                        onChange={(date) => handleInputChange(index, 'filingDate', date?.format('YYYY-MM-DD'))}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <CustomInput
-                        value={item.referenceNumber || ''}
-                        onChange={(e) => handleInputChange(index, 'referenceNumber', e.target.value)}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Button variant="contained" size="small" disabled={isSaveDisabled(item)} onClick={() => handleSave(index)}>
-                        Save
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Stack>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
     </MainCard>
   );
 }

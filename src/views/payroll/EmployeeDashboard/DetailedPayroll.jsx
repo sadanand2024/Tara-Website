@@ -116,93 +116,91 @@ const DetailedPayroll = ({ payrollId, month }) => {
     }
   };
   return (
-    <MainCard title="Detailed Payroll Summary">
-      <Stack spacing={3}>
-        <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 1 }}>
-          <Table size="small">
-            <TableHead
-              sx={{
-                backgroundColor: 'primary.main',
-                '& .MuiTableCell-root': {
-                  color: '#ffffff !important'
-                }
-              }}
-            >
+    <MainCard>
+      <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 1 }}>
+        <Table size="small">
+          <TableHead
+            sx={{
+              backgroundColor: 'primary.main',
+              '& .MuiTableCell-root': {
+                color: '#ffffff !important'
+              }
+            }}
+          >
+            <TableRow>
+              {TABLE_HEADERS.map((header, idx) => (
+                <TableCell key={idx} sx={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>
+                  {header}
+                </TableCell>
+              ))}
+              <TableCell sx={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>Action</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {loading ? (
               <TableRow>
-                {TABLE_HEADERS.map((header, idx) => (
-                  <TableCell key={idx} sx={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>
-                    {header}
-                  </TableCell>
-                ))}
-                <TableCell sx={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>Action</TableCell>
+                <TableCell colSpan={TABLE_HEADERS.length + 1} align="center" sx={{ height: 300 }}>
+                  <CircularProgress />
+                </TableCell>
               </TableRow>
-            </TableHead>
-            <TableBody>
-              {loading ? (
-                <TableRow>
-                  <TableCell colSpan={TABLE_HEADERS.length + 1} align="center" sx={{ height: 300 }}>
-                    <CircularProgress />
+            ) : paginatedData.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={TABLE_HEADERS.length + 1} align="center" sx={{ height: 300 }}>
+                  <EmptyDataPlaceholder title="No Data Found" subtitle="Start by adding a new record." />
+                </TableCell>
+              </TableRow>
+            ) : (
+              paginatedData.map((item, index) => (
+                <TableRow key={item.employee_id || index}>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{item.associate_id}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{item.employee_name}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{item.department}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{item.designation}</TableCell>
+                  <TableCell>{item.total_days_of_month}</TableCell>
+                  <TableCell>{item.lop}</TableCell>
+                  <TableCell>{item.paid_days}</TableCell>
+                  <TableCell>{item.ctc}</TableCell>
+                  <TableCell>{item.gross_salary}</TableCell>
+                  <TableCell>{item.earned_salary}</TableCell>
+                  <TableCell>{item.basic_salary}</TableCell>
+                  <TableCell>{item.hra}</TableCell>
+                  <TableCell>{item.special_allowance}</TableCell>
+                  <TableCell>{item.bonus}</TableCell>
+                  <TableCell>{item.other_earnings}</TableCell>
+                  <TableCell>{item.benefits_total}</TableCell>
+                  <TableCell>{item.total_deductions}</TableCell>
+                  <TableCell>{item.epf}</TableCell>
+                  <TableCell>{item.esi}</TableCell>
+                  <TableCell>{item.pt}</TableCell>
+                  <TableCell>{item.tds}</TableCell>
+                  <TableCell>{item.loans_advances}</TableCell>
+                  <TableCell>{item.other_deductions}</TableCell>
+                  <TableCell>{item.total_deductions}</TableCell>
+                  <TableCell>{item.net_salary}</TableCell>
+                  <TableCell>{item.status}</TableCell>
+                  <TableCell>
+                    <Typography
+                      variant="body2"
+                      sx={{ cursor: 'pointer', color: 'primary.main', textDecoration: 'underline', whiteSpace: 'nowrap' }}
+                      onClick={() => {
+                        viewPayslip(item.employee, item.month, item.financial_year);
+                      }}
+                    >
+                      View / Download
+                    </Typography>
                   </TableCell>
                 </TableRow>
-              ) : paginatedData.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={TABLE_HEADERS.length + 1} align="center" sx={{ height: 300 }}>
-                    <EmptyDataPlaceholder title="No Data Found" subtitle="Start by adding a new record." />
-                  </TableCell>
-                </TableRow>
-              ) : (
-                paginatedData.map((item, index) => (
-                  <TableRow key={item.employee_id || index}>
-                    <TableCell>{item.associate_id}</TableCell>
-                    <TableCell>{item.employee_name}</TableCell>
-                    <TableCell>{item.department}</TableCell>
-                    <TableCell>{item.designation}</TableCell>
-                    <TableCell>{item.total_days_of_month}</TableCell>
-                    <TableCell>{item.lop}</TableCell>
-                    <TableCell>{item.paid_days}</TableCell>
-                    <TableCell>{item.ctc}</TableCell>
-                    <TableCell>{item.gross_salary}</TableCell>
-                    <TableCell>{item.earned_salary}</TableCell>
-                    <TableCell>{item.basic_salary}</TableCell>
-                    <TableCell>{item.hra}</TableCell>
-                    <TableCell>{item.special_allowance}</TableCell>
-                    <TableCell>{item.bonus}</TableCell>
-                    <TableCell>{item.other_earnings}</TableCell>
-                    <TableCell>{item.benefits_total}</TableCell>
-                    <TableCell>{item.total_deductions}</TableCell>
-                    <TableCell>{item.epf}</TableCell>
-                    <TableCell>{item.esi}</TableCell>
-                    <TableCell>{item.pt}</TableCell>
-                    <TableCell>{item.tds}</TableCell>
-                    <TableCell>{item.loans_advances}</TableCell>
-                    <TableCell>{item.other_deductions}</TableCell>
-                    <TableCell>{item.total_deductions}</TableCell>
-                    <TableCell>{item.net_salary}</TableCell>
-                    <TableCell>{item.status}</TableCell>
-                    <TableCell>
-                      <Typography
-                        variant="body2"
-                        sx={{ cursor: 'pointer', color: 'primary.main', textDecoration: 'underline' }}
-                        onClick={() => {
-                          viewPayslip(item.employee, item.month, item.financial_year);
-                        }}
-                      >
-                        View / Download
-                      </Typography>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
 
-        {detailedSummary.length > 0 && (
-          <Stack direction="row" justifyContent="center" alignItems="center" sx={{ py: 2 }}>
-            <Pagination count={totalPages} page={currentPage} onChange={handlePageChange} shape="rounded" color="primary" />
-          </Stack>
-        )}
-      </Stack>
+      {detailedSummary.length > 0 && (
+        <Stack direction="row" justifyContent="center" alignItems="center" sx={{ py: 2 }}>
+          <Pagination count={totalPages} page={currentPage} onChange={handlePageChange} shape="rounded" color="primary" />
+        </Stack>
+      )}
     </MainCard>
   );
 };

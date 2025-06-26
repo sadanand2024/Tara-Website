@@ -424,7 +424,7 @@ const PayrollSettingsLayout = () => {
             },
             '& button.Mui-selected': {
               color: 'primary.main',
-              bgcolor: mode === 'dark' ? 'dark.main' : 'grey.100'
+              bgcolor: mode === 'dark' ? 'dark.main' : '#b7d0e9'
             },
             '& button > svg': {
               height: 20,
