@@ -333,7 +333,7 @@ const StepFour = ({step,setStep}) => {
           ))}
         </Stepper>
       )}
-      <Box display="flex" justifyContent="flex-end" mt={2} gap={1}>
+      <Box display="flex" justifyContent="flex-end" mt={28} gap={1}>
         <Box >
           <Button variant="outlined" color="primary" startIcon={<ArrowBackIcon />} onClick={() => setStep(step - 1)}>
             Back

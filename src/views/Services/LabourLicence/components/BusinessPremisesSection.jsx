@@ -16,7 +16,7 @@ const BusinessPremisesSection = ({ taskId }) => {
     const service_id = searchParams.get('service_id');
   const [businessPremises, setBusinessPremises] = useState({
     id: null,
-    additional_space: 'no'
+    additional_space: false
   });
   const dispatch = useDispatch();
   let mainFields = [
@@ -85,7 +85,7 @@ const BusinessPremisesSection = ({ taskId }) => {
       rental_agreement: null,
       bankStatement: null,
       workplace: '',
-      additional_space: 'no'
+      additional_space: false
     },
     validationSchema: Yup.object({
       addressLine1: Yup.string().required('Address Line 1 is required'),
@@ -186,7 +186,7 @@ const BusinessPremisesSection = ({ taskId }) => {
       });
       setBusinessPremises({
         ...data,
-        // additional_space: data.additional_space || 'no'
+        additional_space: data.additional_space ?? null
       });
     }
   };

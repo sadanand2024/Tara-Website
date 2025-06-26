@@ -191,7 +191,7 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
 
 
     const fetchData = async () => {
-      if (businessPremises?.id && additionalSpace === 'yes') {
+      if (businessPremises?.id && additionalSpace === true) {
         const url = `/labourlicense/additional-space/view?business_location_proofs=${businessPremises.id}`;
         const { res } = await Factory('get', url);
         if (res.status_cd === 0 && res.data) {
@@ -219,7 +219,7 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
 
       if (res.status_cd === 0 && res.data) {
         const data = res.data;
-        setAdditionalSpace(data.additional_space || null);
+        setAdditionalSpace(data.additional_space || false);
         seWorkPlace(data?.workplace || null);
 
 
@@ -229,6 +229,10 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
   useEffect(() => {
     fetchAdditionalSpace();
   }, [businessPremises?.service_request]);
+
+  useEffect(() => {
+    setAdditionalSpace(businessPremises?.additional_space ?? null);
+  }, [businessPremises?.additional_space]);
 
   const renderField = (field) => {
     switch (field.type) {
@@ -315,9 +319,9 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
     label="Yes"
     control={
       <Radio
-        checked={additionalSpace === 'yes'}
+        checked={additionalSpace === true}
         onChange={async () => {
-          setAdditionalSpace('yes');
+          setAdditionalSpace(true);
 
           const url = businessPremises.id
             ? `/labourlicense/business-location/${businessPremises.id}/`
@@ -327,7 +331,7 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
 
           const payload = {
             // ...businessPremises,
-            additional_space: 'yes',
+            additional_space: true,
             workplace: values.workplace || '',
             status: 'in progress'
           };
@@ -346,7 +350,7 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
             );
             setBusinessPremises((prev) => ({
     ...prev,
-    additional_space: 'yes',
+    additional_space: true,
     workplace: values.workplace || '',
     status: 'in progress'
   }));
@@ -360,7 +364,7 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
   label="No"
   control={
     <Radio
-      checked={additionalSpace === 'no'}
+      checked={additionalSpace === false}
       onChange={async () => {
         // Step 1: Delete additional space if it exists
         if (values.id) {
@@ -391,7 +395,7 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
         }
 
         // Step 2: Update the business location to set additional_space: 'no'
-        setAdditionalSpace('no');
+        setAdditionalSpace(false);
 
         const url = businessPremises.id
           ? `/labourlicense/business-location/${businessPremises.id}/`
@@ -400,7 +404,7 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
         const method = businessPremises.id ? 'put' : 'post';
 
         const payload = {
-          additional_space: 'no',
+          additional_space: false,
           status: 'in progress'
         };
 
@@ -418,7 +422,7 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
           );
             setBusinessPremises((prev) => ({
     ...prev,
-    additional_space: 'no',
+    additional_space: false,
     workplace: null,
     status: 'in progress'
   }));
@@ -434,12 +438,12 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
           </Box>
         </Grid2>
         {console.log(additionalSpace)}
-        {additionalSpace === 'yes' && (
+        {additionalSpace === true && (
           
           <Grid2 item xs={12}>
             <form onSubmit={handleSubmit}>
 
-          {additionalSpace === 'yes' && (
+          {additionalSpace === true && (
             <Grid2 item xs={12} sm={6} md={4} sx={{ mt: 1 }}>
               <Autocomplete
                 size="small"
@@ -454,7 +458,7 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
                   if (value && businessPremises?.id) {
                     const url = `/labourlicense/business-location/${businessPremises.id}/`;
                     const payload = {
-                      additional_space: 'yes',
+                      additional_space: true,
                       workplace: value
                     };
 
@@ -473,7 +477,7 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
                       setBusinessPremises((prev) => ({
     ...prev,
     workplace: value,
-    additional_space: 'yes',
+    additional_space: true,
     status: 'in progress'
   }));
 

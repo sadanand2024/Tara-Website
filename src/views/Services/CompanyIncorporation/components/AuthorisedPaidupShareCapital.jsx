@@ -227,10 +227,17 @@ const AuthorisedPaidupShareCapital = ({ taskId }) => {
       size="small"
       name={field.name}
       placeholder={field.placeholder}
+       sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
+ 
       value={formik.values[field.name]}
       onChange={(e) => {
         if (field.name === 'bank_name') {
-          formik.setFieldValue(field.name, e.target.value);
+          formik.setFieldValue(field.name, e.target.value.toUpperCase());
         } else if (!field.disabled) {
           handleNumberInput(e, field.name);
         }
@@ -247,7 +254,7 @@ const AuthorisedPaidupShareCapital = ({ taskId }) => {
       <Card sx={{ p: 3 }}>
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
           <Typography variant="h5" fontWeight={700}>
-            <span style={{ textDecoration: 'underline' }}>Proposed Company Details</span>
+            <span style={{ textDecoration: 'underline' }}>Authorised & Paidup Share Capital</span>
           </Typography>
 
           <Box>
@@ -267,7 +274,7 @@ const AuthorisedPaidupShareCapital = ({ taskId }) => {
           <Grid2 container spacing={2}>
             {formFields.map((field) => (
               <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4 }}>
-                <Typography color="text.secondary" fontWeight={500} mb={1}>
+                <Typography variant='subtitle1' mb={1}>
                   {field.label}
                 </Typography>
                 {renderField(field)}
@@ -275,11 +282,12 @@ const AuthorisedPaidupShareCapital = ({ taskId }) => {
             ))}
           </Grid2>
           <Grid2>
-            <Stack direction="row" spacing={2} justifyContent="flex-end" mt={3}>
+            <Stack direction="row" spacing={1} justifyContent="flex-end" mt={3}>
               <Button 
                 variant="contained" 
                 color="primary" 
                 type="submit"
+                
                 disabled={isLoading}
               >
                 Save

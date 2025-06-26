@@ -10,6 +10,7 @@ import RaiseRequest from '../../RaiseRequest';
 import GetActionButtons from '../../FormHelpers';
 
 
+
 const typeOfBusinessActivityOptions = [
   'Agriculture',
   'Forestry',
@@ -115,8 +116,15 @@ const ProposalCompanyDetails = ({taskId}) => {
       name_3: Yup.string().required('Proposed company names3 is required'),
       objectives_of_company: Yup.string().required('Main objectives of the company is required'),
       business_activity: Yup.mixed().required('Business Activity is required'),
-      mobile_number: Yup.string().required('Mobile Number is required'),
-      email: Yup.string().required('Email Address is required')
+      mobile_number: Yup.string()
+                            .required('Mobile Number is required')
+                            .matches(/^[0-9]+$/, 'Mobile Number must be a number')
+                            .min(10, 'Mobile Number must be at least 10 digits')
+                            .max(10, 'Mobile Number must not exceed 10 digits'),
+      email: Yup.string().required('Email Address is required'),
+      nic_code: Yup.string()
+                .matches(/^[0-9]{5}$/, 'NIC Code must be exactly 5 digits')
+                .max(5, 'NIC Code must be exactly 5 digits')
     }),
 
    onSubmit: async (values) => {
@@ -221,21 +229,51 @@ const ProposalCompanyDetails = ({taskId}) => {
                 onChange={handleChange}
                 error={touched[field.name] && Boolean(errors[field.name])}
                 helperText={touched[field.name] && errors[field.name]}
+                 sx={{
+                 width: '100%',
+                '& .MuiInputBase-input': {
+                 color: 'grey.600'
+              }
+            }}
               />
             )}
           />
         );
       case 'text':
+        const isNumericField = ['pincode', 'nic_code', 'mobile_number'].includes(field.name);
+        let maxLength = undefined;
+        if (field.name === 'mobile_number') maxLength = 10;
+        if (field.name === 'nic_code') maxLength = 5;
         return (
           <TextField
             fullWidth
             size="small"
             name={field.name}
             value={values[field.name]}
-            onChange={handleChange}
+            onChange={e => {
+              if (isNumericField) {
+                let onlyNums = e.target.value.replace(/[^0-9]/g, '');
+                if (typeof maxLength === 'number') {
+                  onlyNums = onlyNums.slice(0, maxLength);
+                }
+                setFieldValue(field.name, onlyNums);
+              } else {
+                handleChange(e);
+              }
+            }}
             error={touched[field.name] && Boolean(errors[field.name])}
             helperText={touched[field.name] && errors[field.name]}
             onBlur={handleBlur}
+            inputProps={{
+              ...(isNumericField ? { inputMode: 'numeric', pattern: '[0-9]*' } : {}),
+              ...(typeof maxLength === 'number' ? { maxLength } : {})
+            }}
+             sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
           />
         );
 
@@ -258,7 +296,7 @@ const ProposalCompanyDetails = ({taskId}) => {
             <span style={{ textDecoration: 'underline' }}>Proposed Company Details</span>
           </Typography>
 
-          <Box>
+          <Box >
             <RaiseRequest
               fields={[
                 'Proposed Company Name1',
@@ -280,7 +318,7 @@ const ProposalCompanyDetails = ({taskId}) => {
           <Grid2 container spacing={2}>
             {fields.map((field) => (
               <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4 }}>
-                <Typography color="text.secondary" fontWeight={500} mb={1}>
+                <Typography variant='subtitle1' mb={1}>
                   {field.label}
                 </Typography>
                 {renderField(field)}
@@ -289,12 +327,14 @@ const ProposalCompanyDetails = ({taskId}) => {
           </Grid2>
 
           <Grid2 size={12}>
-            <Stack direction="row" spacing={2} justifyContent="flex-end" mt={3}>
-              <Button variant="contained" color="primary" type="submit">
+            <Stack direction="row" spacing={1} justifyContent="flex-end" mt={3}>
+              <Button variant="contained"  color="primary" type="submit">
                  Save 
               </Button>
               {proposedCompany.id && proposedCompany.status && (
                 <GetActionButtons
+                  variant="contained"
+                  color="primary"
                   type="put"
                   urlEndpoint="proposed-company-detail"
                   recId={proposedCompany.id}
