@@ -45,22 +45,22 @@ const RegistrationInfo = () => {
   ];
 
   const validationSchema = Yup.object().shape({
-    is_this_voluntary_registration: Yup.string().required('Please select an option'),
-    applying_for_casual_taxable_person: Yup.string().required('Please select an option'),
-    opting_for_composition_scheme: Yup.string().required('Please select an option'),
-    any_existing_registration: Yup.string().required('Please select an option'),
-    registration_number: Yup.string().when('existingGST', (existingGST, schema) => {
-      return existingGST === 'yes'
-        ? schema.required('Registration No. is required')
-        : schema.notRequired();
+   is_this_voluntary_registration: Yup.boolean().required('Please select an option'),
+  applying_for_casual_taxable_person: Yup.boolean().required('Please select an option'),
+  opting_for_composition_scheme: Yup.boolean().required('Please select an option'),
+  any_existing_registration: Yup.boolean().required('Please select an option'),
+  registration_number: Yup.string().when('any_existing_registration', {
+    is: true,
+    then: (schema) => schema.required('Registration No. is required'),
+    otherwise: (schema) => schema.notRequired()
+  }),
+  date_of_registration: Yup.date()
+    .transform((value, originalValue) => (originalValue === '' ? null : value))
+    .when('any_existing_registration', {
+      is: true,
+      then: (schema) => schema.required('Registration Date is required'),
+      otherwise: (schema) => schema.notRequired()
     }),
-    date_of_registration: Yup.date()
-      .transform((value, originalValue) => (originalValue === '' ? null : value))
-      .when('existingGST', (existingGST, schema) => {
-        return existingGST === 'yes'
-          ? schema.required('Registration Date is required')
-          : schema.notRequired();
-      }),
   });
 
   const formik = useFormik({
@@ -91,7 +91,7 @@ const RegistrationInfo = () => {
         formData.append('applying_for_casual_taxable_person', values.applying_for_casual_taxable_person);
         formData.append('opting_for_composition_scheme', values.opting_for_composition_scheme);
         formData.append('any_existing_registration', values.any_existing_registration);
-        if (values.any_existing_registration === 'Yes') {
+        if (values.any_existing_registration === true) {
   formData.append('registration_number', values.registration_number);
   formData.append('date_of_registration', values.date_of_registration);
   }
@@ -150,14 +150,14 @@ const RegistrationInfo = () => {
     
       if (res?.data?.task_data && data !== null) {
       formik.setValues({
-        is_this_voluntary_registration: data.is_this_voluntary_registration || '',
-        applying_for_casual_taxable_person: data.applying_for_casual_taxable_person || '',
-        opting_for_composition_scheme: data.opting_for_composition_scheme || '',
-        any_existing_registration: data.any_existing_registration || '',
-        registration_number: data.registration_number || '',
-        date_of_registration: data.date_of_registration || '',
-        id:data.id || '',
-        task_id: res.data?.task_data["Registration Info"]?.task_id || null,
+      is_this_voluntary_registration: data.is_this_voluntary_registration === true,
+  applying_for_casual_taxable_person: data.applying_for_casual_taxable_person === true,
+  opting_for_composition_scheme: data.opting_for_composition_scheme === true,
+  any_existing_registration: data.any_existing_registration === true,
+  registration_number: data.registration_number || '',
+  date_of_registration: data.date_of_registration || '',
+  id: data.id || '',
+  task_id: res.data?.task_data["Registration Info"]?.task_id || null
 
       });
       setregistrationInfo({
@@ -207,16 +207,18 @@ const RegistrationInfo = () => {
                 fullWidth
                 sx={{ mt: 2 }}
               >
-                <FormLabel component="legend">{item.label}</FormLabel>
-                <RadioGroup
-                  row
-                  name={item.stateKey}
-                  value={formik.values[item.stateKey]}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                >
-                  <FormControlLabel value="Yes" control={<Radio />} label="Yes" />
-                  <FormControlLabel value="No" control={<Radio />} label="No" />
+                <FormLabel variant="subtitle1" component="legend">{item.label}</FormLabel>
+               <RadioGroup
+  row
+  name={item.stateKey}
+  value={formik.values[item.stateKey] === true ? 'true' : 'false'}
+  onChange={(e) => {
+    formik.setFieldValue(item.stateKey, e.target.value === 'true');
+  }}
+  onBlur={formik.handleBlur}
+>
+                  <FormControlLabel value="true" control={<Radio />} label="Yes" />
+                  <FormControlLabel value="false" control={<Radio />} label="No" />
                 </RadioGroup>
                 {formik.touched[item.stateKey] && formik.errors[item.stateKey] && (
                   <Typography variant="caption" color="error">
@@ -226,7 +228,7 @@ const RegistrationInfo = () => {
               </FormControl>
             ))}
 
-            {formik.values.any_existing_registration === 'Yes' && (
+            {formik.values.any_existing_registration === true && (
               <Box mt={3}>
                 <Typography variant="subtitle1" gutterBottom>
                   GST Registration Details
