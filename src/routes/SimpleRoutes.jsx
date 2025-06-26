@@ -19,6 +19,12 @@ const KnowledgePage = Loadable(lazy(() => import('views/pages/knowledge')));
 const CompanyPage = Loadable(lazy(() => import('views/pages/company')));
 const BookConsultationPage = Loadable(lazy(() => import('views/pages/BookConsultation')));
 const ProductDetails = Loadable(lazy(() => import('views/pages/products/ProductDetails')));
+const TermsOfUse = Loadable(lazy(() => import('views/pages/TermsOfUse')));
+const Refund = Loadable(lazy(() => import('views/pages/Refund')));
+const PrivacyPolicy = Loadable(lazy(() => import('views/pages/PrivacyPolicy')));
+
+
+
 // ==============================|| SIMPLE ROUTING ||============================== //
 
 const SimpleRoutes = {
@@ -50,9 +56,7 @@ const SimpleRoutes = {
       path: '/company',
       element: <CompanyPage />
     },
-   
-   
-    {
+   {
       path: '/book-consultation',
       element: <BookConsultationPage />
     },
@@ -60,6 +64,7 @@ const SimpleRoutes = {
       path: 'services/:category',
       element: <ServiceCategory />
     },
+
     {
       path: 'services/:category/:slug',
       element: <ServicePage />
@@ -71,7 +76,22 @@ const SimpleRoutes = {
     {
       path: 'products/plans',
       element: <ProductDetails />
-    }
+    },
+     {
+      path: '/TermsOfUse',
+      element: <TermsOfUse/>
+    
+    },
+     {
+      path: '/Refund',
+      element: <Refund/>
+    
+    },
+     {
+      path: '/PrivacyPolicy',
+      element: <PrivacyPolicy/>
+    
+    },
   ]
 };
 

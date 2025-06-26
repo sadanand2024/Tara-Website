@@ -62,7 +62,8 @@ const RelatedServices = ({ related }) => {
             justifyContent: 'center',
             width: 40,
             height: 40,
-            color:'#FFFFFF'
+            color:'#FFFFFF',
+            ml:-3
           }}
           onClick={scrollLeft}
         >
@@ -169,7 +170,7 @@ const RelatedServices = ({ related }) => {
             justifyContent: 'center',
             width: 40,
             height: 40,
-            // mr:5,
+            mr:-3,
             color:'#FFFFFF'
           }}
           onClick={scrollRight}

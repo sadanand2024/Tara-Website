@@ -30,25 +30,25 @@ import { useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { IconPlus } from '@tabler/icons-react';
 import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
-export default function BranchesInfo({ handleBack, handleNext }) {
+
+import AddBranchDialog from './AddBranchDialog';
+export default function BranchesInfo({ handleBack, handleNext, fetchBusinessDetails }) {
   const [branches, setBranches] = useState([]);
   const dispatch = useDispatch();
   const user = useSelector((state) => state.accountReducer.user);
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
-  const [type, setType] = useState('');
-  const [postType, setPostType] = useState('');
+  const [type, setType] = useState('add');
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-
   const handlePageChange = (event, value) => {
     setCurrentPage(value);
   };
-  const paginatedBranches = branches.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
-  const branchFields = [
-    { name: 'branch_name', label: 'Branch Name' },
-    { name: 'branch_code', label: 'Branch Code' }
-  ];
+  const handleClose = () => {
+    setOpen(false);
+    setType('');
+    setSelectedRecord(null);
+  };
   const getBranches = async () => {
     const { res } = await Factory('get', `/user_management/branches/${user.active_context.business_id}/`, {}, {});
     if (res.status_cd === 0) {
@@ -95,88 +95,21 @@ export default function BranchesInfo({ handleBack, handleNext }) {
     setOpen(true);
     setType('add');
   };
-  const handleClose = () => {
-    setOpen(false);
-  };
+
   const handleEditBranch = (index) => {
     setOpen(true);
     setType('edit');
     setSelectedRecord(branches[index]);
-    setValues(branches[index]);
-  };
-  const validationSchema = Yup.object().shape({
-    branch_name: Yup.string().required('Branch Name is required'),
-    branch_code: Yup.string().required('Branch Code is required')
-  });
-  const formik = useFormik({
-    initialValues: {
-      branch_name: '',
-      branch_code: ''
-    },
-    validationSchema,
-    onSubmit: async (values) => {
-      const postData = { ...values, business: user.active_context.business_id };
-      const url = type === 'edit' ? `/user_management/branches/${selectedRecord.id}/` : '/user_management/branches/';
-      let postmethod = type === 'edit' ? 'put' : 'post';
-      const { res } = await Factory(postmethod, url, postData);
-      if (res?.status_cd === 0) {
-        setType('');
-        getBranches();
-        resetForm();
-        handleClose();
-        dispatch(
-          openSnackbar({
-            open: true,
-            message: type === 'edit' ? 'Branch Updated Successfully' : 'Branch Saved Successfully',
-            variant: 'alert',
-            alert: { color: 'success' },
-            close: false
-          })
-        );
-      } else {
-        dispatch(
-          openSnackbar({
-            open: true,
-            message: JSON.stringify(res?.data?.data?.error || 'Unknown error'),
-            variant: 'alert',
-            alert: { color: 'error' },
-            close: false
-          })
-        );
-      }
-    }
-  });
-  const renderFields = (fields) => {
-    return fields.map((field) => {
-      return (
-        <Grid2 key={field.name} size={{ xs: 12, sm: 6 }}>
-          <Typography gutterBottom>
-            {field.label} {<span style={{ color: 'red' }}>*</span>}
-          </Typography>
-          <CustomInput
-            value={values[field.name]}
-            name={field.name}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            error={touched[field.name] && Boolean(errors[field.name])}
-            helperText={touched[field.name] && errors[field.name]}
-            sx={{ width: '100%' }}
-          />
-        </Grid2>
-      );
-    });
   };
   useEffect(() => {
     getBranches();
   }, []);
-  const { values, setValues, handleChange, errors, touched, handleSubmit, handleBlur, resetForm, setFieldValue } = formik;
-
   return (
     <Grid2 container spacing={2}>
       <Grid2 size={{ xs: 12 }}>
         <Stack direction="row" justifyContent="space-between" alignItems="center">
           <Typography variant="h4">Branches Info</Typography>
-          <Button startIcon={<IconPlus size={16} />} variant="contained" color="primary" onClick={handleOpenDialog}>
+          <Button size="small" startIcon={<IconPlus size={16} />} variant="contained" color="primary" onClick={handleOpenDialog}>
             Add Branch
           </Button>
         </Stack>
@@ -228,65 +161,55 @@ export default function BranchesInfo({ handleBack, handleNext }) {
             </Table>
           </TableContainer>
         </Card>
-        {branches.length > 0 && (
-          <Stack direction="row" justifyContent="center" sx={{ py: 2 }}>
-            <Pagination count={Math.ceil(branches.length / rowsPerPage)} page={currentPage} onChange={handlePageChange} />
-          </Stack>
-        )}
-        <Modal
-          open={open}
-          showClose={true}
-          title={type === 'edit' ? 'Edit Branch' : 'Add Branch'}
-          handleClose={() => {
-            setType('');
-            resetForm(); // Optional
-            handleClose(); // <- this closes the modal
-          }}
-          footer={
-            <Stack direction="row" sx={{ width: 1, justifyContent: 'space-between', gap: 2 }}>
-              <Button
-                onClick={() => {
-                  setType('');
-                  resetForm();
-                  handleClose();
-                }}
-                variant="outlined"
-                color="error"
-              >
-                Cancel
-              </Button>
-              <Button onClick={handleSubmit} type="submit" variant="contained" color="primary">
-                Save
-              </Button>
-            </Stack>
-          }
-        >
-          <Box component="form" onSubmit={handleSubmit} sx={{ padding: 2 }}>
-            <Grid2 container spacing={3}>
-              {renderFields(branchFields)}
-            </Grid2>
-          </Box>
-        </Modal>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
+
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Button
             variant="outlined"
             startIcon={<ArrowBackIcon />}
             onClick={() => {
               navigate('/app/invoice');
             }}
+            size="small"
           >
             Back to Dashboard
           </Button>
+
+          {branches.length === 0 && (
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                py: 3,
+                width: '100%',
+                color: 'text.secondary'
+              }}
+            >
+              No branches added yet
+            </Box>
+          )}
+          {branches.length > 0 && (
+            <Stack direction="row" justifyContent="center" sx={{ py: 2 }}>
+              <Pagination count={Math.ceil(branches.length / rowsPerPage)} page={currentPage} onChange={handlePageChange} />
+            </Stack>
+          )}
           <Stack direction="row" spacing={2}>
-            <Button variant="outlined" onClick={handleBack}>
+            <Button variant="outlined" size="small" onClick={handleBack}>
               Back
             </Button>
-            <Button variant="contained" onClick={handleNext}>
+            <Button variant="contained" size="small" onClick={handleNext}>
               Next
             </Button>
           </Stack>
         </Box>
       </Grid2>
+      <AddBranchDialog
+        open={open}
+        handleClose={handleClose}
+        selectedRecord={selectedRecord}
+        getBranches={getBranches}
+        setSelectedRecord={setSelectedRecord}
+      />
     </Grid2>
   );
 }

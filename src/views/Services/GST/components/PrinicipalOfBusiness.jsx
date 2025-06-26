@@ -16,10 +16,17 @@ import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
 import Factory from 'utils/Factory';
 import { indian_States_And_UTs } from 'utils/indian_States_And_UT';
 import * as Yup from 'yup';
+import { useSearchParams } from 'react-router-dom';
+import RaiseRequest from '../../RaiseRequest';
+import GetActionButtons from '../../FormHelpers';
+
 
 const PrincipleOfBusiness = () => {
+   const [searchParams] = useSearchParams();
+    const service_id = searchParams.get('service_id');
   const [prinicipalBusiness, setprinicipalBusiness] = useState({
     id: null,
+     task_id: null
   });
   const dispatch = useDispatch();
 
@@ -108,7 +115,9 @@ const PrincipleOfBusiness = () => {
       bank_statement_or_cancelled_cheque: null,
     },
     validationSchema: Yup.object({
-      pincode: Yup.number().required('Pincode is required'),
+     pincode: Yup.string()
+          .matches(/^[1-9][0-9]{5}$/, 'Pincode must be exactly 6 digits')
+          .required('Pincode is required'),
       state: Yup.string().required('State is required'),
       city: Yup.string().required('City is required'),
       district: Yup.string().required('District is required'),
@@ -121,11 +130,12 @@ const PrincipleOfBusiness = () => {
       address_proof_file: Yup.mixed().required('Address Proof file is required'),
     }),
     onSubmit: async (values) => {
+      const task_id = prinicipalBusiness.task_id;
       try {
         let url = prinicipalBusiness.id ? `/gst/principal-place-details/${prinicipalBusiness.id}/` : `/gst/principal-place-details/`;
         let formData = new FormData();
-        formData.append('service_request', 32);
-        formData.append('service_task', 68);
+        formData.append('service_request',service_id);
+        formData.append('service_task',task_id);
         formData.append(
           'principal_place',
           JSON.stringify({
@@ -154,7 +164,7 @@ const PrincipleOfBusiness = () => {
         }
 
         const { res } = await Factory(prinicipalBusiness.id ? 'put' : 'post', url, formData);
-        // console.log('API Response:', res);
+        
         
         if (res.status_cd === 1) {
           dispatch(
@@ -194,13 +204,17 @@ const PrincipleOfBusiness = () => {
   });
 
   const getprinicipalBusiness = async () => {
-    const url = `/gst/principal-place-details/by-service-request/?service_request_id=32`;
+    const url = `/gst/service-request-section-data?service_request_id=${service_id}&section=business_details`;
     const { res } = await Factory('get', url, {});
    
     if (res.status_cd === 0 && res.data) {
-      const data = res.data;
+    const data = res?.data?.task_data["Principal Place Details"]?.data;
+
+      // const data = res.data;
+      if (res?.data?.task_data && data !== null) {
       formik.setValues({
         pincode: data.principal_place?.pincode || '',
+        name_1:data.profg?.name_1||'',
         state: data.principal_place?.state || '',
         district: data.principal_place?.district || '',
         city: data.principal_place?.city || '',
@@ -213,11 +227,19 @@ const PrincipleOfBusiness = () => {
         address_proof_file: data.address_proof_file || null,
         rental_agreement_or_noc: data.rental_agreement_or_noc || null,
         bank_statement_or_cancelled_cheque: data.bank_statement_or_cancelled_cheque || null,
+        task_id: res?.data?.task_data["Principal Place Details"]?.task_id || null,
       });
       setprinicipalBusiness({
         ...data,
-        id: data.id
+        // id: data.id,
+        task_id: res.data?.task_data["Principal Place Details"]?.task_id || null,
       });
+    }
+    else {
+        setprinicipalBusiness({
+          task_id: res?.data?.task_data["Principal Place Details"]?.task_id,
+        });
+      }
     }
   };
 
@@ -228,7 +250,7 @@ const PrincipleOfBusiness = () => {
       case 'text':
         return ['nature_of_possession_of_premise', 'address_proof', 'state'].includes(field.name) ? (
           <>
-            <Typography color="text.secondary" fontWeight={500} mb={1}>
+            <Typography variant="subtitle1" mb={1}>
               {field.label}
             </Typography>
             <Autocomplete
@@ -249,13 +271,19 @@ const PrincipleOfBusiness = () => {
                   name={field.name}
                   error={touched[field.name] && Boolean(errors[field.name])}
                   helperText={touched[field.name] && errors[field.name]}
+                sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                 />
               )}
             />
           </>
         ) : (
           <>
-            <Typography color="text.secondary" fontWeight={500} mb={1}>
+            <Typography variant="subtitle1"  mb={1}>
               {field.label}
             </Typography>
             <TextField
@@ -267,13 +295,19 @@ const PrincipleOfBusiness = () => {
               onBlur={handleBlur}
               error={touched[field.name] && Boolean(errors[field.name])}
               helperText={touched[field.name] && errors[field.name]}
+              sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
             />
           </>
         );
       case 'file':
         return (
           <>
-            <Typography color="text.secondary" fontWeight={500} mb={1}>
+            <Typography variant="subtitle1"  mb={1}>
               {field.label}
             </Typography>
             <RenderFileUpload
@@ -283,6 +317,12 @@ const PrincipleOfBusiness = () => {
               setFieldValue={setFieldValue}
               touched={touched[field.name]}
               errors={errors[field.name]}
+              sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
             />
           </>
         );
@@ -300,10 +340,34 @@ const PrincipleOfBusiness = () => {
       <Card sx={{ p: 3 }}>
         <form onSubmit={formik.handleSubmit}>
           <Grid2 container spacing={2}>
-            <Grid2 size={12}>
+            <Grid2>
               <Typography variant="h4" fontWeight={700}>
-                Details of Principal Place of Business
+                Principal  Information
               </Typography>
+            </Grid2>
+            <Grid2 sx={{ flexGrow:1,ml:95 }}>
+              <Box display="flex" justifyContent="flex-end" gap={1}>
+                <RaiseRequest
+                  fields={[
+  'Pincode',
+  'State',
+  'District',
+  'City',
+  'Road / Street / Locality',
+  'Building / Flat No.',
+  'Latitude',
+  'Longitude',
+  'Nature of Possession of Premise',
+  'Address Proof',
+  'Address Proof File',
+  'Rental Agreement or NOC',
+  'Bank Statement or Cancelled Cheque'
+]}
+
+                task_id={prinicipalBusiness.task_id}
+              />
+                
+              </Box>
             </Grid2>
 
             {mainFields.map((field) => (
@@ -313,10 +377,22 @@ const PrincipleOfBusiness = () => {
             ))}
 
             <Grid2 size={12}>
-              <Stack direction="row" spacing={2} justifyContent="flex-end" mt={3}>
+              <Stack direction="row" spacing={1} justifyContent="flex-end" mt={3}>
                 <Button variant="contained" color="primary" type="submit">
-                  {prinicipalBusiness.id ? 'Update' : 'Save'}
+                  {/* {prinicipalBusiness.id ? 'Update' : 'Save'} */}
+                  Save
                 </Button>
+                                        <GetActionButtons
+                                            type="put"
+                                            urlEndpoint="principal-place-details"
+                                            recId={prinicipalBusiness.id}
+                                            status={prinicipalBusiness.status}
+                                            data={prinicipalBusiness}
+                                            service_request={service_id}
+                                            task_id={prinicipalBusiness.task_id}
+                                            urlKey="gst"
+                                            urlBool={true}
+                                            />
               </Stack>
             </Grid2>
           </Grid2>

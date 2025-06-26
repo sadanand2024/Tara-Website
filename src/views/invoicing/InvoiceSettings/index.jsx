@@ -24,6 +24,7 @@ import ReceiptLongTwoToneIcon from '@mui/icons-material/ReceiptLongTwoTone';
 import GSTSettings from 'views/application/Business/GSTSettings';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
+import { useSearchParams } from 'react-router-dom';
 function TabPanel({ children, value, index, ...other }) {
   return (
     <div role="tabpanel" hidden={value !== index} id={`simple-tabpanel-${index}`} aria-labelledby={`simple-tab-${index}`} {...other}>
@@ -45,19 +46,27 @@ export default function SimpleTabs() {
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('md')); // Change layout for md and below
 
   const { mode, borderRadius } = useConfig();
-  const [value, setValue] = useState(1);
+  const dispatch = useDispatch();
+  const [value, setValue] = useState(0);
   const [businessDetails, setBusinessDetails] = useState(null);
   const [postType, setPostType] = useState('');
   const [loading, setLoading] = useState(true);
   const [customers, setCustomers] = useState([]);
   const user = useSelector((state) => state.accountReducer?.user);
-
+  const [searchParams] = useSearchParams();
+  useEffect(() => {
+    const from = searchParams.get('from');
+    const tabValue = Number(searchParams.get('tab'));
+    if (from === 'invoice') {
+      setValue(tabValue);
+    }
+  }, [searchParams]);
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
 
   const handleNext = () => {
-    if (value < 4) setValue((prev) => prev + 1);
+    if (value < 5) setValue((prev) => prev + 1);
   };
 
   const handleBack = () => {
@@ -271,7 +280,14 @@ export default function SimpleTabs() {
               />
             </TabPanel>
             <TabPanel value={value} index={1}>
-              <GSTSettings user={user} tabChange={handleChange} tabval={value} />
+              <GSTSettings
+                user={user}
+                tabChange={handleChange}
+                tabval={value}
+                from="invoice"
+                handleBack={handleBack}
+                handleNext={handleNext}
+              />
             </TabPanel>
             <TabPanel value={value} index={2}>
               <BranchesInfo
@@ -315,5 +331,3 @@ export default function SimpleTabs() {
     </Card>
   );
 }
-
-TabPanel.propTypes = { children: PropTypes.any, value: PropTypes.any, index: PropTypes.any, other: PropTypes.any };

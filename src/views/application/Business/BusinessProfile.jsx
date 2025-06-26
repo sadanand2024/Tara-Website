@@ -3,6 +3,7 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { Autocomplete } from '@mui/material';
 import { useSnackbar } from 'notistack';
+import { Delete } from '@mui/icons-material';
 import {
   Box,
   Button,
@@ -13,25 +14,37 @@ import {
   InputLabel,
   MenuItem,
   Select,
-  Switch,
   TextField,
   Typography,
   RadioGroup,
   Radio,
   CircularProgress,
-  Avatar
+  Avatar,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Card,
+  Pagination,
+  Stack
 } from '@mui/material';
-import { useDispatch } from 'store';
-import { openSnackbar } from 'store/slices/snackbar';
+
 import { industries } from 'utils/industries';
 import { entity_choices } from 'utils/Entity-types';
 import { __IndianStates } from 'utils/indianStates';
 import Factory from 'utils/Factory';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
+import Edit from '@mui/icons-material/Edit';
 import IconButton from '@mui/material/IconButton';
+import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
+import AddBranchDialog from './AddBranchDialog';
+import { useDispatch, useSelector } from 'react-redux';
+import { openSnackbar } from 'store/slices/snackbar';
 
-// Add a mapping for entity types
 const entityTypeMapping = {
   privateLimitedCompany: 'Private Limited Company',
   publicCompanyListed: 'Public Company Listed',
@@ -105,6 +118,11 @@ const businessProfileFields = [
     type: 'text'
   },
   {
+    name: 'logo',
+    label: 'Logo',
+    type: 'file'
+  },
+  {
     name: 'pan',
     label: 'PAN',
     type: 'text'
@@ -163,7 +181,8 @@ let primaryContactFields = [
     type: 'text'
   }
 ];
-const BusinessProfile = ({ user, tabChange, tabval }) => {
+const BusinessProfile = ({ tabChange, tabval }) => {
+  const user = useSelector((state) => state.accountReducer.user);
   const dispatch = useDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const [logoFile, setLogoFile] = useState(null);
@@ -173,6 +192,73 @@ const BusinessProfile = ({ user, tabChange, tabval }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [branches, setBranches] = useState([]);
   const [isMultipleBranches, setIsMultipleBranches] = useState('no');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [open, setOpen] = useState(false);
+  const [selectedBranch, setSelectedBranch] = useState(null);
+  const handlePageChange = (event, value) => {
+    setCurrentPage(value);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const handleAddBranch = () => {
+    setOpen(true);
+  };
+
+  const handleEdit = (branch) => {
+    setOpen(true);
+    setSelectedBranch(branch);
+  };
+
+  const handleRemoveBranch = async (index) => {
+    // If the branch doesn't have an ID, it means it hasn't been saved yet
+    if (!branches[index].id) {
+      const newBranches = [...branches];
+      newBranches.splice(index, 1);
+      setBranches(newBranches);
+      return;
+    }
+
+    // If the branch has an ID, proceed with API deletion
+    let url = `/user_management/branches/${branches[index].id}/`;
+    let response = await Factory('delete', url, {});
+    if (response.res.status_cd === 0) {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Branch deleted successfully',
+          variant: 'alert',
+          alert: { color: 'success' },
+          close: false
+        })
+      );
+      const branchesResponse = await Factory('get', `/user_management/branches/${user.active_context.business_id}/`, {}, {});
+      if (branchesResponse.res.status_cd === 0) {
+        if (branchesResponse.res.data.length > 0) {
+          setIsMultipleBranches('yes');
+          setBranches(branchesResponse.res.data);
+        } else {
+          setIsMultipleBranches('no');
+          setBranches([]);
+        }
+      }
+    } else {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Failed to delete branch',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
+    }
+  };
+
+  const paginatedData = branches.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+
   const [initialValues, setInitialValues] = useState({
     nameOfBusiness: '',
     business_nature: '',
@@ -249,15 +335,15 @@ const BusinessProfile = ({ user, tabChange, tabval }) => {
         }
       } catch (error) {
         console.error('Error fetching data:', error);
-        enqueueSnackbar('Failed to load data', {
-          variant: 'error',
-          anchorOrigin: { vertical: 'top', horizontal: 'right' },
-          ContentProps: {
-            sx: {
-              color: 'white'
-            }
-          }
-        });
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'Failed to load data',
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
       } finally {
         setIsLoading(false);
       }
@@ -287,15 +373,15 @@ const BusinessProfile = ({ user, tabChange, tabval }) => {
           );
           tabChange('e', 1 + tabval);
         } else {
-          enqueueSnackbar(response.res.message || 'Failed to update business profile', {
-            variant: 'error',
-            anchorOrigin: { vertical: 'top', horizontal: 'right' },
-            ContentProps: {
-              sx: {
-                color: 'white'
-              }
-            }
-          });
+          dispatch(
+            openSnackbar({
+              open: true,
+              message: response.res.message || 'Failed to update business profile',
+              variant: 'alert',
+              alert: { color: 'error' },
+              close: false
+            })
+          );
         }
       } catch (error) {
         console.error('Error updating business profile:', error);
@@ -354,61 +440,6 @@ const BusinessProfile = ({ user, tabChange, tabval }) => {
     }
   };
 
-  const handleAddBranch = () => {
-    const newBranches = [...branches, { branch_name: '', branch_code: '' }];
-    setBranches(newBranches);
-  };
-
-  const handleRemoveBranch = async (index) => {
-    // If the branch doesn't have an ID, it means it hasn't been saved yet
-    if (!branches[index].id) {
-      const newBranches = [...branches];
-      newBranches.splice(index, 1);
-      setBranches(newBranches);
-      return;
-    }
-
-    // If the branch has an ID, proceed with API deletion
-    let url = `/user_management/branches/${branches[index].id}/`;
-    let response = await Factory('delete', url, {});
-    if (response.res.status_cd === 0) {
-      dispatch(
-        openSnackbar({
-          open: true,
-          message: 'Branch deleted successfully',
-          variant: 'alert',
-          alert: { color: 'success' },
-          close: false
-        })
-      );
-      const branchesResponse = await Factory('get', `/user_management/branches/${user.active_context.business_id}/`, {}, {});
-      if (branchesResponse.res.status_cd === 0) {
-        if (branchesResponse.res.data.length > 0) {
-          setIsMultipleBranches('yes');
-          setBranches(branchesResponse.res.data);
-        } else {
-          setIsMultipleBranches('no');
-          setBranches([]);
-        }
-      }
-    } else {
-      dispatch(
-        openSnackbar({
-          open: true,
-          message: 'Failed to delete branch',
-          variant: 'alert',
-          alert: { color: 'error' },
-          close: false
-        })
-      );
-    }
-  };
-
-  const handleBranchChange = (index, field, value) => {
-    const newBranches = [...branches];
-    newBranches[index] = { ...newBranches[index], [field]: value };
-    setBranches(newBranches);
-  };
   const renderField = (field) => {
     // Helper function to get nested value
     const getNestedValue = (obj, path) => {
@@ -433,6 +464,11 @@ const BusinessProfile = ({ user, tabChange, tabval }) => {
                 helperText={touched[field.name] && errors[field.name]}
               />
             )}
+            sx={{
+              '& .MuiInputBase-input': {
+                color: 'text.disabled'
+              }
+            }}
           />
         );
       case 'text':
@@ -454,6 +490,11 @@ const BusinessProfile = ({ user, tabChange, tabval }) => {
                 setFieldValue(field.name, e.target.value);
               }
             }}
+            sx={{
+              '& .MuiInputBase-input': {
+                color: 'text.disabled'
+              }
+            }}
             error={touched[field.name] && Boolean(errors[field.name])}
             helperText={touched[field.name] && errors[field.name]}
             onBlur={handleBlur}
@@ -473,79 +514,19 @@ const BusinessProfile = ({ user, tabChange, tabval }) => {
             helperText={touched[field.name] && errors[field.name]}
           />
         );
+      case 'file':
+        return (
+          <Grid2 size={{ xs: 12, sm: 6, md: 4 }} key={field.name}>
+            <input
+              accept="image/*"
+              style={{ display: 'none' }}
+              id="profile-image-upload"
+              type="file"
+              onChange={handleLogoChange}
+              ref={fileInputRef}
+            />
 
-      default:
-        return null;
-    }
-  };
-
-  const handleSaveBranch = async (index) => {
-    let branchesdata = branches[index];
-    let data = {
-      branch_name: branchesdata.branch_name,
-      branch_code: branchesdata.branch_code,
-      business: user.active_context.business_id
-    };
-
-    try {
-      let response;
-      if (branchesdata.id) {
-        // If branch has an ID, use PUT to update existing branch
-        response = await Factory('put', `/user_management/branches/${branchesdata.id}/`, data);
-      } else {
-        // If no ID, use POST to create new branch
-        response = await Factory('post', '/user_management/branches/', data);
-      }
-
-      if (response.res.status_cd === 0) {
-        enqueueSnackbar('Branch saved successfully', {
-          variant: 'success',
-          anchorOrigin: { vertical: 'top', horizontal: 'right' }
-        });
-        // Refresh branches after saving
-        const branchesResponse = await Factory('get', `/user_management/branches/${user.active_context.business_id}/`, {}, {});
-        if (branchesResponse.res.status_cd === 0) {
-          setBranches(branchesResponse.res.data || []);
-        }
-      }
-    } catch (error) {
-      console.error('Error saving branch:', error);
-      enqueueSnackbar('Failed to save branch', {
-        variant: 'error',
-        anchorOrigin: { vertical: 'top', horizontal: 'right' }
-      });
-    }
-  };
-
-  if (isLoading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
-  const { values, handleChange, errors, touched, handleSubmit, handleBlur, resetForm, setFieldValue } = formik;
-  console.log(errors);
-  return (
-    <Box component="form" onSubmit={handleSubmit}>
-      <Grid2 container spacing={2}>
-        {/* Business Name Header */}
-        <Grid2 size={{ xs: 12 }}>
-          <Typography variant="h4" color="text.primary" gutterBottom>
-            Business Profile
-          </Typography>
-        </Grid2>
-        <Grid2 size={{ xs: 12, md: 6 }} sx={{ mt: 2, mb: 2 }}>
-          <Grid2 container spacing={2} direction="column" alignItems="center">
-            <Grid2>
-              <input
-                accept="image/*"
-                style={{ display: 'none' }}
-                id="profile-image-upload"
-                type="file"
-                onChange={handleLogoChange}
-                ref={fileInputRef}
-              />
+            <Box display="flex" alignItems="center" gap={10}>
               <Avatar
                 alt="Profile"
                 src={logoUrlDetails?.logo || (logoFile ? URL.createObjectURL(logoFile) : '')}
@@ -564,20 +545,44 @@ const BusinessProfile = ({ user, tabChange, tabval }) => {
                   }
                 }}
               />
-            </Grid2>
 
-            <Grid2>
               <label htmlFor="profile-image-upload">
-                <Button variant="contained" size="small" component="span">
+                <Button variant="contained" size="small" component="span" sx={{ whiteSpace: 'nowrap' }}>
                   Upload / Change Logo
                 </Button>
               </label>
-            </Grid2>
+            </Box>
           </Grid2>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+  const { values, handleChange, errors, touched, handleSubmit, handleBlur, resetForm, setFieldValue } = formik;
+  return (
+    <Box component="form" onSubmit={handleSubmit}>
+      <Grid2 container spacing={2}>
+        {/* Business Name Header */}
+        <Grid2 size={{ xs: 12 }}>
+          <Typography variant="h4" color="text.primary" gutterBottom>
+            Business Profile
+          </Typography>
         </Grid2>
+        {/* <Grid2 size={{ xs: 12, md: 6 }} sx={{ mt: 2, mb: 2 }}>
+        
+        </Grid2> */}
         {businessProfileFields.map((field) => (
           <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4 }}>
-            <Typography color="text.secondary" fontWeight={500} mb={1}>
+            <Typography variant="subtitle1" mb={0.5}>
               {field.label}
             </Typography>
             {renderField(field)}
@@ -591,8 +596,8 @@ const BusinessProfile = ({ user, tabChange, tabval }) => {
           </Typography>
         </Grid2>
         {primaryContactFields.map((field) => (
-          <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4 }}>
-            <Typography color="text.secondary" fontWeight={500} mb={1}>
+          <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+            <Typography variant="subtitle1" mb={0.5}>
               {field.label}
             </Typography>
             {renderField(field)}
@@ -674,49 +679,85 @@ const BusinessProfile = ({ user, tabChange, tabval }) => {
           </FormControl>
         </Grid2>
 
-        <Grid2 size={{ xs: 12 }}>
+        <Grid2 size={{ xs: 10 }}>
           {isMultipleBranches === 'yes' && (
             <>
-              {branches.map((branch, index) => (
-                <Grid2 container spacing={2} key={index} sx={{ mt: 1, mb: 4 }}>
-                  <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                    <TextField
-                      fullWidth
-                      size="small"
-                      label="Branch Name"
-                      value={branch.branch_name}
-                      onChange={(e) => handleBranchChange(index, 'branch_name', e.target.value)}
-                    />
-                  </Grid2>
-                  <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                    <TextField
-                      fullWidth
-                      size="small"
-                      label="Branch Code"
-                      value={branch.branch_code}
-                      onChange={(e) => handleBranchChange(index, 'branch_code', e.target.value)}
-                    />
-                  </Grid2>
-                  <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                    <Button type="button" variant="outlined" color="primary" onClick={() => handleSaveBranch(index)} size="small">
-                      Save Branch
-                    </Button>
-                  </Grid2>
-                  <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                    <Button type="button" variant="outlined" color="error" onClick={() => handleRemoveBranch(index)} size="small">
-                      Remove Branch
-                    </Button>
-                  </Grid2>
-                </Grid2>
-              ))}
-              <Grid2 size={{ xs: 12, md: 12, sm: 12 }} sx={{ mt: 2 }}>
+              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+                <Typography variant="h6" color="text.primary" gutterBottom sx={{ mb: 2 }}></Typography>
                 <Button variant="outlined" color="primary" onClick={handleAddBranch} startIcon={<AddIcon />} size="small">
                   Add Branch
                 </Button>
-              </Grid2>
+              </Stack>
+              <Card
+                elevation={2}
+                component="div"
+                sx={{
+                  mb: 2,
+
+                  '& .MuiTableContainer-root': {
+                    borderRadius: 0
+                  },
+                  '& .MuiTableCell-root': {
+                    color: 'text.primary'
+                  },
+                  '& .MuiTableHead-root .MuiTableCell-root': {
+                    py: 1,
+                    backgroundColor: 'primary.main',
+                    color: '#fff'
+                  }
+                }}
+              >
+                <TableContainer>
+                  <Table size="small">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>S.No</TableCell>
+                        <TableCell>Branch Name</TableCell>
+                        <TableCell>Branch Code</TableCell>
+                        <TableCell align="center">Actions</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {paginatedData.map((branch, index) => (
+                        <TableRow key={index}>
+                          <TableCell>{(currentPage - 1) * rowsPerPage + index + 1}</TableCell>
+                          <TableCell>{branch.branch_name}</TableCell>
+                          <TableCell>{branch.branch_code}</TableCell>
+                          <TableCell align="center">
+                            <Stack direction="row" spacing={2} justifyContent="center" alignItems="center">
+                              <IconButton color="primary" size="small" onClick={() => handleEdit(branch)}>
+                                <Edit />
+                              </IconButton>
+                              <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
+                                <IconButton color="error" size="small" onClick={() => handleRemoveBranch(index)}>
+                                  <Delete />
+                                </IconButton>
+                              </Box>
+                            </Stack>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </Card>
+
+              {branches.length > 0 && (
+                <Stack direction="row" justifyContent="center" sx={{ py: 2 }}>
+                  <Pagination count={Math.ceil(branches.length / rowsPerPage)} page={currentPage} onChange={handlePageChange} />
+                </Stack>
+              )}
             </>
           )}
         </Grid2>
+        <AddBranchDialog
+          open={open}
+          handleClose={handleClose}
+          branches={branches}
+          setBranches={setBranches}
+          user={user}
+          selectedBranch={selectedBranch}
+        />
       </Grid2>
     </Box>
   );

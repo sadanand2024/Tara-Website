@@ -28,12 +28,19 @@ export default function CustomersComponent({ getCustomersData, customers, busine
         <Grid2 size={{ xs: 12 }}>
           <Stack direction="row" justifyContent="space-between" alignItems="center">
             <Typography variant="h4">Customers</Typography>
-            <Button variant="contained" startIcon={<IconPlus size={16} />} onClick={handleOpen}>
+            <Button size="small" variant="contained" startIcon={<IconPlus size={16} />} onClick={handleOpen}>
               Add Customer
             </Button>
           </Stack>
 
-          <AddCustomer open={open} handleClose={handleClose} getCustomersData={getCustomersData} businessDetailsData={businessDetails} />
+          <AddCustomer
+            type={type}
+            setType={setType}
+            open={open}
+            handleClose={handleClose}
+            getCustomersData={getCustomersData}
+            businessDetailsData={businessDetails}
+          />
         </Grid2>
 
         {/* Customer List Section */}
@@ -47,30 +54,13 @@ export default function CustomersComponent({ getCustomersData, customers, busine
             businessDetailsData={businessDetails}
             customersListData={customers}
             getCustomersData={getCustomersData}
+            handleBack={handleBack}
+            handleNext={handleNext}
           />
         </Grid2>
       </Grid2>
 
       {/* Footer Navigation Buttons */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
-        <Button
-          variant="outlined"
-          startIcon={<ArrowBackIcon />}
-          onClick={() => {
-            navigate('/app/invoice');
-          }}
-        >
-          Back to Dashboard
-        </Button>
-        <Stack direction="row" spacing={2}>
-          <Button variant="outlined" onClick={handleBack}>
-            Back
-          </Button>
-          <Button variant="contained" onClick={handleNext}>
-            Next
-          </Button>
-        </Stack>
-      </Box>
     </>
   );
 }

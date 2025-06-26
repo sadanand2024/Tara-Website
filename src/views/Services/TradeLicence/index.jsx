@@ -3,6 +3,8 @@ import { Card, Typography, Box, Paper } from '@mui/material';
 import StepOne from './components/StepOne';
 import StepTwo from './components/StepTwo';
 import StepThree from './components/StepThree';
+import { useSearchParams } from 'react-router-dom';
+import Factory from 'utils/Factory';
 const steps = [
   { label: 'Applicant & Business Details', width: 200 },
   { label: 'Documents & Declaration', width: 200 },
@@ -10,11 +12,35 @@ const steps = [
 ];
 
 const TradeLicenceRegistration = () => {
+
+const [searchParams] = useSearchParams();
+  const service_id = searchParams.get('service_id');
   const [step, setStep] = React.useState(0);
   const activeStep = step;
   const handleStepClick = (targetStep) => {
     if (targetStep <= step + 1) setStep(targetStep);
   };
+   const [taskIds, setTaskIds] = useState({
+    businessdocumentdetails: null,
+  tradelicencedetails: null
+  });
+      const fetchTaskId = async () => {
+      const url = `/tradelicense/service-request-section-data?service_request_id=${service_id}&section=document_related_info`;
+      const { res } = await Factory('get', url);
+     if (res.status_cd === 0 && res.data?.tasks) {
+      const tasks = res.data.tasks;
+        setTaskIds({businessdocumentdetails: tasks["Business Document Details"]?.task_id || null,
+          tradelicencedetails: tasks["Trade License Details"]?.task_id || null});
+        
+      }
+    };
+  
+    useEffect(() => {
+     
+      if (service_id) {
+        fetchTaskId();
+      }
+    }, [service_id]);
 
   return (
     <Card sx={{ minHeight: '100vh', p: { xs: 1, md: 4 } }}>
@@ -65,11 +91,18 @@ const TradeLicenceRegistration = () => {
             ))}
           </Box>
 
-          {step === 0 && <StepOne />}
+          {step === 0 && <StepOne  step={step} setStep={setStep}/>}
 
-          {step === 1 && <StepTwo />}
+{step === 1 && (
+  <StepTwo
+    taskId={taskIds.businessdocumentdetails}
+    tradelicencedetailsTaskId={taskIds.tradelicencedetails}
+    step={step}
+          setStep={setStep}
+  />
+)}
 
-          {step === 2 && <StepThree />}
+          {step === 2 && <StepThree step={step} setStep={setStep} />}
         </Paper>
       </Box>
     </Card>

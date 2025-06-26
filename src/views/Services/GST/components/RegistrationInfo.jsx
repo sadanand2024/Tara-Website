@@ -18,6 +18,11 @@ import React, { useEffect, useState } from 'react';
 import Factory from 'utils/Factory';
 import * as Yup from 'yup';
 import { openSnackbar } from 'store/slices/snackbar';
+import { useSearchParams } from 'react-router-dom';
+import RaiseRequest from '../../RaiseRequest';
+import GetActionButtons from '../../FormHelpers';
+
+
 
 
 // Dummy placeholders - replace with your actual imports/context hooks
@@ -27,7 +32,9 @@ import { useDispatch } from 'react-redux';
 
 
 const RegistrationInfo = () => {
-  const [businessPremises, setBusinessPremises] = useState({});
+     const [searchParams] = useSearchParams();
+      const service_id = searchParams.get('service_id');
+  const [registrationInfo, setregistrationInfo] = useState({});
   const dispatch = useDispatch();
 
   const questions = [
@@ -38,22 +45,22 @@ const RegistrationInfo = () => {
   ];
 
   const validationSchema = Yup.object().shape({
-    is_this_voluntary_registration: Yup.string().required('Please select an option'),
-    applying_for_casual_taxable_person: Yup.string().required('Please select an option'),
-    opting_for_composition_scheme: Yup.string().required('Please select an option'),
-    any_existing_registration: Yup.string().required('Please select an option'),
-    registration_number: Yup.string().when('existingGST', (existingGST, schema) => {
-      return existingGST === 'yes'
-        ? schema.required('Registration No. is required')
-        : schema.notRequired();
+   is_this_voluntary_registration: Yup.boolean().required('Please select an option'),
+  applying_for_casual_taxable_person: Yup.boolean().required('Please select an option'),
+  opting_for_composition_scheme: Yup.boolean().required('Please select an option'),
+  any_existing_registration: Yup.boolean().required('Please select an option'),
+  registration_number: Yup.string().when('any_existing_registration', {
+    is: true,
+    then: (schema) => schema.required('Registration No. is required'),
+    otherwise: (schema) => schema.notRequired()
+  }),
+  date_of_registration: Yup.date()
+    .transform((value, originalValue) => (originalValue === '' ? null : value))
+    .when('any_existing_registration', {
+      is: true,
+      then: (schema) => schema.required('Registration Date is required'),
+      otherwise: (schema) => schema.notRequired()
     }),
-    date_of_registration: Yup.date()
-      .transform((value, originalValue) => (originalValue === '' ? null : value))
-      .when('existingGST', (existingGST, schema) => {
-        return existingGST === 'yes'
-          ? schema.required('Registration Date is required')
-          : schema.notRequired();
-      }),
   });
 
   const formik = useFormik({
@@ -68,24 +75,30 @@ const RegistrationInfo = () => {
     },
     validationSchema,
     onSubmit: async (values) => {
+      const task_id = registrationInfo.task_id;
       try {
-        const url = businessPremises.id
-          ? `/gst/registration-info/${businessPremises.id}/`
+        const url = registrationInfo.id
+          ? `/gst/registration-info/${registrationInfo.id}/`
           : `/gst/registration-info/`;
 
         const formData = new FormData();
-        formData.append('service_request',32);
-        formData.append('service_task', 67);
+        formData.append('service_request',service_id);
+        formData.append('service_task', task_id);
+        formData.append('status', 'in progress');
 
         // Map your form values to formData keys (adjust keys as per your API)
         formData.append('is_this_voluntary_registration', values.is_this_voluntary_registration);
         formData.append('applying_for_casual_taxable_person', values.applying_for_casual_taxable_person);
         formData.append('opting_for_composition_scheme', values.opting_for_composition_scheme);
         formData.append('any_existing_registration', values.any_existing_registration);
-        if (values.any_existing_registration === 'Yes') {
+        if (values.any_existing_registration === true) {
   formData.append('registration_number', values.registration_number);
   formData.append('date_of_registration', values.date_of_registration);
-}
+  }
+  else {
+  formData.append('registration_number', '');
+  formData.append('date_of_registration', '');
+  }
 
         // Example: if you had file inputs:
         // if (values.someFileField && typeof values.someFileField !== 'string') {
@@ -93,20 +106,20 @@ const RegistrationInfo = () => {
         // }
 
         // Replace Factory with your API calling method:
-        const { res } = await Factory(businessPremises.id ? 'put' : 'post', url, formData);
+        const { res } = await Factory(registrationInfo.id ? 'put' : 'post', url, formData);
 
         if (res.status_cd === 0) {
           dispatch(
             openSnackbar({
               open: true,
-              message: businessPremises.id ? 'Data updated successfully' : 'Data saved successfully',
+              message: registrationInfo.id ? 'Data updated successfully' : 'Data saved successfully',
               variant: 'alert',
               alert: { color: 'success' },
               close: false
             })
           );
-          // alert(businessPremises.id ? 'Data updated successfully' : 'Data saved successfully');
-          getBusinessPremises(); // Refresh data
+          // alert(registrationInfo.id ? 'Data updated successfully' : 'Data saved successfully');
+          getregistrationInfo(); // Refresh data
         } else {
           dispatch(
             openSnackbar({
@@ -125,32 +138,45 @@ const RegistrationInfo = () => {
     }
   });
 
-  // Move getBusinessPremises above useEffect so it's defined before useEffect runs
-  const getBusinessPremises = async () => {
-    const url = `/gst/registration-info/by-service-request/?service_request_id=32`;
+  // Move getregistrationInfo above useEffect so it's defined before useEffect runs
+  const getregistrationInfo = async () => {
+    const url = `/gst/service-request-section-data?service_request_id=${service_id}&section=business_details`;
     const { res } = await Factory('get', url);
-    // console.log(res.data , res.status_cd);
+    
+
     if (res.status_cd === 0 && res.data) {
-      const data = res.data;
-      // console.log(data);
+      const data = res?.data?.task_data["Registration Info"]?.data;
+      // const data = res.data;
+    
+      if (res?.data?.task_data && data !== null) {
       formik.setValues({
-        is_this_voluntary_registration: data.is_this_voluntary_registration || '',
-        applying_for_casual_taxable_person: data.applying_for_casual_taxable_person || '',
-        opting_for_composition_scheme: data.opting_for_composition_scheme || '',
-        any_existing_registration: data.any_existing_registration || '',
-        registration_number: data.registration_number || '',
-        date_of_registration: data.date_of_registration || '',
-        id:data.id || '',
+      is_this_voluntary_registration: data.is_this_voluntary_registration === true,
+  applying_for_casual_taxable_person: data.applying_for_casual_taxable_person === true,
+  opting_for_composition_scheme: data.opting_for_composition_scheme === true,
+  any_existing_registration: data.any_existing_registration === true,
+  registration_number: data.registration_number || '',
+  date_of_registration: data.date_of_registration || '',
+  id: data.id || '',
+  task_id: res.data?.task_data["Registration Info"]?.task_id || null
+
       });
-      setBusinessPremises({
+      setregistrationInfo({
         ...data,
+        task_id: res.data?.task_data["Registration Info"]?.task_id || null,
+
       });
+    }
+    else {
+        setregistrationInfo({
+          task_id: res?.data?.task_data["Registration Info"]?.task_id,
+        });
+      }
     }
   };
 
-  // useEffect must be after getBusinessPremises is defined
+  // useEffect must be after getregistrationInfo is defined
   useEffect(() => {
-    getBusinessPremises();
+    getregistrationInfo();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -158,9 +184,20 @@ const RegistrationInfo = () => {
     <Box sx={{ pt: 4 }}>
       <Card variant="outlined">
         <CardContent>
-          <Typography variant="h4" gutterBottom>
-            Registration Info
-          </Typography>
+          <Grid2>
+               <Typography variant="h4" fontWeight={700}>
+                 Registration Information
+               </Typography>
+             </Grid2>
+             <Grid2 sx={{ flexGrow:1,ml:95 }}>
+               <Box display="flex" justifyContent="flex-end" gap={1}>
+                 <RaiseRequest
+                   fields={[]}
+                   task_id={registrationInfo.task_id}
+                 />
+                 
+               </Box>
+             </Grid2>
 
           <form onSubmit={formik.handleSubmit}>
             {questions.map((item, index) => (
@@ -170,16 +207,18 @@ const RegistrationInfo = () => {
                 fullWidth
                 sx={{ mt: 2 }}
               >
-                <FormLabel component="legend">{item.label}</FormLabel>
-                <RadioGroup
-                  row
-                  name={item.stateKey}
-                  value={formik.values[item.stateKey]}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                >
-                  <FormControlLabel value="Yes" control={<Radio />} label="Yes" />
-                  <FormControlLabel value="No" control={<Radio />} label="No" />
+                <FormLabel variant="subtitle1" component="legend">{item.label}</FormLabel>
+               <RadioGroup
+  row
+  name={item.stateKey}
+  value={formik.values[item.stateKey] === true ? 'true' : 'false'}
+  onChange={(e) => {
+    formik.setFieldValue(item.stateKey, e.target.value === 'true');
+  }}
+  onBlur={formik.handleBlur}
+>
+                  <FormControlLabel value="true" control={<Radio />} label="Yes" />
+                  <FormControlLabel value="false" control={<Radio />} label="No" />
                 </RadioGroup>
                 {formik.touched[item.stateKey] && formik.errors[item.stateKey] && (
                   <Typography variant="caption" color="error">
@@ -189,7 +228,7 @@ const RegistrationInfo = () => {
               </FormControl>
             ))}
 
-            {formik.values.any_existing_registration === 'Yes' && (
+            {formik.values.any_existing_registration === true && (
               <Box mt={3}>
                 <Typography variant="subtitle1" gutterBottom>
                   GST Registration Details
@@ -230,10 +269,22 @@ const RegistrationInfo = () => {
             )}
 
             <Grid2 size={{ xs: 12 }}>
-              <Stack direction="row" spacing={2} justifyContent="flex-end" mt={3}>
+              <Stack direction="row" spacing={1} justifyContent="flex-end" mt={3}>
                 <Button variant="contained" color="primary" type="submit">
                   Save
                 </Button>
+                 <GetActionButtons
+                            type="put"
+                            urlEndpoint="registration-info"
+                            recId={registrationInfo.id}
+                            status={registrationInfo.status}
+                            data={registrationInfo}
+                            service_request={service_id}
+                            task_id={registrationInfo.task_id}
+                            urlKey="gst"
+                            urlBool={true}
+                            
+                          />
               </Stack>
             </Grid2>
           </form>

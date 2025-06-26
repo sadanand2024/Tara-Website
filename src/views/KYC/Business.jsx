@@ -1,31 +1,111 @@
 import React from 'react';
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  TextField,
-  MenuItem,
-  Box,
-  Stack,
-  Typography,
-  CircularProgress
-} from '@mui/material';
-import Grid from '@mui/material/Grid2';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs from 'dayjs';
-import { DIALOG_TITLE_PADDING, DIALOG_CONTENT_PADDING } from 'config';
-import { useTheme } from '@mui/material/styles';
 import { entityTypes, businessNatureChoices, states } from '../../utils/constants';
+import Modal from 'ui-component/extended/Modal';
+import { FormControl, FormLabel, Autocomplete, Button, TextField, Grid2, Stack, Box, Typography, CircularProgress } from '@mui/material';
+
+const personalFields = [
+  {
+    name: 'nameOfBusiness',
+    label: 'Business Name',
+    type: 'text',
+    required: true
+  },
+  {
+    name: 'registrationNumber',
+    label: 'Registration Number',
+    type: 'text',
+    required: false
+  },
+  {
+    name: 'entityType',
+    label: 'Entity Type',
+    type: 'select',
+    options: entityTypes,
+    required: true
+  },
+  {
+    name: 'pan',
+    label: 'PAN',
+    type: 'text',
+    required: true
+  },
+  {
+    name: 'business_nature',
+    label: 'Nature of Business',
+    type: 'select',
+    options: businessNatureChoices,
+    required: false
+  },
+  {
+    name: 'trade_name',
+    label: 'Trade Name',
+    type: 'text',
+    required: false
+  },
+  {
+    name: 'mobile_number',
+    label: 'Mobile Number',
+    type: 'text',
+    required: false
+  },
+  {
+    name: 'email',
+    label: 'Email',
+    type: 'text',
+    required: false
+  },
+  {
+    name: 'dob_or_incorp_date',
+    label: 'Date of Incorporation',
+    type: 'date',
+    required: false
+  }
+];
+
+const headOfficeFields = [
+  {
+    name: 'address_line1',
+    label: 'Address Line 1',
+    type: 'text',
+    required: true
+  },
+  {
+    name: 'address_line2',
+    label: 'Address Line 2',
+    type: 'text',
+    required: false
+  },
+  {
+    name: 'city',
+    label: 'City',
+    type: 'text',
+    required: true
+  },
+  {
+    name: 'state',
+    label: 'State',
+    type: 'select',
+    options: states,
+    required: true
+  },
+  {
+    name: 'country',
+    label: 'Country',
+    type: 'text',
+    required: true
+  },
+  {
+    name: 'pincode',
+    label: 'PIN Code',
+    type: 'text',
+    required: true
+  }
+];
 
 const BusinessKYCDialog = ({ open, onClose, onSubmit, isSubmitting }) => {
-  const theme = useTheme();
-
   const validationSchema = Yup.object({
     nameOfBusiness: Yup.string().required('Business name is required').min(3, 'Business name should be at least 3 characters'),
     registrationNumber: Yup.string().min(6, 'Registration number should be at least 6 characters'),
@@ -33,16 +113,133 @@ const BusinessKYCDialog = ({ open, onClose, onSubmit, isSubmitting }) => {
     pan: Yup.string()
       .required('PAN is required')
       .matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN format'),
-    mobile_number: Yup.string().matches(/^[0-9]{10}$/, 'Invalid mobile number'),
-    email: Yup.string().email('Invalid email format'),
-    dob_or_incorp_date: Yup.date().max(new Date(), 'Date cannot be in the future'),
-    headOffice: Yup.object({
-      address_line1: Yup.string().min(5, 'Address should be at least 5 characters'),
-      address_line2: Yup.string(),
-      city: Yup.string().matches(/^[a-zA-Z\s]+$/, 'City should only contain letters'),
-      pincode: Yup.number().min(100000, 'Invalid PIN code').max(999999, 'Invalid PIN code')
-    })
+    business_nature: Yup.string().required('Business nature is required'),
+    trade_name: Yup.string().required('Trade name is required'),
+    mobile_number: Yup.string()
+      .required('Mobile number is required')
+      .matches(/^[0-9]{10}$/, 'Invalid mobile number'),
+    email: Yup.string().required('Email is required').email('Invalid email format'),
+    dob_or_incorp_date: Yup.date().required('Date of incorporation is required').max(new Date(), 'Date cannot be in the future'),
+    address_line1: Yup.string().required('Address is required').min(5, 'Address should be at least 5 characters'),
+    address_line2: Yup.string(),
+    city: Yup.string()
+      .required('City is required')
+      .matches(/^[a-zA-Z\s]+$/, 'City should only contain letters'),
+    state: Yup.string().required('State is required'),
+    country: Yup.string().required('Country is required'),
+    pincode: Yup.string()
+      .required('PIN code is required')
+      .matches(/^[0-9]{6}$/, 'PIN code should be 6 digits')
   });
+  const renderFields = (fields) => {
+    return fields.map((field) =>
+      field.name === 'state' || field.name === 'entityType' || field.name === 'business_nature' ? (
+        <Grid2 size={{ xs: 12, sm: 6, md: 4 }} key={field.name}>
+          <FormControl fullWidth>
+            <FormLabel>{field.label}</FormLabel>
+            <Autocomplete
+              value={
+                field.name === 'entityType' ? entityTypes.find((option) => option.value === values[field.name]) || null : values[field.name]
+              }
+              onChange={(e, value) => {
+                if (field.name === 'entityType') {
+                  setFieldValue(field.name, value ? value.value : '');
+                } else {
+                  setFieldValue(field.name, value);
+                }
+              }}
+              onBlur={() => handleBlur({ target: { name: field.name } })}
+              options={field.options}
+              getOptionLabel={(option) => {
+                if (field.name === 'entityType') {
+                  return option ? option.label : '';
+                }
+                return option || '';
+              }}
+              isOptionEqualToValue={(option, value) => {
+                if (field.name === 'entityType') {
+                  return option.value === (value ? value.value : '');
+                }
+                return option === value;
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  size="small"
+                  error={touched[field.name] && Boolean(errors[field.name])}
+                  helperText={touched[field.name] && errors[field.name]}
+                />
+              )}
+            />
+          </FormControl>
+        </Grid2>
+      ) : field.name === 'dob_or_incorp_date' ? (
+        <Grid2 size={{ xs: 12, sm: 6, md: 4 }} key={field.name}>
+          <FormControl fullWidth>
+            <FormLabel>{field.label}</FormLabel>
+            <TextField
+              fullWidth
+              type="date"
+              name={field.name}
+              size="small"
+              value={values[field.name] || ''}
+              onChange={(e) => setFieldValue(field.name, e.target.value)}
+              onBlur={(e) => handleBlur({ target: { name: field.name } })}
+              error={touched[field.name] && Boolean(errors[field.name])}
+              helperText={touched[field.name] && errors[field.name]}
+              InputLabelProps={{
+                shrink: true
+              }}
+            />
+          </FormControl>
+        </Grid2>
+      ) : (
+        <Grid2 size={{ xs: 12, sm: 6, md: 4 }} key={field.name}>
+          <FormControl fullWidth>
+            <FormLabel>{field.label}</FormLabel>
+            <TextField
+              fullWidth
+              name={field.name}
+              value={values[field.name]}
+              onChange={(e) => {
+                let value = e.target.value;
+
+                if (field.name === 'pan') {
+                  // Only allow letters and numbers, max 10 characters
+                  value = value.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+                  if (value.length > 10) {
+                    return;
+                  }
+                } else if (field.name === 'mobile_number') {
+                  // Only allow numbers, max 10 characters
+                  value = value.replace(/[^0-9]/g, '');
+                  if (value.length > 10) {
+                    return;
+                  }
+                } else if (field.name === 'pincode') {
+                  // Only allow numbers, max 6 characters
+                  value = value.replace(/[^0-9]/g, '');
+                  if (value.length > 6) {
+                    return;
+                  }
+                } else if (field.name === 'city' || field.name === 'country') {
+                  // Only allow letters and spaces
+                  value = value.replace(/[^a-zA-Z\s]/g, '');
+                }
+
+                setFieldValue(field.name, value);
+              }}
+              onBlur={handleBlur}
+              error={touched[field.name] && Boolean(errors[field.name])}
+              helperText={touched[field.name] && errors[field.name]}
+              size="small"
+              disabled={field.name === 'country'}
+            />
+          </FormControl>
+        </Grid2>
+      )
+    );
+  };
 
   const formik = useFormik({
     initialValues: {
@@ -54,15 +251,13 @@ const BusinessKYCDialog = ({ open, onClose, onSubmit, isSubmitting }) => {
       trade_name: '',
       mobile_number: '',
       email: '',
-      dob_or_incorp_date: null,
-      headOffice: {
-        address_line1: '',
-        address_line2: '',
-        city: '',
-        state: '',
-        country: 'India',
-        pincode: ''
-      }
+      dob_or_incorp_date: '',
+      address_line1: '',
+      address_line2: '',
+      city: '',
+      state: '',
+      country: 'India',
+      pincode: ''
     },
     validationSchema,
     onSubmit: (values) => {
@@ -70,310 +265,63 @@ const BusinessKYCDialog = ({ open, onClose, onSubmit, isSubmitting }) => {
         ...values,
         dob_or_incorp_date: values.dob_or_incorp_date ? dayjs(values.dob_or_incorp_date).format('YYYY-MM-DD') : null,
         headOffice: {
-          ...values.headOffice,
-          pincode: values.headOffice.pincode ? parseInt(values.headOffice.pincode, 10) : ''
+          address_line1: values.address_line1,
+          address_line2: values.address_line2,
+          city: values.city,
+          state: values.state,
+          country: values.country,
+          pincode: values.pincode
         }
       };
       onSubmit(submissionData);
     }
   });
 
-  const requiredLabel = (label) => (
-    <Box component="span" sx={{ display: 'flex', alignItems: 'center' }}>
-      {label}
-    </Box>
-  );
+  const { values, errors, touched, handleSubmit, handleBlur, setFieldValue } = formik;
 
   return (
-    <Dialog
+    <Modal
       open={open}
-      maxWidth="sm"
-      fullWidth
-      PaperProps={{
-        sx: {
-          borderRadius: 2,
-          m: 2
-        }
-      }}
-    >
-      <DialogTitle sx={{ ...DIALOG_TITLE_PADDING }}>
-        <Stack direction="column" spacing={0}>
-          <Typography variant="h3">Business KYC</Typography>
-          <Typography variant="caption">Please provide your business details for KYC verification</Typography>
-        </Stack>
-      </DialogTitle>
-      <form onSubmit={formik.handleSubmit}>
-        <DialogContent sx={{ ...DIALOG_CONTENT_PADDING }} dividers>
-          <Grid container spacing={2}>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField
-                fullWidth
-                label={
-                  <Box component="span" sx={{ display: 'flex', alignItems: 'center' }}>
-                    Business Name
-                    <Typography component="span" sx={{ color: 'error.main', ml: 0.5 }}>
-                      *
-                    </Typography>
-                  </Box>
-                }
-                name="nameOfBusiness"
-                value={formik.values.nameOfBusiness}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                error={formik.touched.nameOfBusiness && Boolean(formik.errors.nameOfBusiness)}
-                helperText={formik.touched.nameOfBusiness && formik.errors.nameOfBusiness}
-                size="small"
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField
-                fullWidth
-                label={requiredLabel('Registration Number')}
-                name="registrationNumber"
-                value={formik.values.registrationNumber}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                error={formik.touched.registrationNumber && Boolean(formik.errors.registrationNumber)}
-                helperText={formik.touched.registrationNumber && formik.errors.registrationNumber}
-                size="small"
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField
-                fullWidth
-                select
-                label={requiredLabel('Entity Type')}
-                name="entityType"
-                value={formik.values.entityType}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                error={formik.touched.entityType && Boolean(formik.errors.entityType)}
-                helperText={formik.touched.entityType && formik.errors.entityType}
-                size="small"
-              >
-                {entityTypes.map((option) => (
-                  <MenuItem key={option.value} value={option.value}>
-                    {option.label}
-                  </MenuItem>
-                ))}
-              </TextField>
-            </Grid>
-
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField
-                fullWidth
-                label={
-                  <Box component="span" sx={{ display: 'flex', alignItems: 'center' }}>
-                    PAN
-                    <Typography component="span" sx={{ color: 'error.main', ml: 0.5 }}>
-                      *
-                    </Typography>
-                  </Box>
-                }
-                name="pan"
-                value={formik.values.pan}
-                onChange={(e) => formik.setFieldValue('pan', e.target.value.toUpperCase())}
-                onBlur={formik.handleBlur}
-                error={formik.touched.pan && Boolean(formik.errors.pan)}
-                helperText={formik.touched.pan && formik.errors.pan}
-                size="small"
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField
-                fullWidth
-                select
-                label={requiredLabel('Nature of Business')}
-                name="business_nature"
-                value={formik.values.business_nature}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                error={formik.touched.business_nature && Boolean(formik.errors.business_nature)}
-                helperText={formik.touched.business_nature && formik.errors.business_nature}
-                size="small"
-              >
-                {businessNatureChoices.map((choice) => (
-                  <MenuItem key={choice} value={choice}>
-                    {choice}
-                  </MenuItem>
-                ))}
-              </TextField>
-            </Grid>
-
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField
-                fullWidth
-                label={requiredLabel('Trade Name')}
-                name="trade_name"
-                value={formik.values.trade_name}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                error={formik.touched.trade_name && Boolean(formik.errors.trade_name)}
-                helperText={formik.touched.trade_name && formik.errors.trade_name}
-                size="small"
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField
-                fullWidth
-                label={requiredLabel('Mobile Number')}
-                name="mobile_number"
-                value={formik.values.mobile_number}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                error={formik.touched.mobile_number && Boolean(formik.errors.mobile_number)}
-                helperText={formik.touched.mobile_number && formik.errors.mobile_number}
-                size="small"
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField
-                fullWidth
-                label={requiredLabel('Email')}
-                name="email"
-                value={formik.values.email}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                error={formik.touched.email && Boolean(formik.errors.email)}
-                helperText={formik.touched.email && formik.errors.email}
-                size="small"
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DatePicker
-                  label={requiredLabel('Date of Incorporation')}
-                  value={formik.values.dob_or_incorp_date}
-                  onChange={(value) => formik.setFieldValue('dob_or_incorp_date', value)}
-                  onBlur={() => formik.setFieldTouched('dob_or_incorp_date', true)}
-                  slotProps={{
-                    textField: {
-                      fullWidth: true,
-                      size: 'small',
-                      error: formik.touched.dob_or_incorp_date && Boolean(formik.errors.dob_or_incorp_date),
-                      helperText: formik.touched.dob_or_incorp_date && formik.errors.dob_or_incorp_date
-                    }
-                  }}
-                />
-              </LocalizationProvider>
-            </Grid>
-
-            <Grid size={12}>
-              <Typography variant="h4" sx={{ m: 0 }}>
-                Head Office Address
-              </Typography>
-            </Grid>
-
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField
-                fullWidth
-                label={requiredLabel('Address Line 1')}
-                name="headOffice.address_line1"
-                value={formik.values.headOffice.address_line1}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                error={formik.touched.headOffice?.address_line1 && Boolean(formik.errors.headOffice?.address_line1)}
-                helperText={formik.touched.headOffice?.address_line1 && formik.errors.headOffice?.address_line1}
-                size="small"
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField
-                fullWidth
-                label="Address Line 2"
-                name="headOffice.address_line2"
-                value={formik.values.headOffice.address_line2}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                error={formik.touched.headOffice?.address_line2 && Boolean(formik.errors.headOffice?.address_line2)}
-                helperText={formik.touched.headOffice?.address_line2 && formik.errors.headOffice?.address_line2}
-                size="small"
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField
-                fullWidth
-                label={requiredLabel('City')}
-                name="headOffice.city"
-                value={formik.values.headOffice.city}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                error={formik.touched.headOffice?.city && Boolean(formik.errors.headOffice?.city)}
-                helperText={formik.touched.headOffice?.city && formik.errors.headOffice?.city}
-                size="small"
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField
-                fullWidth
-                select
-                label={requiredLabel('State')}
-                name="headOffice.state"
-                value={formik.values.headOffice.state}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                error={formik.touched.headOffice?.state && Boolean(formik.errors.headOffice?.state)}
-                helperText={formik.touched.headOffice?.state && formik.errors.headOffice?.state}
-                size="small"
-              >
-                {states.map((state) => (
-                  <MenuItem key={state} value={state}>
-                    {state}
-                  </MenuItem>
-                ))}
-              </TextField>
-            </Grid>
-
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField
-                fullWidth
-                label={requiredLabel('Country')}
-                name="headOffice.country"
-                value={formik.values.headOffice.country}
-                disabled
-                size="small"
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField
-                fullWidth
-                label={requiredLabel('PIN Code')}
-                name="headOffice.pincode"
-                type="number"
-                value={formik.values.headOffice.pincode}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                error={formik.touched.headOffice?.pincode && Boolean(formik.errors.headOffice?.pincode)}
-                helperText={formik.touched.headOffice?.pincode && formik.errors.headOffice?.pincode}
-                size="small"
-              />
-            </Grid>
-          </Grid>
-        </DialogContent>
-        <DialogActions sx={{ p: 2, px: 3 }}>
+      maxWidth="md"
+      showClose={false}
+      title="Business KYC Details"
+      // handleClose={onClose}
+      footer={
+        <Stack direction="row" sx={{ justifyContent: 'flex-end', gap: 2 }}>
+          {/* <Button onClick={onClose} variant="outlined" color="error" disabled={isSubmitting}>
+            Cancel
+          </Button> */}
           <Button
+            onClick={handleSubmit}
             type="submit"
             variant="contained"
             color="primary"
-            size="medium"
-            disabled={isSubmitting || !formik.dirty || Object.keys(formik.errors).length > 0}
-            startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : null}
+            disabled={isSubmitting}
+            startIcon={isSubmitting ? <CircularProgress size={16} /> : null}
           >
-            {isSubmitting ? 'Submitting...' : 'Submit'}
+            {isSubmitting ? 'Saving...' : 'Save'}
           </Button>
-        </DialogActions>
-      </form>
-    </Dialog>
+        </Stack>
+      }
+    >
+      <Box component="form" onSubmit={handleSubmit} sx={{ padding: 3 }}>
+        <Typography variant="h5" sx={{ fontWeight: 600, mb: 2 }}>
+          Business Information
+        </Typography>
+
+        <Grid2 container spacing={3} sx={{ mb: 4 }}>
+          {renderFields(personalFields)}
+        </Grid2>
+
+        <Typography variant="h5" sx={{ fontWeight: 600, mb: 2 }}>
+          Head Office Address
+        </Typography>
+
+        <Grid2 container spacing={3} sx={{ mb: 2 }}>
+          {renderFields(headOfficeFields)}
+        </Grid2>
+      </Box>
+    </Modal>
   );
 };
 

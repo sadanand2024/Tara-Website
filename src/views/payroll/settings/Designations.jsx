@@ -27,7 +27,7 @@ import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
 import { IconButton } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
 import BulkUploadDialog from 'ui-component/extended/BulkUploadDialog';
-function Designations() {
+function Designations({ handleBack, handleNext }) {
   const [designations, setDesignations] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [postType, setPostType] = useState('');
@@ -92,10 +92,11 @@ function Designations() {
       title="Designation Details"
       secondary={
         <Stack direction="row" spacing={2}>
-          <Button variant="outlined" color="secondary" onClick={() => setOpenBulkDialog(true)}>
+          <Button size="small" variant="outlined" color="secondary" onClick={() => setOpenBulkDialog(true)}>
             Bulk Upload
           </Button>
           <Button
+            size="small"
             variant="contained"
             color="primary"
             onClick={() => {
@@ -118,7 +119,7 @@ function Designations() {
         xlsxTemplateUrl="/payroll/download-template/xlsx?type=designation"
         csvTemplateUrl="/payroll/download-template/csv?type=designation"
       />
-      <Grid2 container spacing={3}>
+      <Grid2 container>
         <Grid2 size={{ xs: 12 }}>
           <DesignationDialog
             open={openDialog}
@@ -132,9 +133,9 @@ function Designations() {
         </Grid2>
 
         <TableContainer component={Paper} sx={{ width: '100%', borderRadius: 2, boxShadow: 1, overflowX: 'auto' }}>
-          <Table>
-            <TableHead>
-              <TableRow sx={{ bgcolor: 'grey.100' }}>
+          <Table size="small">
+            <TableHead sx={{ backgroundColor: 'primary.main' }}>
+              <TableRow>
                 {['S No', 'Designation Name', 'No of Employees', 'Actions'].map((header, idx) => (
                   <TableCell
                     key={idx}
@@ -142,6 +143,7 @@ function Designations() {
                       fontWeight: 'bold',
                       whiteSpace: 'nowrap',
                       fontSize: '0.9rem',
+                      color: '#fff !important',
                       textAlign: ['S No', 'No of Employees', 'Actions'].includes(header) ? 'center' : 'left'
                     }}
                   >
@@ -150,7 +152,6 @@ function Designations() {
                 ))}
               </TableRow>
             </TableHead>
-
             <TableBody>
               {paginatedData.length === 0 ? (
                 <TableRow>
@@ -166,10 +167,10 @@ function Designations() {
                     <TableCell align="center">{designation.employee_count || 0}</TableCell>
                     <TableCell align="center" sx={{ width: '120px' }}>
                       <Box display="flex" justifyContent="center" alignItems="center" gap={1} sx={{ width: '100%' }}>
-                        <IconButton color="primary" onClick={() => handleEdit(designation)}>
+                        <IconButton size="small" color="primary" onClick={() => handleEdit(designation)}>
                           <Edit />
                         </IconButton>
-                        <IconButton color="error" onClick={() => handleOpenDeleteDialog(designation)}>
+                        <IconButton size="small" color="error" onClick={() => handleOpenDeleteDialog(designation)}>
                           <Delete />
                         </IconButton>
                       </Box>
@@ -197,7 +198,11 @@ function Designations() {
 
         {designations.length > 0 && (
           <Grid2 size={{ xs: 12 }}>
-            <Stack direction="row" justifyContent="center" sx={{ mt: 2 }}>
+            <Stack direction="row" justifyContent="space-between" sx={{ mt: 2 }}>
+              <Button size="small" variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigate('/app/payroll')}>
+                Back to Dashboard
+              </Button>
+
               <Pagination
                 count={Math.ceil(designations.length / rowsPerPage)}
                 page={currentPage}
@@ -205,16 +210,18 @@ function Designations() {
                 shape="rounded"
                 color="primary"
               />
+              <Stack direction="row" spacing={2}>
+                <Button size="small" variant="outlined" startIcon={<ArrowBackIcon />} onClick={handleBack}>
+                  Back
+                </Button>
+                <Button size="small" variant="contained" onClick={handleNext}>
+                  Next
+                </Button>
+              </Stack>
             </Stack>
           </Grid2>
         )}
       </Grid2>
-
-      <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigate(-1)}>
-          Back to Dashboard
-        </Button>
-      </Box>
     </MainCard>
   );
 }

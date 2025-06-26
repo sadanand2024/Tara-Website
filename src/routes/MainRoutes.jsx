@@ -11,6 +11,7 @@ const PayrollDashboard = Loadable(lazy(() => import('views/payroll'))); // ✅ w
 const EmployeeDashboard = Loadable(lazy(() => import('views/payroll/EmployeeDashboard')));
 const PayrollWorkflows = Loadable(lazy(() => import('views/payroll/PayrollWorkflows')));
 const PayrollSettings = Loadable(lazy(() => import('views/payroll/settings')));
+const PayrollSettingsLayout = Loadable(lazy(() => import('views/payroll/settings')));
 const OrganizationDetails = Loadable(lazy(() => import('views/payroll/settings/Organizationdetails')));
 const WorkLocation = Loadable(lazy(() => import('views/payroll/settings/Worklocation')));
 const Departments = Loadable(lazy(() => import('views/payroll/settings/Departments')));
@@ -60,11 +61,14 @@ const MSMEDashboard = Loadable(lazy(() => import('views/Services/MSME')));
 const TradeLicence = Loadable(lazy(() => import('views/Services/TradeLicence')));
 const LabourLicence = Loadable(lazy(() => import('views/Services/LabourLicence')));
 const GstRegistration = Loadable(lazy(() => import('views/Services/GST')));
+const CompanyIncorporation = Loadable(lazy(() => import('views/Services/CompanyIncorporation')));
+
 
 //Admin Panel
 const UserManagement = Loadable(lazy(() => import('views/SuperAdmin/UserManagement')));
 const NewRequests = Loadable(lazy(() => import('views/SuperAdmin/ServiceManagement/NewRequests')));
 const TaskManagement = Loadable(lazy(() => import('views/SuperAdmin/ServiceManagement/TaskManagement')));
+const ServiceSummary = Loadable(lazy(() => import('views/SuperAdmin/ServiceManagement/ServiceSummary')));
 // ==============================|| MAIN ROUTING ||============================== //
 
 const MainRoutes = {
@@ -132,6 +136,7 @@ const MainRoutes = {
       path: '/app/task-management/msme-registration',
       element: <MSMEDashboard />
     },
+
     {
       path: '/app/my-services/msme-registration',
       element: <MSMEDashboard />
@@ -153,8 +158,26 @@ const MainRoutes = {
       element: <LabourLicence />
     },
     {
-      path: '/app/my-services/gst-registration',
+      path: '/app/my-services/registration',
+
       element: <GstRegistration />
+    },
+    {
+      path: '/app/task-management/registration',
+      element: <GstRegistration />
+    },
+      {
+      path: '/app/my-services/private-limited',
+
+      element: <CompanyIncorporation />
+    },
+     
+    
+    {
+      path: '/app/task-management/private-limited',
+    
+
+      element: <CompanyIncorporation/>
     },
     {
       path: '/app/users',
@@ -172,6 +195,10 @@ const MainRoutes = {
     {
       path: '/app/task-management',
       element: <TaskManagement />
+    },
+    {
+      path: '/app/service-summary',
+      element: <ServiceSummary />
     },
     {
       path: '/app/manage-tasks',
@@ -215,55 +242,19 @@ const MainRoutes = {
     },
     {
       path: '/app/payroll/settings',
-      element: <PayrollSettings />
+      element: <PayrollSettingsLayout />
     },
     {
-      path: '/payroll/settings/organization-details',
-      element: <OrganizationDetails />
+      path: '/app/payroll/settings/*',
+      element: <PayrollSettingsLayout />
     },
     {
-      path: '/payroll/settings/work-location',
-      element: <WorkLocation />
-    },
-    {
-      path: '/payroll/settings/departments',
-      element: <Departments />
-    },
-    {
-      path: '/payroll/settings/designations',
-      element: <Designations />
-    },
-    {
-      path: '/payroll/settings/statutory-components',
-      element: <StatuitoryComponents />
-    },
-    {
-      path: '/payroll/settings/salary-components',
-      element: <SalaryComponents />
-    },
-    {
-      path: '/payroll/settings/salary-template-list',
-      element: <SalaryTemplateList />
+      path: '/payroll/settings/*',
+      element: <PayrollSettingsLayout />
     },
     {
       path: '/payroll/settings/salary-template',
       element: <SalaryTemplate />
-    },
-    {
-      path: '/payroll/settings/pay-schedule',
-      element: <PaySchedule />
-    },
-    {
-      path: '/payroll/settings/leave-attendance',
-      element: <LeaveAttendance />
-    },
-    // {
-    //   path: '/payroll/settings/business-profile',
-    //   element: <BusinessProfileSetup />
-    // },
-    {
-      path: '/payroll/settings/employee-master',
-      element: <EmployeeMaster />
     },
     {
       path: '/payroll/settings/add-employee',

@@ -3,6 +3,8 @@ import { Card, Typography, Box, Paper } from '@mui/material';
 import StepOne from './components/StepOne';
 import StepTwo from './components/StepTwo';
 import StepThree from './components/StepThree';
+import { useSearchParams } from 'react-router-dom';
+import Factory from 'utils/Factory';
 const steps = [
   { label: 'Applicant & Business Details', width: 200 },
   { label: 'Documents & Declaration', width: 200 },
@@ -10,19 +12,37 @@ const steps = [
 ];
 
 const LabourLicenceRegistration = () => {
+  const [searchParams] = useSearchParams();
+    const service_id = searchParams.get('service_id');
   const [step, setStep] = React.useState(0);
   const activeStep = step;
   const handleStepClick = (targetStep) => {
     setStep(targetStep);
   };
+  const [taskIds, setTaskIds] = useState({
+    businessregistration: null});
+    const fetchTaskId = async () => {
+    const url = `/labourlicense/service-request-section-data?service_request_id=${service_id}&section=document_related_info`;
+    const { res } = await Factory('get', url);
+    if (res.status_cd === 0 && res.data?.task_data) {
+      const taskData = res.data.task_data;
+      setTaskIds({businessregistration: taskData["Business Registration Documents"]?.task_id || null});
+    }
+  };
+
+  useEffect(() => {
+    if (service_id) {
+      fetchTaskId();
+    }
+  }, [service_id]);
 
   return (
     <Card sx={{ minHeight: '100vh', p: { xs: 1, md: 4 } }}>
       <Typography variant="h3" mb={1}>
-        Labour Licence Registration
+        Labour License Registration
       </Typography>
       <Typography variant="caption" color="text.secondary">
-        Register your business for a Labour Licence as required by your local municipal authority.
+        Register your business for a Labour License as required by your local municipal authority.
       </Typography>
       <Box sx={{ mt: 2 }}>
         <Paper elevation={0} sx={{ bgcolor: '#eef2f6', p: { xs: 2, sm: 4 }, borderRadius: 3, minHeight: 700 }}>
@@ -65,11 +85,13 @@ const LabourLicenceRegistration = () => {
             ))}
           </Box>
 
-          {step === 0 && <StepOne />}
+          {step === 0 &&  <StepOne step={step} setStep={setStep} />}
 
-          {step === 1 && <StepTwo />}
+          {step === 1 && <StepTwo taskId={taskIds.businessregistration}
+          step={step}
+          setStep={setStep}/>}
 
-          {step === 2 && <StepThree />}
+          {step === 2 && <StepThree step={step} setStep={setStep} />}
         </Paper>
       </Box>
     </Card>

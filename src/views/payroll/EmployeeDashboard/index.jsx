@@ -32,7 +32,7 @@ const PRODUCTS_DATA = [
 ];
 const TabPanel = ({ children, value, index }) => (
   <div role="tabpanel" hidden={value !== index} id={`simple-tabpanel-${index}`} aria-labelledby={`simple-tab-${index}`}>
-    {value === index && <Box sx={{ pt: 0 }}>{children}</Box>}
+    {value === index && children}
   </div>
 );
 
@@ -117,7 +117,7 @@ export default function Index() {
   return (
     <MainCard title={`Monthly Payroll Dashboard of ${months[month - 1]}`} tagline="Explore your monthly payroll details">
       {' '}
-      <Box sx={{ pb: 3 }}>
+      <Box>
         <Grid2 container spacing={{ xs: 2, md: 3 }}>
           <Grid2 size={12}>
             {loading ? (

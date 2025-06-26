@@ -2,7 +2,19 @@ import React from 'react';
 import { Autocomplete } from '@mui/material';
 import TextField from '@mui/material/TextField';
 
-const CustomAutocomplete = ({ label, value, onChange, options, error, helperText, name, textColor, getOptionKey, ...props }) => {
+const CustomAutocomplete = ({
+  label,
+  value,
+  onChange,
+  options,
+  error,
+  helperText,
+  name,
+  textColor,
+  getOptionKey,
+  customTextField,
+  ...props
+}) => {
   return (
     <Autocomplete
       size="small"
@@ -11,21 +23,25 @@ const CustomAutocomplete = ({ label, value, onChange, options, error, helperText
       options={options}
       disableClearable
       getOptionKey={(option) => (getOptionKey ? getOptionKey(option) : option.id || option)}
-      renderInput={(params) => (
-        <TextField
-          sx={{
-            '& .MuiInputBase-input': {
-              fontSize: '15px',
-              color: textColor || 'inherit' // Apply text color
-            }
-          }}
-          {...params}
-          label={label}
-          error={error}
-          helperText={helperText}
-          fullWidth
-        />
-      )}
+      renderInput={(params) =>
+        customTextField ? (
+          customTextField(params)
+        ) : (
+          <TextField
+            sx={{
+              '& .MuiInputBase-input': {
+                fontSize: '15px',
+                color: textColor || 'inherit' // Apply text color
+              }
+            }}
+            {...params}
+            label={label}
+            error={error}
+            helperText={helperText}
+            fullWidth
+          />
+        )
+      }
       {...props}
     />
   );

@@ -14,7 +14,10 @@ import {
   Divider,
   Grid2,
   Stack,
-  Link
+  Link,
+  TableContainer,
+  Card,
+  Pagination
 } from '@mui/material';
 import Factory from 'utils/Factory';
 import UploadIcon from '@mui/icons-material/Upload';
@@ -29,6 +32,17 @@ const InvoiceNumberFormatComponent = ({ businessDetails, handleBack, handleNext 
   const navigate = useNavigate();
   const [authorizedSignature, setAuthorizedSignature] = useState(null);
   const [signaturePreview, setSignaturePreview] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const rowsPerPage = 5;
+
+  // Add null check before accessing businessDetails.invoice_format
+  const paginatedData = businessDetails?.invoice_format
+    ? businessDetails.invoice_format.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage)
+    : [];
+
+  const handlePageChange = (event, value) => {
+    setCurrentPage(value);
+  };
   const [selectedRecord, setSelectedRecord] = useState({
     id: null,
     format_version: null,
@@ -118,7 +132,7 @@ const InvoiceNumberFormatComponent = ({ businessDetails, handleBack, handleNext 
   const handleEdit = (gstin) => {
     setSelectedGSTIN(gstin);
 
-    const formatToEdit = businessDetails.invoice_format.find((f) => f.gstin === gstin);
+    const formatToEdit = businessDetails?.invoice_format?.find((f) => f.gstin === gstin);
     if (formatToEdit) {
       setFormatOptions((prev) => ({
         ...prev,
@@ -195,9 +209,9 @@ const InvoiceNumberFormatComponent = ({ businessDetails, handleBack, handleNext 
     postData.format_version = postType === 'put' ? Number(selectedRecord.format_version || 1) + 1 : 1;
 
     if (formatOptions.sameFormatForAllGST === true) {
-      postData.is_common_format = 'yes';
+      postData.is_common_format = true;
     } else {
-      postData.is_common_format = 'no';
+      postData.is_common_format = false;
     }
 
     if (postType === 'put') {
@@ -228,7 +242,7 @@ const InvoiceNumberFormatComponent = ({ businessDetails, handleBack, handleNext 
           close: false
         })
       );
-      // navigate('/app/invoice');
+      navigate('/app/invoice');
     } else {
       dispatch(
         openSnackbar({
@@ -243,7 +257,9 @@ const InvoiceNumberFormatComponent = ({ businessDetails, handleBack, handleNext 
   };
 
   useEffect(() => {
-    if (businessDetails.invoice_format.length === 0) {
+    if (!businessDetails) return;
+
+    if (!businessDetails?.invoice_format || businessDetails.invoice_format.length === 0) {
       setPostType('post');
     } else {
       setPostType('put');
@@ -255,18 +271,12 @@ const InvoiceNumberFormatComponent = ({ businessDetails, handleBack, handleNext 
     }
     if (businessDetails?.invoice_format?.length > 0) {
       const formats = businessDetails.invoice_format;
-      if (formats.find((f) => f.is_common_format === 'no')) {
+      if (formats.find((f) => f.is_common_format === false)) {
         setFormatOptions((prev) => ({
           ...prev,
           sameFormatForAllGST: false,
           separateFormatForEachGST: true
         }));
-        // setSelectedRecord({
-        //   id: formats[0].id,
-        //   format_version: formats[0].format_version,
-        //   gstin: formats[0].gstin
-        // });
-        // setSelectedGSTIN(formats[0].gstin);
       } else {
         // Only one format = treat as common format
         const format = formats[0];
@@ -292,7 +302,6 @@ const InvoiceNumberFormatComponent = ({ businessDetails, handleBack, handleNext 
           prefix: format.prefix || '',
           startingNumber: String(format.running_number_start || '1')
         });
-        // setSelectedRecord(format);
         setSelectedGSTIN(format.gstin);
         setSelectedRecord(format);
       }
@@ -353,6 +362,14 @@ const InvoiceNumberFormatComponent = ({ businessDetails, handleBack, handleNext 
     }
   };
 
+  if (!businessDetails) {
+    return (
+      <Box sx={{ p: 3 }}>
+        <Typography>Loading...</Typography>
+      </Box>
+    );
+  }
+
   return (
     <Box>
       <Typography variant="h4" gutterBottom>
@@ -365,7 +382,7 @@ const InvoiceNumberFormatComponent = ({ businessDetails, handleBack, handleNext 
             checked={formatOptions.sameFormatForAllGST}
             onChange={handleChange('sameFormatForAllGST')}
             disabled={
-              formatOptions.separateFormatForEachGST || Boolean(businessDetails.invoice_format.find((f) => f.is_common_format === 'yes'))
+              formatOptions.separateFormatForEachGST || Boolean(businessDetails?.invoice_format?.find((f) => f.is_common_format === true))
             }
           />
         }
@@ -376,58 +393,78 @@ const InvoiceNumberFormatComponent = ({ businessDetails, handleBack, handleNext 
           <Checkbox
             checked={formatOptions.separateFormatForEachGST}
             onChange={handleChange('separateFormatForEachGST')}
-            disabled={formatOptions.sameFormatForAllGST || Boolean(businessDetails.invoice_format.find((f) => f.is_common_format === 'no'))}
+            disabled={
+              formatOptions.sameFormatForAllGST || Boolean(businessDetails?.invoice_format?.find((f) => f.is_common_format === false))
+            }
           />
         }
         label="Create Seperate format for each GST number"
       />
 
       {formatOptions.separateFormatForEachGST && (
-        <>
+        <Box sx={{ maxWidth: '1000px' }}>
           <Typography variant="h5" sx={{ my: 2 }}>
             GSTIN-wise Formats
           </Typography>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>GSTIN</TableCell>
-                {/* <TableCell>Format Preview</TableCell> */}
-                <TableCell>Action</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {businessDetails.gst_details.map((gst) => (
-                <TableRow key={gst.gstin}>
-                  <TableCell>{gst.gstin}</TableCell>
-                  {/* <TableCell>
-                    {[
-                      gst.prefix,
-                      gst.include_branch_code && 'BR',
-                      gst.include_financial_year && '2025-26',
-                      gst.include_series_code && 'SC',
-                      gst.include_running_number && String(gst.running_number_start).padStart(4, '0')
-                    ]
-                      .filter(Boolean)
-                      .join('-')}
-                  </TableCell> */}
-                  <TableCell>
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      onClick={() => {
-                        handleEdit(gst.gstin);
-                      }}
-                    >
-                      Edit
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </>
+          <Card
+            elevation={2}
+            sx={{
+              mb: 2,
+              '& .MuiTableContainer-root': {
+                borderRadius: 0
+              },
+              '& .MuiTableCell-root': {
+                color: 'text.primary'
+              },
+              '& .MuiTableHead-root .MuiTableCell-root': {
+                py: 1,
+                backgroundColor: 'primary.main',
+                color: '#fff'
+              }
+            }}
+          >
+            <TableContainer>
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell align="center">S.No</TableCell>
+                    <TableCell align="center">GSTIN</TableCell>
+                    <TableCell align="center">Action</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {paginatedData.map((gst, index) => (
+                    <TableRow key={gst.gstin}>
+                      <TableCell align="center"> {rowsPerPage * (currentPage - 1) + index + 1}</TableCell>
+                      <TableCell align="center">{gst.gstin}</TableCell>
+
+                      <TableCell align="center">
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          onClick={() => {
+                            handleEdit(gst.gstin);
+                          }}
+                        >
+                          View/Edit
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Card>
+          <Stack direction="row" justifyContent="center" sx={{ py: 2 }}>
+            <Pagination
+              count={Math.ceil((businessDetails?.invoice_format?.length || 0) / rowsPerPage)}
+              page={currentPage}
+              onChange={handlePageChange}
+              color="primary"
+            />
+          </Stack>
+        </Box>
       )}
-      <Divider sx={{ my: 2 }} />
       {(formatOptions.sameFormatForAllGST || selectedGSTIN) && (
         <>
           <Typography variant="h5" sx={{ my: 2 }}>
@@ -455,73 +492,69 @@ const InvoiceNumberFormatComponent = ({ businessDetails, handleBack, handleNext 
             />
           </Box>
 
-          <Typography variant="h5">Component Details</Typography>
+          <Box sx={{ my: 4 }}>
+            <Typography variant="h5">Component Details</Typography>
+            <Grid2 container spacing={2} my={2}>
+              <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+                <label style={{ fontSize: '15px' }}>Prefix</label>
+                <TextField
+                  name="prefix"
+                  size="small"
+                  fullWidth
+                  value={formValues.prefix}
+                  onChange={handleInputChange}
+                  disabled={!formatOptions.usePrefix}
+                  sx={{ mt: 1 }}
+                />
+              </Grid2>
+              <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+                <label style={{ fontSize: '15px' }}>Running Number starts from</label>
+                <TextField
+                  size="small"
+                  name="startingNumber"
+                  type="number"
+                  fullWidth
+                  value={formValues.startingNumber}
+                  onChange={handleInputChange}
+                  disabled={!formatOptions.useRunningNumber}
+                  sx={{ mt: 1 }}
+                />
+              </Grid2>
+              <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+                <label style={{ fontSize: '15px' }}>
+                  Preview <span style={{ color: 'text.textSecondary' }}> Ex : (INV-BR-2024-25-A-0001) </span>
+                </label>
 
-          <Grid2 container spacing={2} my={2}>
-            <Grid2 size={{ xs: 6 }}>
-              <label style={{ fontSize: '15px' }}>Prefix</label>
-              <TextField
-                name="prefix"
-                size="small"
-                fullWidth
-                value={formValues.prefix}
-                onChange={handleInputChange}
-                disabled={!formatOptions.usePrefix}
-              />
+                <TextField size="small" fullWidth value={generatePreview()} disabled sx={{ backgroundColor: 'white', mt: 1 }} />
+              </Grid2>
             </Grid2>
-          </Grid2>
-          <Grid2 size={{ xs: 6 }}>
-            <label style={{ fontSize: '15px' }}>Running Number starts from</label>
-            <TextField
-              size="small"
-              name="startingNumber"
-              type="number"
-              fullWidth
-              value={formValues.startingNumber}
-              onChange={handleInputChange}
-              disabled={!formatOptions.useRunningNumber}
+          </Box>
+
+          <Box sx={{ my: 4 }}>
+            <Typography variant="h5">Configurations</Typography>
+
+            <FormControlLabel
+              control={<Checkbox checked={configOptions.resetEveryFY} onChange={handleChange('resetEveryFY', true)} />}
+              label="Reset every financial year"
             />
-          </Grid2>
-
-          <Divider sx={{ my: 2 }} />
-
-          <Typography variant="h5">
-            Preview <span style={{ color: 'text.textSecondary' }}> Ex : (INV-BR-2024-25-A-0001) </span>
-          </Typography>
-          <Grid2 container spacing={2} my={2}>
-            <Grid2 size={{ xs: 6 }}>
-              <Typography variant="body1" color="textSecondary" gutterBottom>
-                Current Format:
-              </Typography>
-              <TextField size="small" fullWidth value={generatePreview()} disabled sx={{ backgroundColor: 'white' }} />
-            </Grid2>
-          </Grid2>
-
-          <Divider sx={{ my: 2 }} />
-          <Typography variant="h5">Configurations</Typography>
-
-          <FormControlLabel
-            control={<Checkbox checked={configOptions.resetEveryFY} onChange={handleChange('resetEveryFY', true)} />}
-            label="Reset every financial year"
-          />
-          <FormControlLabel
-            control={
-              <Checkbox checked={configOptions.separateSequencePerBranch} onChange={handleChange('separateSequencePerBranch', true)} />
-            }
-            label="Maintain separate sequence per branch"
-          />
-          <FormControlLabel
-            control={
-              <Checkbox checked={configOptions.separateSequencePerGSTIN} onChange={handleChange('separateSequencePerGSTIN', true)} />
-            }
-            label="Maintain separate sequence per GSTIN"
-          />
+            <FormControlLabel
+              control={
+                <Checkbox checked={configOptions.separateSequencePerBranch} onChange={handleChange('separateSequencePerBranch', true)} />
+              }
+              label="Maintain separate sequence per branch"
+            />
+            <FormControlLabel
+              control={
+                <Checkbox checked={configOptions.separateSequencePerGSTIN} onChange={handleChange('separateSequencePerGSTIN', true)} />
+              }
+              label="Maintain separate sequence per GSTIN"
+            />
+          </Box>
         </>
       )}
 
-      {/* <Divider sx={{ my: 2 }} /> */}
       <Typography variant="h5">Authorized Signature</Typography>
-      <Box sx={{ display: 'flex', gap: 2, justifyContent: 'space-between', my: 2 }}>
+      <Box sx={{ display: 'flex', gap: 2, my: 2 }}>
         <FileUploadBox onFiles={handleSignatureUpload} accept="image/*,application/pdf" size="10 KB" />
         {signaturePreview &&
           (typeof signaturePreview === 'string' ? (

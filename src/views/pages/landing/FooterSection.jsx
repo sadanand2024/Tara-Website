@@ -50,7 +50,7 @@ export default function FooterSection() {
               <Grid size={{ xs: 12, md: 4 }}>
                 <Stack spacing={{ xs: 2, md: 5 }}>
                   <Typography component={RouterLink} to="/" aria-label="theme-logo">
-                    <CardMedia component="img" src={taralogoWhite} alt="defaultLayout" sx={{ width: 200,ml:-3.5 }} />
+                    <CardMedia component="img" src={taralogoWhite} alt="defaultLayout" sx={{ width: 200, ml: -3.5 }} />
                   </Typography>
                   <Typography variant="body2" color={textColor}>
                     Tara First is a unified fintech platform for managing personal and business finances. From company registration to GST,
@@ -107,9 +107,11 @@ export default function FooterSection() {
                         {/* <FooterLink href="#" underline="none">
                           Blog
                         </FooterLink> */}
-                        <FooterLink underline="none">Terms & Conditions</FooterLink>
-                        <FooterLink href="#" underline="none">
-                         Privacy Policy
+                        <FooterLink to={'/TermsOfUse'} component={RouterLink} underline="none">
+                          Terms & Conditions
+                        </FooterLink>
+                        <FooterLink to={'/PrivacyPolicy'} component={RouterLink} underline="none">
+                          Privacy Policy
                         </FooterLink>
                         <FooterLink to={'/book-consultation'} component={RouterLink} underline="none">
                           Support
@@ -131,7 +133,12 @@ export default function FooterSection() {
                             }}
                           />
                         </IconButton>
-                        <IconButton size="small" aria-label="TaraFirst Instagram" component={Link} href="https://www.instagram.com/tarafirst_official?igsh=dzM2OHJvMzRuOG9t">
+                        <IconButton
+                          size="small"
+                          aria-label="TaraFirst Instagram"
+                          component={Link}
+                          href="https://www.instagram.com/tarafirst_official?igsh=dzM2OHJvMzRuOG9t"
+                        >
                           <InstagramIcon
                             sx={{
                               color: 'text.secondary',
@@ -164,7 +171,12 @@ export default function FooterSection() {
                             }}
                           />
                         </IconButton>
-                        <IconButton size="small" aria-label="TaraFirst LinkedIn" component={Link} href="https://www.linkedin.com/company/tarafirst/">
+                        <IconButton
+                          size="small"
+                          aria-label="TaraFirst LinkedIn"
+                          component={Link}
+                          href="https://www.linkedin.com/company/tarafirst/"
+                        >
                           <LinkedInIcon
                             sx={{
                               color: 'text.secondary',
@@ -284,6 +296,25 @@ export default function FooterSection() {
             </Stack>
           </Stack>
         </Container> */}
+        <Container>
+          <Stack
+            direction={{ xs: 'column', sm: 'row' }}
+            alignItems="center"
+            // justifyContent="space-between"
+            spacing={{ xs: 1.5, sm: 1, md: 3 }}
+          >
+            <FooterLink to={'/TermsOfUse'} component={RouterLink} underline="none">
+              TermsOfUse
+            </FooterLink>
+
+            <FooterLink to={'/Refund'} component={RouterLink} underline="none">
+              Refund & Cancellation
+            </FooterLink>
+            <FooterLink to={'/PrivacyPolicy'} component={RouterLink} underline="none">
+              Privacy Policy
+            </FooterLink>
+          </Stack>
+        </Container>
       </Box>
     </>
   );

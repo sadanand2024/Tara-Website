@@ -51,7 +51,7 @@ export default function GoodsServicesComponent({ businessDetails, handleNext, ha
         <Grid2 size={{ xs: 12 }}>
           <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={2}>
             <Typography variant="h4">Goods & Services</Typography>
-            <Button variant="contained" startIcon={<IconPlus size={16} />} onClick={handleOpen}>
+            <Button size="small" variant="contained" startIcon={<IconPlus size={16} />} onClick={handleOpen}>
               Add Item
             </Button>
             <AddItem
@@ -79,31 +79,12 @@ export default function GoodsServicesComponent({ businessDetails, handleNext, ha
               businessDetailsData={businessDetails}
               itemsData={items}
               get_Goods_and_Services_Data={fetchItems}
+              handleBack={handleBack}
+              handleNext={handleNext}
             />
           )}
         </Grid2>
       </Grid2>
-
-      {/* Footer Navigation */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
-        <Button
-          variant="outlined"
-          startIcon={<ArrowBackIcon />}
-          onClick={() => {
-            navigate('/app/invoice');
-          }}
-        >
-          Back To Dashboard
-        </Button>
-        <Stack direction="row" spacing={2}>
-          <Button variant="outlined" onClick={handleBack}>
-            Back
-          </Button>
-          <Button variant="contained" onClick={handleNext}>
-            Next
-          </Button>
-        </Stack>
-      </Box>
     </>
   );
 }

@@ -1,15 +1,29 @@
-import React, { useEffect } from 'react';
-import { Box, Typography, Button, Grid2 } from '@mui/material';
+import React, { useEffect,useState } from 'react';
+import { Box, Typography, Button, Grid2,Card } from '@mui/material';
 import IconSave from '@mui/icons-material/Save';
 import { useFormik } from 'formik';
+
+
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import * as Yup from 'yup';
 import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
 import { useDispatch } from 'react-redux';
 import { Autocomplete, TextField } from '@mui/material';
 import { openSnackbar } from 'store/slices/snackbar';
 import Factory from 'utils/Factory';
+import { useSearchParams } from 'react-router-dom';
+import RaiseRequest from '../../RaiseRequest';
+import GetActionButtons from '../../FormHelpers';
 import BusinessRegistrationDocumenst from './BusinessRegistrationDocumenst';
-const StepTwo = () => {
+const StepTwo = ({taskId,tradelicencedetailsTaskId, step, setStep}) => {
+
+  const [searchParams] = useSearchParams();
+  const service_id = searchParams.get('service_id');
+   const [tradeLicense, settradeLicense] = useState({
+       task_id: null
+    });
+  
   const dispatch = useDispatch();
 
   const licenseOptions = [
@@ -38,13 +52,14 @@ const StepTwo = () => {
       })
     }),
     onSubmit: async (values) => {
-      console.log(values);
+      // console.log(values);
       let url = values.id ? `/tradelicense/trade-license-exist/${values.id}/` : `/tradelicense/trade-license-exist/`;
       const formData = new FormData();
-      formData.append('service_request', 25);
-      formData.append('service_task', 5);
+      formData.append('service_request', service_id);
+      formData.append('service_task', tradelicencedetailsTaskId);
       formData.append('apply_new_license', values.apply_new_license?.value);
       formData.append('trade_license_number', values.trade_license_number);
+      formData.append('status', 'in progress');
       if (values.trade_license_file && typeof values.trade_license_file !== 'string') {
         formData.append('trade_license_file', values.trade_license_file);
       }
@@ -60,6 +75,7 @@ const StepTwo = () => {
           })
         );
         getTradeLicenseDeclaration();
+        
       } else {
         dispatch(
           openSnackbar({
@@ -76,7 +92,7 @@ const StepTwo = () => {
 
   // Fetch and set values for both forms
   const getTradeLicenseDeclaration = async () => {
-    const url = `/tradelicense/trade-license-exist/by-request-or-task?service_request_id=25`;
+    const url = `/tradelicense/trade-license-exist/by-request-or-task?service_request_id=${service_id}`;
     const { res } = await Factory('get', url);
     if (res.status_cd === 0) {
       // Format the response data to match form structure
@@ -87,6 +103,7 @@ const StepTwo = () => {
         trade_license_file: res.data.trade_license_file
       };
       setValues(formattedData);
+    settradeLicense(res.data);
     }
   };
   useEffect(() => {
@@ -95,14 +112,34 @@ const StepTwo = () => {
   const { values, setValues, setFieldValue, handleChange, errors, touched, handleSubmit, handleBlur } = formik;
   return (
     <>
+    <Card sx={{ p: 3, mt: 4 }}>
       <form autoComplete="off" onSubmit={handleSubmit}>
         <Box mb={3}>
-          <Typography variant="h4" mb={1}>
-            Trade licence Declaration
-          </Typography>
+          <Grid2 container alignItems="center" justifyContent="space-between" mb={2}>
+          <Grid2>
+            <Typography variant="h4" fontWeight={700}>
+              <span style={{ textDecoration: 'underline' }}>Trade licence Declaration</span>
+            </Typography>
+          </Grid2>
+          <Grid2 sx={{ flexGrow: 1, ml: 95 }}>
+            <Box display="flex" justifyContent="flex-end" gap={1}>
+            
+              <RaiseRequest
+                fields={[
+                  'Apply new license',
+                'Trade license number',
+                'Trade license file'
+                
+                ]}
+              
+                task_id={taskId}
+              />
+            </Box>
+          </Grid2>
+        </Grid2>
           <Grid2 container spacing={2} alignItems="center">
             <Grid2 size={{ sm: 3, md: 3, xs: 12 }}>
-              <Typography>Apply for a new Trade Licence</Typography>
+              <Typography variant="subtitle1">Apply for a new Trade Licence</Typography>
             </Grid2>
             <Grid2 size={{ sm: 3, md: 3, xs: 12 }}>
               <Autocomplete
@@ -156,14 +193,38 @@ const StepTwo = () => {
             )}
           </Grid2>
         </Box>
-        <Box display="flex" justifyContent="flex-end" mt={2}>
+        <Box display="flex" justifyContent="flex-end" mt={2} gap={1}>
           <Button size="medium" variant="contained" color="primary" type="submit">
             Save
           </Button>
+          
+          <GetActionButtons
+                    type="put"
+                    urlEndpoint="trade-license-exist"
+                    recId={tradeLicense.id}
+                                        status={tradeLicense.status}
+                                        data={tradeLicense}
+                                        service_request={service_id}
+                                        task_id={taskId}
+                                        urlKey="tradelicense"
+                                        urlBool={true}
+                                      />
         </Box>
       </form>
-      <BusinessRegistrationDocumenst />
+       </Card>
+      <BusinessRegistrationDocumenst taskId={taskId}/>
+        <Box display="flex" justifyContent="space-between" mt={2}>
+        <Button variant="outlined"size="small" onClick={() => setStep(step - 1)}  startIcon={<ArrowBackIcon />}>
+          Back
+        </Button>
+      <Button variant="contained" size="small" color="primary" onClick={() => setStep(step + 1)} endIcon={<ArrowForwardIcon />}>
+          Continue
+        </Button>
+        </Box>
+      
     </>
+    
+  
   );
 };
 

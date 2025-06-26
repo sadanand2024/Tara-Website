@@ -26,7 +26,7 @@ import Factory from '../../utils/Factory';
 import { useTheme } from '@mui/material/styles';
 
 const RaiseRequest = ({ fields, task_id, details }) => {
-  const user = useSelector((state) => state).accountReducer.user;
+  const user = useSelector((state) => state.accountReducer.user);
   const theme = useTheme();
   const [open, setOpen] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
@@ -36,7 +36,6 @@ const RaiseRequest = ({ fields, task_id, details }) => {
   const [otherRequestType, setOtherRequestType] = useState('');
   const [description, setDescription] = useState('');
 
-  console.log(requestType);
   const handleSubmit = async () => {
     let apiType = 'post';
     const response = await Factory(apiType, '/servicetasks/subtasks/', {

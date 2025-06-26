@@ -13,7 +13,7 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import Modal from 'ui-component/extended/Modal';
 
-function PaySchedule() {
+function PaySchedule({ handleBack, handleNext }) {
   const [payrollId, setPayrollId] = useState(null);
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
   const [formData, setFormData] = useState(null);
@@ -187,72 +187,76 @@ function PaySchedule() {
     }
   }, [payrollId]);
   return (
-    <MainCard
-      title="Pay Schedule"
-      tagline="Setup your organization before starting payroll"
-      secondary={<Stack direction="row" sx={{ gap: 2 }}></Stack>}
-    >
+    <MainCard title="Pay Schedule">
       <form onSubmit={handleSubmit}>
-        <MainCard sx={{ padding: 2 }}>
-          <Typography variant="h4">Select your week off</Typography>
-          <Typography variant="body1" sx={{ mt: 1 }}>
-            Choose your week off days from the calendar
-          </Typography>
+        <Typography variant="h5">Select your week off</Typography>
+        <Typography variant="body1" sx={{ mt: 1 }}>
+          Choose your week off days from the calendar
+        </Typography>
 
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mt: 2 }}>
-            {weekOffOptions.map((day) => (
-              <Card
-                key={day.short}
-                sx={{
-                  padding: 1,
-                  borderRadius: 1,
-                  boxShadow: 1,
-                  cursor: 'pointer',
-                  color: values.weekOff[day.short] ? 'white' : 'inherit',
-                  backgroundColor: values.weekOff[day.short] ? '#006397' : 'white'
-                }}
-                onClick={() => {
-                  setFieldValue(`weekOff.${day.short}`, !values.weekOff[day.short]);
-                }}
-              >
-                <Typography>{day.full}</Typography>
-              </Card>
-            ))}
-          </Box>
-
-          <Box sx={{ mt: 5 }}>
-            <Typography mb={1}>Start your first payroll from</Typography>
-            <Grid2 container>
-              <Grid2 size={{ xs: 12, sm: 4 }}>
-                <CustomDatePicker
-                  name="payroll_start_month"
-                  value={values.payroll_start_month}
-                  onChange={(newDate) => {
-                    setFieldValue('payroll_start_month', newDate || null);
-                  }}
-                  onBlur={handleBlur}
-                  error={touched.payroll_start_month && Boolean(errors.payroll_start_month)}
-                  helperText={touched.payroll_start_month && errors.payroll_start_month}
-                />
-              </Grid2>
-            </Grid2>
-          </Box>
-
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 3 }}>
-            <Button
-              variant="outlined"
-              startIcon={<ArrowBackIcon />}
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mt: 2 }}>
+          {weekOffOptions.map((day) => (
+            <Card
+              key={day.short}
+              sx={{
+                padding: 1,
+                borderRadius: 1,
+                boxShadow: 1,
+                cursor: 'pointer',
+                color: values.weekOff[day.short] ? 'white' : 'inherit',
+                backgroundColor: values.weekOff[day.short] ? '#006397' : 'white'
+              }}
               onClick={() => {
-                navigate(-1);
+                setFieldValue(`weekOff.${day.short}`, !values.weekOff[day.short]);
               }}
             >
-              Back to Dashboard
-            </Button>
-            <Button variant="contained" type="submit">
+              <Typography>{day.full}</Typography>
+            </Card>
+          ))}
+        </Box>
+
+        <Box sx={{ mt: 5 }}>
+          <Typography variant="subtitle1">Start your first payroll from</Typography>
+          <Grid2 container>
+            <Grid2 size={{ xs: 12, sm: 4 }}>
+              <CustomDatePicker
+                name="payroll_start_month"
+                value={values.payroll_start_month}
+                onChange={(newDate) => {
+                  setFieldValue('payroll_start_month', newDate || null);
+                }}
+                onBlur={handleBlur}
+                error={touched.payroll_start_month && Boolean(errors.payroll_start_month)}
+                helperText={touched.payroll_start_month && errors.payroll_start_month}
+              />
+            </Grid2>
+          </Grid2>
+        </Box>
+
+        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mt: 3 }}>
+          <Button
+            variant="outlined"
+            startIcon={<ArrowBackIcon />}
+            onClick={() => {
+              navigate('/app/payroll');
+            }}
+          >
+            Back to Dashboard
+          </Button>
+          <Stack direction="row" spacing={2}>
+            <Button variant="contained" type="submit" onClick={handleSubmit}>
               Save
             </Button>
-          </Box>
-        </MainCard>
+          </Stack>
+          <Stack direction="row" spacing={2}>
+            <Button variant="outlined" type="submit" onClick={() => handleBack()}>
+              Back
+            </Button>
+            <Button variant="contained" type="submit" onClick={handleNext}>
+              Next
+            </Button>
+          </Stack>
+        </Stack>
       </form>
 
       <Modal

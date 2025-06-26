@@ -1,7 +1,7 @@
 // File: InvoiceDetailsForm.jsx
 
-import React from 'react';
-import { Typography, Grid2 } from '@mui/material';
+import React, { useState } from 'react';
+import { Typography, Grid2, Button } from '@mui/material';
 import CustomAutocomplete from 'utils/CustomAutocomplete';
 import CustomInput from 'utils/CustomInput';
 import CustomDatePicker from 'utils/CustomDateInput';
@@ -9,6 +9,11 @@ import { indian_States_And_UTs } from 'utils/indian_States_And_UT';
 import dayjs from 'dayjs';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
+import AddGSTIN from 'views/application/Business/AddGSTDialog';
+import AddCustomer from 'views/invoicing/InvoiceSettings/Customers/AddCustomer';
+import AddBranch from 'views/invoicing/InvoiceSettings/BranchesInfo/AddBranchDialog';
+import { IconPlus } from '@tabler/icons-react';
+import { useNavigate } from 'react-router-dom';
 const InvoiceDetailsForm = ({
   formik,
   invoiceDetailsFields,
@@ -16,8 +21,38 @@ const InvoiceDetailsForm = ({
   customers,
   getInvoiceFormat,
   branches,
-  setInvoiceNumberFormat
+  setInvoiceNumberFormat,
+  getGSTDetails,
+  fetch_Business_Details,
+  getCustomersData,
+  getBranchesData
 }) => {
+  const [openAddGSTIN, setOpenAddGSTIN] = useState(false);
+  const [openAddCustomer, setOpenAddCustomer] = useState(false);
+  const [openAddBranch, setOpenAddBranch] = useState(false);
+  const [type, setType] = useState('add');
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const handleOpenAddGSTIN = () => {
+    setOpenAddGSTIN(true);
+  };
+  const handleOpenAddCustomer = () => {
+    setOpenAddCustomer(true);
+  };
+  const handleOpenAddBranch = () => {
+    setOpenAddBranch(true);
+  };
+  const handleCloseAddGSTIN = () => {
+    setOpenAddGSTIN(false);
+    fetch_Business_Details();
+  };
+  const handleCloseAddCustomer = () => {
+    setOpenAddCustomer(false);
+  };
+  const handleCloseAddBranch = () => {
+    setOpenAddBranch(false);
+  };
   const termsDropdown = [
     'NET 15',
     'NET 30',
@@ -63,31 +98,53 @@ const InvoiceDetailsForm = ({
     formik.setFieldValue('terms', newValue);
   };
 
-  const handleCustomerChange = (newValue) => {
-    const selectedCustomer = customers?.find((c) => c.name === newValue);
+  const handleCustomerBranchChange = (newValue) => {
+    const selectedCustomer = customers?.find((c) => c.name === formik.values.customer);
     if (!selectedCustomer) return;
+    let customerBranches = [];
 
-    formik.setFieldValue('customer', newValue);
+    if (selectedCustomer) {
+      // If GST registered, add Head Office first
+      if (selectedCustomer) {
+        const headOffice = {
+          branch_name: 'Head Office',
+          gstin: selectedCustomer.gstin,
+          gst_type: selectedCustomer.gst_type,
+          address_line1: selectedCustomer.address_line1,
+          address_line2: selectedCustomer.address_line2,
+          country: selectedCustomer.country,
+          state: selectedCustomer.state,
+          postal_code: selectedCustomer.postal_code
+        };
+        customerBranches.push(headOffice);
+      }
+
+      // Add all real branches (if any)
+      const otherBranches = selectedCustomer.branches || [];
+      customerBranches.push(...otherBranches);
+    }
+    let selectedBranch = customerBranches.find((item) => item.branch_name === newValue);
+    console.log(selectedBranch);
+    formik.setFieldValue('customer_branch', newValue || '');
     formik.setFieldValue('place_of_supply', selectedCustomer.state);
 
     // Always update billing address
-    formik.setFieldValue('billing_address.address_line1', selectedCustomer.address_line1);
-    formik.setFieldValue('billing_address.address_line2', selectedCustomer.address_line2);
-    formik.setFieldValue('billing_address.state', selectedCustomer.state);
-    formik.setFieldValue('billing_address.country', selectedCustomer.country);
-    formik.setFieldValue('billing_address.postal_code', selectedCustomer.postal_code);
-    formik.setFieldValue('customer_gstin', selectedCustomer.gstin);
-    formik.setFieldValue('customer_pan', selectedCustomer.pan_number);
+    formik.setFieldValue('billing_address.address_line1', selectedBranch.address_line1);
+    formik.setFieldValue('billing_address.address_line2', selectedBranch.address_line2);
+    formik.setFieldValue('billing_address.state', selectedBranch.state);
+    formik.setFieldValue('billing_address.country', selectedBranch.country);
+    formik.setFieldValue('billing_address.postal_code', selectedBranch.postal_code);
+    formik.setFieldValue('customer_gstin', selectedBranch.gstin);
     // Conditionally update shipping address if "same_address" is true
     if (formik.values.same_address) {
-      formik.setFieldValue('shipping_address.address_line1', selectedCustomer.address_line1);
-      formik.setFieldValue('shipping_address.address_line2', selectedCustomer.address_line2);
-      formik.setFieldValue('shipping_address.state', selectedCustomer.state);
-      formik.setFieldValue('shipping_address.country', selectedCustomer.country);
-      formik.setFieldValue('shipping_address.postal_code', selectedCustomer.postal_code);
+      formik.setFieldValue('shipping_address.address_line1', selectedBranch.address_line1);
+      formik.setFieldValue('shipping_address.address_line2', selectedBranch.address_line2);
+      formik.setFieldValue('shipping_address.state', selectedBranch.state);
+      formik.setFieldValue('shipping_address.country', selectedBranch.country);
+      formik.setFieldValue('shipping_address.postal_code', selectedBranch.postal_code);
     }
   };
-
+  // console.log(businessDetailsData);
   const renderField = (item) => {
     const fieldName = item.name;
     const value = formik.values[fieldName];
@@ -112,58 +169,162 @@ const InvoiceDetailsForm = ({
           helperText={formik.touched[fieldName] && formik.errors[fieldName]}
         />
       );
-    } else if (['place_of_supply', 'state', 'gstin', 'branch_code'].includes(fieldName)) {
+    } else if (['place_of_supply', 'state', 'gstin', 'branch_code', 'customer_branch'].includes(fieldName)) {
+      let computedOptions = [];
+
+      if (fieldName === 'gstin') {
+        computedOptions =
+          businessDetailsData?.gst_details?.length > 0 ? businessDetailsData.gst_details.map((item) => item.gstin || 'NA') : ['NA'];
+      } else if (fieldName === 'branch_code') {
+        computedOptions = branches?.map((item) => item.branch_name || 'NA') || [];
+      } else if (fieldName === 'customer') {
+        computedOptions = customers?.map((item) => item.name) || [];
+      } else if (fieldName === 'customer_branch') {
+        const selectedCustomer = customers?.find((item) => item.name === formik.values.customer);
+
+        let customerBranches = [];
+
+        if (selectedCustomer) {
+          // If GST registered, add Head Office first
+          if (selectedCustomer) {
+            const headOffice = {
+              branch_name: 'Head Office',
+              gstin: selectedCustomer.gstin,
+              gst_type: selectedCustomer.gst_type,
+              address_line1: selectedCustomer.address_line1,
+              address_line2: selectedCustomer.address_line2,
+              country: selectedCustomer.country,
+              state: selectedCustomer.state,
+              postal_code: selectedCustomer.postal_code
+            };
+            customerBranches.push(headOffice);
+          }
+
+          // Add all real branches (if any)
+          const otherBranches = selectedCustomer.branches || [];
+          customerBranches.push(...otherBranches);
+        }
+
+        // Set options to array of branch names
+        computedOptions = customerBranches.map((item) => item.branch_name).filter(Boolean);
+      } else {
+        computedOptions = indian_States_And_UTs;
+      }
       return (
         <CustomAutocomplete
           name={fieldName}
           value={value || ''}
           onChange={(_, val) => {
             if (fieldName === 'gstin') {
-              formik.setFieldValue('gstin', val || 'NA');
-              if (businessDetailsData?.invoice_format?.find((item) => item.gstin === val || ('NA' && item.include_branch_code === false))) {
-                console.log('hjb');
-                getInvoiceFormat(val, 'NA');
+              const gstinValue = val || 'NA';
+              formik.setFieldValue('gstin', gstinValue);
+              let selectedGSTIN = businessDetailsData?.invoice_format?.find((item) => item.gstin === gstinValue);
+              if (selectedGSTIN && selectedGSTIN.include_branch_code === false) {
+                getInvoiceFormat(gstinValue, 'NA');
                 formik.setFieldValue('branch_code', '');
                 formik.setFieldValue('invoice_number', '');
                 setInvoiceNumberFormat('');
-              } else {
-                console.log('hjb2');
-                console.log(businessDetailsData?.invoice_format);
+              } else if (selectedGSTIN) {
                 formik.setFieldValue('branch_code', '');
                 formik.setFieldValue('invoice_number', '');
                 setInvoiceNumberFormat('');
               }
             } else if (fieldName === 'branch_code') {
-              formik.setFieldValue('branch_code', val || '');
-              console.log(businessDetailsData?.invoice_format);
+              let branch = branches?.find((item) => item.branch_name === val);
+              formik.setFieldValue('branch_code', branch?.branch_code || '');
               if (
                 businessDetailsData?.invoice_format?.find(
                   (item) => item.gstin === formik.values.gstin || ('NA' && item.include_branch_code === true)
                 )
               ) {
-                getInvoiceFormat(formik.values.gstin, val);
+                getInvoiceFormat(formik.values.gstin, branch?.branch_code || '');
               }
+            } else if (fieldName === 'customer_branch') {
+              handleCustomerBranchChange(val);
+              getInvoiceFormat(formik.values.gstin, formik.values.branch_code || '');
             }
             formik.setFieldValue(fieldName, val);
           }}
           disabled={
-            (fieldName === 'branch_code' &&
-              businessDetailsData?.invoice_format?.find(
-                (item) => item.gstin === formik.values.gstin || ('NA' && item.include_branch_code === false)
-              )) ||
-            (fieldName === 'branch_code' && formik.values.gstin === '')
+            fieldName === 'branch_code' &&
+            (() => {
+              if (!formik.values.gstin || formik.values.gstin === '') {
+                return true;
+              }
+              const selectedFormat = businessDetailsData?.invoice_format?.find((item) => item.gstin === formik.values.gstin);
+              return selectedFormat ? !selectedFormat.include_branch_code : true;
+            })()
           }
-          options={
-            fieldName === 'gstin'
-              ? businessDetailsData?.gst_details?.length > 0
-                ? businessDetailsData.gst_details.map((item) => item.gstin || 'NA')
-                : ['NA']
-              : fieldName === 'branch_code'
-                ? branches?.map((item) => item.branch_code || 'NA')
-                : indian_States_And_UTs
-          }
+          options={computedOptions}
           error={formik.touched[fieldName] && Boolean(formik.errors[fieldName])}
           helperText={formik.touched[fieldName] && formik.errors[fieldName]}
+          ListboxProps={
+            fieldName === 'gstin'
+              ? {
+                  style: { maxHeight: 250 },
+                  component: React.forwardRef(function CustomListboxComponent(props, ref) {
+                    const { children, ...rest } = props;
+                    return (
+                      <ul ref={ref} {...rest}>
+                        {children}
+                        <li style={{ padding: '8px 16px' }}>
+                          <Button
+                            startIcon={<IconPlus />}
+                            variant="contained"
+                            fullWidth
+                            size="small"
+                            sx={{
+                              bgcolor: 'primary.main',
+                              '&:hover': {
+                                bgcolor: 'primary.dark'
+                              }
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpenAddGSTIN();
+                            }}
+                          >
+                            Add GSTIN
+                          </Button>
+                        </li>
+                      </ul>
+                    );
+                  })
+                }
+              : fieldName === 'branch_code'
+                ? {
+                    style: { maxHeight: 250 },
+                    component: React.forwardRef(function CustomListboxComponent(props, ref) {
+                      const { children, ...rest } = props;
+                      return (
+                        <ul ref={ref} {...rest}>
+                          {children}
+                          <li style={{ padding: '8px 16px' }}>
+                            <Button
+                              startIcon={<IconPlus />}
+                              variant="contained"
+                              fullWidth
+                              size="small"
+                              sx={{
+                                bgcolor: 'primary.main',
+                                '&:hover': {
+                                  bgcolor: 'primary.dark'
+                                }
+                              }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleOpenAddBranch();
+                              }}
+                            >
+                              Add Branch
+                            </Button>
+                          </li>
+                        </ul>
+                      );
+                    })
+                  }
+                : undefined
+          }
         />
       );
     } else if (fieldName === 'terms') {
@@ -182,11 +343,54 @@ const InvoiceDetailsForm = ({
         <CustomAutocomplete
           name={fieldName}
           value={value || ''}
-          onChange={(_, val) => handleCustomerChange(val)}
+          onChange={(_, val) => {
+            formik.setFieldValue('customer_branch', '');
+            formik.setFieldValue('customer_gstin', '');
+            formik.setFieldValue('customer', val);
+            let selectedCustomer = customers?.find((c) => c.name === val);
+            formik.setFieldValue('customer_pan', selectedCustomer.pan_number);
+          }}
           options={customers?.map((c) => c.name) || []}
           error={formik.touched[fieldName] && Boolean(formik.errors[fieldName])}
           helperText={formik.touched[fieldName] && formik.errors[fieldName]}
+          ListboxProps={{
+            style: { maxHeight: 250 },
+            component: React.forwardRef(function CustomListboxComponent(props, ref) {
+              const { children, ...rest } = props;
+              return (
+                <ul ref={ref} {...rest}>
+                  {children}
+                  <li style={{ padding: '8px 16px' }}>
+                    <Button
+                      startIcon={<IconPlus />}
+                      variant="contained"
+                      fullWidth
+                      size="small"
+                      sx={{
+                        bgcolor: 'primary.main',
+                        '&:hover': {
+                          bgcolor: 'primary.dark'
+                        }
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleOpenAddCustomer();
+                      }}
+                    >
+                      Add Customer
+                    </Button>
+                  </li>
+                </ul>
+              );
+            })
+          }}
         />
+      );
+    } else if (fieldName === 'invoice_number' && formik.values.invoice_number === 'No Invoice Format found for the provided profile.') {
+      return (
+        <Button variant="contained" color="primary" onClick={() => navigate('/app/invoice/settings?tab=5&from=invoice')}>
+          <Typography color="white">Configure Invoice Format</Typography>
+        </Button>
       );
     } else {
       return (
@@ -204,11 +408,29 @@ const InvoiceDetailsForm = ({
   return (
     <Grid2 container spacing={2}>
       {invoiceDetailsFields.map((item) => (
-        <Grid2 size={{ xs: 12, sm: 6 }} key={item.name}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={item.name}>
           <Typography sx={{ mb: 1 }}>{item.label}</Typography>
           {renderField(item)}
         </Grid2>
       ))}
+      <AddGSTIN
+        open={openAddGSTIN}
+        handleClose={handleCloseAddGSTIN}
+        businessDetailsData={businessDetailsData}
+        setOpen={setOpenAddGSTIN}
+        getGSTDetails={getGSTDetails}
+        fetchBusinessDetails={fetch_Business_Details}
+      />
+      <AddCustomer
+        open={openAddCustomer}
+        handleClose={handleCloseAddCustomer}
+        getCustomersData={getCustomersData}
+        businessDetailsData={businessDetailsData}
+        type={type}
+        setType={setType}
+        selectedCustomer={selectedCustomer}
+      />
+      <AddBranch open={openAddBranch} handleClose={handleCloseAddBranch} getBranchesData={getBranchesData} />
     </Grid2>
   );
 };

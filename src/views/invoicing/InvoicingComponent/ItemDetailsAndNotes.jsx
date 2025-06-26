@@ -22,8 +22,23 @@ import {
   InputLabel,
   Card,
   CardContent,
-  Divider
+  Divider,
+  Chip,
+  IconButton,
+  Tooltip,
+  useTheme,
+  alpha
 } from '@mui/material';
+import {
+  Inventory2,
+  Add as AddIcon,
+  Delete as DeleteIcon,
+  Receipt as ReceiptIcon,
+  Note as NoteIcon,
+  LocalShipping as ShippingIcon,
+  Discount as DiscountIcon,
+  Calculate as CalculateIcon
+} from '@mui/icons-material';
 import { IconPlus, IconTrash } from '@tabler/icons-react';
 import CustomInput from 'utils/CustomInput';
 import CustomAutocomplete from 'utils/CustomAutocomplete';
@@ -51,6 +66,7 @@ const ItemDetailsAndNotes = ({
 }) => {
   const [openAddItem, setOpenAddItem] = useState(false);
   const [type, setType] = useState('');
+  const theme = useTheme();
 
   const handleOpenAddItem = () => {
     setOpenAddItem(true);
@@ -70,154 +86,281 @@ const ItemDetailsAndNotes = ({
 
   return (
     <Box sx={{ mb: 4 }}>
-      <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="h4">Item Details</Typography>
-        <Button
-          variant="contained"
-          startIcon={<IconPlus />}
-          onClick={handleOpenAddItem}
-          sx={{
-            bgcolor: 'primary.main',
-            '&:hover': {
-              bgcolor: 'primary.dark'
-            }
-          }}
-        >
-          Add New Item
-        </Button>
-      </Box>
-
-      <TableContainer
-        component={Paper}
+      {/* Header Section */}
+      <Box
         sx={{
-          width: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 2,
+          mb: 2,
+          p: 1.5,
+          backgroundColor: alpha(theme.palette.primary.main, 0.05),
           borderRadius: 2,
-          boxShadow: 1,
-          overflowX: 'auto'
+          border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`
         }}
       >
-        <Table>
-          <TableHead>
-            <TableRow sx={{ bgcolor: 'grey.100' }}>
-              <TableCell>Item</TableCell>
-              <TableCell>Note</TableCell>
-              <TableCell>Quantity</TableCell>
-              <TableCell>Rate</TableCell>
-              <TableCell>Discount type</TableCell>
-              <TableCell>Discount</TableCell>
-              <TableCell>Amount</TableCell>
-              <TableCell>Tax %</TableCell>
-              <TableCell>Tax Amount</TableCell>
-              <TableCell>Total Amount</TableCell>
-              <TableCell>Action</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {formik.values.item_details.map((item, index) => (
-              <TableRow key={index}>
-                <TableCell>
-                  <CustomAutocomplete
-                    size="small"
-                    options={itemsList.map((item) => item.name)}
-                    value={item.item || ''}
-                    onChange={(e, val) => handleItemChange(index, val)}
-                    onKeyDown={handleItemInputKeyDown}
-                    renderInput={(params) => <TextField {...params} sx={{ minWidth: 200, maxWidth: 200 }} />}
-                  />
-                </TableCell>
-                <TableCell>
-                  <CustomInput
-                    value={item.note}
-                    onChange={(e) => handleNoteChange(index, e.target.value)}
-                    sx={{ minWidth: 100, maxWidth: 100 }}
-                    onKeyDown={handleItemInputKeyDown}
-                    multiline={true}
-                    minRows={1}
-                  />
-                </TableCell>
-                <TableCell>
-                  <CustomInput
-                    value={item.quantity}
-                    onChange={(e) => handleQuantityChange(index, e.target.value)}
-                    sx={{ minWidth: 100, maxWidth: 100 }}
-                    onKeyDown={handleItemInputKeyDown}
-                  />
-                </TableCell>
+        <Inventory2 sx={{ color: theme.palette.primary.main, fontSize: 24 }} />
+        <Typography
+          variant="h5"
+          sx={{
+            fontWeight: 600,
+            color: theme.palette.primary.main
+          }}
+        >
+          Item Details & Notes
+        </Typography>
+      </Box>
 
-                <TableCell>
-                  <CustomInput
-                    value={item.rate}
-                    onChange={(e) => handleRateChange(index, e.target.value)}
-                    sx={{ minWidth: 150, maxWidth: 150 }}
-                    onKeyDown={handleItemInputKeyDown}
-                  />
-                </TableCell>
-
-                <TableCell>
-                  <CustomAutocomplete
-                    options={['%', '₹']}
-                    value={item.discount_type || ''}
-                    onChange={(e, val) => handleDiscountTypeChange(index, val)}
-                    onKeyDown={handleItemInputKeyDown}
-                    renderInput={(params) => <TextField {...params} sx={{ minWidth: 100, maxWidth: 100 }} />}
-                  />
-                </TableCell>
-
-                <TableCell>
-                  <CustomInput
-                    value={item.discount}
-                    onChange={(e) => handleDiscountChange(index, e.target.value)}
-                    sx={{ minWidth: 100, maxWidth: 100 }}
-                    onKeyDown={handleItemInputKeyDown}
-                  />
-                </TableCell>
-
-                <TableCell>{item.amount.toFixed(2)}</TableCell>
-                <TableCell>{item.tax}</TableCell>
-                <TableCell>{item.taxamount.toFixed(2)}</TableCell>
-                <TableCell>{item.total_amount.toFixed(2)}</TableCell>
-                <TableCell>
-                  <ListItemButton sx={{ color: '#d32f2f' }} onClick={() => handleDeleteItem(index)}>
-                    <ListItemIcon>
-                      <IconTrash size={16} style={{ color: '#d32f2f' }} />
-                    </ListItemIcon>
-                  </ListItemButton>
-                </TableCell>
+      {/* Items Table Section */}
+      <Paper
+        elevation={2}
+        sx={{
+          mb: 2,
+          borderRadius: 2,
+          overflow: 'hidden',
+          border: `1px solid ${alpha(theme.palette.divider, 0.2)}`,
+          '& .MuiTableContainer-root': {
+            borderRadius: 0
+          },
+          '& .MuiTableCell-root': {
+            color: 'text.primary',
+            borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`
+          },
+          '& .MuiTableHead-root .MuiTableCell-root': {
+            py: 1.5,
+            backgroundColor: 'primary.main',
+            color: '#fff',
+            fontWeight: 600,
+            fontSize: '0.875rem'
+          },
+          '& .MuiTableBody-root .MuiTableRow-root:hover': {
+            backgroundColor: alpha(theme.palette.primary.main, 0.02)
+          }
+        }}
+      >
+        <TableContainer>
+          <Table size="small">
+            <TableHead>
+              <TableRow>
+                <TableCell>Item</TableCell>
+                <TableCell>Note</TableCell>
+                <TableCell align="center">Quantity</TableCell>
+                <TableCell align="center">Rate</TableCell>
+                <TableCell align="center">Discount Type</TableCell>
+                <TableCell align="center">Discount</TableCell>
+                <TableCell align="right">Amount</TableCell>
+                <TableCell align="center">Tax %</TableCell>
+                <TableCell align="right">Tax Amount</TableCell>
+                <TableCell align="right">Total Amount</TableCell>
+                <TableCell align="center">Action</TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
+            <TableBody>
+              {formik.values.item_details.map((item, index) => (
+                <TableRow key={index} sx={{ '&:last-child td': { border: 0 } }}>
+                  <TableCell>
+                    <CustomAutocomplete
+                      size="small"
+                      options={itemsList.map((item) => item.name)}
+                      value={item.item || ''}
+                      onChange={(e, val) => {
+                        // Prevent setting the value if "Add New Item" is clicked
+                        if (val === null) return;
+                        handleItemChange(index, val);
+                      }}
+                      onKeyDown={handleItemInputKeyDown}
+                      renderInput={(params) => <TextField {...params} sx={{ minWidth: 200, maxWidth: 200 }} />}
+                      renderOption={(props, option) => (
+                        <li {...props} key={option}>
+                          {option}
+                        </li>
+                      )}
+                      noOptionsText={
+                        <Box sx={{ p: 2, textAlign: 'center' }}>
+                          <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
+                            No Results found
+                          </Typography>
+                          <Button
+                            variant="contained"
+                            fullWidth
+                            size="small"
+                            sx={{
+                              bgcolor: 'primary.main',
+                              '&:hover': {
+                                bgcolor: 'primary.dark'
+                              }
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpenAddItem();
+                            }}
+                            startIcon={<IconPlus size={18} />}
+                          >
+                            Add New Item
+                          </Button>
+                        </Box>
+                      }
+                      ListboxProps={{
+                        style: { maxHeight: 250 },
+                        component: React.forwardRef(function CustomListboxComponent(props, ref) {
+                          const { children, ...rest } = props;
+                          return (
+                            <ul ref={ref} {...rest}>
+                              {children}
+                              {children && children.length > 0 && (
+                                <li style={{ padding: '8px 16px' }}>
+                                  <Button
+                                    variant="contained"
+                                    fullWidth
+                                    size="small"
+                                    sx={{
+                                      bgcolor: 'primary.main',
+                                      '&:hover': {
+                                        bgcolor: 'primary.dark'
+                                      }
+                                    }}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleOpenAddItem();
+                                    }}
+                                    startIcon={<IconPlus size={18} />}
+                                  >
+                                    Add New Item
+                                  </Button>
+                                </li>
+                              )}
+                            </ul>
+                          );
+                        })
+                      }}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <CustomInput
+                      value={item.note}
+                      onChange={(e) => handleNoteChange(index, e.target.value)}
+                      sx={{ minWidth: 100, maxWidth: 100 }}
+                      onKeyDown={handleItemInputKeyDown}
+                      multiline={true}
+                      minRows={1}
+                    />
+                  </TableCell>
+                  <TableCell align="center">
+                    <CustomInput
+                      value={item.quantity}
+                      onChange={(e) => handleQuantityChange(index, e.target.value)}
+                      sx={{ minWidth: 80, maxWidth: 80 }}
+                      onKeyDown={handleItemInputKeyDown}
+                    />
+                  </TableCell>
 
-      <Box sx={{ mt: 2, display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+                  <TableCell align="center">
+                    <CustomInput
+                      value={item.rate}
+                      onChange={(e) => handleRateChange(index, e.target.value)}
+                      sx={{ minWidth: 120, maxWidth: 120 }}
+                      onKeyDown={handleItemInputKeyDown}
+                    />
+                  </TableCell>
+
+                  <TableCell align="center">
+                    <CustomAutocomplete
+                      options={['%', '₹']}
+                      value={item.discount_type || ''}
+                      onChange={(e, val) => handleDiscountTypeChange(index, val)}
+                      onKeyDown={handleItemInputKeyDown}
+                      renderInput={(params) => <TextField {...params} sx={{ minWidth: 80, maxWidth: 80 }} />}
+                    />
+                  </TableCell>
+
+                  <TableCell align="center">
+                    <CustomInput
+                      value={item.discount}
+                      onChange={(e) => handleDiscountChange(index, e.target.value)}
+                      sx={{ minWidth: 80, maxWidth: 80 }}
+                      onKeyDown={handleItemInputKeyDown}
+                    />
+                  </TableCell>
+                  <TableCell align="right">
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      ₹{item.amount.toFixed(2)}
+                    </Typography>
+                  </TableCell>
+                  <TableCell align="center">
+                    {/* <Chip label={`${item.tax}%`} size="small" color="primary" variant="outlined" sx={{ fontSize: '0.75rem' }} /> */}
+                    {`${item.tax}%`}
+                  </TableCell>
+                  <TableCell align="right">
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      ₹{item.taxamount.toFixed(2)}
+                    </Typography>
+                  </TableCell>
+                  <TableCell align="right">
+                    <Typography variant="body2" sx={{ fontWeight: 600, color: theme.palette.primary.main }}>
+                      ₹{item.total_amount.toFixed(2)}
+                    </Typography>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Tooltip title="Delete Item">
+                      <IconButton
+                        size="small"
+                        onClick={() => handleDeleteItem(index)}
+                        sx={{
+                          color: theme.palette.error.main,
+                          '&:hover': {
+                            backgroundColor: alpha(theme.palette.error.main, 0.1)
+                          }
+                        }}
+                      >
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Paper>
+
+      {/* Action Buttons */}
+      <Box
+        sx={{
+          mt: 2,
+          display: 'flex',
+          gap: 2,
+          justifyContent: 'flex-start',
+          flexWrap: 'wrap'
+        }}
+      >
         <Button
-          variant="outlined"
-          startIcon={<IconPlus />}
+          variant="contained"
+          startIcon={<AddIcon />}
           onClick={handleAddItemRow}
           sx={{
-            borderColor: 'primary.main',
-            color: 'primary.main',
+            bgcolor: theme.palette.primary.main,
             '&:hover': {
-              borderColor: 'primary.dark',
-              bgcolor: 'primary.light',
-              color: 'primary.dark'
-            }
+              bgcolor: theme.palette.primary.dark
+            },
+            borderRadius: 2,
+            px: 3
           }}
         >
           Add New Row
         </Button>
         <Button
           variant="outlined"
-          startIcon={<IconPlus />}
+          startIcon={<AddIcon />}
           onClick={openBulkItemsModal}
           sx={{
-            borderColor: 'secondary.main',
-            color: 'secondary.main',
+            borderColor: theme.palette.secondary.main,
+            color: theme.palette.secondary.main,
             '&:hover': {
-              borderColor: 'secondary.dark',
-              bgcolor: 'secondary.light',
-              color: 'secondary.dark'
-            }
+              borderColor: theme.palette.secondary.dark,
+              bgcolor: alpha(theme.palette.secondary.main, 0.1)
+            },
+            borderRadius: 2,
+            px: 3
           }}
         >
           Add Items in Bulk
@@ -235,13 +378,27 @@ const ItemDetailsAndNotes = ({
         from={'itemDetails'}
       />
 
-      <Card sx={{ mt: 4, borderRadius: 2, boxShadow: 2 }}>
-        <CardContent>
+      {/* Notes and Totals Section */}
+      <Card
+        sx={{
+          mt: 4,
+          borderRadius: 3,
+          boxShadow: 3,
+          border: `1px solid ${alpha(theme.palette.divider, 0.2)}`,
+          overflow: 'hidden'
+        }}
+      >
+        <CardContent sx={{ p: 3 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 4, flexWrap: 'wrap' }}>
             {/* Left: Notes and Terms */}
-            <Box sx={{ flex: 1, minWidth: '280px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Box sx={{ flex: 1, minWidth: '300px', display: 'flex', flexDirection: 'column', gap: 3 }}>
               <Box>
-                <Typography gutterBottom>Customer Notes</Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+                  <NoteIcon sx={{ color: theme.palette.primary.main, fontSize: 20 }} />
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    Customer Notes
+                  </Typography>
+                </Box>
                 <CustomInput
                   multiline
                   minRows={3}
@@ -249,11 +406,21 @@ const ItemDetailsAndNotes = ({
                   name="notes"
                   value={formik.values.notes}
                   onChange={(e) => formik.setFieldValue('notes', e.target.value)}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: 2
+                    }
+                  }}
                 />
               </Box>
 
               <Box>
-                <Typography gutterBottom>Terms & Conditions</Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+                  <ReceiptIcon sx={{ color: theme.palette.secondary.main, fontSize: 20 }} />
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    Terms & Conditions
+                  </Typography>
+                </Box>
                 <CustomInput
                   multiline
                   minRows={3}
@@ -261,49 +428,109 @@ const ItemDetailsAndNotes = ({
                   name="terms_and_conditions"
                   value={formik.values.terms_and_conditions}
                   onChange={(e) => formik.setFieldValue('terms_and_conditions', e.target.value)}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: 2
+                    }
+                  }}
                 />
               </Box>
             </Box>
 
             {/* Right: Totals */}
-            <Box sx={{ flex: 1, minWidth: '280px', display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Typography variant="body1">Sub Total:</Typography>
-                <Typography variant="body1">{formik.values.subtotal_amount.toFixed(2)}</Typography>
+            <Box
+              sx={{
+                flex: 1,
+                minWidth: '300px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 2,
+                p: 3,
+                backgroundColor: alpha(theme.palette.background.default, 0.5),
+                borderRadius: 2,
+                border: `1px solid ${alpha(theme.palette.divider, 0.1)}`
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                <CalculateIcon sx={{ color: theme.palette.success.main, fontSize: 20 }} />
+                <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                  Invoice Summary
+                </Typography>
+              </Box>
+
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                  Sub Total:
+                </Typography>
+                <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                  ₹{formik.values.subtotal_amount.toFixed(2)}
+                </Typography>
               </Box>
 
               <Box
-                sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', bgcolor: 'grey.100', p: 1, borderRadius: 1 }}
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  bgcolor: alpha(theme.palette.info.main, 0.1),
+                  p: 1.5,
+                  borderRadius: 2,
+                  border: `1px solid ${alpha(theme.palette.info.main, 0.2)}`
+                }}
               >
-                <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
-                  Shipping Charges:
-                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <ShippingIcon sx={{ color: theme.palette.info.main, fontSize: 18 }} />
+                  <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                    Shipping Charges:
+                  </Typography>
+                </Box>
                 <CustomInput
                   name="shipping_amount"
                   value={formik.values.shipping_amount}
                   onChange={handleShippingAmountChange}
-                  sx={{ maxWidth: 100, bgcolor: 'white' }}
+                  sx={{
+                    maxWidth: 120,
+                    bgcolor: 'white',
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: 1
+                    }
+                  }}
                 />
               </Box>
 
               {/* Discount Total Row */}
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
-                  Discount Total:
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <DiscountIcon sx={{ color: theme.palette.warning.main, fontSize: 18 }} />
+                  <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                    Discount Total:
+                  </Typography>
+                </Box>
+                <Typography variant="body1" sx={{ fontWeight: 600, color: theme.palette.warning.main }}>
+                  ₹{typeof totalDiscount === 'number' ? totalDiscount.toFixed(2) : '0.00'}
                 </Typography>
-                <Typography variant="body1">{typeof totalDiscount === 'number' ? totalDiscount.toFixed(2) : '0.00'}</Typography>
               </Box>
 
               <FormControlLabel
-                control={<Checkbox checked={formik.values.applied_tax} onChange={handleApplyTaxChange} />}
+                control={
+                  <Checkbox
+                    checked={formik.values.applied_tax}
+                    onChange={handleApplyTaxChange}
+                    sx={{
+                      '&.Mui-checked': {
+                        color: theme.palette.success.main
+                      }
+                    }}
+                  />
+                }
                 label="Apply Tax on Shipping"
               />
 
               {formik.values.applied_tax && (
                 <>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <InputLabel>GST Rate</InputLabel>
-                    <Select value={formik.values.selected_gst_rate} onChange={handleGSTRateChange} sx={{ minWidth: 100 }}>
+                    <InputLabel sx={{ fontSize: '0.875rem' }}>GST Rate</InputLabel>
+                    <Select value={formik.values.selected_gst_rate} onChange={handleGSTRateChange} sx={{ minWidth: 100 }} size="small">
                       {gstRates.map((rate) => (
                         <MenuItem key={rate} value={rate}>
                           {rate}%
@@ -311,43 +538,63 @@ const ItemDetailsAndNotes = ({
                       ))}
                     </Select>
                   </Box>
-                  <Typography variant="body2">Shipping (With Tax): {formik.values.shipping_amount_with_tax.toFixed(2)}</Typography>
+                  <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
+                    Shipping (With Tax): ₹{formik.values.shipping_amount_with_tax.toFixed(2)}
+                  </Typography>
                 </>
               )}
 
               {formik.values.total_cgst_amount > 0 && (
                 <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <Typography>CGST:</Typography>
-                  <Typography>{formik.values.total_cgst_amount.toFixed(2)}</Typography>
+                  <Typography variant="body2">CGST:</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                    ₹{formik.values.total_cgst_amount.toFixed(2)}
+                  </Typography>
                 </Box>
               )}
               {formik.values.total_sgst_amount > 0 && (
                 <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <Typography>SGST:</Typography>
-                  <Typography>{formik.values.total_sgst_amount.toFixed(2)}</Typography>
+                  <Typography variant="body2">SGST:</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                    ₹{formik.values.total_sgst_amount.toFixed(2)}
+                  </Typography>
                 </Box>
               )}
               {formik.values.total_igst_amount > 0 && (
                 <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <Typography>IGST:</Typography>
-                  <Typography>{formik.values.total_igst_amount.toFixed(2)}</Typography>
+                  <Typography variant="body2">IGST:</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                    ₹{formik.values.total_igst_amount.toFixed(2)}
+                  </Typography>
                 </Box>
               )}
               {formik.values.applied_tax && (
                 <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <Typography>Tax on Shipping:</Typography>
-                  <Typography>{formik.values.shipping_tax.toFixed(2)}</Typography>
+                  <Typography variant="body2">Tax on Shipping:</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                    ₹{formik.values.shipping_tax.toFixed(2)}
+                  </Typography>
                 </Box>
               )}
 
-              <Divider sx={{ my: 1 }} />
+              <Divider sx={{ my: 2 }} />
 
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="h6" fontWeight="bold">
-                  Total:
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  p: 2,
+                  backgroundColor: alpha(theme.palette.success.main, 0.1),
+                  borderRadius: 2,
+                  border: `2px solid ${alpha(theme.palette.success.main, 0.2)}`
+                }}
+              >
+                <Typography variant="h6" sx={{ fontWeight: 700, color: theme.palette.success.main }}>
+                  Total Amount:
                 </Typography>
-                <Typography variant="h6" fontWeight="bold">
-                  {formik.values.total_amount.toFixed(2)}
+                <Typography variant="h6" sx={{ fontWeight: 700, color: theme.palette.success.main }}>
+                  ₹{formik.values.total_amount.toFixed(2)}
                 </Typography>
               </Box>
             </Box>

@@ -29,7 +29,7 @@ import DeleteDialog from '../../../ui-component/extended/DeleteDialog'; // adjus
 import { IconButton, Tooltip } from '@mui/material'; // Add these if not already
 import { Edit, Delete } from '@mui/icons-material';
 import BulkUploadDialog from 'ui-component/extended/BulkUploadDialog';
-function Worklocation() {
+function Worklocation({ handleBack, handleNext }) {
   const [openDialog, setOpenDialog] = useState(false);
   const [workLocations, setWorkLocations] = useState([]);
   const [payrollid, setPayrollId] = useState(null);
@@ -136,10 +136,11 @@ function Worklocation() {
           title="Work Location Details"
           secondary={
             <Stack direction="row" spacing={2}>
-              <Button variant="outlined" color="secondary" onClick={() => setOpenBulkDialog(true)}>
+              <Button size="small" variant="outlined" color="secondary" onClick={() => setOpenBulkDialog(true)}>
                 Bulk Upload
               </Button>
               <Button
+                size="small"
                 variant="contained"
                 color="primary"
                 onClick={() => {
@@ -162,117 +163,125 @@ function Worklocation() {
             xlsxTemplateUrl="/payroll/download-template/xlsx?type=work_location"
             csvTemplateUrl="/payroll/download-template/csv?type=work_location"
           />
-          <Grid2 container spacing={{ xs: 2, sm: 3 }}>
-            <Grid2 size={{ xs: 12 }}>
-              <WorkLocationDialog
-                open={openDialog}
-                handleClose={handleCloseDialog}
-                fetchWorkLocations={fetchWorkLocations}
-                selectedRecord={selectedRecord}
-                type={postType}
-                setType={setPostType}
-              />
-            </Grid2>
 
-            <TableContainer
-              component={Paper}
-              sx={{
-                width: '100%',
-                borderRadius: 2,
-                boxShadow: 1,
-                overflowX: 'auto'
-              }}
-            >
-              <Table size="small">
-                <TableHead>
-                  <TableRow sx={{ bgcolor: 'grey.100' }}>
-                    {['S No', 'Name', 'Address', 'State', 'No of Employees', 'Actions'].map((header, idx) => (
-                      <TableCell
-                        key={idx}
-                        align={['S No', 'State', 'No of Employees', 'Actions'].includes(header) ? 'center' : 'left'}
-                        sx={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}
-                      >
-                        {header}
-                      </TableCell>
-                    ))}
+          <WorkLocationDialog
+            open={openDialog}
+            handleClose={handleCloseDialog}
+            fetchWorkLocations={fetchWorkLocations}
+            selectedRecord={selectedRecord}
+            type={postType}
+            setType={setPostType}
+          />
+
+          <TableContainer
+            component={Paper}
+            sx={{
+              width: '100%',
+              borderRadius: 2,
+              boxShadow: 1,
+              overflowX: 'auto'
+            }}
+          >
+            <Table size="small">
+              <TableHead
+                sx={{
+                  backgroundColor: 'primary.main',
+                  '& .MuiTableCell-root': {
+                    color: '#ffffff !important'
+                  }
+                }}
+              >
+                <TableRow>
+                  {['S No', 'Name', 'Address', 'State', 'No of Employees', 'Actions'].map((header, idx) => (
+                    <TableCell
+                      key={idx}
+                      align={['S No', 'State', 'No of Employees', 'Actions'].includes(header) ? 'center' : 'left'}
+                      sx={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}
+                    >
+                      {header}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {paginatedData.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} align="center" sx={{ height: 300 }}>
+                      <EmptyDataPlaceholder title="No Data Found" subtitle="Start by adding a new Data." />
+                    </TableCell>
                   </TableRow>
-                </TableHead>
-                <TableBody>
-                  {paginatedData.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={6} align="center" sx={{ height: 300 }}>
-                        <EmptyDataPlaceholder title="No Data Found" subtitle="Start by adding a new Data." />
+                ) : (
+                  paginatedData.map((location, index) => (
+                    <TableRow
+                      key={location.id}
+                      hover
+                      sx={{
+                        minHeight: 56,
+                        '&:hover': { bgcolor: 'action.hover' }
+                      }}
+                    >
+                      <TableCell align="center">{(currentPage - 1) * rowsPerPage + index + 1}</TableCell>
+                      <TableCell>{location.location_name || 'N/A'}</TableCell>
+                      <TableCell>
+                        <Typography noWrap sx={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {location.address_line1
+                            ? `${location.address_line1}${location.address_line2 ? `, ${location.address_line2}` : ''}`
+                            : 'N/A'}
+                        </Typography>
+                      </TableCell>
+
+                      <TableCell align="center">{location.address_state || 'N/A'}</TableCell>
+                      <TableCell align="center">{location.employees || 0}</TableCell>
+                      <TableCell align="center">
+                        {index !== 0 && (
+                          <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
+                            <IconButton color="primary" onClick={() => handleEdit(location)}>
+                              <Edit />
+                            </IconButton>
+                            <IconButton color="error" onClick={() => handleOpenDeleteDialog(location)}>
+                              <Delete />
+                            </IconButton>
+                          </Box>
+                        )}
                       </TableCell>
                     </TableRow>
-                  ) : (
-                    paginatedData.map((location, index) => (
-                      <TableRow
-                        key={location.id}
-                        hover
-                        sx={{
-                          minHeight: 56,
-                          '&:hover': { bgcolor: 'action.hover' }
-                        }}
-                      >
-                        <TableCell align="center">{(currentPage - 1) * rowsPerPage + index + 1}</TableCell>
-                        <TableCell>{location.location_name || 'N/A'}</TableCell>
-                        <TableCell>
-                          <Typography noWrap sx={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                            {location.address_line1
-                              ? `${location.address_line1}${location.address_line2 ? `, ${location.address_line2}` : ''}`
-                              : 'N/A'}
-                          </Typography>
-                        </TableCell>
-
-                        <TableCell align="center">{location.address_state || 'N/A'}</TableCell>
-                        <TableCell align="center">{location.employees || 0}</TableCell>
-                        <TableCell align="center">
-                          {index !== 0 && (
-                            <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
-                              <IconButton color="primary" onClick={() => handleEdit(location)}>
-                                <Edit />
-                              </IconButton>
-                              <IconButton color="error" onClick={() => handleOpenDeleteDialog(location)}>
-                                <Delete />
-                              </IconButton>
-                            </Box>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-              <DeleteDialog
-                open={openDeleteDialog}
-                onClose={() => setOpenDeleteDialog(false)}
-                onConfirm={handleConfirmDelete}
-                dialogData={{
-                  title: 'Delete Record',
-                  heading: 'Are you sure?',
-                  description: 'This action will permanently delete the record.'
-                }}
+                  ))
+                )}
+              </TableBody>
+            </Table>
+            <DeleteDialog
+              open={openDeleteDialog}
+              onClose={() => setOpenDeleteDialog(false)}
+              onConfirm={handleConfirmDelete}
+              dialogData={{
+                title: 'Delete Record',
+                heading: 'Are you sure?',
+                description: 'This action will permanently delete the record.'
+              }}
+            />
+          </TableContainer>
+          {workLocations.length > 0 && (
+            <Stack direction="row" justifyContent="space-between" sx={{ mt: 2 }}>
+              <Button size="small" variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigate('/app/payroll')}>
+                Back to Dashboard
+              </Button>
+              <Pagination
+                count={Math.ceil(workLocations.length / rowsPerPage)}
+                page={currentPage}
+                onChange={handlePageChange}
+                shape="rounded"
+                color="primary"
               />
-            </TableContainer>
-            {workLocations.length > 0 && (
-              <Grid2 size={12}>
-                <Stack direction="row" justifyContent="center" sx={{ mt: 2 }}>
-                  <Pagination
-                    count={Math.ceil(workLocations.length / rowsPerPage)}
-                    page={currentPage}
-                    onChange={handlePageChange}
-                    shape="rounded"
-                    color="primary"
-                  />
-                </Stack>
-              </Grid2>
-            )}
-          </Grid2>
-          <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigate(-1)}>
-              Back to Dashboard
-            </Button>
-          </Box>
+              <Stack direction="row" spacing={2}>
+                <Button size="small" variant="outlined" startIcon={<ArrowBackIcon />} onClick={handleBack}>
+                  Back
+                </Button>
+                <Button size="small" variant="contained" onClick={handleNext}>
+                  Next
+                </Button>
+              </Stack>
+            </Stack>
+          )}
         </MainCard>
       )}
     </>

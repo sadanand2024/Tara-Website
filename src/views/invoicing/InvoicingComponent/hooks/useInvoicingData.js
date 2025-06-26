@@ -11,6 +11,7 @@ export const useInvoicingData = () => {
   const [itemsList, setItemsList] = useState([]);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [branches, setBranches] = useState([]);
+  const [gstList, setGstList] = useState([]);
   const user = useSelector((state) => state.accountReducer.user);
   const businessId = user.active_context.business_id;
 
@@ -82,12 +83,20 @@ export const useInvoicingData = () => {
       );
     }
   };
-
+  const getGSTDetails = async () => {
+    const url = `/user_management/gst-details/${businessId}/`;
+    const { res } = await Factory('get', url, {});
+    if (res.status_cd === 0) {
+      setGstList(res.data);
+    }
+  };
   const getInvoiceFormat = async (gstin, branch_code) => {
     let url = `/invoicing/latest/${businessDetails?.id}/?branch_code=${branch_code}&gstin=${gstin}`;
     const { res } = await Factory('get', url, {});
     if (res.status_cd === 0) {
       setInvoiceNumberFormat(res.data.latest_invoice_number);
+    } else if (res.status_cd === 1 && res.data.error === 'No Invoice Format found for the provided profile.') {
+      setInvoiceNumberFormat(res.data.error);
     } else {
       dispatch(
         openSnackbar({
@@ -137,6 +146,9 @@ export const useInvoicingData = () => {
   useEffect(() => {
     getBranchesData();
   }, [businessId]);
+  useEffect(() => {
+    getGSTDetails();
+  }, [businessId]);
   return {
     businessDetails,
     customers,
@@ -146,6 +158,11 @@ export const useInvoicingData = () => {
     selectedInvoice,
     getInvoiceFormat,
     getGoodsAndServicesData,
-    branches
+    branches,
+    gstList,
+    getGSTDetails,
+    fetchBusinessDetails,
+    getCustomersData,
+    getBranchesData
   };
 };

@@ -7,7 +7,8 @@ import {
   IconGitPullRequest,
   IconBrandAsana,
   IconBriefcase,
-  IconUsers
+  IconUsers,
+  IconMessageCog
 } from '@tabler/icons-react';
 
 // constant
@@ -19,7 +20,8 @@ const icons = {
   IconBrandAsana,
   IconReservedLine,
   IconBriefcase,
-  IconUsers
+  IconUsers,
+  IconMessageCog
 };
 
 // Should Only work for Admin
@@ -42,7 +44,7 @@ const TaraUsers = {
       title: 'service-summary',
       type: 'item',
       url: '/app/service-summary',
-      icon: icons.IconBriefcase,
+      icon: icons.IconMessageCog,
       breadcrumbs: false
     },
     {

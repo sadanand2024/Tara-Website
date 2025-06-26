@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { Button, Box, Stack, Typography, Grid2 } from '@mui/material';
+import { Button, Box, Stack, Typography, Grid2, TextField } from '@mui/material';
 import CustomInput from 'utils/CustomInput';
 import Modal from 'ui-component/extended/Modal';
 import Factory from 'utils/Factory';
@@ -104,10 +104,11 @@ export default function DesignationDialog({ open, handleClose, fetchDesignations
       <Box component="form" onSubmit={handleSubmit} sx={{ p: 2 }}>
         {designationFields.map((field) => (
           <Grid2 key={field.name} size={{ xs: 12 }}>
-            <Typography gutterBottom>
-              {field.label} <span style={{ color: 'red' }}>*</span>
+            <Typography variant="subtitle1" gutterBottom>
+              {field.label}
             </Typography>
-            <CustomInput
+            <TextField
+              size="small"
               fullWidth
               name={field.name}
               value={values[field.name]}
@@ -115,6 +116,11 @@ export default function DesignationDialog({ open, handleClose, fetchDesignations
               onBlur={handleBlur}
               error={touched[field.name] && Boolean(errors[field.name])}
               helperText={touched[field.name] && errors[field.name]}
+              sx={{
+                '& .MuiInputBase-input': {
+                  color: 'grey.600'
+                }
+              }}
             />
           </Grid2>
         ))}
