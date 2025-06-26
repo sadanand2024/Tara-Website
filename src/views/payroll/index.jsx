@@ -32,38 +32,23 @@ const PayrollDashboard = () => {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [monthWiseData, setMonthWiseData] = useState(null);
 
-  const [loading, setLoading] = useState(false);
+  // Separate loading states to prevent blinking
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [monthDataLoading, setMonthDataLoading] = useState(false);
+  const [salaryCalculationLoading, setSalaryCalculationLoading] = useState(false);
+  const [refreshLoading, setRefreshLoading] = useState(false);
+
   const [businessDetails, setBusinessDetails] = useState({});
   const [financialYear, setFinancialYear] = useState(null);
 
   const financialYearOptions = generateFinancialYears();
 
-  const detail_employee_payroll_salary = async () => {
-    if (!monthNumber) return;
-    setLoading(true);
-    const url = `/payroll/detail_employee_payroll_salary?payroll_id=${payrollId}&month=${monthNumber}&financial_year=${financialYear}`;
-    const { res, error } = await Factory('get', url, {});
-    setLoading(false);
-    // if (res?.status_cd === 0) {
-    //   setMonthWiseData(res.data);
-    // } else {
-    //   dispatch(
-    //     openSnackbar({
-    //       open: true,
-    //       message: JSON.stringify(res?.data?.error),
-    //       variant: 'alert',
-    //       alert: { color: 'error' },
-    //       close: false
-    //     })
-    //   );
-    // }
-  };
   const get_payrollMonthData = async (monthNumber) => {
     if (!monthNumber) return;
-    setLoading(true);
+    setMonthDataLoading(true);
     const url = `/payroll/payroll-summary-view?payroll_id=${businessDetails?.payroll_id}&month=${monthNumber}&financial_year=${financialYear}`;
     const { res, error } = await Factory('get', url, {});
-    setLoading(false);
+    setMonthDataLoading(false);
     if (res?.status_cd === 0) {
       setMonthWiseData(res.data);
     } else {
@@ -78,6 +63,7 @@ const PayrollDashboard = () => {
       );
     }
   };
+
   const handleMonthChange = (event, newValue) => {
     if (!newValue || newValue === 'Please select') {
       dispatch(
@@ -97,8 +83,9 @@ const PayrollDashboard = () => {
 
     get_payrollMonthData(monthIndex + 1); // API expects 1-based month number
   };
+
   const calculate_employee_monthly_salary_status = async (payrollId) => {
-    setLoading(true);
+    setSalaryCalculationLoading(true);
     const url = `/payroll/calculate-employee-monthly-salary?payroll_id=${payrollId}&month=${selectedMonth}&financial_year=${financialYear}`;
     const { res } = await Factory('get', url, {});
     if (res?.status_cd === 0) {
@@ -115,7 +102,6 @@ const PayrollDashboard = () => {
         setMonthWiseData(null); // Clear the data to hide the component
       } else {
         // setMonthWiseData(res.data);
-        // detail_employee_payroll_salary(selectedMonth);
         get_payrollMonthData(selectedMonth);
       }
     } else {
@@ -129,27 +115,26 @@ const PayrollDashboard = () => {
         })
       );
     }
-    setLoading(false);
+    setSalaryCalculationLoading(false);
   };
+
   const getData = async (id) => {
-    setLoading(true);
+    setInitialLoading(true);
     const url = `/payroll/payroll-setup-status?business_id=${id}`;
     const { res, error } = await Factory('get', url, {});
 
     if (res?.status_cd === 0) {
       if (res.data.payroll_setup === false) {
         navigate('/app/payroll/settings?payroll_setup=false');
-        setLoading(false);
+        setInitialLoading(false);
       } else {
         setBusinessDetails(res?.data);
-        if (financialYear) {
-          calculate_employee_monthly_salary_status(res?.data?.payroll_id);
-        }
-        setLoading(false);
+        setInitialLoading(false);
+        // Don't call calculate_employee_monthly_salary_status here, let the useEffect handle it
       }
     } else {
       setBusinessDetails({});
-      setLoading(false);
+      setInitialLoading(false);
       dispatch(
         openSnackbar({
           open: true,
@@ -162,6 +147,36 @@ const PayrollDashboard = () => {
     }
   };
 
+  const refreshEmployees_on_payroll = async () => {
+    setRefreshLoading(true);
+    const url = `/payroll/detail_employee_payroll_salary?payroll_id=${businessDetails?.payroll_id}&month=${selectedMonth}&financial_year=${financialYear}`;
+    const { res } = await Factory('get', url, {});
+    if (res.status_cd === 0) {
+      get_payrollMonthData(selectedMonth);
+
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Employees on your payroll have been refreshed',
+          variant: 'alert',
+          alert: { color: 'success' },
+          close: false
+        })
+      );
+    } else {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res?.data?.error) || 'An error occurred',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
+    }
+    setRefreshLoading(false);
+  };
+
   useEffect(() => {
     // if (user?.user?.registration_completed === 'False') {
     //   // navigate('/payrollsetup/payroll_business_profileSetup');
@@ -171,6 +186,7 @@ const PayrollDashboard = () => {
     // }
     getData(businessId);
   }, [user.active_context]);
+
   useEffect(() => {
     const getCurrentFinancialYear = () => {
       const today = new Date();
@@ -187,16 +203,21 @@ const PayrollDashboard = () => {
   }, []);
 
   useEffect(() => {
-    if (financialYear && businessDetails?.payroll_id) {
+    if (financialYear && businessDetails?.payroll_id && !initialLoading) {
       calculate_employee_monthly_salary_status(businessDetails.payroll_id);
     }
-  }, [financialYear, businessDetails?.payroll_id]);
+  }, [financialYear, businessDetails?.payroll_id, initialLoading]);
 
-  return loading ? (
-    <Stack alignItems="center" sx={{ mt: 4 }}>
-      <CircularProgress />
-    </Stack>
-  ) : (
+  // Show loading only during initial load
+  if (initialLoading) {
+    return (
+      <Stack alignItems="center" sx={{ mt: 4 }}>
+        <CircularProgress />
+      </Stack>
+    );
+  }
+
+  return (
     <MainCard
       title={`Payroll for ${businessDetails?.nameOfBusiness}`}
       secondary={
@@ -280,10 +301,35 @@ const PayrollDashboard = () => {
                       >
                         Resume Payroll
                       </Button>
+                      <Button
+                        variant="outlined"
+                        onClick={() => {
+                          refreshEmployees_on_payroll();
+                        }}
+                        disabled={refreshLoading}
+                      >
+                        {refreshLoading ? 'Refreshing...' : 'Refresh Employees on Your Payroll'}
+                      </Button>
                     </Stack>
                   </Stack>
                 </Stack>
-                {monthWiseData ? (
+
+                {/* Show loading for month data */}
+                {monthDataLoading ? (
+                  <Stack alignItems="center" sx={{ py: 4 }}>
+                    <CircularProgress size={40} />
+                    <Typography variant="body2" sx={{ mt: 1, color: 'text.secondary' }}>
+                      Loading month data...
+                    </Typography>
+                  </Stack>
+                ) : salaryCalculationLoading ? (
+                  <Stack alignItems="center" sx={{ py: 4 }}>
+                    <CircularProgress size={40} />
+                    <Typography variant="body2" sx={{ mt: 1, color: 'text.secondary' }}>
+                      Calculating salary status...
+                    </Typography>
+                  </Stack>
+                ) : monthWiseData ? (
                   <PayrollSummaryGrid data={monthWiseData} config={ServicesData} />
                 ) : (
                   <Typography variant="h4" align="center" sx={{ mt: 4 }}>

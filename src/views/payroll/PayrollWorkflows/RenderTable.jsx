@@ -19,7 +19,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
 import DeleteDialog from '../../../ui-component/extended/DeleteDialog'; // adjust path accordingly
 import { IconButton, Tooltip } from '@mui/material'; // Add these if not already
-
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ActionCell from '../../../ui-component/extended/ActionCell';
 import EmptyDataPlaceholder from 'ui-component/extended/EmptyDataPlaceholder';
 import { Edit, Delete } from '@mui/icons-material';
@@ -67,7 +67,7 @@ const RenderTable = ({
   const safeTableData = Array.isArray(tableData) ? tableData : [];
   const paginatedData = safeTableData.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
   return (
-    <Stack spacing={3}>
+    <Stack>
       {loading ? (
         <Box display="flex" justifyContent="center" alignItems="center" minHeight="50vh">
           <CircularProgress />
@@ -75,8 +75,15 @@ const RenderTable = ({
       ) : (
         <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 1 }}>
           <Table size="small">
-            <TableHead>
-              <TableRow sx={{ bgcolor: 'grey.100' }}>
+            <TableHead
+              sx={{
+                backgroundColor: 'primary.main',
+                '& .MuiTableCell-root': {
+                  color: '#ffffff !important'
+                }
+              }}
+            >
+              <TableRow>
                 {headerData.map((header, index) => (
                   <TableCell key={index} sx={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>
                     {header}
@@ -146,17 +153,31 @@ const RenderTable = ({
         </TableContainer>
       )}
       {safeTableData.length > 0 && (
-        <Grid2 size={12}>
-          <Stack direction="row" justifyContent="center" sx={{ mt: 2 }}>
-            <Pagination
-              count={Math.ceil(safeTableData.length / rowsPerPage)}
-              page={currentPage}
-              onChange={handlePageChange}
-              shape="rounded"
+        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mt: 2 }}>
+          <Button startIcon={<ArrowBackIcon />} variant="outlined" color="primary" onClick={() => navigate('/app/payroll')}>
+            Back to dashboard
+          </Button>
+          <Pagination
+            count={Math.ceil(safeTableData.length / rowsPerPage)}
+            page={currentPage}
+            onChange={handlePageChange}
+            shape="rounded"
+            color="primary"
+          />
+          {/* <Box display="flex" gap={1}>
+            <Button
+              startIcon={<ArrowBackIcon />}
+              variant="outlined"
               color="primary"
-            />
-          </Stack>
-        </Grid2>
+              onClick={() => handlePageChange(null, currentPage - 1)}
+            >
+              Back
+            </Button>
+            <Button variant="contained" color="primary" onClick={() => handlePageChange(null, currentPage + 1)}>
+              Next
+            </Button>
+          </Box> */}
+        </Stack>
       )}
     </Stack>
   );

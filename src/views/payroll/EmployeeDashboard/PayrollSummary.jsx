@@ -153,83 +153,81 @@ const PayrollSummary = ({ payrollId, month, financialYear }) => {
     if (payrollId && financialYear) fetchPayrollSummary();
   }, [payrollId, financialYear]);
   return (
-    <MainCard title="Payroll Summary">
-      <Stack spacing={3}>
-        <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 1 }}>
-          <Table size="small">
-            <TableHead
-              sx={{
-                backgroundColor: 'primary.main',
-                '& .MuiTableCell-root': {
-                  color: '#ffffff !important'
-                }
-              }}
-            >
+    <MainCard>
+      <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 1 }}>
+        <Table size="small">
+          <TableHead
+            sx={{
+              backgroundColor: 'primary.main',
+              '& .MuiTableCell-root': {
+                color: '#ffffff !important'
+              }
+            }}
+          >
+            <TableRow>
+              {TABLE_HEADERS.map((header, idx) => (
+                <TableCell key={idx} sx={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>
+                  {header}
+                </TableCell>
+              ))}
+              <TableCell align="center" sx={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>
+                Action
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {loading ? (
               <TableRow>
-                {TABLE_HEADERS.map((header, idx) => (
-                  <TableCell key={idx} sx={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>
-                    {header}
-                  </TableCell>
-                ))}
-                <TableCell align="center" sx={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>
-                  Action
+                <TableCell colSpan={TABLE_HEADERS.length + 1} align="center" sx={{ height: 300 }}>
+                  <CircularProgress />
                 </TableCell>
               </TableRow>
-            </TableHead>
-            <TableBody>
-              {loading ? (
-                <TableRow>
-                  <TableCell colSpan={TABLE_HEADERS.length + 1} align="center" sx={{ height: 300 }}>
-                    <CircularProgress />
+            ) : paginatedData.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={TABLE_HEADERS.length + 1} align="center" sx={{ height: 300 }}>
+                  <EmptyDataPlaceholder title="No Data Found" subtitle="Start by adding a new record." />
+                </TableCell>
+              </TableRow>
+            ) : (
+              paginatedData.map((item, index) => (
+                <TableRow key={item.id || index}>
+                  <TableCell>{item.associate_id || 'NA'}</TableCell>
+                  <TableCell>{item.employee_name || 'NA'}</TableCell>
+                  <TableCell>{item.department || 'NA'}</TableCell>
+                  <TableCell>{item.designation || 'NA'}</TableCell>
+                  <TableCell>{item.paid_days || 'NA'}</TableCell>
+                  <TableCell>{item.ctc || 'NA'}</TableCell>
+                  <TableCell>{item.actual_gross || 'NA'}</TableCell>
+                  <TableCell>{item.gross_salary || 'NA'}</TableCell>
+                  <TableCell>{item.earned_salary || 'NA'}</TableCell>
+                  <TableCell>{item.deductions?.['Total'] || 'NA'}</TableCell>
+                  <TableCell>{item.net_salary || 'NA'}</TableCell>
+                  <TableCell>
+                    <Typography
+                      align="center"
+                      variant="body2"
+                      sx={{
+                        cursor: 'pointer',
+                        textDecoration: 'underline',
+                        color: 'primary.main'
+                      }}
+                      onClick={() => viewPayslip(item.employee_id, item.month, item.financial_year)}
+                    >
+                      View / Download
+                    </Typography>
                   </TableCell>
                 </TableRow>
-              ) : paginatedData.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={TABLE_HEADERS.length + 1} align="center" sx={{ height: 300 }}>
-                    <EmptyDataPlaceholder title="No Data Found" subtitle="Start by adding a new record." />
-                  </TableCell>
-                </TableRow>
-              ) : (
-                paginatedData.map((item, index) => (
-                  <TableRow key={item.id || index}>
-                    <TableCell>{item.associate_id || 'NA'}</TableCell>
-                    <TableCell>{item.employee_name || 'NA'}</TableCell>
-                    <TableCell>{item.department || 'NA'}</TableCell>
-                    <TableCell>{item.designation || 'NA'}</TableCell>
-                    <TableCell>{item.paid_days || 'NA'}</TableCell>
-                    <TableCell>{item.ctc || 'NA'}</TableCell>
-                    <TableCell>{item.actual_gross || 'NA'}</TableCell>
-                    <TableCell>{item.gross_salary || 'NA'}</TableCell>
-                    <TableCell>{item.earned_salary || 'NA'}</TableCell>
-                    <TableCell>{item.deductions?.['Total'] || 'NA'}</TableCell>
-                    <TableCell>{item.net_salary || 'NA'}</TableCell>
-                    <TableCell>
-                      <Typography
-                        align="center"
-                        variant="body2"
-                        sx={{
-                          cursor: 'pointer',
-                          textDecoration: 'underline',
-                          color: 'primary.main'
-                        }}
-                        onClick={() => viewPayslip(item.employee_id, item.month, item.financial_year)}
-                      >
-                        View / Download
-                      </Typography>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
 
-        {payrollSummaryData.length > 0 && (
-          <Stack direction="row" justifyContent="center" alignItems="center" sx={{ py: 2 }}>
-            <Pagination count={totalPages} page={currentPage} onChange={handlePageChange} shape="rounded" color="primary" />
-          </Stack>
-        )}
-      </Stack>
+      {payrollSummaryData.length > 0 && (
+        <Stack direction="row" justifyContent="center" alignItems="center" sx={{ py: 2 }}>
+          <Pagination count={totalPages} page={currentPage} onChange={handlePageChange} shape="rounded" color="primary" />
+        </Stack>
+      )}
     </MainCard>
   );
 };
