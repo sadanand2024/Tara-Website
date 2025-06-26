@@ -515,7 +515,7 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
             <FormControl fullWidth>
-              <FormLabel>Do You have Multiple branches ?</FormLabel>
+              <FormLabel>Do You have Multiple branches?</FormLabel>
               <RadioGroup
                 row
                 name="has_multiple_branches"
