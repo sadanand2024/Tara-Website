@@ -141,7 +141,7 @@ const ProfessionalTax = ({ handleNext, handleBack }) => {
                     color="primary"
                   />
                   <Stack direction="row" spacing={2}>
-                    <Button variant="contained" onClick={handleBack}>
+                    <Button startIcon={<ArrowBackIcon />} variant="outlined" onClick={handleBack}>
                       Back
                     </Button>
                     <Button variant="contained" onClick={handleNext}>

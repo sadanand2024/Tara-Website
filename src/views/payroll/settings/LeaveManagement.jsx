@@ -125,10 +125,10 @@ function LeaveManagement() {
         ) : (
           <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 1 }}>
             <Table size="small">
-              <TableHead>
-                <TableRow sx={{ bgcolor: 'grey.100' }}>
+              <TableHead sx={{ bgcolor: 'primary.main' }}>
+                <TableRow>
                   {['S.No', 'Leave Name', 'Code', 'Type', 'Period', 'No of Leaves', 'Actions'].map((head, idx) => (
-                    <TableCell key={idx} align="center" sx={{ fontWeight: 'bold' }}>
+                    <TableCell key={idx} align="center" sx={{ fontWeight: 'bold', color: '#fff !important' }}>
                       {head}
                     </TableCell>
                   ))}
@@ -152,10 +152,10 @@ function LeaveManagement() {
                       <TableCell align="center">{item.number_of_leaves}</TableCell>
                       <TableCell align="center">
                         <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
-                          <IconButton color="primary" onClick={() => openDialog('edit', item)}>
+                          <IconButton size="small" color="primary" onClick={() => openDialog('edit', item)}>
                             <Edit />
                           </IconButton>
-                          <IconButton color="error" onClick={() => handleOpenDeleteDialog(item)}>
+                          <IconButton size="small" color="error" onClick={() => handleOpenDeleteDialog(item)}>
                             <Delete />
                           </IconButton>
                         </Box>
