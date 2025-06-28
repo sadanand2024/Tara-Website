@@ -72,6 +72,27 @@ function SalaryDetails({
     onSubmit: async (values) => {
       const postData = { ...values };
 
+      // Calculate Fixed Allowance before posting
+      const annualCtc = parseFloat(values.annual_ctc || 0);
+      const earningsWithoutFA = values.earnings.filter((e) => e.component_name !== 'Fixed Allowance');
+      const benefitsTotal = values.benefits?.reduce((sum, b) => (b.annually !== 'NA' ? sum + parseFloat(b.annually || 0) : sum), 0) || 0;
+
+      const totalEarningsWithoutFA = earningsWithoutFA.reduce((sum, e) => sum + parseFloat(e.annually || 0), 0);
+      const faAnnual = annualCtc - totalEarningsWithoutFA - benefitsTotal;
+      const faMonthly = faAnnual / 12;
+
+      // Include Fixed Allowance in earnings
+      postData.earnings = [
+        ...earningsWithoutFA,
+        {
+          component_name: 'Fixed Allowance',
+          calculation_type: 'Fixed',
+          calculation: 0,
+          monthly: Math.round(faMonthly * 100) / 100,
+          annually: Math.round(faAnnual * 100) / 100
+        }
+      ];
+
       // Show error if present in form values
       if (postData.errorMessage) {
         dispatch(
@@ -97,6 +118,7 @@ function SalaryDetails({
       postData.payroll_month = month === null ? new Date().getMonth() + 1 : Number(month);
       let currentYear = `${new Date().getFullYear()}-${new Date().getFullYear() + 1}`;
       postData.payroll_year = financial_year === null ? currentYear.split('-')[0] : Number(financial_year.split('-')[0]);
+
       // Determine API method and URL
       const method = employeeData?.employee_salary?.id ? 'put' : 'post';
       const url = employeeData?.employee_salary?.id
@@ -117,8 +139,6 @@ function SalaryDetails({
         );
         return;
       }
-
-      // Success case
       dispatch(
         openSnackbar({
           open: true,

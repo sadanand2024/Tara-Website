@@ -159,7 +159,7 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
   });
   const renderFields = (fields) => {
     return fields.map((field) => (
-      <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4 }}>
+      <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
         <Typography variant="subtitle1">{field.label}</Typography>
         {field.name === 'gender' || field.name === 'work_location' || field.name === 'designation' || field.name === 'department' ? (
           <CustomAutocomplete

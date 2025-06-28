@@ -126,11 +126,11 @@ const RenderTable = ({
                         </Button>
                       ) : (
                         <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
-                          <IconButton color="primary" onClick={() => handleEdit(row)}>
+                          <IconButton size="small" color="primary" onClick={() => handleEdit(row)}>
                             <Edit />
                           </IconButton>
                           {from !== 'Tds' ? (
-                            <IconButton color="error" onClick={() => handleOpenDeleteDialog(row)}>
+                            <IconButton size="small" color="error" onClick={() => handleOpenDeleteDialog(row)}>
                               <Delete />
                             </IconButton>
                           ) : null}
@@ -156,9 +156,11 @@ const RenderTable = ({
       )}
 
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mt: 2 }}>
-        <Button startIcon={<ArrowBackIcon />} variant="outlined" color="primary" onClick={() => navigate('/app/payroll')}>
-          Back to dashboard
-        </Button>
+        {from !== 'Tds' && (
+          <Button startIcon={<ArrowBackIcon />} variant="outlined" color="primary" onClick={() => navigate('/app/payroll')}>
+            Back to dashboard
+          </Button>
+        )}
         <Box display="flex" gap={1}>
           {safeTableData.length > 0 && (
             <Pagination
@@ -176,7 +178,7 @@ const RenderTable = ({
           </Button>
           {from === 'Tds' ? (
             <Button variant="contained" color="primary" onClick={() => navigate('/app/payroll')}>
-              Proceed to Payroll
+              Proceed to Dashboard
             </Button>
           ) : (
             <Button variant="contained" color="primary" onClick={() => handleNext()}>
