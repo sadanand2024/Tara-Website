@@ -270,7 +270,7 @@ const GSTSettings = ({ from, handleBack, handleNext }) => {
         </Box>
       )}
       {/* Add/Edit GST Dialog */}
-      <AddGSTDialog open={open} selectedGST={selectedGST} handleClose={handleClose} />
+      <AddGSTDialog open={open} selectedGST={selectedGST} handleClose={handleClose} fetchGSTList={fetchGSTList} />
 
       <DeleteConfirmationDialog
         open={deleteDialogOpen}
