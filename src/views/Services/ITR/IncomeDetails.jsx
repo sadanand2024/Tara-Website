@@ -1,32 +1,31 @@
-import React, { useEffect, useState } from 'react';
+import DeleteIcon from '@mui/icons-material/Delete';
 import {
-  Box,
-  Typography,
-  TextField,
-  Button,
-  Grid2,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
-  Checkbox,
-  Radio,
-  FormControlLabel,
-  Card,
-  Paper,
   Autocomplete,
+  Box,
+  Button,
+  Checkbox,
+  FormControl,
+  FormControlLabel,
+  Grid2,
+  IconButton,
+  Paper,
+  Radio,
   RadioGroup,
   Stack,
-  IconButton,
-  FormControl
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography
 } from '@mui/material';
-import { useFormik, FieldArray, FormikProvider } from 'formik';
-import * as Yup from 'yup';
-import DeleteIcon from '@mui/icons-material/Delete';
+import { FieldArray, FormikProvider, useFormik } from 'formik';
 import { useSnackbar } from 'notistack';
-import GetActionButtons from '../FormHelpers';
+import React, { useEffect, useState } from 'react';
+import * as Yup from 'yup';
 import Factory from '../../../utils/Factory';
+import GetActionButtons from '../FormHelpers';
 import RaiseRequest from '../RaiseRequest';
 const viewFile = async (url) => {
   const response = await Factory('get', `/docwallet/generate_presigned_url?url=${url}`, {}, {});
@@ -93,7 +92,7 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
   };
   const otherIncomeInitial = {
     otherIncome:
-      other_income?.data?.length > 0 && other_income?.data[0]?.other_income_info.length > 0
+      other_income?.data?.length > 0 && other_income?.data[0]?.other_income_info?.length > 0
         ? other_income?.data[0]?.other_income_info
         : [
             {
@@ -171,7 +170,10 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
       formData.append('status', 'in progress');
       const res = await Factory(type, url, formData, {});
       if (res.res.status_cd === 0) {
-        setSalaryIncome((prev) => ({ ...prev, data: [res.res] }));
+        const result = type === 'post' ? res.res : res.res.data;
+        console.log(res.res)
+        setSalaryIncome((prev) => ({ ...prev, data: [result] }));
+        
         enqueueSnackbar('Documents saved successfully!', {
           variant: 'success',
           anchorOrigin: { vertical: 'top', horizontal: 'right' }
@@ -235,6 +237,10 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
           variant: 'success',
           anchorOrigin: { vertical: 'top', horizontal: 'right' }
         });
+        setForeignIncome((prev) => ({
+                                ...prev,
+                                status: 'in progress'
+                            }));
       } else {
         enqueueSnackbar('Error saving Foreign/NRI Employment & Salary Details!', {
           variant: 'error',
@@ -403,6 +409,7 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
                               placeholder="Details"
                               value={row?.details}
                               onChange={(e) => otherIncomeFormik.setFieldValue(`otherIncome[${idx}].details`, e.target.value)}
+                              
                             />
                           </TableCell>
                           <TableCell>
@@ -469,14 +476,15 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
                                   formData.append('details', row.details || '');
                                   formData.append('amount', row.amount || '');
                                   formData.append('notes', row.notes || '');
-                                  if (other_income.data[0].other_income_info[idx])
-                                    formData.append('id', other_income.data[0].other_income_info[idx].id);
+                                  if (other_income?.data[0]?.other_income_info[idx])
+                                    formData.append('id', other_income.data[0]?.other_income_info[idx].id);
                                   if (row.file && row.file instanceof File) formData.append('file', row.file);
                                   let type = 'post';
                                   let url = '/income_tax_returns/other-income-details/';
                                   const res = await Factory(type, url, formData, {});
                                   if (res.res.status_cd === 0) {
                                     setOtherIncome((prev) => ({ ...prev, data: [res.res] }));
+                                  
                                     enqueueSnackbar('Other income saved successfully!', {
                                       variant: 'success',
                                       anchorOrigin: { vertical: 'top', horizontal: 'right' }
@@ -602,7 +610,7 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
             <Grid2 container spacing={2} alignItems="center" mt={2}>
               {/* Period of Employment */}
               <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                <Typography>Period of Employment</Typography>
+                <Typography variant="subtitle1">Period of Employment</Typography>
               </Grid2>
               <Grid2 size={{ xs: 6, sm: 3, md: 2 }}>
                 <TextField
@@ -613,6 +621,12 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
                   value={foreignFormik.values.periodFrom}
                   onChange={(e) => foreignFormik.setFieldValue('periodFrom', e.target.value)}
                   InputLabelProps={{ shrink: true }}
+                    sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                 />
               </Grid2>
               <Grid2 size={{ xs: 6, sm: 3, md: 2 }}>
@@ -624,11 +638,17 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
                   value={foreignFormik.values.periodTo}
                   onChange={(e) => foreignFormik.setFieldValue('periodTo', e.target.value)}
                   InputLabelProps={{ shrink: true }}
+                                sx={{
+                                  width: '100%',
+                                  '& .MuiInputBase-input': {
+                                    color: 'grey.600'
+                                    }
+                                  }}
                 />
               </Grid2>
               {/* Country of Employment */}
               <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                <Typography>Country of Employment</Typography>
+                <Typography variant="subtitle1">Country of Employment</Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <TextField
@@ -636,6 +656,12 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
                   fullWidth
                   value={foreignFormik.values.country}
                   onChange={(e) => foreignFormik.setFieldValue('country', e.target.value)}
+                   sx={{
+                                  width: '100%',
+                                  '& .MuiInputBase-input': {
+                                    color: 'grey.600'
+                                    }
+                                  }}
                 />
               </Grid2>
             </Grid2>
@@ -768,6 +794,17 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
   // Handle field change
   const handleChange = (idx, field, value) => {
     const updated = [...properties];
+    // Convert string 'true'/'false' to boolean for specific fields
+    const booleanFields = [
+      'owned_property',
+      'is_it_property_let_out',
+      'pay_municipal_tax',
+      'home_loan_on_property'
+    ];
+    if (booleanFields.includes(field) && (value === 'true' || value === 'false')) {
+      value = value === 'true';
+    }
+
     if (field.startsWith('property_address.')) {
       const addrField = field.split('.')[1];
       updated[idx].property_address = {
@@ -812,6 +849,7 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
       if (res.res?.status_cd === 0) {
         if (res.res?.data?.property_info) setProperties(res.res?.data?.property_info);
         enqueueSnackbar(`Property ${idx + 1} saved!`, { variant: 'success', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
+        
       } else {
         enqueueSnackbar(`Error saving property ${idx + 1}`, { variant: 'error', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
       }
@@ -4504,7 +4542,10 @@ const AgricultureIncome = ({ data, service_id, setFileDialogOpen, fileDialogOpen
       type = 'put';
       url = `/income_tax_returns/agriculture-income-docs/${id}/update/`;
       formData.append('id', parseInt(id));
+      console.log(id)
     }
+    console.log("asdfghjkl", parseInt(data.data[0].id))
+
     formData.append('agriculture_income', parseInt(data.data[0].id));
     formData.append('service_request', parseInt(service_id));
     formData.append('service_task', parseInt(data.task_id));

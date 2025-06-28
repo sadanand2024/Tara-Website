@@ -162,7 +162,7 @@ const fields_lut = [
     type: 'file'
   }
 ];
-const AddGSTDialog = ({ open, selectedGST, handleClose }) => {
+const AddGSTDialog = ({ open, selectedGST, handleClose, fetchGSTList }) => {
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
   const user = useSelector((state) => state.accountReducer.user);
@@ -258,9 +258,9 @@ const AddGSTDialog = ({ open, selectedGST, handleClose }) => {
       address: '',
       state: '',
       pincode: '',
-      is_composition_scheme: 'no',
+      is_composition_scheme: false,
       composition_scheme_percent: '',
-      is_export_sez: 'no',
+      is_export_sez: false,
       lut_reg_no: '',
       dob: '',
       financial_year: '',
@@ -291,7 +291,7 @@ const AddGSTDialog = ({ open, selectedGST, handleClose }) => {
       formData.append('composition_scheme_percent', values.composition_scheme_percent);
       formData.append('is_export_sez', values.is_export_sez);
       formData.append('lut_reg_no', values.lut_reg_no);
-      formData.append('dob', values.dob);
+      formData.append('dob', values.dob ? values.dob : '');
       formData.append('financial_year', values.financial_year);
       if (values.lut_letter && typeof values.lut_letter !== 'string') {
         formData.append('lut_letter', values.lut_letter);
@@ -308,7 +308,7 @@ const AddGSTDialog = ({ open, selectedGST, handleClose }) => {
       }
       const { res } = await Factory(type, url, formData, {}, true);
       if (res.status_cd === 0) {
-        // await fetch_Business_Details();
+        await fetchGSTList();
         handleClose();
         dispatch(
           openSnackbar({

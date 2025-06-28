@@ -412,7 +412,7 @@ const PayrollSettingsLayout = () => {
               minHeight: 'auto',
               minWidth: isSmallScreen ? 'auto' : '100%',
               py: 1.5,
-              px: 2,
+              px: 1,
               display: 'flex',
               flexDirection: 'row',
               alignItems: 'center',
@@ -433,7 +433,10 @@ const PayrollSettingsLayout = () => {
             '& > div > span': {
               display: 'none'
             },
-            padding: 2
+            padding: 1,
+            '& button:hover': {
+              backgroundColor: 'grey.100'
+            }
           }}
         >
           {steps.map((step, index) => {
@@ -469,7 +472,7 @@ const PayrollSettingsLayout = () => {
                   <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 0.5, mt: 1 }}>
                     <Stack direction="row" spacing={2}>
                       <IconComponent color="primary" />
-                      <Typography variant="h5" sx={{ fontSize: 13, fontWeight: 500 }} noWrap>
+                      <Typography variant="h6" sx={{ fontWeight: 500 }} noWrap>
                         {step.nameKey}
                       </Typography>
                     </Stack>

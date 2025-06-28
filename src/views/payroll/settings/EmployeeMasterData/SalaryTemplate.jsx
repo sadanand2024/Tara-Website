@@ -262,7 +262,6 @@ export default function RenderSalaryTemplateTable({
     setFieldValue('errorMessage', ''); // ✅ clear previous error
     setEnablePreviewButton(true);
   };
-
   const fetch_preview = async () => {
     const annualCtc = parseFloat(values.annual_ctc || 0);
 
@@ -307,6 +306,7 @@ export default function RenderSalaryTemplateTable({
     const finalPayload = {
       ...values,
       payroll: payrollId,
+      employee: createdEmployeeId,
       earnings: [
         ...updatedEarnings.filter((e) => e.component_name !== 'Fixed Allowance'),
         {

@@ -210,10 +210,10 @@ function HolidayManagement({ handleBack, handleNext }) {
             }}
           >
             <Table size="small">
-              <TableHead>
-                <TableRow sx={{ bgcolor: 'grey.100' }}>
+              <TableHead sx={{ bgcolor: 'primary.main' }}>
+                <TableRow>
                   {['S.No', 'Holiday Name', 'Date', 'Description', 'Locations', 'Actions'].map((header, idx) => (
-                    <TableCell key={idx} sx={{ fontWeight: 'bold', textAlign: 'center' }}>
+                    <TableCell key={idx} sx={{ fontWeight: 'bold', textAlign: 'center', color: '#fff !important' }}>
                       {header}
                     </TableCell>
                   ))}
@@ -238,10 +238,10 @@ function HolidayManagement({ handleBack, handleNext }) {
                       <TableCell align="center">{item.applicable_for}</TableCell>
                       <TableCell align="center">
                         <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
-                          <IconButton color="primary" onClick={() => handleEdit(item)}>
+                          <IconButton size="small" color="primary" onClick={() => handleEdit(item)}>
                             <Edit />
                           </IconButton>
-                          <IconButton color="error" onClick={() => handleOpenDeleteDialog(item)}>
+                          <IconButton size="small" color="error" onClick={() => handleOpenDeleteDialog(item)}>
                             <Delete />
                           </IconButton>
                         </Box>

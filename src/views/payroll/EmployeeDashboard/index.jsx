@@ -56,7 +56,6 @@ export default function Index() {
 
   useEffect(() => {
     const tabValue = searchParams.get('tabvalue');
-    console.log(tabValue);
     if (tabValue) setActiveTab(Number(tabValue));
   }, [searchParams]);
   // Accessibility props for tabs
@@ -67,7 +66,11 @@ export default function Index() {
   });
 
   // Tab labels
-  const tabLabels = ['Payroll Summary', 'Detailed Payroll', 'Compliance Summary'];
+  const tabLabels = [
+    'Payroll Summary',
+    'Detailed Payroll'
+    // 'Compliance Summary'
+  ];
   const handleNext = () => {
     setActiveTab((prev) => (prev < 3 ? prev + 1 : prev));
   };
@@ -105,7 +108,6 @@ export default function Index() {
       }
     } catch (err) {
       setError('Error parsing monthwise data');
-      console.error('Error parsing monthwise data:', err);
     } finally {
       setLoading(false);
     }
@@ -115,7 +117,15 @@ export default function Index() {
     navigate(`/payroll${href}?payrollid=${payrollId}&tabValue=${index}&month=${month}&financial_year=${financialYear}`);
   };
   return (
-    <MainCard title={`Monthly Payroll Dashboard of ${months[month - 1]}`} tagline="Explore your monthly payroll details">
+    <MainCard
+      title={`Monthly Payroll Dashboard of ${months[month - 1]}`}
+      tagline="Explore your monthly payroll details"
+      secondary={
+        <Button startIcon={<ArrowBackIcon />} variant="outlined" color="primary" onClick={() => navigate('/app/payroll')}>
+          Go to Payroll Dashboard
+        </Button>
+      }
+    >
       {' '}
       <Box>
         <Grid2 container spacing={{ xs: 2, md: 3 }}>
