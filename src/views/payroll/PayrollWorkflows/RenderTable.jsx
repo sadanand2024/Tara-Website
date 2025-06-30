@@ -73,7 +73,7 @@ const RenderTable = ({
           <CircularProgress />
         </Box>
       ) : (
-        <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 1 }}>
+        <TableContainer component={Paper}>
           <Table size="small">
             <TableHead>
               <TableRow sx={{ bgcolor: 'grey.100' }}>
@@ -147,7 +147,7 @@ const RenderTable = ({
       )}
       {safeTableData.length > 0 && (
         <Grid2 size={12}>
-          <Stack direction="row" justifyContent="center" sx={{ mt: 2 }}>
+          <Stack direction="row" justifyContent="center">
             <Pagination
               count={Math.ceil(safeTableData.length / rowsPerPage)}
               page={currentPage}

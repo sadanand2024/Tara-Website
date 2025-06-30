@@ -190,7 +190,12 @@ export default function UserProfile({ user, pageChange, value }) {
             size="small"
             name="pan_number"
             value={formik.values.pan_number}
-            onChange={(e) => formik.setFieldValue('pan_number', e.target.value.toUpperCase())}
+            onChange={(e) => {
+              const upperCaseValue = e.target.value.toUpperCase();
+              if (upperCaseValue.length <= 10) {
+                formik.setFieldValue('pan_number', upperCaseValue);
+              }
+            }}
             onBlur={formik.handleBlur}
             error={formik.touched.pan_number && Boolean(formik.errors.pan_number)}
             helperText={formik.touched.pan_number && formik.errors.pan_number}
