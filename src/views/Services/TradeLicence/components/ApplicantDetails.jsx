@@ -75,7 +75,7 @@ const ApplicantDetails = ({applicantTaskId}) => {
       pan_image: '',
       passport_photo: '',
       address: '',
-      residential_address: 'no',
+      residential_address: false,
       id: '',
       status: '',
       service_type: '',
@@ -96,14 +96,15 @@ const ApplicantDetails = ({applicantTaskId}) => {
       aadhaar_image: Yup.mixed().required('Aadhaar Image is required'),
 
       pan_image: Yup.mixed().required('PAN Image is required'),
-      passport_photo: Yup.mixed().required('Passport Photo is required'), 
+      passport_photo: Yup.mixed().required('Passport Photo is required'),
       address: Yup.string()
     .when('residential_address', {
-      is: 'no',
+      is: false,
       then: (schema) => schema.required('Address is required when residential is not same'),
       otherwise: (schema) => schema.notRequired(),
     }),
-      residential_address: Yup.string().oneOf(['yes', 'no'], 'Residential address must be either yes or no')
+      // residential_address: Yup.string().oneOf(['yes', 'no'], 'Residential address must be either yes or no')
+      residential_address: Yup.boolean().required('Required')
       
     }),
     onSubmit: async (values) => {
@@ -219,7 +220,7 @@ const ApplicantDetails = ({applicantTaskId}) => {
   };
   const handleCheckboxChange = (event) => {
     console.log(event.target.checked)
-    setFieldValue('residential_address', event.target.checked ? 'yes' : 'no');
+    setFieldValue('residential_address', event.target.checked );
     if (event.target.checked) {
       setFieldValue('address', '');
     }
@@ -248,6 +249,7 @@ const ApplicantDetails = ({applicantTaskId}) => {
     getApplicantDetails();
   }, []);
   const { values, handleChange, handleBlur, setFieldValue, touched, errors, handleSubmit, setValues } = formik;
+  
   return (
     <Card sx={{ p: 3, mt: 3 }}>
         <Grid2 container alignItems="center" justifyContent="space-between" mb={2}>
@@ -294,10 +296,10 @@ const ApplicantDetails = ({applicantTaskId}) => {
               <span style={{ textDecoration: 'underline' }}>Residential Address</span>
             </Typography>
             <FormControlLabel
-              control={<Checkbox checked={values.residential_address === 'yes'} onChange={handleCheckboxChange} />}
+              control={<Checkbox checked={values.residential_address } onChange={handleCheckboxChange} />}
               label="Same as in Aadhaar"
             />
-            {values.residential_address === 'no' && (
+            {values.residential_address === false && (
               <TextField
                 fullWidth
                 size="small"
