@@ -622,7 +622,7 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
         </Stack>
       }
     >
-      <Box component="form" onSubmit={handleSubmit}>
+      <Box component="form" onSubmit={handleSubmit} mt={2}>
         <Grid2 container spacing={2}>
           {/* Render dynamic fields for department */}
           {from === 'Salary Revisions' && selectedRecord === null ? renderFields(fields.slice(0, 4)) : renderFields(fields)}

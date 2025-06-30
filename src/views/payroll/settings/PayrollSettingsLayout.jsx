@@ -413,6 +413,7 @@ const PayrollSettingsLayout = () => {
               minWidth: isSmallScreen ? 'auto' : '100%',
               py: 1.5,
               px: 1,
+              mb: 1,
               display: 'flex',
               flexDirection: 'row',
               alignItems: 'center',
@@ -424,7 +425,7 @@ const PayrollSettingsLayout = () => {
             },
             '& button.Mui-selected': {
               color: 'primary.main',
-              bgcolor: mode === 'dark' ? 'dark.main' : '#b7d0e9'
+              bgcolor: mode === 'dark' ? 'dark.main' : 'primary.light'
             },
             '& button > svg': {
               height: 20,
@@ -435,7 +436,7 @@ const PayrollSettingsLayout = () => {
             },
             padding: 1,
             '& button:hover': {
-              backgroundColor: 'grey.100'
+              backgroundColor: 'primary.light'
             }
           }}
         >
@@ -469,14 +470,13 @@ const PayrollSettingsLayout = () => {
                 //   </Box>
                 // }
                 label={
-                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 0.5, mt: 1 }}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 0.5, mt: 0.5 }}>
                     <Stack direction="row" spacing={2}>
                       <IconComponent color="primary" />
-                      <Typography variant="h6" sx={{ fontWeight: 500 }} noWrap>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 500 }} noWrap>
                         {step.nameKey}
                       </Typography>
                     </Stack>
-
                     {step.dataKey === 'statutory_component' && !step.completed && (
                       <Box
                         component="span"

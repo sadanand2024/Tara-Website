@@ -506,7 +506,7 @@ const ItemDetailsAndNotes = ({
                     Discount Total:
                   </Typography>
                 </Box>
-                <Typography variant="body1" sx={{ fontWeight: 600, color: theme.palette.warning.main }}>
+                <Typography variant="body1" sx={{ fontWeight: 600 }}>
                   ₹{typeof totalDiscount === 'number' ? totalDiscount.toFixed(2) : '0.00'}
                 </Typography>
               </Box>
@@ -590,10 +590,10 @@ const ItemDetailsAndNotes = ({
                   border: `2px solid ${alpha(theme.palette.success.main, 0.2)}`
                 }}
               >
-                <Typography variant="h6" sx={{ fontWeight: 700, color: theme.palette.success.main }}>
+                <Typography variant="h6" sx={{ fontWeight: 700 }}>
                   Total Amount:
                 </Typography>
-                <Typography variant="h6" sx={{ fontWeight: 700, color: theme.palette.success.main }}>
+                <Typography variant="h6" sx={{ fontWeight: 700 }}>
                   ₹{formik.values.total_amount.toFixed(2)}
                 </Typography>
               </Box>

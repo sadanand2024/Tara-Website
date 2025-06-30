@@ -74,10 +74,10 @@ export default function RecordPayment() {
     { label: 'Customer Name', value: selectedInvoice?.customer, icon: FiUser },
     { label: 'Invoice Number', value: selectedInvoice?.invoice_number, icon: AiOutlineNumber },
     { label: 'Invoice Date', value: selectedInvoice?.invoice_date, icon: AiOutlineCalendar },
-    { label: 'Invoice Amount', value: selectedInvoice?.amount_invoiced, icon: RiFileList3Line },
+    { label: 'Invoice Amount', value: selectedInvoice?.total_amount, icon: RiFileList3Line },
     {
       label: 'Total Amount Paid',
-      value: selectedInvoice?.amount_invoiced - selectedInvoice?.balance_due,
+      value: selectedInvoice?.total_amount - selectedInvoice?.balance_due,
       icon: IconCurrencyRupee
     },
     { label: 'Due Amount', value: selectedInvoice?.balance_due, icon: RiAlertLine }

@@ -488,7 +488,7 @@ export default function BusinessProfileComponnet({ businessDetails = {}, postTyp
                 value={values[item.name]}
                 size="small"
                 onChange={(e) => {
-                  if (item.name === 'pan' || item.name === 'ifsc_code' || item.name === 'bank_name') {
+                  if (item.name === 'pan' || item.name === 'ifsc_code' || item.name === 'bank_name' || item.name === 'swift_code') {
                     setFieldValue(item.name, e.target.value.toUpperCase());
                   } else {
                     setFieldValue(item.name, e.target.value);
