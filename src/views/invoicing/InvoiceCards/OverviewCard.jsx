@@ -498,7 +498,7 @@ export default function OverviewCard({ invoicing_profile_data, businessId, open,
             <Table size="small">
               <TableHead>
                 <TableRow sx={{ bgcolor: 'primary.main', color: 'white' }}>
-                  <TableCell>Date</TableCell>
+                  <TableCell>Invoice Date</TableCell>
                   <TableCell>Invoice Number</TableCell>
                   <TableCell>Customer</TableCell>
                   <TableCell>Payment Status</TableCell>
@@ -523,7 +523,7 @@ export default function OverviewCard({ invoicing_profile_data, businessId, open,
                         }
                       }}
                     >
-                      <TableCell>{invoice.invoice_date}</TableCell>
+                      <TableCell>{new Date(invoice.invoice_date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: '2-digit' })}</TableCell>
                       <TableCell>{invoice.invoice_number}</TableCell>
                       <TableCell>{invoice.customer}</TableCell>
                       <TableCell>
@@ -542,7 +542,7 @@ export default function OverviewCard({ invoicing_profile_data, businessId, open,
                           color={invoice.invoice_status === 'Approved' ? 'success' : 'warning'}
                         />
                       </TableCell>
-                      <TableCell>{invoice.due_date}</TableCell>
+                      <TableCell>{new Date(invoice.due_date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: '2-digit' })}</TableCell>
                       <TableCell>
                         {indianCurrency}&nbsp;{invoice.total_amount}
                       </TableCell>
