@@ -66,7 +66,7 @@ const AddBusiness = ({ open, onClose, userData, setUserData, getContext }) => {
       business_nature: '',
       trade_name: '',
       mobile_number: '',
-      email: '',
+      email: ''
     },
 
     validationSchema,
@@ -197,7 +197,12 @@ const AddBusiness = ({ open, onClose, userData, setUserData, getContext }) => {
                 name="pan"
                 label="PAN Number"
                 value={formik.values.pan}
-                onChange={formik.handleChange}
+                onChange={(e) => {
+                  const upperCaseValue = e.target.value.toUpperCase();
+                  if (upperCaseValue.length <= 10) {
+                    formik.setFieldValue('pan', upperCaseValue);
+                  }
+                }}
                 error={formik.touched.pan && Boolean(formik.errors.pan)}
                 helperText={formik.touched.pan && formik.errors.pan}
               />

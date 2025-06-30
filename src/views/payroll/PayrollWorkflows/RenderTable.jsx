@@ -75,7 +75,7 @@ const RenderTable = ({
           <CircularProgress />
         </Box>
       ) : (
-        <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 1 }}>
+        <TableContainer component={Paper}>
           <Table size="small">
             <TableHead
               sx={{
