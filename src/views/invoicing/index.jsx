@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useDispatch } from 'store';
 import OverviewCard from './InvoiceCards/OverviewCard';
-import { Button, Stack, Typography, Box, Skeleton } from '@mui/material';
+import { Button, Stack, Typography, Box, CircularProgress } from '@mui/material';
 import { IconSparkles, IconSettings2, IconReceipt, IconPlus } from '@tabler/icons-react';
 import MainCard from '../../ui-component/cards/MainCard';
 import { openSnackbar } from 'store/slices/snackbar';
@@ -57,7 +57,7 @@ const AnalyticsOverview = () => {
     invoice_settings_status_check();
   }, [user]);
 
-  return (
+  return !loading ? (
     <Box
       sx={{
         width: '100%',
@@ -76,6 +76,7 @@ const AnalyticsOverview = () => {
           <Stack direction="row" spacing={2}>
             <Button
               variant="contained"
+              size="small"
               onClick={() => {
                 setType('add');
                 navigate(`/app/invoice/generateInvoice`);
@@ -92,6 +93,7 @@ const AnalyticsOverview = () => {
             </Button>
             <Button
               variant="outlined"
+              size="small"
               onClick={() => navigate('/app/invoice/settings')}
               startIcon={<IconSettings2 size={18} />}
               sx={{
@@ -113,29 +115,23 @@ const AnalyticsOverview = () => {
           flexDirection: 'column'
         }}
       >
-        {loading ? (
-          <Box sx={{ p: 3, flex: 1 }}>
-            <Grid container spacing={3}>
-              <Grid size={{ xs: 12 }}>
-                <Skeleton variant="rectangular" height={200} sx={{ borderRadius: 2 }} />
-              </Grid>
-            </Grid>
-          </Box>
-        ) : (
-          <Box sx={{ p: { xs: 1 }, flex: 1 }}>
-            <OverviewCard
-              businessId={user.active_context.business_id}
-              invoicing_profile_data={invoicing_profile_data}
-              open={open}
-              onClose={handleClose}
-              type={type}
-              setType={setType}
-              handleOpen={handleOpen}
-            />
-          </Box>
-        )}
+        <Box sx={{ p: { xs: 1 }, flex: 1 }}>
+          <OverviewCard
+            businessId={user.active_context.business_id}
+            invoicing_profile_data={invoicing_profile_data}
+            open={open}
+            onClose={handleClose}
+            type={type}
+            setType={setType}
+            handleOpen={handleOpen}
+          />
+        </Box>
       </MainCard>
     </Box>
+  ) : (
+    <Stack alignItems="center" justifyContent="center" sx={{ minHeight: 200 }}>
+      <CircularProgress />
+    </Stack>
   );
 };
 

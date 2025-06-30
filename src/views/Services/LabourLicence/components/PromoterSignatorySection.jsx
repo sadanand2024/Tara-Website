@@ -54,7 +54,7 @@ const PromoterSignatorySection = ({ taskId }) => {
           address: item.address || '',
           email: item.email || '',
           mobile_number: item.mobile_number || '',
-          residential_address: item.residential_address === 'yes',
+          residential_address: item.residential_address === true,
           id: item.id || ''
         })) || [];
 
@@ -101,7 +101,11 @@ const PromoterSignatorySection = ({ taskId }) => {
           photo_image: Yup.mixed().required('Photo file is required'),
           // address: Yup.string().required('Address is required'),
           email: Yup.string().email('Invalid email').required('Email is required'),
-          mobile_number: Yup.string().required('Mobile is required'),
+          mobile_number: Yup.string()
+                            .required('Mobile Number is required')
+                            .matches(/^[0-9]+$/, 'Mobile Number must be a number')
+                            .min(10, 'Mobile Number must be at least 10 digits')
+                            .max(10, 'Mobile Number must not exceed 10 digits'),
           residential_address: Yup.boolean()
         })
       )
@@ -128,7 +132,7 @@ const PromoterSignatorySection = ({ taskId }) => {
         formData.append('email', promoter.email);
         formData.append('mobile_number', promoter.mobile_number);
         formData.append('address', promoter.address);
-        formData.append('residential_address', promoter.residential_address ? 'yes' : 'no');
+        formData.append('residential_address', promoter.residential_address ? 'true' : 'false');
         formData.append('status', 'in progress');
 
         let url = promoter.id ? `/labourlicense/signatory-details/${promoter.id}/` : `/labourlicense/signatory-details/`;
@@ -286,7 +290,7 @@ const PromoterSignatorySection = ({ taskId }) => {
         </Box>
 
         <TableContainer component={Paper} elevation={2} sx={{ borderRadius: 2 }}>
-          <Table>
+          <Table size="small">
             <TableHead>
               <TableRow sx={{ bgcolor: 'primary.main' }}>
                 {['Name', 'Aadhaar', 'PAN', 'Photo', 'Mobile', 'Email', 'Address', 'Same As Aadhaar', 'Action'].map((head) => (

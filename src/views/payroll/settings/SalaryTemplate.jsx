@@ -123,6 +123,11 @@ function SalaryTemplate() {
               onBlur={handleBlur}
               error={touched.template_name && Boolean(errors.template_name)}
               helperText={touched.template_name && errors.template_name}
+              sx={{
+                '& .MuiInputBase-input': {
+                  color: 'grey.600'
+                }
+              }}
             />
           </Grid2>
 
@@ -139,6 +144,11 @@ function SalaryTemplate() {
               onBlur={handleBlur}
               error={touched.description && Boolean(errors.description)}
               helperText={touched.description && errors.description}
+              sx={{
+                '& .MuiInputBase-input': {
+                  color: 'grey.600'
+                }
+              }}
             />
           </Grid2>
 
@@ -169,7 +179,12 @@ function SalaryTemplate() {
                     <InputAdornment position="start">
                       ₹<Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
                     </InputAdornment>
-                  )
+                  ),
+                  sx: {
+                    '& .MuiInputBase-input': {
+                      color: 'grey.600'
+                    }
+                  }
                 }}
               />
               <Typography variant="subtitle1" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>

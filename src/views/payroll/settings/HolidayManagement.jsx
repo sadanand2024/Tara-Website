@@ -29,7 +29,9 @@ import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
 import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
 import DeleteDialog from 'ui-component/extended/DeleteDialog';
-function HolidayManagement() {
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { useNavigate } from 'react-router-dom';
+function HolidayManagement({ handleBack, handleNext }) {
   const [holidayManagementData, setHolidayManagementData] = useState([]);
   const [workLocations, setWorkLocations] = useState([]);
   const [selectedRecord, setSelectedRecord] = useState(null);
@@ -45,6 +47,7 @@ function HolidayManagement() {
   const [loading, setLoading] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
+  const navigate = useNavigate();
   const handleOpenDeleteDialog = (designation) => {
     setSelectedRow(designation);
     setOpenDeleteDialog(true);
@@ -207,10 +210,10 @@ function HolidayManagement() {
             }}
           >
             <Table size="small">
-              <TableHead>
-                <TableRow sx={{ bgcolor: 'grey.100' }}>
+              <TableHead sx={{ bgcolor: 'primary.main' }}>
+                <TableRow>
                   {['S.No', 'Holiday Name', 'Date', 'Description', 'Locations', 'Actions'].map((header, idx) => (
-                    <TableCell key={idx} sx={{ fontWeight: 'bold', textAlign: 'center' }}>
+                    <TableCell key={idx} sx={{ fontWeight: 'bold', textAlign: 'center', color: '#fff !important' }}>
                       {header}
                     </TableCell>
                   ))}
@@ -235,10 +238,10 @@ function HolidayManagement() {
                       <TableCell align="center">{item.applicable_for}</TableCell>
                       <TableCell align="center">
                         <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
-                          <IconButton color="primary" onClick={() => handleEdit(item)}>
+                          <IconButton size="small" color="primary" onClick={() => handleEdit(item)}>
                             <Edit />
                           </IconButton>
-                          <IconButton color="error" onClick={() => handleOpenDeleteDialog(item)}>
+                          <IconButton size="small" color="error" onClick={() => handleOpenDeleteDialog(item)}>
                             <Delete />
                           </IconButton>
                         </Box>
@@ -262,7 +265,10 @@ function HolidayManagement() {
         )}
 
         {holidayManagementData.length > 0 && (
-          <Stack direction="row" justifyContent="center" sx={{ py: 2 }}>
+          <Stack direction="row" justifyContent="space-between" sx={{ py: 2 }}>
+            <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigate('/app/payroll')}>
+              Back to Dashboard
+            </Button>
             <Pagination
               count={Math.ceil(holidayManagementData.length / rowsPerPage)}
               page={currentPage}
@@ -270,6 +276,9 @@ function HolidayManagement() {
               shape="rounded"
               color="primary"
             />
+            <Button variant="outlined" onClick={handleBack}>
+              Back
+            </Button>
           </Stack>
         )}
       </Stack>

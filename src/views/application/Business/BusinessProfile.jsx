@@ -464,6 +464,11 @@ const BusinessProfile = ({ tabChange, tabval }) => {
                 helperText={touched[field.name] && errors[field.name]}
               />
             )}
+            sx={{
+              '& .MuiInputBase-input': {
+                color: 'text.disabled'
+              }
+            }}
           />
         );
       case 'text':
@@ -483,6 +488,11 @@ const BusinessProfile = ({ tabChange, tabval }) => {
                 }
               } else {
                 setFieldValue(field.name, e.target.value);
+              }
+            }}
+            sx={{
+              '& .MuiInputBase-input': {
+                color: 'text.disabled'
               }
             }}
             error={touched[field.name] && Boolean(errors[field.name])}
@@ -572,7 +582,7 @@ const BusinessProfile = ({ tabChange, tabval }) => {
         </Grid2> */}
         {businessProfileFields.map((field) => (
           <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4 }}>
-            <Typography color="text.secondary" fontWeight={500} mb={1}>
+            <Typography variant="subtitle1" mb={0.5}>
               {field.label}
             </Typography>
             {renderField(field)}
@@ -587,7 +597,7 @@ const BusinessProfile = ({ tabChange, tabval }) => {
         </Grid2>
         {primaryContactFields.map((field) => (
           <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-            <Typography color="text.secondary" fontWeight={500} mb={1}>
+            <Typography variant="subtitle1" mb={0.5}>
               {field.label}
             </Typography>
             {renderField(field)}

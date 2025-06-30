@@ -207,7 +207,7 @@ export default function BulkUploadDialog({ open, handleClose, getData, payrollid
         </Stack>
       }
     >
-      <Box>
+      <Box sx={{ mt: 1 }}>
         <Typography variant="subtitle1" color="text.secondary" mb={2}>
           Download a sample{' '}
           <Link component="button" onClick={() => handleDownload('csv')}>

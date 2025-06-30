@@ -113,7 +113,9 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
       addressLine2: Yup.string().required('Address Line 2 is required'),
       city: Yup.string().required('City is required'),
       state: Yup.string().required('State is required'),
-      pincode: Yup.number().required('Pincode is required'),
+      pincode: Yup.string()
+                .matches(/^[1-9][0-9]{5}$/, 'Pincode must be exactly 6 digits')
+                .required('Pincode is required'),
       nature_of_possession: Yup.string().required('Nature of possession is required'),
       address_proof_additional: Yup.mixed().required('Address proof is required'),
       rental_agreement_additional: Yup.mixed().required('Rental Agreement/NOC is required')
@@ -189,7 +191,7 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
 
 
     const fetchData = async () => {
-      if (businessPremises?.id && additionalSpace === 'yes') {
+      if (businessPremises?.id && additionalSpace === true) {
         const url = `/labourlicense/additional-space/view?business_location_proofs=${businessPremises.id}`;
         const { res } = await Factory('get', url);
         if (res.status_cd === 0 && res.data) {
@@ -217,7 +219,7 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
 
       if (res.status_cd === 0 && res.data) {
         const data = res.data;
-        setAdditionalSpace(data.additional_space || null);
+        setAdditionalSpace(data.additional_space || false);
         seWorkPlace(data?.workplace || null);
 
 
@@ -228,12 +230,16 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
     fetchAdditionalSpace();
   }, [businessPremises?.service_request]);
 
+  useEffect(() => {
+    setAdditionalSpace(businessPremises?.additional_space ?? null);
+  }, [businessPremises?.additional_space]);
+
   const renderField = (field) => {
     switch (field.type) {
       case 'text':
         return field.name === 'state' || field.name === 'nature_of_possession' ? (
           <>
-            <Typography color="text.secondary" fontWeight={500} mb={1}>
+            <Typography variant="subtitle1" mb={1}>
               {field.label}
             </Typography>
             <Autocomplete
@@ -248,13 +254,19 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
                   name={field.name}
                   error={touched[field.name] && Boolean(errors[field.name])}
                   helperText={touched[field.name] && errors[field.name]}
+                  sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                 />
               )}
             />
           </>
         ) : (
           <>
-            <Typography color="text.secondary" fontWeight={500} mb={1}>
+            <Typography variant="subtitle1" mb={1}>
               {field.label}
             </Typography>
             <TextField
@@ -266,13 +278,19 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
               onBlur={handleBlur}
               error={touched[field.name] && Boolean(errors[field.name])}
               helperText={touched[field.name] && errors[field.name]}
+              sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
             />
           </>
         );
       case 'file':
         return (
           <>
-            <Typography color="text.secondary" fontWeight={500} mb={1}>
+            <Typography variant="subtitle1" mb={1}>
               {field.label}
             </Typography>
             <RenderFileUpload
@@ -289,7 +307,6 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
         return null;
     }
   };
-
   return (
     <Box>
     <Card sx={{ p: 3, mt: 3 }}>
@@ -302,9 +319,9 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
     label="Yes"
     control={
       <Radio
-        checked={additionalSpace === 'yes'}
+        checked={additionalSpace === true}
         onChange={async () => {
-          setAdditionalSpace('yes');
+          setAdditionalSpace(true);
 
           const url = businessPremises.id
             ? `/labourlicense/business-location/${businessPremises.id}/`
@@ -314,9 +331,9 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
 
           const payload = {
             // ...businessPremises,
-            additional_space: 'yes',
-             workplace: values.workplace || '',
-             status: 'in progress'
+            additional_space: true,
+            workplace: values.workplace || '',
+            status: 'in progress'
           };
 
           const { res } = await Factory(method, url, payload);
@@ -331,9 +348,9 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
                 close: false
               })
             );
-             setBusinessPremises((prev) => ({
+            setBusinessPremises((prev) => ({
     ...prev,
-    additional_space: 'yes',
+    additional_space: true,
     workplace: values.workplace || '',
     status: 'in progress'
   }));
@@ -342,12 +359,12 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
       />
     }
   />
- 
+
   <FormControlLabel
   label="No"
   control={
     <Radio
-      checked={additionalSpace === 'no'}
+      checked={additionalSpace === false}
       onChange={async () => {
         // Step 1: Delete additional space if it exists
         if (values.id) {
@@ -378,7 +395,7 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
         }
 
         // Step 2: Update the business location to set additional_space: 'no'
-        setAdditionalSpace('no');
+        setAdditionalSpace(false);
 
         const url = businessPremises.id
           ? `/labourlicense/business-location/${businessPremises.id}/`
@@ -387,7 +404,7 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
         const method = businessPremises.id ? 'put' : 'post';
 
         const payload = {
-          additional_space: 'no',
+          additional_space: false,
           status: 'in progress'
         };
 
@@ -405,7 +422,7 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
           );
             setBusinessPremises((prev) => ({
     ...prev,
-    additional_space: 'no',
+    additional_space: false,
     workplace: null,
     status: 'in progress'
   }));
@@ -421,12 +438,12 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
           </Box>
         </Grid2>
         {console.log(additionalSpace)}
-        {additionalSpace === 'yes' && (
+        {additionalSpace === true && (
           
           <Grid2 item xs={12}>
             <form onSubmit={handleSubmit}>
 
-          {additionalSpace === 'yes' && (
+          {additionalSpace === true && (
             <Grid2 item xs={12} sm={6} md={4} sx={{ mt: 1 }}>
               <Autocomplete
                 size="small"
@@ -441,7 +458,7 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
                   if (value && businessPremises?.id) {
                     const url = `/labourlicense/business-location/${businessPremises.id}/`;
                     const payload = {
-                      additional_space: 'yes',
+                      additional_space: true,
                       workplace: value
                     };
 
@@ -457,10 +474,10 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
                           close: false
                         })
                       );
-                       setBusinessPremises((prev) => ({
+                      setBusinessPremises((prev) => ({
     ...prev,
     workplace: value,
-    additional_space: 'yes',
+    additional_space: true,
     status: 'in progress'
   }));
 

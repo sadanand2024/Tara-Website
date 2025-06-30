@@ -27,26 +27,26 @@ const StepTwo = ({taskId,tradelicencedetailsTaskId, step, setStep}) => {
   const dispatch = useDispatch();
 
   const licenseOptions = [
-    { label: 'Yes', value: 'yes' },
-    { label: 'No', value: 'no' }
+    { label: 'Yes', value: true },
+    { label: 'No', value: false }
   ];
 
   const formik = useFormik({
     initialValues: {
       id: '',
       apply_new_license: null,
-      trade_license_number: null,
+      trade_license_number: '',
       trade_license_file: null
     },
     validationSchema: Yup.object().shape({
       apply_new_license: Yup.object().nullable().required('Required'),
       trade_license_number: Yup.string().when('apply_new_license', {
-        is: (val) => val?.value === 'no',
+        is: (val) => val?.value === false,
         then: (schema) => schema.required('TIN Number is required'),
         otherwise: (schema) => schema.notRequired()
       }),
       trade_license_file: Yup.mixed().when('apply_new_license', {
-        is: (val) => val?.value === 'no',
+        is: (val) => val?.value === false,
         then: (schema) => schema.required('Trade license file is required'),
         otherwise: (schema) => schema.notRequired()
       })
@@ -63,6 +63,11 @@ const StepTwo = ({taskId,tradelicencedetailsTaskId, step, setStep}) => {
       if (values.trade_license_file && typeof values.trade_license_file !== 'string') {
         formData.append('trade_license_file', values.trade_license_file);
       }
+      else {
+    formData.append('trade_license_number', '');
+    formData.append('trade_license_file', '');
+  }
+
       const { res } = await Factory(values.id ? 'put' : 'post', url, formData);
       if (res.status_cd === 0) {
         dispatch(
@@ -139,7 +144,7 @@ const StepTwo = ({taskId,tradelicencedetailsTaskId, step, setStep}) => {
         </Grid2>
           <Grid2 container spacing={2} alignItems="center">
             <Grid2 size={{ sm: 3, md: 3, xs: 12 }}>
-              <Typography>Apply for a new Trade Licence</Typography>
+              <Typography variant="subtitle1">Apply for a new Trade Licence</Typography>
             </Grid2>
             <Grid2 size={{ sm: 3, md: 3, xs: 12 }}>
               <Autocomplete
@@ -147,7 +152,7 @@ const StepTwo = ({taskId,tradelicencedetailsTaskId, step, setStep}) => {
                 size="small"
                 onChange={(event, value) => {
                   setFieldValue('apply_new_license', value);
-                  if (value?.value === 'yes') {
+                  if (value?.value === true) {
                     setFieldValue('trade_license_number', '');
                     setFieldValue('trade_license_file', null);
                   }
@@ -166,7 +171,7 @@ const StepTwo = ({taskId,tradelicencedetailsTaskId, step, setStep}) => {
             </Grid2>
             <Grid2 size={{ sm: 6, md: 6, xs: 12 }}></Grid2>
 
-            {values.apply_new_license?.value === 'no' && (
+            {values.apply_new_license?.value === false && (
               <>
                 <Grid2 size={{ sm: 3, md: 3, xs: 12 }}>
                   <Typography style={{ whiteSpace: 'nowrap' }}>Enter TIN Number</Typography>

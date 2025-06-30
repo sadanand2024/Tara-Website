@@ -209,9 +209,9 @@ const InvoiceNumberFormatComponent = ({ businessDetails, handleBack, handleNext 
     postData.format_version = postType === 'put' ? Number(selectedRecord.format_version || 1) + 1 : 1;
 
     if (formatOptions.sameFormatForAllGST === true) {
-      postData.is_common_format = 'yes';
+      postData.is_common_format = true;
     } else {
-      postData.is_common_format = 'no';
+      postData.is_common_format = false;
     }
 
     if (postType === 'put') {
@@ -271,7 +271,7 @@ const InvoiceNumberFormatComponent = ({ businessDetails, handleBack, handleNext 
     }
     if (businessDetails?.invoice_format?.length > 0) {
       const formats = businessDetails.invoice_format;
-      if (formats.find((f) => f.is_common_format === 'no')) {
+      if (formats.find((f) => f.is_common_format === false)) {
         setFormatOptions((prev) => ({
           ...prev,
           sameFormatForAllGST: false,
@@ -382,7 +382,7 @@ const InvoiceNumberFormatComponent = ({ businessDetails, handleBack, handleNext 
             checked={formatOptions.sameFormatForAllGST}
             onChange={handleChange('sameFormatForAllGST')}
             disabled={
-              formatOptions.separateFormatForEachGST || Boolean(businessDetails.invoice_format.find((f) => f.is_common_format === 'yes'))
+              formatOptions.separateFormatForEachGST || Boolean(businessDetails?.invoice_format?.find((f) => f.is_common_format === true))
             }
           />
         }
@@ -393,7 +393,9 @@ const InvoiceNumberFormatComponent = ({ businessDetails, handleBack, handleNext 
           <Checkbox
             checked={formatOptions.separateFormatForEachGST}
             onChange={handleChange('separateFormatForEachGST')}
-            disabled={formatOptions.sameFormatForAllGST || Boolean(businessDetails.invoice_format.find((f) => f.is_common_format === 'no'))}
+            disabled={
+              formatOptions.sameFormatForAllGST || Boolean(businessDetails?.invoice_format?.find((f) => f.is_common_format === false))
+            }
           />
         }
         label="Create Seperate format for each GST number"

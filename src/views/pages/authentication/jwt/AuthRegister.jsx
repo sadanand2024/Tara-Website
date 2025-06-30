@@ -47,6 +47,8 @@ export default function JWTRegister({ ...others }) {
   const [showOTPField, setShowOTPField] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [countdown, setCountdown] = useState(0);
+  const [canResend, setCanResend] = useState(false);
 
   const [strength, setStrength] = useState(0);
   const [level, setLevel] = useState();
@@ -80,6 +82,19 @@ export default function JWTRegister({ ...others }) {
     changePassword('123456');
   }, []);
 
+  // Countdown timer effect
+  useEffect(() => {
+    let timer;
+    if (countdown > 0) {
+      timer = setTimeout(() => {
+        setCountdown(countdown - 1);
+      }, 1000);
+    } else if (countdown === 0 && showOTPField) {
+      setCanResend(true);
+    }
+    return () => clearTimeout(timer);
+  }, [countdown, showOTPField]);
+
   const handleRequestOTP = async (values) => {
     try {
       await axios.post(`${import.meta.env.VITE_APP_BASE_URL}/user_management/request-otp/`, {
@@ -88,6 +103,8 @@ export default function JWTRegister({ ...others }) {
       setEmail(values.email);
       setPassword(values.password);
       setShowOTPField(true);
+      setCountdown(30);
+      setCanResend(false);
       dispatch(
         openSnackbar({
           open: true,
@@ -108,6 +125,35 @@ export default function JWTRegister({ ...others }) {
         })
       );
       throw err;
+    }
+  };
+
+  const handleResendOTP = async () => {
+    try {
+      await axios.post(`${import.meta.env.VITE_APP_BASE_URL}/user_management/request-otp/`, {
+        email: email
+      });
+      setCountdown(30);
+      setCanResend(false);
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'OTP resent successfully',
+          variant: 'alert',
+          alert: { color: 'success' },
+          close: false
+        })
+      );
+    } catch (err) {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: err.response?.data?.error || 'Failed to resend OTP. Please try again.',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     }
   };
 
@@ -319,32 +365,47 @@ export default function JWTRegister({ ...others }) {
                 )}
               </>
             ) : (
-              <OtpInput
-                value={values.otp}
-                onChange={(otpNumber) => {
-                  // Only allow numbers
-                  const numbersOnly = otpNumber.replace(/[^0-9]/g, '');
-                  handleChange({ target: { name: 'otp', value: numbersOnly } });
-                }}
-                numInputs={6}
-                type="number"
-                shouldAutoFocus
-                containerStyle={{ justifyContent: 'space-between' }}
-                inputStyle={{
-                  width: '100%',
-                  margin: '8px',
-                  padding: '10px',
-                  border: `1px solid ${borderColor}`,
-                  borderRadius: 4,
-                  ':hover': {
-                    borderColor: theme.palette.primary.main
-                  }
-                }}
-                focusStyle={{
-                  outline: 'none',
-                  border: `2px solid ${theme.palette.primary.main}`
-                }}
-              />
+              <>
+                <OtpInput
+                  value={values.otp}
+                  onChange={(otpNumber) => {
+                    // Only allow numbers
+                    const numbersOnly = otpNumber.replace(/[^0-9]/g, '');
+                    handleChange({ target: { name: 'otp', value: numbersOnly } });
+                  }}
+                  numInputs={6}
+                  type="number"
+                  shouldAutoFocus
+                  containerStyle={{ justifyContent: 'space-between' }}
+                  inputStyle={{
+                    width: '100%',
+                    margin: '8px',
+                    padding: '10px',
+                    border: `1px solid ${borderColor}`,
+                    borderRadius: 4,
+                    ':hover': {
+                      borderColor: theme.palette.primary.main
+                    }
+                  }}
+                  focusStyle={{
+                    outline: 'none',
+                    border: `2px solid ${theme.palette.primary.main}`
+                  }}
+                />
+
+                {/* Resend OTP Section */}
+                <Box sx={{ mt: 2, textAlign: 'center' }}>
+                  {countdown > 0 ? (
+                    <Typography variant="body2" color="textSecondary">
+                      Resend OTP in {countdown} seconds
+                    </Typography>
+                  ) : (
+                    <Button variant="text" color="primary" onClick={handleResendOTP} disabled={!canResend} sx={{ textTransform: 'none' }}>
+                      Resend OTP
+                    </Button>
+                  )}
+                </Box>
+              </>
             )}
             {!showOTPField && (
               <Grid container sx={{ alignItems: 'center', justifyContent: 'space-between' }}>

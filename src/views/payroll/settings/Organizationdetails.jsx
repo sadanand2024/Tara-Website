@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { CardContent, Button, Box, Typography, Tooltip, Card } from '@mui/material';
+import { CardContent, Button, Box, Typography, Tooltip, Card, TextField } from '@mui/material';
 import Grid2 from '@mui/material/Grid2';
 import { indian_States_And_UTs } from 'utils/indian_States_And_UT';
 import { industries } from 'utils/industries';
@@ -9,6 +9,7 @@ import { entity_choices } from 'utils/Entity-types';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import CustomDatePicker from 'utils/CustomDateInput';
 import dayjs from 'dayjs';
+import BusinessIcon from '@mui/icons-material/Business';
 import { IconEdit } from '@tabler/icons-react';
 import FilingAddressDialog from './FilingAddressDialog';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -24,7 +25,9 @@ import CustomAutocomplete from 'utils/CustomAutocomplete';
 import CustomInput from 'utils/CustomInput';
 import Factory from 'utils/Factory';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useTheme } from '@mui/material/styles';
 function Organizationdetails() {
+  const theme = useTheme();
   const user = useSelector((state) => state.accountReducer.user);
   const businessId = user.active_context.business_id;
   const [loading, setLoading] = useState(false);
@@ -63,7 +66,7 @@ function Organizationdetails() {
 
   const fields = [
     { name: 'business_name', label: 'Business Name' },
-    { name: 'logo', label: 'Logo' },
+    // { name: 'logo', label: 'Logo' },
     { name: 'business_nature', label: 'Business Nature' },
     { name: 'pan', label: 'Business PAN' },
     { name: 'entityType', label: 'Entity Type' },
@@ -181,35 +184,22 @@ function Organizationdetails() {
 
   const renderFields = (fields) => {
     return fields.map((field) => {
-      if (field.name === 'logo') {
-        return (
-          <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4 }}>
-            <Typography gutterBottom>{field.label}</Typography>
-            {/* <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <CustomUpload
-                title="Upload Logo"
-                setData={(data) => {
-                  setLogoDetails(data);
-                  formik.setFieldTouched('logo', true, false);
-                }}
-                initialValue={values.logo}
-                error={touched.logo && Boolean(errors.logo)}
-                helperText={touched.logo && errors.logo}
-                onDelete={handleDeleteLogo}
-                sx={{ width: '100%' }}
-              />
-            </Box> */}
-            <RenderFileUpload
-              label={field.label}
-              fieldName={field.name}
-              file={values[field.name]}
-              setFieldValue={setFieldValue}
-              touched={touched[field.name]}
-              errors={errors[field.name]}
-            />
-          </Grid2>
-        );
-      }
+      // if (field.name === 'logo') {
+      //   return (
+      //     <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+      //       <Typography gutterBottom>{field.label}</Typography>
+
+      //       <RenderFileUpload
+      //         label={field.label}
+      //         fieldName={field.name}
+      //         file={values[field.name]}
+      //         setFieldValue={setFieldValue}
+      //         touched={touched[field.name]}
+      //         errors={errors[field.name]}
+      //       />
+      //     </Grid2>
+      //   );
+      // }
 
       if (
         field.name === 'org_address_state' ||
@@ -218,9 +208,9 @@ function Organizationdetails() {
         field.name === 'entityType'
       ) {
         return (
-          <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4 }}>
-            <Typography gutterBottom>
-              {field.label} {<span style={{ color: 'red' }}>*</span>}
+          <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+            <Typography variant="subtitle1" gutterBottom>
+              {field.label}
             </Typography>
             <CustomAutocomplete
               value={values[field.name]}
@@ -229,7 +219,11 @@ function Organizationdetails() {
               options={field.name === 'business_nature' ? industries : field.name === 'entityType' ? entity_choices : indian_States_And_UTs}
               error={touched[field.name] && Boolean(errors[field.name])}
               helperText={touched[field.name] && errors[field.name]}
-              sx={{ width: '100%' }}
+              sx={{
+                '& .MuiInputBase-input': {
+                  color: 'grey.600'
+                }
+              }}
               // disabled={field.name === 'org_address_state'}
             />
           </Grid2>
@@ -237,9 +231,9 @@ function Organizationdetails() {
       }
       if (field.name === 'dob_or_incorp_date') {
         return (
-          <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4 }}>
-            <Typography gutterBottom>
-              {field.label} {<span style={{ color: 'red' }}>*</span>}
+          <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+            <Typography variant="subtitle1" gutterBottom>
+              {field.label}
             </Typography>
             <CustomDatePicker
               name="dob_or_incorp_date"
@@ -249,25 +243,28 @@ function Organizationdetails() {
               }}
               error={formik.touched.dob_or_incorp_date && Boolean(formik.errors.dob_or_incorp_date)}
               helperText={formik.touched.dob_or_incorp_date && formik.errors.dob_or_incorp_date}
+              sx={{
+                '& .MuiInputBase-input': {
+                  color: 'grey.600'
+                }
+              }}
             />
           </Grid2>
         );
       }
       return (
-        <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4 }}>
-          <Typography gutterBottom>
-            {field.label}{' '}
-            {field.name !== 'org_address_line2' && field.name !== 'filling_address_line2' && field.name !== 'registration_number' && (
-              <span style={{ color: 'red' }}>*</span>
-            )}{' '}
+        <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+          <Typography variant="subtitle1" gutterBottom>
+            {field.label}
             {field.name === 'sender_email' && (
               <Tooltip title="Pay slips, offer letters, and emails will be sent through this email." placement="right" arrow>
                 <InfoOutlinedIcon sx={{ fontSize: 18, ml: 0.5, color: 'gray', cursor: 'pointer' }} />
               </Tooltip>
             )}
           </Typography>
-          <CustomInput
+          <TextField
             name={field.name}
+            size="small"
             value={values[field.name]}
             onChange={(e) => {
               const value = e.target.value;
@@ -287,11 +284,16 @@ function Organizationdetails() {
                 setFieldValue(field.name, value);
               }
             }}
-            type={field.name === 'pan' ? 'text' : field.name === 'org_address_pincode' ? 'number' : 'text'}
+            // type={field.name === 'pan' ? 'text' : field.name === 'org_address_pincode' ? 'number' : 'text'}
             onBlur={handleBlur}
             error={touched[field.name] && Boolean(errors[field.name])}
             helperText={touched[field.name] && errors[field.name]}
-            sx={{ width: '100%' }}
+            sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
             disabled={field.name === 'country'}
           />
         </Grid2>
@@ -424,8 +426,12 @@ function Organizationdetails() {
           <CircularProgress />
         </Box>
       ) : (
-        <MainCard title="Business profile" subtitle="Setup company name, registration details, and basic business information.">
-          <Box component="form" onSubmit={handleSubmit} sx={{ padding: 1 }}>
+        <MainCard
+          title="Business profile"
+          icon={<BusinessIcon sx={{ color: theme.palette.primary.main, fontSize: 24, mb: 1 }} />}
+          // subtitle="Setup company name, registration details, and basic business information."
+        >
+          <Box component="form" onSubmit={handleSubmit}>
             <Grid2 container spacing={2}>
               {renderFields(fields)}
             </Grid2>
@@ -484,7 +490,7 @@ function Organizationdetails() {
                 }}
               >
                 <CardContent>
-                  <Typography variant="h4" sx={{ mb: 2, color: 'text.secondary' }}>
+                  <Typography variant="h4" sx={{ mb: 2 }}>
                     {values.filling_address_location_name || 'Head Office'}
                   </Typography>
                   {[
@@ -516,16 +522,20 @@ function Organizationdetails() {
 
             <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Button
+                size="small"
                 variant="outlined"
                 startIcon={<ArrowBackIcon />}
                 onClick={() => {
-                  navigate(-1);
+                  navigate('/app/payroll');
                 }}
               >
                 Back to Dashboard
               </Button>
-              <Button type="submit" variant="contained" color="primary">
+              <Button type="submit" variant="contained" color="primary" size="small">
                 Save
+              </Button>
+              <Button variant="contained" onClick={() => navigate('/app/payroll/settings/professional-tax')}>
+                Next
               </Button>
             </Box>
             {filingAddressDialog === true && (

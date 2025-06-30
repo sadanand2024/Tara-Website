@@ -55,33 +55,30 @@ const MainCard = forwardRef(function MainCard(
     >
       {/* card header and action */}
       {!darkTitle && title && (
-        <CardHeader sx={{ ...headerStyle, ...headerSX, mt: 0 }} title={title} action={secondary} />
-        // <Box
-        //   sx={{
-        //     display: 'flex',
-        //     alignItems: 'center',
-        //     gap: 2,
-        //     mb: 2,
-        //     p: 1.5,
-        //     backgroundColor: alpha(theme.palette.primary.main, 0.05),
-        //     borderRadius: 2,
-        //     border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`
-        //   }}
-        // >
-        //   {icon}
-        //   <Typography
-        //     variant="h5"
-        //     sx={{
-        //       fontWeight: 600,
-        //       color: theme.palette.primary.main
-        //     }}
-        //   >
-        //     {title}
-        //   </Typography>
-        // </Box>
+        <CardHeader
+          // sx={{
+          //   ...headerStyle,
+          //   ...headerSX,
+          //   m: 2,
+          //   backgroundColor: alpha(theme.palette.primary.main, 0.05),
+          //   borderRadius: 2,
+          //   border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`
+          // }}
+          // avatar={icon}
+          title={title}
+          action={secondary}
+          sx={{
+            padding: 2
+          }}
+        />
       )}
       {darkTitle && title && (
-        <CardHeader sx={{ ...headerStyle, ...headerSX }} title={<Typography variant="h3">{title}</Typography>} action={secondary} />
+        <CardHeader
+          sx={{ ...headerStyle, ...headerSX }}
+          avatar={icon}
+          title={<Typography variant="h3">{title}</Typography>}
+          action={secondary}
+        />
       )}
 
       {/* content & header divider */}
@@ -89,7 +86,13 @@ const MainCard = forwardRef(function MainCard(
 
       {/* card content */}
       {content && (
-        <CardContent sx={contentSX} className={contentClass}>
+        <CardContent
+          sx={{
+            padding: '8px 16px 16px 16px',
+            ...contentSX
+          }}
+          className={contentClass}
+        >
           {children}
         </CardContent>
       )}

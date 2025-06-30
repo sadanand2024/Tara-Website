@@ -487,7 +487,7 @@ export default function ITR() {
                           <Grid2 container spacing={2} alignItems="center">
                             {/* Upload PAN */}
                             <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                              <Typography>Upload PAN</Typography>
+                              <Typography variant="subtitle1">Upload PAN</Typography>
                             </Grid2>
                             <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
                               <Button size="small" variant="contained" component="label">
@@ -525,7 +525,7 @@ export default function ITR() {
                             </Grid2>
                             {/* Upload Aadhaar */}
                             <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                              <Typography>Upload Aadhaar</Typography>
+                              <Typography variant="subtitle1">Upload Aadhaar</Typography>
                             </Grid2>
                             <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
                               <Button size="small" variant="contained" component="label">
@@ -563,7 +563,7 @@ export default function ITR() {
                             </Grid2>
                             {/* Mobile number */}
                             <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                              <Typography>Mobile number</Typography>
+                              <Typography variant="subtitle1">Mobile number</Typography>
                             </Grid2>
                             <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
                               <Field
@@ -574,11 +574,17 @@ export default function ITR() {
                                 value={values?.mobile_number || ''}
                                 error={Boolean(touched?.mobile_number && errors?.mobile_number)}
                                 helperText={<ErrorMessage name="mobile_number" />}
+                                sx={{
+                                  width: '100%',
+                                  '& .MuiInputBase-input': {
+                                    color: 'grey.600'
+                                    }
+                                  }}
                               />
                             </Grid2>
                             {/* Email Id */}
                             <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                              <Typography>Email Id</Typography>
+                              <Typography variant="subtitle1">Email Id</Typography>
                             </Grid2>
                             <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
                               <Field
@@ -589,11 +595,17 @@ export default function ITR() {
                                 value={values?.email || ''}
                                 error={Boolean(touched?.email && errors?.email)}
                                 helperText={<ErrorMessage name="email" />}
+                                sx={{
+                                  width: '100%',
+                                  '& .MuiInputBase-input': {
+                                    color: 'grey.600'
+                                    }
+                                  }}
                               />
                             </Grid2>
                             {/* Name (3 fields) */}
                             <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                              <Typography>Name</Typography>
+                              <Typography variant="subtitle1">Name</Typography>
                             </Grid2>
                             <Grid2 size={{ xs: 12, sm: 6, md: 4 }} container spacing={1}>
                               <Grid2 size={{ xs: 12, sm: 4 }}>
@@ -606,6 +618,12 @@ export default function ITR() {
                                   value={values?.first_name || ''}
                                   error={Boolean(touched?.first_name && errors?.first_name)}
                                   helperText={<ErrorMessage name="first_name" />}
+                                  sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                                 />
                               </Grid2>
                               <Grid2 size={{ xs: 12, sm: 4 }}>
@@ -616,6 +634,12 @@ export default function ITR() {
                                   name="middle_name"
                                   placeholder="Middle"
                                   value={values?.middle_name || ''}
+                                  sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                                 />
                               </Grid2>
                               <Grid2 size={{ xs: 12, sm: 4 }}>
@@ -626,12 +650,18 @@ export default function ITR() {
                                   name="last_name"
                                   placeholder="Last"
                                   value={values?.last_name || ''}
+                                  sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                                 />
                               </Grid2>
                             </Grid2>
                             {/* Gender */}
                             <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                              <Typography>Gender</Typography>
+                              <Typography variant="subtitle1">Gender</Typography>
                             </Grid2>
                             <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
                               <RadioGroup row value={values?.gender} onChange={(e) => setFieldValue('gender', e.target.value)}>
@@ -646,7 +676,7 @@ export default function ITR() {
                             </Grid2>
                             {/* Residential Status */}
                             <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                              <Typography>Residential Status</Typography>
+                              <Typography variant="subtitle1">Residential Status</Typography>
                             </Grid2>
                             <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
                               <Autocomplete
@@ -663,6 +693,12 @@ export default function ITR() {
                                     helperText={
                                       touched?.residentail_status && errors?.residentail_status ? errors?.residentail_status : ' '
                                     }
+                                    sx={{
+                                  width: '100%',
+                                  '& .MuiInputBase-input': {
+                                    color: 'grey.600'
+                                    }
+                                  }}
                                   />
                                 )}
                               />
@@ -688,8 +724,8 @@ export default function ITR() {
                                     <FormControlLabel
                                       control={
                                         <Checkbox
-                                          checked={values?.[fieldName] === 'yes'}
-                                          onChange={(e) => setFieldValue(fieldName, e.target.checked ? 'yes' : null)}
+                                          checked={values?.[fieldName] === true}
+                                          onChange={(e) => setFieldValue(fieldName, e.target.checked )}
                                         />
                                       }
                                       label={option.label}
@@ -746,20 +782,29 @@ export default function ITR() {
                               variant: 'success',
                               anchorOrigin: { vertical: 'top', horizontal: 'right' }
                             });
+                            setTaxPaidDetails((prev) => ({
+                                ...prev,
+                                status: 'in progress'
+                            }));
+                            
                           } else {
                             enqueueSnackbar('Error saving tax paid details.', {
                               variant: 'error',
                               anchorOrigin: { vertical: 'top', horizontal: 'right' }
                             });
                           }
+                          
                         } catch (err) {
                           enqueueSnackbar('Error saving tax paid details.', {
                             variant: 'error',
                             anchorOrigin: { vertical: 'top', horizontal: 'right' }
                           });
                         }
+                          await fetchTaxPaidDetails();
                       }}
+                      
                     >
+          
                       {({ setFieldValue, values, errors, touched }) => (
                         <Form>
                           <Typography variant="h5" fontWeight={700} mb={2}>
@@ -771,7 +816,7 @@ export default function ITR() {
                           <Grid2 container spacing={2} alignItems="center">
                             {/* Upload 26AS */}
                             <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                              <Typography>Upload 26AS</Typography>
+                              <Typography variant="subtitle1">Upload 26AS</Typography>
                             </Grid2>
                             <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
                               <Button size="small" variant="contained" component="label">
@@ -810,7 +855,7 @@ export default function ITR() {
                             </Grid2>
                             {/* Upload AIS */}
                             <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                              <Typography>Upload AIS</Typography>
+                              <Typography variant="subtitle1">Upload AIS</Typography>
                             </Grid2>
                             <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                               <Button size="small" variant="contained" component="label">
@@ -849,7 +894,7 @@ export default function ITR() {
                             </Grid2>
                             {/* Advance tax / Self Assisted Tax Challan */}
                             <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                              <Typography>Advance tax / Self Assisted Tax Challan</Typography>
+                              <Typography variant="subtitle1">Advance tax / Self Assisted Tax Challan</Typography>
                             </Grid2>
                             <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
                               <Box display="flex" alignItems="center" gap={1}>
@@ -1039,7 +1084,15 @@ export default function ITR() {
                                     formData.append('status', 'in progress');
                                     const res = await Factory(type, urlEndpoint, formData, {});
                                     if (res.res.status_cd === 0) {
-                                      setReviewAndFiling({ ...reviewAndFiling, data: { ...res.res.data } });
+                                      // setReviewAndFiling({ ...reviewAndFiling, data: { ...res.res.data } });
+                                    setReviewAndFiling((prev) => ({
+    ...prev,
+    task_id: reviewAndFiling?.task_id || null,
+    data: {
+      ...res.res,
+      draft_filing_certificate: e.target.files[0] || null
+    }
+  }));
                                       enqueueSnackbar('Draft income tax computation saved successfully!', {
                                         variant: 'success',
                                         anchorOrigin: { vertical: 'top', horizontal: 'right' }

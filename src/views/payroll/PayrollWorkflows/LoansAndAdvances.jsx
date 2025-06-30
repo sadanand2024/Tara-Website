@@ -5,7 +5,7 @@ import Factory from 'utils/Factory';
 import { useSearchParams } from 'react-router-dom';
 import RenderDialog from './RenderDialog';
 
-export default function LoansAndAdvances({ employeeMasterData, from, openDialog, fields, setOpenDialog }) {
+export default function LoansAndAdvances({ employeeMasterData, from, openDialog, fields, setOpenDialog, handleBack, handleNext }) {
   const headerData = [
     'Employee ID',
     'Employee Name',
@@ -93,6 +93,8 @@ export default function LoansAndAdvances({ employeeMasterData, from, openDialog,
         loading={loading}
         from={from}
         setLoading={setLoading}
+        handleBack={handleBack}
+        handleNext={handleNext}
       />
       <RenderDialog
         from={from}

@@ -76,7 +76,7 @@ const StepThree = ({ step, setStep, onShareholderDelete }) => {
             city: sh.residential_address?.city || '',
             state: sh.residential_address?.state || '',
             pincode: sh.residential_address?.pincode || '',
-            residential_same_as_aadhaar_address: Object.keys(sh.residential_address || {}).length === 0 ? 'Yes' : 'No',
+            residential_same_as_aadhaar_address: (sh.residential_same_as_aadhaar_address === true || sh.residential_same_as_aadhaar_address === 'Yes') ? 'Yes' : 'No',
           })));
         } else {
           setCommonShareholders([]);
@@ -95,7 +95,7 @@ const StepThree = ({ step, setStep, onShareholderDelete }) => {
 
 
   const shareholderFields = [
-    { label: 'First Name', name: 'shareholder_first_name', type: 'text' },
+    { label: 'Shareholder First Name', name: 'shareholder_first_name', type: 'text' },
     { label: 'Middle Name', name: 'middle_name', type: 'text' },
     { label: 'Last Name', name: 'last_name', type: 'text' },
     { label: 'Shareholder Type', name: 'shareholder_type', type: 'autocomplete', 
@@ -174,12 +174,17 @@ const StepThree = ({ step, setStep, onShareholderDelete }) => {
     validationSchema: Yup.object({
       shareholders: Yup.array().of(
         Yup.object({
-          shareholder_first_name: Yup.string().required('First Name is required'),
+          shareholder_first_name: Yup.string().required('Shareholder First Name is required'),
           last_name: Yup.string().required('Last Name is required'),
           pan_card_file: Yup.mixed().required('PAN is required'),
           aadhaar_card_file: Yup.mixed().required('Aadhaar is required'),
           bank_statement_file: Yup.mixed().required('Bank Statement is required'),
-          mobile_number: Yup.string().required('Mobile Number is required'),
+          shareholder_type: Yup.mixed().required('Shareholder Type is required'),
+          mobile_number: Yup.string()
+                            .required('Mobile Number is required')
+                            .matches(/^[0-9]+$/, 'Mobile Number must be a number')
+                            .min(10, 'Mobile Number must be at least 10 digits')
+                            .max(10, 'Mobile Number must not exceed 10 digits'),
           email: Yup.string().email('Invalid email').required('Email is required'),
           shareholding_percentage: Yup.string().required('Percentage Holding is required'),
           residential_address_proof: Yup.string().required('Residential Address Proof Type is required'),
@@ -208,7 +213,9 @@ const StepThree = ({ step, setStep, onShareholderDelete }) => {
             is: 'No',
             then: (schema) => schema.required('Pincode is required'),
             otherwise: (schema) => schema.notRequired()
-          })
+          }),
+          
+          
         })
       )
     }),
@@ -277,20 +284,30 @@ const StepThree = ({ step, setStep, onShareholderDelete }) => {
             alert: { color: 'success' },
             close: false
           }));
-          if (shareholder.id) {
-            try {
-              const formData = new FormData();
-              formData.append('service_request', service_id);
-              formData.append('service_task', taskIds?.shareHolder?.task_id);
-              formData.append('status', 'in progress');
-              await Factory('post', '/companyincorporation/shareholders/', formData);
-              console.log('Shareholder status submitted successfully.');
-            } catch (err) {
-              console.error('Shareholder status API error:', err);
-            }
-          }
+          // if (shareholder.id) {
+          //   try {
+          //     const formData = new FormData();
+          //     formData.append('service_request', service_id);
+          //     formData.append('service_task', taskIds?.shareHolder?.task_id);
+          //     formData.append('status', 'in progress');
+          //     await Factory('post', '/companyincorporation/shareholders/', formData);
+          //     console.log('Shareholder status submitted successfully.');
+          //   } catch (err) {
+          //     // console.error('Shareholder status API error:', err);
+          //   }
+          // }
           await fetchShareholders();
           await fetchTaskId();
+          // Normalize after save for current tab
+          const updated = values.shareholders.map((sh, i) =>
+            i === tabIndex
+              ? {
+                  ...sh,
+                  residential_same_as_aadhaar_address: (sh.residential_same_as_aadhaar_address === true || sh.residential_same_as_aadhaar_address === 'Yes') ? 'Yes' : 'No',
+                }
+              : sh
+          );
+          setFieldValue('shareholders', updated);
         } else {
           throw new Error(res.data?.message || 'Failed to save shareholder');
         }
@@ -326,7 +343,7 @@ const StepThree = ({ step, setStep, onShareholderDelete }) => {
           city: sh.residential_address?.city || '',
           state: sh.residential_address?.state || '',
           pincode: sh.residential_address?.pincode || '',
-          residential_address: Object.keys(sh.residential_address || {}).length === 0 ? 'yes' : 'no',
+          residential_same_as_aadhaar_address: (sh.residential_same_as_aadhaar_address === true || sh.residential_same_as_aadhaar_address === 'Yes') ? 'Yes' : 'No',
         })));
       } else {
         formik.setFieldValue('shareholders', [
@@ -485,7 +502,7 @@ const StepThree = ({ step, setStep, onShareholderDelete }) => {
       case 'text':
         return (
           <Box>
-            <Typography variant="subtitle2" fontWeight={500} mb={0.5}>
+            <Typography variant="subtitle1" fontWeight={500} mb={0.5}>
               {field.label}
             </Typography>
             <TextField
@@ -497,6 +514,12 @@ const StepThree = ({ step, setStep, onShareholderDelete }) => {
               onBlur={handleBlur}
               error={Boolean(error)}
               helperText={error}
+               sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
             />
           </Box>
         );
@@ -504,7 +527,7 @@ const StepThree = ({ step, setStep, onShareholderDelete }) => {
       case 'autocomplete':
         return (
           <Box>
-            <Typography variant="subtitle2" fontWeight={500} mb={0.5}>
+            <Typography variant="subtitle1" fontWeight={500} mb={0.5}>
               {field.label}
             </Typography>
             <TextField
@@ -517,6 +540,12 @@ const StepThree = ({ step, setStep, onShareholderDelete }) => {
               onBlur={handleBlur}
               error={Boolean(error)}
               helperText={error}
+               sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
             >
               {field.options.map((opt) => (
                 <MenuItem key={opt} value={opt}>
@@ -530,7 +559,7 @@ const StepThree = ({ step, setStep, onShareholderDelete }) => {
       case 'file':
         return (
           <Box>
-            <Typography variant="subtitle2" fontWeight={500} mb={0.5}>
+            <Typography variant="subtitle1" mb={0.5}>
               {field.label}
             </Typography>
             <RenderFileUpload
@@ -539,6 +568,12 @@ const StepThree = ({ step, setStep, onShareholderDelete }) => {
               setFieldValue={setFieldValue}
               touched={getIn(touched, fieldName)}
               errors={error}
+               sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
             />
           </Box>
         );
@@ -569,6 +604,12 @@ const StepThree = ({ step, setStep, onShareholderDelete }) => {
                   onBlur={handleBlur}
                   error={Boolean(getIn(touched, `${path}[${idx}].din_number`) && getIn(errors, `${path}[${idx}].din_number`))}
                   helperText={getIn(touched, `${path}[${idx}].din_number`) && getIn(errors, `${path}[${idx}].din_number`)}
+                   sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                 />
               </Box>
             )}
@@ -584,7 +625,7 @@ const StepThree = ({ step, setStep, onShareholderDelete }) => {
       <Card sx={{ p: 3, mt: 4 }}>
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
           <Box display="flex" alignItems="center">
-            <Typography>No. of Shareholders</Typography>
+            <Typography variant='subtitle1'>Add No. of Shareholders</Typography>
           
           <Button variant="outlined" size="small" sx={{ mx: 2 }} onClick={removeShareholder}>
             -
@@ -645,9 +686,9 @@ const StepThree = ({ step, setStep, onShareholderDelete }) => {
 
         {values.shareholders.map((_, idx) => (
           <TabPanel key={idx} value={tabIndex} index={idx}>
-            <Typography variant="subtitle1" color="text.secondary" fontWeight={700} mt={2}>
+            {/* <Typography variant="subtitle1" mt={2}>
               Name Of the Shareholder
-            </Typography>
+            </Typography> */}
             <Grid2 container spacing={2}>
               {shareholderFields.map((field) => (
                 <Grid2 key={field.name} size={{ xs: 2, sm: 6, md: 4 }} sx={{mt:1}}>
@@ -684,7 +725,7 @@ const StepThree = ({ step, setStep, onShareholderDelete }) => {
                   return (
                     <Grid2 size={{ xs: 2, sm: 6, md: 4 }} key={key}>
                       <Box>
-                        <Typography variant="subtitle2" fontWeight={500} mb={0.5}>
+                        <Typography variant="subtitle1" fontWeight={500} mb={0.5}>
                           {label}
                         </Typography>
                         <TextField
@@ -696,6 +737,12 @@ const StepThree = ({ step, setStep, onShareholderDelete }) => {
                           onBlur={handleBlur}
                           error={Boolean(error)}
                           helperText={error}
+                           sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                         />
                       </Box>
                     </Grid2>
@@ -704,10 +751,9 @@ const StepThree = ({ step, setStep, onShareholderDelete }) => {
             </Grid2>
 
             <Grid2 size={12} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <Box display="flex" gap={2}>
+              <Box display="flex" gap={1}>
                 <Button
                   variant="contained"
-                  size="small"
                   onClick={async () => {
                     // Mark all fields for this specific tab as touched
                     const currentShareholder = values.shareholders[idx];
@@ -755,7 +801,6 @@ const StepThree = ({ step, setStep, onShareholderDelete }) => {
                 <Button
                   variant="outlined"
                   color="error"
-                  size="small"
                   onClick={() => handleShareholderDelete(idx)}
                 >
                   Delete Shareholder {idx + 1}

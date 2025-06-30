@@ -207,13 +207,13 @@ export default function BulkUploadDialog({ open, handleClose, getData, payrollid
         </Stack>
       }
     >
-      <Box>
+      <Box sx={{ mt: 1 }}>
         <Typography variant="subtitle1" color="text.secondary" mb={2}>
           Download a sample{' '}
-          <Link component="button" onClick={() => handleDownload('csv')}>
+          {/* <Link component="button" onClick={() => handleDownload('csv')}>
             .csv format
           </Link>{' '}
-          or{' '}
+          or{' '} */}
           <Link component="button" onClick={() => handleDownload('xlsx')}>
             .xls format
           </Link>{' '}
@@ -238,7 +238,7 @@ export default function BulkUploadDialog({ open, handleClose, getData, payrollid
             {file ? file.name : 'Drop files here or click here to upload'}
           </Typography>
           <Typography variant="caption" color="text.secondary">
-            Maximum File Size: 15 MB | File Format: CSV or XLSX
+            Maximum File Size: 15 MB | File Format: XLSX
           </Typography>
           <input type="file" ref={fileInputRef} onChange={handleFileChange} accept=".xlsx,.csv" style={{ display: 'none' }} />
         </Paper>

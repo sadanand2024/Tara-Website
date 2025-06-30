@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { Button, Box, Stack, Grid2, Typography } from '@mui/material';
+import { Button, Box, Stack, Grid2, Typography, TextField } from '@mui/material';
 import { indian_States_And_UTs } from 'utils/indian_States_And_UT';
 import CustomInput from 'utils/CustomInput';
 import CustomAutocomplete from 'utils/CustomAutocomplete';
@@ -95,8 +95,8 @@ export default function WorkLocationDialog({ open, handleClose, fetchWorkLocatio
       if (field.name === 'address_state') {
         return (
           <Grid2 key={field.name} size={{ xs: 12, sm: 6 }}>
-            <Typography gutterBottom>
-              {field.label} {<span style={{ color: 'red' }}>*</span>}
+            <Typography variant="subtitle1" gutterBottom>
+              {field.label}
             </Typography>
             <CustomAutocomplete
               value={values[field.name]}
@@ -105,7 +105,11 @@ export default function WorkLocationDialog({ open, handleClose, fetchWorkLocatio
               options={indian_States_And_UTs}
               error={touched[field.name] && Boolean(errors[field.name])}
               helperText={touched[field.name] && errors[field.name]}
-              sx={{ width: '100%' }}
+              sx={{
+                '& .MuiInputBase-root': {
+                  color: 'grey.600'
+                }
+              }}
             />
           </Grid2>
         );
@@ -113,10 +117,11 @@ export default function WorkLocationDialog({ open, handleClose, fetchWorkLocatio
 
       return (
         <Grid2 key={field.name} size={{ xs: 12, sm: 6 }}>
-          <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
-            {field.label} {field.name !== 'address_line2' && <span style={{ color: 'red' }}>*</span>}
+          <Typography variant="subtitle1" sx={{ mb: 0.5 }}>
+            {field.label}
           </Typography>
-          <CustomInput
+          <TextField
+            size="small"
             name={field.name}
             value={values[field.name]}
             onChange={(e) => {
@@ -132,7 +137,12 @@ export default function WorkLocationDialog({ open, handleClose, fetchWorkLocatio
             onBlur={handleBlur}
             error={touched[field.name] && Boolean(errors[field.name])}
             helperText={touched[field.name] && errors[field.name]}
-            sx={{ width: '100%' }}
+            sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
           />
         </Grid2>
       );

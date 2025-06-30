@@ -76,12 +76,20 @@ const ProfessionalTax = ({ handleNext, handleBack }) => {
       ) : (
         <MainCard title="Professional Tax Details">
           <Grid2 container spacing={2}>
-            <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 1 }}>
-              <Table size="medium">
-                <TableHead>
-                  <TableRow sx={{ bgcolor: 'grey.100' }}>
+            <TableContainer component={Paper} sx={{ width: '100%', borderRadius: 2, boxShadow: 1, overflowX: 'auto' }}>
+              <Table size="small">
+                <TableHead sx={{ backgroundColor: 'primary.main' }}>
+                  <TableRow>
                     {['S No', 'Work Location', 'PT Number', 'State', 'PT Slabs'].map((col, idx) => (
-                      <TableCell key={idx} sx={{ whiteSpace: 'nowrap', fontWeight: 'bold' }} align={col === 'PT Slabs' ? 'center' : 'left'}>
+                      <TableCell
+                        key={idx}
+                        sx={{
+                          whiteSpace: 'nowrap',
+                          fontWeight: 'bold',
+                          color: '#fff !important'
+                        }}
+                        align={col === 'PT Slabs' ? 'center' : 'left'}
+                      >
                         {col}
                       </TableCell>
                     ))}
@@ -120,7 +128,11 @@ const ProfessionalTax = ({ handleNext, handleBack }) => {
 
             {ptData.length > 0 && (
               <Grid2 size={{ xs: 12 }}>
-                <Stack direction="row" justifyContent="center" sx={{ mt: 2 }}>
+                <Stack direction="row" justifyContent="space-between" sx={{ mt: 2 }}>
+                  <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigate(-1)}>
+                    Back to Dashboard
+                  </Button>
+
                   <Pagination
                     count={Math.ceil(ptData.length / rowsPerPage)}
                     page={currentPage}
@@ -128,24 +140,17 @@ const ProfessionalTax = ({ handleNext, handleBack }) => {
                     shape="rounded"
                     color="primary"
                   />
+                  <Stack direction="row" spacing={2}>
+                    <Button startIcon={<ArrowBackIcon />} variant="outlined" onClick={handleBack}>
+                      Back
+                    </Button>
+                    <Button variant="contained" onClick={handleNext}>
+                      Next
+                    </Button>
+                  </Stack>
                 </Stack>
               </Grid2>
             )}
-            <Grid2 size={{ xs: 12 }}>
-              <Box display="flex" justifyContent="space-between" mt={3}>
-                <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigate(-1)}>
-                  Back to Dashboard
-                </Button>
-                {/* <Stack direction="row" spacing={2}>
-                  <Button variant="contained" onClick={handleBack}>
-                    Back
-                  </Button>
-                  <Button variant="contained" onClick={handleNext}>
-                    Next
-                  </Button>
-                </Stack> */}
-              </Box>
-            </Grid2>
           </Grid2>
 
           {/* View Slabs Modal */}

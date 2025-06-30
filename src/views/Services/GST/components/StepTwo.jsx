@@ -61,7 +61,8 @@ const StepTwo = ({ step, setStep}) => {
             mobile: item.mobile || '',
             gender: item.gender || '',
             designation: item.designation || '',
-            residential_same_as_aadhaar_address: item.residential_same_as_aadhaar_address === 'Yes',
+            residential_same_as_aadhaar_address: item.residential_same_as_aadhaar_address === true || item.residential_same_as_aadhaar_address === 'true',
+
             id: item.id || '',
             task_id: res.data?.task_data['Promoter Signatory Details']?.task_id || null
           })) || [];
@@ -94,7 +95,7 @@ const StepTwo = ({ step, setStep}) => {
           mobile: '',
           gender: '',
           designation: '',
-          residential_same_as_aadhaar_address: 'true'
+          residential_same_as_aadhaar_address: true
         }
       ]
     },
@@ -107,10 +108,18 @@ const StepTwo = ({ step, setStep}) => {
           photo: Yup.mixed().required('Photo file is required'),
           // residential_address: Yup.string().required('residential_address is required'),
           email: Yup.string().email('Invalid email').required('Email is required'),
-          mobile: Yup.string().required('Mobile is required'),
+          // mobile: Yup.string().required('Mobile is required'),
+            mobile: Yup.string()
+                            .required('Mobile Number is required')
+                            .matches(/^[0-9]+$/, 'Mobile Number must be a number')
+                            .min(10, 'Mobile Number must be at least 10 digits')
+                            .max(10, 'Mobile Number must not exceed 10 digits'),
           gender: Yup.string().required('gender is required'),
           designation: Yup.string().required('designation is required'),
-          residential_same_as_aadhaar_address: Yup.boolean('')
+          residential_same_as_aadhaar_address: Yup.boolean().required('Please choose an option'),
+          
+          
+
         })
       )
     }),
@@ -140,7 +149,8 @@ const StepTwo = ({ step, setStep}) => {
         formData.append('residential_address', promoter.residential_address);
         formData.append('gender', promoter.gender);
         formData.append('designation', promoter.designation);
-        formData.append('residential_same_as_aadhaar_address', promoter.residential_same_as_aadhaar_address ? 'Yes' : 'No');
+        formData.append('residential_same_as_aadhaar_address', promoter.residential_same_as_aadhaar_address);
+
         formData.append('status', 'in progress');
         // formData.append('id', promoter.id || ''); // Include ID if it exists
         // let url = `/gst/promoter-signatory-details/`;
@@ -301,7 +311,7 @@ const StepTwo = ({ step, setStep}) => {
         </Box>
 
         <TableContainer component={Paper} elevation={2} sx={{ borderRadius: 2 }}>
-          <Table>
+          <Table size="small">
             <TableHead>
               <TableRow sx={{ bgcolor: 'primary.main' }}>
                 {[
@@ -563,7 +573,7 @@ const StepTwo = ({ step, setStep}) => {
       </Box>
     </form>
     
-  );
+  );0
 };
 
 export default StepTwo;

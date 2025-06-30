@@ -161,6 +161,12 @@ const BusinessIdentityStructureSection = ({ taskId }) => {
                 onChange={handleChange}
                 error={touched[field.name] && Boolean(errors[field.name])}
                 helperText={touched[field.name] && errors[field.name]}
+                sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
               />
             )}
           />
@@ -176,6 +182,12 @@ const BusinessIdentityStructureSection = ({ taskId }) => {
             error={touched[field.name] && Boolean(errors[field.name])}
             helperText={touched[field.name] && errors[field.name]}
             onBlur={handleBlur}
+            sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
           />
         );
       case 'date':
@@ -190,6 +202,12 @@ const BusinessIdentityStructureSection = ({ taskId }) => {
             onBlur={handleBlur}
             error={touched[field.name] && Boolean(errors[field.name])}
             helperText={touched[field.name] && errors[field.name]}
+            sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
           />
         );
       case 'file':
@@ -201,6 +219,12 @@ const BusinessIdentityStructureSection = ({ taskId }) => {
             setFieldValue={setFieldValue}
             touched={touched[field.name]}
             errors={errors[field.name]}
+            sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
           />
         );
       default:
@@ -283,7 +307,7 @@ const BusinessIdentityStructureSection = ({ taskId }) => {
         <Grid2 container spacing={2}>
           {fields.map((field) => (
             <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4 }}>
-              <Typography color="text.secondary" fontWeight={500} mb={1}>
+              <Typography variant="subtitle1" mb={1}>
                 {field.label}
               </Typography>
               {renderField(field)}

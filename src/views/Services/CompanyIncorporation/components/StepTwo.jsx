@@ -68,7 +68,7 @@ const StepTwo = ({ step, setStep }) => {
 
 
   const directorFields = [
-    { label: 'First Name', name: 'director_first_name', type: 'text' },
+    { label: 'Director First Name', name: 'director_first_name', type: 'text' },
     { label: 'Middle Name', name: 'middle_name', type: 'text' },
     { label: 'Last Name', name: 'last_name', type: 'text' },
     {
@@ -185,11 +185,11 @@ const StepTwo = ({ step, setStep }) => {
           form_dir2: null,
           specimen_signature_of_director: null,
           authorised_signatory_name: '',
-          dsc: 'No',
-          din_number: 'No',
-          is_this_director_also_shareholder: '',
-          residential_same_as_aadhaar_address: 'No',
-          details_of_existing_directorships: 'No',
+          dsc: false,
+          din_number: false,
+          is_this_director_also_shareholder: false,
+          residential_same_as_aadhaar_address: false,
+          details_of_existing_directorships: false,
           existing_directorships_details: [
             {
               company_name: '',
@@ -204,13 +204,15 @@ const StepTwo = ({ step, setStep }) => {
     validationSchema: Yup.object({
       directors: Yup.array().of(
         Yup.object({
-          director_first_name: Yup.string().required('First Name is required'),
+          director_first_name: Yup.string().required('Director First Name is required'),
           last_name: Yup.string().required('Last Name is required'),
           category_of_directorship: Yup.string().required('Category Directorship is required'),
           pan_card_file: Yup.mixed().required('PAN is required'),
           aadhaar_card_file: Yup.mixed().required('Aadhaar is required'),
           passport_photo_file: Yup.mixed().required('Passport Photo is required'),
-          mobile_number: Yup.string().required('Mobile Number is required'),
+          mobile_number: Yup.string()
+            .required('Mobile Number is required')
+            .matches(/^[0-9]{10}$/, 'Mobile Number must be exactly 10 digits'),
           email: Yup.string().email('Invalid email').required('Email is required'),
           occupation: Yup.string().required('Occupation is required'),
           area_of_occupation: Yup.string().required('Area of Occupation is required'),
@@ -224,67 +226,72 @@ const StepTwo = ({ step, setStep }) => {
           form_dir2: Yup.string().required('Form Dir 2 is required'),
           specimen_signature_of_director: Yup.string().required('Specimen Signature od Director is required'),
           authorised_signatory_name: Yup.string().required('Authorised Signatory is required'),
-          dsc: Yup.string().oneOf(['Yes', 'No'], 'DSC is required').required('DSC is required'),
-          din_number: Yup.string().oneOf(['Yes', 'No'], 'DIN is required').required('DIN is required'),
+          dsc: Yup.bool().oneOf([true, false], 'DSC is required').required('DSC is required'),
+          din_number: Yup.bool().oneOf([true, false], 'DIN is required').required('DIN is required'),
           din_number_value: Yup.string().when('din_number', {
-            is: 'Yes',
-            then: (schema) => schema.required('DIN Number is required'),
+            is: true,
+            then: (schema) => schema
+              .required('DIN Number is required')
+              .matches(/^[0-9]{8}$/, 'DIN Number must be exactly 8 digits'),
             otherwise: (schema) => schema.notRequired(),
           }),
-          is_this_director_also_shareholder: Yup.string().required('Share Holder is required'),
-          residential_same_as_aadhaar_address: Yup.string().oneOf(['Yes', 'No']).required('Residential Address Same as Aadhaar is required'),
+          is_this_director_also_shareholder: Yup.bool().oneOf([true, false], 'Share Holder is required').required('Share Holder is required'),
+          residential_same_as_aadhaar_address: Yup.bool().oneOf([true, false]).required('Residential Address Same as Aadhaar is required'),
           address_line_1: Yup.string().when('residential_same_as_aadhaar_address', {
-            is: 'No',
+            is: false,
             then: (schema) => schema.required('Address Line 1 is required'),
             otherwise: (schema) => schema.notRequired()
           }),
           address_line_2: Yup.string().when('residential_same_as_aadhaar_address', {
-            is: 'No',
+            is: false,
             then: (schema) => schema.required('Address Line 2 is required'),
             otherwise: (schema) => schema.notRequired()
           }),
           city: Yup.string().when('residential_same_as_aadhaar_address', {
-            is: 'No',
+            is: false,
             then: (schema) => schema.required('City is required'),
             otherwise: (schema) => schema.notRequired()
           }),
           state: Yup.string().when('residential_same_as_aadhaar_address', {
-            is: 'No',
+            is: false,
             then: (schema) => schema.required('State is required'),
             otherwise: (schema) => schema.notRequired()
           }),
           pincode: Yup.string().when('residential_same_as_aadhaar_address', {
-            is: 'No',
-            then: (schema) => schema.required('Pincode is required'),
+            is: false,
+            then: (schema) => schema
+              .required('Pincode is required')
+              .matches(/^[0-9]{6}$/, 'Pincode must be exactly 6 digits'),
             otherwise: (schema) => schema.notRequired()
           }),
-          details_of_existing_directorships: Yup.string().oneOf(['Yes', 'No']).required('Required'),
+          details_of_existing_directorships: Yup.bool().oneOf([true, false]).required('Required'),
           existing_directorships_details: Yup.array().of(
             Yup.object({
               company_name: Yup.string().test('required-when-has-existing', 'Company Name is required', function (value) {
                 const parentDirector = this.options.from[1]?.value;
-                if (parentDirector?.details_of_existing_directorships === 'Yes') {
+                if (parentDirector?.details_of_existing_directorships === true) {
                   return !!value;
                 }
                 return true;
               }),
               cin: Yup.string().test('required-when-has-existing', 'CIN is required', function (value) {
                 const parentDirector = this.options.from[1]?.value;
-                if (parentDirector?.details_of_existing_directorships === 'Yes') {
+                if (parentDirector?.details_of_existing_directorships === true) {
                   return !!value;
                 }
                 return true;
-              }),
-              type_of_company: Yup.string().test('required-when-has-existing', 'Type of Company is required', function (value) {
+              })
+              .matches(/^[LU][0-9]{5}[A-Z]{2}[0-9]{4}[A-Z]{3}[0-9]{6}$/, 'CIN must be in format U12345MH2024PTC123456'),
+              type_of_company: Yup.string().test('required-when-has-existing', 'Company Type is required', function (value) {
                 const parentDirector = this.options.from[1]?.value;
-                if (parentDirector?.details_of_existing_directorships === 'Yes') {
+                if (parentDirector?.details_of_existing_directorships === true) {
                   return !!value;
                 }
                 return true;
               }),
               position_held: Yup.string().test('required-when-has-existing', 'Position Held is required', function (value) {
                 const parentDirector = this.options.from[1]?.value;
-                if (parentDirector?.details_of_existing_directorships === 'Yes') {
+                if (parentDirector?.details_of_existing_directorships === true) {
                   return !!value;
                 }
                 return true;
@@ -292,18 +299,24 @@ const StepTwo = ({ step, setStep }) => {
             })
           ),
           no_of_shares: Yup.string().when('is_this_director_also_shareholder', {
-            is: 'Yes',
-            then: (schema) => schema.required('No. of Shares is required'),
+            is: true,
+            then: (schema) => schema
+              .required('No. of Shares is required')
+              .matches(/^[0-9]+$/, 'No. of Shares must be a number'),
             otherwise: (schema) => schema.notRequired(),
           }),
           shareholding_percentage: Yup.string().when('is_this_director_also_shareholder', {
-            is: 'Yes',
-            then: (schema) => schema.required('Percentage of Holding is required'),
+            is: true,
+            then: (schema) => schema
+              .required('Percentage of Holding is required')
+              .matches(/^[0-9]+$/, 'Percentage of Holding must be a number'),
             otherwise: (schema) => schema.notRequired(),
           }),
           paid_up_capital: Yup.string().when('is_this_director_also_shareholder', {
-            is: 'Yes',
-            then: (schema) => schema.required('Paid Up Capital is required'),
+            is: true,
+            then: (schema) => schema
+              .required('Paid Up Capital is required')
+              .matches(/^[0-9]+$/, 'Paid Up Capital must be a number'),
             otherwise: (schema) => schema.notRequired(),
           }),
         })
@@ -325,7 +338,7 @@ const StepTwo = ({ step, setStep }) => {
         // Send residential address as empty object if 'Yes', otherwise send address fields
         formData.append(
           'residential_address',
-          director.residential_same_as_aadhaar_address === 'Yes'
+          director.residential_same_as_aadhaar_address === true
             ? JSON.stringify({})
             : JSON.stringify({
                 address_line_1: director.address_line_1 || '',
@@ -339,11 +352,18 @@ const StepTwo = ({ step, setStep }) => {
         // Send existing_directorships_details as empty array if 'No', otherwise send the details
         formData.append(
           'existing_directorships_details',
-          director.details_of_existing_directorships === 'Yes'
+          director.details_of_existing_directorships === true
             ? JSON.stringify(director.existing_directorships_details)
             : JSON.stringify([])
         );
         
+
+        // Always append boolean fields, even if false
+        ['dsc', 'din_number', 'is_this_director_also_shareholder', 'details_of_existing_directorships', 'residential_same_as_aadhaar_address'].forEach((key) => {
+          if (key in director) {
+            formData.append(key, director[key]);
+          }
+        });
 
         Object.entries(director).forEach(([key, value]) => {
           if ([
@@ -364,7 +384,7 @@ const StepTwo = ({ step, setStep }) => {
             }
           } else if (
             ['no_of_shares', 'shareholding_percentage', 'paid_up_capital'].includes(key) &&
-            director.is_this_director_also_shareholder === 'No'
+            director.is_this_director_also_shareholder === false
           ) {
             formData.append(key, '');
           } else if (typeof value === 'string' || typeof value === 'number') {
@@ -391,18 +411,18 @@ const StepTwo = ({ step, setStep }) => {
             close: false
           }));
           await fetchDirectors(); // This will update the form with the latest data
-          if (director.id) {
-            try {
-              const formData = new FormData();
-              formData.append('service_request', service_id);
-              formData.append('service_task', taskIds?.director?.task_id);
-              formData.append('status', 'in progress');
-              await Factory('post', '/companyincorporation/directors/', formData);
-              // console.log('Status submitted successfully.');
-            } catch (err) {
-              // console.error('Status API error:', err);
-            }
-          }
+          // if (director.id) {
+          //   try {
+          //     const formData = new FormData();
+          //     formData.append('service_request', service_id);
+          //     formData.append('service_task', taskIds?.director?.task_id);
+          //     formData.append('status', 'in progress');
+          //     await Factory('post', '/companyincorporation/directors/', formData);
+          //     console.log('Status submitted successfully.');
+          //   } catch (err) {
+          //     console.error('Status API error:', err);
+          //   }
+          // }
           fetchTaskId();
         } else {
           throw new Error(res.data?.message || 'Failed to save director');
@@ -456,12 +476,12 @@ const StepTwo = ({ step, setStep }) => {
             form_dir2: director.form_dir2 || null,
             specimen_signature_of_director: director.specimen_signature_of_director || null,
             authorised_signatory_name: director.authorised_signatory_name || '',
-            dsc: director.dsc === 'Yes' ? 'Yes' : 'No',
-            din_number: director.din_number === 'Yes' ? 'Yes' : 'No',
+            dsc: director.dsc === true ? true : false,
+            din_number: director.din_number === true ? true : false,
             din_number_value: director.din_number_value || '',
-            is_this_director_also_shareholder: director.is_this_director_also_shareholder || '',
-            residential_same_as_aadhaar_address: director.residential_same_as_aadhaar_address || 'No',
-            details_of_existing_directorships: director.details_of_existing_directorships || 'No',
+            is_this_director_also_shareholder: director.is_this_director_also_shareholder === true ? true : false,
+            residential_same_as_aadhaar_address: director.residential_same_as_aadhaar_address === true ? true : false,
+            details_of_existing_directorships: director.details_of_existing_directorships === true ? true : false,
             existing_directorships_details: director.existing_directorships_details?.map(detail => ({
               id: detail.id,
               company_name: detail.company_name || '',
@@ -514,11 +534,11 @@ const StepTwo = ({ step, setStep }) => {
             form_dir2: null,
             specimen_signature_of_director: null,
             authorised_signatory_name: '',
-            dsc: 'No',
-            din_number: 'No',
-            is_this_director_also_shareholder: '',
-            residential_same_as_aadhaar_address: 'No',
-            details_of_existing_directorships: 'No',
+            dsc: false,
+            din_number: false,
+            is_this_director_also_shareholder: false,
+            residential_same_as_aadhaar_address: false,
+            details_of_existing_directorships: false,
             existing_directorships_details: [
               {
                 company_name: '',
@@ -596,11 +616,11 @@ const StepTwo = ({ step, setStep }) => {
           form_dir2: null,
           specimen_signature_of_director: null,
           authorised_signatory_name: '',
-          dsc: 'No',
-          din_number: 'No',
-          is_this_director_also_shareholder: '',
-          residential_same_as_aadhaar_address: 'No',
-          details_of_existing_directorships: 'No',
+          dsc: false,
+          din_number: false,
+          is_this_director_also_shareholder: false,
+          residential_same_as_aadhaar_address: false,
+          details_of_existing_directorships: false,
           existing_directorships_details: [
             {
               company_name: '',
@@ -641,9 +661,19 @@ const StepTwo = ({ step, setStep }) => {
 
     switch (field.type) {
       case 'text':
+        // Custom input restrictions for specific fields
+        let inputProps = {};
+        if (field.name === 'mobile_number') inputProps = { inputMode: 'numeric', pattern: '[0-9]*', maxLength: 10 };
+        if (field.name === 'din_number') inputProps = { inputMode: 'numeric', pattern: '[0-9]*', maxLength: 8 };
+        if (field.name === 'din_number_value') inputProps = { inputMode: 'numeric', pattern: '[0-9]*', maxLength: 8 };
+        if (field.name === 'no_of_shares') inputProps = { inputMode: 'numeric', pattern: '[0-9]*' };
+        if (field.name === 'paid_up_capital') inputProps = { inputMode: 'numeric', pattern: '[0-9]*' };
+        if (field.name === 'shareholding_percentage') inputProps = { inputMode: 'decimal', pattern: '^[0-9]*\.?[0-9]*$' };
+        if (field.name === 'pincode') inputProps = { inputMode: 'numeric', pattern: '[0-9]*', maxLength: 6 };
+        if (field.name === 'cin') inputProps = { pattern: '[LUlu][0-9]{5}[A-Za-z]{2}[0-9]{4}[A-Za-z]{3}[0-9]{6}', maxLength: 21, style: { textTransform: 'uppercase' } };
         return (
           <Box>
-            <Typography variant="subtitle2" fontWeight={500} mb={0.5}>
+            <Typography variant="subtitle1" mb={0.5}>
               {field.label}
             </Typography>
             <TextField
@@ -651,10 +681,33 @@ const StepTwo = ({ step, setStep }) => {
               size="small"
               name={fieldName}
               value={value}
-              onChange={handleChange}
+              onChange={e => {
+                if (field.name === 'no_of_shares' || field.name === 'paid_up_capital') {
+                  const newValue = e.target.value.replace(/[^0-9]/g, '');
+                  setFieldValue(fieldName, newValue);
+                } else if (field.name === 'shareholding_percentage') {
+                  let newValue = e.target.value.replace(/[^0-9.]/g, '');
+                  // Only allow one dot
+                  const parts = newValue.split('.');
+                  if (parts.length > 2) {
+                    newValue = parts[0] + '.' + parts.slice(1).join('');
+                  }
+                  setFieldValue(fieldName, newValue);
+                } else if (field.name === 'din_number') {
+                  const newValue = e.target.value.replace(/[^0-9]/g, '').slice(0, 8);
+                  setFieldValue(fieldName, newValue);
+                } else if (field.name === 'din_number_value') {
+                  const newValue = e.target.value.replace(/[^0-9]/g, '').slice(0, 8);
+                  setFieldValue(fieldName, newValue);
+                } else {
+                  handleDirectorFieldChange(e, idx, field);
+                }
+              }}
               onBlur={handleBlur}
               error={Boolean(error)}
-              helperText={error}
+              helperText={error || ''}
+              sx={{ width: '100%', '& .MuiInputBase-input': { color: 'grey.600' } }}
+              inputProps={inputProps}
             />
           </Box>
         );
@@ -662,7 +715,7 @@ const StepTwo = ({ step, setStep }) => {
       case 'autocomplete':
         return (
           <Box>
-            <Typography variant="subtitle2" fontWeight={500} mb={0.5}>
+            <Typography variant="subtitle1" mb={0.5}>
               {field.label}
             </Typography>
             <TextField
@@ -674,7 +727,8 @@ const StepTwo = ({ step, setStep }) => {
               onChange={handleChange}
               onBlur={handleBlur}
               error={Boolean(error)}
-              helperText={error}
+              helperText={error || ''}
+              sx={{ width: '100%', '& .MuiInputBase-input': { color: 'grey.600' } }}
             >
               {field.options.map((opt) => (
                 <MenuItem key={opt} value={opt}>
@@ -686,14 +740,48 @@ const StepTwo = ({ step, setStep }) => {
         );
       
       case 'file':
-      if (field.name === 'form_dir2') {
-        return (
-          <Box>
-            <Typography variant="subtitle2" fontWeight={500} mb={0.5}>
-              {field.label}
-            </Typography>
-            <Box display="flex" alignItems="center" gap={1} width={400}>
-              <Box width={235}>
+          if (field.name === 'form_dir2') {
+            return (
+              <Box>
+                <Typography variant="subtitle1" mb={0.5}>
+                  {field.label}
+                </Typography>
+                <Box display="flex" alignItems="center" gap={1} width={400}>
+                  <Box  width={225}>
+                  <RenderFileUpload
+                    fieldName={fieldName}
+                    file={value}
+                    setFieldValue={setFieldValue}
+                    touched={touched[path]?.[idx]?.[field.name]}
+                    errors={error}
+                    accept="*/*"
+                     sx={{
+                  width: '100%',
+                  '& .MuiInputBase-input': {
+                    color: 'grey.600'
+                  }
+                }}
+                  />
+                  </Box>
+                  <Button
+                    variant="outlined"
+                    size="small"
+      
+                    sx={{ height: 31, width: 135 }}
+                    href="/templates/DIR2-draft-format.docx"
+                    download
+                  >
+                    Download Template
+                  </Button>
+                </Box>
+              </Box>
+            );
+          }
+          return (
+            <Box>
+              <Typography variant="subtitle1" mb={0.5}>
+                {field.label}
+              </Typography>
               <RenderFileUpload
                 fieldName={fieldName}
                 file={value}
@@ -701,35 +789,84 @@ const StepTwo = ({ step, setStep }) => {
                 touched={touched[path]?.[idx]?.[field.name]}
                 errors={error}
                 accept="*/*"
+                 sx={{
+                  width: '100%',
+                  '& .MuiInputBase-input': {
+                    color: 'grey.600'
+                  }
+                }}
               />
-              </Box>
-              <Button
-                variant="outlined"
-                size='small'
-                href="/templates/DIR2-draft-format.docx"
-                download
-              >
-                Download Template
-              </Button>
             </Box>
+          );
+      // ... existing code ...
+      // case 'file':
+        if (field.name === 'form_dir2') {
+          return (
+            <Box>
+              <Typography variant="subtitle1" mb={0.5}>
+                {field.label}
+              </Typography>
+              <Box display="flex" alignItems="center" gap={1} width={400}>
+                {/* Upload Button and View Button (if file uploaded) */}
+                <Box display="flex" alignItems="center" gap={1}>
+                  <Box height={34} width={180}>
+                    <RenderFileUpload
+                      fieldName={fieldName}
+                      file={value}
+                      setFieldValue={setFieldValue}
+                      touched={touched[path]?.[idx]?.[field.name]}
+                      errors={error}
+                      accept="*/*"
+                      sx={{ width: '100%', '& .MuiInputBase-input': { color: 'grey.600' } }}
+                    />
+                  </Box>
+                  {/* If file is uploaded, show View button */}
+                  {value && (
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      sx={{ height: 34 }}
+                      onClick={() => {
+                        // If value is a File, create a URL, otherwise use value as URL
+                        const url = value instanceof File ? URL.createObjectURL(value) : value;
+                        window.open(url, '_blank');
+                      }}
+                    >
+                      View1
+                    </Button>
+                  )}
+                </Box>
+                {/* Download Template Button */}
+                <Button
+                  variant="outlined"
+                  size="small"
+                  sx={{ height: 34, width: 180, minWidth: 120 }}
+                  href="/templates/DIR2-draft-format.docx"
+                  download
+                >
+                  Download Template
+                </Button>
+              </Box>
+            </Box>
+          );
+        }
+        return (
+          <Box>
+            <Typography variant="subtitle1" mb={0.5}>
+              {field.label}
+            </Typography>
+            <RenderFileUpload
+              fieldName={fieldName}
+              file={value}
+              setFieldValue={setFieldValue}
+              touched={touched[path]?.[idx]?.[field.name]}
+              errors={error}
+              accept="*/*"
+              sx={{ width: '100%', '& .MuiInputBase-input': { color: 'grey.600' } }}
+            />
           </Box>
         );
-      }
-      return (
-        <Box>
-          <Typography variant="subtitle2" fontWeight={500} mb={0.5}>
-            {field.label}
-          </Typography>
-          <RenderFileUpload
-            fieldName={fieldName}
-            file={value}
-            setFieldValue={setFieldValue}
-            touched={touched[path]?.[idx]?.[field.name]}
-            errors={error}
-            accept="*/*"
-          />
-        </Box>
-      );
+// ... existing code ...
 
       case 'shareholding':
         const shareRadioPath = `${path}[${idx}].${field.name}`;
@@ -738,64 +875,85 @@ const StepTwo = ({ step, setStep }) => {
         return (
           <Box key={field.name}>
             <FormControl component="fieldset">
-              <FormLabel color="inherit">{field.label}</FormLabel>
-              <RadioGroup row name={shareRadioPath} value={value} onChange={(e) => setFieldValue(shareRadioPath, e.target.value)}>
-                {field.options.map((option) => (
-                  <FormControlLabel key={option.value} value={option.value} control={<Radio />} label={option.label} />
-                ))}
+              <FormLabel><Typography variant="subtitle1">{field.label}</Typography></FormLabel>
+              <RadioGroup
+                row
+                name={shareRadioPath}
+                value={values[path][idx]?.is_this_director_also_shareholder === true ? 'true' : 'false'}
+                onChange={e => setFieldValue(shareRadioPath, e.target.value === 'true')}
+              >
+                <FormControlLabel value="true" control={<Radio />} label="Yes" />
+                <FormControlLabel value="false" control={<Radio />} label="No" />
               </RadioGroup>
             </FormControl>
 
-            {value === 'Yes' && (
-              <Grid2 container spacing={1} mt={1}>
+            {values[path][idx]?.is_this_director_also_shareholder === true && (
+              <Grid2 container spacing={13} mt={1} >
                 <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                  <Box>
-                    <Typography variant="subtitle2" fontWeight={500} mb={0.5}>
+                  <Box sx={{ width: 150 }}>
+                    <Typography variant="subtitle1" mb={1} >
                       No. of Shares
                     </Typography>
                     <TextField
-                      fullWidth
                       size="small"
                       name={`${sharePrefixPath}.no_of_shares`}
                       value={values[path][idx]?.no_of_shares || ''}
-                      onChange={handleChange}
+                      onChange={e => {
+                        const newValue = e.target.value.replace(/[^0-9]/g, '');
+                        setFieldValue(`${sharePrefixPath}.no_of_shares`, newValue);
+                      }}
                       onBlur={handleBlur}
                       error={Boolean(touched[path]?.[idx]?.no_of_shares && errors[path]?.[idx]?.no_of_shares)}
                       helperText={touched[path]?.[idx]?.no_of_shares && errors[path]?.[idx]?.no_of_shares}
+                      // sx={{ width: 320, '& .MuiInputBase-input': { color: 'grey.600' } }}
+                      inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
                     />
                   </Box>
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                  <Box>
-                    <Typography variant="subtitle2" fontWeight={500} mb={0.5}>
+                  <Box  sx={{ width: 150 }}>
+                    <Typography variant="subtitle1" mb={1} >
                       Percentage of Holding
                     </Typography>
                     <TextField
-                      fullWidth
                       size="small"
                       name={`${sharePrefixPath}.shareholding_percentage`}
                       value={values[path][idx]?.shareholding_percentage || ''}
-                      onChange={handleChange}
+                      onChange={e => {
+                        let newValue = e.target.value.replace(/[^0-9.]/g, '');
+                        // Only allow one dot
+                        const parts = newValue.split('.');
+                        if (parts.length > 2) {
+                          newValue = parts[0] + '.' + parts.slice(1).join('');
+                        }
+                        setFieldValue(`${sharePrefixPath}.shareholding_percentage`, newValue);
+                      }}
                       onBlur={handleBlur}
                       error={Boolean(touched[path]?.[idx]?.shareholding_percentage && errors[path]?.[idx]?.shareholding_percentage)}
                       helperText={touched[path]?.[idx]?.shareholding_percentage && errors[path]?.[idx]?.shareholding_percentage}
+                      // sx={{ width: 320, '& .MuiInputBase-input': { color: 'grey.600' } }}
+                      inputProps={{ inputMode: 'decimal', pattern: '^[0-9]*\.?[0-9]*$' }}
                     />
                   </Box>
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                  <Box>
-                    <Typography variant="subtitle2" fontWeight={500} mb={0.5}>
+                  <Box sx={{ width: 150}}>
+                    <Typography variant="subtitle1" mb={1} >
                       Paid Up Capital
                     </Typography>
                     <TextField
-                      fullWidth
                       size="small"
                       name={`${sharePrefixPath}.paid_up_capital`}
                       value={values[path][idx]?.paid_up_capital || ''}
-                      onChange={handleChange}
+                      onChange={e => {
+                        const newValue = e.target.value.replace(/[^0-9]/g, '');
+                        setFieldValue(`${sharePrefixPath}.paid_up_capital`, newValue);
+                      }}
                       onBlur={handleBlur}
                       error={Boolean(touched[path]?.[idx]?.paid_up_capital && errors[path]?.[idx]?.paid_up_capital)}
                       helperText={touched[path]?.[idx]?.paid_up_capital && errors[path]?.[idx]?.paid_up_capital}
+                      // sx={{ width: 320, '& .MuiInputBase-input': { color: 'grey.600' } }}
+                      inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
                     />
                   </Box>
                 </Grid2>
@@ -808,31 +966,29 @@ const StepTwo = ({ step, setStep }) => {
         return (
           <>
             <FormControl component="fieldset" error={Boolean(error)}>
-              <FormLabel color="inherit">{field.label}</FormLabel>
+              <FormLabel><Typography variant="subtitle1">{field.label}</Typography></FormLabel>
               <RadioGroup
                 row
                 name={fieldName}
-                value={value || 'No'}
-                onChange={(e) => {
-                  setFieldValue(fieldName, e.target.value);
-                  if (field.name === 'din_number') {
-                    if (e.target.value === 'No') {
-                      setFieldValue(`${path}[${idx}].din_number_value`, '');
-                    } else if (e.target.value === 'Yes' && !values[path][idx]?.din_number_value) {
-                      setFieldValue(`${path}[${idx}].din_number_value`, '');
-                    }
-                  }
-                }}
+                value={['dsc', 'din_number'].includes(field.name) ? (value === true ? 'true' : 'false') : value}
+                onChange={['dsc', 'din_number'].includes(field.name)
+                  ? (e) => setFieldValue(fieldName, e.target.value === 'true')
+                  : handleChange}
               >
                 {field.options.map((opt) => (
-                  <FormControlLabel key={opt} value={opt} control={<Radio />} label={opt} />
+                  <FormControlLabel
+                    key={opt}
+                    value={['dsc', 'din_number'].includes(field.name) ? (opt === 'Yes' ? 'true' : 'false') : opt}
+                    control={<Radio />}
+                    label={opt}
+                  />
                 ))}
               </RadioGroup>
               {Boolean(error) && <FormHelperText>{error}</FormHelperText>}
             </FormControl>
 
             {/* Show extra field if DIN is Yes */}
-            {field.name === 'din_number' && value === 'Yes' && (
+            {field.name === 'din_number' && value === true && (
               <Box mt={2}>
                 <TextField
                   fullWidth
@@ -840,10 +996,15 @@ const StepTwo = ({ step, setStep }) => {
                   label="DIN Number"
                   name={`${path}[${idx}].din_number_value`}
                   value={values[path][idx]?.din_number_value || ''}
-                  onChange={handleChange}
+                  onChange={e => {
+                    const newValue = e.target.value.replace(/[^0-9]/g, '').slice(0, 8);
+                    setFieldValue(`${path}[${idx}].din_number_value`, newValue);
+                  }}
                   onBlur={handleBlur}
                   error={Boolean(touched[path]?.[idx]?.din_number_value && errors[path]?.[idx]?.din_number_value)}
                   helperText={touched[path]?.[idx]?.din_number_value && errors[path]?.[idx]?.din_number_value}
+                  sx={{ width: '100%', '& .MuiInputBase-input': { color: 'grey.600' } }}
+                  inputProps={{ inputMode: 'numeric', pattern: '[0-9]*', maxLength: 8 }}
                 />
               </Box>
             )}
@@ -885,12 +1046,12 @@ const StepTwo = ({ step, setStep }) => {
             form_dir2: null,
             specimen_signature_of_director: null,
             authorised_signatory_name: '',
-            dsc: 'No',
-            din_number: 'No',
-            is_this_director_also_shareholder: '',
-            residential_same_as_aadhaar_address: 'No',
+            dsc: false,
+            din_number: false,
+            is_this_director_also_shareholder: false,
+            residential_same_as_aadhaar_address: false,
             // has_existing_directorships: 'No',
-            details_of_existing_directorships: 'No',
+            details_of_existing_directorships: false,
             existing_directorships_details: [
               {
                 company_name: '',
@@ -944,11 +1105,11 @@ const StepTwo = ({ step, setStep }) => {
             form_dir2: null,
             specimen_signature_of_director: null,
             authorised_signatory_name: '',
-            dsc: 'No',
-            din_number: 'No',
-            is_this_director_also_shareholder: '',
-            residential_same_as_aadhaar_address: 'No',
-            details_of_existing_directorships: 'No',
+            dsc: false,
+            din_number: false,
+            is_this_director_also_shareholder: false,
+            residential_same_as_aadhaar_address: false,
+            details_of_existing_directorships: false,
             existing_directorships_details: [
               {
                 company_name: '',
@@ -985,13 +1146,37 @@ const StepTwo = ({ step, setStep }) => {
 
   const { values, errors, touched, handleChange, handleBlur, setFieldValue, resetForm } = formik;
 
+  // --- Input restrictions for numeric fields and CIN ---
+  const handleDirectorFieldChange = (e, idx, field) => {
+    const { name, value } = e.target;
+    let newValue = value;
+    if (field.name === 'mobile_number') {
+      newValue = value.replace(/[^0-9]/g, '').slice(0, 10);
+    } else if (field.name === 'din_number') {
+      newValue = value.replace(/[^0-9]/g, '').slice(0, 8);
+    } else if (field.name === 'din_number_value') {
+      newValue = value.replace(/[^0-9]/g, '').slice(0, 8);
+    } else if ([
+      'no_of_shares',
+      'shareholding_percentage',
+      'paid_up_capital'
+    ].includes(field.name)) {
+      newValue = value.replace(/[^0-9]/g, '');
+    } else if (field.name === 'pincode') {
+      newValue = value.replace(/[^0-9]/g, '').slice(0, 6);
+    } else if (field.name === 'cin') {
+      newValue = value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    }
+    setFieldValue(name, newValue);
+  };
+
   return (
     <form onSubmit={formik.handleSubmit}>
       <Card sx={{ p: 3, mt: 4 }}>
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
           {/* Left side: Add No. of Directors */}
           <Box display="flex" alignItems="center">
-            <Typography>Add No. of Directors</Typography>
+            <Typography variant='subtitle1'>Add No. of Directors</Typography>
             <Button variant="outlined" size="small" sx={{ mx: 2, height: 36 }} onClick={removeDirector}>
               -
             </Button>
@@ -1050,9 +1235,9 @@ const StepTwo = ({ step, setStep }) => {
 
         {values.directors.filter(Boolean).map((_, idx) => (
           <TabPanel key={idx} value={tabIndex} index={idx}>
-            <Typography variant="subtitle1" color="text.secondary" fontWeight={700} mt={2}>
+            {/* <Typography variant="subtitle1"mt={2}>
               Name Of the Director
-            </Typography>
+            </Typography> */}
             <Grid2 container spacing={2}  >
               {directorFields.map((field) => (
                 <Grid2 key={field.name} size={{ xs: 2, sm: 6, md: 4 }} sx={{mt:1}}>
@@ -1071,15 +1256,15 @@ const StepTwo = ({ step, setStep }) => {
                 <FormControlLabel
                   control={
                     <Checkbox
-                      checked={values.directors[idx].residential_same_as_aadhaar_address === 'Yes'}
-                      onChange={(e) => setFieldValue(`directors[${idx}].residential_same_as_aadhaar_address`, e.target.checked ? 'Yes' : 'No')}
+                      checked={values.directors[idx].residential_same_as_aadhaar_address === true}
+                      onChange={(e) => setFieldValue(`directors[${idx}].residential_same_as_aadhaar_address`, e.target.checked ? true : false)}
                     />
                   }
                   label="Same as in Aadhaar"
                 />
               </Grid2>
               {/* Show address fields only when NOT same as Aadhaar */}
-              {values.directors[idx].residential_same_as_aadhaar_address === 'No' &&
+              {values.directors[idx].residential_same_as_aadhaar_address === false &&
                 nestedAddressFields.map(({ key, label }) => {
                   const fieldName = `directors[${idx}].${key}`;
                   const error = getIn(touched, fieldName) && getIn(errors, fieldName);
@@ -1087,7 +1272,7 @@ const StepTwo = ({ step, setStep }) => {
                   return (
                     <Grid2 size={{ xs: 2, sm: 6, md: 4 }} key={key}>
                       <Box>
-                        <Typography variant="subtitle2" fontWeight={500} mb={0.5}>
+                        <Typography variant="subtitle1" mb={0.5}>
                           {label}
                         </Typography>
                         <TextField
@@ -1098,7 +1283,8 @@ const StepTwo = ({ step, setStep }) => {
                           onChange={handleChange}
                           onBlur={handleBlur}
                           error={Boolean(error)}
-                          helperText={error}
+                          helperText={error || ''}
+                          sx={{ width: '100%', '& .MuiInputBase-input': { color: 'grey.600' } }}
                         />
                       </Box>
                     </Grid2>
@@ -1108,15 +1294,17 @@ const StepTwo = ({ step, setStep }) => {
 
             <Box mt={4} mb={4}>
               <FormControl component="fieldset">
-                <FormLabel color="inherit">Details of Existing Directors</FormLabel>
+                <FormLabel>
+                  <Typography variant="subtitle1">Details of Existing Directors</Typography>
+                </FormLabel>
                 <RadioGroup
                   row
                   name="details_of_existing_directorships"
-                  value={values.directors[idx].details_of_existing_directorships}
+                  value={values.directors[idx].details_of_existing_directorships === true ? 'true' : 'false'}
                   onChange={(e) => {
-                    const val = e.target.value;
+                    const val = e.target.value === 'true';
                     setFieldValue(`directors[${idx}].details_of_existing_directorships`, val);
-                    if (val === 'No') {
+                    if (val === false) {
                       setFieldValue(`directors[${idx}].existing_directorships_details`, [
                         {
                           company_name: '',
@@ -1128,15 +1316,15 @@ const StepTwo = ({ step, setStep }) => {
                     }
                   }}
                 >
-                  <FormControlLabel value="Yes" control={<Radio />} label="Yes" />
-                  <FormControlLabel value="No" control={<Radio />} label="No" />
+                  <FormControlLabel value="true" control={<Radio />} label="Yes" />
+                  <FormControlLabel value="false" control={<Radio />} label="No" />
                 </RadioGroup>
               </FormControl>
 
-              {values.directors[idx].details_of_existing_directorships === 'Yes' && (
+              {values.directors[idx].details_of_existing_directorships === true && (
                 <Box mt={2}>
                   <Box display="flex" alignItems="center" mb={2}>
-                    <Typography>No. of Directories</Typography>
+                    <Typography variant='subtitle1'>No. of Directories</Typography>
                     <Button
                       variant="outlined"
                       size="small"
@@ -1177,7 +1365,7 @@ const StepTwo = ({ step, setStep }) => {
                         <Typography fontWeight={600} mb={1}>
                           Director {edIdx + 1}
                         </Typography>
-                        <Grid2 container spacing={2} alignItems="flex-end">
+                        <Grid2 container spacing={1} alignItems="flex-end">
                           <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
                             <Box>{renderField(nestedDirectorFields[0], edIdx, `directors[${idx}].existing_directorships_details`, idx)}</Box>
                           </Grid2>
@@ -1194,7 +1382,7 @@ const StepTwo = ({ step, setStep }) => {
                             <Button
                               variant="contained"
                               size="small"
-                              sx={{ marginTop: '12px' }}
+                              sx={{ marginBottom: '0px' }}
                               onClick={async () => {
                                 const allErrors = await formik.validateForm();
                                 const entryErrors =
@@ -1237,7 +1425,7 @@ const StepTwo = ({ step, setStep }) => {
                               variant="outlined"
                               color="error"
                               size="small"
-                              sx={{ marginTop: '12px' }}
+                              sx={{ marginBottom: '0px' }}
                               onClick={() => {
                                 const updated = values.directors[idx].existing_directorships_details.filter((_, i) => i !== edIdx);
                                 setFieldValue(`directors[${idx}].existing_directorships_details`, updated);
@@ -1254,11 +1442,10 @@ const StepTwo = ({ step, setStep }) => {
             </Box>
 
             <Grid2>
-              <Box display="flex" justifyContent="flex-end" mt={2} gap={2}>
+              <Box display="flex" justifyContent="flex-end" mt={2} gap={1}>
                 <Button
                   variant="contained"
-                  size="small"
-                  sx={{ height: 36 }}
+                  // sx={{ height: 36 }}
                   onClick={async () => {
                     const allErrors = await formik.validateForm();
                     const entryErrors = allErrors.directors && allErrors.directors[idx];
@@ -1271,7 +1458,7 @@ const StepTwo = ({ step, setStep }) => {
                           i === idx
                             ? {
                                 ...Object.fromEntries(Object.keys(dir).map((k) => [k, true])),
-                                ...(dir.residential_same_as_aadhaar_address === 'No'
+                                ...(dir.residential_same_as_aadhaar_address === false
                                   ? {
                                       address_line_1: true,
                                       address_line_2: true,
@@ -1292,8 +1479,7 @@ const StepTwo = ({ step, setStep }) => {
                 <Button
                   variant="outlined"
                   color="error"
-                  size="small"
-                  sx={{ height: 36 }}
+                  // sx={{ height: 36 }}
                   onClick={() => handleDirectorDelete(idx)}
                 >
                   Delete Director {idx + 1}
@@ -1305,7 +1491,7 @@ const StepTwo = ({ step, setStep }) => {
         ))}
         
       </Card>
-        <Box display="flex" justifyContent="space-between" mt={2}>
+        <Box display="flex" justifyContent="space-between" gap={1}mt={2}>
       {/* Left side: Back button */}
       {step > 0 && (
         <Button
@@ -1343,7 +1529,7 @@ const StepTwo = ({ step, setStep }) => {
           </Button>
         )}
       </Box>
-    </Box>
+        </Box>
     </form>
   );
 };
