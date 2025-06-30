@@ -220,12 +220,10 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
       ) : (
         <Box>
           <Grid2 size={{ xs: 12 }}>
-            <Box sx={{ width: '100%', display: 'flex', justifyContent: 'flex-end', mb: 2 }} />
-
             <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 1 }}>
               <Table size="small">
-                <TableHead>
-                  <TableRow sx={{ bgcolor: 'grey.100' }}>
+                <TableHead sx={{ backgroundColor: 'primary.main' }}>
+                  <TableRow>
                     {['Component Name', 'Calculation', 'Consider for EPF', 'Consider for ESI', 'Status', 'Actions'].map((head, idx) => (
                       <TableCell
                         key={idx}
@@ -233,6 +231,7 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
                           fontWeight: 'bold',
                           whiteSpace: 'nowrap',
                           fontSize: '0.9rem',
+                          color: '#fff !important',
                           textAlign: idx === 5 ? 'center' : 'left'
                         }}
                       >
@@ -280,10 +279,10 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
 
                         <TableCell align="left">
                           <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
-                            <IconButton color="primary" onClick={() => handleEdit(item)}>
+                            <IconButton size="small" color="primary" onClick={() => handleEdit(item)}>
                               <Edit />
                             </IconButton>
-                            <IconButton color="error" onClick={() => handleOpenDeleteDialog(item)}>
+                            <IconButton size="small" color="error" onClick={() => handleOpenDeleteDialog(item)}>
                               <Delete />
                             </IconButton>
                           </Box>
@@ -305,35 +304,38 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
               />
             </TableContainer>
 
-            {earningsData.length > rowsPerPage && (
-              <Stack direction="row" justifyContent="center" sx={{ py: 2 }}>
+            {earningsData.length > 0 && (
+              <Stack direction="row" justifyContent="space-between" sx={{ mt: 2 }}>
+                <Button
+                  variant="outlined"
+                  startIcon={<ArrowBackIcon />}
+                  onClick={() => {
+                    navigate('/app/payroll');
+                  }}
+                >
+                  Back to Dashboard
+                </Button>
                 <Pagination
                   count={Math.ceil(earningsData.length / rowsPerPage)}
                   page={currentPage}
                   onChange={(e, value) => setCurrentPage(value)}
                   color="primary"
                 />
+                <Stack direction="row" spacing={2}>
+                  <Button size="small" variant="outlined" startIcon={<ArrowBackIcon />} onClick={handleBack}>
+                    Back
+                  </Button>
+                  <Button size="small" variant="contained" onClick={handleNext}>
+                    Next
+                  </Button>
+                </Stack>
               </Stack>
             )}
           </Grid2>
 
-          <Grid2 size={{ xs: 12 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
-              <Button
-                variant="outlined"
-                startIcon={<ArrowBackIcon />}
-                onClick={() => {
-                  navigate(-1);
-                }}
-              >
-                Back to Dashboard
-              </Button>
-            </Box>
-          </Grid2>
-
           <Modal
             open={open}
-            maxWidth={'lg'}
+            maxWidth={'sm'}
             header={{ title: values.component_name || 'New Component', subheader: '' }}
             showClose={true}
             handleClose={handleClose}

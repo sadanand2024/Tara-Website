@@ -158,7 +158,12 @@ const PayrollSettingsLayout = () => {
   const [value, setValue] = useState(0);
 
   const businessId = user.active_context.business_id;
-
+  const handleBack = () => {
+    setValue(value - 1);
+  };
+  const handleNext = () => {
+    setValue(value + 1);
+  };
   const hasFetched = React.useRef(false);
 
   const fetchPayrollDetails = useCallback(async () => {
@@ -347,28 +352,28 @@ const PayrollSettingsLayout = () => {
     >
       {/* Header at the top */}
       <CardHeader
-        title="Payroll Setup"
-        subheader={
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 1 }}>
-            <LinearProgress
-              variant="determinate"
-              value={completionPercentage}
-              sx={{
-                width: 200,
-                height: 8,
-                borderRadius: 4,
-                backgroundColor: '#f0f0f0',
-                '& .MuiLinearProgress-bar': {
-                  borderRadius: 4,
-                  background: 'linear-gradient(45deg, #4A90E2 0%, #357ABD 100%)'
-                }
-              }}
-            />
-            <Typography variant="h5" sx={{ color: '#666' }}>
-              {completionPercentage}% Complete
-            </Typography>
-          </Box>
-        }
+        title="Payroll Settings"
+        // subheader={
+        //   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 1 }}>
+        //     <LinearProgress
+        //       variant="determinate"
+        //       value={completionPercentage}
+        //       sx={{
+        //         width: 200,
+        //         height: 8,
+        //         borderRadius: 4,
+        //         backgroundColor: '#f0f0f0',
+        //         '& .MuiLinearProgress-bar': {
+        //           borderRadius: 4,
+        //           background: 'linear-gradient(45deg, #4A90E2 0%, #357ABD 100%)'
+        //         }
+        //       }}
+        //     />
+        //     <Typography variant="h5" sx={{ color: '#666' }}>
+        //       {completionPercentage}% Complete
+        //     </Typography>
+        //   </Box>
+        // }
         action={
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Button startIcon={<ArrowBackIcon />} variant="outlined" onClick={() => navigate('/app/payroll')} size="small">
@@ -407,7 +412,7 @@ const PayrollSettingsLayout = () => {
               minHeight: 'auto',
               minWidth: isSmallScreen ? 'auto' : '100%',
               py: 1.5,
-              px: 2,
+              px: 1,
               display: 'flex',
               flexDirection: 'row',
               alignItems: 'center',
@@ -419,7 +424,7 @@ const PayrollSettingsLayout = () => {
             },
             '& button.Mui-selected': {
               color: 'primary.main',
-              bgcolor: mode === 'dark' ? 'dark.main' : 'grey.100'
+              bgcolor: mode === 'dark' ? 'dark.main' : '#b7d0e9'
             },
             '& button > svg': {
               height: 20,
@@ -428,7 +433,10 @@ const PayrollSettingsLayout = () => {
             '& > div > span': {
               display: 'none'
             },
-            padding: 2
+            padding: 1,
+            '& button:hover': {
+              backgroundColor: 'grey.100'
+            }
           }}
         >
           {steps.map((step, index) => {
@@ -436,55 +444,69 @@ const PayrollSettingsLayout = () => {
             return (
               <Tab
                 key={index}
-                icon={
-                  <Box
-                    sx={{
-                      width: 24,
-                      height: 24,
-                      borderRadius: '50%',
-                      backgroundColor: step.completed ? '#4CAF50' : value === index ? '#4A90E2' : '#E0E0E0',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0
-                    }}
-                  >
-                    {step.completed ? (
-                      <Typography variant="h6" sx={{ color: '#FFFFFF', fontSize: 18 }}>
-                        ✓
-                      </Typography>
-                    ) : (
-                      <Typography variant="h6" sx={{ color: '#FFFFFF', fontSize: 16 }}>
-                        {index + 1}
-                      </Typography>
-                    )}
-                  </Box>
-                }
+                // icon={
+                //   <Box
+                //     sx={{
+                //       width: 24,
+                //       height: 24,
+                //       borderRadius: '50%',
+                //       backgroundColor: step.completed ? '#4CAF50' : value === index ? '#4A90E2' : '#E0E0E0',
+                //       display: 'flex',
+                //       alignItems: 'center',
+                //       justifyContent: 'center',
+                //       flexShrink: 0
+                //     }}
+                //   >
+                //     {step.completed ? (
+                //       <Typography variant="h6" sx={{ color: '#FFFFFF', fontSize: 18 }}>
+                //         ✓
+                //       </Typography>
+                //     ) : (
+                //       <Typography variant="h6" sx={{ color: '#FFFFFF', fontSize: 16 }}>
+                //         {index + 1}
+                //       </Typography>
+                //     )}
+                //   </Box>
+                // }
                 label={
-                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 0.5 }}>
-                    <Typography variant="h6" sx={{ fontSize: 13 }} noWrap>
-                      {step.nameKey}
-                    </Typography>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 0.5, mt: 1 }}>
+                    <Stack direction="row" spacing={2}>
+                      <IconComponent color="primary" />
+                      <Typography variant="h6" sx={{ fontWeight: 500 }} noWrap>
+                        {step.nameKey}
+                      </Typography>
+                    </Stack>
 
                     {step.dataKey === 'statutory_component' && !step.completed && (
-                      <Button
-                        variant="outlined"
-                        size="small"
+                      <Box
+                        component="span"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleMarkStatutoryComplete();
                         }}
-                        disabled={markingComplete}
                         sx={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
                           minWidth: 'auto',
                           px: 1,
                           py: 0.25,
                           fontSize: '0.65rem',
-                          height: 24
+                          height: 24,
+                          border: '1px solid',
+                          borderColor: 'primary.main',
+                          borderRadius: 1,
+                          color: 'primary.main',
+                          cursor: markingComplete ? 'not-allowed' : 'pointer',
+                          opacity: markingComplete ? 0.6 : 1,
+                          '&:hover': {
+                            backgroundColor: markingComplete ? 'transparent' : 'primary.main',
+                            color: markingComplete ? 'primary.main' : 'white'
+                          }
                         }}
                       >
                         {markingComplete ? <CircularProgress size={12} /> : 'Mark Complete'}
-                      </Button>
+                      </Box>
                     )}
                   </Box>
                 }
@@ -498,34 +520,34 @@ const PayrollSettingsLayout = () => {
         <Box sx={{ flexGrow: 1, width: '100%', overflowY: 'auto' }}>
           <CardContent sx={{ p: 0 }}>
             <TabPanel value={value} index={0}>
-              <OrganizationDetails />
+              <OrganizationDetails handleBack={handleBack} handleNext={handleNext} />
             </TabPanel>
             <TabPanel value={value} index={1}>
-              <WorkLocation />
+              <WorkLocation handleBack={handleBack} handleNext={handleNext} />
             </TabPanel>
             <TabPanel value={value} index={2}>
-              <Departments />
+              <Departments handleBack={handleBack} handleNext={handleNext} />
             </TabPanel>
             <TabPanel value={value} index={3}>
-              <Designations />
+              <Designations handleBack={handleBack} handleNext={handleNext} />
             </TabPanel>
             <TabPanel value={value} index={4}>
-              <StatuitoryComponents />
+              <StatuitoryComponents handleBack={handleBack} handleNext={handleNext} />
             </TabPanel>
             <TabPanel value={value} index={5}>
-              <SalaryComponents />
+              <SalaryComponents handleBack={handleBack} handleNext={handleNext} />
             </TabPanel>
             <TabPanel value={value} index={6}>
-              <SalaryTemplateList />
+              <SalaryTemplateList handleBack={handleBack} handleNext={handleNext} />
             </TabPanel>
             <TabPanel value={value} index={7}>
-              <EmployeeMaster />
+              <EmployeeMaster handleBack={handleBack} handleNext={handleNext} />
             </TabPanel>
             <TabPanel value={value} index={8}>
-              <PaySchedule />
+              <PaySchedule handleBack={handleBack} handleNext={handleNext} />
             </TabPanel>
             <TabPanel value={value} index={9}>
-              <LeaveAttendance />
+              <LeaveAttendance handleBack={handleBack} handleNext={handleNext} />
             </TabPanel>
           </CardContent>
         </Box>

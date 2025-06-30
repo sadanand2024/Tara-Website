@@ -150,9 +150,7 @@ const PersonalDetails = ({ fetchEmployeeData, employeeData, createdEmployeeId, s
 
     return (
       <>
-        <Typography variant="subtitle2" sx={{ color: 'grey.800', mb: 0.8 }}>
-          {field.label}
-        </Typography>
+        <Typography variant="subtitle1">{field.label}</Typography>
 
         {field.name === 'dob' ? (
           <CustomDatePicker
@@ -177,6 +175,7 @@ const PersonalDetails = ({ fetchEmployeeData, employeeData, createdEmployeeId, s
             onChange={(e, newValue) => setFieldValue(fieldName, newValue)}
             error={Boolean(isTouched && error)}
             helperText={isTouched && error}
+            sx={{ width: '100%', '& .MuiInputBase-input': { color: 'grey.600' } }}
           />
         ) : (
           <CustomInput
@@ -222,6 +221,7 @@ const PersonalDetails = ({ fetchEmployeeData, employeeData, createdEmployeeId, s
             onBlur={handleBlur}
             error={Boolean(isTouched && error)}
             helperText={isTouched && error}
+            sx={{ width: '100%', '& .MuiInputBase-input': { color: 'grey.600' } }}
           />
         )}
       </>

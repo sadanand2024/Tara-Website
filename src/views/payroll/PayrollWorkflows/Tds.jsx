@@ -5,7 +5,7 @@ import Factory from 'utils/Factory';
 import { useSearchParams } from 'react-router-dom';
 import RenderDialog from './RenderDialog';
 
-export default function Tds({ employeeMasterData, from, openDialog, fields, setOpenDialog }) {
+export default function Tds({ employeeMasterData, from, openDialog, fields, setOpenDialog, handleBack, handleNext }) {
   const headerData = [
     'Employee ID',
     'Employee Name',
@@ -95,6 +95,8 @@ export default function Tds({ employeeMasterData, from, openDialog, fields, setO
         from={from}
         loading={loading}
         setLoading={setLoading}
+        handleBack={handleBack}
+        handleNext={handleNext}
       />
       <RenderDialog
         from={from}

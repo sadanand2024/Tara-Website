@@ -6,7 +6,7 @@ import RenderTable from './RenderTable';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
 
-function NewJoiners() {
+function NewJoiners({ handleBack, handleNext }) {
   const headerData = [
     'Employee ID',
     'Employee',
@@ -71,7 +71,17 @@ function NewJoiners() {
     }
   }, [payrollid]);
 
-  return <RenderTable headerData={headerData} tableData={newJoinersData} loading={loading} body_keys={body_keys} handleEdit={handleEdit} />;
+  return (
+    <RenderTable
+      headerData={headerData}
+      tableData={newJoinersData}
+      loading={loading}
+      body_keys={body_keys}
+      handleEdit={handleEdit}
+      handleBack={handleBack}
+      handleNext={handleNext}
+    />
+  );
 }
 
 export default NewJoiners;

@@ -255,8 +255,7 @@ function Organizationdetails() {
       return (
         <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
           <Typography variant="subtitle1" gutterBottom>
-            {field.label}{' '}
-            {field.name !== 'org_address_line2' && field.name !== 'filling_address_line2' && field.name !== 'registration_number'}{' '}
+            {field.label}
             {field.name === 'sender_email' && (
               <Tooltip title="Pay slips, offer letters, and emails will be sent through this email." placement="right" arrow>
                 <InfoOutlinedIcon sx={{ fontSize: 18, ml: 0.5, color: 'gray', cursor: 'pointer' }} />
@@ -491,7 +490,7 @@ function Organizationdetails() {
                 }}
               >
                 <CardContent>
-                  <Typography variant="h4" sx={{ mb: 2, color: 'text.secondary' }}>
+                  <Typography variant="h4" sx={{ mb: 2 }}>
                     {values.filling_address_location_name || 'Head Office'}
                   </Typography>
                   {[
@@ -523,16 +522,20 @@ function Organizationdetails() {
 
             <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Button
+                size="small"
                 variant="outlined"
                 startIcon={<ArrowBackIcon />}
                 onClick={() => {
-                  navigate(-1);
+                  navigate('/app/payroll');
                 }}
               >
                 Back to Dashboard
               </Button>
-              <Button type="submit" variant="contained" color="primary">
+              <Button type="submit" variant="contained" color="primary" size="small">
                 Save
+              </Button>
+              <Button variant="contained" onClick={() => navigate('/app/payroll/settings/professional-tax')}>
+                Next
               </Button>
             </Box>
             {filingAddressDialog === true && (

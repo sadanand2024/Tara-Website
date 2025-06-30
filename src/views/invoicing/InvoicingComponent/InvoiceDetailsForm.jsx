@@ -105,7 +105,7 @@ const InvoiceDetailsForm = ({
 
     if (selectedCustomer) {
       // If GST registered, add Head Office first
-      if (selectedCustomer.gst_registered === 'Yes') {
+      if (selectedCustomer) {
         const headOffice = {
           branch_name: 'Head Office',
           gstin: selectedCustomer.gstin,
@@ -186,7 +186,7 @@ const InvoiceDetailsForm = ({
 
         if (selectedCustomer) {
           // If GST registered, add Head Office first
-          if (selectedCustomer.gst_registered === 'Yes') {
+          if (selectedCustomer) {
             const headOffice = {
               branch_name: 'Head Office',
               gstin: selectedCustomer.gstin,
@@ -241,6 +241,7 @@ const InvoiceDetailsForm = ({
               }
             } else if (fieldName === 'customer_branch') {
               handleCustomerBranchChange(val);
+              getInvoiceFormat(formik.values.gstin, formik.values.branch_code || '');
             }
             formik.setFieldValue(fieldName, val);
           }}

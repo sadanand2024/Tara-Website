@@ -27,7 +27,7 @@ import DeleteDialog from 'ui-component/extended/DeleteDialog';
 import IconButton from '@mui/material/IconButton';
 import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
 
-function SalaryTemplateList() {
+function SalaryTemplateList({ handleBack, handleNext }) {
   const [salaryTemplates, setSalaryTemplates] = useState([]);
   const [payrollid, setPayrollId] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
@@ -98,14 +98,18 @@ function SalaryTemplateList() {
         </Stack>
       }
     >
-      <Grid2 container spacing={3}>
+      <Grid2 container>
         <Grid2 size={{ xs: 12 }}>
           <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 1 }}>
             <Table size="small">
-              <TableHead>
-                <TableRow sx={{ bgcolor: 'grey.100' }}>
+              <TableHead sx={{ backgroundColor: 'primary.main' }}>
+                <TableRow>
                   {['S.No', 'Template Name', 'Description', 'Status', 'Actions'].map((header, idx) => (
-                    <TableCell key={idx} align={idx === 4 ? 'center' : 'left'} sx={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>
+                    <TableCell
+                      key={idx}
+                      align={idx === 4 ? 'center' : 'left'}
+                      sx={{ fontWeight: 'bold', whiteSpace: 'nowrap', color: '#fff !important' }}
+                    >
                       {header}
                     </TableCell>
                   ))}
@@ -127,10 +131,10 @@ function SalaryTemplateList() {
                       <TableCell align="left">{template.status === true ? 'Active' : 'Inactive'}</TableCell>
                       <TableCell align="center">
                         <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
-                          <IconButton color="primary" onClick={() => handleEdit(template)}>
+                          <IconButton size="small" color="primary" onClick={() => handleEdit(template)}>
                             <Edit />
                           </IconButton>
-                          <IconButton color="error" onClick={() => handleOpenDeleteDialog(template)}>
+                          <IconButton size="small" color="error" onClick={() => handleOpenDeleteDialog(template)}>
                             <Delete />
                           </IconButton>
                         </Box>
@@ -151,26 +155,33 @@ function SalaryTemplateList() {
               }}
             />
           </TableContainer>
-          {salaryTemplates.length > rowsPerPage && (
+          {salaryTemplates.length > 0 && (
             <Grid2 size={{ xs: 12 }}>
-              <Stack direction="row" justifyContent="center" alignItems="center" sx={{ mt: 2, width: '100%' }}>
+              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mt: 2, width: '100%' }}>
+                <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigate('/app/payroll')}>
+                  Back to Dashboard
+                </Button>
                 <Pagination
                   count={Math.ceil(salaryTemplates.length / rowsPerPage)}
                   page={currentPage}
                   onChange={(e, value) => setCurrentPage(value)}
                   color="primary"
                 />
+                <Stack direction="row" spacing={2}>
+                  <Button size="small" variant="outlined" startIcon={<ArrowBackIcon />} onClick={handleBack}>
+                    Back
+                  </Button>
+                  <Button size="small" variant="contained" onClick={handleNext}>
+                    Next
+                  </Button>
+                </Stack>
               </Stack>
             </Grid2>
           )}
         </Grid2>
       </Grid2>
       <Grid2 size={{ xs: 12 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
-          <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigate(-1)}>
-            Back to Dashboard
-          </Button>
-        </Box>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}></Box>
       </Grid2>
     </MainCard>
   );

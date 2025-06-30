@@ -159,10 +159,8 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
   });
   const renderFields = (fields) => {
     return fields.map((field) => (
-      <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4 }}>
-        <Typography variant="subtitle2" sx={{ color: 'grey.800', mb: 0.5 }}>
-          {field.label}
-        </Typography>
+      <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+        <Typography variant="subtitle1">{field.label}</Typography>
         {field.name === 'gender' || field.name === 'work_location' || field.name === 'designation' || field.name === 'department' ? (
           <CustomAutocomplete
             value={
@@ -205,7 +203,7 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
             }
             error={touched[field.name] && Boolean(errors[field.name])}
             helperText={touched[field.name] && errors[field.name]}
-            sx={{ width: '100%' }}
+            sx={{ width: '100%', '& .MuiInputBase-input': { color: 'grey.600' } }}
             {...(field.name === 'work_location'
               ? { getOptionLabel: (option) => option?.location_name || '' }
               : field.name === 'designation'

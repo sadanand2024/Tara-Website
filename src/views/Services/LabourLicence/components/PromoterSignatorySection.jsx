@@ -54,7 +54,7 @@ const PromoterSignatorySection = ({ taskId }) => {
           address: item.address || '',
           email: item.email || '',
           mobile_number: item.mobile_number || '',
-          residential_address: item.residential_address === 'yes',
+          residential_address: item.residential_address === true,
           id: item.id || ''
         })) || [];
 
@@ -132,7 +132,7 @@ const PromoterSignatorySection = ({ taskId }) => {
         formData.append('email', promoter.email);
         formData.append('mobile_number', promoter.mobile_number);
         formData.append('address', promoter.address);
-        formData.append('residential_address', promoter.residential_address ? 'yes' : 'no');
+        formData.append('residential_address', promoter.residential_address ? 'true' : 'false');
         formData.append('status', 'in progress');
 
         let url = promoter.id ? `/labourlicense/signatory-details/${promoter.id}/` : `/labourlicense/signatory-details/`;

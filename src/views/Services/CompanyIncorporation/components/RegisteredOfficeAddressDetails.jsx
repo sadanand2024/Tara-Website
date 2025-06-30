@@ -63,7 +63,7 @@ const RegisteredOfficeAddressDetails = ({taskId}) => {
       type: 'file'
     },
     {
-      label: 'NOC_file',
+      label: 'NOC File',
       name: 'NOC_file',
       type: 'file'
     },
@@ -103,7 +103,9 @@ const RegisteredOfficeAddressDetails = ({taskId}) => {
       city: Yup.string().required('City is required'),
       district: Yup.mixed().required('District is required'),
       state: Yup.string().required('State is required'),
-      pincode: Yup.string().required('Pincode is required'),
+      pincode: Yup.string()
+                .matches(/^[1-9][0-9]{5}$/, 'Pincode must be exactly 6 digits')
+                .required('Pincode is required'),
       utility_bill_file: Yup.string().required('Utility Bill is required')
     }),
     onSubmit: async (values) => {
@@ -212,21 +214,44 @@ const RegisteredOfficeAddressDetails = ({taskId}) => {
                 onChange={handleChange}
                 error={touched[field.name] && Boolean(errors[field.name])}
                 helperText={touched[field.name] && errors[field.name]}
+                 sx={{
+                 width: '100%',
+                 '& .MuiInputBase-input': {
+                 color: 'grey.600'
+              }
+            }}
               />
             )}
           />
         );
       case 'text':
+        // Only allow numeric input for pincode
+        const isPincodeField = field.name === 'pincode';
         return (
           <TextField
             fullWidth
             size="small"
             name={field.name}
             value={values[field.name]}
-            onChange={handleChange}
+            onChange={e => {
+              if (isPincodeField) {
+                let onlyNums = e.target.value.replace(/[^0-9]/g, '');
+                onlyNums = onlyNums.slice(0, 6);
+                setFieldValue(field.name, onlyNums);
+              } else {
+                handleChange(e);
+              }
+            }}
             error={touched[field.name] && Boolean(errors[field.name])}
             helperText={touched[field.name] && errors[field.name]}
             onBlur={handleBlur}
+            inputProps={isPincodeField ? { inputMode: 'numeric', pattern: '[0-9]*', maxLength: 6 } : {}}
+             sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+              color: 'grey.600'
+              }
+            }}
           />
         );
       case 'file':
@@ -239,6 +264,12 @@ const RegisteredOfficeAddressDetails = ({taskId}) => {
               setFieldValue={setFieldValue}
               touched={touched[field.name]}
               errors={errors[field.name]}
+               sx={{
+               width: '100%',
+              '& .MuiInputBase-input': {
+               color: 'grey.600'
+              }
+            }}
             />
           </>
         );
@@ -279,8 +310,8 @@ const RegisteredOfficeAddressDetails = ({taskId}) => {
             />
           </Box>
         </Box>
-        <Grid2 ml={51}>
-          <Typography variant="subtitle1" color="text.secondary" fontWeight={700} mt={2}>
+        <Grid2 ml={50}>
+          <Typography variant="subtitle1" mt={2}>
             Address Of Proposed Registered Office
           </Typography>
         </Grid2>
@@ -288,7 +319,7 @@ const RegisteredOfficeAddressDetails = ({taskId}) => {
           <Grid2 container spacing={2}>
             {fields.map((field) => (
               <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4 }}>
-                <Typography color="text.secondary" fontWeight={500} mb={1}>
+                <Typography variant='subtitle1' mb={1}>
                   {field.label}
                 </Typography>
                 {renderField(field)}
@@ -297,7 +328,7 @@ const RegisteredOfficeAddressDetails = ({taskId}) => {
           </Grid2>
 
           <Grid2 size={12}>
-            <Stack direction="row" spacing={2} justifyContent="flex-end" mt={3}>
+            <Stack direction="row" spacing={1} justifyContent="flex-end" mt={3}>
               <Button variant="contained" color="primary" type="submit">
                  Save
               </Button>

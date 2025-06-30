@@ -291,10 +291,11 @@ function EpfComponent({ handleNext }) {
                     <Grid2 size={12}>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
                         <Button
+                          size="small"
                           variant="outlined"
                           startIcon={<ArrowBackIcon />}
                           onClick={() => {
-                            navigate(-1);
+                            navigate('/app/payroll');
                           }}
                         >
                           Back to Dashboard

@@ -28,7 +28,7 @@ export const quickaccessCards = [
 export const ServicesData = [
   {
     id: 1,
-    title: 'Employees on Your Rolls',
+    title: 'Employees on Your Payroll',
     key: 'total_employees'
   },
 

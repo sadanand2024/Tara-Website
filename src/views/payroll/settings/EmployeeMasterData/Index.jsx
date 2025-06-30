@@ -28,7 +28,7 @@ import { IconButton } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
 import DeleteDialog from 'ui-component/extended/DeleteDialog';
 import EmployeeBulkUploadDialog from 'ui-component/extended/EmployeeBulkUploadDialog';
-function EmployeeList() {
+function EmployeeList({ handleBack, handleNext }) {
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(false);
   const [payrollId, setPayrollId] = useState(null);
@@ -152,85 +152,97 @@ function EmployeeList() {
             // csvTemplateUrl="/payroll/download-template/csv?type=employee"
           />
           <Grid2 container spacing={2}>
-            <Grid2 size={{ xs: 12 }}>
-              <TableContainer component={Paper}>
-                <Table size="small">
-                  <TableHead>
-                    <TableRow sx={{ bgcolor: 'grey.100' }}>
-                      {['S.No', 'Employee ID', 'Employee Name', 'Department', 'Designation', 'Email', 'Status', 'Actions'].map(
-                        (header, idx) => (
-                          <TableCell key={idx} sx={{ whiteSpace: 'nowrap', fontWeight: 'bold', textAlign: 'center' }}>
-                            {header}
-                          </TableCell>
-                        )
-                      )}
+            <TableContainer
+              component={Paper}
+              sx={{
+                width: '100%',
+                borderRadius: 2,
+                boxShadow: 1,
+                overflowX: 'auto'
+              }}
+            >
+              <Table size="small">
+                <TableHead sx={{ backgroundColor: 'primary.main' }}>
+                  <TableRow>
+                    {['S.No', 'Employee ID', 'Employee Name', 'Department', 'Designation', 'Email', 'Status', 'Actions'].map(
+                      (header, idx) => (
+                        <TableCell
+                          key={idx}
+                          sx={{ whiteSpace: 'nowrap', fontWeight: 'bold', textAlign: 'center', color: '#fff !important' }}
+                        >
+                          {header}
+                        </TableCell>
+                      )
+                    )}
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {paginatedEmployees.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} align="center" sx={{ height: 300 }}>
+                        <EmptyDataPlaceholder title="No Data Found" subtitle="Start Adding data." />
+                      </TableCell>
                     </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {paginatedEmployees.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={7} align="center" sx={{ height: 300 }}>
-                          <EmptyDataPlaceholder title="No Data Found" subtitle="Start Adding data." />
+                  ) : (
+                    paginatedEmployees.map((employee, index) => (
+                      <TableRow key={employee.id} hover sx={{ '&:nth-of-type(odd)': { backgroundColor: 'grey.50' } }}>
+                        <TableCell align="center">{(currentPage - 1) * rowsPerPage + index + 1}</TableCell>
+                        <TableCell align="center">{employee.associate_id}</TableCell>
+                        <TableCell align="center">{`${employee.first_name || ''} ${employee.last_name || ''}`}</TableCell>
+                        <TableCell align="center">{employee.department_name || '-'}</TableCell>
+                        <TableCell align="center">{employee.designation_name || '-'}</TableCell>
+                        <TableCell align="center">{employee.work_email || '-'}</TableCell>
+                        <TableCell align="center">{employee.employee_status ? 'Active' : 'Inactive'}</TableCell>
+                        <TableCell align="center">
+                          <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
+                            <IconButton size="small" color="primary" onClick={() => handleEdit(employee)}>
+                              <Edit />
+                            </IconButton>
+                            <IconButton size="small" color="error" onClick={() => handleOpenDeleteDialog(employee)}>
+                              <Delete />
+                            </IconButton>
+                          </Box>
                         </TableCell>
                       </TableRow>
-                    ) : (
-                      paginatedEmployees.map((employee, index) => (
-                        <TableRow key={employee.id} hover sx={{ '&:nth-of-type(odd)': { backgroundColor: 'grey.50' } }}>
-                          <TableCell align="center">{(currentPage - 1) * rowsPerPage + index + 1}</TableCell>
-                          <TableCell align="center">{employee.associate_id}</TableCell>
-                          <TableCell align="center">{`${employee.first_name || ''} ${employee.last_name || ''}`}</TableCell>
-                          <TableCell align="center">{employee.department_name || '-'}</TableCell>
-                          <TableCell align="center">{employee.designation_name || '-'}</TableCell>
-                          <TableCell align="center">{employee.work_email || '-'}</TableCell>
-                          <TableCell align="center">{employee.employee_status ? 'Active' : 'Inactive'}</TableCell>
-                          <TableCell align="center">
-                            <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
-                              <IconButton color="primary" onClick={() => handleEdit(employee)}>
-                                <Edit />
-                              </IconButton>
-                              <IconButton color="error" onClick={() => handleOpenDeleteDialog(employee)}>
-                                <Delete />
-                              </IconButton>
-                            </Box>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-                <DeleteDialog
-                  open={openDeleteDialog}
-                  onClose={() => setOpenDeleteDialog(false)}
-                  onConfirm={handleConfirmDelete}
-                  dialogData={{
-                    title: 'Delete Record',
-                    heading: 'Are you sure you want to delete this Record?',
-                    description: 'This action will permanently delete the record.'
-                  }}
-                />
-              </TableContainer>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+              <DeleteDialog
+                open={openDeleteDialog}
+                onClose={() => setOpenDeleteDialog(false)}
+                onConfirm={handleConfirmDelete}
+                dialogData={{
+                  title: 'Delete Record',
+                  heading: 'Are you sure you want to delete this Record?',
+                  description: 'This action will permanently delete the record.'
+                }}
+              />
+            </TableContainer>
 
-              {employees.length > 0 && (
-                <Grid2 size={{ xs: 12 }}>
-                  <Stack direction="row" justifyContent="center" alignItems="center" sx={{ mt: 2, width: '100%' }}>
-                    <Pagination
-                      count={Math.ceil(employees.length / rowsPerPage)}
-                      page={currentPage}
-                      onChange={(e, value) => setCurrentPage(value)}
-                      color="primary"
-                    />
+            {employees.length > 0 && (
+              <Grid2 size={{ xs: 12 }}>
+                <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mt: 2, width: '100%' }}>
+                  <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigate('/app/payroll')}>
+                    Back to Dashboard
+                  </Button>
+                  <Pagination
+                    count={Math.ceil(employees.length / rowsPerPage)}
+                    page={currentPage}
+                    onChange={(e, value) => setCurrentPage(value)}
+                    color="primary"
+                  />
+                  <Stack direction="row" spacing={2}>
+                    <Button size="small" variant="outlined" startIcon={<ArrowBackIcon />} onClick={handleBack}>
+                      Back
+                    </Button>
+                    <Button size="small" variant="contained" onClick={handleNext}>
+                      Next
+                    </Button>
                   </Stack>
-                </Grid2>
-              )}
-            </Grid2>
-
-            <Grid2 size={{ xs: 12 }}>
-              <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between' }}>
-                <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigate(-1)}>
-                  Back to Dashboard
-                </Button>
-              </Box>
-            </Grid2>
+                </Stack>
+              </Grid2>
+            )}
           </Grid2>
         </MainCard>
       )}
