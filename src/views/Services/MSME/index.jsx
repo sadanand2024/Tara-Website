@@ -64,9 +64,9 @@ const businessIdentityInitialValues = {
   aadhar_of_signatory: '',
   mobile_number: '',
   email_id: '',
-  Are_you_previously_registered_UAM: 'yes',
+  Are_you_previously_registered_UAM: true,
   UAM_number: '',
-  has_business_commenced: 'yes',
+  has_business_commenced: true,
   date_of_commencement: ''
 };
 
@@ -164,9 +164,11 @@ const MSMEDashboard = () => {
       aadhar_of_signatory: Yup.mixed().required('Required'),
       mobile_number: Yup.string().required('Required'),
       email_id: Yup.string().email('Invalid email_id').required('Required'),
-      Are_you_previously_registered_UAM: Yup.string().required('Required'),
-      has_business_commenced: Yup.string().required('Required')
-    }),
+Are_you_previously_registered_UAM: Yup.boolean()
+  .required('Required'),
+
+has_business_commenced: Yup.boolean()
+  .required('Required'),    }),
     onSubmit: async (values) => {
       let url = '/msme/business-identity/';
       let type = 'post';
@@ -184,7 +186,8 @@ const MSMEDashboard = () => {
           if (value instanceof File) {
             formData.append(key, value);
           }
-        } else if (value !== null && value !== undefined && !(value instanceof File)) {
+        }
+          else if (value !== null && value !== undefined && !(value instanceof File)) {
           formData.append(key, value);
         }
       });
@@ -301,10 +304,13 @@ const MSMEDashboard = () => {
         type = 'put';
       }
       const formData = new FormData();
-      formData.append('service_request', service_id);
-      formData.append('service_task', sectionData.tasks['Registered Address'].task_id);
+      // formData.append('service_request', service_id);
+      // formData.append('service_task', sectionData.tasks['Registered Address'].task_id);
 
       Object.entries(values).forEach(([key, value]) => {
+         if (key === 'location_of_plant_or_unit' || key === 'location_of_plant') {
+    return; // ✅ Skip sending this field
+  }
         if (key === 'status') {
           formData.append(key, 'in progress');
         } else if (key === 'official_address_of_enterprise') {
@@ -313,7 +319,11 @@ const MSMEDashboard = () => {
           if (value instanceof File) {
             formData.append(key, value);
           }
-        } else if (value !== null && value !== undefined && !(value instanceof File)) {
+        }
+  //        else if (typeof value === 'boolean') {
+  //   formData.append(key, value ? 'true' : 'false');
+  // } 
+    else if (value !== null && value !== undefined && !(value instanceof File)) {
           formData.append(key, value);
         }
       });
@@ -440,7 +450,7 @@ const MSMEDashboard = () => {
                 {/* 1. Organisation type */}
                 <Grid2 size={{ xs: 12, sm: 6, md: 3 }} display="flex" alignItems="center">
                   <Typography
-                    varient="subtitle1"
+                    variant="subtitle1"
                     sx={{
                       color:
                         businessIdentityFormik.errors.organisation_type && businessIdentityFormik.touched.organisation_type
@@ -461,6 +471,12 @@ const MSMEDashboard = () => {
                     onChange={(e, value) => businessIdentityFormik?.setFieldValue('organisation_type', value)}
                     renderInput={(params) => (
                       <TextField
+                      sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                         {...params}
                         label="Organisation Type"
                         error={businessIdentityFormik?.errors?.organisation_type && businessIdentityFormik?.touched?.organisation_type}
@@ -473,7 +489,7 @@ const MSMEDashboard = () => {
                 {/* 2. Business Name */}
                 <Grid2 size={{ xs: 12, sm: 6, md: 3 }} display="flex" alignItems="center">
                   <Typography
-                    varient="subtitle1"
+                    variant="subtitle1"
                     sx={{
                       color: businessIdentityFormik.errors.business_name && businessIdentityFormik.touched.business_name ? 'red' : 'inherit'
                     }}
@@ -484,6 +500,12 @@ const MSMEDashboard = () => {
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                   <TextField
+                  sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                     fullWidth
                     size="small"
                     value={businessIdentityFormik?.values?.business_name}
@@ -496,7 +518,7 @@ const MSMEDashboard = () => {
                 {/* 3. PAN of Business & COI */}
                 <Grid2 size={{ xs: 12, sm: 6, md: 3 }} display="flex" alignItems="center">
                   <Typography
-                    varient="subtitle1"
+                    variant="subtitle1"
                     sx={{
                       color:
                         businessIdentityFormik?.errors?.pan_of_business_or_COI && businessIdentityFormik?.touched?.pan_of_business_or_COI
@@ -546,7 +568,7 @@ const MSMEDashboard = () => {
                 {/* 4. Aadhaar of authorized signatory */}
                 <Grid2 size={{ xs: 12, sm: 6, md: 3 }} display="flex" alignItems="center">
                   <Typography
-                    varient="subtitle1"
+                    variant="subtitle1"
                     sx={{
                       color:
                         businessIdentityFormik.errors.pan_of_business_or_COI && businessIdentityFormik.touched.pan_of_business_or_COI
@@ -594,7 +616,7 @@ const MSMEDashboard = () => {
                 {/* 5. Mobile Number */}
                 <Grid2 size={{ xs: 12, sm: 6, md: 3 }} display="flex" alignItems="center">
                   <Typography
-                    varient="subtitle1"
+                    variant="subtitle1"
                     sx={{
                       color:
                         businessIdentityFormik?.errors?.mobile_number && businessIdentityFormik?.touched?.mobile_number ? 'red' : 'inherit'
@@ -606,6 +628,12 @@ const MSMEDashboard = () => {
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                   <TextField
+                  sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                     fullWidth
                     size="small"
                     value={businessIdentityFormik?.values?.mobile_number}
@@ -618,7 +646,7 @@ const MSMEDashboard = () => {
                 {/* 6. Email ID */}
                 <Grid2 size={{ xs: 12, sm: 6, md: 3 }} display="flex" alignItems="center">
                   <Typography
-                    varient="subtitle1"
+                    variant="subtitle1"
                     sx={{
                       color: businessIdentityFormik?.errors?.email_id && businessIdentityFormik?.touched?.email_id ? 'red' : 'inherit'
                     }}
@@ -629,6 +657,12 @@ const MSMEDashboard = () => {
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                   <TextField
+                  sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                     fullWidth
                     size="small"
                     value={businessIdentityFormik?.values?.email_id}
@@ -640,21 +674,34 @@ const MSMEDashboard = () => {
                 </Grid2>
                 {/* 7. UAM Registered */}
                 <Grid2 size={{ xs: 12, sm: 6, md: 5 }} display="flex" alignItems="center">
-                  <Typography varient="subtitle1">Are you previously registered under Udyog Aadhaar? (UAM)</Typography>
+                  <Typography variant="subtitle1">Are you previously registered under Udyog Aadhaar? (UAM)</Typography>
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 7 }}>
                   <Stack direction="row" alignItems="center" spacing={2}>
-                    <RadioGroup
-                      row
-                      value={businessIdentityFormik?.values?.Are_you_previously_registered_UAM}
-                      sx={{ width: '40%' }}
-                      onChange={(e) => businessIdentityFormik?.setFieldValue('Are_you_previously_registered_UAM', e.target.value)}
-                    >
-                      <FormControlLabel value="yes" control={<Radio color="primary" />} label="Yes" />
-                      <FormControlLabel value="no" control={<Radio color="primary" />} label="No" />
-                    </RadioGroup>
-                    {businessIdentityFormik?.values?.Are_you_previously_registered_UAM === 'yes' && (
+                     <RadioGroup
+      row
+      value={businessIdentityFormik?.values?.Are_you_previously_registered_UAM}
+      sx={{ width: '40%' }}
+      onChange={(e) => {
+        const isRegistered = e.target.value === 'true';
+        businessIdentityFormik?.setFieldValue('Are_you_previously_registered_UAM', isRegistered);
+
+        if (!isRegistered) {
+          businessIdentityFormik?.setFieldValue('UAM_number', '');
+        }
+      }}
+    >
+      <FormControlLabel value="true" control={<Radio color="primary" />} label="Yes" />
+      <FormControlLabel value="false" control={<Radio color="primary" />} label="No" />
+    </RadioGroup>
+                    {businessIdentityFormik?.values?.Are_you_previously_registered_UAM === true && (
                       <TextField
+                      sx={{
+                    width: '100%',
+                   '& .MuiInputBase-input': {
+                    color: 'grey.600'
+              }
+            }}
                         size="small"
                         fullWidth
                         value={businessIdentityFormik?.values?.UAM_number}
@@ -666,21 +713,34 @@ const MSMEDashboard = () => {
                 </Grid2>
                 {/* 8. Business Commenced */}
                 <Grid2 size={{ xs: 12, sm: 6, md: 5 }} gap={2} display="flex" alignItems="center">
-                  <Typography varient="subtitle1">Has Business Commenced?</Typography>
-                  <RadioGroup
-                    row
-                    value={businessIdentityFormik?.values?.has_business_commenced}
-                    sx={{ width: '40%' }}
-                    onChange={(e) => businessIdentityFormik?.setFieldValue('has_business_commenced', e.target.value)}
-                  >
-                    <FormControlLabel value="yes" control={<Radio color="primary" />} label="Yes" />
-                    <FormControlLabel value="no" control={<Radio color="primary" />} label="No" />
+                  <Typography variant="subtitle1">Has Business Commenced?</Typography>
+                   <RadioGroup
+    row
+    value={businessIdentityFormik?.values?.has_business_commenced}
+    sx={{ width: '40%' }}
+    onChange={(e) => {
+      const hasCommenced = e.target.value === 'true';
+      businessIdentityFormik?.setFieldValue('has_business_commenced', hasCommenced);
+
+      if (!hasCommenced) {
+        businessIdentityFormik?.setFieldValue('date_of_commencement', '');
+      }
+    }}
+  >
+                    <FormControlLabel value="true" control={<Radio color="primary" />} label="Yes" />
+                    <FormControlLabel value="false" control={<Radio color="primary" />} label="No" />
                   </RadioGroup>
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 7 }}>
                   <Stack direction="row" alignItems="center" spacing={2}>
-                    {businessIdentityFormik.values.has_business_commenced === 'yes' && (
+                    {businessIdentityFormik.values.has_business_commenced === true && (
                       <TextField
+                      sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                         size="small"
                         fullWidth
                         value={businessIdentityFormik?.values?.date_of_commencement}
@@ -738,7 +798,7 @@ const MSMEDashboard = () => {
               <Grid2 container spacing={2}>
                 {/* 1. Major Activity */}
                 <Grid2 size={{ xs: 12, sm: 6, md: 4 }} display="flex" alignItems="center">
-                  <Typography varient="subtitle1">Major Activity</Typography>
+                  <Typography variant="subtitle1">Major Activity</Typography>
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 8 }}>
                   <RadioGroup
@@ -746,16 +806,22 @@ const MSMEDashboard = () => {
                     value={businessClassificationFormik.values.major_activity}
                     onChange={(e) => businessClassificationFormik.setFieldValue('major_activity', e.target.value)}
                   >
-                    <FormControlLabel value="MANUFACTURING" control={<Radio color="primary" />} label="Manufacturing" />
-                    <FormControlLabel value="SERVICE" control={<Radio color="primary" />} label="Service" />
+                    <FormControlLabel value="Manufacturing" control={<Radio color="primary" />} label="Manufacturing" />
+                    <FormControlLabel value="Service" control={<Radio color="primary" />} label="Service" />
                   </RadioGroup>
                 </Grid2>
                 {/* 2. Nature of Business */}
                 <Grid2 size={{ xs: 12, sm: 6, md: 4 }} display="flex" alignItems="center">
-                  <Typography varient="subtitle1">Nature of Business</Typography>
+                  <Typography variant="subtitle1">Nature of Business</Typography>
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 8 }}>
                   <TextField
+                  sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                     fullWidth
                     size="small"
                     onChange={(e) => businessClassificationFormik.setFieldValue('nature_of_business', e.target.value)}
@@ -764,7 +830,7 @@ const MSMEDashboard = () => {
                 </Grid2>
                 {/* 3. NIC Codes */}
                 <Grid2 size={{ xs: 12, sm: 6, md: 4 }} display="flex" alignItems="center">
-                  <Typography varient="subtitle1">NIC Codes</Typography>
+                  <Typography variant="subtitle1">NIC Codes</Typography>
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 8 }}>
                   <Stack direction="row" spacing={2}>
@@ -802,12 +868,18 @@ const MSMEDashboard = () => {
                 </Grid2>
                 {/* 4. Number of persons employed */}
                 <Grid2 size={{ xs: 12, sm: 6, md: 4 }} display="flex" alignItems="center">
-                  <Typography varient="subtitle1">Number of persons employed</Typography>
+                  <Typography variant="subtitle1">Number of persons employed</Typography>
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 8 }}>
                   <Stack direction="row" spacing={2}>
                     <Grid2 size={{ xs: 3 }}>
                       <TextField
+                      sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                         size="small"
                         label="Male"
                         fullWidth
@@ -828,6 +900,12 @@ const MSMEDashboard = () => {
                     </Grid2>
                     <Grid2 size={{ xs: 3 }}>
                       <TextField
+                      sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                         size="small"
                         label="Female"
                         fullWidth
@@ -848,6 +926,12 @@ const MSMEDashboard = () => {
                     </Grid2>
                     <Grid2 size={{ xs: 3 }}>
                       <TextField
+                      sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                         size="small"
                         label="Others"
                         fullWidth
@@ -868,6 +952,12 @@ const MSMEDashboard = () => {
                     </Grid2>
                     <Grid2 size={{ xs: 3 }}>
                       <TextField
+                      sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                         size="small"
                         label="Total"
                         fullWidth
@@ -1330,14 +1420,18 @@ const FinancialLocationDetails = ({
         <Grid2 container spacing={2} mb={2}>
           {/* Turnover in INR */}
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }} display="flex" alignItems="center">
-            <Typography varient="subtitle1">Turnover in INR</Typography>
+            <Typography variant="subtitle1">Turnover in INR</Typography>
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 6, md: 8 }}>
             <Stack direction="row" spacing={2}>
               <TextField
                 size="small"
                 label="Total Annual Turnover"
-                sx={{ minWidth: 160 }}
+                sx={{ minWidth: 160, width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                 name="totalTurnover"
                 value={turnoverFormik.values.turnover_in_inr.totalTurnover}
                 onChange={(e) => {
@@ -1347,7 +1441,12 @@ const FinancialLocationDetails = ({
               <TextField
                 size="small"
                 label="Export Turnover"
-                sx={{ minWidth: 160 }}
+                sx={{ minWidth: 160,
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                 name="exportTurnover"
                 value={turnoverFormik.values.turnover_in_inr.exportTurnover}
                 onChange={(e) => {
@@ -1357,7 +1456,13 @@ const FinancialLocationDetails = ({
               <TextField
                 size="small"
                 label="Net Domestic Turnover"
-                sx={{ minWidth: 180 }}
+                sx={{ minWidth: 180,
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
+                 
                 name="domesticTurnover"
                 value={turnoverFormik.values.turnover_in_inr.domesticTurnover}
                 onChange={(e) => {
@@ -1368,10 +1473,16 @@ const FinancialLocationDetails = ({
           </Grid2>
           {/* Investment in Plant & Machinery */}
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }} display="flex" alignItems="center">
-            <Typography varient="subtitle1">Investment in Plant & Machinery</Typography>
+            <Typography variant="subtitle1">Investment in Plant & Machinery</Typography>
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 6, md: 8 }}>
             <TextField
+              sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
               fullWidth
               size="small"
               name="investment_in_plant_and_machinery"
@@ -1383,22 +1494,29 @@ const FinancialLocationDetails = ({
           </Grid2>
           {/* ITR for previous year */}
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }} display="flex" alignItems="center">
-            <Typography varient="subtitle1">Have you filed ITR for previous year?</Typography>
+            <Typography variant="subtitle1">Have you filed ITR for previous year?</Typography>
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 6, md: 8 }}>
             <RadioGroup
               row
               name="have_you_filed_itr_previous_year"
-              value={turnoverFormik.values.have_you_filed_itr_previous_year}
-              onChange={turnoverFormik.handleChange}
+              //  value={turnoverFormik.values.have_you_filed_itr_previous_year}
+              //   onChange={turnoverFormik.handleChange}
+              value={String(turnoverFormik.values.have_you_filed_itr_previous_year)}
+    onChange={(e) =>
+      turnoverFormik.setFieldValue(
+        'have_you_filed_itr_previous_year',
+        e.target.value === 'true'
+      )
+    }
             >
-              <FormControlLabel value="yes" control={<Radio color="primary" />} label="Yes" />
-              <FormControlLabel value="no" control={<Radio color="primary" />} label="No" />
+              <FormControlLabel value="true" control={<Radio color="primary" />} label="Yes" />
+              <FormControlLabel value="false" control={<Radio color="primary" />} label="No" />
             </RadioGroup>
           </Grid2>
           {/* Registered under GST */}
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }} display="flex" alignItems="center">
-            <Typography varient="subtitle1">Are you registered under GST?</Typography>
+            <Typography variant="subtitle1">Are you registered under GST?</Typography>
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
             <Stack direction="row" spacing={2}>
@@ -1494,12 +1612,18 @@ const FinancialLocationDetails = ({
         <Grid2 container spacing={2} mb={2}>
           {/* Official address of enterprise */}
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }} display="flex" alignItems="center">
-            <Typography varient="subtitle1">Official address of enterprise</Typography>
+            <Typography variant="subtitle1">Official address of enterprise</Typography>
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 6, md: 8 }}>
             <Grid2 container spacing={2}>
               <Grid2 size={{ xs: 12, md: 6 }}>
                 <TextField
+                sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                   fullWidth
                   size="small"
                   label="Flat/Door/Block No"
@@ -1512,6 +1636,12 @@ const FinancialLocationDetails = ({
               </Grid2>
               <Grid2 size={{ xs: 12, md: 6 }}>
                 <TextField
+                sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                   fullWidth
                   size="small"
                   label="Name of Premise/Building"
@@ -1524,6 +1654,12 @@ const FinancialLocationDetails = ({
               </Grid2>
               <Grid2 size={{ xs: 12, md: 4 }}>
                 <TextField
+                sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                   fullWidth
                   size="small"
                   label="Road/Street/Lane"
@@ -1536,6 +1672,12 @@ const FinancialLocationDetails = ({
               </Grid2>
               <Grid2 size={{ xs: 12, md: 4 }}>
                 <TextField
+                sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                   fullWidth
                   size="small"
                   label="Village/Town"
@@ -1548,6 +1690,12 @@ const FinancialLocationDetails = ({
               </Grid2>
               <Grid2 size={{ xs: 12, md: 4 }}>
                 <TextField
+                sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                   fullWidth
                   size="small"
                   label="City"
@@ -1560,6 +1708,12 @@ const FinancialLocationDetails = ({
               </Grid2>
               <Grid2 size={{ xs: 12, md: 4 }}>
                 <TextField
+                sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                   fullWidth
                   size="small"
                   label="District"
@@ -1572,6 +1726,12 @@ const FinancialLocationDetails = ({
               </Grid2>
               <Grid2 size={{ xs: 12, md: 4 }}>
                 <TextField
+                sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                   fullWidth
                   size="small"
                   label="State"
@@ -1584,6 +1744,12 @@ const FinancialLocationDetails = ({
               </Grid2>
               <Grid2 size={{ xs: 12, md: 4 }}>
                 <TextField
+                sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                   fullWidth
                   size="small"
                   label="Pin Code"
@@ -1596,6 +1762,12 @@ const FinancialLocationDetails = ({
               </Grid2>
               <Grid2 size={{ xs: 12, md: 4 }}>
                 <TextField
+                sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                   fullWidth
                   size="small"
                   label="Latitude"
@@ -1608,6 +1780,12 @@ const FinancialLocationDetails = ({
               </Grid2>
               <Grid2 size={{ xs: 12, md: 4 }}>
                 <TextField
+                sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                   fullWidth
                   size="small"
                   label="Longitude"
@@ -1622,7 +1800,7 @@ const FinancialLocationDetails = ({
           </Grid2>
           {/* Bank statement/Cancelled Cheque */}
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }} display="flex" alignItems="center">
-            <Typography varient="subtitle1">Bank statement/Cancelled Cheque</Typography>
+            <Typography variant="subtitle1">Bank statement/Cancelled Cheque</Typography>
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 6, md: 8 }}>
             <Button size="small" variant="contained" color="primary" component="label">
@@ -1657,7 +1835,7 @@ const FinancialLocationDetails = ({
           </Grid2>
           {/* Official address proof */}
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }} display="flex" alignItems="center">
-            <Typography varient="subtitle1">Official address proof (Rental agreement/Utility bill)</Typography>
+            <Typography variant="subtitle1">Official address proof (Rental agreement/Utility bill)</Typography>
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 6, md: 8 }}>
             <Button size="small" variant="contained" color="primary" component="label">
@@ -1706,7 +1884,9 @@ const FinancialLocationDetails = ({
             control={
               <Checkbox
                 size="small"
-                checked={registeredAddressUnitsData?.location_of_plant === 'yes'}
+                checked={registeredAddressUnitsData?.location_of_plant === true
+
+                }
                 onChange={async (e) => {
                   let url = '/msme/registration-address-details/';
                   let type = 'post';
@@ -1718,7 +1898,8 @@ const FinancialLocationDetails = ({
                   formData.append('service_request', service_id);
                   formData.append('service_task', sectionData.tasks['Registered Address'].task_id);
                   formData.append('status', 'in progress');
-                  formData.append('location_of_plant', e.target.checked ? 'yes' : 'no');
+                  formData.append('location_of_plant', e.target.checked ? 'true' : 'false');
+
                   const response = await Factory(type, url, formData);
                   if (response.res.status_cd === 0) {
                     setRegisteredAddressUnitsData(response.res.data);
@@ -1730,7 +1911,7 @@ const FinancialLocationDetails = ({
           />
         </Stack>
 
-        {registeredAddressUnitsData?.location_of_plant === 'yes' &&
+        {(registeredAddressUnitsData?.location_of_plant === true || registeredAddressUnitsData?.location_of_plant === 'true') &&
           plantUnits.map((unit, idx) => (
             <Box key={idx} sx={{ border: '1px solid #e0e0e0', borderRadius: 2, p: 2, mb: 2, bgcolor: '#f8fafc' }}>
               <Typography variant="subtitle1" mb={2}>
@@ -1739,6 +1920,12 @@ const FinancialLocationDetails = ({
               <Grid2 container spacing={2}>
                 <Grid2 size={{ xs: 12, md: 4 }}>
                   <TextField
+                  sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                     fullWidth
                     size="small"
                     label="Unit Name"
@@ -1753,6 +1940,12 @@ const FinancialLocationDetails = ({
                 </Grid2>
                 <Grid2 size={{ xs: 12, md: 4 }}>
                   <TextField
+                  sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                     fullWidth
                     size="small"
                     label="Flat/Door/Block No"
@@ -1767,6 +1960,12 @@ const FinancialLocationDetails = ({
                 </Grid2>
                 <Grid2 size={{ xs: 12, md: 4 }}>
                   <TextField
+                  sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                     fullWidth
                     size="small"
                     label="Name of Premise/Building"
@@ -1781,6 +1980,12 @@ const FinancialLocationDetails = ({
                 </Grid2>
                 <Grid2 size={{ xs: 12, md: 4 }}>
                   <TextField
+                  sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                     fullWidth
                     size="small"
                     label="Village/Town"
@@ -1795,6 +2000,12 @@ const FinancialLocationDetails = ({
                 </Grid2>
                 <Grid2 size={{ xs: 12, md: 4 }}>
                   <TextField
+                  sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                     fullWidth
                     size="small"
                     label="Road/Street/Lane"
@@ -1809,6 +2020,12 @@ const FinancialLocationDetails = ({
                 </Grid2>
                 <Grid2 size={{ xs: 12, md: 4 }}>
                   <TextField
+                  sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                     fullWidth
                     size="small"
                     label="City"
@@ -1823,6 +2040,12 @@ const FinancialLocationDetails = ({
                 </Grid2>
                 <Grid2 size={{ xs: 12, md: 4 }}>
                   <TextField
+                  sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                     fullWidth
                     size="small"
                     label="District"
@@ -1837,6 +2060,12 @@ const FinancialLocationDetails = ({
                 </Grid2>
                 <Grid2 size={{ xs: 12, md: 4 }}>
                   <TextField
+                  sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                     fullWidth
                     size="small"
                     label="State"
@@ -1851,6 +2080,12 @@ const FinancialLocationDetails = ({
                 </Grid2>
                 <Grid2 size={{ xs: 12, md: 4 }}>
                   <TextField
+                  sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                     fullWidth
                     size="small"
                     label="Pin Code"
@@ -1871,10 +2106,11 @@ const FinancialLocationDetails = ({
               </Box>
             </Box>
           ))}
-        {registeredAddressUnitsData?.location_of_plant === 'yes' && (
-          <Box display="flex" justifyContent="flex-end" mt={2} gap={1}>
+         {console.log("xdfvgbhnjkl",registeredAddressUnitsData?.location_of_plant)}
+         <Box display="flex" justifyContent="flex-end" mt={2} gap={1}>
+        {(registeredAddressUnitsData?.location_of_plant === true || registeredAddressUnitsData?.location_of_plant === 'true') && (
+          <Box>
             <Button
-              size="small"
               variant="outlined"
               color="primary"
               onClick={() =>
@@ -1898,8 +2134,12 @@ const FinancialLocationDetails = ({
               }
             >
               Add Plant/Unit
-            </Button>
-            <GetActionButtons
+            </Button> 
+          </Box>
+        )}
+        <Box>
+   <Stack direction="row" spacing={1} justifyContent="flex-end">
+        <GetActionButtons
               type="put"
               data={sectionData?.tasks?.['Registered Address']}
               status={registeredAddressUnitsData?.status}
@@ -1916,8 +2156,9 @@ const FinancialLocationDetails = ({
                 }
               }}
             />
-          </Box>
-        )}
+            </Stack>
+            </Box>
+            </Box>
       </form>
     </Box>
   );
