@@ -234,7 +234,7 @@ export default function SimpleTabs() {
             },
             '& button.Mui-selected': {
               color: 'primary.main',
-              bgcolor: mode === ThemeMode.DARK ? 'dark.main' : 'grey.100'
+              bgcolor: mode === ThemeMode.DARK ? 'dark.main' : 'primary.light'
             },
             '& button > svg': {
               height: 20,
@@ -243,6 +243,7 @@ export default function SimpleTabs() {
             '& > div > span': {
               display: 'none'
             },
+
             padding: 2
           }}
         >
@@ -250,6 +251,12 @@ export default function SimpleTabs() {
             <Tab
               key={index}
               icon={tab.icon}
+              sx={{
+                mt: 0.5,
+                '&:hover': {
+                  backgroundColor: 'primary.light'
+                }
+              }}
               label={
                 <Typography variant="subtitle1" noWrap>
                   {tab.label}

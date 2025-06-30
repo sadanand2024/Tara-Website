@@ -307,7 +307,7 @@ const BusinessBankDetails = ({ user, tabChange, tabval }) => {
                   id="ifsc_code"
                   name="ifsc_code"
                   label="IFSC Code"
-                  value={formik.values.ifsc_code}
+                  value={formik.values.ifsc_code.toUpperCase()}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                   error={formik.touched.ifsc_code && Boolean(formik.errors.ifsc_code)}
@@ -321,7 +321,7 @@ const BusinessBankDetails = ({ user, tabChange, tabval }) => {
                   id="swift_code"
                   name="swift_code"
                   label="Swift Code (Optional)"
-                  value={formik.values.swift_code}
+                  value={formik.values.swift_code?.toUpperCase()}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                   error={formik.touched.swift_code && Boolean(formik.errors.swift_code)}

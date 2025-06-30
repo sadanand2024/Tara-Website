@@ -26,7 +26,7 @@ import CustomInput from 'utils/CustomInput';
 import Factory from 'utils/Factory';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTheme } from '@mui/material/styles';
-function Organizationdetails() {
+function Organizationdetails({ handleNext }) {
   const theme = useTheme();
   const user = useSelector((state) => state.accountReducer.user);
   const businessId = user.active_context.business_id;
@@ -531,12 +531,15 @@ function Organizationdetails() {
               >
                 Back to Dashboard
               </Button>
-              <Button type="submit" variant="contained" color="primary" size="small">
-                Save
-              </Button>
-              <Button variant="contained" onClick={() => navigate('/app/payroll/settings/professional-tax')}>
-                Next
-              </Button>
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <Button type="submit" variant="contained" color="primary" size="small">
+                  Save
+                </Button>
+                <Button variant="outlined" onClick={() => handleNext()} size="small">
+                  {/* <Button variant="contained" onClick={() => navigate('/app/payroll/settings/professional-tax')}> */}
+                  Next
+                </Button>
+              </Box>
             </Box>
             {filingAddressDialog === true && (
               <FilingAddressDialog

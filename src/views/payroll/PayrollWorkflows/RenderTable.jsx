@@ -75,7 +75,7 @@ const RenderTable = ({
           <CircularProgress />
         </Box>
       ) : (
-        <TableContainer component={Paper}>
+        <TableContainer component={Paper} sx={{ borderRadius: 0 }}>
           <Table size="small">
             <TableHead
               sx={{
@@ -87,11 +87,11 @@ const RenderTable = ({
             >
               <TableRow>
                 {headerData.map((header, index) => (
-                  <TableCell key={index} sx={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>
+                  <TableCell key={index} sx={{ fontWeight: 'bold', whiteSpace: 'nowrap', py: 1.5 }}>
                     {header}
                   </TableCell>
                 ))}
-                <TableCell align="center" sx={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>
+                <TableCell align="center" sx={{ fontWeight: 'bold', whiteSpace: 'nowrap', py: 1.5 }}>
                   Actions
                 </TableCell>
               </TableRow>
@@ -155,7 +155,7 @@ const RenderTable = ({
         </TableContainer>
       )}
 
-      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mt: 2 }}>
+      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mt: 2, px: 2 }}>
         {from !== 'Tds' && (
           <Button startIcon={<ArrowBackIcon />} variant="outlined" color="primary" onClick={() => navigate('/app/payroll')}>
             Back to dashboard

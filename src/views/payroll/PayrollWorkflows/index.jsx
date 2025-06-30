@@ -249,46 +249,58 @@ const PayrollWorkflows = ({ type }) => {
         </Stack>
       }
     >
-      <Tabs
-        variant="fullWidth"
-        scrollButtons={true}
-        value={activeTab}
-        sx={{ borderBottom: '1px solid #e9e9e9' }}
-        onChange={handleTabChange}
+      <Paper
+        elevation={3}
+        sx={{
+          width: '100%',
+          bgcolor: 'background.paper',
+          borderRadius: 2,
+          overflow: 'hidden',
+          border: '1px solid #e0e0e0',
+          pb: 2
+        }}
       >
-        {tabs.map((tab, index) => (
-          <Tab
-            key={`tab-${index}`}
-            label={
-              <Stack direction="row" sx={{ alignItems: 'center' }}>
-                <Avatar variant="rounded" sx={{ mr: 1, bgcolor: 'primary.light', width: 36, height: 36 }}>
-                  {tabIcons[index] && React.createElement(tabIcons[index], { color: theme.palette.text.primary })}
-                </Avatar>
-                <Typography variant="subtitle1">{tab.label}</Typography>
-              </Stack>
-            }
-            value={index}
-            sx={{ fontSize: '1rem', textTransform: 'none', p: 1, py: 2 }}
-          />
-        ))}
-      </Tabs>
+        <Tabs
+          variant="fullWidth"
+          scrollButtons={true}
+          value={activeTab}
+          sx={{ borderBottom: '1px solid #e9e9e9' }}
+          onChange={handleTabChange}
+        >
+          {tabs.map((tab, index) => (
+            <Tab
+              key={`tab-${index}`}
+              label={
+                <Stack direction="row" sx={{ alignItems: 'center' }}>
+                  <Avatar variant="rounded" sx={{ mr: 1, bgcolor: 'primary.light', width: 36, height: 36 }}>
+                    {tabIcons[index] && React.createElement(tabIcons[index], { color: theme.palette.text.primary })}
+                  </Avatar>
+                  <Typography variant="subtitle1">{tab.label}</Typography>
+                </Stack>
+              }
+              value={index}
+              sx={{ fontSize: '1rem', textTransform: 'none', p: 1, py: '14px' }}
+            />
+          ))}
+        </Tabs>
 
-      {tabs.map((tab, index) => (
-        <TabPanel key={`panel-${index}`} value={activeTab} index={index}>
-          <tab.component
-            from={tab.label}
-            openDialog={openDialog}
-            setOpenDialog={setOpenDialog}
-            fields={tab.fields}
-            loading={loading}
-            employeeMasterData={employeeMasterData}
-            fetchAttendance={tab.label === 'Attendance' ? getAttandanceData : undefined}
-            attendanceData={tab.label === 'Attendance' ? attendanceData : undefined}
-            handleBack={() => setActiveTab((prev) => prev - 1)}
-            handleNext={() => setActiveTab((prev) => prev + 1)}
-          />
-        </TabPanel>
-      ))}
+        {tabs.map((tab, index) => (
+          <TabPanel key={`panel-${index}`} value={activeTab} index={index}>
+            <tab.component
+              from={tab.label}
+              openDialog={openDialog}
+              setOpenDialog={setOpenDialog}
+              fields={tab.fields}
+              loading={loading}
+              employeeMasterData={employeeMasterData}
+              fetchAttendance={tab.label === 'Attendance' ? getAttandanceData : undefined}
+              attendanceData={tab.label === 'Attendance' ? attendanceData : undefined}
+              handleBack={() => setActiveTab((prev) => prev - 1)}
+              handleNext={() => setActiveTab((prev) => prev + 1)}
+            />
+          </TabPanel>
+        ))}
+      </Paper>
     </MainCard>
   );
 };
