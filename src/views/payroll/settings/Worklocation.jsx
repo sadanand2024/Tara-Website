@@ -262,9 +262,7 @@ function Worklocation({ handleBack, handleNext }) {
           </TableContainer>
           {workLocations.length > 0 && (
             <Stack direction="row" justifyContent="space-between" sx={{ mt: 2 }}>
-              <Button size="small" variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigate('/app/payroll')}>
-                Back to Dashboard
-              </Button>
+              <Typography></Typography>
               <Pagination
                 count={Math.ceil(workLocations.length / rowsPerPage)}
                 page={currentPage}

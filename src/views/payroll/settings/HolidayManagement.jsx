@@ -3,7 +3,7 @@ import {
   Box,
   Stack,
   Button,
-  Grid,
+  Typography,
   Table,
   TableBody,
   TableCell,
@@ -264,11 +264,9 @@ function HolidayManagement({ handleBack, handleNext }) {
           </TableContainer>
         )}
 
-        {holidayManagementData.length > 0 && (
-          <Stack direction="row" justifyContent="space-between" sx={{ py: 2 }}>
-            <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigate('/app/payroll')}>
-              Back to Dashboard
-            </Button>
+        <Stack direction="row" justifyContent="space-between" sx={{ py: 2 }}>
+          <Typography></Typography>
+          {holidayManagementData.length > 0 && (
             <Pagination
               count={Math.ceil(holidayManagementData.length / rowsPerPage)}
               page={currentPage}
@@ -276,11 +274,13 @@ function HolidayManagement({ handleBack, handleNext }) {
               shape="rounded"
               color="primary"
             />
-            <Button variant="outlined" onClick={handleBack}>
-              Back
+          )}
+          <Stack direction="row" spacing={2}>
+            <Button size="small" variant="contained" onClick={handleNext}>
+              Next
             </Button>
           </Stack>
-        )}
+        </Stack>
       </Stack>
 
       {/* Dialogs */}

@@ -43,9 +43,8 @@ function PaymentInformation({ employeeData, createdEmployeeId, onNext, setSubmit
       .required('Account Number is required')
       .matches(/^\d{9,18}$/, 'Account Number must be between 9 and 18 digits'),
 
-    ifsc_code: Yup.string()
-      .required('IFSC Code is required')
-      .matches(/^[A-Za-z]{4}\d{7}$/, 'Invalid IFSC Code. Format: ABCD1234567'),
+    ifsc_code: Yup.string().required('IFSC Code is required'),
+    // .matches(/^[A-Za-z]{4}\d{7}$/, 'Invalid IFSC Code. Format: ABCD1234567'),
 
     branch_name: Yup.string().required('Branch Name is required').max(100, 'Branch Name cannot exceed 100 characters'),
 

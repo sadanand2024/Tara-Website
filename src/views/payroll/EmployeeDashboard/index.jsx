@@ -21,6 +21,7 @@ import ComplianceSummary from './ComplianceSummary';
 import PayrollSummaryGrid from '../PayrollSummaryGrid';
 import { ServicesData } from '../data';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import EmployeeBulkUploadDialog from './EmployeeBulkUploadDialog';
 const PRODUCTS_DATA = [
   { title: 'New Joiners', href: '/payroll-workflows', icon: <PersonAddIcon />, color: '#4CAF50' },
   { title: 'Exits', href: '/payroll-workflows', icon: <ExitToAppIcon />, color: '#F44336' },
@@ -51,6 +52,7 @@ export default function Index() {
   const [monthWiseData, setMonthWiseData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [openBulkDialog, setOpenBulkDialog] = useState(false);
 
   const handleTabChange = (_event, newTabIndex) => setActiveTab(newTabIndex);
 
@@ -116,6 +118,15 @@ export default function Index() {
   const handleCardClick = (href, index) => {
     navigate(`/payroll${href}?payrollid=${payrollId}&tabValue=${index}&month=${month}&financial_year=${financialYear}`);
   };
+
+  const fetchEmployees = async () => {
+    // Implementation of fetchEmployees function
+  };
+
+  const closeBulkDialog = () => {
+    setOpenBulkDialog(false);
+  };
+
   return (
     <MainCard
       title={`Monthly Payroll Dashboard of ${months[month - 1]}`}
@@ -270,6 +281,15 @@ export default function Index() {
           </Grid2>
         </Grid2>
       </Box>
+      <EmployeeBulkUploadDialog
+        open={openBulkDialog}
+        handleClose={closeBulkDialog}
+        getData={fetchEmployees}
+        payrollid={payrollId}
+        type="Employees"
+        bulkUploadUrl="/payroll/employees/upload/"
+        xlsxTemplateUrl={`/payroll/download-template/${payrollId}/`}
+      />
     </MainCard>
   );
 }

@@ -199,9 +199,7 @@ function Designations({ handleBack, handleNext }) {
         {designations.length > 0 && (
           <Grid2 size={{ xs: 12 }}>
             <Stack direction="row" justifyContent="space-between" sx={{ mt: 2 }}>
-              <Button size="small" variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigate('/app/payroll')}>
-                Back to Dashboard
-              </Button>
+              <Typography></Typography>
 
               <Pagination
                 count={Math.ceil(designations.length / rowsPerPage)}

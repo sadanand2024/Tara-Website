@@ -306,29 +306,14 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
 
             {earningsData.length > 0 && (
               <Stack direction="row" justifyContent="space-between" sx={{ mt: 2 }}>
-                <Button
-                  variant="outlined"
-                  startIcon={<ArrowBackIcon />}
-                  onClick={() => {
-                    navigate('/app/payroll');
-                  }}
-                >
-                  Back to Dashboard
-                </Button>
+                <Typography></Typography>
                 <Pagination
                   count={Math.ceil(earningsData.length / rowsPerPage)}
                   page={currentPage}
                   onChange={(e, value) => setCurrentPage(value)}
                   color="primary"
                 />
-                <Stack direction="row" spacing={2}>
-                  <Button size="small" variant="outlined" startIcon={<ArrowBackIcon />} onClick={handleBack}>
-                    Back
-                  </Button>
-                  <Button size="small" variant="contained" onClick={handleNext}>
-                    Next
-                  </Button>
-                </Stack>
+                <Stack direction="row" spacing={2}></Stack>
               </Stack>
             )}
           </Grid2>

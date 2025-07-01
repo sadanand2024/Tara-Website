@@ -234,26 +234,16 @@ function PaySchedule({ handleBack, handleNext }) {
         </Box>
 
         <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mt: 3 }}>
-          <Button
-            variant="outlined"
-            startIcon={<ArrowBackIcon />}
-            onClick={() => {
-              navigate('/app/payroll');
-            }}
-          >
-            Back to Dashboard
-          </Button>
-          <Stack direction="row" spacing={2}>
-            <Button variant="contained" type="submit" onClick={handleSubmit}>
-              Save
-            </Button>
-          </Stack>
+          <Typography></Typography>
           <Stack direction="row" spacing={2}>
             <Button variant="outlined" type="submit" onClick={() => handleBack()}>
               Back
             </Button>
             <Button variant="contained" type="submit" onClick={handleNext}>
               Next
+            </Button>
+            <Button variant="contained" type="submit" onClick={handleSubmit}>
+              Save
             </Button>
           </Stack>
         </Stack>
