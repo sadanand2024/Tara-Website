@@ -28,7 +28,7 @@ import { IconButton } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
 import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
 
-function LeaveManagement() {
+function LeaveManagement({ handleBack, handleNext }) {
   const [leaveType, setLeaveType] = useState('All');
   const [loading, setLoading] = useState(false);
   const [payrollId, setPayrollId] = useState(null);

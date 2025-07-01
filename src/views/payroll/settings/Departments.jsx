@@ -222,9 +222,7 @@ function Departments({ handleBack, handleNext }) {
         {departments.length > 0 && (
           <Grid2 size={12}>
             <Stack direction="row" justifyContent="space-between" sx={{ mt: 2 }}>
-              <Button size="small" variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigate('/app/payroll')}>
-                Back to Dashboard
-              </Button>
+              <Typography></Typography>
 
               <Pagination
                 count={Math.ceil(departments.length / rowsPerPage)}

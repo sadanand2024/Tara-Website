@@ -520,23 +520,12 @@ function Organizationdetails({ handleNext }) {
               </Card>
             </Box>
 
-            <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Button
-                size="small"
-                variant="outlined"
-                startIcon={<ArrowBackIcon />}
-                onClick={() => {
-                  navigate('/app/payroll');
-                }}
-              >
-                Back to Dashboard
-              </Button>
+            <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
               <Box sx={{ display: 'flex', gap: 1 }}>
                 <Button type="submit" variant="contained" color="primary" size="small">
                   Save
                 </Button>
                 <Button variant="outlined" onClick={() => handleNext()} size="small">
-                  {/* <Button variant="contained" onClick={() => navigate('/app/payroll/settings/professional-tax')}> */}
                   Next
                 </Button>
               </Box>

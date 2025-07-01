@@ -155,29 +155,28 @@ function SalaryTemplateList({ handleBack, handleNext }) {
               }}
             />
           </TableContainer>
-          {salaryTemplates.length > 0 && (
-            <Grid2 size={{ xs: 12 }}>
-              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mt: 2, width: '100%' }}>
-                <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigate('/app/payroll')}>
-                  Back to Dashboard
-                </Button>
+
+          <Grid2 size={{ xs: 12 }}>
+            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mt: 2, width: '100%' }}>
+              <Typography></Typography>
+              {salaryTemplates.length > 0 && (
                 <Pagination
                   count={Math.ceil(salaryTemplates.length / rowsPerPage)}
                   page={currentPage}
                   onChange={(e, value) => setCurrentPage(value)}
                   color="primary"
                 />
-                <Stack direction="row" spacing={2}>
-                  <Button size="small" variant="outlined" startIcon={<ArrowBackIcon />} onClick={handleBack}>
-                    Back
-                  </Button>
-                  <Button size="small" variant="contained" onClick={handleNext}>
-                    Next
-                  </Button>
-                </Stack>
+              )}
+              <Stack direction="row" spacing={2}>
+                <Button size="small" variant="outlined" startIcon={<ArrowBackIcon />} onClick={handleBack}>
+                  Back
+                </Button>
+                <Button size="small" variant="contained" onClick={handleNext}>
+                  Next
+                </Button>
               </Stack>
-            </Grid2>
-          )}
+            </Stack>
+          </Grid2>
         </Grid2>
       </Grid2>
       <Grid2 size={{ xs: 12 }}>
