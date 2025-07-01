@@ -21,7 +21,7 @@ import ComplianceSummary from './ComplianceSummary';
 import PayrollSummaryGrid from '../PayrollSummaryGrid';
 import { ServicesData } from '../data';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import EmployeeBulkUploadDialog from './EmployeeBulkUploadDialog';
+import EmployeeBulkUploadDialog from '../../../ui-component/extended/EmployeeBulkUploadDialog';
 const PRODUCTS_DATA = [
   { title: 'New Joiners', href: '/payroll-workflows', icon: <PersonAddIcon />, color: '#4CAF50' },
   { title: 'Exits', href: '/payroll-workflows', icon: <ExitToAppIcon />, color: '#F44336' },
