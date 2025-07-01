@@ -232,7 +232,7 @@ export default function SimpleTabs() {
               borderRadius: `${borderRadius}px`,
               mx: isSmallScreen ? 0.5 : 0
             },
-            '& button.Mui-selected': {
+            '& .Mui-selected': {
               color: 'primary.main',
               bgcolor: mode === ThemeMode.DARK ? 'dark.main' : 'primary.light'
             },
@@ -243,7 +243,6 @@ export default function SimpleTabs() {
             '& > div > span': {
               display: 'none'
             },
-
             padding: 2
           }}
         >
@@ -257,11 +256,7 @@ export default function SimpleTabs() {
                   backgroundColor: 'primary.light'
                 }
               }}
-              label={
-                <Typography variant="subtitle1" noWrap>
-                  {tab.label}
-                </Typography>
-              }
+              label={tab.label}
               {...a11yProps(index)}
             />
           ))}
