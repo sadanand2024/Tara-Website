@@ -504,7 +504,7 @@ const ManageSubscriptions = () => {
                     <TableCell>{task?.payment_order_id || '-'}</TableCell>
                     <TableCell>
                       <Typography variant="body1" color="text" fontWeight={500}>
-                        {task?.created_at ? new Date(task?.created_at).toLocaleDateString() : '-'}
+                        {task?.created_at ? new Date(task?.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '-'}
                       </Typography>
                       <Typography variant="body1" color="text.secondary">
                         {task?.created_at ? new Date(task?.created_at).toLocaleTimeString() : '-'}

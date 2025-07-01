@@ -167,7 +167,7 @@ const ServiceRequests = ({ searchQuery, setUsers, assigned, setSearchQuery }) =>
                 <TableRow hover key={idx}>
                   <TableCell sx={{ pl: 3 }}>{row.id}</TableCell>
                   <TableCell sx={{ p: 1.5 }}>
-                    {assigned ? (
+                    {assigned && row.assignee !== null && row.reviewer !== null ? (
                       <Link
                         href={`/app/task-management/${row.service_name}?service_id=${row.id}`}
                         sx={{ textDecoration: 'underline', textDecorationColor: 'inherit' }}
