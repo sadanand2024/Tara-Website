@@ -241,6 +241,7 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
                                 ...prev,
                                 status: 'in progress'
                             }));
+   
       } else {
         enqueueSnackbar('Error saving Foreign/NRI Employment & Salary Details!', {
           variant: 'error',
@@ -623,10 +624,10 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
                   InputLabelProps={{ shrink: true }}
                     sx={{
                                   width: '100%',
-                                   '& .MuiInputBase-input': {
-                                     color: 'grey.600'
-                                     }
-                                   }}
+                                  '& .MuiInputBase-input': {
+                                    color: 'grey.600'
+                                      }
+                                    } }
                 />
               </Grid2>
               <Grid2 size={{ xs: 6, sm: 3, md: 2 }}>
@@ -656,7 +657,7 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
                   fullWidth
                   value={foreignFormik.values.country}
                   onChange={(e) => foreignFormik.setFieldValue('country', e.target.value)}
-                   sx={{
+                  sx={{
                                   width: '100%',
                                   '& .MuiInputBase-input': {
                                     color: 'grey.600'
@@ -794,16 +795,7 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
   // Handle field change
   const handleChange = (idx, field, value) => {
     const updated = [...properties];
-    // Convert string 'true'/'false' to boolean for specific fields
-    const booleanFields = [
-      'owned_property',
-      'is_it_property_let_out',
-      'pay_municipal_tax',
-      'home_loan_on_property'
-    ];
-    if (booleanFields.includes(field) && (value === 'true' || value === 'false')) {
-      value = value === 'true';
-    }
+   
 
     if (field.startsWith('property_address.')) {
       const addrField = field.split('.')[1];
@@ -830,7 +822,8 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
     formData.append('status', 'in progress');
 
     Object.entries(property).forEach(([key, value]) => {
-      if (!value) return;
+      // if (!value) return;
+        if (value === null || value === undefined) return;
       if (key === 'property_address') {
         formData.append(key, JSON.stringify(value));
       } else if (value instanceof File) {
@@ -846,11 +839,30 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
 
     try {
       const res = await Factory('post', '/income_tax_returns/house-property-details/upsert/', formData, {});
-      if (res.res?.status_cd === 0) {
-        if (res.res?.data?.property_info) setProperties(res.res?.data?.property_info);
-        enqueueSnackbar(`Property ${idx + 1} saved!`, { variant: 'success', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
+      // if (res.res?.status_cd === 0) {
+      //   if (res.res?.data?.property_info) setProperties(res.res?.data?.property_info);
+      //   enqueueSnackbar(`Property ${idx + 1} saved!`, { variant: 'success', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
         
-      } else {
+      // } 
+      if (res.res?.data?.property_info) {
+  const parsedProperties = res.res.data.property_info.map((property) => ({
+    ...property,
+    owned_property: property.owned_property === true || property.owned_property === 'true',
+    is_it_property_let_out: property.is_it_property_let_out === true || property.is_it_property_let_out === 'true',
+    pay_municipal_tax: property.pay_municipal_tax === true || property.pay_municipal_tax === 'true',
+    home_loan_on_property: property.home_loan_on_property === true || property.home_loan_on_property === 'true',
+  }));
+ 
+  console.log('Parsed properties:', parsedProperties);
+  setProperties(parsedProperties);
+ 
+  // ✅ Add Snackbar here
+  enqueueSnackbar(`Property ${idx + 1} saved!`, {
+    variant: 'success',
+    anchorOrigin: { vertical: 'top', horizontal: 'right' }
+  });
+}
+      else {
         enqueueSnackbar(`Error saving property ${idx + 1}`, { variant: 'error', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
       }
     } catch (err) {
@@ -899,7 +911,7 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
             </Typography>
             <Grid2 container spacing={2} alignItems="center" mb={2}>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography>Type of Property</Typography>
+                <Typography variant="subtitle1">Type of Property</Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <Autocomplete
@@ -909,10 +921,16 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
                   value={property.type_of_property || ''}
                   onChange={(_, v) => handleChange(idx, 'type_of_property', v || '')}
                   renderInput={(params) => <TextField {...params} placeholder="Select type" />}
+                  sx={{
+                                  width: '100%',
+                                  '& .MuiInputBase-input': {
+                                    color: 'grey.600'
+                                    }
+                                  }}
                 />
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography>Country (if Foreign)</Typography>
+                <Typography variant="subtitle1">Country (if Foreign)</Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <Autocomplete
@@ -922,10 +940,16 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
                   value={property.country || ''}
                   onChange={(_, v) => handleChange(idx, 'country', v || '')}
                   renderInput={(params) => <TextField {...params} placeholder="Select country" />}
+                  sx={{
+                                  width: '100%',
+                                  '& .MuiInputBase-input': {
+                                    color: 'grey.600'
+                                    }
+                                  }}
                 />
               </Grid2>{' '}
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography>Property Address</Typography>
+                <Typography variant="subtitle1">Property Address</Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 9 }}>
                 <Grid2 container spacing={1}>
@@ -937,6 +961,12 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
                       label="Line 1"
                       value={property.property_address?.address_line1 || ''}
                       onChange={(e) => handleChange(idx, 'property_address.address_line1', e.target.value)}
+                      sx={{
+                                  width: '100%',
+                                  '& .MuiInputBase-input': {
+                                    color: 'grey.600'
+                                    }
+                                  }}
                     />
                   </Grid2>
                   <Grid2 size={3}>
@@ -947,6 +977,12 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
                       label="Line 2"
                       value={property.property_address?.address_line2 || ''}
                       onChange={(e) => handleChange(idx, 'property_address.address_line2', e.target.value)}
+                      sx={{
+                                  width: '100%',
+                                  '& .MuiInputBase-input': {
+                                    color: 'grey.600'
+                                    }
+                                  }}
                     />
                   </Grid2>
                   <Grid2 size={3}>
@@ -957,6 +993,12 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
                       label="State"
                       value={property.property_address?.state || ''}
                       onChange={(e) => handleChange(idx, 'property_address.state', e.target.value)}
+                       sx={{
+                                  width: '100%',
+                                  '& .MuiInputBase-input': {
+                                    color: 'grey.600'
+                                    }
+                                  }}
                     />
                   </Grid2>
                   <Grid2 size={3}>
@@ -967,21 +1009,41 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
                       label="Pincode"
                       value={property.property_address?.pincode || ''}
                       onChange={(e) => handleChange(idx, 'property_address.pincode', e.target.value)}
+                       sx={{
+                                  width: '100%',
+                                  '& .MuiInputBase-input': {
+                                    color: 'grey.600'
+                                    }
+                                  }}
                     />
                   </Grid2>
                 </Grid2>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography>Is it Co-owned Property?</Typography>
+                <Typography variant="subtitle1">Is it Co-owned Property?</Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <RadioGroup row value={property.owned_property || ''} onChange={(_, v) => handleChange(idx, 'owned_property', v)}>
+                {/* <RadioGroup row value={property.owned_property || ''} onChange={(_, v) => handleChange(idx, 'owned_property', v)}>
                   <FormControlLabel value={true} control={<Radio size="small" />} label="Yes" />
                   <FormControlLabel value={false} control={<Radio size="small" />} label="No" />
-                </RadioGroup>
+                </RadioGroup> */}
+                <RadioGroup
+  row
+  value={
+    property.owned_property === true
+      ? 'true'
+      : property.owned_property === false
+      ? 'false'
+      : ''
+  }
+  onChange={(_, v) => handleChange(idx, 'owned_property', v === 'true')}
+>
+  <FormControlLabel value="true" control={<Radio size="small" />} label="Yes" />
+  <FormControlLabel value="false" control={<Radio size="small" />} label="No" />
+</RadioGroup>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography>Ownership Percentage</Typography>
+                <Typography variant="subtitle1">Ownership Percentage</Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <TextField
@@ -991,6 +1053,12 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
                   placeholder="%"
                   value={property.ownership_percentage || ''}
                   onChange={(e) => handleChange(idx, 'ownership_percentage', e.target.value)}
+                   sx={{
+                                  width: '100%',
+                                  '& .MuiInputBase-input': {
+                                    color: 'grey.600'
+                                    }
+                                  }}
                 />
               </Grid2>
             </Grid2>
@@ -1000,20 +1068,34 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
             </Typography>
             <Grid2 container spacing={2} alignItems="center" mb={2}>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography>Is this property let-out?</Typography>
+                <Typography variant="subtitle1">Is this property let-out?</Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <RadioGroup
+                {/* <RadioGroup
                   row
                   value={property.is_it_property_let_out || ''}
                   onChange={(_, v) => handleChange(idx, 'is_it_property_let_out', v)}
                 >
                   <FormControlLabel value={true} control={<Radio size="small" />} label="Yes" />
                   <FormControlLabel value={false} control={<Radio size="small" />} label="No" />
-                </RadioGroup>
+                </RadioGroup> */}
+                 <RadioGroup
+  row
+  value={
+    property.is_it_property_let_out === true
+      ? 'true'
+      : property.is_it_property_let_out === false
+      ? 'false'
+      : ''
+  }
+  onChange={(_, v) => handleChange(idx, 'is_it_property_let_out', v === 'true')}
+>
+  <FormControlLabel value="true" control={<Radio size="small" />} label="Yes" />
+  <FormControlLabel value="false" control={<Radio size="small" />} label="No" />
+</RadioGroup>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography>Annual Rent Received</Typography>
+                <Typography variant="subtitle1">Annual Rent Received</Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <TextField
@@ -1023,10 +1105,16 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
                   placeholder="Amount"
                   value={property.annual_rent_received || ''}
                   onChange={(e) => handleChange(idx, 'annual_rent_received', e.target.value)}
+                   sx={{
+                                  width: '100%',
+                                  '& .MuiInputBase-input': {
+                                    color: 'grey.600'
+                                    }
+                                  }}
                 />
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography>Rent Received In</Typography>
+                <Typography variant="subtitle1">Rent Received In</Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <Autocomplete
@@ -1036,19 +1124,39 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
                   value={property.rent_received || ''}
                   onChange={(_, v) => handleChange(idx, 'rent_received', v || '')}
                   renderInput={(params) => <TextField {...params} placeholder="Select mode" />}
+                   sx={{
+                                  width: '100%',
+                                  '& .MuiInputBase-input': {
+                                    color: 'grey.600'
+                                    }
+                                  }}
                 />
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography>Did you pay municipal taxes?</Typography>
+                <Typography variant="subtitle1">Did you pay municipal taxes?</Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <RadioGroup row value={property.pay_municipal_tax || ''} onChange={(_, v) => handleChange(idx, 'pay_municipal_tax', v)}>
+                {/* <RadioGroup row value={property.pay_municipal_tax || ''} onChange={(_, v) => handleChange(idx, 'pay_municipal_tax', v)}>
                   <FormControlLabel value={true} control={<Radio size="small" />} label="Yes" />
                   <FormControlLabel value={false} control={<Radio size="small" />} label="No" />
-                </RadioGroup>
+                </RadioGroup> */}
+                <RadioGroup
+  row
+  value={
+    property.pay_municipal_tax === true
+      ? 'true'
+      : property.pay_municipal_tax === false
+      ? 'false'
+      : ''
+  }
+  onChange={(_, v) => handleChange(idx, 'pay_municipal_tax', v === 'true')}
+>
+  <FormControlLabel value="true" control={<Radio size="small" />} label="Yes" />
+  <FormControlLabel value="false" control={<Radio size="small" />} label="No" />
+</RadioGroup>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography>Municipal tax paid</Typography>
+                <Typography variant="subtitle1">Municipal tax paid</Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <TextField
@@ -1058,10 +1166,16 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
                   placeholder="Amount"
                   value={property.municipal_tax_paid || ''}
                   onChange={(e) => handleChange(idx, 'municipal_tax_paid', e.target.value)}
+                   sx={{
+                                  width: '100%',
+                                  '& .MuiInputBase-input': {
+                                    color: 'grey.600'
+                                    }
+                                  }}
                 />
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography>Municipal tax receipt</Typography>
+                <Typography variant="subtitle1">Municipal tax receipt</Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <Button size="small" variant="contained" component="label">
@@ -1092,20 +1206,34 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
             </Typography>
             <Grid2 container spacing={2} alignItems="center">
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography>Home loan on this property?</Typography>
+                <Typography variant="subtitle1">Home loan on this property?</Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <RadioGroup
+                {/* <RadioGroup
                   row
                   value={property.home_loan_on_property || ''}
                   onChange={(_, v) => handleChange(idx, 'home_loan_on_property', v)}
                 >
                   <FormControlLabel value={true} control={<Radio size="small" />} label="Yes" />
                   <FormControlLabel value={false} control={<Radio size="small" />} label="No" />
-                </RadioGroup>
+                </RadioGroup> */}
+                <RadioGroup
+  row
+  value={
+    property.home_loan_on_property === true
+      ? 'true'
+      : property.home_loan_on_property === false
+      ? 'false'
+      : ''
+  }
+  onChange={(_, v) => handleChange(idx, 'home_loan_on_property', v === 'true')}
+>
+  <FormControlLabel value="true" control={<Radio size="small" />} label="Yes" />
+  <FormControlLabel value="false" control={<Radio size="small" />} label="No" />
+</RadioGroup>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography>Interest paid during the FY</Typography>
+                <Typography variant="subtitle1">Interest paid during the FY</Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <TextField
@@ -1118,7 +1246,7 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
                 />
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography>Principal paid during the FY</Typography>
+                <Typography variant="subtitle1">Principal paid during the FY</Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <TextField
@@ -1128,10 +1256,16 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
                   placeholder="Amount"
                   value={property.principal_during_financial_year || ''}
                   onChange={(e) => handleChange(idx, 'principal_during_financial_year', e.target.value)}
+                 sx={{
+                                  width: '100%',
+                                  '& .MuiInputBase-input': {
+                                    color: 'grey.600'
+                                    }
+                                  }}
                 />
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography>Upload loan interest certificate</Typography>
+                <Typography variant="subtitle1">Upload loan interest certificate</Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <Button size="small" variant="contained" component="label">
@@ -1160,7 +1294,7 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
                 )}
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography>Loan statement</Typography>
+                <Typography variant="subtitle1">Loan statement</Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <Button size="small" variant="contained" component="label">
@@ -1264,6 +1398,7 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
   let [cg_other_sources, setCgOtherSources] = React.useState(data.find((item) => item.category_name === 'Other Capital Gains') || null);
   const [selectedTypes, setSelectedTypes] = React.useState([]);
   const [properties, setProperties] = React.useState(initialState);
+  const [showReview, setShowReview] = useState([]);
   const [numOtherGains, setNumOtherGains] = React.useState(1);
   const { enqueueSnackbar } = useSnackbar();
   const propertyTypes = ['land', 'plot', 'building'];
@@ -1352,8 +1487,8 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
     camsFiles.forEach((file) => {
       if (file instanceof File) formData.append('documents', file);
     });
-    formData.append('sell_any_foreign_sales', soldForeignShares);
-    formData.append('sell_any_unlisted_sales', soldUnlistedShares);
+    formData.append('sell_any_foreign_sales', soldForeignShares? 'true' : 'false');
+    formData.append('sell_any_unlisted_sales', soldUnlistedShares? 'true' : 'false');
 
     const response = await Factory('post', `/income_tax_returns/capital-gains/equity-mutual-fund/submit/`, formData);
     if (response.res.status_cd === 0) {
@@ -1439,7 +1574,7 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
             </Typography>
             <Grid2 container spacing={2} alignItems="center" mb={2}>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography>Property Type</Typography>
+                <Typography variant="subtitle1">Property Type</Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <Autocomplete
@@ -1454,10 +1589,17 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                     setProperties(updated);
                   }}
                   renderInput={(params) => <TextField {...params} placeholder="Select type" />}
+                   sx={{
+                                  width: '100%',
+                                  '& .MuiInputBase-input': {
+                                    color: 'grey.600'
+                                    }
+                                  }}
+                  
                 />
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography>Date of Purchase</Typography>
+                <Typography variant="subtitle1">Date of Purchase</Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <TextField
@@ -1471,10 +1613,16 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                     updated[idx].date_of_purchase = e.target.value;
                     setProperties(updated);
                   }}
+                   sx={{
+                                  width: '100%',
+                                  '& .MuiInputBase-input': {
+                                    color: 'grey.600'
+                                    }
+                                  }}
                 />
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography>Purchase Cost</Typography>
+                <Typography variant="subtitle1">Purchase Cost</Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <TextField
@@ -1488,10 +1636,16 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                     updated[idx].purchase_cost = e.target.value;
                     setProperties(updated);
                   }}
+                  sx={{
+                                  width: '100%',
+                                  '& .MuiInputBase-input': {
+                                    color: 'grey.600'
+                                    }
+                                  }}
                 />
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography>Date of Sale</Typography>
+                <Typography variant="subtitle1">Date of Sale</Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <TextField
@@ -1505,10 +1659,16 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                     updated[idx].date_of_sale = e.target.value;
                     setProperties(updated);
                   }}
+                   sx={{
+                                  width: '100%',
+                                  '& .MuiInputBase-input': {
+                                    color: 'grey.600'
+                                    }
+                                  }}
                 />
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography>Sale Value</Typography>
+                <Typography variant="subtitle1">Sale Value</Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <TextField
@@ -1522,10 +1682,16 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                     updated[idx].sale_value = e.target.value;
                     setProperties(updated);
                   }}
+                   sx={{
+                                  width: '100%',
+                                  '& .MuiInputBase-input': {
+                                    color: 'grey.600'
+                                    }
+                                  }}
                 />
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography>Upload purchase doc</Typography>
+                <Typography variant="subtitle1">Upload purchase doc</Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <Button size="small" variant="contained" component="label" sx={{ mr: 1 }}>
@@ -1538,6 +1704,12 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                       updated[idx].purchase_doc = e.target.files[0];
                       setProperties(updated);
                     }}
+                    sx={{
+                                  width: '100%',
+                                  '& .MuiInputBase-input': {
+                                    color: 'grey.600'
+                                    }
+                                  }}
                   />
                 </Button>
                 {properties[idx].purchase_doc && (
@@ -1557,7 +1729,7 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                 )}
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography>Upload sale doc</Typography>
+                <Typography variant="subtitle1">Upload sale doc</Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <Button size="small" variant="contained" component="label">
@@ -1570,6 +1742,12 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                       updated[idx].sale_doc = e.target.files[0];
                       setProperties(updated);
                     }}
+                     sx={{
+                                  width: '100%',
+                                  '& .MuiInputBase-input': {
+                                    color: 'grey.600'
+                                    }
+                                  }}
                   />
                 </Button>
                 {properties[idx].sale_doc && (
@@ -1590,7 +1768,7 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                 )}
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography>Reinvestment made</Typography>
+                <Typography variant="subtitle1">Reinvestment made</Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <RadioGroup
@@ -1598,16 +1776,16 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                   value={properties[idx].reinvestment_made}
                   onChange={(_, v) => {
                     const arr = [...properties];
-                    arr[idx].reinvestment_made = v;
+                    arr[idx].reinvestment_made = v==='true';
                     setProperties(arr);
                   }}
                 >
-                  <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
-                  <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
+                  <FormControlLabel value="true" control={<Radio size="small" />} label="Yes" />
+                  <FormControlLabel value="false" control={<Radio size="small" />} label="No" />
                 </RadioGroup>
               </Grid2>
             </Grid2>
-            {properties[idx].reinvestment_made === 'yes' && (
+            {properties[idx].reinvestment_made === true && (
               <Box mt={2} mb={2}>
                 <Typography fontWeight={500} mb={1}>
                   Reinvestment Details
@@ -1711,7 +1889,7 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                   formData.append('service_request', service_id);
                   formData.append('service_task', cg_property_land.task_id);
                   formData.append('capital_gains_applicable', cg_property_land.data.id);
-                  formData.append('reinvestment_made', properties[idx].reinvestment_made);
+                  formData.append('reinvestment_made', properties[idx].reinvestment_made? 'true' : 'false');
                   formData.append('status', 'in progress');
                   formData.append('gains_applicable', selectedTypes);
 
@@ -1742,6 +1920,9 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                       __properties[idx] = response.res.data;
                       setProperties(__properties);
                     }
+                    
+                    
+                    
                     enqueueSnackbar('Property saved successfully', {
                       anchorOrigin: { vertical: 'top', horizontal: 'right' },
                       variant: 'success'
@@ -1860,17 +2041,17 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
           {/* 3. Did you sell any foreign shares? */}
           <Stack direction="row" spacing={2} alignItems="center" mb={2}>
             <Typography mb={1}>Did you sell any foreign shares?</Typography>
-            <RadioGroup row value={soldForeignShares} onChange={(_, v) => setSoldForeignShares(v)}>
-              <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
-              <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
+            <RadioGroup row value={soldForeignShares? 'true' : 'false'} onChange={(_, v) => setSoldForeignShares(v=== 'true')}>
+              <FormControlLabel value='true' control={<Radio size="small" />} label="Yes" />
+              <FormControlLabel value='false' control={<Radio size="small" />} label="No" />
             </RadioGroup>
           </Stack>
           {/* 4. Did you sell any unlisted shares? */}
           <Stack direction="row" spacing={2} alignItems="center" mb={2}>
             <Typography mb={1}>Did you sell any unlisted shares?</Typography>
-            <RadioGroup row value={soldUnlistedShares} onChange={(_, v) => setSoldUnlistedShares(v)}>
-              <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
-              <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
+            <RadioGroup row value={soldUnlistedShares? 'true' : 'false'} onChange={(_, v) => setSoldUnlistedShares(v=== 'true')}>
+              <FormControlLabel value='true' control={<Radio size="small" />} label="Yes" />
+              <FormControlLabel value='false' control={<Radio size="small" />} label="No" />
             </RadioGroup>
           </Stack>
           <Stack direction="row" sx={{ justifyContent: 'flex-end' }} spacing={1} mb={2}>
@@ -2169,8 +2350,8 @@ function transformBusinessApiResponse(apiObj) {
     id: apiObj.id,
     business_name: apiObj.business_name || '',
     business_type: apiObj.business_type || '',
-    opting_for_presumptive_taxation: apiObj.opting_for_presumptive_taxation || 'no',
-    gst_registered: apiObj.gst_registered || 'no',
+    opting_for_presumptive_taxation: apiObj.opting_for_presumptive_taxation === true,
+    gst_registered: apiObj.gst_registered === true,
     status: apiObj?.status || '',
     service_request: apiObj?.service_request,
     service_task: apiObj?.service_task,
@@ -2223,9 +2404,9 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
           balance_sheet_files: null,
           gst_returns_files: null,
           other_files: null,
-          opting_for_presumptive_taxation: 'no',
-          bookMaintained: 'no',
-          gst_registered: 'no'
+          opting_for_presumptive_taxation: false,
+          book_maintained: false,
+          gst_registered: false
         }
       ]);
     }
@@ -2234,9 +2415,11 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
   const saveBusinessRow = async (idx) => {
     const businessData = {
       ...businessRows[idx],
-      opting_for_presumptive_taxation: businessRows[idx]?.opting_for_presumptive_taxation || 'no',
-      bookMaintained: businessRows[idx]?.bookMaintained || 'no',
-      gst_registered: businessRows[idx]?.gst_registered || 'no',
+        opting_for_presumptive_taxation: !!businessRows[idx]?.opting_for_presumptive_taxation,
+
+      book_maintained: businessRows[idx]?.book_maintained,
+        gst_registered: !!businessRows[idx]?.gst_registered,
+
       selectedSection: selectedSection[idx]
     };
     let opting_data = {
@@ -2248,10 +2431,12 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
       section: businessData.section,
       netProfit: businessData.netProfit
     };
+    
     const formData = new FormData();
     formData.append('service_request', service_id);
     formData.append('service_task', data.task_id);
     formData.append('status', 'in progress');
+    console.log("opting_for_presumptive_taxation", businessData.opting_for_presumptive_taxation)
 
     formData.append('opting_data', JSON.stringify(opting_data));
     Object.entries(businessData).forEach(([key, value]) => {
@@ -2283,15 +2468,19 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
         } else {
           if (value) {
             formData.append(key, value);
+          }else if ((value) === false) {
+              formData.append(key, value);
           }
         }
       }
     });
+    console.log(formData)
     let type = 'post';
     let url = '/income_tax_returns/business-professional-income/';
     const res = await Factory(type, url, formData);
     if (res.res.status_cd === 0) {
       setBusinessRows(res.res.id.business_professional_income_info.map(transformBusinessApiResponse));
+      console.log()
       enqueueSnackbar('Business/Profession Income saved successfully!', {
         variant: 'success',
         anchorOrigin: { vertical: 'top', horizontal: 'right' }
@@ -2402,20 +2591,20 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <RadioGroup
                   row
-                  value={businessRows[idx]?.opting_for_presumptive_taxation || 'no'}
+                  value={businessRows[idx]?.opting_for_presumptive_taxation ? 'true' : 'false'}
                   onChange={(_, v) => {
                     const updated = [...businessRows];
-                    updated[idx].opting_for_presumptive_taxation = v;
+                    updated[idx].opting_for_presumptive_taxation = v === 'true';
                     setBusinessRows(updated);
                   }}
                 >
-                  <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
-                  <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
+                  <FormControlLabel value="true" control={<Radio size="small" />} label="Yes" />
+                  <FormControlLabel value="false" control={<Radio size="small" />} label="No" />
                 </RadioGroup>
               </Grid2>
             </Grid2>
             {/* If Presumptive = Yes, show left-side fields (4-12) */}
-            {businessRows[idx]?.opting_for_presumptive_taxation === 'yes' && (
+            {businessRows[idx]?.opting_for_presumptive_taxation === true && (
               <Box mb={2}>
                 <Grid2 container spacing={2} alignItems="center">
                   <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
@@ -2665,7 +2854,7 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
               </Box>
             )}
             {/* If Presumptive = No, show right-side fields */}
-            {businessRows[idx]?.opting_for_presumptive_taxation === 'no' && (
+            {businessRows[idx]?.opting_for_presumptive_taxation === false && (
               <Box mb={2}>
                 <Grid2 container spacing={2} alignItems="center">
                   <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
@@ -2760,19 +2949,19 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                   <Grid2 size={{ xs: 12, sm: 6, md: 9 }}>
                     <RadioGroup
                       row
-                      value={businessRows[idx]?.bookMaintained || 'no'}
+                      value={businessRows[idx]?.book_maintained ? 'true' : 'false'}
                       onChange={(_, v) => {
                         const updated = [...businessRows];
-                        updated[idx].bookMaintained = v;
+                        updated[idx].book_maintained = v=== 'true';
                         setBusinessRows(updated);
                       }}
                     >
-                      <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
-                      <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
+                      <FormControlLabel value="true" control={<Radio size="small" />} label="Yes" />
+                      <FormControlLabel value="false" control={<Radio size="small" />} label="No" />
                     </RadioGroup>
                   </Grid2>
                   {/* If Books Maintained = Yes */}
-                  {businessRows[idx]?.bookMaintained === 'yes' && (
+                  {businessRows[idx]?.book_maintained === true && (
                     <>
                       <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                         <Typography>Profit & Loss</Typography>
@@ -2854,19 +3043,19 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                   <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                     <RadioGroup
                       row
-                      value={businessRows[idx]?.gst_registered || 'no'}
+                      value={businessRows[idx]?.gst_registered ? 'true' : 'false'}
                       onChange={(_, v) => {
                         const updated = [...businessRows];
-                        updated[idx].gst_registered = v;
+                        updated[idx].gst_registered = v=== 'true';
                         setBusinessRows(updated);
                       }}
                     >
-                      <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
-                      <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
+                      <FormControlLabel value="true" control={<Radio size="small" />} label="Yes" />
+                      <FormControlLabel value="false" control={<Radio size="small" />} label="No" />
                     </RadioGroup>
                   </Grid2>
                   {/* If GST Registered = Yes */}
-                  {businessRows[idx]?.gst_registered === 'yes' && (
+                  {businessRows[idx]?.gst_registered === true && (
                     <>
                       <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                         <Typography>GST Returns</Typography>
@@ -3060,7 +3249,7 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                 gst_returns_files: null,
                 other_files: null,
                 opting_for_presumptive_taxation: 'no',
-                bookMaintained: 'no',
+                book_maintained: 'no',
                 gst_registered: 'no'
               }
             ]);
@@ -3303,7 +3492,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
   const [dividendRows, setDividendRows] = React.useState([{ id: null, received_from: '', dividend_received: '', file: '' }]);
   const [giftApplicable, setGiftApplicable] = React.useState('Not Applicable');
   const [giftRows, setGiftRows] = React.useState([
-    { id: null, amount: '', received_from: '', relation: '', date_received: '', was_it_marriage_related: 'No', file: '' }
+    { id: null, amount: '', received_from: '', relation: '', date_received: '', was_it_marriage_related: 'false', file: '' }
   ]);
   const [familyApplicable, setFamilyApplicable] = React.useState('Not Applicable');
   const [familyRows, setFamilyRows] = React.useState([{ id: null, amount: '', source: '', file: '' }]);
@@ -3463,7 +3652,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
     formData.append('received_from', row.received_from);
     formData.append('relation', row.relation);
     formData.append('date_received', row.date_received);
-    formData.append('was_it_marriage_related', row.was_it_marriage_related);
+    formData.append('was_it_marriage_related', row.was_it_marriage_related? 'true' : 'false');
     formData.append('gift_income', gift_income.data[0].id);
     const res = await Factory(type, url, formData);
     if (res.res.status_cd === 0) {
@@ -3509,7 +3698,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
     formData.append('country', row.country);
     formData.append('currency', row.currency);
     formData.append('amount', row.amount);
-    formData.append('tax_paid_abroad', row.tax_paid_abroad);
+    formData.append('tax_paid_abroad', row.tax_paid_abroad? 'true' : 'false');
     if (row.form67_file instanceof File) {
       formData.append('form67_file', row.form67_file);
     }
@@ -3986,22 +4175,22 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                     <TableCell sx={{ p: 0.5, py: 1 }} align="center">
                       <RadioGroup
                         row
-                        value={row.was_it_marriage_related}
+                        value={row.was_it_marriage_related? 'true' : 'false'}
                         onChange={(_, v) => {
                           const updated = [...giftRows];
-                          updated[idx].was_it_marriage_related = v;
+                          updated[idx].was_it_marriage_related = v=== 'true';
                           setGiftRows(updated);
                         }}
                       >
                         <FormControlLabel
-                          value="Yes"
-                          control={<Radio size="small" checked={row.was_it_marriage_related === 'Yes'} />}
+                          value="true"
+                          control={<Radio size="small"  />}
                           label="Yes"
                           sx={{ m: 0 }}
                         />
                         <FormControlLabel
-                          value="No"
-                          control={<Radio size="small" checked={row.was_it_marriage_related === 'No'} />}
+                          value="false"
+                          control={<Radio size="small"  />}
                           label="No"
                           sx={{ m: 0 }}
                         />
@@ -4260,23 +4449,23 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                     <TableCell sx={{ p: 0.5, py: 1 }}>
                       <RadioGroup
                         row
-                        value={row?.tax_paid_abroad}
+                        value={row?.tax_paid_abroad? 'true' : 'false'}
                         onChange={(_, v) => {
                           const updated = [...foreignRows];
-                          updated[idx].tax_paid_abroad = v;
+                          updated[idx].tax_paid_abroad = v === 'true';
                           setForeignRows(updated);
                         }}
                       >
                         <FormControlLabel
-                          value="yes"
+                          value="true"
                           sx={{ m: 0 }}
-                          control={<Radio sx={{ m: 0, px: 0.5 }} size="small" checked={row.tax_paid_abroad === 'yes'} />}
+                          control={<Radio sx={{ m: 0, px: 0.5 }} size="small"  />}
                           label="Yes"
                         />
                         <FormControlLabel
-                          value="no"
+                          value="false"
                           sx={{ m: 0 }}
-                          control={<Radio sx={{ m: 0, px: 0.5 }} size="small" checked={row.tax_paid_abroad === 'no'} />}
+                          control={<Radio sx={{ m: 0, px: 0.5 }} size="small"  />}
                           label="No"
                         />
                       </RadioGroup>

@@ -574,12 +574,12 @@ export default function ITR() {
                                 value={values?.mobile_number || ''}
                                 error={Boolean(touched?.mobile_number && errors?.mobile_number)}
                                 helperText={<ErrorMessage name="mobile_number" />}
-                                 sx={{
+                                sx={{
                                   width: '100%',
-                                   '& .MuiInputBase-input': {
-                                     color: 'grey.600'
-                                     }
-                                   }}
+                                  '& .MuiInputBase-input': {
+                                    color: 'grey.600'
+                                    }
+                                  }}
                               />
                             </Grid2>
                             {/* Email Id */}
@@ -597,10 +597,10 @@ export default function ITR() {
                                 helperText={<ErrorMessage name="email" />}
                                 sx={{
                                   width: '100%',
-                                   '& .MuiInputBase-input': {
-                                     color: 'grey.600'
-                                     }
-                                   }}
+                                  '& .MuiInputBase-input': {
+                                    color: 'grey.600'
+                                    }
+                                  }}
                               />
                             </Grid2>
                             {/* Name (3 fields) */}
@@ -695,10 +695,10 @@ export default function ITR() {
                                     }
                                     sx={{
                                   width: '100%',
-                                   '& .MuiInputBase-input': {
-                                     color: 'grey.600'
-                                     }
-                                   }}
+                                  '& .MuiInputBase-input': {
+                                    color: 'grey.600'
+                                    }
+                                  }}
                                   />
                                 )}
                               />
@@ -724,8 +724,8 @@ export default function ITR() {
                                     <FormControlLabel
                                       control={
                                         <Checkbox
-                                          checked={values?.[fieldName] === 'yes'}
-                                          onChange={(e) => setFieldValue(fieldName, e.target.checked ? 'yes' : null)}
+                                          checked={values?.[fieldName] === true}
+                                          onChange={(e) => setFieldValue(fieldName, e.target.checked )}
                                         />
                                       }
                                       label={option.label}
@@ -786,20 +786,25 @@ export default function ITR() {
                                 ...prev,
                                 status: 'in progress'
                             }));
+                            
                           } else {
                             enqueueSnackbar('Error saving tax paid details.', {
                               variant: 'error',
                               anchorOrigin: { vertical: 'top', horizontal: 'right' }
                             });
                           }
+                          
                         } catch (err) {
                           enqueueSnackbar('Error saving tax paid details.', {
                             variant: 'error',
                             anchorOrigin: { vertical: 'top', horizontal: 'right' }
                           });
                         }
+                          await fetchTaxPaidDetails();
                       }}
+                      
                     >
+          
                       {({ setFieldValue, values, errors, touched }) => (
                         <Form>
                           <Typography variant="h5" fontWeight={700} mb={2}>
@@ -1079,7 +1084,15 @@ export default function ITR() {
                                     formData.append('status', 'in progress');
                                     const res = await Factory(type, urlEndpoint, formData, {});
                                     if (res.res.status_cd === 0) {
-                                      setReviewAndFiling({ ...reviewAndFiling, data: { ...res.res.data } });
+                                      // setReviewAndFiling({ ...reviewAndFiling, data: { ...res.res.data } });
+                                    setReviewAndFiling((prev) => ({
+    ...prev,
+    task_id: reviewAndFiling?.task_id || null,
+    data: {
+      ...res.res,
+      draft_filing_certificate: e.target.files[0] || null
+    }
+  }));
                                       enqueueSnackbar('Draft income tax computation saved successfully!', {
                                         variant: 'success',
                                         anchorOrigin: { vertical: 'top', horizontal: 'right' }

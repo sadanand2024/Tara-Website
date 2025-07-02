@@ -237,20 +237,10 @@ const KeyManagerialPersonnel = () => {
                   <TableCell>{person.designation}</TableCell>
                   <TableCell>{person.pan_number}</TableCell>
                   <TableCell>
-                    <Chip 
-                      label={person.role} 
-                      color={getRoleColor(person.role)} 
-                      size="small"
-                      sx={{ fontWeight: 500 }}
-                    />
+                    <Chip label={person.role} color={getRoleColor(person.role)} size="small" sx={{ fontWeight: 500 }} />
                   </TableCell>
                   <TableCell>
-                    <Chip 
-                      label={person.status} 
-                      color={person.status === 'active' ? 'success' : 'error'} 
-                      size="small" 
-                      variant="outlined" 
-                    />
+                    <Chip label={person.status} color={person.status === 'active' ? 'success' : 'error'} size="small" variant="outlined" />
                   </TableCell>
                   <TableCell align="right">
                     <Stack direction="row" spacing={1} justifyContent="flex-end">
@@ -323,7 +313,12 @@ const KeyManagerialPersonnel = () => {
                   name="pan_number"
                   label="PAN Number"
                   value={formik.values.pan_number}
-                  onChange={formik.handleChange}
+                  onChange={(e) => {
+                    const upperCaseValue = e.target.value.toUpperCase();
+                    if (upperCaseValue.length <= 10) {
+                      formik.setFieldValue('pan_number', upperCaseValue);
+                    }
+                  }}
                   onBlur={formik.handleBlur}
                   error={formik.touched.pan_number && Boolean(formik.errors.pan_number)}
                   helperText={formik.touched.pan_number && formik.errors.pan_number}
@@ -370,10 +365,10 @@ const KeyManagerialPersonnel = () => {
             <Button onClick={handleClose} size="small" sx={{ color: 'text.primary' }}>
               Cancel
             </Button>
-            <Button 
-              type="submit" 
-              variant="contained" 
-              size="small" 
+            <Button
+              type="submit"
+              variant="contained"
+              size="small"
               color="primary"
               disabled={formik.isSubmitting}
               sx={{ position: 'relative', minWidth: '100px' }}
@@ -426,4 +421,3 @@ const KeyManagerialPersonnel = () => {
 };
 
 export default KeyManagerialPersonnel;
- 

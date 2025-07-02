@@ -260,11 +260,11 @@ function Worklocation({ handleBack, handleNext }) {
               }}
             />
           </TableContainer>
-          {workLocations.length > 0 && (
-            <Stack direction="row" justifyContent="space-between" sx={{ mt: 2 }}>
-              <Button size="small" variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigate('/app/payroll')}>
-                Back to Dashboard
-              </Button>
+          <Stack direction="row" justifyContent="space-between" sx={{ mt: 2 }}>
+            <Button size="small" variant="outlined" startIcon={<ArrowBackIcon />} onClick={handleBack}>
+              Back
+            </Button>
+            {workLocations.length > 0 && (
               <Pagination
                 count={Math.ceil(workLocations.length / rowsPerPage)}
                 page={currentPage}
@@ -272,16 +272,11 @@ function Worklocation({ handleBack, handleNext }) {
                 shape="rounded"
                 color="primary"
               />
-              <Stack direction="row" spacing={2}>
-                <Button size="small" variant="outlined" startIcon={<ArrowBackIcon />} onClick={handleBack}>
-                  Back
-                </Button>
-                <Button size="small" variant="contained" onClick={handleNext}>
-                  Next
-                </Button>
-              </Stack>
-            </Stack>
-          )}
+            )}
+            <Button size="small" variant="contained" onClick={handleNext}>
+              Next
+            </Button>
+          </Stack>
         </MainCard>
       )}
     </>

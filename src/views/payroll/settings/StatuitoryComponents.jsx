@@ -19,7 +19,7 @@ TabPanel.propTypes = {
   index: PropTypes.number.isRequired
 };
 
-const StatutoryComponents = () => {
+const StatutoryComponents = ({ handleNext }) => {
   const [activeTab, setActiveTab] = useState(0);
 
   const tabConfig = [
@@ -29,7 +29,7 @@ const StatutoryComponents = () => {
   ];
 
   const handleTabChange = (_event, newValue) => setActiveTab(newValue);
-  const handleNext = () => setActiveTab((prev) => (prev < tabConfig.length - 1 ? prev + 1 : prev));
+  // const handleNext = () => setActiveTab((prev) => (prev < tabConfig.length - 1 ? prev + 1 : prev));
   const handleBack = () => setActiveTab((prev) => (prev > 0 ? prev - 1 : prev));
 
   return (

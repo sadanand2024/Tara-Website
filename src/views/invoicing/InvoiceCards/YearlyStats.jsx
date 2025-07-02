@@ -93,7 +93,8 @@ const YearlyStats = ({ theme, title, setTitle, financialYear, setFinancialYear, 
                   sx={{
                     p: 2,
                     cursor: 'pointer',
-                    bgcolor: item.title === title ? 'primary.lighter' : 'background.paper',
+                    boxShadow: (theme) => (item.title === title ? theme.shadows[4] : 'none'),
+                    transform: item.title === title && 'translateY(-4px)',
                     transition: 'all 0.3s ease-in-out',
                     '&:hover': {
                       transform: 'translateY(-4px)',

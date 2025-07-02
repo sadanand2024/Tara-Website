@@ -153,7 +153,7 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
   };
 
   const fetchData = async () => {
-    if (businessPremises?.id && additionalSpace === 'yes') {
+    if (businessPremises?.id && additionalSpace === true) {
       const url = `/tradelicense/additional-space/${businessPremises.id}/`;
       const { res } = await Factory('get', url);
       if (res.status_cd === 0 && res.data) {
@@ -294,9 +294,9 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
     label="Yes"
     control={
       <Radio
-        checked={additionalSpace === 'yes'}
+        checked={additionalSpace === true}
         onChange={async () => {
-          setAdditionalSpace('yes');
+          setAdditionalSpace(true);
 
           const url = businessPremises.id
             ? `/tradelicense/business-location/${businessPremises.id}/`
@@ -306,7 +306,7 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
 
           const payload = {
             // ...businessPremises,
-            additional_space: 'yes'
+            additional_space: true
           };
 
           const { res } = await Factory(method, url, payload);
@@ -323,7 +323,7 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
             );
             setBusinessPremises((prev) => ({
       ...prev,
-      additional_space: 'yes',
+      additional_space: true,
       status: 'in progress'
     }));
             fetchData();
@@ -337,7 +337,7 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
   label="No"
   control={
     <Radio
-      checked={additionalSpace === 'no'}
+      checked={additionalSpace === false}
       onChange={async () => {
         // Step 1: Delete additional space if it exists
         if (values.id) {
@@ -368,7 +368,7 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
         }
 
         // Step 2: Update the business location to set additional_space: 'no'
-        setAdditionalSpace('no');
+        setAdditionalSpace(false);
 
         const url = businessPremises.id
           ? `/tradelicense/business-location/${businessPremises.id}/`
@@ -377,7 +377,7 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
         const method = businessPremises.id ? 'put' : 'post';
 
         const payload = {
-          additional_space: 'no'
+          additional_space: false
         };
 
         const { res } = await Factory(method, url, payload);
@@ -394,7 +394,7 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
           );
           setBusinessPremises((prev) => ({
               ...prev,
-              additional_space: 'no',
+              additional_space: false,
               status: 'in progress'
   }));
           clearFormFields();
@@ -408,7 +408,7 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
           </Box>
         </Grid2>
 
-        {additionalSpace === 'yes' && (
+        {additionalSpace === true && (
           <Grid2 item xs={12}>
             <form onSubmit={handleSubmit}>
               <Grid2 container spacing={2}>

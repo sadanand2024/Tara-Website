@@ -24,8 +24,9 @@ import {
   Typography,
   Stack,
   Link,
-  Paper
+  Chip
 } from '@mui/material';
+
 // ==============================|| MANAGE USERS ||============================== //
 
 const ServiceRequests = ({ searchQuery, setUsers, assigned, setSearchQuery }) => {
@@ -166,8 +167,9 @@ const ServiceRequests = ({ searchQuery, setUsers, assigned, setSearchQuery }) =>
               <TableCell sx={{ pl: 3 }}>Request ID</TableCell>
               <TableCell sx={{ p: 1.5 }}>Services</TableCell>
               <TableCell sx={{ p: 1.5 }}>Category</TableCell>
-              <TableCell sx={{ p: 1.5 }}>Client</TableCell>
+              {/* <TableCell sx={{ p: 1.5 }}>Client</TableCell> */}
               <TableCell sx={{ p: 1.5 }}>Created On</TableCell>
+              <TableCell sx={{ p: 1.5 }}>Status</TableCell>
               <TableCell sx={{ p: 1.5 }}>Assignee</TableCell>
               <TableCell sx={{ p: 1.5 }}>Reviewer</TableCell>
               {!assigned && <TableCell sx={{ p: 1.5 }}>Action</TableCell>}
@@ -181,7 +183,7 @@ const ServiceRequests = ({ searchQuery, setUsers, assigned, setSearchQuery }) =>
                 <TableRow hover key={idx}>
                   <TableCell sx={{ pl: 3 }}>{row.id}</TableCell>
                   <TableCell sx={{ p: 1.5 }}>
-                    {assigned ? (
+                    {assigned && row.assignee !== null && row.reviewer !== null ? (
                       <Link
                         href={`/app/task-management/${row.service_name}?service_id=${row.id}`}
                         sx={{ textDecoration: 'underline', textDecorationColor: 'inherit' }}
@@ -193,48 +195,75 @@ const ServiceRequests = ({ searchQuery, setUsers, assigned, setSearchQuery }) =>
                     )}
                   </TableCell>
                   <TableCell sx={{ p: 1.5 }}>{row.category}</TableCell>
-                  <TableCell sx={{ p: 1.5 }}>{row.user.full_name || 'Unnamed '}</TableCell>
+                  {/* <TableCell sx={{ p: 1.5 }}>{row.user.full_name || 'Unnamed '}</TableCell> */}
                   <TableCell sx={{ p: 1.5 }}>
                     {new Date(row.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                   </TableCell>
-
+                  <TableCell sx={{ p: 1.5 }}>
+                    <Chip
+                      sx={{
+                        fontWeight: 'bold'
+                      }}
+                      variant="outlined"
+                      label={row.status === 'initiated' ? 'Payment Pending' : 'Payment Successful'}
+                      color={row.status === 'initiated' ? 'warning' : 'success'}
+                    />
+                  </TableCell>
                   {!assigned ? (
                     <>
                       <TableCell sx={{ p: 1.5 }}>
-                        <Autocomplete
-                          size="small"
-                          options={userOptions}
-                          disabled={assigned}
-                          getOptionLabel={(option) => option.name || option.first_name || option.email || ''}
-                          value={assigneeObj}
-                          onChange={(_, value) => handleARChange(row, value, 'assignee', idx)}
-                          isOptionEqualToValue={(option, value) => option.id === value.id}
-                          renderOption={(props, option) => (
-                            <Box component="li" {...props} display="flex" alignItems="center" key={option.id}>
-                              <Avatar src={option.avatar} sx={{ width: 24, height: 24, mr: 1 }} />
-                              {option.name || option.first_name || option.email}
-                            </Box>
-                          )}
-                          renderInput={(params) => <TextField {...params} placeholder="Select Assignee" />}
-                        />
+                        <Box
+                          sx={
+                            row.status === 'initiated' && {
+                              cursor: 'not-allowed',
+                              '& *': { cursor: 'not-allowed !important' }
+                            }
+                          }
+                        >
+                          <Autocomplete
+                            size="small"
+                            options={userOptions}
+                            disabled={row.status === 'initiated'}
+                            getOptionLabel={(option) => option.name || option.first_name || option.email || ''}
+                            value={assigneeObj}
+                            onChange={(_, value) => handleARChange(row, value, 'assignee')}
+                            isOptionEqualToValue={(option, value) => option.id === value.id}
+                            renderOption={(props, option) => (
+                              <Box component="li" {...props} display="flex" alignItems="center" key={option.id}>
+                                <Avatar src={option.avatar} sx={{ width: 24, height: 24, mr: 1 }} />
+                                {option.name || option.first_name || option.email}
+                              </Box>
+                            )}
+                            renderInput={(params) => <TextField {...params} placeholder="Select Assignee" />}
+                          />
+                        </Box>
                       </TableCell>
                       <TableCell sx={{ p: 1.5 }}>
-                        <Autocomplete
-                          size="small"
-                          options={userOptions}
-                          disabled={assigned}
-                          getOptionLabel={(option) => option.name || option.first_name || option.email || ''}
-                          value={reviewerObj}
-                          onChange={(_, value) => handleARChange(row, value, 'reviewer', idx)}
-                          isOptionEqualToValue={(option, value) => option.id === value.id}
-                          renderOption={(props, option) => (
-                            <Box component="li" {...props} display="flex" alignItems="center" key={option.id}>
-                              <Avatar src={option.avatar} sx={{ width: 24, height: 24, mr: 1 }} />
-                              {option.name || option.first_name || option.email}
-                            </Box>
-                          )}
-                          renderInput={(params) => <TextField {...params} placeholder="Select Reviewer" />}
-                        />
+                        <Box
+                          sx={
+                            row.status === 'initiated' && {
+                              cursor: 'not-allowed',
+                              '& *': { cursor: 'not-allowed !important' }
+                            }
+                          }
+                        >
+                          <Autocomplete
+                            size="small"
+                            options={userOptions}
+                            disabled={row.status === 'initiated'}
+                            getOptionLabel={(option) => option.name || option.first_name || option.email || ''}
+                            value={reviewerObj}
+                            onChange={(_, value) => handleARChange(row, value, 'reviewer')}
+                            isOptionEqualToValue={(option, value) => option.id === value.id}
+                            renderOption={(props, option) => (
+                              <Box component="li" {...props} display="flex" alignItems="center" key={option.id}>
+                                <Avatar src={option.avatar} sx={{ width: 24, height: 24, mr: 1 }} />
+                                {option.name || option.first_name || option.email}
+                              </Box>
+                            )}
+                            renderInput={(params) => <TextField {...params} placeholder="Select Reviewer" />}
+                          />
+                        </Box>
                       </TableCell>
                     </>
                   ) : (

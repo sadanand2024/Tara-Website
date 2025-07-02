@@ -82,7 +82,7 @@ export function JWTProvider({ children }) {
     };
 
     init();
-  }, []);
+  }, [reduxDispatch, dispatch]);
 
   const login = async (email, password) => {
     const response = await axios.post('/user_management/auth/login', { email, password });
@@ -125,8 +125,10 @@ export function JWTProvider({ children }) {
         __postData.account_type = 'personal';
       }
       const response = await axios.post(url, __postData);
-      if (response.status === 201 && response.statusText === 'Created') {
+
+      if (response.status === 201) {
         const serviceToken = response.data.access_token;
+
         const user = response.data;
 
         if (serviceToken) {

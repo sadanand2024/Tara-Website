@@ -22,7 +22,6 @@ const SalaryTemplateList = Loadable(lazy(() => import('views/payroll/settings/Sa
 const SalaryTemplate = Loadable(lazy(() => import('views/payroll/settings/SalaryTemplate')));
 const PaySchedule = Loadable(lazy(() => import('views/payroll/settings/PaySchedule')));
 const LeaveAttendance = Loadable(lazy(() => import('views/payroll/settings/LeaveAttendance')));
-// const BusinessProfileSetup = Loadable(lazy(() => import('views/payroll/settings/BusinessProfileSetup')));
 const EmployeeMaster = Loadable(lazy(() => import('views/payroll/settings/EmployeeMasterData/Index')));
 const AddEmployee = Loadable(lazy(() => import('views/payroll/settings/EmployeeMasterData/AddEmployee')));
 
@@ -62,7 +61,6 @@ const TradeLicence = Loadable(lazy(() => import('views/Services/TradeLicence')))
 const LabourLicence = Loadable(lazy(() => import('views/Services/LabourLicence')));
 const GstRegistration = Loadable(lazy(() => import('views/Services/GST')));
 const CompanyIncorporation = Loadable(lazy(() => import('views/Services/CompanyIncorporation')));
-
 
 //Admin Panel
 const UserManagement = Loadable(lazy(() => import('views/SuperAdmin/UserManagement')));
@@ -166,18 +164,16 @@ const MainRoutes = {
       path: '/app/task-management/registration',
       element: <GstRegistration />
     },
-      {
+    {
       path: '/app/my-services/private-limited',
 
       element: <CompanyIncorporation />
     },
-     
-    
+
     {
       path: '/app/task-management/private-limited',
-    
 
-      element: <CompanyIncorporation/>
+      element: <CompanyIncorporation />
     },
     {
       path: '/app/users',

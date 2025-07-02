@@ -343,19 +343,30 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
     if (employeeData) {
       setValues((prev) => ({
         ...prev,
-        first_name: employeeData.first_name,
-        middle_name: employeeData.middle_name,
-        last_name: employeeData.last_name,
-        associate_id: employeeData.associate_id,
-        doj: employeeData.doj,
-        work_email: employeeData.work_email,
-        mobile_number: employeeData.mobile_number,
-        gender: employeeData.gender.charAt(0).toUpperCase() + employeeData.gender.slice(1),
-        work_location: employeeData.work_location,
-        designation: employeeData.designation,
-        department: employeeData.department,
-        enable_portal_access: employeeData.enable_portal_access,
-        statutory_components: { ...employeeData.statutory_components }
+        first_name: employeeData.first_name || '',
+        middle_name: employeeData.middle_name || '',
+        last_name: employeeData.last_name || '',
+        associate_id: employeeData.associate_id || '',
+        doj: employeeData.doj || '',
+        work_email: employeeData.work_email || '',
+        mobile_number: employeeData.mobile_number || '',
+        gender: employeeData.gender ? employeeData.gender.charAt(0).toUpperCase() + employeeData.gender.slice(1) : '',
+        work_location: employeeData.work_location || '',
+        designation: employeeData.designation || '',
+        department: employeeData.department || '',
+        enable_portal_access: employeeData.enable_portal_access || false,
+        statutory_components: {
+          epf_enabled: employeeData.statutory_components?.epf_enabled || false,
+          esi_enabled: employeeData.statutory_components?.esi_enabled || false,
+          professional_tax: employeeData.statutory_components?.professional_tax || false,
+          employee_provident_fund: {
+            pf_account_number: employeeData.statutory_components?.employee_provident_fund?.pf_account_number || '',
+            uan: employeeData.statutory_components?.employee_provident_fund?.uan || ''
+          },
+          employee_state_insurance: {
+            esi_number: employeeData.statutory_components?.employee_state_insurance?.esi_number || ''
+          }
+        }
       }));
     }
   }, [employeeData]);
@@ -419,7 +430,7 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
                 </Typography>
                 <TextField
                   fullWidth
-                  value={values.statutory_components.employee_provident_fund.pf_account_number}
+                  value={values.statutory_components?.employee_provident_fund?.pf_account_number || ''}
                   onChange={(e) => setFieldValue('statutory_components.employee_provident_fund.pf_account_number', e.target.value)}
                   onBlur={handleBlur}
                   name="statutory_components.employee_provident_fund.pf_account_number"
@@ -442,7 +453,7 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
                 </Typography>
                 <TextField
                   fullWidth
-                  value={values.statutory_components.employee_provident_fund.uan || ''}
+                  value={values.statutory_components?.employee_provident_fund?.uan || ''}
                   onChange={(e) => setFieldValue('statutory_components.employee_provident_fund.uan', e.target.value)}
                   onBlur={handleBlur}
                   name="statutory_components.employee_provident_fund.uan"
@@ -485,7 +496,7 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
                 </Typography>
                 <TextField
                   fullWidth
-                  value={values.statutory_components.employee_state_insurance.esi_number}
+                  value={values.statutory_components?.employee_state_insurance?.esi_number || ''}
                   onChange={(e) => setFieldValue('statutory_components.employee_state_insurance.esi_number', e.target.value)}
                   onBlur={handleBlur}
                   name="statutory_components.employee_state_insurance.esi_number"

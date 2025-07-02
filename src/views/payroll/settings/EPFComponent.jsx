@@ -170,11 +170,6 @@ function EpfComponent({ handleNext }) {
                 {epfData && (
                   <>
                     <Grid2 size={6}>
-                      <Typography variant="h4" sx={{ textAlign: 'left', whiteSpace: 'nowrap' }}>
-                        Employees Provident Fund
-                      </Typography>
-                    </Grid2>
-                    <Grid2 size={6}>
                       <Box sx={{ textAlign: 'left' }}>
                         <Button
                           variant="contained"
@@ -290,30 +285,21 @@ function EpfComponent({ handleNext }) {
                     </Grid2>
                     <Grid2 size={12}>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
-                        <Button
+                        <Typography></Typography>
+                        {/* <Button
                           size="small"
-                          variant="outlined"
-                          startIcon={<ArrowBackIcon />}
+                          variant="contained"
                           onClick={() => {
-                            navigate('/app/payroll');
+                            setPostType('put');
+                            setValues(epfData);
+                            setEpfdisableDialog(true);
                           }}
                         >
-                          Back to Dashboard
-                        </Button>
-                        {/* <Button
-                            size="small"
-                            variant="contained"
-                            onClick={() => {
-                              setPostType('put');
-                              setValues(epfData);
-                              setEpfdisableDialog(true);
-                            }}
-                          >
-                            Disable EPF
-                          </Button> */}
+                          Disable EPF
+                        </Button> */}
                         {/* <Button size="small" variant="contained" onClick={handleNext}>
-                            Next
-                          </Button> */}
+                          Next
+                        </Button> */}
                       </Box>
                     </Grid2>
                   </>

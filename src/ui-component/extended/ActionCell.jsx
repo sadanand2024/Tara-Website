@@ -66,7 +66,7 @@ export default function ActionCell({
       </IconButton>
 
       {/* Popper Action Menu */}
-      <Popper open={isOpen} anchorEl={anchorEl} placement="top-end" transition>
+      <Popper open={isOpen} anchorEl={anchorEl} placement="top-end" transition sx={{ boxShadow: 2, borderRadius: 2, zIndex: 9999 }}>
         {({ TransitionProps }) => (
           <Fade {...TransitionProps} in={isOpen}>
             <Box

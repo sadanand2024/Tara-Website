@@ -189,10 +189,10 @@ const Personal = ({ open, onClose, onSubmit, isSubmitting, cancel }) => {
 
                 if (field.name === 'pan_number') {
                   // Only allow letters and numbers, max 10 characters
-                  value = value.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
                   if (value.length > 10) {
                     return;
                   }
+                  value = value.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
                 } else if (field.name === 'aadhaar_number') {
                   // Only allow numbers, max 12 characters
                   value = value.replace(/[^0-9]/g, '');
@@ -259,10 +259,13 @@ const Personal = ({ open, onClose, onSubmit, isSubmitting, cancel }) => {
       maxWidth="sm"
       showClose={false}
       title="Add Personal Details"
-      handleClose={onClose}
+      handleClose={
+        // onClose
+        () => {}
+      }
       footer={
         <Stack direction="row" sx={{ width: 1, justifyContent: 'flex-end', gap: 2 }}>
-          <Button
+          {/* <Button
             onClick={() => {
               onClose();
             }}
@@ -270,7 +273,7 @@ const Personal = ({ open, onClose, onSubmit, isSubmitting, cancel }) => {
             color="error"
           >
             Cancel
-          </Button>
+          </Button> */}
           <Button onClick={handleSubmit} type="submit" variant="contained" color="primary">
             Save
           </Button>
