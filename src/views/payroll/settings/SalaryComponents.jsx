@@ -16,14 +16,14 @@ TabPanel.propTypes = {
   index: PropTypes.number.isRequired
 };
 
-const SalaryComponentTabs = ({ type }) => {
+const SalaryComponentTabs = ({ type, handleBack, handleNext }) => {
   const [activeTab, setActiveTab] = useState(0);
   const [open, setOpen] = useState(false);
   const [postType, setPostType] = useState('');
 
   const handleTabChange = (_event, newValue) => setActiveTab(newValue);
 
-  const handleNext = () => {
+  const handleTabNext = () => {
     if (activeTab < tabLabels.length - 1) setActiveTab((prev) => prev + 1);
   };
 
@@ -55,14 +55,23 @@ const SalaryComponentTabs = ({ type }) => {
       </Box>
 
       <TabPanel value={activeTab} index={0}>
-        <EarningsComponent handleNext={handleNext} open={open} setOpen={setOpen} postType={postType} setPostType={setPostType} />
+        <EarningsComponent
+          handleBack={handleBack}
+          handleNext={handleNext}
+          open={open}
+          setOpen={setOpen}
+          postType={postType}
+          setPostType={setPostType}
+        />
       </TabPanel>
     </MainCard>
   );
 };
 
 SalaryComponentTabs.propTypes = {
-  type: PropTypes.any
+  type: PropTypes.any,
+  handleBack: PropTypes.func,
+  handleNext: PropTypes.func
 };
 
 export default SalaryComponentTabs;

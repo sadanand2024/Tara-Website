@@ -285,7 +285,10 @@ const BusinessKYCDialog = ({ open, onClose, onSubmit, isSubmitting }) => {
       maxWidth="md"
       showClose={false}
       title="Business KYC Details"
-      // handleClose={onClose}
+      handleClose={
+        // onClose
+        () => {}
+      }
       footer={
         <Stack direction="row" sx={{ justifyContent: 'flex-end', gap: 2 }}>
           {/* <Button onClick={onClose} variant="outlined" color="error" disabled={isSubmitting}>

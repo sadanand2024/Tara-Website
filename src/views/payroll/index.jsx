@@ -241,7 +241,17 @@ const PayrollDashboard = () => {
           >
             Add Employee
           </Button>
-          <Button variant="outlined" onClick={() => navigate('/app/payroll/settings')} startIcon={<IconSettings2 size={18} />}>
+          <Button
+            variant="outlined"
+            onClick={() => {
+              if (businessDetails?.payroll_id) {
+                navigate(`/app/payroll/settings?payrollid=${businessDetails.payroll_id}`);
+              } else {
+                navigate('/app/payroll/settings');
+              }
+            }}
+            startIcon={<IconSettings2 size={18} />}
+          >
             Payroll Settings
           </Button>
         </Stack>

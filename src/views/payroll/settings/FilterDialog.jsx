@@ -4,6 +4,7 @@ import Grid2 from '@mui/material/Grid2';
 import Modal from 'ui-component/extended/Modal';
 import CustomAutocomplete from 'utils/CustomAutocomplete';
 export default function FilterDialog({
+  open,
   financialYear,
   setFinancialYear,
   workLocations,

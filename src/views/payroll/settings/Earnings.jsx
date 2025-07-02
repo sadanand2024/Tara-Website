@@ -304,18 +304,24 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
               />
             </TableContainer>
 
-            {earningsData.length > 0 && (
-              <Stack direction="row" justifyContent="space-between" sx={{ mt: 2 }}>
-                <Typography></Typography>
-                <Pagination
-                  count={Math.ceil(earningsData.length / rowsPerPage)}
-                  page={currentPage}
-                  onChange={(e, value) => setCurrentPage(value)}
-                  color="primary"
-                />
-                <Stack direction="row" spacing={2}></Stack>
+            <Grid2 size={12} sx={{ mt: 2 }}>
+              <Stack direction="row" justifyContent="space-between">
+                <Button size="small" variant="outlined" startIcon={<ArrowBackIcon />} onClick={handleBack}>
+                  Back
+                </Button>
+                {earningsData.length > 0 && (
+                  <Pagination
+                    count={Math.ceil(earningsData.length / rowsPerPage)}
+                    page={currentPage}
+                    onChange={(e, value) => setCurrentPage(value)}
+                    color="primary"
+                  />
+                )}
+                <Button size="small" variant="contained" onClick={handleNext}>
+                  Next
+                </Button>
               </Stack>
-            )}
+            </Grid2>
           </Grid2>
 
           <Modal
