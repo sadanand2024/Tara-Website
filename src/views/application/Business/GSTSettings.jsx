@@ -12,7 +12,9 @@ import {
   Button,
   IconButton,
   Stack,
-  Tooltip
+  Tooltip,
+  Paper,
+  CircularProgress
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
@@ -26,6 +28,9 @@ import DeleteConfirmationDialog from 'utils/DeleteConfirmationDialog';
 import { Pagination } from '@mui/material';
 import AddGSTDialog from './AddGSTDialog';
 import { useNavigate } from 'react-router-dom';
+import MainCard from 'ui-component/cards/MainCard';
+import GroupIcon from '@mui/icons-material/Group';
+
 const GSTSettings = ({ from, handleBack, handleNext }) => {
   const [gstList, setGstList] = useState([]);
   const [open, setOpen] = useState(false);
@@ -37,15 +42,20 @@ const GSTSettings = ({ from, handleBack, handleNext }) => {
   const dispatch = useDispatch();
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 8;
+  const [isLoading, setIsLoading] = useState(false);
   const [paginatedData, setPaginatedData] = useState([]);
   const navigate = useNavigate();
+
   const handlePageChange = (event, value) => {
     setCurrentPage(value);
   };
 
   useEffect(() => {
-    setPaginatedData(gstList.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage));
+    if (gstList && Array.isArray(gstList)) {
+      setPaginatedData(gstList.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage));
+    }
   }, [currentPage, gstList]);
+
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
     setOpen(false);
@@ -121,84 +131,114 @@ const GSTSettings = ({ from, handleBack, handleNext }) => {
   };
 
   const fetchGSTList = async () => {
-    try {
-      const response = await Factory('get', `/user_management/gst-details/${user.active_context.business_id}/`, {}, {});
-      if (response.res.status_cd === 0) {
-        setGstList(response.res.data);
-      } else {
-        dispatch(
-          openSnackbar({
-            open: true,
-            message: 'Failed to fetch GST details',
-            variant: 'alert',
-            alert: { color: 'error' },
-            close: false
-          })
-        );
-      }
-    } catch (error) {
-      console.error('Error fetching GST details:', error);
+    setIsLoading(true);
+    const response = await Factory('get', `/user_management/gst-details/${user.active_context.business_id}/`, {}, {});
+    if (response.res.status_cd === 0) {
+      const results = response.res.data.results || [];
+      setGstList(results);
+      setPaginatedData(results.slice(0, rowsPerPage));
       dispatch(
         openSnackbar({
           open: true,
-          message: 'Failed to fetch GST details',
+          message: 'GST details fetched successfully',
+          variant: 'alert',
+          alert: { color: 'success' },
+          close: false
+        })
+      );
+    } else {
+      setGstList([]);
+      setPaginatedData([]);
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(response?.res?.data || 'Failed to fetch GST details'),
           variant: 'alert',
           alert: { color: 'error' },
           close: false
         })
       );
     }
+
+    setIsLoading(false);
   };
 
   useEffect(() => {
     fetchGSTList();
   }, []);
 
-  return (
-    <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
-        <Typography variant="h4" color="text.primary" gutterBottom>
-          GST Settings
-        </Typography>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={handleOpen} size="small">
-          Add GST
-        </Button>
-      </Box>
-      <Card
-        elevation={2}
+  if (isLoading) {
+    return (
+      <Box
         sx={{
-          mb: 2,
-          '& .MuiTableContainer-root': {
-            borderRadius: 0
-          },
-          '& .MuiTableCell-root': {
-            color: 'text.primary'
-          },
-          '& .MuiTableHead-root .MuiTableCell-root': {
-            py: 1,
-            backgroundColor: 'primary.dark',
-            color: '#fff'
-          }
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '400px',
+          flexDirection: 'column',
+          gap: 2
         }}
       >
-        <TableContainer>
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell sx={{ backgroundColor: 'primary.main', color: '#fff', fontWeight: 600 }}>GST Number</TableCell>
-                <TableCell sx={{ backgroundColor: 'primary.main', color: '#fff', fontWeight: 600 }}>Trade Name</TableCell>
-                <TableCell sx={{ backgroundColor: 'primary.main', color: '#fff', fontWeight: 600 }}>Branch/Vertical</TableCell>
-                <TableCell sx={{ backgroundColor: 'primary.main', color: '#fff', fontWeight: 600 }}>State</TableCell>
-                <TableCell sx={{ backgroundColor: 'primary.main', color: '#fff', fontWeight: 600 }}>Type</TableCell>
-                <TableCell sx={{ backgroundColor: 'primary.main', color: '#fff', fontWeight: 600 }}>Export/SEZ</TableCell>
-                <TableCell sx={{ backgroundColor: 'primary.main', color: '#fff', fontWeight: 600 }}>GST DOC</TableCell>
-                <TableCell sx={{ backgroundColor: 'primary.main', color: '#fff', fontWeight: 600 }} align="right">
-                  Actions
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {paginatedData.map((row, idx) => (
+        <CircularProgress size={50} />
+        <Typography variant="h5" color="text.secondary">
+          Loading Personnel...
+        </Typography>
+      </Box>
+    );
+  }
+
+  return (
+    <MainCard
+      title="GST Settings"
+      subtitle="Manage your business GST settings for seamless operations"
+      action={
+        <Button
+          variant="contained"
+          size="small"
+          startIcon={<AddIcon />}
+          onClick={handleOpen}
+          sx={{
+            textTransform: 'none',
+            fontWeight: 600,
+            fontSize: '0.9rem'
+          }}
+        >
+          Add GST
+        </Button>
+      }
+    >
+      <TableContainer
+        component={Paper}
+        sx={{
+          width: '100%',
+          borderRadius: 2,
+          boxShadow: 1,
+          overflowX: 'auto'
+        }}
+      >
+        <Table size="small">
+          <TableHead
+            sx={{
+              backgroundColor: 'primary.main',
+              '& .MuiTableCell-root': {
+                color: '#ffffff !important'
+              }
+            }}
+          >
+            <TableRow>
+              <TableCell>GST Number</TableCell>
+              <TableCell>Trade Name</TableCell>
+              <TableCell>Branch/Vertical</TableCell>
+              <TableCell>State</TableCell>
+              <TableCell>Type</TableCell>
+              <TableCell>Export/SEZ</TableCell>
+              <TableCell>GST DOC</TableCell>
+              <TableCell align="right">Actions</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {paginatedData && paginatedData.length > 0 ? (
+              paginatedData.map((row, idx) => (
                 <TableRow key={idx} hover>
                   <TableCell>{row.gstin}</TableCell>
                   <TableCell>{row.trade_name}</TableCell>
@@ -228,64 +268,41 @@ const GSTSettings = ({ from, handleBack, handleNext }) => {
                     </Stack>
                   </TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Card>
-      {from === 'invoice' && (
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Button
-            variant="outlined"
-            startIcon={<ArrowBackIcon />}
-            onClick={() => {
-              navigate('/app/invoice');
-            }}
-            size="small"
-          >
-            Back To Dashboard
-          </Button>
-          {paginatedData.length === 0 && (
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                py: 3,
-                width: '100%',
-                color: 'text.secondary'
-              }}
-            >
-              No GST records added yet
-            </Box>
-          )}
-          <Stack direction="row" spacing={2}>
-            <Button variant="outlined" onClick={handleBack}>
-              Back
-            </Button>
-            <Button variant="contained" onClick={handleNext}>
-              Next
-            </Button>
-          </Stack>
-        </Box>
-      )}
-      {/* Add/Edit GST Dialog */}
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={8} align="center">
+                  <Box
+                    sx={{
+                      textAlign: 'center',
+                      py: 4
+                    }}
+                  >
+                    <GroupIcon sx={{ fontSize: 60, color: 'grey.400', mb: 2 }} />
+                    <Typography variant="h6" color="text.secondary" gutterBottom>
+                      No GST Added
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                      Start by adding your GST for business operations
+                    </Typography>
+                    <Button variant="outlined" onClick={handleOpen} startIcon={<AddIcon />} sx={{ borderRadius: 2, textTransform: 'none' }}>
+                      Add First GST
+                    </Button>
+                  </Box>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
       <AddGSTDialog open={open} selectedGST={selectedGST} handleClose={handleClose} fetchGSTList={fetchGSTList} />
 
-      <DeleteConfirmationDialog
-        open={deleteDialogOpen}
-        onClose={handleDeleteClose}
-        onConfirm={() => deleteIndex !== null && handleDelete()}
-        title="Delete GST Details"
-        message="Are you sure you want to delete this GST details? This action cannot be undone."
-        itemName={deleteIndex !== null ? `GST Number: ${gstList[deleteIndex]?.gstin}` : ''}
-      />
-      {paginatedData.length > 0 && (
+      {paginatedData && paginatedData.length > 0 && gstList && gstList.length > 0 && (
         <Stack direction="row" justifyContent="center" sx={{ py: 2 }}>
           <Pagination count={Math.ceil(gstList.length / rowsPerPage)} page={currentPage} onChange={handlePageChange} />
         </Stack>
       )}
-    </Box>
+    </MainCard>
   );
 };
 

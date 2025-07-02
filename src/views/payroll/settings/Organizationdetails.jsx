@@ -284,7 +284,6 @@ function Organizationdetails({ handleNext }) {
                 setFieldValue(field.name, value);
               }
             }}
-            // type={field.name === 'pan' ? 'text' : field.name === 'org_address_pincode' ? 'number' : 'text'}
             onBlur={handleBlur}
             error={touched[field.name] && Boolean(errors[field.name])}
             helperText={touched[field.name] && errors[field.name]}

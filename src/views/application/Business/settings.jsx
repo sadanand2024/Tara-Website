@@ -40,11 +40,12 @@ import Licenses from './Licenses';
 import DSCRegister from './DSCRegister';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { useTheme } from '@mui/material/styles';
+import { useMediaQuery, Box, Card, CardHeader } from '@mui/material';
 // tabs
 function TabPanel({ children, value, index, ...other }) {
   return (
     <div role="tabpanel" hidden={value !== index} id={`simple-tabpanel-${index}`} aria-labelledby={`simple-tab-${index}`} {...other}>
-      {value === index && <div>{children}</div>}
+      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
     </div>
   );
 }
@@ -114,6 +115,7 @@ export default function Profile2() {
   const user = useSelector((state) => state.accountReducer.user);
   const [searchParams] = useSearchParams();
   const tabvalue = searchParams.get('tabvalue');
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('md'));
 
   useEffect(() => {
     if (tabvalue) {
@@ -126,135 +128,158 @@ export default function Profile2() {
   };
 
   return (
-    <Grid container spacing={gridSpacing}>
-      <Grid size={12}>
-        <MainCard
-          title="Business Settings"
-          icon={<SettingsIcon sx={{ color: theme.palette.primary.main, fontSize: 24 }} />}
-          content={false}
+    <Card
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        width: '100%',
+        minHeight: '800px',
+        overflow: 'hidden'
+      }}
+    >
+      {/* Header at the top */}
+      <CardHeader title="Business Settings" />
+      <Divider />
+      {/* Main content area: Tabs + TabPanels */}
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: isSmallScreen ? 'column' : 'row',
+          flexGrow: 1,
+          overflow: 'hidden'
+        }}
+      >
+        {/* Tabs section */}
+        <Tabs
+          value={value}
+          onChange={handleChange}
+          orientation={isSmallScreen ? 'horizontal' : 'vertical'}
+          variant="scrollable"
+          sx={{
+            minWidth: isSmallScreen ? '100%' : 320,
+            borderRight: isSmallScreen ? 'none' : '1px solid',
+            borderBottom: isSmallScreen ? '1px solid' : 'none',
+            borderColor: 'divider',
+            '& .MuiTabs-flexContainer': {
+              flexDirection: isSmallScreen ? 'row' : 'column'
+            },
+            '& button': {
+              color: mode === 'dark' ? 'grey.600' : 'grey.900',
+              minHeight: 'auto',
+              minWidth: isSmallScreen ? 'auto' : '100%',
+              py: 1.5,
+              px: 2,
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'flex-start',
+              gap: 1,
+              borderRadius: `${borderRadius}px`,
+              mx: isSmallScreen ? 0.5 : 0
+            },
+            '& button.Mui-selected': {
+              color: 'primary.main',
+              bgcolor: mode === 'dark' ? 'dark.main' : 'primary.light'
+            },
+            '& button > svg': {
+              height: 20,
+              width: 20
+            },
+            '& > div > span': {
+              display: 'none'
+            },
+            padding: 2
+          }}
         >
-          <Grid container spacing={gridSpacing}>
-            <Grid size={{ xs: 12, lg: 3 }}>
-              <CardContent>
-                <Tabs
-                  value={value}
-                  onChange={handleChange}
-                  orientation="vertical"
-                  variant="scrollable"
-                  sx={{
-                    '& .MuiTabs-flexContainer': {
-                      borderBottom: 'none'
-                    },
-                    '& button': {
-                      color: mode === ThemeMode.DARK ? 'grey.600' : 'grey.900',
-                      minHeight: 'auto',
-                      minWidth: '100%',
-                      py: 1.5,
-                      px: 0,
-                      display: 'flex',
-                      flexDirection: 'row',
-                      alignItems: 'flex-start',
-                      textAlign: 'left',
-                      justifyContent: 'flex-start',
-                      borderRadius: `${borderRadius}px`
-                    },
-                    '& button.Mui-selected': {
-                      color: 'primary.main',
-                      bgcolor: mode === ThemeMode.DARK ? 'dark.main' : 'grey.50'
-                    },
-                    '& button > svg': {
-                      marginBottom: '0px !important',
-                      marginRight: 1.25,
-                      marginTop: 1.25,
-                      height: 20,
-                      width: 20
-                    },
-                    '& button > div > span': {
-                      display: 'block'
-                    },
-                    '& > div > span': {
-                      display: 'none'
-                    }
-                  }}
-                >
-                  {tabsOption.map((tab, index) => (
-                    <Tab
-                      key={index}
-                      icon={tab.icon}
-                      label={
-                        <Grid container direction="column">
-                          <Typography variant="subtitle1" color="inherit">
-                            {tab.label}
-                          </Typography>
-                          <Typography variant="caption" sx={{ textTransform: 'capitalize' }}>
-                            {tab.caption}
-                          </Typography>
-                        </Grid>
-                      }
-                      {...a11yProps(index)}
-                    />
-                  ))}
-                </Tabs>
-              </CardContent>
-            </Grid>
-            <Grid size={{ xs: 12, lg: 9 }}>
-              <CardContent sx={{ borderLeft: '1px solid', borderColor: 'divider', height: '100%' }}>
-                <TabPanel value={value} index={0}>
-                  <BusinessProfile user={user} tabChange={handleChange} tabval={value} />
-                </TabPanel>
-                <TabPanel value={value} index={1}>
-                  <BusinessBankDetails user={user} tabChange={handleChange} tabval={value} />
-                </TabPanel>
-                <TabPanel value={value} index={2}>
-                  <KeyManagerialPersonnel user={user} tabChange={handleChange} tabval={value} />
-                </TabPanel>
-                {/* <TabPanel value={value} index={3}>
-                  <MSMESettings />
-                </TabPanel> */}
-                <TabPanel value={value} index={3}>
-                  <GSTSettings user={user} tabChange={handleChange} tabval={value} />
-                </TabPanel>
-                <TabPanel value={value} index={4}>
-                  <TDSAndIncomeTax user={user} tabChange={handleChange} tabval={value} />
-                </TabPanel>
-                {/* <TabPanel value={value} index={5}>
-                  <PayrollCompliance user={user} tabChange={handleChange} tabval={value} />
-                </TabPanel> */}
-                <TabPanel value={value} index={5}>
-                  <Licenses user={user} tabChange={handleChange} tabval={value} />
-                </TabPanel>
-                <TabPanel value={value} index={6}>
-                  <DSCRegister user={user} tabChange={handleChange} tabval={value} />
-                </TabPanel>
-              </CardContent>
-            </Grid>
+          {tabsOption.map((tab, index) => (
+            <Tab
+              key={index}
+              icon={tab.icon}
+              sx={{
+                mt: 0.5,
+                '&:hover': {
+                  backgroundColor: 'primary.light'
+                }
+              }}
+              label={
+                <Box>
+                  <Typography variant="subtitle1" color="inherit" noWrap sx={{ textAlign: 'left' }}>
+                    {tab.label}
+                  </Typography>
+                  <Typography variant="caption" sx={{ textTransform: 'capitalize', textAlign: 'left', whiteSpace: 'break-spaces' }}>
+                    {tab.caption}
+                  </Typography>
+                </Box>
+              }
+              {...a11yProps(index)}
+            />
+          ))}
+        </Tabs>
+
+        {/* TabPanels content section */}
+        <Box sx={{ flexGrow: 1, width: '100%', overflowY: 'auto' }}>
+          <CardContent
+            sx={{
+              paddingTop: 2,
+              paddingBottom: 2,
+              paddingLeft: isSmallScreen ? 2 : 3,
+              paddingRight: 2
+            }}
+          >
+            <TabPanel value={value} index={0}>
+              <BusinessProfile user={user} tabChange={handleChange} tabval={value} />
+            </TabPanel>
+            <TabPanel value={value} index={1}>
+              <BusinessBankDetails user={user} tabChange={handleChange} tabval={value} />
+            </TabPanel>
+            <TabPanel value={value} index={2}>
+              <KeyManagerialPersonnel user={user} tabChange={handleChange} tabval={value} />
+            </TabPanel>
+            {/* <TabPanel value={value} index={3}>
+              <MSMESettings />
+            </TabPanel> */}
+            <TabPanel value={value} index={3}>
+              <GSTSettings user={user} tabChange={handleChange} tabval={value} />
+            </TabPanel>
+            <TabPanel value={value} index={4}>
+              <TDSAndIncomeTax user={user} tabChange={handleChange} tabval={value} />
+            </TabPanel>
+            {/* <TabPanel value={value} index={5}>
+              <PayrollCompliance user={user} tabChange={handleChange} tabval={value} />
+            </TabPanel> */}
+            <TabPanel value={value} index={5}>
+              <Licenses user={user} tabChange={handleChange} tabval={value} />
+            </TabPanel>
+            <TabPanel value={value} index={6}>
+              <DSCRegister user={user} tabChange={handleChange} tabval={value} />
+            </TabPanel>
+          </CardContent>
+        </Box>
+      </Box>
+      <Divider />
+      <CardActions>
+        <Grid container sx={{ width: 1, alignContent: 'center', justifyContent: 'space-between' }}>
+          <Grid>
+            {value > 0 && (
+              <AnimateButton>
+                <Button variant="outlined" size="large" onClick={(e) => handleChange(e, value - 1)}>
+                  Back
+                </Button>
+              </AnimateButton>
+            )}
           </Grid>
-          <Divider />
-          <CardActions>
-            <Grid container sx={{ width: 1, alignContent: 'center', justifyContent: 'space-between' }}>
-              <Grid>
-                {value > 0 && (
-                  <AnimateButton>
-                    <Button variant="outlined" size="large" onClick={(e) => handleChange(e, value - 1)}>
-                      Back
-                    </Button>
-                  </AnimateButton>
-                )}
-              </Grid>
-              <Grid>
-                {value < 7 && value !== 0 && (
-                  <AnimateButton>
-                    <Button variant="contained" size="large" onClick={(e) => handleChange(e, 1 + value)}>
-                      Continue
-                    </Button>
-                  </AnimateButton>
-                )}
-              </Grid>
-            </Grid>
-          </CardActions>
-        </MainCard>
-      </Grid>
-    </Grid>
+          <Grid>
+            {value < 7 && value !== 0 && (
+              <AnimateButton>
+                <Button variant="contained" size="large" onClick={(e) => handleChange(e, 1 + value)}>
+                  Continue
+                </Button>
+              </AnimateButton>
+            )}
+          </Grid>
+        </Grid>
+      </CardActions>
+    </Card>
   );
 }
 

@@ -1,56 +1,82 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  Box,
-  Card,
-  Grid,
-  Stack,
+  Grid2,
   Typography,
+  TextField,
   Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   IconButton,
+  Box,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
+  CircularProgress,
+  Stack,
+  Snackbar,
+  Alert,
   Chip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
+  Tooltip,
+  Fade,
+  Divider,
+  Paper,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
-  CircularProgress,
-  Snackbar,
-  Alert
+  Avatar
 } from '@mui/material';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
+import CloseIcon from '@mui/icons-material/Close';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import CloseIcon from '@mui/icons-material/Close';
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
+import PersonIcon from '@mui/icons-material/Person';
+import GroupIcon from '@mui/icons-material/Group';
+import WorkIcon from '@mui/icons-material/Work';
 import { useSelector } from 'store';
 import Factory from 'utils/Factory';
 import DeleteConfirmationDialog from 'utils/DeleteConfirmationDialog';
+import MainCard from 'ui-component/cards/MainCard';
+import Modal from 'ui-component/extended/Modal';
+import { useDispatch } from 'store';
+import { openSnackbar } from 'store/slices/snackbar';
 
 const roles = ['CEO', 'CFO', 'CS', 'Director', 'Other'];
 
 const getRoleColor = (role) => {
   switch (role) {
     case 'CEO':
-      return 'error'; // Red for CEO
+      return 'error';
     case 'CFO':
-      return 'warning'; // Orange for CFO
+      return 'warning';
     case 'CS':
-      return 'success'; // Green for Company Secretary
+      return 'success';
     case 'Director':
-      return 'primary'; // Blue for Director
+      return 'primary';
     default:
-      return 'secondary'; // Purple for Other roles
+      return 'secondary';
+  }
+};
+
+const getRoleIcon = (role) => {
+  switch (role) {
+    case 'CEO':
+      return '👑';
+    case 'CFO':
+      return '💰';
+    case 'CS':
+      return '⚖️';
+    case 'Director':
+      return '🎯';
+    default:
+      return '👤';
   }
 };
 
@@ -64,94 +90,84 @@ const validationSchema = Yup.object().shape({
   status: Yup.string().required('Status is required')
 });
 
-const KeyManagerialPersonnel = () => {
-  const [personnel, setPersonnel] = useState([]);
+const fields = [
+  { name: 'name', label: 'Name' },
+  { name: 'designation', label: 'Designation' },
+  { name: 'pan_number', label: 'PAN Number' },
+  { name: 'role', label: 'Role', type: 'select', options: roles },
+  { name: 'status', label: 'Status', type: 'select', options: ['active', 'inactive'] }
+];
+
+const KeyManagerialPersonnel = ({ user, tabChange, tabval }) => {
   const [open, setOpen] = useState(false);
-  const [editIndex, setEditIndex] = useState(null);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [deleteIndex, setDeleteIndex] = useState(null);
-  const user = useSelector((state) => state).accountReducer.user;
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: '',
-    severity: 'success'
-  });
+  const [personnel, setPersonnel] = useState([]);
+  const dispatch = useDispatch();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => {
+    resetForm();
+    setOpen(false);
+  };
+
+  const fetchPersonnel = async () => {
+    setIsLoading(true);
+    const response = await Factory('get', `/user_management/kmp-details/${user.active_context.business_id}/`, {}, {});
+    if (response.res.status_cd === 0) {
+      setPersonnel(response.res.data);
+    } else {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(response?.res?.data || 'Failed to fetch personnel'),
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
+    }
+    setIsLoading(false);
+  };
 
   useEffect(() => {
     fetchPersonnel();
   }, []);
 
-  const handleSnackbarClose = (event, reason) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-    setSnackbar({ ...snackbar, open: false });
-  };
-
-  const showNotification = (message, severity = 'success') => {
-    setSnackbar({
-      open: true,
-      message,
-      severity
-    });
-  };
-
-  const fetchPersonnel = async () => {
-    try {
-      const response = await Factory('get', `/user_management/kmp-details/${user.active_context.business_id}/`, {}, {});
-      if (response.res.status_cd === 0) {
-        setPersonnel(response.res.data);
-      } else {
-        showNotification('Failed to fetch personnel list', 'error');
-      }
-    } catch (error) {
-      console.error('Error fetching personnel:', error);
-      showNotification('Failed to fetch personnel list', 'error');
-    }
-  };
-
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => {
-    formik.resetForm();
-    setOpen(false);
-    setEditIndex(null);
-  };
-
   const handleEdit = (index) => {
-    setEditIndex(index);
-    formik.setValues({ ...personnel[index] });
+    const person = personnel[index];
+    setValues({ ...person });
     setOpen(true);
   };
 
-  const handleDeleteClick = (index) => {
-    setDeleteIndex(index);
-    setDeleteDialogOpen(true);
-  };
-
-  const handleDeleteClose = () => {
-    setDeleteDialogOpen(false);
-    setDeleteIndex(null);
-  };
-
-  const handleDelete = async () => {
-    try {
-      const response = await Factory('delete', `/user_management/kmp-details/${personnel[deleteIndex].id}/`, {}, {});
-      if (response.res.status_cd === 0) {
-        setPersonnel(personnel.filter((_, i) => i !== deleteIndex));
-        showNotification('Personnel deleted successfully');
-      } else {
-        showNotification('Failed to delete personnel', 'error');
-      }
-    } catch (error) {
-      console.error('Error deleting personnel:', error);
-      showNotification('Failed to delete personnel', 'error');
-    } finally {
-      handleDeleteClose();
+  const handleDelete = async (item) => {
+    const { res } = await Factory('delete', `/user_management/kmp-details/${item.id}/`, {}, {});
+    if (res.status_cd === 0) {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Personnel deleted successfully',
+          variant: 'alert',
+          alert: { color: 'success' },
+          close: false
+        })
+      );
+      fetchPersonnel();
+    } else {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res?.data || 'Failed to delete personnel'),
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     }
   };
 
   const formik = useFormik({
     initialValues: {
+      business: user?.active_context?.business_id,
       name: '',
       designation: '',
       pan_number: '',
@@ -160,263 +176,308 @@ const KeyManagerialPersonnel = () => {
     },
     validationSchema,
     onSubmit: async (values, { setSubmitting }) => {
-      try {
-        const payload = {
-          ...values,
-          business: user.active_context.business_id
-        };
+      const payload = {
+        ...values,
+        business: user.active_context.business_id
+      };
 
-        let url = '/user_management/kmp-details/';
-        let type = 'post';
-        if (editIndex !== null) {
-          url = `/user_management/kmp-details/${personnel[editIndex].id}/`;
-          type = 'put';
-        }
-
-        const response = await Factory(type, url, payload, {});
-
-        if (response.res.status_cd === 0) {
-          if (editIndex !== null) {
-            const updated = [...personnel];
-            updated[editIndex] = response.res.data;
-            setPersonnel(updated);
-            showNotification('Personnel updated successfully');
-          } else {
-            setPersonnel([...personnel, response.res]);
-            showNotification('Personnel added successfully');
-          }
-          handleClose();
-        } else {
-          showNotification(response.res.status_msg || 'Failed to save personnel', 'error');
-        }
-      } catch (error) {
-        console.error('Error submitting personnel:', error);
-        showNotification('Failed to save personnel', 'error');
-      } finally {
-        setSubmitting(false);
+      let url = '/user_management/kmp-details/';
+      let type = 'post';
+      if (values.id) {
+        url = `/user_management/kmp-details/${values.id}/`;
+        type = 'put';
       }
+
+      const response = await Factory(type, url, payload, {});
+
+      if (response.res.status_cd === 0) {
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'Personnel updated successfully',
+            variant: 'alert',
+            alert: { color: 'success' },
+            close: false
+          })
+        );
+        fetchPersonnel();
+        handleClose();
+      } else {
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: JSON.stringify(response?.res?.data || 'Failed to save personnel'),
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
+      }
+      setSubmitting(false);
     }
   });
 
-  return (
-    <Box>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
-        <Typography variant="h4" color="text.primary">
-          Key Managerial Personnel
+  const renderFields = () => {
+    return fields.map((field) => (
+      <Grid2 key={field.name} size={{ xs: 12, sm: 6 }}>
+        <Typography variant="subtitle1" gutterBottom>
+          {field.label}
         </Typography>
-        <Button variant="contained" size="small" startIcon={<AddIcon />} onClick={handleOpen}>
-          Add Personnel
-        </Button>
-      </Stack>
+        {field.type === 'select' ? (
+          <FormControl fullWidth size="small">
+            <Select
+              name={field.name}
+              value={values[field.name] || ''}
+              onChange={(e) => setFieldValue(field.name, e.target.value)}
+              onBlur={handleBlur}
+              error={touched[field.name] && Boolean(errors[field.name])}
+            >
+              {field.options.map((option) => (
+                <MenuItem key={option} value={option}>
+                  {field.name === 'role' ? (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <span>{getRoleIcon(option)}</span>
+                      <span>{option}</span>
+                    </Box>
+                  ) : (
+                    option.charAt(0).toUpperCase() + option.slice(1)
+                  )}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        ) : (
+          <TextField
+            fullWidth
+            size="small"
+            name={field.name}
+            value={values[field.name] || ''}
+            onChange={(e) => {
+              if (field.name === 'pan_number') {
+                const value = e.target.value.toUpperCase();
+                if (value.length <= 10) {
+                  setFieldValue(field.name, value);
+                }
+              } else if (field.name === 'name') {
+                const value = e.target.value;
+                setFieldValue(field.name, value);
+              } else {
+                setFieldValue(field.name, e.target.value);
+              }
+            }}
+            onBlur={handleBlur}
+            error={touched[field.name] && Boolean(errors[field.name])}
+            helperText={touched[field.name] && errors[field.name] ? errors[field.name] : ''}
+          />
+        )}
+      </Grid2>
+    ));
+  };
 
-      <Card
-        elevation={2}
+  if (isLoading) {
+    return (
+      <Box
         sx={{
-          mb: 3,
-          '& .MuiTableContainer-root': { borderRadius: 0 },
-          '& .MuiTableCell-root': { color: 'text.primary' },
-          '& .MuiTableHead-root .MuiTableCell-root': { py: 1, backgroundColor: 'primary.dark', color: '#fff' }
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '400px',
+          flexDirection: 'column',
+          gap: 2
         }}
       >
-        <TableContainer>
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell>Name</TableCell>
-                <TableCell>Designation</TableCell>
-                <TableCell>PAN Number</TableCell>
-                <TableCell>Role</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell align="right">Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {personnel.map((person, idx) => (
-                <TableRow key={idx} hover>
-                  <TableCell>{person.name}</TableCell>
-                  <TableCell>{person.designation}</TableCell>
-                  <TableCell>{person.pan_number}</TableCell>
+        <CircularProgress size={50} />
+        <Typography variant="h5" color="text.secondary">
+          Loading Personnel...
+        </Typography>
+      </Box>
+    );
+  }
+
+  const { values, setValues, handleChange, errors, touched, handleSubmit, handleBlur, resetForm, setFieldValue } = formik;
+
+  return (
+    <MainCard
+      title="Key Managerial Personnel"
+      subtitle="Manage your business key personnel and their roles for seamless operations"
+      action={
+        <Button
+          variant="contained"
+          size="small"
+          startIcon={<AddIcon />}
+          onClick={handleOpen}
+          sx={{
+            textTransform: 'none',
+            fontWeight: 600,
+            fontSize: '0.9rem'
+          }}
+        >
+          Add Personnel
+        </Button>
+      }
+    >
+      <TableContainer
+        component={Paper}
+        sx={{
+          width: '100%',
+          borderRadius: 2,
+          boxShadow: 1,
+          overflowX: 'auto'
+        }}
+      >
+        <Table size="small">
+          <TableHead
+            sx={{
+              backgroundColor: 'primary.main',
+              '& .MuiTableCell-root': {
+                color: '#ffffff !important'
+              }
+            }}
+          >
+            <TableRow>
+              <TableCell sx={{ fontWeight: 600 }}>Name</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>Designation</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>PAN Number</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>Role</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
+              <TableCell align="center" sx={{ fontWeight: 600 }}>
+                Actions
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {personnel.length > 0 ? (
+              personnel.map((person, index) => (
+                <TableRow key={index} hover>
                   <TableCell>
-                    <Chip label={person.role} color={getRoleColor(person.role)} size="small" sx={{ fontWeight: 500 }} />
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Typography variant="body2" fontWeight={500}>
+                        {person.name}
+                      </Typography>
+                    </Box>
                   </TableCell>
                   <TableCell>
-                    <Chip label={person.status} color={person.status === 'active' ? 'success' : 'error'} size="small" variant="outlined" />
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <WorkIcon color="action" fontSize="small" />
+                      <Typography variant="body2">{person.designation}</Typography>
+                    </Box>
                   </TableCell>
-                  <TableCell align="right">
-                    <Stack direction="row" spacing={1} justifyContent="flex-end">
-                      <IconButton size="small" color="primary" onClick={() => handleEdit(idx)}>
-                        <EditIcon fontSize="small" />
-                      </IconButton>
-                      <IconButton size="small" color="error" onClick={() => handleDeleteClick(idx)}>
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
+                  <TableCell>
+                    <Typography variant="body2">{person.pan_number}</Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Chip
+                      label={
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          <span>{getRoleIcon(person.role)}</span>
+                          <span>{person.role}</span>
+                        </Box>
+                      }
+                      color={getRoleColor(person.role)}
+                      size="small"
+                      sx={{ fontWeight: 500 }}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Chip
+                      label={person.status}
+                      color={person.status === 'active' ? 'success' : 'error'}
+                      size="small"
+                      variant="outlined"
+                      sx={{ fontWeight: 500 }}
+                    />
+                  </TableCell>
+                  <TableCell align="center">
+                    <Stack direction="row" spacing={1} justifyContent="center">
+                      <Tooltip title="Edit Personnel">
+                        <IconButton
+                          color="primary"
+                          size="small"
+                          onClick={() => handleEdit(index)}
+                          sx={{
+                            backgroundColor: 'primary.50',
+                            '&:hover': { backgroundColor: 'primary.100' }
+                          }}
+                        >
+                          <EditIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Delete Personnel">
+                        <IconButton
+                          color="error"
+                          size="small"
+                          onClick={() => handleDelete(person)}
+                          sx={{
+                            backgroundColor: 'error.50',
+                            '&:hover': { backgroundColor: 'error.100' }
+                          }}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
                     </Stack>
                   </TableCell>
                 </TableRow>
-              ))}
-              {personnel.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
-                    No personnel added yet
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Card>
-
-      {/* Add/Edit Personnel Dialog */}
-      <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-        <DialogTitle sx={{ color: 'text.primary' }}>
-          {editIndex !== null ? 'Edit Personnel' : 'Add Personnel'}
-          <IconButton aria-label="close" onClick={handleClose} sx={{ position: 'absolute', right: 8, top: 8 }}>
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-        <form onSubmit={formik.handleSubmit}>
-          <DialogContent dividers>
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  id="name"
-                  name="name"
-                  label="Name"
-                  value={formik.values.name}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  error={formik.touched.name && Boolean(formik.errors.name)}
-                  helperText={formik.touched.name && formik.errors.name}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  id="designation"
-                  name="designation"
-                  label="Designation"
-                  value={formik.values.designation}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  error={formik.touched.designation && Boolean(formik.errors.designation)}
-                  helperText={formik.touched.designation && formik.errors.designation}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  id="pan_number"
-                  name="pan_number"
-                  label="PAN Number"
-                  value={formik.values.pan_number}
-                  onChange={(e) => {
-                    const upperCaseValue = e.target.value.toUpperCase();
-                    if (upperCaseValue.length <= 10) {
-                      formik.setFieldValue('pan_number', upperCaseValue);
-                    }
-                  }}
-                  onBlur={formik.handleBlur}
-                  error={formik.touched.pan_number && Boolean(formik.errors.pan_number)}
-                  helperText={formik.touched.pan_number && formik.errors.pan_number}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <FormControl fullWidth size="small" error={formik.touched.role && Boolean(formik.errors.role)}>
-                  <InputLabel>Role</InputLabel>
-                  <Select
-                    id="role"
-                    name="role"
-                    value={formik.values.role}
-                    label="Role"
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={6} align="center">
+                  <Box
+                    sx={{
+                      textAlign: 'center',
+                      py: 4
+                    }}
                   >
-                    {roles.map((role) => (
-                      <MenuItem key={role} value={role}>
-                        {role}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12}>
-                <FormControl fullWidth size="small" error={formik.touched.status && Boolean(formik.errors.status)}>
-                  <InputLabel>Status</InputLabel>
-                  <Select
-                    id="status"
-                    name="status"
-                    value={formik.values.status}
-                    label="Status"
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                  >
-                    <MenuItem value="active">Active</MenuItem>
-                    <MenuItem value="inactive">Inactive</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-            </Grid>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleClose} size="small" sx={{ color: 'text.primary' }}>
+                    <GroupIcon sx={{ fontSize: 60, color: 'grey.400', mb: 2 }} />
+                    <Typography variant="h6" color="text.secondary" gutterBottom>
+                      No Personnel Added
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                      Start by adding your key managerial personnel for business operations
+                    </Typography>
+                    <Button variant="outlined" onClick={handleOpen} startIcon={<AddIcon />} sx={{ borderRadius: 2, textTransform: 'none' }}>
+                      Add First Personnel
+                    </Button>
+                  </Box>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      <Modal
+        open={open}
+        showClose={true}
+        title={values.id ? 'Edit Personnel' : 'Add Personnel'}
+        handleClose={() => {
+          resetForm();
+          handleClose();
+        }}
+        footer={
+          <Stack direction="row" sx={{ width: 1, justifyContent: 'space-between', gap: 2 }}>
+            <Button
+              onClick={() => {
+                resetForm();
+                handleClose();
+              }}
+              variant="outlined"
+              color="error"
+            >
               Cancel
             </Button>
-            <Button
-              type="submit"
-              variant="contained"
-              size="small"
-              color="primary"
-              disabled={formik.isSubmitting}
-              sx={{ position: 'relative', minWidth: '100px' }}
-            >
-              {formik.isSubmitting ? (
-                <>
-                  <CircularProgress
-                    size={24}
-                    sx={{
-                      position: 'absolute',
-                      top: '50%',
-                      left: '50%',
-                      marginTop: '-12px',
-                      marginLeft: '-12px'
-                    }}
-                  />
-                  {editIndex !== null ? 'Updating...' : 'Saving...'}
-                </>
-              ) : editIndex !== null ? (
-                'Update'
-              ) : (
-                'Save'
-              )}
+            <Button onClick={handleSubmit} type="submit" variant="contained" color="primary">
+              Save
             </Button>
-          </DialogActions>
-        </form>
-      </Dialog>
-
-      <DeleteConfirmationDialog
-        open={deleteDialogOpen}
-        onClose={handleDeleteClose}
-        onConfirm={handleDelete}
-        title="Delete Personnel"
-        message="Are you sure you want to delete this personnel? This action cannot be undone."
-        itemName={deleteIndex !== null ? `Personnel: ${personnel[deleteIndex]?.name}` : ''}
-      />
-
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={6000}
-        onClose={handleSnackbarClose}
-        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+          </Stack>
+        }
       >
-        <Alert onClose={handleSnackbarClose} severity={snackbar.severity} variant="filled">
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
-    </Box>
+        <Box component="form" onSubmit={handleSubmit} sx={{ padding: 2 }}>
+          <Grid2 container spacing={2}>
+            {renderFields()}
+          </Grid2>
+        </Box>
+      </Modal>
+    </MainCard>
   );
 };
 
