@@ -196,11 +196,12 @@ function Designations({ handleBack, handleNext }) {
 
         {/* Pagination */}
 
-        {designations.length > 0 && (
-          <Grid2 size={{ xs: 12 }}>
-            <Stack direction="row" justifyContent="space-between" sx={{ mt: 2 }}>
-              <Typography></Typography>
-
+        <Grid2 size={{ xs: 12 }} sx={{ mt: 2 }}>
+          <Stack direction="row" justifyContent="space-between">
+            <Button size="small" variant="outlined" startIcon={<ArrowBackIcon />} onClick={handleBack}>
+              Back
+            </Button>
+            {designations.length > 0 && (
               <Pagination
                 count={Math.ceil(designations.length / rowsPerPage)}
                 page={currentPage}
@@ -208,17 +209,13 @@ function Designations({ handleBack, handleNext }) {
                 shape="rounded"
                 color="primary"
               />
-              <Stack direction="row" spacing={2}>
-                <Button size="small" variant="outlined" startIcon={<ArrowBackIcon />} onClick={handleBack}>
-                  Back
-                </Button>
-                <Button size="small" variant="contained" onClick={handleNext}>
-                  Next
-                </Button>
-              </Stack>
-            </Stack>
-          </Grid2>
-        )}
+            )}
+
+            <Button size="small" variant="contained" onClick={handleNext}>
+              Next
+            </Button>
+          </Stack>
+        </Grid2>
       </Grid2>
     </MainCard>
   );

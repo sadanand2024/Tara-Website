@@ -383,6 +383,19 @@ export default function BulkUploadDialog({ open, handleClose, getData, payrollid
   };
 
   const handleCloseDialog = () => {
+    // Prevent closing if we're on step 2 (salary upload step)
+    if (currentStep === 2) {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Please complete the salary template upload to finish the process.',
+          variant: 'alert',
+          alert: { color: 'warning' },
+          close: false
+        })
+      );
+      return;
+    }
     resetDialog();
     handleClose();
   };
@@ -466,13 +479,22 @@ export default function BulkUploadDialog({ open, handleClose, getData, payrollid
   return (
     <Modal
       open={open}
-      showClose={true}
+      showClose={currentStep === 1}
       handleClose={handleCloseDialog}
       maxWidth="sm"
       title={`Bulk Upload ${type} - Step ${currentStep} of 2`}
       footer={
         <Stack direction="row" sx={{ width: 1, justifyContent: 'space-between', gap: 2 }}>
-          <Button onClick={handleCloseDialog} variant="outlined" color="error" disabled={uploading}>
+          <Button
+            onClick={handleCloseDialog}
+            variant="outlined"
+            color="error"
+            disabled={uploading || currentStep === 2}
+            sx={{
+              opacity: currentStep === 2 ? 0.5 : 1,
+              cursor: currentStep === 2 ? 'not-allowed' : 'pointer'
+            }}
+          >
             Cancel
           </Button>
           <Button onClick={handleUpload} variant="contained" color="primary" disabled={uploading}>
@@ -491,6 +513,14 @@ export default function BulkUploadDialog({ open, handleClose, getData, payrollid
       )}
 
       {renderStepContent()}
+
+      {currentStep === 2 && (
+        <Box sx={{ mt: 2, p: 2, bgcolor: 'warning.light', borderRadius: 1 }}>
+          <Typography variant="body2" color="warning.dark" sx={{ fontWeight: 500 }}>
+            ⚠️ Please complete the salary template upload to finish the bulk upload process.
+          </Typography>
+        </Box>
+      )}
     </Modal>
   );
 }

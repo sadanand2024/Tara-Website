@@ -158,7 +158,9 @@ function SalaryTemplateList({ handleBack, handleNext }) {
 
           <Grid2 size={{ xs: 12 }}>
             <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mt: 2, width: '100%' }}>
-              <Typography></Typography>
+              <Button size="small" variant="outlined" startIcon={<ArrowBackIcon />} onClick={handleBack}>
+                Back
+              </Button>
               {salaryTemplates.length > 0 && (
                 <Pagination
                   count={Math.ceil(salaryTemplates.length / rowsPerPage)}
@@ -167,14 +169,9 @@ function SalaryTemplateList({ handleBack, handleNext }) {
                   color="primary"
                 />
               )}
-              <Stack direction="row" spacing={2}>
-                <Button size="small" variant="outlined" startIcon={<ArrowBackIcon />} onClick={handleBack}>
-                  Back
-                </Button>
-                <Button size="small" variant="contained" onClick={handleNext}>
-                  Next
-                </Button>
-              </Stack>
+              <Button size="small" variant="contained" onClick={handleNext}>
+                Next
+              </Button>
             </Stack>
           </Grid2>
         </Grid2>

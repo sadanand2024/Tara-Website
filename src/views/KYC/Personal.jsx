@@ -259,10 +259,13 @@ const Personal = ({ open, onClose, onSubmit, isSubmitting, cancel }) => {
       maxWidth="sm"
       showClose={false}
       title="Add Personal Details"
-      handleClose={onClose}
+      handleClose={
+        // onClose
+        () => {}
+      }
       footer={
         <Stack direction="row" sx={{ width: 1, justifyContent: 'flex-end', gap: 2 }}>
-          <Button
+          {/* <Button
             onClick={() => {
               onClose();
             }}
@@ -270,7 +273,7 @@ const Personal = ({ open, onClose, onSubmit, isSubmitting, cancel }) => {
             color="error"
           >
             Cancel
-          </Button>
+          </Button> */}
           <Button onClick={handleSubmit} type="submit" variant="contained" color="primary">
             Save
           </Button>

@@ -194,7 +194,7 @@ function PaySchedule({ handleBack, handleNext }) {
           Choose your week off days from the calendar
         </Typography>
 
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mt: 2 }}>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 2 }}>
           {weekOffOptions.map((day) => (
             <Card
               key={day.short}
@@ -233,18 +233,19 @@ function PaySchedule({ handleBack, handleNext }) {
           </Grid2>
         </Box>
 
-        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mt: 3 }}>
-          <Typography></Typography>
-          <Stack direction="row" spacing={2}>
-            <Button variant="outlined" type="submit" onClick={() => handleBack()}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mt: 2 }}>
+          <Stack direction="row" spacing={1}>
+            <Button variant="outlined" type="button" onClick={() => handleBack()}>
               Back
             </Button>
-            <Button variant="contained" type="submit" onClick={handleNext}>
-              Next
-            </Button>
-            <Button variant="contained" type="submit" onClick={handleSubmit}>
-              Save
-            </Button>
+            <Stack direction="row" spacing={1}>
+              <Button variant="contained" type="submit" onClick={handleSubmit}>
+                Save
+              </Button>
+              <Button variant="contained" type="button" onClick={handleNext}>
+                Next
+              </Button>
+            </Stack>
           </Stack>
         </Stack>
       </form>
