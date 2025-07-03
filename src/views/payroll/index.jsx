@@ -18,6 +18,7 @@ import PayrollComplianceSummary from './PayrollComplianceSummary';
 import PayrollMonthwise from './PayrollMonthwise';
 import { Button, Stack, Typography, Grid2, TextField, Chip, CircularProgress } from '@mui/material';
 import { IconSparkles, IconSettings2 } from '@tabler/icons-react';
+import { IconPlus } from '@tabler/icons-react';
 
 import { generateFinancialYears } from 'utils/FinancialYearsList';
 import MainCard from '../../ui-component/cards/MainCard';
@@ -219,7 +220,25 @@ const PayrollDashboard = () => {
 
   return (
     <MainCard
-      title={`Payroll for ${businessDetails?.nameOfBusiness}`}
+      sx={{
+        // background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+        // boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.15)',
+        borderRadius: 4,
+        p: { xs: 1, md: 2 },
+        animation: 'fadeIn 0.7s',
+        '@keyframes fadeIn': {
+          from: { opacity: 0, transform: 'translateY(24px)' },
+          to: { opacity: 1, transform: 'none' }
+        }
+      }}
+      title={
+        <Stack direction="row" alignItems="center" spacing={2}>
+          <IconSparkles size={28} color="#1976d2" />
+          <Typography variant="h3" sx={{ fontWeight: 800, color: 'primary.main', letterSpacing: 1 }}>
+            Payroll for {businessDetails?.nameOfBusiness}
+          </Typography>
+        </Stack>
+      }
       secondary={
         <Stack direction="row" sx={{ gap: 2 }}>
           <CustomAutocomplete
@@ -228,7 +247,15 @@ const PayrollDashboard = () => {
             onChange={(e, val) => {
               setFinancialYear(val);
             }}
-            sx={{ minWidth: 200, maxWidth: 200 }}
+            sx={{
+              minWidth: 200,
+              maxWidth: 200,
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+                background: '#fff',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
+              }
+            }}
             renderInput={(params) => <TextField {...params} placeholder="Select Financial Year" />}
           />
 
@@ -237,7 +264,14 @@ const PayrollDashboard = () => {
             onClick={() => {
               navigate(`/payroll/settings/add-employee?payrollid=${businessDetails?.payroll_id}`);
             }}
-            startIcon={<IconSparkles size={16} />}
+            startIcon={<IconPlus size={16} />}
+            sx={{
+              background: 'linear-gradient(90deg, #1976d2 0%, #42a5f5 100%)',
+              color: '#fff',
+              fontWeight: 600,
+              boxShadow: '0 2px 8px rgba(25, 118, 210, 0.15)',
+              '&:hover': { background: 'linear-gradient(90deg, #1565c0 0%, #1976d2 100%)' }
+            }}
           >
             Add Employee
           </Button>
@@ -251,6 +285,12 @@ const PayrollDashboard = () => {
               }
             }}
             startIcon={<IconSettings2 size={18} />}
+            sx={{
+              borderColor: '#1976d2',
+              color: '#1976d2',
+              fontWeight: 600,
+              '&:hover': { background: '#e3f2fd', borderColor: '#1565c0' }
+            }}
           >
             Payroll Settings
           </Button>
@@ -260,7 +300,7 @@ const PayrollDashboard = () => {
       <Grid2 container spacing={{ xs: 2, md: 3 }}>
         <Grid2 size={{ xs: 12 }}>
           <Stack sx={{ gap: 4 }}>
-            <MainCard>
+            <MainCard sx={{ boxShadow: '0 4px 24px 0 rgba(25, 118, 210, 0.08)', borderRadius: 3, p: { xs: 2, md: 3 } }}>
               <Stack sx={{ gap: 3 }}>
                 <Stack direction="row" sx={{ gap: 2 }}>
                   <Stack
@@ -268,12 +308,15 @@ const PayrollDashboard = () => {
                     alignItems={{ xs: 'flex-start', sm: 'center' }}
                     justifyContent="space-between"
                     spacing={2}
+                    divider={<span style={{ width: 2, height: 32, background: '#e3e3e3', borderRadius: 1, margin: '0 12px' }} />}
                   >
                     <Typography
                       variant="h4"
                       sx={{
-                        fontWeight: 600,
-                        color: 'primary.main'
+                        fontWeight: 700,
+                        color: 'primary.dark',
+                        letterSpacing: 0.5,
+                        textShadow: '0 2px 8px rgba(25, 118, 210, 0.08)'
                       }}
                     >
                       Payroll for the Month of
@@ -291,12 +334,25 @@ const PayrollDashboard = () => {
                           '& .MuiOutlinedInput-root': {
                             borderRadius: 2,
                             boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-                            backgroundColor: 'background.paper'
+                            backgroundColor: 'background.paper',
+                            fontWeight: 600
                           }
                         }}
                       />
 
-                      <Chip variant="outlined" label="In Progress" color="warning" sx={{ fontWeight: 500 }} />
+                      <Chip
+                        variant="filled"
+                        label="In Progress"
+                        color="warning"
+                        size="small"
+                        sx={{
+                          fontWeight: 700,
+                          fontSize: 16,
+                          px: 2,
+                          textTransform: 'uppercase',
+                          letterSpacing: 1
+                        }}
+                      />
 
                       <Button
                         variant="contained"
@@ -304,26 +360,35 @@ const PayrollDashboard = () => {
                         onClick={() => {
                           if (businessDetails?.payroll_id) {
                             navigate(
-                              `/payroll/employee-dashboard?payrollid=${businessDetails?.payroll_id}&month=${selectedMonth}&financialYear=${financialYear}&monthwisedata=${encodeURIComponent(JSON.stringify(monthWiseData))}`
+                              `/payroll/employee-dashboard?payrollid=${businessDetails?.payroll_id}&month=${selectedMonth}&financialYear=${financialYear}`
                             );
                           }
+                        }}
+                        sx={{
+                          color: '#fff',
+                          fontWeight: 700
                         }}
                       >
                         Resume Payroll
                       </Button>
                       <Button
                         variant="outlined"
+                        size="small"
                         onClick={() => {
                           refreshEmployees_on_payroll();
                         }}
                         disabled={refreshLoading}
+                        sx={{
+                          fontWeight: 700,
+                          '&:hover': { borderColor: '#2196f3' }
+                        }}
                       >
                         {refreshLoading ? 'Refreshing...' : 'Refresh Employees on Your Payroll'}
                       </Button>
                     </Stack>
                   </Stack>
                 </Stack>
-
+                <div style={{ borderBottom: '1.5px solid #e3e3e3' }} />
                 {/* Show loading for month data */}
                 {monthDataLoading ? (
                   <Stack alignItems="center" sx={{ py: 4 }}>
@@ -342,17 +407,19 @@ const PayrollDashboard = () => {
                 ) : monthWiseData ? (
                   <PayrollSummaryGrid data={monthWiseData} config={ServicesData} />
                 ) : (
-                  <Typography variant="h4" align="center" sx={{ mt: 4 }}>
-                    Detailed salary calculations are available only between the 26th and 30th of each month. Please select a previous month
-                    to view the details.
-                  </Typography>
+                  <Stack alignItems="center" sx={{ mt: 4, gap: 2 }}>
+                    <IconSparkles size={48} color="#bdbdbd" />
+                    <Typography variant="h4" align="center" sx={{ color: 'text.secondary', fontWeight: 500 }}>
+                      Detailed salary calculations are available only between the 26th and 30th of each month. Please select a previous
+                      month to view the details.
+                    </Typography>
+                  </Stack>
                 )}
               </Stack>
             </MainCard>
           </Stack>
           {/* <PayrollMonthwise payrollId={businessDetails?.payroll_id} financialYear={financialYear} /> */}
         </Grid2>
-
         <Grid2 size={{ xs: 12 }}>
           <PayrollStatusSummary
             payrollId={businessDetails?.payroll_id}

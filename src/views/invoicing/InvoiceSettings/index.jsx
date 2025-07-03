@@ -268,72 +268,73 @@ export default function SimpleTabs() {
         </Tabs>
 
         {/* TabPanels content section */}
-        <Box sx={{ flexGrow: 1, width: '100%', overflowY: 'auto' }}>
-          <CardContent
-            sx={{
-              paddingTop: 2,
-              paddingBottom: 2,
-              paddingLeft: isSmallScreen ? 2 : 3,
-              paddingRight: 2
-            }}
-          >
-            <TabPanel value={value} index={0}>
-              <BusinessProfile
-                businessDetails={businessDetails}
-                setBusinessDetails={setBusinessDetails}
-                postType={postType}
-                handleNext={handleNext}
-                setTabValue={setValue}
-              />
-            </TabPanel>
-            <TabPanel value={value} index={1}>
-              <GSTSettings
-                user={user}
-                tabChange={handleChange}
-                tabval={value}
-                from="invoice"
-                handleBack={handleBack}
-                handleNext={handleNext}
-              />
-            </TabPanel>
-            <TabPanel value={value} index={2}>
-              <BranchesInfo
-                businessDetails={businessDetails}
-                setBusinessDetails={setBusinessDetails}
-                postType={postType}
-                handleNext={handleNext}
-                handleBack={handleBack}
-              />
-            </TabPanel>
-            <TabPanel value={value} index={3}>
-              <Customers
-                getCustomersData={getCustomersData}
-                customers={customers}
-                businessDetails={businessDetails}
-                setBusinessDetails={setBusinessDetails}
-                handleNext={handleNext}
-                handleBack={handleBack}
-              />
-            </TabPanel>
-            <TabPanel value={value} index={4}>
-              <GoodsServices
-                businessDetails={businessDetails}
-                setBusinessDetails={setBusinessDetails}
-                handleNext={handleNext}
-                handleBack={handleBack}
-              />
-            </TabPanel>
-            <TabPanel value={value} index={5}>
-              <InvoiceNumberFormat
-                getCustomersData={getCustomersData}
-                customers={customers}
-                businessDetails={businessDetails}
-                setBusinessDetails={setBusinessDetails}
-                handleBack={handleBack}
-              />
-            </TabPanel>
-          </CardContent>
-        </Box>
+        <CardContent
+          sx={{
+            paddingTop: 0,
+            paddingBottom: 0,
+            paddingLeft: isSmallScreen ? 0 : 0,
+            paddingRight: 0,
+            flexGrow: 1,
+            width: '100%',
+            overflowY: 'auto'
+          }}
+        >
+          <TabPanel value={value} index={0}>
+            <BusinessProfile
+              businessDetails={businessDetails}
+              setBusinessDetails={setBusinessDetails}
+              postType={postType}
+              handleNext={handleNext}
+              setTabValue={setValue}
+            />
+          </TabPanel>
+          <TabPanel value={value} index={1}>
+            <GSTSettings
+              user={user}
+              tabChange={handleChange}
+              tabval={value}
+              from="invoice"
+              handleBack={handleBack}
+              handleNext={handleNext}
+            />
+          </TabPanel>
+          <TabPanel value={value} index={2}>
+            <BranchesInfo
+              businessDetails={businessDetails}
+              setBusinessDetails={setBusinessDetails}
+              postType={postType}
+              handleNext={handleNext}
+              handleBack={handleBack}
+            />
+          </TabPanel>
+          <TabPanel value={value} index={3}>
+            <Customers
+              getCustomersData={getCustomersData}
+              customers={customers}
+              businessDetails={businessDetails}
+              setBusinessDetails={setBusinessDetails}
+              handleNext={handleNext}
+              handleBack={handleBack}
+            />
+          </TabPanel>
+          <TabPanel value={value} index={4}>
+            <GoodsServices
+              businessDetails={businessDetails}
+              setBusinessDetails={setBusinessDetails}
+              handleNext={handleNext}
+              handleBack={handleBack}
+            />
+          </TabPanel>
+          <TabPanel value={value} index={5}>
+            <InvoiceNumberFormat
+              getCustomersData={getCustomersData}
+              customers={customers}
+              businessDetails={businessDetails}
+              setBusinessDetails={setBusinessDetails}
+              handleBack={handleBack}
+            />
+          </TabPanel>
+        </CardContent>
       </Box>
     </Card>
   );

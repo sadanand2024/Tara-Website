@@ -58,6 +58,7 @@ import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
 import AddBranchDialog from './AddBranchDialog';
 import { useDispatch, useSelector } from 'react-redux';
 import { openSnackbar } from 'store/slices/snackbar';
+import MainCard from 'ui-component/cards/MainCard';
 
 const entityTypeMapping = {
   privateLimitedCompany: 'Private Limited Company',
@@ -685,201 +686,195 @@ const BusinessProfile = ({ tabChange, tabval }) => {
   const { values, handleChange, errors, touched, handleSubmit, handleBlur, setFieldValue } = formik;
 
   return (
-    <Box component="form" onSubmit={handleSubmit}>
-      {/* Header Section */}
-      <Box sx={{ mb: 2 }}>
-        <Typography variant="h4" color="text.primary" gutterBottom sx={{ fontWeight: 600 }}>
-          Business Profile
-        </Typography>
-      </Box>
-
-      <Grid2 container spacing={3}>
-        {/* Business Information Section */}
-        <Grid2 size={{ xs: 12, md: 8 }}>
-          <Card elevation={0} sx={{ border: '1px solid', borderColor: 'grey.400', borderRadius: 3 }}>
-            <CardHeader
-              title={
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <BusinessIcon color="primary" />
-                  <Typography variant="h5" fontWeight={600}>
-                    Business Information
-                  </Typography>
-                </Box>
-              }
-              sx={{
-                backgroundColor: 'primary.50',
-                borderBottom: '1px solid',
-                borderColor: 'grey.200',
-                padding: 2
-              }}
-            />
-            <CardContent sx={{ p: 3 }}>
-              <Grid2 container spacing={3}>
-                {businessProfileFields.map((field) => (
-                  <Grid2 key={field.name} size={{ xs: 12, sm: 6 }}>
-                    {renderField(field)}
-                  </Grid2>
-                ))}
-              </Grid2>
-            </CardContent>
-          </Card>
-        </Grid2>
-        {/* Logo Upload Section */}
-        <Grid2 size={{ xs: 12, md: 4 }}>{renderLogoUpload()}</Grid2>
-        {/* Primary Contact Section */}
-        <Grid2 size={{ xs: 12 }}>
-          <Card elevation={0} sx={{ border: '1px solid', borderColor: 'grey.400', borderRadius: 3 }}>
-            <CardHeader
-              title={
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <ContactMailIcon color="primary" />
-                  <Typography variant="h5" fontWeight={600}>
-                    Primary Contact Information
-                  </Typography>
-                </Box>
-              }
-              sx={{
-                backgroundColor: 'primary.50',
-                borderBottom: '1px solid',
-                borderColor: 'grey.200',
-                padding: 2
-              }}
-            />
-            <CardContent sx={{ p: 3 }}>
-              <Grid2 container spacing={3}>
-                {primaryContactFields.map((field) => (
-                  <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4 }}>
-                    {renderField(field)}
-                  </Grid2>
-                ))}
-              </Grid2>
-            </CardContent>
-          </Card>
-        </Grid2>
-
-        {/* MSME Registration Section */}
-        <Grid2 size={{ xs: 12 }}>
-          <Card elevation={0} sx={{ border: '1px solid', borderColor: 'grey.400', borderRadius: 3 }}>
-            <CardHeader
-              title={
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <VerifiedIcon color="primary" />
-                  <Typography variant="h5" fontWeight={600}>
-                    MSME Registration
-                  </Typography>
-                </Box>
-              }
-              sx={{
-                backgroundColor: 'primary.50',
-                borderBottom: '1px solid',
-                borderColor: 'grey.400',
-                padding: 2
-              }}
-            />
-            <CardContent sx={{ p: 3 }}>
-              <Box sx={{ mb: 3 }}>
-                <Typography variant="subtitle1" color="text.primary" fontWeight={500} gutterBottom>
-                  Is your business MSME Registered?
-                </Typography>
-                <RadioGroup row name="is_msme_registered" value={values.is_msme_registered} onChange={handleChange} sx={{ mt: 1 }}>
-                  <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" sx={{ mr: 4 }} />
-                  <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
-                </RadioGroup>
-              </Box>
-
-              <Fade in={values.is_msme_registered === 'yes'}>
-                <Box>
-                  <Grid2 container spacing={3}>
-                    <Grid2 size={{ xs: 12, sm: 6 }}>
-                      <Autocomplete
-                        fullWidth
-                        value={values.msme_registration_type}
-                        size="small"
-                        sx={{
-                          '& .MuiOutlinedInput-root': {
-                            borderRadius: 2
-                          }
-                        }}
-                        options={['Micro', 'Small', 'Medium']}
-                        onChange={(e, value) => setFieldValue('msme_registration_type', value)}
-                        onBlur={handleBlur}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            label="MSME/Udyam Registration Type"
-                            size="small"
-                            error={touched.msme_registration_type && Boolean(errors.msme_registration_type)}
-                            helperText={
-                              touched.msme_registration_type && errors.msme_registration_type ? errors.msme_registration_type : ''
-                            }
-                          />
-                        )}
-                      />
-                    </Grid2>
-
-                    <Grid2 size={{ xs: 12, sm: 6 }}>
-                      <TextField
-                        fullWidth
-                        size="small"
-                        id="msme_registration_number"
-                        name="msme_registration_number"
-                        label="MSME/Udyam Registration Number"
-                        value={values.msme_registration_number}
-                        onChange={handleChange}
-                        error={touched.msme_registration_number && Boolean(errors.msme_registration_number)}
-                        helperText={
-                          touched.msme_registration_number && errors.msme_registration_number ? errors.msme_registration_number : ''
-                        }
-                        sx={{
-                          '& .MuiOutlinedInput-root': {
-                            borderRadius: 2
-                          }
-                        }}
-                      />
-                    </Grid2>
-                  </Grid2>
-                </Box>
-              </Fade>
-
-              <Alert severity="info" sx={{ mt: 2, borderRadius: 2 }}>
-                <Typography variant="body2">
-                  <strong>Note:</strong> For MSME registered businesses, please include your MSME registration number in the address.
-                </Typography>
-              </Alert>
-            </CardContent>
-          </Card>
-        </Grid2>
-
-        {/* Submit Button */}
-        <Grid2 size={{ xs: 12 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
-            <Button
-              type="submit"
-              variant="contained"
-              size="small"
-              disabled={isSubmitting}
-              sx={{
-                textTransform: 'none',
-                fontSize: '0.9rem',
-                fontWeight: 600,
-                boxShadow: 3,
-                '&:hover': {
-                  boxShadow: 6
+    <MainCard title="Business Profile" subtitle="Manage your business profile for invoice generation and business operations">
+      <Box component="form" onSubmit={handleSubmit} sx={{ flexGrow: 1, width: '100%', overflowY: 'auto' }}>
+        <Grid2 container spacing={3}>
+          {/* Business Information Section */}
+          <Grid2 size={{ xs: 12, md: 8 }}>
+            <Card elevation={0} sx={{ border: '1px solid', borderColor: 'grey.400', borderRadius: 3 }}>
+              <CardHeader
+                title={
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <BusinessIcon color="primary" />
+                    <Typography variant="h5" fontWeight={600}>
+                      Business Information
+                    </Typography>
+                  </Box>
                 }
-              }}
-            >
-              {isSubmitting ? (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <CircularProgress size={20} color="inherit" />
-                  Saving...
-                </Box>
-              ) : (
-                'Save & Continue'
-              )}
-            </Button>
-          </Box>
-        </Grid2>
+                sx={{
+                  backgroundColor: 'primary.50',
+                  borderBottom: '1px solid',
+                  borderColor: 'grey.200',
+                  padding: 2
+                }}
+              />
+              <CardContent sx={{ p: 3 }}>
+                <Grid2 container spacing={3}>
+                  {businessProfileFields.map((field) => (
+                    <Grid2 key={field.name} size={{ xs: 12, sm: 6 }}>
+                      {renderField(field)}
+                    </Grid2>
+                  ))}
+                </Grid2>
+              </CardContent>
+            </Card>
+          </Grid2>
+          {/* Logo Upload Section */}
+          <Grid2 size={{ xs: 12, md: 4 }}>{renderLogoUpload()}</Grid2>
+          {/* Primary Contact Section */}
+          <Grid2 size={{ xs: 12 }}>
+            <Card elevation={0} sx={{ border: '1px solid', borderColor: 'grey.400', borderRadius: 3 }}>
+              <CardHeader
+                title={
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <ContactMailIcon color="primary" />
+                    <Typography variant="h5" fontWeight={600}>
+                      Primary Contact Information
+                    </Typography>
+                  </Box>
+                }
+                sx={{
+                  backgroundColor: 'primary.50',
+                  borderBottom: '1px solid',
+                  borderColor: 'grey.200',
+                  padding: 2
+                }}
+              />
+              <CardContent sx={{ p: 3 }}>
+                <Grid2 container spacing={3}>
+                  {primaryContactFields.map((field) => (
+                    <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4 }}>
+                      {renderField(field)}
+                    </Grid2>
+                  ))}
+                </Grid2>
+              </CardContent>
+            </Card>
+          </Grid2>
 
+          {/* MSME Registration Section */}
+          <Grid2 size={{ xs: 12 }}>
+            <Card elevation={0} sx={{ border: '1px solid', borderColor: 'grey.400', borderRadius: 3 }}>
+              <CardHeader
+                title={
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <VerifiedIcon color="primary" />
+                    <Typography variant="h5" fontWeight={600}>
+                      MSME Registration
+                    </Typography>
+                  </Box>
+                }
+                sx={{
+                  backgroundColor: 'primary.50',
+                  borderBottom: '1px solid',
+                  borderColor: 'grey.400',
+                  padding: 2
+                }}
+              />
+              <CardContent sx={{ p: 3 }}>
+                <Box sx={{ mb: 3 }}>
+                  <Typography variant="subtitle1" color="text.primary" fontWeight={500} gutterBottom>
+                    Is your business MSME Registered?
+                  </Typography>
+                  <RadioGroup row name="is_msme_registered" value={values.is_msme_registered} onChange={handleChange} sx={{ mt: 1 }}>
+                    <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" sx={{ mr: 4 }} />
+                    <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
+                  </RadioGroup>
+                </Box>
+
+                <Fade in={values.is_msme_registered === 'yes'}>
+                  <Box>
+                    <Grid2 container spacing={3}>
+                      <Grid2 size={{ xs: 12, sm: 6 }}>
+                        <Autocomplete
+                          fullWidth
+                          value={values.msme_registration_type}
+                          size="small"
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: 2
+                            }
+                          }}
+                          options={['Micro', 'Small', 'Medium']}
+                          onChange={(e, value) => setFieldValue('msme_registration_type', value)}
+                          onBlur={handleBlur}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              label="MSME/Udyam Registration Type"
+                              size="small"
+                              error={touched.msme_registration_type && Boolean(errors.msme_registration_type)}
+                              helperText={
+                                touched.msme_registration_type && errors.msme_registration_type ? errors.msme_registration_type : ''
+                              }
+                            />
+                          )}
+                        />
+                      </Grid2>
+
+                      <Grid2 size={{ xs: 12, sm: 6 }}>
+                        <TextField
+                          fullWidth
+                          size="small"
+                          id="msme_registration_number"
+                          name="msme_registration_number"
+                          label="MSME/Udyam Registration Number"
+                          value={values.msme_registration_number}
+                          onChange={handleChange}
+                          error={touched.msme_registration_number && Boolean(errors.msme_registration_number)}
+                          helperText={
+                            touched.msme_registration_number && errors.msme_registration_number ? errors.msme_registration_number : ''
+                          }
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: 2
+                            }
+                          }}
+                        />
+                      </Grid2>
+                    </Grid2>
+                  </Box>
+                </Fade>
+
+                <Alert severity="info" sx={{ mt: 2, borderRadius: 2 }}>
+                  <Typography variant="body2">
+                    <strong>Note:</strong> For MSME registered businesses, please include your MSME registration number in the address.
+                  </Typography>
+                </Alert>
+              </CardContent>
+            </Card>
+          </Grid2>
+
+          {/* Submit Button */}
+          <Grid2 size={{ xs: 12 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+              <Button
+                type="submit"
+                variant="contained"
+                size="small"
+                disabled={isSubmitting}
+                sx={{
+                  textTransform: 'none',
+                  fontSize: '0.9rem',
+                  fontWeight: 600,
+                  boxShadow: 3,
+                  '&:hover': {
+                    boxShadow: 6
+                  }
+                }}
+              >
+                {isSubmitting ? (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <CircularProgress size={20} color="inherit" />
+                    Saving...
+                  </Box>
+                ) : (
+                  'Save & Continue'
+                )}
+              </Button>
+            </Box>
+          </Grid2>
+        </Grid2>
         {/* Branch Management Section */}
         <Grid2 size={{ xs: 12 }}>
           <Card elevation={0} sx={{ border: '1px solid', borderColor: 'grey.400', borderRadius: 3 }}>
@@ -1048,17 +1043,17 @@ const BusinessProfile = ({ tabChange, tabval }) => {
             )}
           </Card>
         </Grid2>
-      </Grid2>
 
-      <AddBranchDialog
-        open={open}
-        handleClose={handleClose}
-        branches={branches}
-        setBranches={setBranches}
-        user={user}
-        selectedBranch={selectedBranch}
-      />
-    </Box>
+        <AddBranchDialog
+          open={open}
+          handleClose={handleClose}
+          branches={branches}
+          setBranches={setBranches}
+          user={user}
+          selectedBranch={selectedBranch}
+        />
+      </Box>
+    </MainCard>
   );
 };
 

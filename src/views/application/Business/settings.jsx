@@ -225,10 +225,10 @@ export default function Profile2() {
         <Box sx={{ flexGrow: 1, width: '100%', overflowY: 'auto' }}>
           <CardContent
             sx={{
-              paddingTop: 2,
-              paddingBottom: 2,
-              paddingLeft: isSmallScreen ? 2 : 3,
-              paddingRight: 2
+              paddingTop: 0,
+              paddingBottom: 0,
+              paddingLeft: isSmallScreen ? 0 : 0,
+              paddingRight: 0
             }}
           >
             <TabPanel value={value} index={0}>
