@@ -41,6 +41,7 @@ import MainCard from 'ui-component/cards/MainCard';
 import Modal from 'ui-component/extended/Modal';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 const validationSchema = Yup.object().shape({
   bank_name: Yup.string().required('Bank name is required'),
   account_number: Yup.string()
@@ -59,7 +60,7 @@ const fields = [
   { name: 'ifsc_code', label: 'IFSC Code' },
   { name: 'swift_code', label: 'Swift Code' }
 ];
-const BusinessBankDetails = ({ user, tabChange, tabval }) => {
+const BusinessBankDetails = ({ user, handleNext, handleBack, tabChange, tabval }) => {
   const [open, setOpen] = useState(false);
   const [bankAccounts, setBankAccounts] = useState([]);
   const dispatch = useDispatch();
@@ -385,6 +386,16 @@ const BusinessBankDetails = ({ user, tabChange, tabval }) => {
           </TableBody>
         </Table>
       </TableContainer>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', mt: 2 }}>
+        <Button startIcon={<ArrowBackIcon />} variant="outlined" onClick={handleBack}>
+          Back
+        </Button>
+        <Stack direction="row" spacing={2}>
+          <Button variant="contained" onClick={handleNext}>
+            Next
+          </Button>
+        </Stack>
+      </Box>
       <Modal
         open={open}
         showClose={true}

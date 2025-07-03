@@ -570,19 +570,10 @@ const InvoiceNumberFormatComponent = ({ businessDetails, handleBack, handleNext 
           ))}
       </Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
-        <Button
-          variant="outlined"
-          startIcon={<ArrowBackIcon />}
-          onClick={() => {
-            navigate('/app/invoice');
-          }}
-        >
-          Back to Dashboard
+        <Button startIcon={<ArrowBackIcon />} variant="outlined" onClick={handleBack}>
+          Back
         </Button>
         <Stack direction="row" spacing={2}>
-          <Button variant="outlined" onClick={handleBack}>
-            Back
-          </Button>
           <Button variant="contained" onClick={handleSave}>
             Save
           </Button>

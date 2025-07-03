@@ -112,7 +112,7 @@ const MainCard = forwardRef(function MainCard(
           }
           subheader={
             subtitle && (
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 0 }}>
                 {subtitle}
               </Typography>
             )

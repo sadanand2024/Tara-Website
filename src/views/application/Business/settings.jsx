@@ -126,7 +126,12 @@ export default function Profile2() {
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
-
+  const handleNext = () => {
+    setValue(value + 1);
+  };
+  const handleBack = () => {
+    setValue(value - 1);
+  };
   return (
     <Card
       sx={{
@@ -230,55 +235,33 @@ export default function Profile2() {
               <BusinessProfile user={user} tabChange={handleChange} tabval={value} />
             </TabPanel>
             <TabPanel value={value} index={1}>
-              <BusinessBankDetails user={user} tabChange={handleChange} tabval={value} />
+              <BusinessBankDetails user={user} handleNext={handleNext} handleBack={handleBack} tabChange={handleChange} tabval={value} />
             </TabPanel>
             <TabPanel value={value} index={2}>
-              <KeyManagerialPersonnel user={user} tabChange={handleChange} tabval={value} />
+              <KeyManagerialPersonnel user={user} handleNext={handleNext} handleBack={handleBack} tabChange={handleChange} tabval={value} />
             </TabPanel>
             {/* <TabPanel value={value} index={3}>
               <MSMESettings />
             </TabPanel> */}
             <TabPanel value={value} index={3}>
-              <GSTSettings user={user} tabChange={handleChange} tabval={value} />
+              <GSTSettings user={user} handleNext={handleNext} handleBack={handleBack} tabChange={handleChange} tabval={value} />
             </TabPanel>
             <TabPanel value={value} index={4}>
-              <TDSAndIncomeTax user={user} tabChange={handleChange} tabval={value} />
+              <TDSAndIncomeTax user={user} handleNext={handleNext} handleBack={handleBack} tabChange={handleChange} tabval={value} />
             </TabPanel>
             {/* <TabPanel value={value} index={5}>
               <PayrollCompliance user={user} tabChange={handleChange} tabval={value} />
             </TabPanel> */}
             <TabPanel value={value} index={5}>
-              <Licenses user={user} tabChange={handleChange} tabval={value} />
+              <Licenses user={user} handleNext={handleNext} handleBack={handleBack} tabChange={handleChange} tabval={value} />
             </TabPanel>
             <TabPanel value={value} index={6}>
-              <DSCRegister user={user} tabChange={handleChange} tabval={value} />
+              <DSCRegister user={user} handleNext={handleNext} handleBack={handleBack} tabChange={handleChange} tabval={value} />
             </TabPanel>
           </CardContent>
         </Box>
       </Box>
       <Divider />
-      <CardActions>
-        <Grid container sx={{ width: 1, alignContent: 'center', justifyContent: 'space-between' }}>
-          <Grid>
-            {value > 0 && (
-              <AnimateButton>
-                <Button variant="outlined" size="large" onClick={(e) => handleChange(e, value - 1)}>
-                  Back
-                </Button>
-              </AnimateButton>
-            )}
-          </Grid>
-          <Grid>
-            {value < 7 && value !== 0 && (
-              <AnimateButton>
-                <Button variant="contained" size="large" onClick={(e) => handleChange(e, 1 + value)}>
-                  Continue
-                </Button>
-              </AnimateButton>
-            )}
-          </Grid>
-        </Grid>
-      </CardActions>
     </Card>
   );
 }

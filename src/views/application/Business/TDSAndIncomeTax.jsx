@@ -1,59 +1,166 @@
 import React, { useState, useEffect } from 'react';
 import {
+  Grid2,
+  Typography,
+  TextField,
+  Button,
+  IconButton,
   Box,
-  Card,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Typography,
-  Button,
-  IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Grid,
-  TextField,
-  Select,
-  MenuItem,
-  InputLabel,
-  FormControl,
+  CircularProgress,
   Stack,
   Tooltip,
-  FormHelperText,
-  CircularProgress,
-  Snackbar,
-  Alert
+  Paper,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  FormHelperText
 } from '@mui/material';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import CloseIcon from '@mui/icons-material/Close';
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
-import { useSelector } from 'store';
+import ReceiptIcon from '@mui/icons-material/Receipt';
+import { useSelector, useDispatch } from 'store';
 import Factory from 'utils/Factory';
 import { INDIAN_STATES } from 'utils/constants';
 import DeleteConfirmationDialog from 'utils/DeleteConfirmationDialog';
-
-const initialTDS = [
-  {
-    tan: 'DELH12345B',
-    trade_name: 'Acme Corp',
-    location: 'Delhi',
-    deductor_category: 'Company',
-    deductor_type: 'Government',
-    pan: 'AAAPL1234C',
-    state: 'Delhi',
-    status: 'Active'
-  }
-];
+import MainCard from 'ui-component/cards/MainCard';
+import Modal from 'ui-component/extended/Modal';
+import { openSnackbar } from 'store/slices/snackbar';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 const deductorCategories = ['Company', 'Individual', 'Firm', 'Trust'];
 const deductorTypes = ['Government', 'Non-Government'];
+
+const deductorFields = [
+  {
+    label: 'TAN Number',
+    name: 'tan_number',
+    type: 'text'
+  },
+  {
+    label: 'PAN',
+    name: 'pan',
+    type: 'text'
+  },
+  {
+    label: 'Legal Name',
+    name: 'legal_name',
+    type: 'text'
+  },
+  {
+    label: 'Trade Name',
+    name: 'trade_name',
+    type: 'text'
+  },
+  {
+    label: 'Location/Vertical',
+    name: 'location',
+    type: 'text'
+  },
+  {
+    label: 'Deductor Category',
+    name: 'deductor_category',
+    type: 'select',
+    options: deductorCategories
+  },
+  {
+    label: 'Deductor Type',
+    name: 'deductor_type',
+    type: 'select',
+    options: deductorTypes
+  },
+  {
+    label: 'Address',
+    name: 'address',
+    type: 'text'
+  },
+  {
+    label: 'State',
+    name: 'state',
+    type: 'select',
+    options: INDIAN_STATES
+  },
+  {
+    label: 'Pincode',
+    name: 'pincode',
+    type: 'text'
+  },
+  {
+    label: 'Email ID',
+    name: 'email',
+    type: 'text'
+  },
+  {
+    label: 'Contact Number',
+    name: 'mobile_number',
+    type: 'text'
+  },
+  {
+    label: 'Username (TDS Compliance)',
+    name: 'tds_username',
+    type: 'text'
+  },
+  {
+    label: 'Password (TDS Compliance)',
+    name: 'tds_password',
+    type: 'text'
+  }
+];
+
+const authorizedPersonalDetailsFields = [
+  {
+    label: 'Name of Responsible Person',
+    name: 'name',
+    type: 'text'
+  },
+  {
+    label: 'Designation',
+    name: 'designation',
+    type: 'text'
+  },
+  {
+    label: 'PAN of RP',
+    name: 'pan_of_RP',
+    type: 'text'
+  },
+  {
+    label: 'Mobile',
+    name: 'mobile',
+    type: 'text'
+  },
+  {
+    label: 'Email',
+    name: 'email',
+    type: 'text'
+  }
+];
+
+const incomeTaxDetailsFields = [
+  {
+    label: 'PAN',
+    name: 'pan',
+    type: 'text'
+  },
+  {
+    label: 'Password',
+    name: 'password',
+    type: 'text'
+  },
+  {
+    label: 'Registered Mobile Number',
+    name: 'registered_mobile_number',
+    type: 'text'
+  }
+];
 
 const validationSchema = Yup.object().shape({
   tan_number: Yup.string()
@@ -100,18 +207,15 @@ const validationSchema = Yup.object().shape({
   })
 });
 
-const TDSAndIncomeTax = () => {
+const TDSAndIncomeTax = ({ handleBack, handleNext }) => {
   const [tdsList, setTdsList] = useState([]);
   const [open, setOpen] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteIndex, setDeleteIndex] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
   const user = useSelector((state) => state).accountReducer.user;
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: '',
-    severity: 'success'
-  });
+  const dispatch = useDispatch();
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
@@ -152,44 +256,72 @@ const TDSAndIncomeTax = () => {
       const response = await Factory('delete', `/user_management/tds-details/${tdsList[deleteIndex].id}/`, {}, {});
       if (response.res.status_cd === 0) {
         setTdsList(tdsList.filter((_, i) => i !== deleteIndex));
-        showNotification('TDS details deleted successfully');
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'TDS details deleted successfully',
+            variant: 'alert',
+            alert: { color: 'success' },
+            close: false
+          })
+        );
       } else {
-        showNotification('Failed to delete TDS details', 'error');
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: JSON.stringify(response?.res?.data || 'Failed to delete TDS details'),
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
       }
     } catch (error) {
       console.error('Error deleting TDS details:', error);
-      showNotification('Failed to delete TDS details', 'error');
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Failed to delete TDS details',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     } finally {
       handleDeleteClose();
     }
   };
 
-  const handleSnackbarClose = (event, reason) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-    setSnackbar({ ...snackbar, open: false });
-  };
-
-  const showNotification = (message, severity = 'success') => {
-    setSnackbar({
-      open: true,
-      message,
-      severity
-    });
-  };
-
   const fetchTDSDetails = async () => {
+    setIsLoading(true);
     try {
       const response = await Factory('get', `/user_management/tds-details/${user.active_context.business_id}/`, {}, {});
       if (response.res.status_cd === 0) {
         setTdsList(response.res.data);
       } else {
-        showNotification('Failed to fetch TDS details', 'error');
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: JSON.stringify(response?.res?.data || 'Failed to fetch TDS details'),
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
       }
     } catch (error) {
       console.error('Error fetching TDS details:', error);
-      showNotification('Failed to fetch TDS details', 'error');
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Failed to fetch TDS details',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -231,10 +363,10 @@ const TDSAndIncomeTax = () => {
           ...values,
           business: user.active_context.business_id,
           authorized_personal_details: {
-            name: values.authorized_personal_name,
-            designation: values.authorized_personal_designation,
-            mobile_number: values.authorized_personal_mobile,
-            email: values.authorized_personal_email
+            name: values.authorized_personal_Details.name,
+            designation: values.authorized_personal_Details.designation,
+            mobile_number: values.authorized_personal_Details.mobile,
+            email: values.authorized_personal_Details.email
           },
           income_tax_details: {
             ward: values.ward,
@@ -268,18 +400,50 @@ const TDSAndIncomeTax = () => {
             const updated = [...tdsList];
             updated[editIndex] = response.res.data;
             setTdsList(updated);
-            showNotification('TDS details updated successfully');
+            dispatch(
+              openSnackbar({
+                open: true,
+                message: 'TDS details updated successfully',
+                variant: 'alert',
+                alert: { color: 'success' },
+                close: false
+              })
+            );
           } else {
             setTdsList([...tdsList, response.res]);
-            showNotification('TDS details added successfully');
+            dispatch(
+              openSnackbar({
+                open: true,
+                message: 'TDS details added successfully',
+                variant: 'alert',
+                alert: { color: 'success' },
+                close: false
+              })
+            );
           }
           handleClose();
         } else {
-          showNotification(response.res.status_msg || 'Failed to save TDS details', 'error');
+          dispatch(
+            openSnackbar({
+              open: true,
+              message: JSON.stringify(response?.res?.data || 'Failed to save TDS details'),
+              variant: 'alert',
+              alert: { color: 'error' },
+              close: false
+            })
+          );
         }
       } catch (error) {
         console.error('Error submitting TDS details:', error);
-        showNotification('Failed to save TDS details', 'error');
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'Failed to save TDS details',
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
       } finally {
         setSubmitting(false);
       }
@@ -290,471 +454,284 @@ const TDSAndIncomeTax = () => {
     fetchTDSDetails();
   }, []);
 
-  return (
-    <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
-        <Typography variant="h4" color="text.primary" gutterBottom>
-          TDS & Income Tax
-        </Typography>
-        <Button variant="contained" startIcon={<AddIcon />} size="small" onClick={handleOpen}>
-          Add TAN
-        </Button>
-      </Box>
-      <Card
-        elevation={2}
+  const renderFields = (fields, prefix = '') => {
+    return fields.map((field) => {
+      const fieldName = prefix ? `${prefix}.${field.name}` : field.name;
+      const fieldValue = prefix ? values[prefix]?.[field.name] || '' : values[field.name] || '';
+      const fieldError = prefix ? errors[prefix]?.[field.name] : errors[field.name];
+      const fieldTouched = prefix ? touched[prefix]?.[field.name] : touched[field.name];
+
+      return (
+        <Grid2 key={fieldName} size={{ xs: 12, sm: 6, md: 4 }}>
+          {field.type === 'text' && (
+            <TextField
+              fullWidth
+              size="small"
+              label={field.label}
+              name={fieldName}
+              value={fieldValue}
+              onChange={(e) => {
+                let value = e.target.value;
+                // Apply specific formatting based on field name
+                if (field.name === 'tan_number' || field.name === 'pan' || field.name === 'pan_of_RP') {
+                  value = value.toUpperCase();
+                } else if (field.name === 'pincode' || field.name === 'mobile' || field.name === 'registered_mobile_number') {
+                  value = value.replace(/\D/g, '');
+                }
+                setFieldValue(fieldName, value);
+              }}
+              onBlur={handleBlur}
+              error={fieldTouched && Boolean(fieldError)}
+              helperText={fieldTouched && fieldError ? fieldError : ''}
+              type={field.name === 'tds_password' || field.name === 'password' ? 'password' : 'text'}
+              autoComplete={
+                field.name === 'tds_username'
+                  ? 'new-username'
+                  : field.name === 'tds_password' || field.name === 'password'
+                    ? 'new-password'
+                    : 'off'
+              }
+              inputProps={
+                field.name === 'pincode' ? { maxLength: 6 } : field.name === 'pan' || field.name === 'pan_of_RP' ? { maxLength: 10 } : {}
+              }
+            />
+          )}
+          {field.type === 'select' && (
+            <FormControl fullWidth size="small" error={fieldTouched && Boolean(fieldError)}>
+              <InputLabel>{field.label}</InputLabel>
+              <Select
+                name={fieldName}
+                value={fieldValue}
+                label={field.label}
+                onChange={(e) => setFieldValue(fieldName, e.target.value)}
+                onBlur={handleBlur}
+              >
+                {field.options.map((option) => (
+                  <MenuItem key={option} value={option}>
+                    {option}
+                  </MenuItem>
+                ))}
+              </Select>
+              {fieldTouched && fieldError && <FormHelperText>{fieldError}</FormHelperText>}
+            </FormControl>
+          )}
+        </Grid2>
+      );
+    });
+  };
+  if (isLoading) {
+    return (
+      <Box
         sx={{
-          mb: 2,
-          '& .MuiTableContainer-root': { borderRadius: 0 },
-          '& .MuiTableCell-root': { color: 'text.primary' },
-          '& .MuiTableHead-root .MuiTableCell-root': { py: 1, backgroundColor: 'primary.dark', color: '#fff' }
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '400px',
+          flexDirection: 'column',
+          gap: 2
         }}
       >
-        <TableContainer>
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell>TAN</TableCell>
-                <TableCell>Trade Name</TableCell>
-                <TableCell>Location/Vertical</TableCell>
-                <TableCell>Deductor Category</TableCell>
-                <TableCell>Deductor Type</TableCell>
-                <TableCell>State</TableCell>
-                <TableCell align="right">Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {tdsList.map((row, idx) => (
+        <CircularProgress size={50} />
+        <Typography variant="h5" color="text.secondary">
+          Loading TDS Details...
+        </Typography>
+      </Box>
+    );
+  }
+
+  const { values, setValues, handleChange, errors, touched, handleSubmit, handleBlur, resetForm, setFieldValue } = formik;
+
+  return (
+    <MainCard
+      title="TDS & Income Tax"
+      subtitle="Manage your TDS (Tax Deducted at Source) and Income Tax details for compliance"
+      action={
+        <Button
+          variant="contained"
+          size="small"
+          startIcon={<AddIcon />}
+          onClick={handleOpen}
+          sx={{
+            textTransform: 'none',
+            fontWeight: 600,
+            fontSize: '0.9rem'
+          }}
+        >
+          Add TAN
+        </Button>
+      }
+    >
+      <TableContainer
+        component={Paper}
+        sx={{
+          width: '100%',
+          borderRadius: 2,
+          boxShadow: 1,
+          overflowX: 'auto'
+        }}
+      >
+        <Table size="small">
+          <TableHead
+            sx={{
+              backgroundColor: 'primary.main',
+              '& .MuiTableCell-root': {
+                color: '#ffffff !important'
+              }
+            }}
+          >
+            <TableRow>
+              <TableCell sx={{ fontWeight: 600 }}>TAN</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>Trade Name</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>Location/Vertical</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>Deductor Category</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>Deductor Type</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>State</TableCell>
+              <TableCell align="center" sx={{ fontWeight: 600 }}>
+                Actions
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {tdsList.length > 0 ? (
+              tdsList.map((row, idx) => (
                 <TableRow key={idx} hover>
-                  <TableCell>{row.tan_number}</TableCell>
-                  <TableCell>{row.trade_name}</TableCell>
-                  <TableCell>{row.location}</TableCell>
-                  <TableCell>{row.deductor_category}</TableCell>
-                  <TableCell>{row.deductor_type}</TableCell>
-                  <TableCell>{row.state}</TableCell>
-                  <TableCell align="right">
-                    <Stack direction="row" spacing={1} justifyContent="flex-end">
-                      <Tooltip title="View/Edit">
-                        <IconButton size="small" color="primary" onClick={() => handleEdit(idx)}>
+                  <TableCell>
+                    <Typography variant="body2" fontWeight={500}>
+                      {row.tan_number}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body2">{row.trade_name}</Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body2">{row.location}</Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body2">{row.deductor_category}</Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body2">{row.deductor_type}</Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body2">{row.state}</Typography>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Stack direction="row" spacing={1} justifyContent="center">
+                      <Tooltip title="Edit TDS Details">
+                        <IconButton
+                          color="primary"
+                          size="small"
+                          onClick={() => handleEdit(idx)}
+                          sx={{
+                            backgroundColor: 'primary.50',
+                            '&:hover': { backgroundColor: 'primary.100' }
+                          }}
+                        >
                           <EditIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
-                      <IconButton size="small" color="error" onClick={() => handleDeleteClick(idx)}>
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
+                      <Tooltip title="Delete TDS Details">
+                        <IconButton
+                          color="error"
+                          size="small"
+                          onClick={() => handleDeleteClick(idx)}
+                          sx={{
+                            backgroundColor: 'error.50',
+                            '&:hover': { backgroundColor: 'error.100' }
+                          }}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
                     </Stack>
                   </TableCell>
                 </TableRow>
-              ))}
-              {tdsList.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={9} align="center" sx={{ py: 3 }}>
-                    No TDS records added yet
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Card>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={7} align="center">
+                  <Box
+                    sx={{
+                      textAlign: 'center',
+                      py: 4
+                    }}
+                  >
+                    <ReceiptIcon sx={{ fontSize: 60, color: 'grey.400', mb: 2 }} />
+                    <Typography variant="h6" color="text.secondary" gutterBottom>
+                      No TDS Records Added
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                      Start by adding your first TDS details for tax compliance
+                    </Typography>
+                    <Button variant="outlined" onClick={handleOpen} startIcon={<AddIcon />} sx={{ borderRadius: 2, textTransform: 'none' }}>
+                      Add First TAN
+                    </Button>
+                  </Box>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
 
-      {/* Add/Edit TDS Dialog */}
-      <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
-        <DialogTitle sx={{ color: 'text.primary' }}>
-          {editIndex !== null ? 'Edit TDS Details' : 'Add TDS Details'}
-          <IconButton aria-label="close" onClick={handleClose} sx={{ position: 'absolute', right: 8, top: 8 }}>
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-        <form autoComplete="off" onSubmit={formik.handleSubmit}>
-          <DialogContent dividers>
-            {/* Deductor Details Group */}
-            <Box mb={2}>
-              <Typography variant="subtitle1" fontWeight={600} gutterBottom color="text.primary">
-                Deductor Details
-              </Typography>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={6} md={4}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    id="tan_number"
-                    name="tan_number"
-                    label="TAN"
-                    value={formik.values.tan_number}
-                    onChange={formik.handleChange}
-                    error={formik.touched.tan_number && Boolean(formik.errors.tan_number)}
-                    helperText={formik.touched.tan_number && formik.errors.tan_number}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    id="pan"
-                    name="pan"
-                    label="PAN"
-                    value={formik.values.pan}
-                    onChange={formik.handleChange}
-                    error={formik.touched.pan && Boolean(formik.errors.pan)}
-                    helperText={formik.touched.pan && formik.errors.pan}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    id="legal_name"
-                    name="legal_name"
-                    label="Legal Name"
-                    value={formik.values.legal_name}
-                    onChange={formik.handleChange}
-                    error={formik.touched.legal_name && Boolean(formik.errors.legal_name)}
-                    helperText={formik.touched.legal_name && formik.errors.legal_name}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    id="trade_name"
-                    name="trade_name"
-                    label="Trade Name"
-                    value={formik.values.trade_name}
-                    onChange={formik.handleChange}
-                    error={formik.touched.trade_name && Boolean(formik.errors.trade_name)}
-                    helperText={formik.touched.trade_name && formik.errors.trade_name}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    id="location"
-                    name="location"
-                    label="Location/Vertical"
-                    value={formik.values.location}
-                    onChange={formik.handleChange}
-                    error={formik.touched.location && Boolean(formik.errors.location)}
-                    helperText={formik.touched.location && formik.errors.location}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <FormControl fullWidth size="small" error={formik.touched.deductor_category && Boolean(formik.errors.deductor_category)}>
-                    <InputLabel>Deductor Category</InputLabel>
-                    <Select
-                      id="deductor_category"
-                      name="deductor_category"
-                      value={formik.values.deductor_category}
-                      label="Deductor Category"
-                      onChange={formik.handleChange}
-                    >
-                      {deductorCategories.map((cat) => (
-                        <MenuItem key={cat} value={cat}>
-                          {cat}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <FormControl fullWidth size="small" error={formik.touched.deductor_type && Boolean(formik.errors.deductor_type)}>
-                    <InputLabel>Type of Deductor</InputLabel>
-                    <Select
-                      id="deductor_type"
-                      name="deductor_type"
-                      value={formik.values.deductor_type}
-                      label="Type of Deductor"
-                      onChange={formik.handleChange}
-                    >
-                      {deductorTypes.map((type) => (
-                        <MenuItem key={type} value={type}>
-                          {type}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    id="address"
-                    name="address"
-                    label="Address"
-                    value={formik.values.address}
-                    onChange={formik.handleChange}
-                    error={formik.touched.address && Boolean(formik.errors.address)}
-                    helperText={formik.touched.address && formik.errors.address}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <FormControl fullWidth size="small" error={formik.touched.state && Boolean(formik.errors.state)}>
-                    <InputLabel>State</InputLabel>
-                    <Select
-                      id="state"
-                      name="state"
-                      value={formik.values.state}
-                      label="State"
-                      onChange={formik.handleChange}
-                      onBlur={formik.handleBlur}
-                    >
-                      {INDIAN_STATES.map((state) => (
-                        <MenuItem key={state} value={state}>
-                          {state}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                    {formik.touched.state && formik.errors.state && <FormHelperText>{formik.errors.state}</FormHelperText>}
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    id="pincode"
-                    name="pincode"
-                    label="Pincode"
-                    value={formik.values.pincode}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    error={formik.touched.pincode && Boolean(formik.errors.pincode)}
-                    helperText={formik.touched.pincode && formik.errors.pincode}
-                    inputProps={{ maxLength: 6 }}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    id="email"
-                    name="email"
-                    label="Email ID"
-                    value={formik.values.email}
-                    onChange={formik.handleChange}
-                    error={formik.touched.email && Boolean(formik.errors.email)}
-                    helperText={formik.touched.email && formik.errors.email}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    id="mobile_number"
-                    name="mobile_number"
-                    label="Contact Number"
-                    value={formik.values.mobile_number}
-                    onChange={formik.handleChange}
-                    error={formik.touched.mobile_number && Boolean(formik.errors.mobile_number)}
-                    helperText={formik.touched.mobile_number && formik.errors.mobile_number}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    id="tds_username"
-                    name="tds_username"
-                    autoComplete="new-username"
-                    label="Username (TDS Compliance)"
-                    value={formik.values.tds_username}
-                    onChange={formik.handleChange}
-                    error={formik.touched.tds_username && Boolean(formik.errors.tds_username)}
-                    helperText={formik.touched.tds_username && formik.errors.tds_username}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    id="tds_password"
-                    name="tds_password"
-                    autoComplete="new-password"
-                    label="Password (TDS Compliance)"
-                    type="password"
-                    value={formik.values.tds_password}
-                    onChange={formik.handleChange}
-                    error={formik.touched.tds_password && Boolean(formik.errors.tds_password)}
-                    helperText={formik.touched.tds_password && formik.errors.tds_password}
-                  />
-                </Grid>
-              </Grid>
-            </Box>
-
-            {/* Authorized Person Details Group */}
-            <Box mb={2}>
-              <Typography variant="subtitle1" fontWeight={600} gutterBottom color="text.primary">
-                Authorized Person Details
-              </Typography>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={6} md={4}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    id="authorized_personal_Details.name"
-                    name="authorized_personal_Details.name"
-                    label="Name of Responsible Person"
-                    value={formik.values.authorized_personal_Details.name}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    error={formik.touched.authorized_personal_Details?.name && Boolean(formik.errors.authorized_personal_Details?.name)}
-                    helperText={formik.touched.authorized_personal_Details?.name && formik.errors.authorized_personal_Details?.name}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    id="authorized_personal_Details.designation"
-                    name="authorized_personal_Details.designation"
-                    label="Designation"
-                    value={formik.values.authorized_personal_Details.designation}
-                    onChange={formik.handleChange}
-                    error={
-                      formik.touched.authorized_personal_Details?.designation &&
-                      Boolean(formik.errors.authorized_personal_Details?.designation)
-                    }
-                    helperText={
-                      formik.touched.authorized_personal_Details?.designation && formik.errors.authorized_personal_Details?.designation
-                    }
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    id="authorized_personal_Details.pan_of_RP"
-                    name="authorized_personal_Details.pan_of_RP"
-                    label="PAN of RP"
-                    value={formik.values.authorized_personal_Details.pan_of_RP}
-                    onChange={formik.handleChange}
-                    error={
-                      formik.touched.authorized_personal_Details?.pan_of_RP && Boolean(formik.errors.authorized_personal_Details?.pan_of_RP)
-                    }
-                    helperText={
-                      formik.touched.authorized_personal_Details?.pan_of_RP && formik.errors.authorized_personal_Details?.pan_of_RP
-                    }
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    id="authorized_personal_Details.mobile"
-                    name="authorized_personal_Details.mobile"
-                    label="Mobile"
-                    value={formik.values.authorized_personal_Details.mobile}
-                    onChange={formik.handleChange}
-                    error={formik.touched.authorized_personal_Details?.mobile && Boolean(formik.errors.authorized_personal_Details?.mobile)}
-                    helperText={formik.touched.authorized_personal_Details?.mobile && formik.errors.authorized_personal_Details?.mobile}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    id="authorized_personal_Details.email"
-                    name="authorized_personal_Details.email"
-                    label="Email"
-                    value={formik.values.authorized_personal_Details.email}
-                    onChange={formik.handleChange}
-                    error={formik.touched.authorized_personal_Details?.email && Boolean(formik.errors.authorized_personal_Details?.email)}
-                    helperText={formik.touched.authorized_personal_Details?.email && formik.errors.authorized_personal_Details?.email}
-                  />
-                </Grid>
-              </Grid>
-            </Box>
-
-            {/* Income Tax Group */}
-            <Box mb={2}>
-              <Typography variant="subtitle1" fontWeight={600} gutterBottom color="text.primary">
-                Income Tax
-              </Typography>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={6} md={4}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    id="income_tax_details.pan"
-                    name="income_tax_details.pan"
-                    label="PAN"
-                    value={formik.values.income_tax_details.pan}
-                    onChange={formik.handleChange}
-                    error={formik.touched.income_tax_details?.pan && Boolean(formik.errors.income_tax_details?.pan)}
-                    helperText={formik.touched.income_tax_details?.pan && formik.errors.income_tax_details?.pan}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    id="income_tax_details.password"
-                    name="income_tax_details.password"
-                    label="Password"
-                    type="password"
-                    value={formik.values.income_tax_details.password}
-                    onChange={formik.handleChange}
-                    error={formik.touched.income_tax_details?.password && Boolean(formik.errors.income_tax_details?.password)}
-                    helperText={formik.touched.income_tax_details?.password && formik.errors.income_tax_details?.password}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    id="income_tax_details.registered_mobile_number"
-                    name="income_tax_details.registered_mobile_number"
-                    label="Registered Mobile Number"
-                    value={formik.values.income_tax_details.registered_mobile_number}
-                    onChange={formik.handleChange}
-                    error={
-                      formik.touched.income_tax_details?.registered_mobile_number &&
-                      Boolean(formik.errors.income_tax_details?.registered_mobile_number)
-                    }
-                    helperText={
-                      formik.touched.income_tax_details?.registered_mobile_number &&
-                      formik.errors.income_tax_details?.registered_mobile_number
-                    }
-                  />
-                </Grid>
-              </Grid>
-            </Box>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleClose} size="small" sx={{ color: 'text.primary' }}>
+      <Modal
+        open={open}
+        showClose={true}
+        title={editIndex !== null ? 'Edit TDS Details' : 'Add TDS Details'}
+        handleClose={() => {
+          resetForm();
+          handleClose();
+        }}
+        footer={
+          <Stack direction="row" sx={{ width: 1, justifyContent: 'space-between', gap: 2 }}>
+            <Button
+              onClick={() => {
+                resetForm();
+                handleClose();
+              }}
+              variant="outlined"
+              color="error"
+            >
               Cancel
             </Button>
-            <Button
-              type="submit"
-              variant="contained"
-              size="small"
-              color="primary"
-              disabled={formik.isSubmitting}
-              onClick={formik.handleSubmit}
-              sx={{ position: 'relative' }}
-            >
-              {formik.isSubmitting ? (
-                <>
-                  <CircularProgress
-                    size={24}
-                    sx={{
-                      position: 'absolute',
-                      top: '50%',
-                      left: '50%',
-                      marginTop: '-12px',
-                      marginLeft: '-12px'
-                    }}
-                  />
-                  {editIndex !== null ? 'Updating...' : 'Saving...'}
-                </>
-              ) : editIndex !== null ? (
-                'Update'
-              ) : (
-                'Save'
-              )}
+            <Button onClick={handleSubmit} type="submit" variant="contained" color="primary">
+              Save
             </Button>
-          </DialogActions>
-        </form>
-      </Dialog>
+          </Stack>
+        }
+      >
+        <Box component="form" onSubmit={handleSubmit} sx={{ padding: 2 }}>
+          {/* Deductor Details Group */}
+          <Box mb={3}>
+            <Typography variant="subtitle1" fontWeight={600} gutterBottom color="text.primary" sx={{ mb: 2 }}>
+              Deductor Details
+            </Typography>
+            <Grid2 container spacing={2}>
+              {renderFields(deductorFields)}
+            </Grid2>
+          </Box>
+
+          {/* Authorized Person Details Group */}
+          <Box mb={3}>
+            <Typography variant="subtitle1" fontWeight={600} gutterBottom color="text.primary" sx={{ mb: 2 }}>
+              Authorized Person Details
+            </Typography>
+            <Grid2 container spacing={2}>
+              {renderFields(authorizedPersonalDetailsFields, 'authorized_personal_Details')}
+            </Grid2>
+          </Box>
+
+          {/* Income Tax Group */}
+          <Box mb={2}>
+            <Typography variant="subtitle1" fontWeight={600} gutterBottom color="text.primary" sx={{ mb: 2 }}>
+              Income Tax
+            </Typography>
+            <Grid2 container spacing={2}>
+              {renderFields(incomeTaxDetailsFields, 'income_tax_details')}
+            </Grid2>
+          </Box>
+        </Box>
+      </Modal>
 
       <DeleteConfirmationDialog
         open={deleteDialogOpen}
@@ -764,18 +741,17 @@ const TDSAndIncomeTax = () => {
         message="Are you sure you want to delete these TDS details? This action cannot be undone."
         itemName={deleteIndex !== null ? `TAN: ${tdsList[deleteIndex]?.tan_number}` : ''}
       />
-
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={6000}
-        onClose={handleSnackbarClose}
-        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-      >
-        <Alert onClose={handleSnackbarClose} severity={snackbar.severity} variant="filled">
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
-    </Box>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', mt: 2 }}>
+        <Button startIcon={<ArrowBackIcon />} variant="outlined" onClick={handleBack}>
+          Back
+        </Button>
+        <Stack direction="row" spacing={2}>
+          <Button variant="contained" onClick={handleNext}>
+            Next
+          </Button>
+        </Stack>
+      </Box>
+    </MainCard>
   );
 };
 

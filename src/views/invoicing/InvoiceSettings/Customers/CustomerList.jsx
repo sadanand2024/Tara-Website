@@ -12,7 +12,7 @@ import {
   Typography,
   Button,
   Box,
-  Card
+  CircularProgress
 } from '@mui/material';
 import Factory from 'utils/Factory';
 import AddCustomer from './AddCustomer';
@@ -24,6 +24,11 @@ import { IconButton, Tooltip } from '@mui/material'; // Add these if not already
 import { Edit, Delete } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { IconPlus } from '@tabler/icons-react';
+import BusinessIcon from '@mui/icons-material/Business';
+import { useDispatch } from 'store';
+import { openSnackbar } from 'store/slices/snackbar';
+
 const CustomerList = ({
   type,
   open,
@@ -41,7 +46,9 @@ const CustomerList = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const handleOpenDeleteDialog = (row) => {
     setSelectedRow(row);
     setOpenDeleteDialog(true);
@@ -69,116 +76,148 @@ const CustomerList = ({
 
   const handleDelete = async (customer) => {
     const url = `/invoicing/customer_profiles/delete/${customer.id}`;
+    setLoading(true);
     const { res } = await Factory('delete', url, {});
     if (res.status_cd === 0) {
       getCustomersData(businessDetailsData?.invoicing_profile_id);
+    } else {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: res.data.error || 'Failed to delete customer',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     }
+    setLoading(false);
   };
 
-  return (
-    <>
-      <Card
-        elevation={2}
+  if (loading) {
+    return (
+      <Box
         sx={{
-          mb: 2,
-          '& .MuiTableContainer-root': {
-            borderRadius: 0
-          },
-          '& .MuiTableCell-root': {
-            color: 'text.primary'
-          },
-          '& .MuiTableHead-root .MuiTableCell-root': {
-            py: 1,
-            backgroundColor: 'primary.main',
-            color: '#fff'
-          }
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '400px',
+          flexDirection: 'column',
+          gap: 2
         }}
       >
-        <TableContainer>
-          <Table size="small">
-            <TableHead>
+        <CircularProgress size={50} />
+        <Typography variant="h5" color="text.secondary">
+          Loading Customers...
+        </Typography>
+      </Box>
+    );
+  }
+  return (
+    <>
+      <TableContainer
+        component={Paper}
+        sx={{
+          width: '100%',
+          borderRadius: 2,
+          boxShadow: 1,
+          overflowX: 'auto'
+        }}
+      >
+        <Table size="small">
+          <TableHead
+            sx={{
+              backgroundColor: 'primary.main',
+              '& .MuiTableCell-root': {
+                color: '#ffffff !important'
+              }
+            }}
+          >
+            <TableRow>
+              <TableCell>Name</TableCell>
+              <TableCell>PAN</TableCell>
+              <TableCell>GSTIN</TableCell>
+              <TableCell>Email</TableCell>
+              <TableCell>Mobile</TableCell>
+              <TableCell>Receivables</TableCell>
+              <TableCell align="center">Actions</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {paginatedData.length === 0 ? (
               <TableRow>
-                <TableCell>Name</TableCell>
-                <TableCell>PAN</TableCell>
-                <TableCell>GSTIN</TableCell>
-                <TableCell>Email</TableCell>
-                <TableCell>Mobile</TableCell>
-                <TableCell>Receivables</TableCell>
-                <TableCell align="center">Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {paginatedData.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={7} align="center">
-                    <EmptyDataPlaceholder title="No Data Found" subtitle="Start by adding a new Data." />
-                  </TableCell>
-                </TableRow>
-              ) : (
-                paginatedData.map((customer, index) => (
-                  <TableRow
-                    key={index}
+                <TableCell colSpan={7} align="center">
+                  <Box
                     sx={{
-                      bgcolor: 'background.paper',
-                      '&:hover': {
-                        boxShadow: 1
-                      }
+                      textAlign: 'center',
+                      py: 4
                     }}
                   >
-                    <TableCell>{customer.name}</TableCell>
-                    <TableCell>{customer.pan_number}</TableCell>
-                    <TableCell>{customer.gstin || 'NA'}</TableCell>
-                    <TableCell>{customer.email}</TableCell>
-                    <TableCell>{customer.mobile_number}</TableCell>
-                    <TableCell>{customer.opening_balance}</TableCell>
-                    <TableCell align="center">
-                      <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
-                        <IconButton color="primary" onClick={() => handleEdit(customer)}>
-                          <Edit />
-                        </IconButton>
-                        <IconButton color="error" onClick={() => handleOpenDeleteDialog(customer)}>
-                          <Delete />
-                        </IconButton>
-                      </Box>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-          <DeleteDialog
-            open={openDeleteDialog}
-            onClose={() => setOpenDeleteDialog(false)}
-            onConfirm={handleConfirmDelete}
-            dialogData={{
-              title: 'Delete Record',
-              heading: 'Are you sure?',
-              description: 'This action will permanently delete the record.'
-            }}
-          />
-        </TableContainer>
-
-        <AddCustomer
-          type={type}
-          setType={setType}
-          businessDetailsData={businessDetailsData}
-          handleClose={handleClose}
-          open={open}
-          getCustomersData={getCustomersData}
-          selectedCustomer={selectedCustomer}
-        />
-      </Card>
-
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Button
-          variant="outlined"
-          startIcon={<ArrowBackIcon />}
-          onClick={() => {
-            navigate('/app/invoice');
+                    <BusinessIcon sx={{ fontSize: 60, color: 'grey.400', mb: 2 }} />
+                    <Typography variant="h6" color="text.secondary" gutterBottom>
+                      No Customers Added
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                      Start by adding your first customer for invoice generation
+                    </Typography>
+                    <Button
+                      variant="outlined"
+                      onClick={handleOpen}
+                      startIcon={<IconPlus />}
+                      sx={{ borderRadius: 2, textTransform: 'none' }}
+                    >
+                      Add First Customer
+                    </Button>
+                  </Box>
+                </TableCell>
+              </TableRow>
+            ) : (
+              paginatedData.map((customer, index) => (
+                <TableRow
+                  key={index}
+                  sx={{
+                    bgcolor: 'background.paper',
+                    '&:hover': {
+                      boxShadow: 1
+                    }
+                  }}
+                >
+                  <TableCell>{customer.name}</TableCell>
+                  <TableCell>{customer.pan_number}</TableCell>
+                  <TableCell>{customer.gstin || 'NA'}</TableCell>
+                  <TableCell>{customer.email}</TableCell>
+                  <TableCell>{customer.mobile_number}</TableCell>
+                  <TableCell>{customer.opening_balance}</TableCell>
+                  <TableCell align="center">
+                    <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
+                      <IconButton color="primary" onClick={() => handleEdit(customer)}>
+                        <Edit />
+                      </IconButton>
+                      <IconButton color="error" onClick={() => handleOpenDeleteDialog(customer)}>
+                        <Delete />
+                      </IconButton>
+                    </Box>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+        <DeleteDialog
+          open={openDeleteDialog}
+          onClose={() => setOpenDeleteDialog(false)}
+          onConfirm={handleConfirmDelete}
+          dialogData={{
+            title: 'Delete Record',
+            heading: 'Are you sure?',
+            description: 'This action will permanently delete the record.'
           }}
-          size="small"
-        >
-          Back to Dashboard
+        />
+      </TableContainer>
+
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
+        <Button startIcon={<ArrowBackIcon />} variant="outlined" size="small" onClick={handleBack}>
+          Back
         </Button>
         {customers.length > 0 && (
           <Stack direction="row" justifyContent="center" sx={{ py: 2 }}>
@@ -186,9 +225,6 @@ const CustomerList = ({
           </Stack>
         )}
         <Stack direction="row" spacing={2}>
-          <Button variant="outlined" size="small" onClick={handleBack}>
-            Back
-          </Button>
           <Button variant="contained" size="small" onClick={handleNext}>
             Next
           </Button>

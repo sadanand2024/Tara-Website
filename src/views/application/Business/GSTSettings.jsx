@@ -31,7 +31,7 @@ import { useNavigate } from 'react-router-dom';
 import MainCard from 'ui-component/cards/MainCard';
 import GroupIcon from '@mui/icons-material/Group';
 
-const GSTSettings = ({ from, handleBack, handleNext }) => {
+const GSTSettings = ({ handleBack, handleNext }) => {
   const [gstList, setGstList] = useState([]);
   const [open, setOpen] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
@@ -302,6 +302,16 @@ const GSTSettings = ({ from, handleBack, handleNext }) => {
           <Pagination count={Math.ceil(gstList.length / rowsPerPage)} page={currentPage} onChange={handlePageChange} />
         </Stack>
       )}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', mt: 2 }}>
+        <Button startIcon={<ArrowBackIcon />} variant="outlined" onClick={handleBack}>
+          Back
+        </Button>
+        <Stack direction="row" spacing={2}>
+          <Button variant="contained" onClick={handleNext}>
+            Next
+          </Button>
+        </Stack>
+      </Box>
     </MainCard>
   );
 };

@@ -47,6 +47,7 @@ import MainCard from 'ui-component/cards/MainCard';
 import Modal from 'ui-component/extended/Modal';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 const roles = ['CEO', 'CFO', 'CS', 'Director', 'Other'];
 
@@ -98,7 +99,7 @@ const fields = [
   { name: 'status', label: 'Status', type: 'select', options: ['active', 'inactive'] }
 ];
 
-const KeyManagerialPersonnel = ({ user, tabChange, tabval }) => {
+const KeyManagerialPersonnel = ({ user, handleNext, handleBack, tabChange, tabval }) => {
   const [open, setOpen] = useState(false);
   const [personnel, setPersonnel] = useState([]);
   const dispatch = useDispatch();
@@ -477,6 +478,16 @@ const KeyManagerialPersonnel = ({ user, tabChange, tabval }) => {
           </Grid2>
         </Box>
       </Modal>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', mt: 2 }}>
+        <Button startIcon={<ArrowBackIcon />} variant="outlined" onClick={handleBack}>
+          Back
+        </Button>
+        <Stack direction="row" spacing={2}>
+          <Button variant="contained" onClick={handleNext}>
+            Next
+          </Button>
+        </Stack>
+      </Box>
     </MainCard>
   );
 };
