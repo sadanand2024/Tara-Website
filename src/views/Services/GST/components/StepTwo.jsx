@@ -41,46 +41,119 @@ const StepTwo = ({ step, setStep}) => {
     task_id: null
   }); // <-- index of promoter to save
 
-  const getSignatoryDetails = async () => {
-    const url = `/gst/service-request-section-data?service_request_id=${service_id}&section=director_promoter_details`;
-    const { res } = await Factory('get', url);
-    const data = res?.data?.task_data['Promoter Signatory Details']?.data;
-    if (res?.data?.task_data && data !== null) {
-      const infoList = data?.info_list ?? res?.info_list ?? [];
-      // console.log('Promoter Signatory Details:', infoList);
+  // const getSignatoryDetails = async () => {
+  //   const url = `/gst/service-request-section-data?service_request_id=${service_id}&section=director_promoter_details`;
+  //   const { res } = await Factory('get', url);
+  //   const data = res?.data?.task_data['Promoter Signatory Details']?.data;
+  //   if (res?.data?.task_data && data !== null) {
+  //     const infoList = data?.info_list ?? res?.info_list ?? [];
+  //     // console.log('Promoter Signatory Details:', infoList);
 
-      if (res.status_cd === 0 && Array.isArray(infoList)) {
-        const promoters =
-          infoList.map((item) => ({
-            name: item.name || '',
-            aadhaar: item.aadhaar || null,
-            pan: item.pan || null,
-            photo: item.photo || null,
-            residential_address: item.residential_address || '',
-            email: item.email || '',
-            mobile: item.mobile || '',
-            gender: item.gender || '',
-            designation: item.designation || '',
-            residential_same_as_aadhaar_address: item.residential_same_as_aadhaar_address === true || item.residential_same_as_aadhaar_address === 'true',
+  //     if (res.status_cd === 0 && Array.isArray(infoList)) {
+  //       const promoters =
+  //         infoList.map((item) => ({
+  //           name: item.name || '',
+  //           aadhaar: item.aadhaar || null,
+  //           pan: item.pan || null,
+  //           photo: item.photo || null,
+  //           residential_address: item.residential_address || '',
+  //           email: item.email || '',
+  //           mobile: item.mobile || '',
+  //           gender: item.gender || '',
+  //           designation: item.designation || '',
+  //           residential_same_as_aadhaar_address: item.residential_same_as_aadhaar_address === true || item.residential_same_as_aadhaar_address === 'true',
 
-            id: item.id || '',
-            task_id: res.data?.task_data['Promoter Signatory Details']?.task_id || null
-          })) || [];
+  //           id: item.id || '',
+  //           task_id: res.data?.task_data['Promoter Signatory Details']?.task_id || null
+  //         })) || [];
 
-        if (promoters.length) {
-          formik.setFieldValue('promoters', promoters);
-        }
-        setPromoterTaskId({
-          ...data,
-          task_id: res.data?.task_data['Promoter Signatory Details']?.task_id || null
-        });
-      }
+  //       if (promoters.length) {
+  //         formik.setFieldValue('promoters', promoters);
+  //       }
+  //       setPromoterTaskId({
+  //         ...data,
+  //         task_id: res.data?.task_data['Promoter Signatory Details']?.task_id || null
+  //       });
+  //     }
+  //   } else {
+  //     setPromoterTaskId({
+  //       task_id: res?.data?.task_data['Promoter Signatory Details']?.task_id || null
+  //     });
+  //   }
+  // };
+onSubmit: async (values) => {
+  if (saveIndex === null) return;
+
+  const promoter = values.promoters[saveIndex];
+
+  try {
+    let formData = new FormData();
+    formData.append('service_request', service_id);
+    formData.append('service_task', taskId);
+    formData.append('name', promoter.name);
+    formData.append('aadhaar', promoter.aadhaar);
+    formData.append('pan', promoter.pan);
+    formData.append('photo', promoter.photo);
+    formData.append('residential_address', promoter.residential_address);
+    formData.append('email', promoter.email);
+    formData.append('mobile', promoter.mobile);
+    formData.append('gender', promoter.gender);
+    formData.append('designation', promoter.designation);
+    formData.append('residential_same_as_aadhaar_address', JSON.stringify(promoter.residential_same_as_aadhaar_address));
+    formData.append('status', 'in progress');
+
+    let url = promoter.id
+      ? `/gst/promoter-signatory-details/${promoter.id}/`
+      : `/gst/promoter-signatory-details/`;
+
+    const { res } = await Factory(promoter.id ? 'put' : 'post', url, formData);
+
+    if (res.status_cd === 0) {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: promoter.id ? 'Data Updated Successfully' : 'Data Saved Successfully',
+          variant: 'alert',
+          alert: { color: 'success' },
+          close: false
+        })
+      );
+
+      // 🔄 Update the specific promoter in the list without reshuffling
+      const updatedPromoter = {
+        ...promoter,
+        id: res?.data?.id || promoter.id // use returned ID
+      };
+
+      const updatedList = [...formik.values.promoters];
+      updatedList[saveIndex] = updatedPromoter;
+      formik.setFieldValue('promoters', updatedList);
+
     } else {
-      setPromoterTaskId({
-        task_id: res?.data?.task_data['Promoter Signatory Details']?.task_id || null
-      });
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res?.data?.data) || 'Something went wrong',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     }
-  };
+  } catch (error) {
+    dispatch(
+      openSnackbar({
+        open: true,
+        message: 'An error occurred while saving data.',
+        variant: 'alert',
+        alert: { color: 'error' },
+        close: false
+      })
+    );
+  }
+
+  setSaveIndex(null);
+};
 
   const formik = useFormik({
     initialValues: {
@@ -180,16 +253,16 @@ const StepTwo = ({ step, setStep}) => {
               close: false
             })
           );
-                  try {
-        const reviewFormData = new FormData();
-        reviewFormData.append('service_request', service_id);
-        reviewFormData.append('service_task', task_id);
-        reviewFormData.append('status', 'in progress');
+      //             try {
+      //   const reviewFormData = new FormData();
+      //   reviewFormData.append('service_request', service_id);
+      //   reviewFormData.append('service_task', task_id);
+      //   reviewFormData.append('status', 'in progress');
 
-        await Factory('post', '/gst/promoter-signatory-details/', reviewFormData);
-      } catch (err) {
-        // console.error('Review status API error:', err);
-      }
+      //   await Factory('post', '/gst/promoter-signatory-details/', reviewFormData);
+      // } catch (err) {
+      //   // console.error('Review status API error:', err);
+      // }
           getSignatoryDetails();
         }
       } catch (error) {

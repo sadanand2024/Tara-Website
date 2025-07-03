@@ -37,45 +37,94 @@ const PromoterSignatorySection = ({ taskId }) => {
             task_id: null
           }); 
 
+  // const getSignatoryDetails = async () => {
+  //   const url = `/labourlicense/signatory-details/by-request?service_request_id=${service_id}`;
+  //   const { res } = await Factory('get', url);
+  //   const signatorydetailsinfo = res?.data?.signatory_details_info ?? res?.signatory_details_info ?? [];
+
+  //       if (res.status_cd === 0 && Array.isArray(signatorydetailsinfo)) {
+
+  //   // if (res.status_cd === 0) {
+  //     const promoters =
+  //       signatorydetailsinfo.map((item) => ({
+  //         name: item.name || '',
+  //         aadhar_image: item.aadhar_image || null,
+  //         pan_image: item.pan_image || null,
+  //         photo_image: item.photo_image || null,
+  //         address: item.address || '',
+  //         email: item.email || '',
+  //         mobile_number: item.mobile_number || '',
+  //         residential_address: item.residential_address === true,
+  //         id: item.id || ''
+  //       })) || [];
+
+  //     if (promoters.length) {
+  //       formik.setFieldValue('promoters', promoters);
+  //     }
+  //       setPromoterTaskId(res.data);
+  //   }
+
+  //   if (res.status_cd === 1) {
+  //     dispatch(
+  //       openSnackbar({
+  //         open: true,
+  //         message: JSON.stringify(res.data.data) || 'Something went wrong',
+  //         variant: 'alert',
+  //         alert: { color: 'error' },
+  //         close: false
+  //       })
+  //     );
+  //   }
+  // };
+  
   const getSignatoryDetails = async () => {
-    const url = `/labourlicense/signatory-details/by-request?service_request_id=${service_id}`;
-    const { res } = await Factory('get', url);
-    const signatorydetailsinfo = res?.data?.signatory_details_info ?? res?.signatory_details_info ?? [];
+  const url = `/labourlicense/signatory-details/by-request?service_request_id=${service_id}`;
+  const { res } = await Factory('get', url);
+  const signatorydetailsinfo = res?.data?.signatory_details_info ?? res?.signatory_details_info ?? [];
 
-        if (res.status_cd === 0 && Array.isArray(signatorydetailsinfo)) {
+  if (res.status_cd === 0 && Array.isArray(signatorydetailsinfo)) {
+    const apiMapped = signatorydetailsinfo.map((item) => ({
+      name: item.name || '',
+      aadhar_image: item.aadhar_image || null,
+      pan_image: item.pan_image || null,
+      photo_image: item.photo_image || null,
+      address: item.address || '',
+      email: item.email || '',
+      mobile_number: item.mobile_number || '',
+      residential_address: item.residential_address === true,
+      id: item.id || ''
+    }));
 
-    // if (res.status_cd === 0) {
-      const promoters =
-        signatorydetailsinfo.map((item) => ({
-          name: item.name || '',
-          aadhar_image: item.aadhar_image || null,
-          pan_image: item.pan_image || null,
-          photo_image: item.photo_image || null,
-          address: item.address || '',
-          email: item.email || '',
-          mobile_number: item.mobile_number || '',
-          residential_address: item.residential_address === true,
-          id: item.id || ''
-        })) || [];
+    const currentPromoters = formik.values.promoters || [];
 
-      if (promoters.length) {
-        formik.setFieldValue('promoters', promoters);
-      }
-        setPromoterTaskId(res.data);
-    }
+    // Reorder promoters according to the existing order in Formik (by ID)
+    const reordered = currentPromoters
+      .map((existing) => apiMapped.find((api) => api.id && api.id === existing.id) || existing)
+      .filter((item) => item.id); // remove any null/undefined
 
-    if (res.status_cd === 1) {
-      dispatch(
-        openSnackbar({
-          open: true,
-          message: JSON.stringify(res.data.data) || 'Something went wrong',
-          variant: 'alert',
-          alert: { color: 'error' },
-          close: false
-        })
-      );
-    }
-  };
+    // Find new ones not already in Formik state
+    const newOnes = apiMapped.filter(
+      (api) => !reordered.find((r) => r.id === api.id)
+    );
+
+    const finalPromoters = [...reordered, ...newOnes];
+
+    formik.setFieldValue('promoters', finalPromoters);
+    setPromoterTaskId(res.data);
+  }
+
+  if (res.status_cd === 1) {
+    dispatch(
+      openSnackbar({
+        open: true,
+        message: JSON.stringify(res.data.data) || 'Something went wrong',
+        variant: 'alert',
+        alert: { color: 'error' },
+        close: false
+      })
+    );
+  }
+};
 
   const formik = useFormik({
     initialValues: {
@@ -132,7 +181,7 @@ const PromoterSignatorySection = ({ taskId }) => {
         formData.append('email', promoter.email);
         formData.append('mobile_number', promoter.mobile_number);
         formData.append('address', promoter.address);
-        formData.append('residential_address', promoter.residential_address ? 'true' : 'false');
+        formData.append('residential_address', promoter.residential_address ? true : false);
         formData.append('status', 'in progress');
 
         let url = promoter.id ? `/labourlicense/signatory-details/${promoter.id}/` : `/labourlicense/signatory-details/`;
@@ -166,9 +215,9 @@ const PromoterSignatorySection = ({ taskId }) => {
         reviewFormData.append('status', 'in progress');
 
         await Factory('post', '/labourlicense/signatory-details/', reviewFormData);
-        // console.log('Review status submitted successfully.');
+       
       } catch (err) {
-        // console.error('Review status API error:', err);
+        
       }
           getSignatoryDetails();
 
