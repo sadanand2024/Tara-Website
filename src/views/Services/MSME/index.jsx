@@ -162,13 +162,29 @@ const MSMEDashboard = () => {
       business_name: Yup.string().required('Required'),
       pan_of_business_or_COI: Yup.mixed().required('Required'),
       aadhar_of_signatory: Yup.mixed().required('Required'),
-      mobile_number: Yup.string().required('Required'),
-      email_id: Yup.string().email('Invalid email_id').required('Required'),
-Are_you_previously_registered_UAM: Yup.boolean()
-  .required('Required'),
+      mobile_number: Yup.string()
+              .required('Mobile Number is required')
+              .matches(/^[0-9]+$/, 'Mobile Number must be a number')
+              .min(10, 'Mobile Number must be at least 10 digits')
+              .max(10, 'Mobile Number must not exceed 10 digits'),  
+     email_id: Yup.string().email('Invalid email_id').required('Required'),
+     Are_you_previously_registered_UAM: Yup.boolean()
+    .required('Required'),
 
-has_business_commenced: Yup.boolean()
-  .required('Required'),    }),
+    has_business_commenced: Yup.boolean()
+    .required('Required'),   
+UAM_number: Yup.string().when('Are_you_previously_registered_UAM', {
+  is: true,
+  then: () => Yup.string().required('UAM Number is required'),    
+  otherwise: () => Yup.string().nullable(),                      
+}),
+
+date_of_commencement: Yup.string().when('has_business_commenced', {
+  is: true,
+  then: () => Yup.string().required('Date of commencement is required'),  
+  otherwise: () => Yup.string().nullable(),                               
+}),
+ }),
     onSubmit: async (values) => {
       let url = '/msme/business-identity/';
       let type = 'post';
@@ -233,7 +249,7 @@ has_business_commenced: Yup.boolean()
           variant: 'success',
           anchorOrigin: { vertical: 'top', horizontal: 'right' }
         });
-      } else {
+      } else { 
         enqueueSnackbar('Failed to save business classification inputs', {
           variant: 'error',
           anchorOrigin: { vertical: 'top', horizontal: 'right' }
@@ -292,9 +308,53 @@ has_business_commenced: Yup.boolean()
     }
   });
 
+
+
+
   // 4. Registered Address & Units Formik
+
+
+  const addressValidationSchema = Yup.object({
+  official_address_of_enterprise: Yup.object({
+    flat: Yup.string()
+      .required('Flat/Plot number is required')
+      .trim(),
+
+    building: Yup.string()
+      .required('Building name is required')
+      .trim(),
+
+    street: Yup.string()
+      .required('Street is required')
+      .trim(),
+
+    village: Yup.string()
+      .required('Village/Area is required')
+      .trim(),
+
+    city: Yup.string()
+      .required('City is required')
+      .matches(/^[A-Za-z ]+$/, 'Only alphabets are allowed in city')
+      .trim(),
+
+    district: Yup.string()
+      .required('District is required')
+      .matches(/^[A-Za-z ]+$/, 'Only alphabets are allowed in district')
+      .trim(),
+
+    state: Yup.string()
+      .required('State is required')
+      .matches(/^[A-Za-z ]+$/, 'Only alphabets are allowed in state')
+      .trim(),
+
+    pin: Yup.string()
+      .required('PIN code is required')
+      .matches(/^[0-9]{6}$/, 'PIN code must be exactly 6 digits')
+  })
+});
   const addressFormik = useFormik({
     initialValues: registeredAddressUnitsData,
+      validationSchema: addressValidationSchema,
 
     onSubmit: async (values) => {
       let url = '/msme/registration-address-details/';
@@ -342,7 +402,7 @@ has_business_commenced: Yup.boolean()
         });
       } else {
         enqueueSnackbar('Failed to save registered address & units', {
-          variant: 'error',
+          variant: 'error', 
           anchorOrigin: { vertical: 'top', horizontal: 'right' }
         });
       }
@@ -678,7 +738,7 @@ has_business_commenced: Yup.boolean()
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 7 }}>
                   <Stack direction="row" alignItems="center" spacing={2}>
-                     <RadioGroup
+                     {/* <RadioGroup
       row
       value={businessIdentityFormik?.values?.Are_you_previously_registered_UAM}
       sx={{ width: '40%' }}
@@ -691,30 +751,57 @@ has_business_commenced: Yup.boolean()
         }
       }}
     >
-      <FormControlLabel value="true" control={<Radio color="primary" />} label="Yes" />
-      <FormControlLabel value="false" control={<Radio color="primary" />} label="No" />
-    </RadioGroup>
+      <FormControlLabel value={true} control={<Radio color="primary" />} label="Yes" />
+      <FormControlLabel value={false} control={<Radio color="primary" />} label="No" />
+    </RadioGroup> */}
+     
+
                     {businessIdentityFormik?.values?.Are_you_previously_registered_UAM === true && (
-                      <TextField
-                      sx={{
-                    width: '100%',
-                   '& .MuiInputBase-input': {
-                    color: 'grey.600'
+            //           <TextField
+            //           sx={{
+            //         width: '100%',
+            //        '& .MuiInputBase-input': {
+            //         color: 'grey.600'
+            //   }
+            // }}
+            //             size="small"
+            //             fullWidth
+            //             value={businessIdentityFormik?.values?.UAM_number}
+            //             onChange={(e) => businessIdentityFormik?.setFieldValue('UAM_number', e.target.value)}
+            //             label="Enter UAM"
+            //           />
+            <TextField
+              sx={{
+                width: '100%',
+                '& .MuiInputBase-input': {
+                  color: 'grey.600'
+                }
+              }}
+              size="small"
+              fullWidth
+              label="Enter UAM"
+              name="UAM_number"
+              type="text"
+              value={businessIdentityFormik?.values?.UAM_number}
+              onChange={(e) =>
+                businessIdentityFormik?.setFieldValue('UAM_number', e.target.value)
               }
-            }}
-                        size="small"
-                        fullWidth
-                        value={businessIdentityFormik?.values?.UAM_number}
-                        onChange={(e) => businessIdentityFormik?.setFieldValue('UAM_number', e.target.value)}
-                        label="Enter UAM"
-                      />
+              onBlur={() =>
+                businessIdentityFormik?.setFieldTouched('UAM_number', true)
+              }
+              error={
+                businessIdentityFormik?.touched?.UAM_number &&
+                Boolean(businessIdentityFormik?.errors?.UAM_number)
+              }
+            />
+
                     )}
                   </Stack>
                 </Grid2>
                 {/* 8. Business Commenced */}
                 <Grid2 size={{ xs: 12, sm: 6, md: 5 }} gap={2} display="flex" alignItems="center">
                   <Typography variant="subtitle1">Has Business Commenced?</Typography>
-                   <RadioGroup
+                   {/* <RadioGroup
     row
     value={businessIdentityFormik?.values?.has_business_commenced}
     sx={{ width: '40%' }}
@@ -729,7 +816,35 @@ has_business_commenced: Yup.boolean()
   >
                     <FormControlLabel value="true" control={<Radio color="primary" />} label="Yes" />
                     <FormControlLabel value="false" control={<Radio color="primary" />} label="No" />
-                  </RadioGroup>
+                  </RadioGroup> */}
+                  <RadioGroup row sx={{ width: '40%' }}>
+  <FormControlLabel
+    label="Yes"
+    control={
+      <Radio
+        color="primary"
+        checked={businessIdentityFormik?.values?.has_business_commenced === true}
+        onChange={() => {
+          businessIdentityFormik?.setFieldValue('has_business_commenced', true);
+        }}
+      />
+    }
+  />
+  <FormControlLabel
+    label="No"
+    control={
+      <Radio
+        color="primary"
+        checked={businessIdentityFormik?.values?.has_business_commenced === false}
+        onChange={() => {
+          businessIdentityFormik?.setFieldValue('has_business_commenced', false);
+          businessIdentityFormik?.setFieldValue('date_of_commencement', '');
+        }}
+      />
+    }
+  />
+</RadioGroup>
+
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 7 }}>
                   <Stack direction="row" alignItems="center" spacing={2}>
@@ -1368,6 +1483,7 @@ const FinancialLocationDetails = ({
     pin: Yup.string().required('Required')
   });
   const savePlantUnits = async (data, idx) => {
+    
     let url = '/msme/location-of-plant-or-unit/';
     let type = 'post';
     let __data = {};
@@ -1497,7 +1613,7 @@ const FinancialLocationDetails = ({
             <Typography variant="subtitle1">Have you filed ITR for previous year?</Typography>
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 6, md: 8 }}>
-            <RadioGroup
+            {/* <RadioGroup
               row
               name="have_you_filed_itr_previous_year"
               //  value={turnoverFormik.values.have_you_filed_itr_previous_year}
@@ -1512,7 +1628,34 @@ const FinancialLocationDetails = ({
             >
               <FormControlLabel value="true" control={<Radio color="primary" />} label="Yes" />
               <FormControlLabel value="false" control={<Radio color="primary" />} label="No" />
-            </RadioGroup>
+            </RadioGroup> */}
+            <RadioGroup row name="have_you_filed_itr_previous_year">
+  <FormControlLabel
+    label="Yes"
+    control={
+      <Radio
+        color="primary"
+        checked={turnoverFormik.values.have_you_filed_itr_previous_year === true}
+        onChange={() =>
+          turnoverFormik.setFieldValue('have_you_filed_itr_previous_year', true)
+        }
+      />
+    }
+  />
+  <FormControlLabel
+    label="No"
+    control={
+      <Radio
+        color="primary"
+        checked={turnoverFormik.values.have_you_filed_itr_previous_year === false}
+        onChange={() =>
+          turnoverFormik.setFieldValue('have_you_filed_itr_previous_year', false)
+        }
+      />
+    }
+  />
+</RadioGroup>
+
           </Grid2>
           {/* Registered under GST */}
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }} display="flex" alignItems="center">
@@ -1571,7 +1714,7 @@ const FinancialLocationDetails = ({
             </Stack>
           </Grid2>
         </Grid2>
-        <Box display="flex" justifyContent="flex-end" mt={2} gap={1}>
+         <Box display="flex" justifyContent="flex-end" mt={2} gap={1}>
           <Button type="submit" size="medium" variant="contained" color="primary">
             Save Turnover & Investment
           </Button>
@@ -1632,6 +1775,17 @@ const FinancialLocationDetails = ({
                   onChange={(e) => {
                     addressFormik.setFieldValue('official_address_of_enterprise.flat', e.target.value);
                   }}
+                   onBlur={() =>
+                  addressFormik.setFieldTouched('official_address_of_enterprise.flat', true)
+                }
+                error={
+                  !!addressFormik.touched.official_address_of_enterprise?.flat &&
+                  !!addressFormik.errors.official_address_of_enterprise?.flat
+                }
+                helperText={
+                  addressFormik.touched.official_address_of_enterprise?.flat &&
+                  addressFormik.errors.official_address_of_enterprise?.flat
+                }
                 />
               </Grid2>
               <Grid2 size={{ xs: 12, md: 6 }}>
@@ -1650,6 +1804,17 @@ const FinancialLocationDetails = ({
                   onChange={(e) => {
                     addressFormik.setFieldValue('official_address_of_enterprise.building', e.target.value);
                   }}
+                   onBlur={() =>
+                    addressFormik.setFieldTouched('official_address_of_enterprise.building', true)
+                  }
+                  error={
+                    !!addressFormik.touched.official_address_of_enterprise?.building &&
+                    !!addressFormik.errors.official_address_of_enterprise?.building
+                  }
+                  helperText={
+                    addressFormik.touched.official_address_of_enterprise?.building &&
+                    addressFormik.errors.official_address_of_enterprise?.building
+                  }
                 />
               </Grid2>
               <Grid2 size={{ xs: 12, md: 4 }}>
@@ -1668,6 +1833,17 @@ const FinancialLocationDetails = ({
                   onChange={(e) => {
                     addressFormik.setFieldValue('official_address_of_enterprise.street', e.target.value);
                   }}
+                   onBlur={() =>
+                  addressFormik.setFieldTouched('official_address_of_enterprise.street', true)
+                }
+                error={
+                  !!addressFormik.touched.official_address_of_enterprise?.street &&
+                  !!addressFormik.errors.official_address_of_enterprise?.street
+                }
+                helperText={
+                  addressFormik.touched.official_address_of_enterprise?.street &&
+                  addressFormik.errors.official_address_of_enterprise?.street
+                }
                 />
               </Grid2>
               <Grid2 size={{ xs: 12, md: 4 }}>
@@ -1686,6 +1862,17 @@ const FinancialLocationDetails = ({
                   onChange={(e) => {
                     addressFormik.setFieldValue('official_address_of_enterprise.village', e.target.value);
                   }}
+                  onBlur={() =>
+                  addressFormik.setFieldTouched('official_address_of_enterprise.village', true)
+                }
+                error={
+                  !!addressFormik.touched.official_address_of_enterprise?.village &&
+                  !!addressFormik.errors.official_address_of_enterprise?.village
+                }
+                helperText={
+                  addressFormik.touched.official_address_of_enterprise?.village &&
+                  addressFormik.errors.official_address_of_enterprise?.village
+                }
                 />
               </Grid2>
               <Grid2 size={{ xs: 12, md: 4 }}>
@@ -1704,7 +1891,18 @@ const FinancialLocationDetails = ({
                   onChange={(e) => {
                     addressFormik.setFieldValue('official_address_of_enterprise.city', e.target.value);
                   }}
-                />
+                  onBlur={() =>
+                  addressFormik.setFieldTouched('official_address_of_enterprise.city', true)
+                }
+                error={
+                  !!addressFormik.touched.official_address_of_enterprise?.city &&
+                  !!addressFormik.errors.official_address_of_enterprise?.city
+                }
+                helperText={
+                  addressFormik.touched.official_address_of_enterprise?.city &&
+                  addressFormik.errors.official_address_of_enterprise?.city
+                }
+                              />
               </Grid2>
               <Grid2 size={{ xs: 12, md: 4 }}>
                 <TextField
@@ -1722,7 +1920,18 @@ const FinancialLocationDetails = ({
                   onChange={(e) => {
                     addressFormik.setFieldValue('official_address_of_enterprise.district', e.target.value);
                   }}
-                />
+                   onBlur={() =>
+                    addressFormik.setFieldTouched('official_address_of_enterprise.district', true)
+                  }
+                  error={
+                    !!addressFormik.touched.official_address_of_enterprise?.district &&
+                    !!addressFormik.errors.official_address_of_enterprise?.district
+                  }
+                  helperText={
+                    addressFormik.touched.official_address_of_enterprise?.district &&
+                    addressFormik.errors.official_address_of_enterprise?.district
+                  }
+                                />
               </Grid2>
               <Grid2 size={{ xs: 12, md: 4 }}>
                 <TextField
@@ -1740,6 +1949,17 @@ const FinancialLocationDetails = ({
                   onChange={(e) => {
                     addressFormik.setFieldValue('official_address_of_enterprise.state', e.target.value);
                   }}
+                   onBlur={() =>
+                  addressFormik.setFieldTouched('official_address_of_enterprise.state', true)
+                }
+                error={
+                  !!addressFormik.touched.official_address_of_enterprise?.state &&
+                  !!addressFormik.errors.official_address_of_enterprise?.state
+                }
+                helperText={
+                  addressFormik.touched.official_address_of_enterprise?.state &&
+                  addressFormik.errors.official_address_of_enterprise?.state
+                }
                 />
               </Grid2>
               <Grid2 size={{ xs: 12, md: 4 }}>
@@ -1758,6 +1978,17 @@ const FinancialLocationDetails = ({
                   onChange={(e) => {
                     addressFormik.setFieldValue('official_address_of_enterprise.pin', e.target.value);
                   }}
+                  onBlur={() =>
+                addressFormik.setFieldTouched('official_address_of_enterprise.pin', true)
+              }
+              error={
+                !!addressFormik.touched.official_address_of_enterprise?.pin &&
+                !!addressFormik.errors.official_address_of_enterprise?.pin
+              }
+              helperText={
+                addressFormik.touched.official_address_of_enterprise?.pin &&
+                addressFormik.errors.official_address_of_enterprise?.pin
+              }
                 />
               </Grid2>
               <Grid2 size={{ xs: 12, md: 4 }}>
@@ -1891,14 +2122,14 @@ const FinancialLocationDetails = ({
                   let url = '/msme/registration-address-details/';
                   let type = 'post';
                   if (registeredAddressUnitsData?.id !== null) {
-                    url = url + registeredAddressUnitsData?.id + '/';
+                    url = url + registeredAddressUnitsData?.id + '/'; 
                     type = 'put';
                   }
                   const formData = new FormData();
                   formData.append('service_request', service_id);
                   formData.append('service_task', sectionData.tasks['Registered Address'].task_id);
                   formData.append('status', 'in progress');
-                  formData.append('location_of_plant', e.target.checked ? 'true' : 'false');
+                  formData.append('location_of_plant', e.target.checked ? true : false);
 
                   const response = await Factory(type, url, formData);
                   if (response.res.status_cd === 0) {
@@ -1911,7 +2142,7 @@ const FinancialLocationDetails = ({
           />
         </Stack>
 
-        {(registeredAddressUnitsData?.location_of_plant === true || registeredAddressUnitsData?.location_of_plant === 'true') &&
+        {(registeredAddressUnitsData?.location_of_plant === true || registeredAddressUnitsData?.location_of_plant === true) &&
           plantUnits.map((unit, idx) => (
             <Box key={idx} sx={{ border: '1px solid #e0e0e0', borderRadius: 2, p: 2, mb: 2, bgcolor: '#f8fafc' }}>
               <Typography variant="subtitle1" mb={2}>
@@ -2036,6 +2267,7 @@ const FinancialLocationDetails = ({
                       newUnits[idx].unit_details.city = e.target.value;
                       setPlantUnits(newUnits);
                     }}
+                    
                   />
                 </Grid2>
                 <Grid2 size={{ xs: 12, md: 4 }}>
@@ -2108,7 +2340,7 @@ const FinancialLocationDetails = ({
           ))}
          {console.log("xdfvgbhnjkl",registeredAddressUnitsData?.location_of_plant)}
          <Box display="flex" justifyContent="flex-end" mt={2} gap={1}>
-        {(registeredAddressUnitsData?.location_of_plant === true || registeredAddressUnitsData?.location_of_plant === 'true') && (
+        {(registeredAddressUnitsData?.location_of_plant === true || registeredAddressUnitsData?.location_of_plant === true) && (
           <Box>
             <Button
               variant="outlined"
