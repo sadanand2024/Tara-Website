@@ -11,16 +11,16 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 
 const PAYROLL_STEPS = [
-  { nameKey: 'Business profile', path: '/payroll/settings/organization-details', dataKey: 'organisation_details' },
-  { nameKey: 'Set up Work Location', path: '/payroll/settings/work-location', dataKey: 'work_locations' },
-  { nameKey: 'Set up Departments', path: '/payroll/settings/departments', dataKey: 'departments' },
-  { nameKey: 'Set up Designations', path: '/payroll/settings/designations', dataKey: 'designations' },
-  { nameKey: 'Set up Statutory Components', path: '/payroll/settings/statutory-components', dataKey: 'statutory_component' },
-  { nameKey: 'Set up Salary Components', path: '/payroll/settings/salary-components', dataKey: 'salary_component' },
-  { nameKey: 'Set up Salary Template', path: '/payroll/settings/salary-template-list', dataKey: 'salary_template' },
-  { nameKey: 'Set up Employee Master', path: '/payroll/settings/employee-master', dataKey: 'employee_master' },
-  { nameKey: 'Set up Pay & Schedule', path: '/payroll/settings/pay-schedule', dataKey: 'pay_schedule' },
-  { nameKey: 'Leave & Attendance', path: '/payroll/settings/leave-attendance', dataKey: 'leave_and_attendance' }
+  { nameKey: 'Business profile', path: '/app/payroll/settings/organization-details', dataKey: 'organisation_details' },
+  { nameKey: 'Set up Work Location', path: '/app/payroll/settings/work-location', dataKey: 'work_locations' },
+  { nameKey: 'Set up Departments', path: '/app/payroll/settings/departments', dataKey: 'departments' },
+  { nameKey: 'Set up Designations', path: '/app/payroll/settings/designations', dataKey: 'designations' },
+  { nameKey: 'Set up Statutory Components', path: '/app/payroll/settings/statutory-components', dataKey: 'statutory_component' },
+  { nameKey: 'Set up Salary Components', path: '/app/payroll/settings/salary-components', dataKey: 'salary_component' },
+  { nameKey: 'Set up Salary Template', path: '/app/payroll/settings/salary-template-list', dataKey: 'salary_template' },
+  { nameKey: 'Set up Employee Master', path: '/app/payroll/settings/employee-master', dataKey: 'employee_master' },
+  { nameKey: 'Set up Pay & Schedule', path: '/app/payroll/settings/pay-schedule', dataKey: 'pay_schedule' },
+  { nameKey: 'Leave & Attendance', path: '/app/payroll/settings/leave-attendance', dataKey: 'leave_and_attendance' }
 ];
 
 const PayrollSetup = () => {
@@ -379,17 +379,12 @@ const StepItem = React.memo(({ step, index, onClick, onMarkStatutoryComplete, ma
           size="small"
           onClick={onClick}
           sx={{
-            background: 'linear-gradient(45deg, #3b82f6 0%, #1d4ed8 100%)',
             borderRadius: 1.5,
             px: 2,
             py: 0.5,
             fontWeight: 500,
             fontSize: '0.8rem',
-            boxShadow: '0 2px 8px rgba(59, 130, 246, 0.25)',
-            '&:hover': {
-              background: 'linear-gradient(45deg, #2563eb 0%, #1e40af 100%)',
-              boxShadow: '0 3px 12px rgba(59, 130, 246, 0.35)'
-            }
+            boxShadow: '0 2px 8px rgba(59, 130, 246, 0.25)'
           }}
         >
           Start
@@ -397,7 +392,7 @@ const StepItem = React.memo(({ step, index, onClick, onMarkStatutoryComplete, ma
       )}
       {/* Show Mark as Complete only for Statutory Components step when not completed */}
       {onMarkStatutoryComplete && !step.completed && (
-        <Button variant="contained" onClick={onMarkStatutoryComplete} disabled={markingComplete}>
+        <Button variant="outlined" onClick={onMarkStatutoryComplete} disabled={markingComplete}>
           {markingComplete ? <CircularProgress size={20} color="inherit" /> : 'Mark as Complete'}
         </Button>
       )}

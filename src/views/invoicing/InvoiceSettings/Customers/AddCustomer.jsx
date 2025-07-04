@@ -46,7 +46,7 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
       name: '',
       pan_number: '',
       entity_type: '',
-      gst_registered: 'No',
+      gst_registered: false,
       gst_type: '',
       gstin: 'NA',
       address_line1: '',
@@ -459,6 +459,7 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
               options={CountriesList}
               error={touched.country && Boolean(errors.country)}
               helperText={touched.country && errors.country}
+              disabled
             />
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>

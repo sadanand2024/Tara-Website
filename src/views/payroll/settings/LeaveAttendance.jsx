@@ -38,7 +38,7 @@ const LeaveAttendance = ({ type }) => {
   };
 
   return (
-    <MainCard title="Leave & Attendance" tagline="Setup your organization before starting payroll">
+    <MainCard title="Leave & Attendance" subtitle="Manage Leave & Attendance for seamless operations">
       <Box sx={{ width: '100%' }}>
         <Tabs
           value={activeTab}

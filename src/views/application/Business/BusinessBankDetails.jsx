@@ -206,12 +206,10 @@ const BusinessBankDetails = ({ user, handleNext, handleBack, tabChange, tabval }
   const renderFields = () => {
     return fields.map((field) => (
       <Grid2 key={field.name} size={{ xs: 12, sm: 6 }}>
-        <Typography variant="subtitle1" gutterBottom>
-          {field.label}
-        </Typography>
         <TextField
           fullWidth
           size="small"
+          label={field.label}
           name={field.name}
           value={values[field.name] || ''}
           onChange={(e) => {

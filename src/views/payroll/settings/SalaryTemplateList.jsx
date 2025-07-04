@@ -90,6 +90,7 @@ function SalaryTemplateList({ handleBack, handleNext }) {
   return (
     <MainCard
       title="Salary Templates"
+      subtitle="Manage your Salary Templates for seamless operations"
       secondary={
         <Stack direction="row" spacing={2}>
           <Button variant="contained" color="primary" onClick={() => navigate(`/payroll/settings/salary-template?payrollid=${payrollid}`)}>

@@ -12,7 +12,8 @@ import {
   Box,
   Pagination,
   Typography,
-  Grid2
+  Grid2,
+  CircularProgress
 } from '@mui/material';
 import MainCard from 'ui-component/cards/MainCard';
 import ActionCell from 'ui-component/extended/ActionCell';
@@ -35,6 +36,7 @@ function Departments({ handleBack, handleNext }) {
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchParams] = useSearchParams();
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
@@ -64,10 +66,12 @@ function Departments({ handleBack, handleNext }) {
   const handleCloseDialog = () => setOpenDialog(false);
 
   const fetchDepartments = async () => {
+    setLoading(true);
     const url = `/payroll/departments/?payroll_id=${payrollid}`;
     const { res } = await Factory('get', url, {});
     if (res?.status_cd === 0 && Array.isArray(res?.data)) {
       setDepartments(res.data);
+      setLoading(false);
     } else {
       dispatch(
         openSnackbar({
@@ -79,6 +83,7 @@ function Departments({ handleBack, handleNext }) {
         })
       );
       setDepartments([]);
+      setLoading(false);
     }
   };
 
@@ -105,9 +110,29 @@ function Departments({ handleBack, handleNext }) {
     }
   };
 
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '400px',
+          flexDirection: 'column',
+          gap: 2
+        }}
+      >
+        <CircularProgress size={50} />
+        <Typography variant="h5" color="text.secondary">
+          Loading Departments...
+        </Typography>
+      </Box>
+    );
+  }
   return (
     <MainCard
       title="Departments Details"
+      subtitle="Manage your departments for seamless operations"
       secondary={
         <Stack direction="row" spacing={2}>
           <Button size="small" variant="outlined" color="secondary" onClick={() => setOpenBulkDialog(true)}>
@@ -194,10 +219,10 @@ function Departments({ handleBack, handleNext }) {
                     <TableCell align="center">{department.employee_count || 0}</TableCell>
                     <TableCell align="center">
                       <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
-                        <IconButton color="primary" onClick={() => handleEdit(department)}>
+                        <IconButton size="small" color="primary" onClick={() => handleEdit(department)}>
                           <Edit />
                         </IconButton>
-                        <IconButton color="error" onClick={() => handleOpenDeleteDialog(department)}>
+                        <IconButton size="small" color="error" onClick={() => handleOpenDeleteDialog(department)}>
                           <Delete />
                         </IconButton>
                       </Box>
