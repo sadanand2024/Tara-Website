@@ -71,11 +71,12 @@ const OverallStats = ({ theme, title, setTitle, dashboardData, getInvoices, getS
             sx={{
               p: 2,
               cursor: 'pointer',
-              bgcolor: item.title === title ? 'primary.lighter' : 'background.paper',
+              boxShadow: (theme) => (item.title === title ? theme.shadows[4] : 'none'),
+              transform: item.title === title && 'translateY(-4px)',
               transition: 'all 0.3s ease-in-out',
               '&:hover': {
                 transform: 'translateY(-4px)',
-                boxShadow: theme.customShadows.z4
+                boxShadow: theme.shadows[4]
               },
               borderTop: `3px solid ${theme.palette[item.color.split('.')[0]][item.color.split('.')[1]]}`
             }}
