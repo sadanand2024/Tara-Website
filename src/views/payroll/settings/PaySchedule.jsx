@@ -233,11 +233,11 @@ function PaySchedule({ handleBack, handleNext }) {
           </Grid2>
         </Box>
 
-        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mt: 2 }}>
-          <Stack direction="row" spacing={1}>
-            <Button variant="outlined" type="button" onClick={() => handleBack()}>
-              Back
-            </Button>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
+          <Button variant="outlined" type="button" onClick={() => handleBack()}>
+            Back
+          </Button>
+          <Box sx={{ display: 'flex', gap: 1 }}>
             <Stack direction="row" spacing={1}>
               <Button variant="contained" type="submit" onClick={handleSubmit}>
                 Save
@@ -246,8 +246,8 @@ function PaySchedule({ handleBack, handleNext }) {
                 Next
               </Button>
             </Stack>
-          </Stack>
-        </Stack>
+          </Box>
+        </Box>
       </form>
 
       <Modal

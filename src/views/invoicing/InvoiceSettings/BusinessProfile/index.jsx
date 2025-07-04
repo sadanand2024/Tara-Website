@@ -30,6 +30,7 @@ import { openSnackbar } from 'store/slices/snackbar';
 import { businessTypesArray } from 'utils/businessTypesArray';
 import CustomUpload from 'utils/CustomUpload';
 import DeleteIcon from '@mui/icons-material/Delete';
+import MainCard from 'ui-component/cards/MainCard';
 
 export default function BusinessProfileComponnet({ businessDetails = {}, postType, handleNext, setBusinessDetails, setTabValue }) {
   const navigate = useNavigate();
@@ -278,11 +279,7 @@ export default function BusinessProfileComponnet({ businessDetails = {}, postTyp
   };
 
   return (
-    <>
-      <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 2 }}>
-        Business Details
-      </Typography>
-
+    <MainCard title="Business Profile" subtitle="Manage your business profile for invoice generation and business operations">
       <Grid2 container spacing={2}>
         {busineesprofileFields.basic_details.map((item, index) =>
           item.name === 'logo' ? (
@@ -504,17 +501,13 @@ export default function BusinessProfileComponnet({ businessDetails = {}, postTyp
         ))}
       </Grid2>
 
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 4 }}>
-        <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigate(-1)}>
-          Back to Dashboard
-        </Button>
-
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mt: 4 }}>
         <Stack direction="row" spacing={2}>
           <Button variant="contained" onClick={handleSubmit}>
             Save & Continue
           </Button>
         </Stack>
       </Box>
-    </>
+    </MainCard>
   );
 }

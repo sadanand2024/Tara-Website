@@ -71,6 +71,7 @@ const AddBranchDialog = ({ open, handleClose, getBranches, selectedRecord, getBr
         <Grid2 key={field.name} size={{ xs: 12, sm: 6 }}>
           <Typography gutterBottom>{field.label}</Typography>
           <TextField
+            size="small"
             value={values[field.name]}
             name={field.name}
             onChange={handleChange}
@@ -93,6 +94,7 @@ const AddBranchDialog = ({ open, handleClose, getBranches, selectedRecord, getBr
   return (
     <Modal
       open={open}
+      maxWidth="sm"
       showClose={true}
       title={type === 'edit' ? 'Edit Branch' : 'Add Branch'}
       handleClose={() => {

@@ -28,8 +28,17 @@ import {
   TableRow,
   Paper,
   Card,
+  CardContent,
+  CardHeader,
   Pagination,
-  Stack
+  Stack,
+  Divider,
+  Chip,
+  IconButton,
+  Tooltip,
+  Alert,
+  Fade,
+  Zoom
 } from '@mui/material';
 
 import { industries } from 'utils/industries';
@@ -39,11 +48,17 @@ import Factory from 'utils/Factory';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Edit from '@mui/icons-material/Edit';
-import IconButton from '@mui/material/IconButton';
+import BusinessIcon from '@mui/icons-material/Business';
+import ContactMailIcon from '@mui/icons-material/ContactMail';
+import VerifiedIcon from '@mui/icons-material/Verified';
+import AccountTreeIcon from '@mui/icons-material/AccountTree';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
 import AddBranchDialog from './AddBranchDialog';
 import { useDispatch, useSelector } from 'react-redux';
 import { openSnackbar } from 'store/slices/snackbar';
+import MainCard from 'ui-component/cards/MainCard';
 
 const entityTypeMapping = {
   privateLimitedCompany: 'Private Limited Company',
@@ -93,7 +108,6 @@ const validationSchema = Yup.object({
     then: () => Yup.string().required('MSME number is required'),
     otherwise: () => Yup.string().nullable()
   }),
-  // is_multiple_branches: Yup.string().oneOf(['yes', 'no']).required(),
   branches: Yup.array().when('is_multiple_branches', {
     is: 'yes',
     then: () =>
@@ -106,81 +120,92 @@ const validationSchema = Yup.object({
     otherwise: () => Yup.array().nullable()
   })
 });
+
 const businessProfileFields = [
   {
     name: 'nameOfBusiness',
     label: 'Business Name',
-    type: 'text'
+    type: 'text',
+    required: true
   },
   {
     name: 'business_nature',
     label: 'Business Nature',
-    type: 'text'
-  },
-  {
-    name: 'logo',
-    label: 'Logo',
-    type: 'file'
+    type: 'text',
+    required: true
   },
   {
     name: 'pan',
     label: 'PAN',
-    type: 'text'
+    type: 'text',
+    required: true
   },
   {
     name: 'registrationNumber',
     label: 'Registration Number',
-    type: 'text'
+    type: 'text',
+    required: true
   },
   {
     name: 'entityType',
     label: 'Entity Type',
     type: 'autocomplete',
-    options: Object.values(entityTypeMapping)
+    options: Object.values(entityTypeMapping),
+    required: true
   },
   {
     name: 'dob_or_incorp_date',
     label: 'Date of Incorporation',
-    type: 'date'
+    type: 'date',
+    required: true
   }
 ];
-let primaryContactFields = [
+
+const primaryContactFields = [
   {
     name: 'email',
     label: 'Email',
-    type: 'text'
+    type: 'text',
+    required: true
   },
   {
     name: 'mobile_number',
     label: 'Mobile Number',
-    type: 'text'
+    type: 'text',
+    required: true
   },
   {
     name: 'headOffice.address_line1',
     label: 'Address Line 1',
-    type: 'text'
+    type: 'text',
+    required: true
   },
   {
     name: 'headOffice.address_line2',
     label: 'Address Line 2',
-    type: 'text'
+    type: 'text',
+    required: false
   },
   {
     name: 'headOffice.city',
     label: 'City',
-    type: 'text'
+    type: 'text',
+    required: true
   },
   {
     name: 'headOffice.state',
     label: 'State',
-    type: 'text'
+    type: 'text',
+    required: true
   },
   {
     name: 'headOffice.pincode',
     label: 'Pincode',
-    type: 'text'
+    type: 'text',
+    required: true
   }
 ];
+
 const BusinessProfile = ({ tabChange, tabval }) => {
   const user = useSelector((state) => state.accountReducer.user);
   const dispatch = useDispatch();
@@ -195,6 +220,8 @@ const BusinessProfile = ({ tabChange, tabval }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [open, setOpen] = useState(false);
   const [selectedBranch, setSelectedBranch] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
+
   const handlePageChange = (event, value) => {
     setCurrentPage(value);
   };
@@ -213,7 +240,6 @@ const BusinessProfile = ({ tabChange, tabval }) => {
   };
 
   const handleRemoveBranch = async (index) => {
-    // If the branch doesn't have an ID, it means it hasn't been saved yet
     if (!branches[index].id) {
       const newBranches = [...branches];
       newBranches.splice(index, 1);
@@ -221,7 +247,6 @@ const BusinessProfile = ({ tabChange, tabval }) => {
       return;
     }
 
-    // If the branch has an ID, proceed with API deletion
     let url = `/user_management/branches/${branches[index].id}/`;
     let response = await Factory('delete', url, {});
     if (response.res.status_cd === 0) {
@@ -286,7 +311,6 @@ const BusinessProfile = ({ tabChange, tabval }) => {
     const fetchAllData = async () => {
       try {
         setIsLoading(true);
-        // Fetch business profile
         const profileResponse = await Factory('get', `/user_management/businesses/${user.active_context.business_id}/`, {}, {});
         if (profileResponse.res.status_cd === 0) {
           const profileData = profileResponse.res.data;
@@ -313,7 +337,6 @@ const BusinessProfile = ({ tabChange, tabval }) => {
           });
         }
 
-        // Fetch branches
         const branchesResponse = await Factory('get', `/user_management/branches/${user.active_context.business_id}/`, {}, {});
         if (branchesResponse.res.status_cd === 0) {
           if (branchesResponse.res.data.length > 0) {
@@ -324,7 +347,7 @@ const BusinessProfile = ({ tabChange, tabval }) => {
             setBranches([]);
           }
         }
-        // Fetch logo
+
         const logoResponse = await Factory('get', `/user_management/business-logo/${user.active_context.business_id}/`, {}, {});
         if (logoResponse.res.status_cd === 0) {
           setLogoUrlDetails(logoResponse.res.data);
@@ -406,14 +429,11 @@ const BusinessProfile = ({ tabChange, tabval }) => {
     const file = event.target.files[0];
     if (file) {
       setLogoFile(file);
-
-      console.log(logoposttype);
       let url = logoposttype === 'put' ? `/user_management/business-logo/${logoUrlDetails.id}/` : '/user_management/business-logo/';
       let formData = new FormData();
       formData.append('logo', file);
       logoposttype === 'post' && formData.append('business', user.active_context.business_id);
       let { res, error } = await Factory(logoposttype, url, formData);
-      console.log(res);
       if (res.status_cd === 0) {
         setLogoUrlDetails(res.data);
         setLogoposttype('put');
@@ -440,10 +460,56 @@ const BusinessProfile = ({ tabChange, tabval }) => {
     }
   };
 
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      const file = files[0];
+      if (file.type.startsWith('image/')) {
+        const event = { target: { files: [file] } };
+        handleLogoChange(event);
+      }
+    }
+  };
+
   const renderField = (field) => {
-    // Helper function to get nested value
     const getNestedValue = (obj, path) => {
       return path.split('.').reduce((acc, part) => (acc ? acc[part] : undefined), obj);
+    };
+
+    const commonTextFieldProps = {
+      fullWidth: true,
+      size: 'small',
+      variant: 'outlined',
+      sx: {
+        '& .MuiOutlinedInput-root': {
+          borderRadius: 2,
+          '&:hover .MuiOutlinedInput-notchedOutline': {
+            borderColor: 'primary.main'
+          },
+          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+            borderColor: 'primary.main',
+            borderWidth: 2
+          }
+        },
+        '& .MuiInputLabel-root': {
+          color: 'text.secondary',
+          '&.Mui-focused': {
+            color: 'primary.main'
+          }
+        }
+      }
     };
 
     switch (field.type) {
@@ -458,298 +524,526 @@ const BusinessProfile = ({ tabChange, tabval }) => {
             renderInput={(params) => (
               <TextField
                 {...params}
+                {...commonTextFieldProps}
                 name={field.name}
-                onChange={(e, value) => setFieldValue(field.name, value)}
+                label={field.label}
                 error={touched[field.name] && Boolean(errors[field.name])}
-                helperText={touched[field.name] && errors[field.name]}
+                helperText={touched[field.name] && errors[field.name] ? errors[field.name] : ''}
               />
             )}
-            sx={{
-              '& .MuiInputBase-input': {
-                color: 'text.disabled'
-              }
-            }}
           />
         );
       case 'text':
         return (
           <TextField
-            fullWidth
-            size="small"
+            {...commonTextFieldProps}
             name={field.name}
+            label={field.label}
             value={getNestedValue(values, field.name)}
             onChange={(e) => {
               if (field.name === 'pan') {
                 let value = e.target.value;
-                if (value.length === 10) {
+                if (value.length <= 10) {
                   setFieldValue(field.name, value.toUpperCase());
-                } else {
-                  return;
                 }
               } else {
                 setFieldValue(field.name, e.target.value);
               }
             }}
-            sx={{
-              '& .MuiInputBase-input': {
-                color: 'text.disabled'
-              }
-            }}
             error={touched[field.name] && Boolean(errors[field.name])}
-            helperText={touched[field.name] && errors[field.name]}
+            helperText={touched[field.name] && errors[field.name] ? errors[field.name] : ''}
             onBlur={handleBlur}
           />
         );
       case 'date':
         return (
           <TextField
-            fullWidth
-            size="small"
+            {...commonTextFieldProps}
             type="date"
             name={field.name}
+            label={field.label}
             value={getNestedValue(values, field.name)}
             onChange={(e) => setFieldValue(field.name, e.target.value)}
             onBlur={handleBlur}
             error={touched[field.name] && Boolean(errors[field.name])}
-            helperText={touched[field.name] && errors[field.name]}
+            helperText={touched[field.name] && errors[field.name] ? errors[field.name] : ''}
+            InputLabelProps={{
+              shrink: true
+            }}
           />
         );
-      case 'file':
-        return (
-          <Grid2 size={{ xs: 12, sm: 6, md: 4 }} key={field.name}>
-            <input
-              accept="image/*"
-              style={{ display: 'none' }}
-              id="profile-image-upload"
-              type="file"
-              onChange={handleLogoChange}
-              ref={fileInputRef}
-            />
-
-            <Box display="flex" alignItems="center" gap={10}>
-              <Avatar
-                alt="Profile"
-                src={logoUrlDetails?.logo || (logoFile ? URL.createObjectURL(logoFile) : '')}
-                sx={{
-                  width: 100,
-                  height: 100,
-                  boxShadow: 3,
-                  border: '2px solid #fff',
-                  background: '#fff'
-                }}
-                imgProps={{
-                  style: {
-                    objectFit: 'contain',
-                    width: '100%',
-                    height: '100%'
-                  }
-                }}
-              />
-
-              <label htmlFor="profile-image-upload">
-                <Button variant="contained" size="small" component="span" sx={{ whiteSpace: 'nowrap' }}>
-                  Upload / Change Logo
-                </Button>
-              </label>
-            </Box>
-          </Grid2>
-        );
-
       default:
         return null;
     }
   };
 
+  const renderLogoUpload = () => (
+    <Card
+      elevation={0}
+      sx={{
+        border: '2px dashed',
+        borderColor: isDragging ? 'primary.main' : 'grey.300',
+        backgroundColor: isDragging ? 'primary.50' : 'background.paper',
+        transition: 'all 0.3s ease',
+        cursor: 'pointer',
+        '&:hover': {
+          borderColor: 'primary.main',
+          backgroundColor: 'primary.50'
+        }
+      }}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+      onClick={() => fileInputRef.current?.click()}
+    >
+      <CardContent sx={{ textAlign: 'center', py: 3 }}>
+        <input
+          accept="image/*"
+          style={{ display: 'none' }}
+          id="profile-image-upload"
+          type="file"
+          onChange={handleLogoChange}
+          ref={fileInputRef}
+        />
+
+        <Box sx={{ position: 'relative', display: 'inline-block', mb: 2 }}>
+          <Avatar
+            alt="Business Logo"
+            src={logoUrlDetails?.logo || (logoFile ? URL.createObjectURL(logoFile) : '')}
+            sx={{
+              width: 120,
+              height: 120,
+              border: '3px solid',
+              borderColor: 'primary.main',
+              backgroundColor: 'background.paper',
+              boxShadow: 3
+            }}
+            imgProps={{
+              style: {
+                objectFit: 'contain',
+                padding: 8
+              }
+            }}
+          >
+            {!logoUrlDetails?.logo && !logoFile && <BusinessIcon sx={{ fontSize: 60, color: 'grey.400' }} />}
+          </Avatar>
+
+          <Box
+            sx={{
+              position: 'absolute',
+              bottom: 0,
+              right: 0,
+              backgroundColor: 'primary.main',
+              borderRadius: '50%',
+              width: 36,
+              height: 36,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              border: '3px solid white',
+              boxShadow: 2
+            }}
+          >
+            <PhotoCameraIcon sx={{ fontSize: 18, color: 'white' }} />
+          </Box>
+        </Box>
+
+        <Typography variant="h6" color="text.primary" gutterBottom>
+          Business Logo
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          {logoUrlDetails?.logo || logoFile ? 'Click to change logo' : 'Drag & drop or click to upload'}
+        </Typography>
+
+        <Stack direction="row" spacing={1} justifyContent="center">
+          <Chip icon={<CloudUploadIcon />} label="Upload Logo" variant="outlined" color="primary" size="small" />
+          {logoUrlDetails?.logo && <Chip icon={<VerifiedIcon />} label="Uploaded" color="success" size="small" />}
+        </Stack>
+      </CardContent>
+    </Card>
+  );
+
   if (isLoading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
-        <CircularProgress />
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '400px',
+          flexDirection: 'column',
+          gap: 2
+        }}
+      >
+        <CircularProgress size={50} />
+        <Typography variant="h5" color="text.secondary">
+          Loading Business Profile...
+        </Typography>
       </Box>
     );
   }
-  const { values, handleChange, errors, touched, handleSubmit, handleBlur, resetForm, setFieldValue } = formik;
+
+  const { values, handleChange, errors, touched, handleSubmit, handleBlur, setFieldValue } = formik;
+
   return (
-    <Box component="form" onSubmit={handleSubmit}>
-      <Grid2 container spacing={2}>
-        {/* Business Name Header */}
-        <Grid2 size={{ xs: 12 }}>
-          <Typography variant="h4" color="text.primary" gutterBottom>
-            Business Profile
-          </Typography>
-        </Grid2>
-        {/* <Grid2 size={{ xs: 12, md: 6 }} sx={{ mt: 2, mb: 2 }}>
-        
-        </Grid2> */}
-        {businessProfileFields.map((field) => (
-          <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4 }}>
-            <Typography variant="subtitle1" mb={0.5}>
-              {field.label}
-            </Typography>
-            {renderField(field)}
-          </Grid2>
-        ))}
-
-        {/* Primary Contact */}
-        <Grid2 size={{ xs: 12 }}>
-          <Typography variant="h4" color="text.primary" gutterBottom sx={{ mt: 2 }}>
-            Primary Contact
-          </Typography>
-        </Grid2>
-        {primaryContactFields.map((field) => (
-          <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-            <Typography variant="subtitle1" mb={0.5}>
-              {field.label}
-            </Typography>
-            {renderField(field)}
-          </Grid2>
-        ))}
-
-        {/* MSME Section */}
-        <Grid2 size={{ xs: 12 }}>
-          <FormControl component="fieldset">
-            <Typography variant="subtitle1" gutterBottom>
-              Is your business MSME Registered?
-            </Typography>
-            <RadioGroup row name="is_msme_registered" value={values.is_msme_registered} onChange={handleChange}>
-              <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
-              <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
-            </RadioGroup>
-          </FormControl>
-        </Grid2>
-
-        {values.is_msme_registered === 'yes' && (
-          <>
-            <Grid2 size={{ xs: 12, sm: 6 }}>
-              <FormControl fullWidth size="small" error={touched.msme_registration_type && Boolean(errors.msme_registration_type)}>
-                <InputLabel>MSME/Udyam Registration Type</InputLabel>
-                <Select
-                  id="msme_registration_type"
-                  name="msme_registration_type"
-                  value={values.msme_registration_type}
-                  label="MSME/Udyam Registration Type"
-                  onChange={handleChange}
-                >
-                  <MenuItem value="micro">Micro</MenuItem>
-                  <MenuItem value="small">Small</MenuItem>
-                  <MenuItem value="medium">Medium</MenuItem>
-                </Select>
-                {touched.msme_registration_type && errors.msme_registration_type && (
-                  <FormHelperText>{errors.msme_registration_type}</FormHelperText>
-                )}
-              </FormControl>
-            </Grid2>
-
-            <Grid2 size={{ xs: 12, sm: 6 }}>
-              <TextField
-                fullWidth
-                size="small"
-                id="msme_registration_number"
-                name="msme_registration_number"
-                label="MSME/Udyam Registration Number"
-                value={values.msme_registration_number}
-                onChange={handleChange}
-                error={touched.msme_registration_number && Boolean(errors.msme_registration_number)}
-                helperText={touched.msme_registration_number && errors.msme_registration_number}
-              />
-            </Grid2>
-          </>
-        )}
-
-        <Grid2 size={{ xs: 12 }}>
-          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
-            * For MSME registered businesses, please include your MSME registration number in the address.
-          </Typography>
-        </Grid2>
-        {/* Submit Button */}
-        <Grid2 size={{ xs: 12 }} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <Button type="submit" variant="contained" color="primary" size="medium" disabled={isSubmitting}>
-            {isSubmitting ? 'Saving...' : 'Save & Continue'}
-          </Button>
-        </Grid2>
-        {/* multiple branches */}
-        <Grid2 size={{ xs: 12 }}>
-          <FormControl component="fieldset">
-            <Typography variant="subtitle1" gutterBottom>
-              Do you have multiple branches?
-            </Typography>
-            <RadioGroup row name="is_multiple_branches" value={isMultipleBranches} onChange={(e) => setIsMultipleBranches(e.target.value)}>
-              <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
-              <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
-            </RadioGroup>
-          </FormControl>
-        </Grid2>
-
-        <Grid2 size={{ xs: 10 }}>
-          {isMultipleBranches === 'yes' && (
-            <>
-              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-                <Typography variant="h6" color="text.primary" gutterBottom sx={{ mb: 2 }}></Typography>
-                <Button variant="outlined" color="primary" onClick={handleAddBranch} startIcon={<AddIcon />} size="small">
-                  Add Branch
-                </Button>
-              </Stack>
-              <Card
-                elevation={2}
-                component="div"
+    <MainCard title="Business Profile" subtitle="Manage your business profile for invoice generation and business operations">
+      <Box component="form" onSubmit={handleSubmit} sx={{ flexGrow: 1, width: '100%', overflowY: 'auto' }}>
+        <Grid2 container spacing={3}>
+          {/* Business Information Section */}
+          <Grid2 size={{ xs: 12, md: 8 }}>
+            <Card elevation={0} sx={{ border: '1px solid', borderColor: 'grey.400', borderRadius: 3 }}>
+              <CardHeader
+                title={
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <BusinessIcon color="primary" />
+                    <Typography variant="h5" fontWeight={600}>
+                      Business Information
+                    </Typography>
+                  </Box>
+                }
                 sx={{
-                  mb: 2,
+                  backgroundColor: 'primary.50',
+                  borderBottom: '1px solid',
+                  borderColor: 'grey.200',
+                  padding: 2
+                }}
+              />
+              <CardContent sx={{ p: 3 }}>
+                <Grid2 container spacing={3}>
+                  {businessProfileFields.map((field) => (
+                    <Grid2 key={field.name} size={{ xs: 12, sm: 6 }}>
+                      {renderField(field)}
+                    </Grid2>
+                  ))}
+                </Grid2>
+              </CardContent>
+            </Card>
+          </Grid2>
+          {/* Logo Upload Section */}
+          <Grid2 size={{ xs: 12, md: 4 }}>{renderLogoUpload()}</Grid2>
+          {/* Primary Contact Section */}
+          <Grid2 size={{ xs: 12 }}>
+            <Card elevation={0} sx={{ border: '1px solid', borderColor: 'grey.400', borderRadius: 3 }}>
+              <CardHeader
+                title={
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <ContactMailIcon color="primary" />
+                    <Typography variant="h5" fontWeight={600}>
+                      Primary Contact Information
+                    </Typography>
+                  </Box>
+                }
+                sx={{
+                  backgroundColor: 'primary.50',
+                  borderBottom: '1px solid',
+                  borderColor: 'grey.200',
+                  padding: 2
+                }}
+              />
+              <CardContent sx={{ p: 3 }}>
+                <Grid2 container spacing={3}>
+                  {primaryContactFields.map((field) => (
+                    <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4 }}>
+                      {renderField(field)}
+                    </Grid2>
+                  ))}
+                </Grid2>
+              </CardContent>
+            </Card>
+          </Grid2>
 
-                  '& .MuiTableContainer-root': {
-                    borderRadius: 0
-                  },
-                  '& .MuiTableCell-root': {
-                    color: 'text.primary'
-                  },
-                  '& .MuiTableHead-root .MuiTableCell-root': {
-                    py: 1,
-                    backgroundColor: 'primary.main',
-                    color: '#fff'
+          {/* MSME Registration Section */}
+          <Grid2 size={{ xs: 12 }}>
+            <Card elevation={0} sx={{ border: '1px solid', borderColor: 'grey.400', borderRadius: 3 }}>
+              <CardHeader
+                title={
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <VerifiedIcon color="primary" />
+                    <Typography variant="h5" fontWeight={600}>
+                      MSME Registration
+                    </Typography>
+                  </Box>
+                }
+                sx={{
+                  backgroundColor: 'primary.50',
+                  borderBottom: '1px solid',
+                  borderColor: 'grey.400',
+                  padding: 2
+                }}
+              />
+              <CardContent sx={{ p: 3 }}>
+                <Box sx={{ mb: 3 }}>
+                  <Typography variant="subtitle1" color="text.primary" fontWeight={500} gutterBottom>
+                    Is your business MSME Registered?
+                  </Typography>
+                  <RadioGroup row name="is_msme_registered" value={values.is_msme_registered} onChange={handleChange} sx={{ mt: 1 }}>
+                    <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" sx={{ mr: 4 }} />
+                    <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
+                  </RadioGroup>
+                </Box>
+
+                <Fade in={values.is_msme_registered === 'yes'}>
+                  <Box>
+                    <Grid2 container spacing={3}>
+                      <Grid2 size={{ xs: 12, sm: 6 }}>
+                        <Autocomplete
+                          fullWidth
+                          value={values.msme_registration_type}
+                          size="small"
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: 2
+                            }
+                          }}
+                          options={['Micro', 'Small', 'Medium']}
+                          onChange={(e, value) => setFieldValue('msme_registration_type', value)}
+                          onBlur={handleBlur}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              label="MSME/Udyam Registration Type"
+                              size="small"
+                              error={touched.msme_registration_type && Boolean(errors.msme_registration_type)}
+                              helperText={
+                                touched.msme_registration_type && errors.msme_registration_type ? errors.msme_registration_type : ''
+                              }
+                            />
+                          )}
+                        />
+                      </Grid2>
+
+                      <Grid2 size={{ xs: 12, sm: 6 }}>
+                        <TextField
+                          fullWidth
+                          size="small"
+                          id="msme_registration_number"
+                          name="msme_registration_number"
+                          label="MSME/Udyam Registration Number"
+                          value={values.msme_registration_number}
+                          onChange={handleChange}
+                          error={touched.msme_registration_number && Boolean(errors.msme_registration_number)}
+                          helperText={
+                            touched.msme_registration_number && errors.msme_registration_number ? errors.msme_registration_number : ''
+                          }
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: 2
+                            }
+                          }}
+                        />
+                      </Grid2>
+                    </Grid2>
+                  </Box>
+                </Fade>
+
+                <Alert severity="info" sx={{ mt: 2, borderRadius: 2 }}>
+                  <Typography variant="body2">
+                    <strong>Note:</strong> For MSME registered businesses, please include your MSME registration number in the address.
+                  </Typography>
+                </Alert>
+              </CardContent>
+            </Card>
+          </Grid2>
+
+          {/* Submit Button */}
+          <Grid2 size={{ xs: 12 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+              <Button
+                type="submit"
+                variant="contained"
+                size="small"
+                disabled={isSubmitting}
+                sx={{
+                  textTransform: 'none',
+                  fontSize: '0.9rem',
+                  fontWeight: 600,
+                  boxShadow: 3,
+                  '&:hover': {
+                    boxShadow: 6
                   }
                 }}
               >
-                <TableContainer>
-                  <Table size="small">
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>S.No</TableCell>
-                        <TableCell>Branch Name</TableCell>
-                        <TableCell>Branch Code</TableCell>
-                        <TableCell align="center">Actions</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {paginatedData.map((branch, index) => (
-                        <TableRow key={index}>
-                          <TableCell>{(currentPage - 1) * rowsPerPage + index + 1}</TableCell>
-                          <TableCell>{branch.branch_name}</TableCell>
-                          <TableCell>{branch.branch_code}</TableCell>
-                          <TableCell align="center">
-                            <Stack direction="row" spacing={2} justifyContent="center" alignItems="center">
-                              <IconButton color="primary" size="small" onClick={() => handleEdit(branch)}>
-                                <Edit />
-                              </IconButton>
-                              <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
-                                <IconButton color="error" size="small" onClick={() => handleRemoveBranch(index)}>
-                                  <Delete />
-                                </IconButton>
-                              </Box>
-                            </Stack>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </Card>
-
-              {branches.length > 0 && (
-                <Stack direction="row" justifyContent="center" sx={{ py: 2 }}>
-                  <Pagination count={Math.ceil(branches.length / rowsPerPage)} page={currentPage} onChange={handlePageChange} />
-                </Stack>
-              )}
-            </>
-          )}
+                {isSubmitting ? (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <CircularProgress size={20} color="inherit" />
+                    Saving...
+                  </Box>
+                ) : (
+                  'Save & Continue'
+                )}
+              </Button>
+            </Box>
+          </Grid2>
         </Grid2>
+        {/* Branch Management Section */}
+        <Grid2 size={{ xs: 12 }}>
+          <Card elevation={0} sx={{ border: '1px solid', borderColor: 'grey.400', borderRadius: 3 }}>
+            <CardHeader
+              title={
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <AccountTreeIcon color="primary" />
+                  <Typography variant="h5" fontWeight={600}>
+                    Branch Management
+                  </Typography>
+                </Box>
+              }
+              action={
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <Typography variant="subtitle1" color="text.secondary">
+                    Do you have multiple branches?
+                  </Typography>
+                  <RadioGroup
+                    row
+                    name="is_multiple_branches"
+                    value={isMultipleBranches}
+                    onChange={(e) => setIsMultipleBranches(e.target.value)}
+                  >
+                    <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" />
+                    <FormControlLabel value="no" control={<Radio size="small" />} label="No" />
+                  </RadioGroup>
+                </Box>
+              }
+              sx={{
+                backgroundColor: 'primary.50',
+                borderBottom: '1px solid',
+                borderColor: 'grey.400',
+                padding: 2
+              }}
+            />
+
+            {isMultipleBranches === 'yes' && (
+              <CardContent sx={{ p: 3 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                  <Typography variant="h6" color="text.primary" fontWeight={500}>
+                    Branch Locations
+                  </Typography>
+                  <Button
+                    size="small"
+                    variant="contained"
+                    onClick={handleAddBranch}
+                    startIcon={<AddIcon />}
+                    sx={{
+                      textTransform: 'none',
+                      fontWeight: 600,
+                      fontSize: '0.9rem'
+                    }}
+                  >
+                    Add Branch
+                  </Button>
+                </Box>
+
+                {branches.length > 0 ? (
+                  <>
+                    <Card elevation={0} sx={{ border: '1px solid', borderColor: 'grey.400', borderRadius: 2 }}>
+                      <TableContainer>
+                        <Table size="small">
+                          <TableHead
+                            sx={{
+                              backgroundColor: 'primary.main',
+                              '& .MuiTableCell-root': {
+                                color: '#ffffff !important'
+                              }
+                            }}
+                          >
+                            <TableRow>
+                              <TableCell>S.No</TableCell>
+                              <TableCell>Branch Name</TableCell>
+                              <TableCell>Branch Code</TableCell>
+                              <TableCell align="center">Actions</TableCell>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {paginatedData.map((branch, index) => (
+                              <TableRow key={index} hover>
+                                <TableCell>{(currentPage - 1) * rowsPerPage + index + 1}</TableCell>
+                                <TableCell>
+                                  <Typography variant="body2" fontWeight={500}>
+                                    {branch.branch_name}
+                                  </Typography>
+                                </TableCell>
+                                <TableCell>
+                                  <Chip label={branch.branch_code} size="small" color="primary" variant="outlined" />
+                                </TableCell>
+                                <TableCell align="center">
+                                  <Stack direction="row" spacing={1} justifyContent="center">
+                                    <Tooltip title="Edit Branch">
+                                      <IconButton
+                                        color="primary"
+                                        size="small"
+                                        onClick={() => handleEdit(branch)}
+                                        sx={{
+                                          backgroundColor: 'primary.50',
+                                          '&:hover': { backgroundColor: 'primary.100' }
+                                        }}
+                                      >
+                                        <Edit fontSize="small" />
+                                      </IconButton>
+                                    </Tooltip>
+                                    <Tooltip title="Delete Branch">
+                                      <IconButton
+                                        color="error"
+                                        size="small"
+                                        onClick={() => handleRemoveBranch(index)}
+                                        sx={{
+                                          backgroundColor: 'error.50',
+                                          '&:hover': { backgroundColor: 'error.100' }
+                                        }}
+                                      >
+                                        <Delete fontSize="small" />
+                                      </IconButton>
+                                    </Tooltip>
+                                  </Stack>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                    </Card>
+
+                    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+                      <Pagination
+                        count={Math.ceil(branches.length / rowsPerPage)}
+                        page={currentPage}
+                        onChange={handlePageChange}
+                        color="primary"
+                        size="large"
+                      />
+                    </Box>
+                  </>
+                ) : (
+                  <Box
+                    sx={{
+                      textAlign: 'center',
+                      py: 4,
+                      border: '2px dashed',
+                      borderColor: 'grey.300',
+                      borderRadius: 2,
+                      backgroundColor: 'grey.50'
+                    }}
+                  >
+                    <AccountTreeIcon sx={{ fontSize: 60, color: 'grey.400', mb: 2 }} />
+                    <Typography variant="h6" color="text.secondary" gutterBottom>
+                      No Branches Added
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                      Start by adding your first branch location
+                    </Typography>
+                    <Button
+                      variant="outlined"
+                      onClick={handleAddBranch}
+                      startIcon={<AddIcon />}
+                      sx={{ borderRadius: 2, textTransform: 'none' }}
+                    >
+                      Add First Branch
+                    </Button>
+                  </Box>
+                )}
+              </CardContent>
+            )}
+          </Card>
+        </Grid2>
+
         <AddBranchDialog
           open={open}
           handleClose={handleClose}
@@ -758,8 +1052,8 @@ const BusinessProfile = ({ tabChange, tabval }) => {
           user={user}
           selectedBranch={selectedBranch}
         />
-      </Grid2>
-    </Box>
+      </Box>
+    </MainCard>
   );
 };
 

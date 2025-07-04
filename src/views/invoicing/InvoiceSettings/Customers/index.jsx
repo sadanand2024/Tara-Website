@@ -7,6 +7,7 @@ import Typography from '@mui/material/Typography';
 import AddCustomer from './AddCustomer';
 import CustomerList from './CustomerList';
 import { ConstructionOutlined } from '@mui/icons-material';
+import MainCard from 'ui-component/cards/MainCard';
 
 export default function CustomersComponent({ getCustomersData, customers, businessDetails, handleNext, handleBack }) {
   const [open, setOpen] = useState(false);
@@ -24,43 +25,48 @@ export default function CustomersComponent({ getCustomersData, customers, busine
   return (
     <>
       {/* Header Section */}
-      <Grid2 container spacing={2}>
-        <Grid2 size={{ xs: 12 }}>
-          <Stack direction="row" justifyContent="space-between" alignItems="center">
-            <Typography variant="h4">Customers</Typography>
-            <Button size="small" variant="contained" startIcon={<IconPlus size={16} />} onClick={handleOpen}>
-              Add Customer
-            </Button>
-          </Stack>
-
-          <AddCustomer
-            type={type}
-            setType={setType}
-            open={open}
-            handleClose={handleClose}
-            getCustomersData={getCustomersData}
-            businessDetailsData={businessDetails}
-          />
-        </Grid2>
+      <MainCard
+        title="Customers"
+        subtitle="Manage your business customers for invoice generation and business operations"
+        action={
+          <Button
+            variant="contained"
+            size="small"
+            startIcon={<IconPlus />}
+            onClick={handleOpen}
+            sx={{
+              textTransform: 'none',
+              fontWeight: 600,
+              fontSize: '0.9rem'
+            }}
+          >
+            Add Customer
+          </Button>
+        }
+      >
+        <AddCustomer
+          type={type}
+          setType={setType}
+          open={open}
+          handleClose={handleClose}
+          getCustomersData={getCustomersData}
+          businessDetailsData={businessDetails}
+        />
 
         {/* Customer List Section */}
-        <Grid2 size={{ xs: 12 }}>
-          <CustomerList
-            type={type}
-            setType={setType}
-            open={open}
-            handleOpen={handleOpen}
-            handleClose={handleClose}
-            businessDetailsData={businessDetails}
-            customersListData={customers}
-            getCustomersData={getCustomersData}
-            handleBack={handleBack}
-            handleNext={handleNext}
-          />
-        </Grid2>
-      </Grid2>
-
-      {/* Footer Navigation Buttons */}
+        <CustomerList
+          type={type}
+          setType={setType}
+          open={open}
+          handleOpen={handleOpen}
+          handleClose={handleClose}
+          businessDetailsData={businessDetails}
+          customersListData={customers}
+          getCustomersData={getCustomersData}
+          handleBack={handleBack}
+          handleNext={handleNext}
+        />
+      </MainCard>
     </>
   );
 }

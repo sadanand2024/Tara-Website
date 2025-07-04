@@ -25,6 +25,8 @@ import { IconButton, Tooltip } from '@mui/material'; // Add these if not already
 import { Edit, Delete } from '@mui/icons-material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useNavigate } from 'react-router-dom';
+import BusinessIcon from '@mui/icons-material/Business';
+import { IconPlus } from '@tabler/icons-react';
 const ItemList = ({
   type,
   setType,
@@ -104,109 +106,131 @@ const ItemList = ({
     setSelectedItem(null);
     handleClose();
   };
-
-  return (
-    <>
-      <Card
-        elevation={2}
+  if (loading) {
+    return (
+      <Box
         sx={{
-          mb: 2,
-          '& .MuiTableContainer-root': {
-            borderRadius: 0
-          },
-          '& .MuiTableCell-root': {
-            color: 'text.primary'
-          },
-          '& .MuiTableHead-root .MuiTableCell-root': {
-            py: 1,
-            backgroundColor: 'primary.main',
-            color: '#fff'
-          }
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '400px',
+          flexDirection: 'column',
+          gap: 2
         }}
       >
-        <TableContainer>
-          <Table size="small">
-            <TableHead>
+        <CircularProgress size={50} />
+        <Typography variant="h5" color="text.secondary">
+          Loading Items...
+        </Typography>
+      </Box>
+    );
+  }
+  return (
+    <>
+      <TableContainer
+        component={Paper}
+        sx={{
+          width: '100%',
+          borderRadius: 2,
+          boxShadow: 1,
+          overflowX: 'auto'
+        }}
+      >
+        <Table size="small">
+          <TableHead
+            sx={{
+              backgroundColor: 'primary.main',
+              '& .MuiTableCell-root': {
+                color: '#ffffff !important'
+              }
+            }}
+          >
+            <TableRow>
+              <TableCell>Name</TableCell>
+              <TableCell>Type</TableCell>
+              <TableCell>SKU</TableCell>
+              <TableCell>Description</TableCell>
+              <TableCell>GST%</TableCell>
+              <TableCell>Rate</TableCell>
+              <TableCell align="center">Actions</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {loading ? (
               <TableRow>
-                <TableCell>Name</TableCell>
-                <TableCell>Type</TableCell>
-                <TableCell>SKU</TableCell>
-                <TableCell>Description</TableCell>
-                <TableCell>GST%</TableCell>
-                <TableCell>Rate</TableCell>
-                <TableCell align="center">Actions</TableCell>
+                <TableCell colSpan={7} align="center">
+                  <CircularProgress size={24} />
+                </TableCell>
               </TableRow>
-            </TableHead>
-            <TableBody>
-              {loading ? (
-                <TableRow>
-                  <TableCell colSpan={7} align="center">
-                    <CircularProgress size={24} />
-                  </TableCell>
-                </TableRow>
-              ) : paginatedData.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={7} align="center">
-                    <Typography variant="body2" color="text.secondary" sx={{ py: 3 }}>
-                      No item records found.
-                    </Typography>
-                  </TableCell>
-                </TableRow>
-              ) : (
-                paginatedData.map((item, index) => (
-                  <TableRow
-                    key={index}
+            ) : paginatedData.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={7} align="center">
+                  <Box
                     sx={{
-                      bgcolor: 'background.paper',
-                      '&:hover': {
-                        boxShadow: 1
-                      }
+                      textAlign: 'center',
+                      py: 4
                     }}
                   >
-                    <TableCell>{item.name}</TableCell>
-                    <TableCell>{item.type}</TableCell>
-                    <TableCell>{item.sku_value}</TableCell>
-                    <TableCell>{item.description}</TableCell>
-                    <TableCell>{item.gst_rate}</TableCell>
-                    <TableCell>{item.selling_price}</TableCell>
-                    <TableCell align="center">
-                      <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
-                        <IconButton color="primary" onClick={() => handleEdit(item)}>
-                          <Edit />
-                        </IconButton>
-                        <IconButton color="error" onClick={() => handleOpenDeleteDialog(item)}>
-                          <Delete />
-                        </IconButton>
-                      </Box>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-          <DeleteDialog
-            open={openDeleteDialog}
-            onClose={() => setOpenDeleteDialog(false)}
-            onConfirm={handleConfirmDelete}
-            dialogData={{
-              title: 'Delete Record',
-              heading: 'Are you sure?',
-              description: 'This action will permanently delete the record.'
-            }}
-          />
-        </TableContainer>
-      </Card>
-
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Button
-          variant="outlined"
-          startIcon={<ArrowBackIcon />}
-          onClick={() => {
-            navigate('/app/invoice');
+                    <BusinessIcon sx={{ fontSize: 60, color: 'grey.400', mb: 2 }} />
+                    <Typography variant="h6" color="text.secondary" gutterBottom>
+                      No Items Added
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                      Start by adding your first item for invoice generation
+                    </Typography>
+                    <Button variant="outlined" size="small" onClick={handleOpen} startIcon={<IconPlus />}>
+                      Add Item
+                    </Button>
+                  </Box>
+                </TableCell>
+              </TableRow>
+            ) : (
+              paginatedData.map((item, index) => (
+                <TableRow
+                  key={index}
+                  sx={{
+                    bgcolor: 'background.paper',
+                    '&:hover': {
+                      boxShadow: 1
+                    }
+                  }}
+                >
+                  <TableCell>{item.name}</TableCell>
+                  <TableCell>{item.type}</TableCell>
+                  <TableCell>{item.sku_value}</TableCell>
+                  <TableCell>{item.description}</TableCell>
+                  <TableCell>{item.gst_rate}</TableCell>
+                  <TableCell>{item.selling_price}</TableCell>
+                  <TableCell align="center">
+                    <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
+                      <IconButton color="primary" onClick={() => handleEdit(item)}>
+                        <Edit />
+                      </IconButton>
+                      <IconButton color="error" onClick={() => handleOpenDeleteDialog(item)}>
+                        <Delete />
+                      </IconButton>
+                    </Box>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+        <DeleteDialog
+          open={openDeleteDialog}
+          onClose={() => setOpenDeleteDialog(false)}
+          onConfirm={handleConfirmDelete}
+          dialogData={{
+            title: 'Delete Record',
+            heading: 'Are you sure?',
+            description: 'This action will permanently delete the record.'
           }}
-          size="small"
-        >
-          Back To Dashboard
+        />
+      </TableContainer>
+
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', mt: 2 }}>
+        <Button startIcon={<ArrowBackIcon />} variant="outlined" size="small" onClick={handleBack}>
+          Back
         </Button>
         {itemsList.length > 0 && (
           <Stack direction="row" justifyContent="center" sx={{ py: 2 }}>
@@ -214,25 +238,11 @@ const ItemList = ({
           </Stack>
         )}
         <Stack direction="row" spacing={2}>
-          <Button variant="outlined" onClick={handleBack} size="small">
-            Back
-          </Button>
           <Button variant="contained" onClick={handleNext} size="small">
             Next
           </Button>
         </Stack>
       </Box>
-
-      <AddItem
-        businessDetailsData={businessDetailsData}
-        open={open}
-        handleOpen={handleOpen}
-        handleClose={handleCloseModal}
-        get_Goods_and_Services_Data={get_Goods_and_Services_Data}
-        selectedItem={selectedItem}
-        type={type}
-        setType={setType}
-      />
     </>
   );
 };
