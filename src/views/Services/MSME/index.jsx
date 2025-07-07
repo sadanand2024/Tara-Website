@@ -738,8 +738,8 @@ date_of_commencement: Yup.string().when('has_business_commenced', {
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 7 }}>
                   <Stack direction="row" alignItems="center" spacing={2}>
-                     {/* <RadioGroup
-      row
+                    <RadioGroup
+                  row
       value={businessIdentityFormik?.values?.Are_you_previously_registered_UAM}
       sx={{ width: '40%' }}
       onChange={(e) => {
@@ -753,23 +753,11 @@ date_of_commencement: Yup.string().when('has_business_commenced', {
     >
       <FormControlLabel value={true} control={<Radio color="primary" />} label="Yes" />
       <FormControlLabel value={false} control={<Radio color="primary" />} label="No" />
-    </RadioGroup> */}
+    </RadioGroup>
      
 
                     {businessIdentityFormik?.values?.Are_you_previously_registered_UAM === true && (
-            //           <TextField
-            //           sx={{
-            //         width: '100%',
-            //        '& .MuiInputBase-input': {
-            //         color: 'grey.600'
-            //   }
-            // }}
-            //             size="small"
-            //             fullWidth
-            //             value={businessIdentityFormik?.values?.UAM_number}
-            //             onChange={(e) => businessIdentityFormik?.setFieldValue('UAM_number', e.target.value)}
-            //             label="Enter UAM"
-            //           />
+          
             <TextField
               sx={{
                 width: '100%',
