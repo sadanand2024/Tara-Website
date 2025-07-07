@@ -26,8 +26,28 @@ const typeOfBusinessOptions = [
   'Liaison Office',
   'Foreign Company'
 ];
-const natureOfBusinessOptions = ['Manufacturing', 'Service'];
-
+const natureOfBusinessOptions = [
+  'Retail Trade',
+  'Wholesale Trade',
+  'Food and Beverage Services',
+  'Manufacturing Units',
+  'Repair and Service Centers',
+  'Beauty and Personal Care',
+  'Educational and Coaching Services',
+  'Healthcare and Medical Services',
+  'Lodging and Hospitality Services',
+  'Storage and Warehousing',
+  'Professional and Consultancy Services',
+  'Transportation and Logistics',
+  'Entertainment and Recreation',
+  'Animal and Pet Services',
+  'Household and Domestic Services',
+  'Event and Wedding Services',
+  'Printing and Publishing',
+  'Construction and Building Materials',
+  'Chemical and Hazardous Goods',
+  'Agricultural and Allied Service'
+];
 const fields = [
   {
     label: 'Type of Business',
@@ -54,8 +74,7 @@ const fields = [
     type: 'file'
   }
 ];
-const BusinessIdentityStructureSection = ({taskId, applicantTaskId}) => {
-
+const BusinessIdentityStructureSection = ({ taskId, applicantTaskId }) => {
   const [searchParams] = useSearchParams();
   const service_id = searchParams.get('service_id');
   const dispatch = useDispatch();
@@ -137,11 +156,11 @@ const BusinessIdentityStructureSection = ({taskId, applicantTaskId}) => {
                 error={touched[field.name] && Boolean(errors[field.name])}
                 helperText={touched[field.name] && errors[field.name]}
                 sx={{
-              width: '100%',
-              '& .MuiInputBase-input': {
-                color: 'grey.600'
-              }
-            }}
+                  width: '100%',
+                  '& .MuiInputBase-input': {
+                    color: 'grey.600'
+                  }
+                }}
               />
             )}
           />
@@ -210,12 +229,12 @@ const BusinessIdentityStructureSection = ({taskId, applicantTaskId}) => {
         legal_name_of_business: res.data.legal_name_of_business || '',
         nature_of_business: res.data.nature_of_business || '',
         business_pan: res.data.business_pan || '',
-        task_id:res.data.task_id || '',
+        task_id: res.data.task_id || '',
         id: res.data.id || ''
       };
       setValues(responseData);
       setbusinessInfo(res.data);
-    
+
       setBusinessIdentityposttype('put');
     }
     if (res.status_cd === 1) {
@@ -237,30 +256,21 @@ const BusinessIdentityStructureSection = ({taskId, applicantTaskId}) => {
   return (
     <Box>
       <Card sx={{ p: 3 }}>
-      <Grid2 container alignItems="center" justifyContent="space-between" mb={2}>
-  <Grid2>
-    <Typography variant="h4" fontWeight={700}>
-      <span style={{ textDecoration: 'underline' }}>Business Identity & Structure</span>
-    </Typography>
-  </Grid2>
-  <Grid2 sx={{ flexGrow: 1, ml: 95 }}>
-    <Box display="flex" justifyContent="flex-end" gap={1}>
-     
-      <RaiseRequest
-        fields={[
-          'Type of business',
-          'legal name of business',
-          'nature of business',
-          'business pan',
-        
-        ]}
-      
-        task_id={taskId}
-      />
-    </Box>
-  </Grid2>
-</Grid2>
-
+        <Grid2 container alignItems="center" justifyContent="space-between" mb={2}>
+          <Grid2>
+            <Typography variant="h4" fontWeight={700}>
+              <span style={{ textDecoration: 'underline' }}>Business Identity & Structure</span>
+            </Typography>
+          </Grid2>
+          <Grid2 sx={{ flexGrow: 1, ml: 95 }}>
+            <Box display="flex" justifyContent="flex-end" gap={1}>
+              <RaiseRequest
+                fields={['Type of business', 'legal name of business', 'nature of business', 'business pan']}
+                task_id={taskId}
+              />
+            </Box>
+          </Grid2>
+        </Grid2>
 
         <form onSubmit={handleSubmit}>
           <Grid2 container spacing={2}>
@@ -277,23 +287,22 @@ const BusinessIdentityStructureSection = ({taskId, applicantTaskId}) => {
             <Button variant="contained" color="primary" type="submit">
               Save
             </Button>
-          
+
             <GetActionButtons
-                              type="put"
-                              urlEndpoint="business-identity"
-                              recId={businessInfo.id}
-                              status={businessInfo.status}
-                              data={businessInfo}
-                              service_request={service_id}
-                              task_id={taskId}
-                              urlKey="tradelicense"
-                              urlBool={true}
-                            />
+              type="put"
+              urlEndpoint="business-identity"
+              recId={businessInfo.id}
+              status={businessInfo.status}
+              data={businessInfo}
+              service_request={service_id}
+              task_id={taskId}
+              urlKey="tradelicense"
+              urlBool={true}
+            />
           </Stack>
         </form>
       </Card>
       <ApplicantDetails applicantTaskId={applicantTaskId} />
-
     </Box>
   );
 };
