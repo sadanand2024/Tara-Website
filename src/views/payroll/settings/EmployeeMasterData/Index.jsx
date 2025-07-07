@@ -130,6 +130,7 @@ function EmployeeList({ handleBack, handleNext }) {
       ) : (
         <MainCard
           title="Employee Master Data"
+          subtitle="Manage your Employee Master Data for seamless operations"
           secondary={
             <Stack direction="row" spacing={2}>
               <Button variant="outlined" color="secondary" onClick={() => setOpenBulkDialog(true)}>

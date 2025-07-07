@@ -51,70 +51,70 @@ import LeaveAttendance from './LeaveAttendance';
 const PAYROLL_STEPS = [
   {
     nameKey: 'Business profile',
-    path: '/payroll/settings/organization-details',
+    path: '/app/payroll/settings/organization-details',
     dataKey: 'organisation_details',
     component: OrganizationDetails,
     icon: BusinessIcon
   },
   {
     nameKey: 'Set up Work Location',
-    path: '/payroll/settings/work-location',
+    path: '/app/payroll/settings/work-location',
     dataKey: 'work_locations',
     component: WorkLocation,
     icon: LocationOnIcon
   },
   {
     nameKey: 'Set up Departments',
-    path: '/payroll/settings/departments',
+    path: '/app/payroll/settings/departments',
     dataKey: 'departments',
     component: Departments,
     icon: AccountTreeIcon
   },
   {
     nameKey: 'Set up Designations',
-    path: '/payroll/settings/designations',
+    path: '/app/payroll/settings/designations',
     dataKey: 'designations',
     component: Designations,
     icon: BadgeIcon
   },
   {
     nameKey: 'Set up Statutory Components',
-    path: '/payroll/settings/statutory-components',
+    path: '/app/payroll/settings/statutory-components',
     dataKey: 'statutory_component',
     component: StatuitoryComponents,
     icon: GavelIcon
   },
   {
     nameKey: 'Set up Salary Components',
-    path: '/payroll/settings/salary-components',
+    path: '/app/payroll/settings/salary-components',
     dataKey: 'salary_component',
     component: SalaryComponents,
     icon: AttachMoneyIcon
   },
   {
     nameKey: 'Set up Salary Template',
-    path: '/payroll/settings/salary-template-list',
+    path: '/app/payroll/settings/salary-template-list',
     dataKey: 'salary_template',
     component: SalaryTemplateList,
     icon: DescriptionIcon
   },
   {
     nameKey: 'Set up Employee Master',
-    path: '/payroll/settings/employee-master',
+    path: '/app/payroll/settings/employee-master',
     dataKey: 'employee_master',
     component: EmployeeMaster,
     icon: PeopleIcon
   },
   {
     nameKey: 'Set up Pay & Schedule',
-    path: '/payroll/settings/pay-schedule',
+    path: '/app/payroll/settings/pay-schedule',
     dataKey: 'pay_schedule',
     component: PaySchedule,
     icon: ScheduleIcon
   },
   {
     nameKey: 'Leave & Attendance',
-    path: '/payroll/settings/leave-attendance',
+    path: '/app/payroll/settings/leave-attendance',
     dataKey: 'leave_and_attendance',
     component: LeaveAttendance,
     icon: EventNoteIcon
@@ -514,7 +514,7 @@ const PayrollSettingsLayout = () => {
                 label={
                   <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 0.5, mt: 0.5 }}>
                     <Stack direction="row" spacing={2}>
-                      <IconComponent color="primary" />
+                      <IconComponent />
                       <Typography variant="subtitle1" sx={{ fontWeight: 500 }} noWrap>
                         {step.nameKey}
                       </Typography>

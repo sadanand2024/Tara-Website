@@ -876,7 +876,7 @@ const BusinessProfile = ({ tabChange, tabval }) => {
           </Grid2>
         </Grid2>
         {/* Branch Management Section */}
-        <Grid2 size={{ xs: 12 }}>
+        <Grid2 size={{ xs: 12 }} mt={2}>
           <Card elevation={0} sx={{ border: '1px solid', borderColor: 'grey.400', borderRadius: 3 }}>
             <CardHeader
               title={

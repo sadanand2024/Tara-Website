@@ -14,7 +14,8 @@ import {
   Paper,
   Pagination,
   Grid2,
-  Typography
+  Typography,
+  CircularProgress
 } from '@mui/material';
 import MainCard from 'ui-component/cards/MainCard';
 import DeleteDialog from 'ui-component/extended/DeleteDialog';
@@ -36,6 +37,7 @@ function Designations({ handleBack, handleNext }) {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
   const [openBulkDialog, setOpenBulkDialog] = useState(false);
+  const [loading, setLoading] = useState(false);
   const handleOpenDeleteDialog = (designation) => {
     setSelectedRow(designation);
     setOpenDeleteDialog(true);
@@ -63,13 +65,16 @@ function Designations({ handleBack, handleNext }) {
   const handleCloseDialog = () => setOpenDialog(false);
 
   const fetchDesignations = async () => {
+    setLoading(true);
     const url = `/payroll/designations/?payroll_id=${payrollid}`;
     const { res } = await Factory('get', url, {});
 
     if (res?.status_cd === 0 && Array.isArray(res?.data)) {
       setDesignations(res.data);
+      setLoading(false);
     } else {
       setDesignations([]);
+      setLoading(false);
     }
   };
 
@@ -87,9 +92,29 @@ function Designations({ handleBack, handleNext }) {
     }
   };
 
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '400px',
+          flexDirection: 'column',
+          gap: 2
+        }}
+      >
+        <CircularProgress size={50} />
+        <Typography variant="h5" color="text.secondary">
+          Loading Designations...
+        </Typography>
+      </Box>
+    );
+  }
   return (
     <MainCard
       title="Designation Details"
+      subtitle="Manage your designations for seamless operations"
       secondary={
         <Stack direction="row" spacing={2}>
           <Button size="small" variant="outlined" color="secondary" onClick={() => setOpenBulkDialog(true)}>

@@ -187,7 +187,7 @@ function PaySchedule({ handleBack, handleNext }) {
     }
   }, [payrollId]);
   return (
-    <MainCard title="Pay Schedule">
+    <MainCard title="Pay Schedule" subtitle="Manage Pay Schedule seamless operations">
       <form onSubmit={handleSubmit}>
         <Typography variant="h5">Select your week off</Typography>
         <Typography variant="body1" sx={{ mt: 1 }}>

@@ -279,7 +279,7 @@ const PayrollDashboard = () => {
             variant="outlined"
             onClick={() => {
               if (businessDetails?.payroll_id) {
-                navigate(`/app/payroll/settings?payrollid=${businessDetails.payroll_id}`);
+                navigate(`/app/payroll/settings/organization-details?payrollid=${businessDetails.payroll_id}`);
               } else {
                 navigate('/app/payroll/settings');
               }
