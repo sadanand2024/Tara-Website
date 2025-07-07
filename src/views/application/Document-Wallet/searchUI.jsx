@@ -5,7 +5,7 @@ import { Tooltip, Typography, Stack } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 
-export default function searchUI({ files, MUIGrid, viewFile, getFileIcon, getFileType }) {
+export default function searchUI({ files, MUIGrid, viewFile, getFileIcon, getFileType, handleMenuOpen, setActions }) {
   return (
     <>
       <Box sx={{ mb: 3 }}>
@@ -14,7 +14,7 @@ export default function searchUI({ files, MUIGrid, viewFile, getFileIcon, getFil
         ) : (
           <>
             <Typography fontWeight={500} sx={{ mb: 1, fontSize: { xs: 15, sm: 17 } }}>
-              Files
+              Files Found
             </Typography>
             <Grid container spacing={2}>
               {files.map((file, idx) => (
@@ -33,7 +33,7 @@ export default function searchUI({ files, MUIGrid, viewFile, getFileIcon, getFil
                       width: '100%'
                     }}
                   >
-                    {getFileIcon(getFileType({ name: file }))}
+                    {getFileIcon(getFileType(file))}
                     <Box sx={{ width: 0, flex: 1, minWidth: 0 }}>
                       <Tooltip title={file.name} placement="bottom">
                         <Typography
@@ -47,7 +47,7 @@ export default function searchUI({ files, MUIGrid, viewFile, getFileIcon, getFil
                             fontSize: { xs: 13, sm: 15 }
                           }}
                         >
-                          {file}
+                          {file.name}
                         </Typography>
                       </Tooltip>
                       <Typography variant="caption" color="text.secondary">

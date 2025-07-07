@@ -488,6 +488,7 @@ const DocumentWallet = () => {
       if (response.res.status_cd === 0) {
         if (currentFolderId) fetchFolderContents(currentFolderId, breadcrumbs[breadcrumbs.length - 1]?.name, false, null, false);
         getRecentFiles();
+        handleSearch(searchQuery);
         enqueueSnackbar('File name changed successfully.', { variant: 'success', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
       } else {
         enqueueSnackbar('Failed to upload files.', { variant: 'error', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
@@ -516,13 +517,11 @@ const DocumentWallet = () => {
     }
   };
 
-  const handleSearch = async (e) => {
-    const val = e.target.value;
+  const handleSearch = async (val) => {
     setSearchQuery(val);
     if (val.length >= 2) {
       const res = await Factory('get', `/docwallet/files/search-autocomplete/?q=${val}`, {});
       if (res.res.status_cd === 0) {
-        console.log(res.res.data.results);
         setSearchResults(res.res.data.results);
       }
     }
@@ -597,7 +596,13 @@ const DocumentWallet = () => {
               border: '1px solid #e3e3e3'
             }}
           >
-            <InputBase label="Search" placeholder="Search" value={searchQuery} onChange={handleSearch} size="small" />
+            <InputBase
+              label="Search"
+              placeholder="Search"
+              value={searchQuery}
+              onChange={(e) => handleSearch(e.target.value)}
+              size="small"
+            />
             <IconButton size="small" sx={{ color: '#888', fontSize: '20px', p: 0 }}>
               <SearchIcon sx={{ fontSize: '20px', p: 0 }} />
             </IconButton>
@@ -624,7 +629,15 @@ const DocumentWallet = () => {
         </Box>
       </Box>
       {searchQuery && searchQuery?.length >= 2 ? (
-        <SearchUI files={searchResults} MUIGrid={MUIGrid} viewFile={viewFile} getFileIcon={getFileIcon} getFileType={getFileType} />
+        <SearchUI
+          files={searchResults}
+          MUIGrid={MUIGrid}
+          handleMenuOpen={handleMenuOpen}
+          setActions={setActions}
+          viewFile={viewFile}
+          getFileIcon={getFileIcon}
+          getFileType={getFileType}
+        />
       ) : (
         <>
           {/* Folders */}

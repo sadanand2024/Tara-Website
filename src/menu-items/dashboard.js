@@ -107,8 +107,8 @@ const dashboard = {
       caption: ''
     },
     {
-      id: 'document-wallet',
-      title: 'document-wallet',
+      id: 'documentWallet',
+      title: 'documentWallet',
       type: 'item',
       url: '/app/document-wallet',
       icon: icons.IconFolder,
@@ -207,9 +207,8 @@ const getDashboardMenu = (user, subscriptions = []) => {
     // If user has a subscription to the module, show
     return subscriptions.some((sub) => {
       const moduleKey = Object.keys(moduleToMenuId).find((key) => moduleToMenuId[key] === item.id);
-      console.log(moduleKey);
       return (
-        (sub.module_name && sub.module_name.toLowerCase().replace(/\s/g, '').includes(moduleKey)) ||
+        (sub.module_name && sub.module_name.toLowerCase().replace(/\s/g, '').includes(moduleKey.toLowerCase().replace(/\s/g, ''))) ||
         (sub.module && sub.module.name && sub.module.name.toLowerCase().replace(/\s/g, '').includes(moduleKey)) ||
         (sub.module && sub.module.id && moduleKey && sub.module.id.toString() === moduleKey)
       );
