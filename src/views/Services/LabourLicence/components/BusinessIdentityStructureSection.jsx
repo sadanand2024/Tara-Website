@@ -29,8 +29,40 @@ const typeOfBusinessOptions = [
   'Liaison Office',
   'Foreign Company'
 ];
-const categoryOfEstablishmentOptions = ['Trust', 'Society', 'Section 8', 'Co-operative', 'Joint Venture', 'Branch Office'];
-const natureOfBusinessOptions = ['Manufacturing', 'Service'];
+const categoryOfEstablishmentOptions = [
+  'Manufacturing & Industrial Units',
+  'Shops & Commercial Establishments',
+  'IT & Professional Services',
+  'Contract & Outsourcing Services',
+  'Hospitality & Food Services',
+  'Health & Medical Services',
+  'Educational & Training Institutions',
+  'Transport & Logistics',
+  'Media & Entertainment',
+  'Others'
+];
+const natureOfBusinessOptions = [
+  'Manufacturing / Production',
+  'Construction and Civil Works',
+  'Trading / Retail / Wholesale',
+  'IT / Software / BPO Services',
+  'Hospitality and Food Services',
+  'Security Services',
+  'Housekeeping / Facility Management',
+  'Logistics and Transportation',
+  'Educational Institutions',
+  'Healthcare and Medical Services',
+  'Administrative / Clerical Services',
+  'Electrical / Mechanical Maintenance',
+  'Marketing and Sales Activities',
+  'Mining and Quarrying',
+  'Event Management Services',
+  'Agriculture and Farming Operations',
+  'Real Estate and Property Management',
+  'Financial and Insurance Services',
+  'Printing and Publishing Services',
+  'Media and Entertainment Services'
+];
 
 const fields = [
   {
@@ -72,9 +104,9 @@ const BusinessIdentityStructureSection = ({ taskId }) => {
   const service_id = searchParams.get('service_id');
   const dispatch = useDispatch();
   const [businessIdentityposttype, setBusinessIdentityposttype] = useState('post');
-   const [businessInfo, setBusinessInfo] = useState({
-       taskId: null
-    });
+  const [businessInfo, setBusinessInfo] = useState({
+    taskId: null
+  });
 
   const formik = useFormik({
     initialValues: {
@@ -139,8 +171,6 @@ const BusinessIdentityStructureSection = ({ taskId }) => {
           })
         );
         getBusinessIdentity();
-            
-
       }
     }
   });
@@ -162,11 +192,11 @@ const BusinessIdentityStructureSection = ({ taskId }) => {
                 error={touched[field.name] && Boolean(errors[field.name])}
                 helperText={touched[field.name] && errors[field.name]}
                 sx={{
-              width: '100%',
-              '& .MuiInputBase-input': {
-                color: 'grey.600'
-              }
-            }}
+                  width: '100%',
+                  '& .MuiInputBase-input': {
+                    color: 'grey.600'
+                  }
+                }}
               />
             )}
           />
@@ -237,7 +267,7 @@ const BusinessIdentityStructureSection = ({ taskId }) => {
     const { res } = await Factory('get', url);
     if (res.status_cd === 0) {
       // Map API response to form fields
-  
+
       const responseData = {
         id: res.data.id || '',
         service_type: res.data.service_type || '',
@@ -272,37 +302,32 @@ const BusinessIdentityStructureSection = ({ taskId }) => {
   };
   useEffect(() => {
     getBusinessIdentity();
-   
-
   }, []);
 
   return (
     <Card sx={{ p: 3 }}>
       <Grid2 container alignItems="center" justifyContent="space-between" mb={2}>
-  <Grid2>
-    <Typography variant="h4" fontWeight={700}>
-      <span style={{ textDecoration: 'underline' }}>Business Identity & Structure</span>
-    </Typography>
-  </Grid2>
-  <Grid2 sx={{ flexGrow: 1, ml: 95 }}>
-    <Box display="flex" justifyContent="flex-end" gap={1}>
-    
-      <RaiseRequest
-        fields={[
-          'Type of business',
-        'Category of establishment',
-            'Legal name of business',
-        'Nature of business',
-          'Business PAN',
-        'Date of commencement'
-        
-        ]}
-      
-        task_id={taskId}
-      />
-    </Box>
-  </Grid2>
-</Grid2>
+        <Grid2>
+          <Typography variant="h4" fontWeight={700}>
+            <span style={{ textDecoration: 'underline' }}>Business Identity & Structure</span>
+          </Typography>
+        </Grid2>
+        <Grid2 sx={{ flexGrow: 1, ml: 95 }}>
+          <Box display="flex" justifyContent="flex-end" gap={1}>
+            <RaiseRequest
+              fields={[
+                'Type of business',
+                'Category of establishment',
+                'Legal name of business',
+                'Nature of business',
+                'Business PAN',
+                'Date of commencement'
+              ]}
+              task_id={taskId}
+            />
+          </Box>
+        </Grid2>
+      </Grid2>
       <form onSubmit={handleSubmit}>
         <Grid2 container spacing={2}>
           {fields.map((field) => (
@@ -318,20 +343,18 @@ const BusinessIdentityStructureSection = ({ taskId }) => {
           <Button variant="contained" color="primary" type="submit">
             Save
           </Button>
-         
-          
+
           <GetActionButtons
-                              type="put"
-                              urlEndpoint="business-identity"
-                              recId={businessInfo.id}
-                              status={businessInfo.status}
-                              data={businessInfo}
-                              service_request={service_id}
-                              task_id={taskId}
-                              urlKey="labourlicense"
-                              urlBool={true}
-                            />
-                                    
+            type="put"
+            urlEndpoint="business-identity"
+            recId={businessInfo.id}
+            status={businessInfo.status}
+            data={businessInfo}
+            service_request={service_id}
+            task_id={taskId}
+            urlKey="labourlicense"
+            urlBool={true}
+          />
         </Stack>
       </form>
     </Card>
