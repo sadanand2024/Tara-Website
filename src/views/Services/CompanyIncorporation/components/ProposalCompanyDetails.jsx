@@ -8,6 +8,7 @@ import { useSearchParams } from 'react-router-dom';
 import {openSnackbar} from 'store/slices/snackbar';
 import RaiseRequest from '../../RaiseRequest';
 import GetActionButtons from '../../FormHelpers';
+import CircularProgressComponent from 'utils/CircularProgressComponent';
 
 
 
@@ -47,6 +48,7 @@ const typeOfBusinessActivityOptions = [
 
 const ProposalCompanyDetails = ({taskId}) => {
   const [searchParams]= useSearchParams();
+  const [isLoading, setIsLoading] = useState(false);
   const service_id = searchParams.get('service_id');
   const [proposedCompany, setproposedCompany] = useState({
     task_id:null,
@@ -126,6 +128,7 @@ const ProposalCompanyDetails = ({taskId}) => {
     }),
 
    onSubmit: async (values) => {
+    setIsLoading(true); // Start loading
     let url = proposedCompany.id
       ? `/companyincorporation/proposed-company-detail/${proposedCompany.id}/`
       : `/companyincorporation/create-proposed-company-details/`;
@@ -150,6 +153,7 @@ const ProposalCompanyDetails = ({taskId}) => {
     formData.append('status', 'in progress');
     
     const { res } = await Factory(proposedCompany.id ? 'put' : 'post', url, formData);
+    setIsLoading(false); // Stop loading
     if (res.status_cd === 0) {
       dispatch(
         openSnackbar({
@@ -177,6 +181,7 @@ const ProposalCompanyDetails = ({taskId}) => {
   });
 
  const getproposedCompany = async () => {
+  setIsLoading(true);
   const url = `/companyincorporation/proposed-company-details-by-service-request/?service_request_id=${service_id}`;
   
   const { res } = await Factory('get', url);
@@ -206,6 +211,7 @@ const ProposalCompanyDetails = ({taskId}) => {
       task_id: res?.data?.task_data?.["Proposed Company Details"]?.task_id || null
     });
   }
+  setIsLoading(false);
 };
 
 
@@ -285,6 +291,10 @@ const ProposalCompanyDetails = ({taskId}) => {
   useEffect(() => {
     getproposedCompany();
   }, []);
+  if (isLoading) {
+        return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading Proposal Company Data...'} />;
+      }
+    
 
   return (
     <Box mt={4}>

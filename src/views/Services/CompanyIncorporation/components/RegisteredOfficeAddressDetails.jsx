@@ -9,11 +9,13 @@ import RaiseRequest from '../../RaiseRequest';
 import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
 import { useSearchParams } from 'react-router-dom';
 import GetActionButtons from '../../FormHelpers';
+import CircularProgressComponent from 'utils/CircularProgressComponent';
 
 
 const typeOfOwnershipOptions = ['Owned', 'Rented', 'Leased'];
 const RegisteredOfficeAddressDetails = ({taskId}) => {
   const [searchParams] = useSearchParams();
+  const [isLoading, setIsLoading] = useState(false);
   const service_id = searchParams.get('service_id');
   const [RegisteredOfficeAddress, setRegisteredOfficeAddress] = useState({
     task_Id:null,
@@ -109,6 +111,7 @@ const RegisteredOfficeAddressDetails = ({taskId}) => {
       utility_bill_file: Yup.string().required('Utility Bill is required')
     }),
     onSubmit: async (values) => {
+      setIsLoading(true); // Start loading
       const task_id = RegisteredOfficeAddress.task_id || taskId;
         let url = RegisteredOfficeAddress.id ? `/companyincorporation/registered-office-address-details/${RegisteredOfficeAddress.id}/` : 
         `/companyincorporation/create-registered-office-address/`;
@@ -143,6 +146,7 @@ const RegisteredOfficeAddressDetails = ({taskId}) => {
     
 
         const { res } = await Factory(RegisteredOfficeAddress.id ? 'put' : 'post', url, formData);
+        setIsLoading(false); // Stop loading
         if (res.status_cd === 0) {
           dispatch(
             openSnackbar({
@@ -170,6 +174,7 @@ const RegisteredOfficeAddressDetails = ({taskId}) => {
   });
 
   const getRegistredOfficeAddress = async () => {
+    setIsLoading(true);
     const url = `/companyincorporation/registered-office-address-by-service-request/?service_request_id=${service_id}`;
     const { res } = await Factory('get', url);
     if (res.status_cd === 0 && res.data) {
@@ -195,6 +200,7 @@ const RegisteredOfficeAddressDetails = ({taskId}) => {
         id: data.id || null
       });
     }
+    setIsLoading(false);
   };
 
   const renderField = (field) => {
@@ -282,6 +288,10 @@ const RegisteredOfficeAddressDetails = ({taskId}) => {
   useEffect(() => {
     getRegistredOfficeAddress();
   }, []);
+  if (isLoading) {
+        console.log('Loading Registered Office Address Details...', isLoading);
+        return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading Registered Office Address Details...'} />;
+      }
 
   return (
     <Box mt={4}>
