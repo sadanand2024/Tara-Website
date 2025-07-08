@@ -15,7 +15,7 @@ import {
   Grid2,
   InputLabel,
   MenuItem,
-  Select,
+  CircularProgress,
   TextField,
   Typography,
   RadioGroup,
@@ -664,9 +664,9 @@ const BusinessProfile = ({ tabChange, tabval }) => {
     </Card>
   );
 
-if(isLoading) {
-  return <CircularProgressComponent isLoading = {isLoading} displayContent= {"Loading Business Profile Data"}/>
-}
+  if (isLoading) {
+    return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading Business Profile Data'} />;
+  }
   const { values, handleChange, errors, touched, handleSubmit, handleBlur, setFieldValue } = formik;
 
   return (
