@@ -504,7 +504,9 @@ const ManageSubscriptions = () => {
                     <TableCell>{task?.payment_order_id || '-'}</TableCell>
                     <TableCell>
                       <Typography variant="body1" color="text" fontWeight={500}>
-                        {task?.created_at ? new Date(task?.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '-'}
+                        {task?.created_at
+                          ? new Date(task?.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+                          : '-'}
                       </Typography>
                       <Typography variant="body1" color="text.secondary">
                         {task?.created_at ? new Date(task?.created_at).toLocaleTimeString() : '-'}
@@ -578,7 +580,7 @@ const ManageSubscriptions = () => {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>Date</TableCell>
+                <TableCell>Paid Date</TableCell>
                 <TableCell>Plan</TableCell>
                 <TableCell>Amount</TableCell>
                 <TableCell>Status</TableCell>
@@ -591,7 +593,17 @@ const ManageSubscriptions = () => {
               {paymentHistory?.length > 0 ? (
                 paymentHistory.map((payment) => (
                   <TableRow key={payment.id}>
-                    <TableCell>{new Date(payment?.created_at).toLocaleDateString()}</TableCell>
+                    <TableCell>
+                      <Typography variant="body1" color="text" fontWeight={500}>
+                        {payment?.paid_at
+                          ? new Date(payment?.paid_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+                          : '-'}
+                      </Typography>
+                      <Typography variant="body1" color="text.secondary">
+                        {payment?.paid_at ? new Date(payment?.paid_at).toLocaleTimeString() : '-'}
+                      </Typography>
+                    </TableCell>
+
                     <TableCell>
                       <Typography variant="subtitle2">{payment?.plan_name || payment?.suite_name}</Typography>
                     </TableCell>
@@ -602,17 +614,15 @@ const ManageSubscriptions = () => {
                     </TableCell>
                     <TableCell>
                       <Chip
-                        label={payment?.status === 'paid' && payment?.payment_captured ? 'Paid' : 'Failed'}
-                        color={payment?.status === 'paid' && payment?.payment_captured ? 'success' : 'error'}
+                        label={payment?.status === 'captured' && payment?.captured ? 'Paid' : 'Failed'}
+                        color={payment?.status === 'captured' && payment?.captured ? 'success' : 'error'}
                         size="small"
                         sx={{ fontWeight: 500 }}
                       />
                     </TableCell>
                     <TableCell>
                       <Typography variant="body2">
-                            {payment?.payment_method
-                          ? payment?.payment_method?.charAt(0)?.toUpperCase() + payment?.payment_method?.slice(1)
-                          : ''}
+                        {payment?.method ? payment?.method?.charAt(0)?.toUpperCase() + payment?.method?.slice(1) : ''}
                         {payment?.card_last4 ? ` ••••${payment?.card_last4}` : ''}
                       </Typography>
                     </TableCell>
