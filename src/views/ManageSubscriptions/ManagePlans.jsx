@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 // material-ui
 import { alpha, useTheme } from '@mui/material/styles';
@@ -50,6 +51,7 @@ const planIcons = [
 // ===============================|| PRICING - PRICE 1 ||=============================== //
 
 export default function Price1() {
+  const navigate = useNavigate();
   const theme = useTheme();
   const [searchParams] = useSearchParams();
   const moduleId = searchParams.get('id');
@@ -233,9 +235,11 @@ export default function Price1() {
             plan={plan}
             onSuccess={(response) => {
               console.log('Payment Success:', response);
+              navigate('/app/subscriptions');
             }}
             onFailure={(response) => {
               console.log('Payment Cancelled:', response);
+              navigate('/app/subscriptions');
             }}
           />
         </Stack>
