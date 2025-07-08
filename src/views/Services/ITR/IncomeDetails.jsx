@@ -21,12 +21,15 @@ import {
   Typography
 } from '@mui/material';
 import { FieldArray, FormikProvider, useFormik } from 'formik';
+
+
 import { useSnackbar } from 'notistack';
 import React, { useEffect, useState } from 'react';
 import * as Yup from 'yup';
 import Factory from '../../../utils/Factory';
 import GetActionButtons from '../FormHelpers';
 import RaiseRequest from '../RaiseRequest';
+
 const viewFile = async (url) => {
   const response = await Factory('get', `/docwallet/generate_presigned_url?url=${url}`, {}, {});
   if (response.res.status_cd === 0) {
@@ -51,6 +54,7 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
   const { enqueueSnackbar } = useSnackbar();
   const [salary_income, setSalaryIncome] = useState(data.find((item) => item.category_name === 'Salary Income'));
   const [other_income, setOtherIncome] = useState(data.find((item) => item.category_name === 'Other Income'));
+  const [isLoading, setIsLoading] = useState(false);
   const [nri_employee_salary, setForeignIncome] = useState(data.find((item) => item.category_name === 'NRI Employee Salary'));
   // Validation schemas
 
@@ -1550,6 +1554,8 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                     setCgPropertyLand((prev) => ({ ...prev, data: response.res.data }));
                     setProperties(response.res.data.capital_gains_property_details);
                   } else {
+                    console.log(response.res.data)
+                    setCgPropertyLand((prev) => ({ ...prev, data: response.res.data  }));
                     setProperties(initialState);
                   }
                 }
@@ -1924,13 +1930,13 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                   const propertyToSave = properties[idx];
                   const formData = new FormData();
                   formData.append('service_request', service_id);
-                  formData.append('service_task', cg_property_land.task_id);
-                  formData.append('capital_gains_applicable', cg_property_land.data.id);
+                  formData.append('service_task', cg_property_land?.task_id);
+                  formData.append('capital_gains_applicable', cg_property_land?.data?.id);
                   formData.append('reinvestment_made', properties[idx].reinvestment_made? true : false);
                   formData.append('status', 'in progress');
                   formData.append('gains_applicable', selectedTypes);
                   
-                    {console.log("dfghjklsdfghjk;",cg_property_land.data.id)}
+                    {console.log("dfghjklsdfghjk;",cg_property_land)}
                   Object.entries(propertyToSave).forEach(([key, value]) => {
                     if (value) {
                       if (key === 'purchase_doc' || key === 'sale_doc' || key === 'reinvestment_details_docs') {
@@ -4890,8 +4896,8 @@ const AgricultureIncome = ({ data, service_id, setFileDialogOpen, fileDialogOpen
     }
     // console.log("asdfghjkl", parseInt(data.data[0].id))
 
-    formData.append('agriculture_income', parseInt(data.data[0].id));
-     console.log("asdfghjkl", parseInt(data.data[0].id))
+    formData.append('agriculture_income', agricultureIncome?.id);
+     console.log("asdfghjkl", agricultureIncome?.id)
     formData.append('service_request', parseInt(service_id));
     formData.append('service_task', parseInt(data.task_id));
     if (agricultureIncome.agriculture_income_docs.file instanceof File)

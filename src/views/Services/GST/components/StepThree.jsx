@@ -6,9 +6,13 @@ import DownloadIcon from '@mui/icons-material/Download';
 import GetActionButtons from '../../FormHelpers';
 import { useSearchParams } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import CircularProgressComponent from 'utils/CircularProgressComponent';
+
 
 const StepThree = ({step, setStep}) => {
   const [searchParams] = useSearchParams();
+    const [isLoading, setIsLoading] = useState(false);
+  
   const [reviewAndFiling, setReviewAndFiling] = useState({
     task_id: null,
     draft_filing_certificate: null
@@ -31,7 +35,8 @@ const StepThree = ({step, setStep}) => {
   useEffect(() => {
     const fetchReviewAndFilingData = async () => {
       try {
-        setLoadingStep4(true);
+        // setLoadingStep4(true);
+         setIsLoading(true);
         const res = await Factory(
           'get',
           `/gst/service-request-section-data?service_request_id=${service_id}&section=review_filing_certificate`
@@ -59,12 +64,18 @@ const StepThree = ({step, setStep}) => {
           anchorOrigin: { vertical: 'top', horizontal: 'right' }
         });
       } finally {
-        setLoadingStep4(false);
+        // setLoadingStep4(false);
+         setIsLoading(false);
       }
     };
 
     fetchReviewAndFilingData();
   }, [service_id, setReviewAndFiling]);
+
+    if (isLoading) {
+      console.log('Loading promoter data...', isLoading);
+      return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading review Data'} />;
+    }
 
   return (
     <Box>
@@ -305,7 +316,7 @@ const StepThree = ({step, setStep}) => {
                             viewFile(reviewAndFiling?.data?.review_certificate);
                           }
                         }}
-                         startIcon={
+                        startIcon={
                             <DownloadIcon sx={{ width: { xs: 24, md: 24 }, height: { xs: 24, md: 24 } }} />
                           }
                       >
