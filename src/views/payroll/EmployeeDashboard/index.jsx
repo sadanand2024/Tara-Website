@@ -377,12 +377,23 @@ export default function Index() {
                             sx={{
                               mt: 1,
                               display: 'flex',
-                              flexDirection: 'column',
+                              // flexDirection: 'column',
+                              justifyContent: 'center',
                               alignItems: 'center',
                               gap: 1
                             }}
                             onClick={(e) => e.stopPropagation()}
                           >
+                            <Button
+                              variant="outlined"
+                              size="small"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                putStatusApicall(index, 'in progress');
+                              }}
+                            >
+                              Edit
+                            </Button>
                             <FormControlLabel
                               control={
                                 <Checkbox
@@ -397,21 +408,11 @@ export default function Index() {
                               }
                               label="Done"
                             />
-                            <Button
-                              variant="outlined"
-                              size="small"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                putStatusApicall(index, 'in progress');
-                              }}
-                            >
-                              Edit
-                            </Button>
                           </Box>
                         </>
                       ) : (
                         <>
-                          <Box
+                          {/* <Box
                             sx={{ mt: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}
                             onClick={(e) => e.stopPropagation()}
                           >
@@ -429,7 +430,7 @@ export default function Index() {
                               }
                               label="Done"
                             />
-                          </Box>
+                          </Box> */}
                           <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center', gap: 1 }}>
                             <Button
                               variant="contained"

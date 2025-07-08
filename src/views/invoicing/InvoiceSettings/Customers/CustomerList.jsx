@@ -213,6 +213,15 @@ const CustomerList = ({
             description: 'This action will permanently delete the record.'
           }}
         />
+        <AddCustomer
+          type={type}
+          setType={setType}
+          open={open}
+          handleClose={handleClose}
+          getCustomersData={getCustomersData}
+          businessDetailsData={businessDetailsData}
+          selectedCustomer={selectedCustomer}
+        />
       </TableContainer>
 
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
