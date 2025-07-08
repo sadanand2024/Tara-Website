@@ -25,6 +25,7 @@ import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import React from 'react';
 import Tds from './Tds';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 // TabPanel Component
 const TabPanel = ({ children, value, index }) => (
   <div role="tabpanel" hidden={value !== index} id={`tabpanel-${index}`} aria-labelledby={`tab-${index}`}>
@@ -243,6 +244,9 @@ const PayrollWorkflows = ({ type }) => {
       tagline="Payroll Workflow"
       secondary={
         <Stack direction="row" sx={{ gap: 2 }}>
+          <Button startIcon={<ArrowBackIcon />} variant="outlined" color="primary" onClick={() => navigate('/app/payroll')}>
+            Back to dashboard
+          </Button>
           <Button variant="contained" color="primary" onClick={handleButtonClick}>
             {renderButtonLabel()}
           </Button>
