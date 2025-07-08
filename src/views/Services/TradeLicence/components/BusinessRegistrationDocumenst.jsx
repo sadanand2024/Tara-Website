@@ -9,10 +9,14 @@ import { useSearchParams } from 'react-router-dom';
 import { openSnackbar } from 'store/slices/snackbar';
 import RaiseRequest from '../../RaiseRequest';
 import GetActionButtons from '../../FormHelpers';
+import CircularProgressComponent from 'utils/CircularProgressComponent';
+
 
 const BusinessRegistrationDocumenst = ({taskId}) => {
   const [searchParams] = useSearchParams();
   const service_id = searchParams.get('service_id');
+ const [isLoading, setIsLoading] = useState(false);
+  
   const [businessDocument, setbusinessDocument] = useState({
       task_id: null
     });
@@ -32,6 +36,7 @@ const BusinessRegistrationDocumenst = ({taskId}) => {
       rental_agreement: Yup.mixed().required('Rental agreement is required')
     }),
     onSubmit: async (values) => {
+      setIsLoading(true);
       let url = values.id ? `/tradelicense/business-documents/${values.id}/` : `/tradelicense/business-documents/`;
       const formData = new FormData();
       formData.append('service_request', service_id);
@@ -72,10 +77,12 @@ const BusinessRegistrationDocumenst = ({taskId}) => {
           })
         );
       }
+      setIsLoading(false);
     }
   });
 
   const getRegistrationDocuments = async () => {
+       setIsLoading(true);
     const url = `/tradelicense/business-documents/by-request-or-task?service_request_id=${service_id}`;
     const { res } = await Factory('get', url);
     if (res.status_cd === 0) {
@@ -87,13 +94,20 @@ const BusinessRegistrationDocumenst = ({taskId}) => {
         rental_agreement: res.data.rental_agreement || null
       });
       setbusinessDocument(res.data);
+      setIsLoading(false);
     }
+   
   };
+  
 
   useEffect(() => {
     getRegistrationDocuments();
     // eslint-disable-next-line
   }, []);
+   if (isLoading) {
+        console.log('Loading promoter data...', isLoading);
+        return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading promoter Data'} />;
+      }
 
   const { values, setValues, setFieldValue, handleChange, errors, touched, handleSubmit, handleBlur } = formik;
   return (

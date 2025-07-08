@@ -11,9 +11,13 @@ import AdditionalPlaceOfBusiness from './AdditionalPlaceOfBusiness';
 import { useSearchParams } from 'react-router-dom';
 import RaiseRequest from '../../RaiseRequest';
 import GetActionButtons from '../../FormHelpers';
+import CircularProgressComponent from 'utils/CircularProgressComponent';
+
 const BusinessPremisesSection = ({ taskId }) => {
   const [searchParams] = useSearchParams();
     const service_id = searchParams.get('service_id');
+      const [isLoading, setIsLoading] = useState(false); 
+
   const [businessPremises, setBusinessPremises] = useState({
     id: null,
     additional_space: false
@@ -108,6 +112,8 @@ const BusinessPremisesSection = ({ taskId }) => {
       // })
     }),
     onSubmit: async (values) => {
+            setIsLoading(true); 
+
       let url = businessPremises.id ? `/labourlicense/business-location/${businessPremises.id}/` : `/labourlicense/business-location/`;
       let formData = new FormData();
       formData.append('service_request', service_id);
@@ -162,6 +168,8 @@ const BusinessPremisesSection = ({ taskId }) => {
           })
         );
       }
+            setIsLoading(false); 
+
     }
   });
 
@@ -280,6 +288,9 @@ const BusinessPremisesSection = ({ taskId }) => {
   useEffect(() => {
     getBusinessPremises();
   }, []);
+   if (isLoading) {
+    return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading business premises data...'} />;
+  }
 
   return (
     <Box mt={4}>

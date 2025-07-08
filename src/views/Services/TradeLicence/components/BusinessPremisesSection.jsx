@@ -11,9 +11,12 @@ import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
 import RaiseRequest from '../../RaiseRequest';
 import GetActionButtons from '../../FormHelpers';
 import AdditionalPlaceOfBusiness from './AdditionalPlaceOfBusiness';
+import CircularProgressComponent from 'utils/CircularProgressComponent';
+
 const BusinessPremisesSection = ({ taskId }) => {
   const [searchParams] = useSearchParams();
   const service_id = searchParams.get('service_id');
+  const [isLoading, setIsLoading] = useState(false);
   const [businessPremises, setBusinessPremises] = useState({
     id: null,
     additional_space: 'no'
@@ -169,6 +172,7 @@ const BusinessPremisesSection = ({ taskId }) => {
       // additional_space: Yup.string().required('Please select if you have additional space')
     }),
     onSubmit: async (values) => {
+      setIsLoading(true);
       let url = businessPremises.id ? `/tradelicense/business-location/${businessPremises.id}/` : `/tradelicense/business-location/`;
       let formData = new FormData();
       formData.append('service_request', service_id);
@@ -226,10 +230,12 @@ const BusinessPremisesSection = ({ taskId }) => {
           })
         );
       }
+      setIsLoading(false);
     }
   });
 
   const getBusinessPremises = async () => {
+    
     const url = `/tradelicense/business-location/by-request-or-task?service_request_id=${service_id}`;
     const { res } = await Factory('get', url);
     if (res.status_cd === 0 && res.data) {
@@ -258,6 +264,7 @@ const BusinessPremisesSection = ({ taskId }) => {
         ...data
         // additional_space: data.additional_space || 'no'
       });
+        
     }
   };
   const renderField = (field, formikContext) => {
@@ -356,6 +363,9 @@ const BusinessPremisesSection = ({ taskId }) => {
   useEffect(() => {
     getBusinessPremises();
   }, []);
+  if (isLoading) {
+    return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading business premises data...'} />;
+  }
   return (
     <>
       <Card sx={{ p: 3, mt: 4 }}>
