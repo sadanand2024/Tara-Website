@@ -5,12 +5,12 @@ import { Tooltip, Typography, Stack } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 
-export default function searchUI({ files, MUIGrid, viewFile, getFileIcon, getFileType, handleMenuOpen, setActions }) {
+export default function searchUI({ files, MUIGrid, viewFile, getFileIcon, getFileType, handleMenuOpen, setActions, EmptyState }) {
   return (
     <>
       <Box sx={{ mb: 3 }}>
         {files === null || files?.length === 0 ? (
-          <Typography>File Not Found </Typography>
+          <EmptyState type="search" />
         ) : (
           <>
             <Typography fontWeight={500} sx={{ mb: 1, fontSize: { xs: 15, sm: 17 } }}>

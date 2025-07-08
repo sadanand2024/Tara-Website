@@ -153,7 +153,9 @@ const EmptyState = ({ type = 'folder', onAction }) => (
     <Typography variant="body2" sx={{ mb: 2 }}>
       {type === 'folder'
         ? 'There are no folders here yet. Create a new folder to get started!'
-        : 'There are no files in this folder yet. Upload files to see them here.'}
+        : type === 'search'
+          ? 'No Files found with the matching keyword'
+          : 'There are no files in this folder yet. Upload files to see them here.'}
     </Typography>
     {onAction && (
       <Button variant="contained" color="primary" onClick={onAction}>
@@ -201,12 +203,6 @@ const DocumentWallet = () => {
     setActions({ data: null, edit: false, delete: false });
     setNewFolderPopup(false);
   };
-
-  useEffect(() => {
-    if (actions.data) {
-      setFolderName(actions.data.name);
-    }
-  }, [actions.data]);
 
   const createInitialFolders = async () => {
     setLoading(true);
@@ -262,16 +258,6 @@ const DocumentWallet = () => {
     setLoading(false);
   };
 
-  useEffect(() => {
-    if (user.active_context) {
-      setCurrentFolderId(null);
-      setBreadcrumbs([]);
-      fetchFolderContents(null, null, true);
-    }
-    getInitialFolders();
-    getRecentFiles();
-  }, [user.active_context]);
-
   const handleUploadClick = () => {
     fileInputRef.current.click();
   };
@@ -310,12 +296,10 @@ const DocumentWallet = () => {
     setLoading(false);
   };
 
-  // Handler for root folder click
   const handleRootFolderClick = (folder) => {
     fetchFolderContents(folder.id, folder.name, true);
   };
 
-  // Fetch folder contents by id
   const fetchFolderContents = async (folderId, folderName, isRoot = false, customBreadcrumbs = null, refresh = true) => {
     setLoading(true);
     try {
@@ -346,7 +330,6 @@ const DocumentWallet = () => {
     setLoading(false);
   };
 
-  // Breadcrumb click handler
   const handleBreadcrumbClick = (idx) => {
     const crumb = breadcrumbs[idx];
     const newTrail = breadcrumbs.slice(0, idx + 1);
@@ -527,6 +510,22 @@ const DocumentWallet = () => {
     }
   };
 
+  useEffect(() => {
+    if (user.active_context) {
+      setCurrentFolderId(null);
+      setBreadcrumbs([]);
+      fetchFolderContents(null, null, true);
+    }
+    getInitialFolders();
+    getRecentFiles();
+  }, [user.active_context]);
+
+  useEffect(() => {
+    if (actions.data) {
+      setFolderName(actions.data.name);
+    }
+  }, [actions.data]);
+
   return (
     <Box
       sx={{
@@ -637,6 +636,7 @@ const DocumentWallet = () => {
           viewFile={viewFile}
           getFileIcon={getFileIcon}
           getFileType={getFileType}
+          EmptyState={EmptyState}
         />
       ) : (
         <>
