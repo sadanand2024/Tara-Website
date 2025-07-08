@@ -47,6 +47,8 @@ import AgricultureIcon from '@mui/icons-material/Agriculture';
 import Avatar from '@mui/material/Avatar';
 import StepContent from '@mui/material/StepContent';
 import CircularProgress from '@mui/material/CircularProgress';
+import CircularProgressComponent from 'utils/CircularProgressComponent'; // Add this import
+
 import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined';
 import RaiseRequest from '../RaiseRequest';
 const steps = ['Personal Info', 'Income Details', 'Deductions', 'Review & Filing'];
@@ -145,6 +147,7 @@ export default function ITR() {
     ais_files: null,
     advance_tax_files: []
   });
+  
   const [incomeDetails, setIncomeDetails] = React.useState([]);
   const [deductions, setDeductions] = React.useState([]);
   const [eduLoan, setEduLoan] = React.useState({ amount: '', educationOf: '', borrower: '', approved: 'no' });
@@ -451,14 +454,17 @@ export default function ITR() {
                             if (value instanceof File) {
                               formData.append(key, value);
                             }
-                            // If value is a string (URL), do not append
                           } else {
                             formData.append(key, value ?? '');
                           }
                         });
                         formData.append('status', 'in progress');
                         if (type === 'put') formData.append('id', personalInfo.id);
+
+                        setLoadingStep1(true); // <-- Set loading before POST/PUT
                         const res = await Factory(type, url, formData, {});
+                        setLoadingStep1(false); // <-- Unset loading after POST/PUT
+
                         if (res.res.status_cd === 0) {
                           setPersonalInfo((prev) => ({ ...prev, ...res.res.data }));
                           enqueueSnackbar('Personal Information saved successfully!', {
@@ -775,34 +781,34 @@ export default function ITR() {
                           if (file instanceof File) formData.append('advance_tax_files', file);
                         });
 
+                        setLoadingStep1(true); // <-- Use loadingStep1 or create loadingStep2 for this section
                         try {
                           const res = await Factory('post', '/income_tax_returns/tax-paid-details/create-or-update/', formData, {});
+                          setLoadingStep1(false);
                           if (res.res.status_cd === 0) {
                             enqueueSnackbar('Tax paid details saved successfully!', {
                               variant: 'success',
                               anchorOrigin: { vertical: 'top', horizontal: 'right' }
                             });
                             setTaxPaidDetails((prev) => ({
-                                ...prev,
-                                status: 'in progress'
+                              ...prev,
+                              status: 'in progress'
                             }));
-                            
                           } else {
                             enqueueSnackbar('Error saving tax paid details.', {
                               variant: 'error',
                               anchorOrigin: { vertical: 'top', horizontal: 'right' }
                             });
                           }
-                          
                         } catch (err) {
+                          setLoadingStep1(false);
                           enqueueSnackbar('Error saving tax paid details.', {
                             variant: 'error',
                             anchorOrigin: { vertical: 'top', horizontal: 'right' }
                           });
                         }
-                          await fetchTaxPaidDetails();
+                        await fetchTaxPaidDetails();
                       }}
-                      
                     >
           
                       {({ setFieldValue, values, errors, touched }) => (

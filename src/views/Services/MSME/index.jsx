@@ -1,43 +1,38 @@
-import React, { useState, useEffect } from 'react';
+import IconArrowBack from '@mui/icons-material/ArrowBack';
+import IconArrowForward from '@mui/icons-material/ArrowForward';
+import DownloadIcon from '@mui/icons-material/Download';
+import IconSave from '@mui/icons-material/Save';
 import {
+  Autocomplete,
   Box,
-  Paper,
-  Typography,
-  TextField,
+  Button,
+  Card,
+  Checkbox,
+  Divider,
+  FormControlLabel,
   Grid2,
+  IconButton,
+  Paper,
   Radio,
   RadioGroup,
-  FormControlLabel,
-  FormControl,
-  FormLabel,
-  Button,
-  Avatar,
   Stack,
-  Stepper,
   Step,
-  StepLabel,
   StepContent,
-  MenuItem,
-  Checkbox,
-  Autocomplete,
-  Card,
-  Divider,
-  IconButton,
-  Tooltip,
-  CircularProgress
+  StepLabel,
+  Stepper,
+  TextField,
+  Typography
 } from '@mui/material';
-import DownloadIcon from '@mui/icons-material/Download';
-import RaiseRequest from '../RaiseRequest';
-import PersonIcon from '@mui/icons-material/Person';
-import GetActionButtons from '../FormHelpers';
-import IconSave from '@mui/icons-material/Save';
-import IconArrowForward from '@mui/icons-material/ArrowForward';
-import IconArrowBack from '@mui/icons-material/ArrowBack';
 import { useFormik } from 'formik';
-import * as Yup from 'yup';
-import { useSearchParams } from 'react-router-dom';
-import Factory from '../../../utils/Factory';
 import { useSnackbar } from 'notistack';
+import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import * as Yup from 'yup';
+import Factory from '../../../utils/Factory';
+import GetActionButtons from '../FormHelpers';
+import RaiseRequest from '../RaiseRequest';
+import CircularProgressComponent from 'utils/CircularProgressComponent';
+
 const steps = [
   { label: 'Enterprise Profile', width: 180 },
   { label: 'Financial + Location Details', width: 220 },
@@ -150,7 +145,7 @@ const MSMEDashboard = () => {
   );
   const [registeredAddressUnitsData, setRegisteredAddressUnitsData] = React.useState(addressInitialValues);
   const [reviewFilingCertificateData, setReviewFilingCertificateData] = React.useState(reviewFilingCertificateInitialValues);
-  const [loading, setLoading] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(false);
   const [searchParams] = useSearchParams();
   const service_id = searchParams.get('service_id');
 
@@ -175,17 +170,18 @@ const MSMEDashboard = () => {
     .required('Required'),   
 UAM_number: Yup.string().when('Are_you_previously_registered_UAM', {
   is: true,
-  then: () => Yup.string().required('UAM Number is required'),    
-  otherwise: () => Yup.string().nullable(),                      
+  then: () => Yup.string().required('UAM Number is required'),
+  otherwise: () => Yup.string().nullable(),
 }),
 
 date_of_commencement: Yup.string().when('has_business_commenced', {
   is: true,
-  then: () => Yup.string().required('Date of commencement is required'),  
-  otherwise: () => Yup.string().nullable(),                               
+  then: () => Yup.string().required('Date of commencement is required'),
+  otherwise: () => Yup.string().nullable(),
 }),
- }),
+}),
     onSubmit: async (values) => {
+      setIsLoading(true);
       let url = '/msme/business-identity/';
       let type = 'post';
       if (values.id !== null) {
@@ -195,20 +191,23 @@ date_of_commencement: Yup.string().when('has_business_commenced', {
       const formData = new FormData();
       formData.append('service_request', service_id);
       formData.append('service_task', sectionData.tasks['Business Identity'].task_id);
+      formData.append('status', 'in progress');
       Object.entries(values).forEach(([key, value]) => {
-        if (key === 'status') {
-          formData.append(key, 'in progress');
-        } else if (key === 'pan_of_business_or_COI' || key === 'aadhar_of_signatory') {
-          if (value instanceof File) {
-            formData.append(key, value);
-          }
-        }
-          else if (value !== null && value !== undefined && !(value instanceof File)) {
-          formData.append(key, value);
-        }
-      });
+  if (key === 'status') {
+    return; // ✅ skip this field
+  }
+
+  if (key === 'pan_of_business_or_COI' || key === 'aadhar_of_signatory') {
+    if (value instanceof File) {
+      formData.append(key, value);
+    }
+  } else if (value !== null && value !== undefined && !(value instanceof File)) {
+    formData.append(key, value);
+  }
+});
 
       const response = await Factory(type, url, formData);
+      setIsLoading(false);
       if (response.res.status_cd === 0) {
         if (type === 'post') {
           setBusinessIdentityData(response.res);
@@ -227,6 +226,7 @@ date_of_commencement: Yup.string().when('has_business_commenced', {
   const businessClassificationFormik = useFormik({
     initialValues: businessClassificationData,
     onSubmit: async (values) => {
+      setIsLoading(true);
       let url = '/msme/business-classification/';
       let type = 'post';
       if (values.id !== null) {
@@ -238,6 +238,7 @@ date_of_commencement: Yup.string().when('has_business_commenced', {
       __postValues.service_task = sectionData.tasks['Business Classification Inputs'].task_id;
       __postValues.status = 'in progress';
       const response = await Factory(type, url, __postValues);
+      setIsLoading(false);
       if (response.res.status_cd === 0) {
         if (type === 'post') {
           setBusinessClassificationData(response.res);
@@ -262,6 +263,7 @@ date_of_commencement: Yup.string().when('has_business_commenced', {
   const turnoverFormik = useFormik({
     initialValues: turnoverInvestmentDeclarationData,
     onSubmit: async (values) => {
+       setIsLoading(true);
       let url = '/msme/turnover-details/';
       let type = 'post';
       if (values.id !== null) {
@@ -288,6 +290,7 @@ date_of_commencement: Yup.string().when('has_business_commenced', {
       });
 
       const response = await Factory(type, url, formData);
+       setIsLoading(false);
       if (response.res.status_cd === 0) {
         if (type === 'post') {
           setTurnoverInvestmentDeclarationData(response.res);
@@ -357,6 +360,7 @@ date_of_commencement: Yup.string().when('has_business_commenced', {
       validationSchema: addressValidationSchema,
 
     onSubmit: async (values) => {
+      setIsLoading(true);
       let url = '/msme/registration-address-details/';
       let type = 'post';
       if (registeredAddressUnitsData?.id !== null) {
@@ -389,6 +393,7 @@ date_of_commencement: Yup.string().when('has_business_commenced', {
       });
 
       const response = await Factory(type, url, formData);
+      setIsLoading(false);
       if (response.res.status_cd === 0) {
         if (type === 'post') {
           setRegisteredAddressUnitsData(response.res);
@@ -421,6 +426,7 @@ date_of_commencement: Yup.string().when('has_business_commenced', {
   const [plantNotApplicable, setPlantNotApplicable] = useState(false);
 
   const getStepData = async (step) => {
+        setIsLoading(true);
     let url = `/msme/service-request-section-data?service_request_id=${service_id}&section=`;
     if (step === 0) {
       url = url + 'enterprise_profile_info';
@@ -456,6 +462,7 @@ date_of_commencement: Yup.string().when('has_business_commenced', {
         }
       }
     }
+     setIsLoading(false);
   };
 
   useEffect(() => {
@@ -465,7 +472,11 @@ date_of_commencement: Yup.string().when('has_business_commenced', {
   useEffect(() => {
     console.log(businessIdentityData);
   }, [businessIdentityData.status]);
-
+   if (isLoading) {
+      console.log('Loading promoter data...', isLoading);
+      return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading  Data'} />;
+    }
+  
   return (
     <Card sx={{ minHeight: '100vh', p: { xs: 1, md: 4 } }}>
       <Typography variant="h3">MSME Registration</Typography>
@@ -988,7 +999,9 @@ date_of_commencement: Yup.string().when('has_business_commenced', {
                         fullWidth
                         value={businessClassificationFormik.values.number_of_persons_employed.male}
                         onChange={(e) => {
-                          const value = parseInt(e.target.value);
+                          // const value = parseInt(e.target.value);
+                          const value = e.target.value === '' ? 0 : parseInt(e.target.value);
+
                           businessClassificationFormik.setFieldValue('number_of_persons_employed.male', value);
                         }}
                         onBlur={() => {
@@ -1014,7 +1027,8 @@ date_of_commencement: Yup.string().when('has_business_commenced', {
                         fullWidth
                         value={businessClassificationFormik.values.number_of_persons_employed.female}
                         onChange={(e) => {
-                          const value = parseInt(e.target.value);
+                          // const value = parseInt(e.target.value);
+                          const value = e.target.value === '' ? 0 : parseInt(e.target.value);
                           businessClassificationFormik.setFieldValue('number_of_persons_employed.female', value);
                         }}
                         onBlur={() => {
@@ -1040,7 +1054,8 @@ date_of_commencement: Yup.string().when('has_business_commenced', {
                         fullWidth
                         value={businessClassificationFormik.values.number_of_persons_employed.others}
                         onChange={(e) => {
-                          const value = parseInt(e.target.value);
+                          // const value = parseInt(e.target.value);
+                          const value = e.target.value === '' ? 0 : parseInt(e.target.value);
                           businessClassificationFormik.setFieldValue('number_of_persons_employed.others', value);
                         }}
                         onBlur={() => {

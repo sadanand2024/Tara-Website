@@ -21,6 +21,8 @@ import { openSnackbar } from 'store/slices/snackbar';
 import { useSearchParams } from 'react-router-dom';
 import RaiseRequest from '../../RaiseRequest';
 import GetActionButtons from '../../FormHelpers';
+import CircularProgressComponent from 'utils/CircularProgressComponent'; // Add this import
+
 
 
 
@@ -33,6 +35,8 @@ import { useDispatch } from 'react-redux';
 
 const RegistrationInfo = () => {
      const [searchParams] = useSearchParams();
+       const [isLoading, setIsLoading] = useState(false); // 1. Add loading state
+
       const service_id = searchParams.get('service_id');
   const [registrationInfo, setregistrationInfo] = useState({});
   const dispatch = useDispatch();
@@ -65,10 +69,10 @@ const RegistrationInfo = () => {
 
   const formik = useFormik({
     initialValues: {
-      is_this_voluntary_registration: '',
-      applying_for_casual_taxable_person: '',
-      opting_for_composition_scheme: '',
-      any_existing_registration: '',
+      is_this_voluntary_registration:false,
+      applying_for_casual_taxable_person: false,
+      opting_for_composition_scheme:false,
+      any_existing_registration: false,
       registration_number: '',
       date_of_registration: '',
       // add any extra fields here if needed for your API
@@ -77,6 +81,7 @@ const RegistrationInfo = () => {
     onSubmit: async (values) => {
       const task_id = registrationInfo.task_id;
       try {
+        setIsLoading(true); 
         const url = registrationInfo.id
           ? `/gst/registration-info/${registrationInfo.id}/`
           : `/gst/registration-info/`;
@@ -107,7 +112,7 @@ const RegistrationInfo = () => {
 
         // Replace Factory with your API calling method:
         const { res } = await Factory(registrationInfo.id ? 'put' : 'post', url, formData);
-
+        setIsLoading(false); // 2. Set loading to false after API call
         if (res.status_cd === 0) {
           dispatch(
             openSnackbar({
@@ -133,6 +138,7 @@ const RegistrationInfo = () => {
           alert('Something went wrong: ' + JSON.stringify(res.data?.data || 'Unknown error'));
         }
       } catch (error) {
+         setIsLoading(false); 
         console.error('Submit error:', error);
       }
     }
@@ -179,6 +185,9 @@ const RegistrationInfo = () => {
     getregistrationInfo();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+    if (isLoading) {
+    return <CircularProgressComponent isLoading={isLoading} displayContent="Saving..." />;
+  }
 
   return (
     <Box sx={{ pt: 4 }}>

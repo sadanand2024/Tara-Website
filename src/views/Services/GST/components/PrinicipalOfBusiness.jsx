@@ -19,10 +19,13 @@ import * as Yup from 'yup';
 import { useSearchParams } from 'react-router-dom';
 import RaiseRequest from '../../RaiseRequest';
 import GetActionButtons from '../../FormHelpers';
+import CircularProgressComponent from 'utils/CircularProgressComponent'; // Add this import
+
 
 
 const PrincipleOfBusiness = () => {
    const [searchParams] = useSearchParams();
+   const [isLoading, setIsLoading] = useState(false); // 1. Add loading state
     const service_id = searchParams.get('service_id');
   const [prinicipalBusiness, setprinicipalBusiness] = useState({
     id: null,
@@ -132,6 +135,7 @@ const PrincipleOfBusiness = () => {
     onSubmit: async (values) => {
       const task_id = prinicipalBusiness.task_id;
       try {
+        setIsLoading(true); // 2. Set loading to true before API call
         let url = prinicipalBusiness.id ? `/gst/principal-place-details/${prinicipalBusiness.id}/` : `/gst/principal-place-details/`;
         let formData = new FormData();
         formData.append('service_request',service_id);
@@ -164,7 +168,7 @@ const PrincipleOfBusiness = () => {
         }
 
         const { res } = await Factory(prinicipalBusiness.id ? 'put' : 'post', url, formData);
-        
+        setIsLoading(false); // 3. Set loading to false after API call
         
         if (res.status_cd === 1) {
           dispatch(
@@ -189,6 +193,7 @@ const PrincipleOfBusiness = () => {
           getprinicipalBusiness();
         }
       } catch (error) {
+        setIsLoading(false); // 4. Set loading to false in case of error
         console.error('Submit error:', error);
         dispatch(
           openSnackbar({
@@ -242,6 +247,7 @@ const PrincipleOfBusiness = () => {
       }
     }
   };
+  
 
   const renderField = (field, formikContext) => {
     const { values, errors, touched, handleChange, handleBlur, setFieldValue } = formikContext;
@@ -334,6 +340,9 @@ const PrincipleOfBusiness = () => {
   useEffect(() => {
     getprinicipalBusiness();
   }, []);
+   if (isLoading) {
+    return <CircularProgressComponent isLoading={isLoading} displayContent="Saving..." />;
+  }
 
   return (
     <Box mt={4}>

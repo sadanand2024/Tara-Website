@@ -4,6 +4,8 @@ import * as Yup from 'yup';
 import { Autocomplete } from '@mui/material';
 import { useSnackbar } from 'notistack';
 import { Delete } from '@mui/icons-material';
+import CircularProgressComponent from 'utils/CircularProgressComponent';
+
 import {
   Box,
   Button,
@@ -18,7 +20,6 @@ import {
   Typography,
   RadioGroup,
   Radio,
-  CircularProgress,
   Avatar,
   Table,
   TableBody,
@@ -214,7 +215,7 @@ const BusinessProfile = ({ tabChange, tabval }) => {
   const [logoposttype, setLogoposttype] = useState('post');
   const [logoUrlDetails, setLogoUrlDetails] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [branches, setBranches] = useState([]);
   const [isMultipleBranches, setIsMultipleBranches] = useState('no');
   const [currentPage, setCurrentPage] = useState(1);
@@ -663,26 +664,9 @@ const BusinessProfile = ({ tabChange, tabval }) => {
     </Card>
   );
 
-  if (isLoading) {
-    return (
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          minHeight: '400px',
-          flexDirection: 'column',
-          gap: 2
-        }}
-      >
-        <CircularProgress size={50} />
-        <Typography variant="h5" color="text.secondary">
-          Loading Business Profile...
-        </Typography>
-      </Box>
-    );
-  }
-
+if(isLoading) {
+  return <CircularProgressComponent isLoading = {isLoading} displayContent= {"Loading Business Profile Data"}/>
+}
   const { values, handleChange, errors, touched, handleSubmit, handleBlur, setFieldValue } = formik;
 
   return (
