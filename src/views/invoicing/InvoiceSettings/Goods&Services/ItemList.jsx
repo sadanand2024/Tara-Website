@@ -227,6 +227,7 @@ const ItemList = ({
           businessDetailsData={businessDetailsData}
           open={open}
           setType={setType}
+          type={type}
           handleOpen={handleOpen}
           handleClose={handleClose}
           get_Goods_and_Services_Data={get_Goods_and_Services_Data}
