@@ -134,7 +134,7 @@ const GSTSettings = ({ handleBack, handleNext }) => {
     setIsLoading(true);
     const response = await Factory('get', `/user_management/gst-details/${user.active_context.business_id}/`, {}, {});
     if (response.res.status_cd === 0) {
-      const results = response.res.data.results || [];
+      const results = response.res.data || [];
       setGstList(results);
       setPaginatedData(results.slice(0, rowsPerPage));
       dispatch(

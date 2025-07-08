@@ -69,7 +69,6 @@ const RenderTable = ({
   };
   const safeTableData = Array.isArray(tableData) ? tableData : [];
   const paginatedData = safeTableData.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
-  console.log(from);
   return (
     <Stack>
       {loading ? (
