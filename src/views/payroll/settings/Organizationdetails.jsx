@@ -19,7 +19,7 @@ import { useSelector } from 'react-redux';
 import CircularProgress from '@mui/material/CircularProgress';
 import DeleteIcon from '@mui/icons-material/Delete';
 import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
-
+import AddIcon from '@mui/icons-material/Add';
 import MainCard from 'ui-component/cards/MainCard';
 import CustomAutocomplete from 'utils/CustomAutocomplete';
 import CustomInput from 'utils/CustomInput';
@@ -284,7 +284,6 @@ function Organizationdetails({ handleNext }) {
                 setFieldValue(field.name, value);
               }
             }}
-            // type={field.name === 'pan' ? 'text' : field.name === 'org_address_pincode' ? 'number' : 'text'}
             onBlur={handleBlur}
             error={touched[field.name] && Boolean(errors[field.name])}
             helperText={touched[field.name] && errors[field.name]}
@@ -419,136 +418,143 @@ function Organizationdetails({ handleNext }) {
     setFieldValue('logo', logoDetails);
   }, [logoDetails]);
   const { values, setValues, handleChange, errors, touched, handleSubmit, handleBlur, setFieldValue } = formik;
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '400px',
+          flexDirection: 'column',
+          gap: 2
+        }}
+      >
+        <CircularProgress size={50} />
+        <Typography variant="h5" color="text.secondary">
+          Loading Business Profile...
+        </Typography>
+      </Box>
+    );
+  }
   return (
-    <>
-      {loading ? (
-        <Box display="flex" justifyContent="center" alignItems="center" minHeight="50vh">
-          <CircularProgress />
-        </Box>
-      ) : (
-        <MainCard
-          title="Business profile"
-          icon={<BusinessIcon sx={{ color: theme.palette.primary.main, fontSize: 24, mb: 1 }} />}
-          // subtitle="Setup company name, registration details, and basic business information."
+    <MainCard title="Business Profile" subtitle="Manage your business profile for invoice generation and business operations">
+      <Box component="form" onSubmit={handleSubmit}>
+        <Grid2 container spacing={2}>
+          {renderFields(fields)}
+        </Grid2>
+
+        <Typography variant="subtitle1" gutterBottom sx={{ flexShrink: 0, fontWeight: 'bold', mt: 3, mb: 2 }}>
+          Organization Address
+          <span>
+            {' '}
+            <Tooltip title="This will be your primary work location." placement="right" arrow>
+              <InfoOutlinedIcon sx={{ fontSize: 18, ml: 0.5, color: 'gray', cursor: 'pointer' }} />
+            </Tooltip>
+          </span>
+        </Typography>
+
+        <Grid2 container spacing={2}>
+          {renderFields(organizationAddress)}
+        </Grid2>
+
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2,
+            mt: 3,
+            mb: 2
+          }}
         >
-          <Box component="form" onSubmit={handleSubmit}>
-            <Grid2 container spacing={2}>
-              {renderFields(fields)}
-            </Grid2>
-
-            <Typography variant="subtitle1" gutterBottom sx={{ flexShrink: 0, fontWeight: 'bold', mt: 3, mb: 2 }}>
-              Organization Address
-              <span>
-                {' '}
-                <Tooltip title="This will be your primary work location." placement="right" arrow>
-                  <InfoOutlinedIcon sx={{ fontSize: 18, ml: 0.5, color: 'gray', cursor: 'pointer' }} />
-                </Tooltip>
-              </span>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <Typography variant="subtitle1" gutterBottom sx={{ flexShrink: 0, fontWeight: 'bold' }}>
+              Filing Address
             </Typography>
-
-            <Grid2 container spacing={2}>
-              {renderFields(organizationAddress)}
-            </Grid2>
-
-            <Box
-              sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 2,
-                mt: 3,
-                mb: 2
+            <Button
+              size="small"
+              variant="outlined"
+              startIcon={<IconEdit size={16} />}
+              onClick={() => {
+                setFilingAddressDialog(true);
               }}
+              sx={{ mt: -1 }}
             >
-              <Box sx={{ display: 'flex', gap: 2 }}>
-                <Typography variant="subtitle1" gutterBottom sx={{ flexShrink: 0, fontWeight: 'bold' }}>
-                  Filing Address
-                </Typography>
-                <Button
-                  size="small"
-                  variant="outlined"
-                  startIcon={<IconEdit size={16} />}
-                  onClick={() => {
-                    setFilingAddressDialog(true);
-                  }}
-                  sx={{ mt: -1 }}
-                >
-                  Change
-                </Button>
-              </Box>
-              <Typography variant="h5">This address will be used across all Forms and Payslips.</Typography>
-
-              <Card
-                sx={{
-                  flex: 1,
-                  p: 1,
-                  borderRadius: 2,
-                  boxShadow: 3,
-                  backgroundColor: 'background.paper',
-                  border: '1px solid',
-                  borderColor: 'divider',
-                  maxWidth: 350
-                }}
-              >
-                <CardContent>
-                  <Typography variant="h4" sx={{ mb: 2 }}>
-                    {values.filling_address_location_name || 'Head Office'}
-                  </Typography>
-                  {[
-                    { label: 'Address Line 1', value: values.filling_address_line1 },
-                    { label: 'Address Line 2', value: values.filling_address_line2 },
-                    { label: 'Country', value: values.country },
-                    { label: 'State', value: values.filling_address_state },
-                    { label: 'City', value: values.filling_address_city },
-                    { label: 'Pincode', value: values.filling_address_pincode }
-                  ].map((item, index) => (
-                    <Typography
-                      key={index}
-                      variant="body2"
-                      sx={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        p: 0.5,
-                        fontWeight: 500,
-                        borderBottom: index !== 5 ? '1px solid' : 'none',
-                        borderColor: 'divider'
-                      }}
-                    >
-                      <strong>{item.label}:</strong> {item.value}
-                    </Typography>
-                  ))}
-                </CardContent>
-              </Card>
-            </Box>
-
-            <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                <Button type="submit" variant="contained" color="primary" size="small">
-                  Save
-                </Button>
-                <Button variant="outlined" onClick={() => handleNext()} size="small">
-                  Next
-                </Button>
-              </Box>
-            </Box>
-            {filingAddressDialog === true && (
-              <FilingAddressDialog
-                getOrgDetails={getOrgDetails}
-                filingAddressDialog={filingAddressDialog}
-                setFilingAddressDialog={setFilingAddressDialog}
-                currentFilingAddress={{
-                  location_name: values.filling_address_location_name || 'Head Office',
-                  address_line1: values.filling_address_line1,
-                  address_line2: values.filling_address_line2,
-                  address_state: values.filling_address_state,
-                  address_city: values.filling_address_city,
-                  address_pincode: values.filling_address_pincode
-                }}
-              />
-            )}
+              Change
+            </Button>
           </Box>
-        </MainCard>
-      )}
-    </>
+          <Typography variant="h5">This address will be used across all Forms and Payslips.</Typography>
+
+          <Card
+            sx={{
+              flex: 1,
+              p: 1,
+              borderRadius: 2,
+              boxShadow: 3,
+              backgroundColor: 'background.paper',
+              border: '1px solid',
+              borderColor: 'divider',
+              maxWidth: 350
+            }}
+          >
+            <CardContent>
+              <Typography variant="h4" sx={{ mb: 2 }}>
+                {values.filling_address_location_name || 'Head Office'}
+              </Typography>
+              {[
+                { label: 'Address Line 1', value: values.filling_address_line1 },
+                { label: 'Address Line 2', value: values.filling_address_line2 },
+                { label: 'Country', value: values.country },
+                { label: 'State', value: values.filling_address_state },
+                { label: 'City', value: values.filling_address_city },
+                { label: 'Pincode', value: values.filling_address_pincode }
+              ].map((item, index) => (
+                <Typography
+                  key={index}
+                  variant="body2"
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    p: 0.5,
+                    fontWeight: 500,
+                    borderBottom: index !== 5 ? '1px solid' : 'none',
+                    borderColor: 'divider'
+                  }}
+                >
+                  <strong>{item.label}:</strong> {item.value}
+                </Typography>
+              ))}
+            </CardContent>
+          </Card>
+        </Box>
+
+        <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button type="submit" variant="contained" color="primary" size="small">
+              Save
+            </Button>
+            <Button variant="outlined" onClick={() => handleNext()} size="small">
+              Next
+            </Button>
+          </Box>
+        </Box>
+        {filingAddressDialog === true && (
+          <FilingAddressDialog
+            getOrgDetails={getOrgDetails}
+            filingAddressDialog={filingAddressDialog}
+            setFilingAddressDialog={setFilingAddressDialog}
+            currentFilingAddress={{
+              location_name: values.filling_address_location_name || 'Head Office',
+              address_line1: values.filling_address_line1,
+              address_line2: values.filling_address_line2,
+              address_state: values.filling_address_state,
+              address_city: values.filling_address_city,
+              address_pincode: values.filling_address_pincode
+            }}
+          />
+        )}
+      </Box>
+    </MainCard>
   );
 }
 

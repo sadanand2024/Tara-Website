@@ -21,12 +21,15 @@ import {
   Typography
 } from '@mui/material';
 import { FieldArray, FormikProvider, useFormik } from 'formik';
+
+
 import { useSnackbar } from 'notistack';
 import React, { useEffect, useState } from 'react';
 import * as Yup from 'yup';
 import Factory from '../../../utils/Factory';
 import GetActionButtons from '../FormHelpers';
 import RaiseRequest from '../RaiseRequest';
+
 const viewFile = async (url) => {
   const response = await Factory('get', `/docwallet/generate_presigned_url?url=${url}`, {}, {});
   if (response.res.status_cd === 0) {
@@ -51,6 +54,7 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
   const { enqueueSnackbar } = useSnackbar();
   const [salary_income, setSalaryIncome] = useState(data.find((item) => item.category_name === 'Salary Income'));
   const [other_income, setOtherIncome] = useState(data.find((item) => item.category_name === 'Other Income'));
+  const [isLoading, setIsLoading] = useState(false);
   const [nri_employee_salary, setForeignIncome] = useState(data.find((item) => item.category_name === 'NRI Employee Salary'));
   // Validation schemas
 
@@ -822,8 +826,7 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
     formData.append('status', 'in progress');
 
     Object.entries(property).forEach(([key, value]) => {
-      // if (!value) return;
-        if (value === null || value === undefined) return;
+      if (value === null || value === undefined) return;
       if (key === 'property_address') {
         formData.append(key, JSON.stringify(value));
       } else if (value instanceof File) {
@@ -839,30 +842,30 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
 
     try {
       const res = await Factory('post', '/income_tax_returns/house-property-details/upsert/', formData, {});
-      // if (res.res?.status_cd === 0) {
-      //   if (res.res?.data?.property_info) setProperties(res.res?.data?.property_info);
-      //   enqueueSnackbar(`Property ${idx + 1} saved!`, { variant: 'success', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
-        
-      // } 
       if (res.res?.data?.property_info) {
-  const parsedProperties = res.res.data.property_info.map((property) => ({
-    ...property,
-    owned_property: property.owned_property === true || property.owned_property === 'true',
-    is_it_property_let_out: property.is_it_property_let_out === true || property.is_it_property_let_out === 'true',
-    pay_municipal_tax: property.pay_municipal_tax === true || property.pay_municipal_tax === 'true',
-    home_loan_on_property: property.home_loan_on_property === true || property.home_loan_on_property === 'true',
-  }));
- 
-  console.log('Parsed properties:', parsedProperties);
-  setProperties(parsedProperties);
- 
-  // ✅ Add Snackbar here
-  enqueueSnackbar(`Property ${idx + 1} saved!`, {
-    variant: 'success',
-    anchorOrigin: { vertical: 'top', horizontal: 'right' }
-  });
-}
-      else {
+        // After successful POST, call the GET API
+        const getRes = await Factory(
+          'get',
+          `/income_tax_returns/service-request-section-data?service_request_id=${service_id}&section=income_details`,
+          {},
+          {}
+        );
+        if (getRes.res?.status_cd === 0 && getRes.res?.data?.house_property_income?.[0]?.data?.[0]?.property_info) {
+          // Update properties from GET response
+          const updatedProperties = getRes.res.data.house_property_income[0].data[0].property_info.map((property) => ({
+            ...property,
+            owned_property: property.owned_property === true || property.owned_property === 'true',
+            is_it_property_let_out: property.is_it_property_let_out === true || property.is_it_property_let_out === 'true',
+            pay_municipal_tax: property.pay_municipal_tax === true || property.pay_municipal_tax === 'true',
+            home_loan_on_property: property.home_loan_on_property === true || property.home_loan_on_property === 'true',
+          }));
+          setProperties(updatedProperties);
+        }
+        enqueueSnackbar(`Property ${idx + 1} saved!`, {
+          variant: 'success',
+          anchorOrigin: { vertical: 'top', horizontal: 'right' }
+        });
+      } else {
         enqueueSnackbar(`Error saving property ${idx + 1}`, { variant: 'error', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
       }
     } catch (err) {
@@ -1023,24 +1026,30 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
                 <Typography variant="subtitle1">Is it Co-owned Property?</Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                {/* <RadioGroup row value={property.owned_property || ''} onChange={(_, v) => handleChange(idx, 'owned_property', v)}>
-                  <FormControlLabel value={true} control={<Radio size="small" />} label="Yes" />
-                  <FormControlLabel value={false} control={<Radio size="small" />} label="No" />
-                </RadioGroup> */}
-                <RadioGroup
-  row
-  value={
-    property.owned_property === true
-      ? 'true'
-      : property.owned_property === false
-      ? 'false'
-      : ''
-  }
-  onChange={(_, v) => handleChange(idx, 'owned_property', v === 'true')}
->
-  <FormControlLabel value="true" control={<Radio size="small" />} label="Yes" />
-  <FormControlLabel value="false" control={<Radio size="small" />} label="No" />
-</RadioGroup>
+              
+                   <RadioGroup row>
+                <FormControlLabel
+                  control={
+                     <Radio
+                 size="small"
+                  checked={property.owned_property === true}
+                     onChange={() => handleChange(idx, 'owned_property', true)}
+                        />
+                         }
+                   label="Yes"
+                   />
+                    <FormControlLabel
+                      control={
+                     <Radio
+                    size="small"
+                       checked={property.owned_property === false}
+                       onChange={() => handleChange(idx, 'owned_property', false)}
+                        />
+                          }
+                        label="No"
+                        />
+              </RadioGroup>
+
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <Typography variant="subtitle1">Ownership Percentage</Typography>
@@ -1071,28 +1080,30 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
                 <Typography variant="subtitle1">Is this property let-out?</Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                {/* <RadioGroup
-                  row
-                  value={property.is_it_property_let_out || ''}
-                  onChange={(_, v) => handleChange(idx, 'is_it_property_let_out', v)}
-                >
-                  <FormControlLabel value={true} control={<Radio size="small" />} label="Yes" />
-                  <FormControlLabel value={false} control={<Radio size="small" />} label="No" />
-                </RadioGroup> */}
-                 <RadioGroup
-  row
-  value={
-    property.is_it_property_let_out === true
-      ? 'true'
-      : property.is_it_property_let_out === false
-      ? 'false'
-      : ''
-  }
-  onChange={(_, v) => handleChange(idx, 'is_it_property_let_out', v === 'true')}
->
-  <FormControlLabel value="true" control={<Radio size="small" />} label="Yes" />
-  <FormControlLabel value="false" control={<Radio size="small" />} label="No" />
+              
+<RadioGroup row>
+  <FormControlLabel
+    control={
+      <Radio
+        size="small"
+        checked={property.is_it_property_let_out === true}
+        onChange={() => handleChange(idx, 'is_it_property_let_out', true)}
+      />
+    }
+    label="Yes"
+  />
+  <FormControlLabel
+    control={
+      <Radio
+        size="small"
+        checked={property.is_it_property_let_out === false}
+        onChange={() => handleChange(idx, 'is_it_property_let_out', false)}
+      />
+    }
+    label="No"
+  />
 </RadioGroup>
+
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <Typography variant="subtitle1">Annual Rent Received</Typography>
@@ -1105,7 +1116,7 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
                   placeholder="Amount"
                   value={property.annual_rent_received || ''}
                   onChange={(e) => handleChange(idx, 'annual_rent_received', e.target.value)}
-                   sx={{
+                  sx={{
                                   width: '100%',
                                   '& .MuiInputBase-input': {
                                     color: 'grey.600'
@@ -1136,24 +1147,31 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
                 <Typography variant="subtitle1">Did you pay municipal taxes?</Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                {/* <RadioGroup row value={property.pay_municipal_tax || ''} onChange={(_, v) => handleChange(idx, 'pay_municipal_tax', v)}>
-                  <FormControlLabel value={true} control={<Radio size="small" />} label="Yes" />
-                  <FormControlLabel value={false} control={<Radio size="small" />} label="No" />
-                </RadioGroup> */}
-                <RadioGroup
-  row
-  value={
-    property.pay_municipal_tax === true
-      ? 'true'
-      : property.pay_municipal_tax === false
-      ? 'false'
-      : ''
-  }
-  onChange={(_, v) => handleChange(idx, 'pay_municipal_tax', v === 'true')}
->
-  <FormControlLabel value="true" control={<Radio size="small" />} label="Yes" />
-  <FormControlLabel value="false" control={<Radio size="small" />} label="No" />
+    
+  <RadioGroup row>
+  <FormControlLabel
+    control={
+      <Radio
+        size="small"
+        checked={property.pay_municipal_tax === true}
+        onChange={() => handleChange(idx, 'pay_municipal_tax', true)}
+      />
+    }
+    label="Yes"
+  />
+  <FormControlLabel
+    control={
+      <Radio
+        size="small"
+        checked={property.pay_municipal_tax === false}
+        onChange={() => handleChange(idx, 'pay_municipal_tax', false)}
+      />
+    }
+    label="No"
+  />
 </RadioGroup>
+
+
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <Typography variant="subtitle1">Municipal tax paid</Typography>
@@ -1209,28 +1227,30 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
                 <Typography variant="subtitle1">Home loan on this property?</Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                {/* <RadioGroup
-                  row
-                  value={property.home_loan_on_property || ''}
-                  onChange={(_, v) => handleChange(idx, 'home_loan_on_property', v)}
-                >
-                  <FormControlLabel value={true} control={<Radio size="small" />} label="Yes" />
-                  <FormControlLabel value={false} control={<Radio size="small" />} label="No" />
-                </RadioGroup> */}
-                <RadioGroup
-  row
-  value={
-    property.home_loan_on_property === true
-      ? 'true'
-      : property.home_loan_on_property === false
-      ? 'false'
-      : ''
-  }
-  onChange={(_, v) => handleChange(idx, 'home_loan_on_property', v === 'true')}
->
-  <FormControlLabel value="true" control={<Radio size="small" />} label="Yes" />
-  <FormControlLabel value="false" control={<Radio size="small" />} label="No" />
-</RadioGroup>
+              
+                 <RadioGroup row>
+                <FormControlLabel
+                 control={
+                   <Radio
+                 size="small"
+                   checked={property.home_loan_on_property === true}
+                   onChange={() => handleChange(idx, 'home_loan_on_property', true)}
+                  />
+                 }
+                label="Yes"
+                  />
+                 <FormControlLabel
+                    control={
+                     <Radio
+                 size="small"
+                   checked={property.home_loan_on_property === false}
+                  onChange={() => handleChange(idx, 'home_loan_on_property', false)}
+                   />
+                  }
+                label="No"
+                 />
+              </RadioGroup>
+
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <Typography variant="subtitle1">Interest paid during the FY</Typography>
@@ -1459,8 +1479,8 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
     if (cg_equity_mutual) {
       setEquityMutualFundType(cg_equity_mutual?.data?.equity_mutual_fund_type || []);
       setCamsFiles(cg_equity_mutual?.data?.documents || []);
-      setSoldForeignShares(cg_equity_mutual?.data?.sell_any_foreign_sales || 'no');
-      setSoldUnlistedShares(cg_equity_mutual?.data?.sell_any_unlisted_sales || 'no');
+      setSoldForeignShares(cg_equity_mutual?.data?.sell_any_foreign_sales || false);
+      setSoldUnlistedShares(cg_equity_mutual?.data?.sell_any_unlisted_sales || false);
     }
   }, [cg_equity_mutual]);
 
@@ -1487,8 +1507,8 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
     camsFiles.forEach((file) => {
       if (file instanceof File) formData.append('documents', file);
     });
-    formData.append('sell_any_foreign_sales', soldForeignShares? 'true' : 'false');
-    formData.append('sell_any_unlisted_sales', soldUnlistedShares? 'true' : 'false');
+    formData.append('sell_any_foreign_sales', soldForeignShares? true : false);
+    formData.append('sell_any_unlisted_sales', soldUnlistedShares? true : false);
 
     const response = await Factory('post', `/income_tax_returns/capital-gains/equity-mutual-fund/submit/`, formData);
     if (response.res.status_cd === 0) {
@@ -1534,6 +1554,8 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                     setCgPropertyLand((prev) => ({ ...prev, data: response.res.data }));
                     setProperties(response.res.data.capital_gains_property_details);
                   } else {
+                    console.log(response.res.data)
+                    setCgPropertyLand((prev) => ({ ...prev, data: response.res.data  }));
                     setProperties(initialState);
                   }
                 }
@@ -1771,18 +1793,38 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                 <Typography variant="subtitle1">Reinvestment made</Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <RadioGroup
-                  row
-                  value={properties[idx].reinvestment_made}
-                  onChange={(_, v) => {
-                    const arr = [...properties];
-                    arr[idx].reinvestment_made = v==='true';
-                    setProperties(arr);
-                  }}
-                >
-                  <FormControlLabel value="true" control={<Radio size="small" />} label="Yes" />
-                  <FormControlLabel value="false" control={<Radio size="small" />} label="No" />
-                </RadioGroup>
+              
+                <RadioGroup row>
+  <FormControlLabel
+    control={
+      <Radio
+        size="small"
+        checked={properties[idx].reinvestment_made === true}
+        onChange={() => {
+          const arr = [...properties];
+          arr[idx].reinvestment_made = true;
+          setProperties(arr);
+        }}
+      />
+    }
+    label="Yes"
+  />
+  <FormControlLabel
+    control={
+      <Radio
+        size="small"
+        checked={properties[idx].reinvestment_made === false}
+        onChange={() => {
+          const arr = [...properties];
+          arr[idx].reinvestment_made = false;
+          setProperties(arr);
+        }}
+      />
+    }
+    label="No"
+  />
+</RadioGroup>
+
               </Grid2>
             </Grid2>
             {properties[idx].reinvestment_made === true && (
@@ -1879,6 +1921,7 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
               </Box>
             )}
             <Box display="flex" justifyContent="flex-end" mt={2} gap={2}>
+              
               <Button
                 size="small"
                 variant="contained"
@@ -1887,12 +1930,13 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                   const propertyToSave = properties[idx];
                   const formData = new FormData();
                   formData.append('service_request', service_id);
-                  formData.append('service_task', cg_property_land.task_id);
-                  formData.append('capital_gains_applicable', cg_property_land.data.id);
-                  formData.append('reinvestment_made', properties[idx].reinvestment_made? 'true' : 'false');
+                  formData.append('service_task', cg_property_land?.task_id);
+                  formData.append('capital_gains_applicable', cg_property_land?.data?.id);
+                  formData.append('reinvestment_made', properties[idx].reinvestment_made? true : false);
                   formData.append('status', 'in progress');
                   formData.append('gains_applicable', selectedTypes);
-
+                  
+                    {console.log("dfghjklsdfghjk;",cg_property_land)}
                   Object.entries(propertyToSave).forEach(([key, value]) => {
                     if (value) {
                       if (key === 'purchase_doc' || key === 'sale_doc' || key === 'reinvestment_details_docs') {
@@ -1934,6 +1978,7 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
               >
                 Save
               </Button>
+            
               {properties?.length > 1 && (
                 <Button
                   size="small"
@@ -2041,18 +2086,58 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
           {/* 3. Did you sell any foreign shares? */}
           <Stack direction="row" spacing={2} alignItems="center" mb={2}>
             <Typography mb={1}>Did you sell any foreign shares?</Typography>
-            <RadioGroup row value={soldForeignShares? 'true' : 'false'} onChange={(_, v) => setSoldForeignShares(v=== 'true')}>
-              <FormControlLabel value='true' control={<Radio size="small" />} label="Yes" />
-              <FormControlLabel value='false' control={<Radio size="small" />} label="No" />
+           
+            <RadioGroup row>
+              <FormControlLabel
+                  control={
+                 <Radio
+                    size="small"
+                  checked={soldForeignShares === true}
+                    onChange={() => setSoldForeignShares(true)}
+                        />
+                        }
+                    label="Yes"
+                      />
+                  <FormControlLabel
+                      control={
+                         <Radio
+                   size="small"
+                    checked={soldForeignShares === false}
+                       onChange={() => setSoldForeignShares(false)}
+                       />
+                      }
+                   label="No"
+                      />
             </RadioGroup>
+
           </Stack>
           {/* 4. Did you sell any unlisted shares? */}
           <Stack direction="row" spacing={2} alignItems="center" mb={2}>
             <Typography mb={1}>Did you sell any unlisted shares?</Typography>
-            <RadioGroup row value={soldUnlistedShares? 'true' : 'false'} onChange={(_, v) => setSoldUnlistedShares(v=== 'true')}>
-              <FormControlLabel value='true' control={<Radio size="small" />} label="Yes" />
-              <FormControlLabel value='false' control={<Radio size="small" />} label="No" />
+          
+            <RadioGroup row>
+              <FormControlLabel
+                    control={
+                       <Radio
+                       size="small"
+                         checked={soldUnlistedShares === true}
+                        onChange={() => setSoldUnlistedShares(true)}
+                         />
+                         }
+                       label="Yes"
+                      />
+                    <FormControlLabel
+                   control={
+                      <Radio
+                  size="small"
+                  checked={soldUnlistedShares === false}
+                     onChange={() => setSoldUnlistedShares(false)}
+                        />
+                    }
+                label="No"
+               />
             </RadioGroup>
+
           </Stack>
           <Stack direction="row" sx={{ justifyContent: 'flex-end' }} spacing={1} mb={2}>
             <Button size="small" variant="contained" onClick={handleCamsSave}>
@@ -2352,6 +2437,8 @@ function transformBusinessApiResponse(apiObj) {
     business_type: apiObj.business_type || '',
     opting_for_presumptive_taxation: apiObj.opting_for_presumptive_taxation === true,
     gst_registered: apiObj.gst_registered === true,
+    book_maintained: apiObj.book_maintained === true,
+
     status: apiObj?.status || '',
     service_request: apiObj?.service_request,
     service_task: apiObj?.service_task,
@@ -2417,7 +2504,7 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
       ...businessRows[idx],
         opting_for_presumptive_taxation: !!businessRows[idx]?.opting_for_presumptive_taxation,
 
-      book_maintained: businessRows[idx]?.book_maintained,
+      book_maintained: !!businessRows[idx]?.book_maintained,
         gst_registered: !!businessRows[idx]?.gst_registered,
 
       selectedSection: selectedSection[idx]
@@ -2436,7 +2523,7 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
     formData.append('service_request', service_id);
     formData.append('service_task', data.task_id);
     formData.append('status', 'in progress');
-    console.log("opting_for_presumptive_taxation", businessData.opting_for_presumptive_taxation)
+    // console.log("opting_for_presumptive_taxation", businessData.book_maintained)
 
     formData.append('opting_data', JSON.stringify(opting_data));
     Object.entries(businessData).forEach(([key, value]) => {
@@ -2474,6 +2561,7 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
         }
       }
     });
+    
     console.log(formData)
     let type = 'post';
     let url = '/income_tax_returns/business-professional-income/';
@@ -2481,6 +2569,7 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
     if (res.res.status_cd === 0) {
       setBusinessRows(res.res.id.business_professional_income_info.map(transformBusinessApiResponse));
       console.log()
+      
       enqueueSnackbar('Business/Profession Income saved successfully!', {
         variant: 'success',
         anchorOrigin: { vertical: 'top', horizontal: 'right' }
@@ -2492,6 +2581,7 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
       });
     }
   };
+  
 
   const removeBusinessIncome = async (row, idx) => {
     const res = await Factory('delete', `/income_tax_returns/business-professional-income/${row.id}/delete/`, {});
@@ -2601,6 +2691,37 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                   <FormControlLabel value="true" control={<Radio size="small" />} label="Yes" />
                   <FormControlLabel value="false" control={<Radio size="small" />} label="No" />
                 </RadioGroup>
+                {/* <RadioGroup row>
+  <FormControlLabel
+    control={
+      <Radio
+        size="small"
+        checked={businessRows[idx]?.opting_for_presumptive_taxation === true}
+        onChange={() => {
+          const updated = [...businessRows];
+          updated[idx].opting_for_presumptive_taxation = true;
+          setBusinessRows(updated);
+        }}
+      />
+    }
+    label="Yes"
+  />
+  <FormControlLabel
+    control={
+      <Radio
+        size="small"
+        checked={businessRows[idx]?.opting_for_presumptive_taxation === false}
+        onChange={() => {
+          const updated = [...businessRows];
+          updated[idx].opting_for_presumptive_taxation = false;
+          setBusinessRows(updated);
+        }}
+      />
+    }
+    label="No"
+  />
+</RadioGroup> */}
+
               </Grid2>
             </Grid2>
             {/* If Presumptive = Yes, show left-side fields (4-12) */}
@@ -2947,18 +3068,38 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                     <Typography>Books Maintained?</Typography>
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 9 }}>
-                    <RadioGroup
-                      row
-                      value={businessRows[idx]?.book_maintained ? 'true' : 'false'}
-                      onChange={(_, v) => {
-                        const updated = [...businessRows];
-                        updated[idx].book_maintained = v=== 'true';
+                   
+                    <RadioGroup row>
+                  <FormControlLabel
+                    control={
+                      <Radio
+                      size="small"
+                        checked={businessRows[idx]?.book_maintained === true}
+                        onChange={() => {
+                      const updated = [...businessRows];
+                      updated[idx].book_maintained = true;
                         setBusinessRows(updated);
-                      }}
-                    >
-                      <FormControlLabel value="true" control={<Radio size="small" />} label="Yes" />
-                      <FormControlLabel value="false" control={<Radio size="small" />} label="No" />
-                    </RadioGroup>
+                        }}
+                        />
+                          }
+                  label="Yes"
+                    />
+                      <FormControlLabel
+                        control={
+                        <Radio
+                        size="small"
+                        checked={businessRows[idx]?.book_maintained === false}
+                          onChange={() => {
+                        const updated = [...businessRows];
+                         updated[idx].book_maintained = false;
+                             setBusinessRows(updated);
+                           }}
+                                />
+                            }
+                       label="No"
+                      />
+                 </RadioGroup>
+
                   </Grid2>
                   {/* If Books Maintained = Yes */}
                   {businessRows[idx]?.book_maintained === true && (
@@ -3041,18 +3182,38 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                     <Typography>GST Registered?</Typography>
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                    <RadioGroup
-                      row
-                      value={businessRows[idx]?.gst_registered ? 'true' : 'false'}
-                      onChange={(_, v) => {
-                        const updated = [...businessRows];
-                        updated[idx].gst_registered = v=== 'true';
-                        setBusinessRows(updated);
-                      }}
-                    >
-                      <FormControlLabel value="true" control={<Radio size="small" />} label="Yes" />
-                      <FormControlLabel value="false" control={<Radio size="small" />} label="No" />
-                    </RadioGroup>
+                   
+                    <RadioGroup row>
+                     <FormControlLabel
+                        control={
+                      <Radio
+                      size="small"
+                          checked={businessRows[idx]?.gst_registered === true}
+                         onChange={() => {
+                             const updated = [...businessRows];
+                         updated[idx].gst_registered = true;
+                             setBusinessRows(updated);
+                               }}
+                                />
+                                    }
+                            label="Yes"
+                           />
+                      <FormControlLabel
+                        control={
+                       <Radio
+                     size="small"
+                        checked={businessRows[idx]?.gst_registered === false}
+                  onChange={() => {
+                       const updated = [...businessRows];
+                       updated[idx].gst_registered = false;
+                       setBusinessRows(updated);
+                       }}
+                     />
+                   }
+                 label="No"
+                 />
+             </RadioGroup>
+
                   </Grid2>
                   {/* If GST Registered = Yes */}
                   {businessRows[idx]?.gst_registered === true && (
@@ -4382,7 +4543,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                   <TableCell sx={{ p: 0.5, py: 1, width: '20%' }} align="center">
                     Document
                   </TableCell>
-                  <TableCell sx={{ p: 0.5, py: 1, py: 1, width: '20%' }} align="center">
+                  <TableCell sx={{ p: 0.5,  py: 1, width: '20%' }} align="center">
                     Actions
                   </TableCell>
                 </TableRow>
@@ -4733,9 +4894,10 @@ const AgricultureIncome = ({ data, service_id, setFileDialogOpen, fileDialogOpen
       formData.append('id', parseInt(id));
       console.log(id)
     }
-    console.log("asdfghjkl", parseInt(data.data[0].id))
+    // console.log("asdfghjkl", parseInt(data.data[0].id))
 
-    formData.append('agriculture_income', parseInt(data.data[0].id));
+    formData.append('agriculture_income', agricultureIncome?.id);
+     console.log("asdfghjkl", agricultureIncome?.id)
     formData.append('service_request', parseInt(service_id));
     formData.append('service_task', parseInt(data.task_id));
     if (agricultureIncome.agriculture_income_docs.file instanceof File)
@@ -4754,8 +4916,8 @@ const AgricultureIncome = ({ data, service_id, setFileDialogOpen, fileDialogOpen
       enqueueSnackbar('Error saving agricultural income', { anchorOrigin: { vertical: 'top', horizontal: 'right' }, variant: 'error' });
     }
   };
-
-  return (
+  
+ return (
     <Box>
       <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
         <Box>

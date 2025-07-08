@@ -32,6 +32,7 @@ const SalaryComponentTabs = ({ type, handleBack, handleNext }) => {
   return (
     <MainCard
       title="Salary Components"
+      subtitle="Manage your Salary Components for seamless operations"
       secondary={
         <Stack direction="row">
           <Button

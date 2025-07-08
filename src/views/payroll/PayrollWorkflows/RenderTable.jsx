@@ -13,7 +13,8 @@ import {
   Button,
   Box,
   CircularProgress,
-  Grid2
+  Grid2,
+  Typography
 } from '@mui/material';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
@@ -68,6 +69,7 @@ const RenderTable = ({
   };
   const safeTableData = Array.isArray(tableData) ? tableData : [];
   const paginatedData = safeTableData.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+  console.log(from);
   return (
     <Stack>
       {loading ? (
@@ -156,26 +158,23 @@ const RenderTable = ({
       )}
 
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mt: 2, px: 2 }}>
-        {from !== 'Tds' && (
-          <Button startIcon={<ArrowBackIcon />} variant="outlined" color="primary" onClick={() => navigate('/app/payroll')}>
-            Back to dashboard
-          </Button>
-        )}
-        <Box display="flex" gap={1}>
-          {safeTableData.length > 0 && (
-            <Pagination
-              count={Math.ceil(safeTableData.length / rowsPerPage)}
-              page={currentPage}
-              onChange={handlePageChange}
-              shape="rounded"
-              color="primary"
-            />
-          )}
-        </Box>
-        <Box display="flex" gap={1}>
+        {from !== 'New Joiners' ? (
           <Button startIcon={<ArrowBackIcon />} variant="outlined" color="primary" onClick={() => handleBack()}>
             Back
           </Button>
+        ) : (
+          <Typography></Typography>
+        )}
+        {safeTableData.length > 0 && (
+          <Pagination
+            count={Math.ceil(safeTableData.length / rowsPerPage)}
+            page={currentPage}
+            onChange={handlePageChange}
+            shape="rounded"
+            color="primary"
+          />
+        )}
+        <Box>
           {from === 'Tds' ? (
             <Button variant="contained" color="primary" onClick={() => navigate('/app/payroll')}>
               Proceed to Dashboard

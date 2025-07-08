@@ -38,7 +38,7 @@ import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import { storeUser } from 'store/slices/account'; // redux slice
 import { useDispatch } from 'store';
 import { useSnackbar } from 'notistack';
-
+import { useNavigate } from 'react-router-dom';
 // ==============================|| MAIN NAVBAR / HEADER ||============================== //
 
 import { useSelector } from 'store';
@@ -52,7 +52,7 @@ const Header = ({ hamburgerDisplay = 'block' }) => {
   const user = useSelector((state) => state.accountReducer.user);
   const theme = useTheme();
   const downMD = useMediaQuery(theme.breakpoints.down('md'));
-
+  const navigate = useNavigate();
   const { mode, menuOrientation } = useConfig();
   const { menuMaster } = useGetMenuMaster();
   const drawerOpen = menuMaster.isDashboardDrawerOpened;
@@ -96,6 +96,8 @@ const Header = ({ hamburgerDisplay = 'block' }) => {
           variant: 'success',
           anchorOrigin: { vertical: 'top', horizontal: 'right' }
         });
+        // window.location.reload();
+        navigate('/dashboard/business');
       }
     } catch (error) {
       console.error('Error switching context:', error);

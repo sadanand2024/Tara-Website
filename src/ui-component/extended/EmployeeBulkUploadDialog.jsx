@@ -244,8 +244,6 @@ export default function BulkUploadDialog({ open, handleClose, getData, payrollid
 
     const url = bulkUploadUrl;
     const { res } = await Factory('post', url, formData, null, true);
-    console.log(res);
-
     // Check if the response indicates success (status_cd === 0) or if there are validation errors
     if (res?.status_cd === 0) {
       setUploadProgress(50);
@@ -354,7 +352,6 @@ export default function BulkUploadDialog({ open, handleClose, getData, payrollid
         }, 50);
       }
     } catch (error) {
-      console.log(error);
       dispatch(
         openSnackbar({
           open: true,
@@ -364,6 +361,19 @@ export default function BulkUploadDialog({ open, handleClose, getData, payrollid
           close: false
         })
       );
+
+      // Clear uploaded data on error
+      if (currentStep === 1) {
+        setFile(null);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+      } else if (currentStep === 2) {
+        setSalaryFile(null);
+        if (salaryFileInputRef.current) {
+          salaryFileInputRef.current.value = '';
+        }
+      }
     } finally {
       setUploading(false);
     }

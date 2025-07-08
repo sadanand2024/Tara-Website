@@ -1,43 +1,38 @@
-import React, { useState, useEffect } from 'react';
+import IconArrowBack from '@mui/icons-material/ArrowBack';
+import IconArrowForward from '@mui/icons-material/ArrowForward';
+import DownloadIcon from '@mui/icons-material/Download';
+import IconSave from '@mui/icons-material/Save';
 import {
+  Autocomplete,
   Box,
-  Paper,
-  Typography,
-  TextField,
+  Button,
+  Card,
+  Checkbox,
+  Divider,
+  FormControlLabel,
   Grid2,
+  IconButton,
+  Paper,
   Radio,
   RadioGroup,
-  FormControlLabel,
-  FormControl,
-  FormLabel,
-  Button,
-  Avatar,
   Stack,
-  Stepper,
   Step,
-  StepLabel,
   StepContent,
-  MenuItem,
-  Checkbox,
-  Autocomplete,
-  Card,
-  Divider,
-  IconButton,
-  Tooltip,
-  CircularProgress
+  StepLabel,
+  Stepper,
+  TextField,
+  Typography
 } from '@mui/material';
-import DownloadIcon from '@mui/icons-material/Download';
-import RaiseRequest from '../RaiseRequest';
-import PersonIcon from '@mui/icons-material/Person';
-import GetActionButtons from '../FormHelpers';
-import IconSave from '@mui/icons-material/Save';
-import IconArrowForward from '@mui/icons-material/ArrowForward';
-import IconArrowBack from '@mui/icons-material/ArrowBack';
 import { useFormik } from 'formik';
-import * as Yup from 'yup';
-import { useSearchParams } from 'react-router-dom';
-import Factory from '../../../utils/Factory';
 import { useSnackbar } from 'notistack';
+import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import * as Yup from 'yup';
+import Factory from '../../../utils/Factory';
+import GetActionButtons from '../FormHelpers';
+import RaiseRequest from '../RaiseRequest';
+import CircularProgressComponent from 'utils/CircularProgressComponent';
+
 const steps = [
   { label: 'Enterprise Profile', width: 180 },
   { label: 'Financial + Location Details', width: 220 },
@@ -64,9 +59,9 @@ const businessIdentityInitialValues = {
   aadhar_of_signatory: '',
   mobile_number: '',
   email_id: '',
-  Are_you_previously_registered_UAM: 'yes',
+  Are_you_previously_registered_UAM: true,
   UAM_number: '',
-  has_business_commenced: 'yes',
+  has_business_commenced: true,
   date_of_commencement: ''
 };
 
@@ -150,7 +145,7 @@ const MSMEDashboard = () => {
   );
   const [registeredAddressUnitsData, setRegisteredAddressUnitsData] = React.useState(addressInitialValues);
   const [reviewFilingCertificateData, setReviewFilingCertificateData] = React.useState(reviewFilingCertificateInitialValues);
-  const [loading, setLoading] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(false);
   const [searchParams] = useSearchParams();
   const service_id = searchParams.get('service_id');
 
@@ -162,12 +157,31 @@ const MSMEDashboard = () => {
       business_name: Yup.string().required('Required'),
       pan_of_business_or_COI: Yup.mixed().required('Required'),
       aadhar_of_signatory: Yup.mixed().required('Required'),
-      mobile_number: Yup.string().required('Required'),
-      email_id: Yup.string().email('Invalid email_id').required('Required'),
-      Are_you_previously_registered_UAM: Yup.string().required('Required'),
-      has_business_commenced: Yup.string().required('Required')
-    }),
+      mobile_number: Yup.string()
+              .required('Mobile Number is required')
+              .matches(/^[0-9]+$/, 'Mobile Number must be a number')
+              .min(10, 'Mobile Number must be at least 10 digits')
+              .max(10, 'Mobile Number must not exceed 10 digits'),  
+     email_id: Yup.string().email('Invalid email_id').required('Required'),
+     Are_you_previously_registered_UAM: Yup.boolean()
+    .required('Required'),
+
+    has_business_commenced: Yup.boolean()
+    .required('Required'),   
+UAM_number: Yup.string().when('Are_you_previously_registered_UAM', {
+  is: true,
+  then: () => Yup.string().required('UAM Number is required'),
+  otherwise: () => Yup.string().nullable(),
+}),
+
+date_of_commencement: Yup.string().when('has_business_commenced', {
+  is: true,
+  then: () => Yup.string().required('Date of commencement is required'),
+  otherwise: () => Yup.string().nullable(),
+}),
+}),
     onSubmit: async (values) => {
+      setIsLoading(true);
       let url = '/msme/business-identity/';
       let type = 'post';
       if (values.id !== null) {
@@ -177,19 +191,23 @@ const MSMEDashboard = () => {
       const formData = new FormData();
       formData.append('service_request', service_id);
       formData.append('service_task', sectionData.tasks['Business Identity'].task_id);
+      formData.append('status', 'in progress');
       Object.entries(values).forEach(([key, value]) => {
-        if (key === 'status') {
-          formData.append(key, 'in progress');
-        } else if (key === 'pan_of_business_or_COI' || key === 'aadhar_of_signatory') {
-          if (value instanceof File) {
-            formData.append(key, value);
-          }
-        } else if (value !== null && value !== undefined && !(value instanceof File)) {
-          formData.append(key, value);
-        }
-      });
+  if (key === 'status') {
+    return; // ✅ skip this field
+  }
+
+  if (key === 'pan_of_business_or_COI' || key === 'aadhar_of_signatory') {
+    if (value instanceof File) {
+      formData.append(key, value);
+    }
+  } else if (value !== null && value !== undefined && !(value instanceof File)) {
+    formData.append(key, value);
+  }
+});
 
       const response = await Factory(type, url, formData);
+      setIsLoading(false);
       if (response.res.status_cd === 0) {
         if (type === 'post') {
           setBusinessIdentityData(response.res);
@@ -208,6 +226,7 @@ const MSMEDashboard = () => {
   const businessClassificationFormik = useFormik({
     initialValues: businessClassificationData,
     onSubmit: async (values) => {
+      setIsLoading(true);
       let url = '/msme/business-classification/';
       let type = 'post';
       if (values.id !== null) {
@@ -219,6 +238,7 @@ const MSMEDashboard = () => {
       __postValues.service_task = sectionData.tasks['Business Classification Inputs'].task_id;
       __postValues.status = 'in progress';
       const response = await Factory(type, url, __postValues);
+      setIsLoading(false);
       if (response.res.status_cd === 0) {
         if (type === 'post') {
           setBusinessClassificationData(response.res);
@@ -230,7 +250,7 @@ const MSMEDashboard = () => {
           variant: 'success',
           anchorOrigin: { vertical: 'top', horizontal: 'right' }
         });
-      } else {
+      } else { 
         enqueueSnackbar('Failed to save business classification inputs', {
           variant: 'error',
           anchorOrigin: { vertical: 'top', horizontal: 'right' }
@@ -243,6 +263,7 @@ const MSMEDashboard = () => {
   const turnoverFormik = useFormik({
     initialValues: turnoverInvestmentDeclarationData,
     onSubmit: async (values) => {
+       setIsLoading(true);
       let url = '/msme/turnover-details/';
       let type = 'post';
       if (values.id !== null) {
@@ -269,6 +290,7 @@ const MSMEDashboard = () => {
       });
 
       const response = await Factory(type, url, formData);
+       setIsLoading(false);
       if (response.res.status_cd === 0) {
         if (type === 'post') {
           setTurnoverInvestmentDeclarationData(response.res);
@@ -289,11 +311,56 @@ const MSMEDashboard = () => {
     }
   });
 
+
+
+
   // 4. Registered Address & Units Formik
+
+
+  const addressValidationSchema = Yup.object({
+  official_address_of_enterprise: Yup.object({
+    flat: Yup.string()
+      .required('Flat/Plot number is required')
+      .trim(),
+
+    building: Yup.string()
+      .required('Building name is required')
+      .trim(),
+
+    street: Yup.string()
+      .required('Street is required')
+      .trim(),
+
+    village: Yup.string()
+      .required('Village/Area is required')
+      .trim(),
+
+    city: Yup.string()
+      .required('City is required')
+      .matches(/^[A-Za-z ]+$/, 'Only alphabets are allowed in city')
+      .trim(),
+
+    district: Yup.string()
+      .required('District is required')
+      .matches(/^[A-Za-z ]+$/, 'Only alphabets are allowed in district')
+      .trim(),
+
+    state: Yup.string()
+      .required('State is required')
+      .matches(/^[A-Za-z ]+$/, 'Only alphabets are allowed in state')
+      .trim(),
+
+    pin: Yup.string()
+      .required('PIN code is required')
+      .matches(/^[0-9]{6}$/, 'PIN code must be exactly 6 digits')
+  })
+});
   const addressFormik = useFormik({
     initialValues: registeredAddressUnitsData,
+      validationSchema: addressValidationSchema,
 
     onSubmit: async (values) => {
+      setIsLoading(true);
       let url = '/msme/registration-address-details/';
       let type = 'post';
       if (registeredAddressUnitsData?.id !== null) {
@@ -301,10 +368,13 @@ const MSMEDashboard = () => {
         type = 'put';
       }
       const formData = new FormData();
-      formData.append('service_request', service_id);
-      formData.append('service_task', sectionData.tasks['Registered Address'].task_id);
+      // formData.append('service_request', service_id);
+      // formData.append('service_task', sectionData.tasks['Registered Address'].task_id);
 
       Object.entries(values).forEach(([key, value]) => {
+         if (key === 'location_of_plant_or_unit' || key === 'location_of_plant') {
+    return; // ✅ Skip sending this field
+  }
         if (key === 'status') {
           formData.append(key, 'in progress');
         } else if (key === 'official_address_of_enterprise') {
@@ -313,12 +383,17 @@ const MSMEDashboard = () => {
           if (value instanceof File) {
             formData.append(key, value);
           }
-        } else if (value !== null && value !== undefined && !(value instanceof File)) {
+        }
+  //        else if (typeof value === 'boolean') {
+  //   formData.append(key, value ? 'true' : 'false');
+  // } 
+    else if (value !== null && value !== undefined && !(value instanceof File)) {
           formData.append(key, value);
         }
       });
 
       const response = await Factory(type, url, formData);
+      setIsLoading(false);
       if (response.res.status_cd === 0) {
         if (type === 'post') {
           setRegisteredAddressUnitsData(response.res);
@@ -332,7 +407,7 @@ const MSMEDashboard = () => {
         });
       } else {
         enqueueSnackbar('Failed to save registered address & units', {
-          variant: 'error',
+          variant: 'error', 
           anchorOrigin: { vertical: 'top', horizontal: 'right' }
         });
       }
@@ -351,6 +426,7 @@ const MSMEDashboard = () => {
   const [plantNotApplicable, setPlantNotApplicable] = useState(false);
 
   const getStepData = async (step) => {
+        setIsLoading(true);
     let url = `/msme/service-request-section-data?service_request_id=${service_id}&section=`;
     if (step === 0) {
       url = url + 'enterprise_profile_info';
@@ -386,6 +462,7 @@ const MSMEDashboard = () => {
         }
       }
     }
+     setIsLoading(false);
   };
 
   useEffect(() => {
@@ -395,7 +472,11 @@ const MSMEDashboard = () => {
   useEffect(() => {
     console.log(businessIdentityData);
   }, [businessIdentityData.status]);
-
+   if (isLoading) {
+      console.log('Loading promoter data...', isLoading);
+      return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading  Data'} />;
+    }
+  
   return (
     <Card sx={{ minHeight: '100vh', p: { xs: 1, md: 4 } }}>
       <Typography variant="h3">MSME Registration</Typography>
@@ -440,7 +521,7 @@ const MSMEDashboard = () => {
                 {/* 1. Organisation type */}
                 <Grid2 size={{ xs: 12, sm: 6, md: 3 }} display="flex" alignItems="center">
                   <Typography
-                    varient="subtitle1"
+                    variant="subtitle1"
                     sx={{
                       color:
                         businessIdentityFormik.errors.organisation_type && businessIdentityFormik.touched.organisation_type
@@ -461,6 +542,12 @@ const MSMEDashboard = () => {
                     onChange={(e, value) => businessIdentityFormik?.setFieldValue('organisation_type', value)}
                     renderInput={(params) => (
                       <TextField
+                      sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                         {...params}
                         label="Organisation Type"
                         error={businessIdentityFormik?.errors?.organisation_type && businessIdentityFormik?.touched?.organisation_type}
@@ -473,7 +560,7 @@ const MSMEDashboard = () => {
                 {/* 2. Business Name */}
                 <Grid2 size={{ xs: 12, sm: 6, md: 3 }} display="flex" alignItems="center">
                   <Typography
-                    varient="subtitle1"
+                    variant="subtitle1"
                     sx={{
                       color: businessIdentityFormik.errors.business_name && businessIdentityFormik.touched.business_name ? 'red' : 'inherit'
                     }}
@@ -484,6 +571,12 @@ const MSMEDashboard = () => {
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                   <TextField
+                  sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                     fullWidth
                     size="small"
                     value={businessIdentityFormik?.values?.business_name}
@@ -496,7 +589,7 @@ const MSMEDashboard = () => {
                 {/* 3. PAN of Business & COI */}
                 <Grid2 size={{ xs: 12, sm: 6, md: 3 }} display="flex" alignItems="center">
                   <Typography
-                    varient="subtitle1"
+                    variant="subtitle1"
                     sx={{
                       color:
                         businessIdentityFormik?.errors?.pan_of_business_or_COI && businessIdentityFormik?.touched?.pan_of_business_or_COI
@@ -546,7 +639,7 @@ const MSMEDashboard = () => {
                 {/* 4. Aadhaar of authorized signatory */}
                 <Grid2 size={{ xs: 12, sm: 6, md: 3 }} display="flex" alignItems="center">
                   <Typography
-                    varient="subtitle1"
+                    variant="subtitle1"
                     sx={{
                       color:
                         businessIdentityFormik.errors.pan_of_business_or_COI && businessIdentityFormik.touched.pan_of_business_or_COI
@@ -594,7 +687,7 @@ const MSMEDashboard = () => {
                 {/* 5. Mobile Number */}
                 <Grid2 size={{ xs: 12, sm: 6, md: 3 }} display="flex" alignItems="center">
                   <Typography
-                    varient="subtitle1"
+                    variant="subtitle1"
                     sx={{
                       color:
                         businessIdentityFormik?.errors?.mobile_number && businessIdentityFormik?.touched?.mobile_number ? 'red' : 'inherit'
@@ -606,6 +699,12 @@ const MSMEDashboard = () => {
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                   <TextField
+                  sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                     fullWidth
                     size="small"
                     value={businessIdentityFormik?.values?.mobile_number}
@@ -618,7 +717,7 @@ const MSMEDashboard = () => {
                 {/* 6. Email ID */}
                 <Grid2 size={{ xs: 12, sm: 6, md: 3 }} display="flex" alignItems="center">
                   <Typography
-                    varient="subtitle1"
+                    variant="subtitle1"
                     sx={{
                       color: businessIdentityFormik?.errors?.email_id && businessIdentityFormik?.touched?.email_id ? 'red' : 'inherit'
                     }}
@@ -629,6 +728,12 @@ const MSMEDashboard = () => {
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                   <TextField
+                  sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                     fullWidth
                     size="small"
                     value={businessIdentityFormik?.values?.email_id}
@@ -640,47 +745,116 @@ const MSMEDashboard = () => {
                 </Grid2>
                 {/* 7. UAM Registered */}
                 <Grid2 size={{ xs: 12, sm: 6, md: 5 }} display="flex" alignItems="center">
-                  <Typography varient="subtitle1">Are you previously registered under Udyog Aadhaar? (UAM)</Typography>
+                  <Typography variant="subtitle1">Are you previously registered under Udyog Aadhaar? (UAM)</Typography>
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 7 }}>
                   <Stack direction="row" alignItems="center" spacing={2}>
                     <RadioGroup
-                      row
-                      value={businessIdentityFormik?.values?.Are_you_previously_registered_UAM}
-                      sx={{ width: '40%' }}
-                      onChange={(e) => businessIdentityFormik?.setFieldValue('Are_you_previously_registered_UAM', e.target.value)}
-                    >
-                      <FormControlLabel value="yes" control={<Radio color="primary" />} label="Yes" />
-                      <FormControlLabel value="no" control={<Radio color="primary" />} label="No" />
-                    </RadioGroup>
-                    {businessIdentityFormik?.values?.Are_you_previously_registered_UAM === 'yes' && (
-                      <TextField
-                        size="small"
-                        fullWidth
-                        value={businessIdentityFormik?.values?.UAM_number}
-                        onChange={(e) => businessIdentityFormik?.setFieldValue('UAM_number', e.target.value)}
-                        label="Enter UAM"
-                      />
+                  row
+      value={businessIdentityFormik?.values?.Are_you_previously_registered_UAM}
+      sx={{ width: '40%' }}
+      onChange={(e) => {
+        const isRegistered = e.target.value === 'true';
+        businessIdentityFormik?.setFieldValue('Are_you_previously_registered_UAM', isRegistered);
+
+        if (!isRegistered) {
+          businessIdentityFormik?.setFieldValue('UAM_number', '');
+        }
+      }}
+    >
+      <FormControlLabel value={true} control={<Radio color="primary" />} label="Yes" />
+      <FormControlLabel value={false} control={<Radio color="primary" />} label="No" />
+    </RadioGroup>
+     
+
+                    {businessIdentityFormik?.values?.Are_you_previously_registered_UAM === true && (
+          
+            <TextField
+              sx={{
+                width: '100%',
+                '& .MuiInputBase-input': {
+                  color: 'grey.600'
+                }
+              }}
+              size="small"
+              fullWidth
+              label="Enter UAM"
+              name="UAM_number"
+              type="text"
+              value={businessIdentityFormik?.values?.UAM_number}
+              onChange={(e) =>
+                businessIdentityFormik?.setFieldValue('UAM_number', e.target.value)
+              }
+              onBlur={() =>
+                businessIdentityFormik?.setFieldTouched('UAM_number', true)
+              }
+              error={
+                businessIdentityFormik?.touched?.UAM_number &&
+                Boolean(businessIdentityFormik?.errors?.UAM_number)
+              }
+            />
+
                     )}
                   </Stack>
                 </Grid2>
                 {/* 8. Business Commenced */}
                 <Grid2 size={{ xs: 12, sm: 6, md: 5 }} gap={2} display="flex" alignItems="center">
-                  <Typography varient="subtitle1">Has Business Commenced?</Typography>
-                  <RadioGroup
-                    row
-                    value={businessIdentityFormik?.values?.has_business_commenced}
-                    sx={{ width: '40%' }}
-                    onChange={(e) => businessIdentityFormik?.setFieldValue('has_business_commenced', e.target.value)}
-                  >
-                    <FormControlLabel value="yes" control={<Radio color="primary" />} label="Yes" />
-                    <FormControlLabel value="no" control={<Radio color="primary" />} label="No" />
-                  </RadioGroup>
+                  <Typography variant="subtitle1">Has Business Commenced?</Typography>
+                   {/* <RadioGroup
+    row
+    value={businessIdentityFormik?.values?.has_business_commenced}
+    sx={{ width: '40%' }}
+    onChange={(e) => {
+      const hasCommenced = e.target.value === 'true';
+      businessIdentityFormik?.setFieldValue('has_business_commenced', hasCommenced);
+
+      if (!hasCommenced) {
+        businessIdentityFormik?.setFieldValue('date_of_commencement', '');
+      }
+    }}
+  >
+                    <FormControlLabel value="true" control={<Radio color="primary" />} label="Yes" />
+                    <FormControlLabel value="false" control={<Radio color="primary" />} label="No" />
+                  </RadioGroup> */}
+                  <RadioGroup row sx={{ width: '40%' }}>
+  <FormControlLabel
+    label="Yes"
+    control={
+      <Radio
+        color="primary"
+        checked={businessIdentityFormik?.values?.has_business_commenced === true}
+        onChange={() => {
+          businessIdentityFormik?.setFieldValue('has_business_commenced', true);
+        }}
+      />
+    }
+  />
+  <FormControlLabel
+    label="No"
+    control={
+      <Radio
+        color="primary"
+        checked={businessIdentityFormik?.values?.has_business_commenced === false}
+        onChange={() => {
+          businessIdentityFormik?.setFieldValue('has_business_commenced', false);
+          businessIdentityFormik?.setFieldValue('date_of_commencement', '');
+        }}
+      />
+    }
+  />
+</RadioGroup>
+
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 7 }}>
                   <Stack direction="row" alignItems="center" spacing={2}>
-                    {businessIdentityFormik.values.has_business_commenced === 'yes' && (
+                    {businessIdentityFormik.values.has_business_commenced === true && (
                       <TextField
+                      sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                         size="small"
                         fullWidth
                         value={businessIdentityFormik?.values?.date_of_commencement}
@@ -738,7 +912,7 @@ const MSMEDashboard = () => {
               <Grid2 container spacing={2}>
                 {/* 1. Major Activity */}
                 <Grid2 size={{ xs: 12, sm: 6, md: 4 }} display="flex" alignItems="center">
-                  <Typography varient="subtitle1">Major Activity</Typography>
+                  <Typography variant="subtitle1">Major Activity</Typography>
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 8 }}>
                   <RadioGroup
@@ -746,16 +920,22 @@ const MSMEDashboard = () => {
                     value={businessClassificationFormik.values.major_activity}
                     onChange={(e) => businessClassificationFormik.setFieldValue('major_activity', e.target.value)}
                   >
-                    <FormControlLabel value="MANUFACTURING" control={<Radio color="primary" />} label="Manufacturing" />
-                    <FormControlLabel value="SERVICE" control={<Radio color="primary" />} label="Service" />
+                    <FormControlLabel value="Manufacturing" control={<Radio color="primary" />} label="Manufacturing" />
+                    <FormControlLabel value="Service" control={<Radio color="primary" />} label="Service" />
                   </RadioGroup>
                 </Grid2>
                 {/* 2. Nature of Business */}
                 <Grid2 size={{ xs: 12, sm: 6, md: 4 }} display="flex" alignItems="center">
-                  <Typography varient="subtitle1">Nature of Business</Typography>
+                  <Typography variant="subtitle1">Nature of Business</Typography>
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 8 }}>
                   <TextField
+                  sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                     fullWidth
                     size="small"
                     onChange={(e) => businessClassificationFormik.setFieldValue('nature_of_business', e.target.value)}
@@ -764,7 +944,7 @@ const MSMEDashboard = () => {
                 </Grid2>
                 {/* 3. NIC Codes */}
                 <Grid2 size={{ xs: 12, sm: 6, md: 4 }} display="flex" alignItems="center">
-                  <Typography varient="subtitle1">NIC Codes</Typography>
+                  <Typography variant="subtitle1">NIC Codes</Typography>
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 8 }}>
                   <Stack direction="row" spacing={2}>
@@ -802,18 +982,26 @@ const MSMEDashboard = () => {
                 </Grid2>
                 {/* 4. Number of persons employed */}
                 <Grid2 size={{ xs: 12, sm: 6, md: 4 }} display="flex" alignItems="center">
-                  <Typography varient="subtitle1">Number of persons employed</Typography>
+                  <Typography variant="subtitle1">Number of persons employed</Typography>
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 8 }}>
                   <Stack direction="row" spacing={2}>
                     <Grid2 size={{ xs: 3 }}>
                       <TextField
+                      sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                         size="small"
                         label="Male"
                         fullWidth
                         value={businessClassificationFormik.values.number_of_persons_employed.male}
                         onChange={(e) => {
-                          const value = parseInt(e.target.value);
+                          // const value = parseInt(e.target.value);
+                          const value = e.target.value === '' ? 0 : parseInt(e.target.value);
+
                           businessClassificationFormik.setFieldValue('number_of_persons_employed.male', value);
                         }}
                         onBlur={() => {
@@ -828,12 +1016,19 @@ const MSMEDashboard = () => {
                     </Grid2>
                     <Grid2 size={{ xs: 3 }}>
                       <TextField
+                      sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                         size="small"
                         label="Female"
                         fullWidth
                         value={businessClassificationFormik.values.number_of_persons_employed.female}
                         onChange={(e) => {
-                          const value = parseInt(e.target.value);
+                          // const value = parseInt(e.target.value);
+                          const value = e.target.value === '' ? 0 : parseInt(e.target.value);
                           businessClassificationFormik.setFieldValue('number_of_persons_employed.female', value);
                         }}
                         onBlur={() => {
@@ -848,12 +1043,19 @@ const MSMEDashboard = () => {
                     </Grid2>
                     <Grid2 size={{ xs: 3 }}>
                       <TextField
+                      sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                         size="small"
                         label="Others"
                         fullWidth
                         value={businessClassificationFormik.values.number_of_persons_employed.others}
                         onChange={(e) => {
-                          const value = parseInt(e.target.value);
+                          // const value = parseInt(e.target.value);
+                          const value = e.target.value === '' ? 0 : parseInt(e.target.value);
                           businessClassificationFormik.setFieldValue('number_of_persons_employed.others', value);
                         }}
                         onBlur={() => {
@@ -868,6 +1070,12 @@ const MSMEDashboard = () => {
                     </Grid2>
                     <Grid2 size={{ xs: 3 }}>
                       <TextField
+                      sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                         size="small"
                         label="Total"
                         fullWidth
@@ -1278,6 +1486,7 @@ const FinancialLocationDetails = ({
     pin: Yup.string().required('Required')
   });
   const savePlantUnits = async (data, idx) => {
+    
     let url = '/msme/location-of-plant-or-unit/';
     let type = 'post';
     let __data = {};
@@ -1330,14 +1539,18 @@ const FinancialLocationDetails = ({
         <Grid2 container spacing={2} mb={2}>
           {/* Turnover in INR */}
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }} display="flex" alignItems="center">
-            <Typography varient="subtitle1">Turnover in INR</Typography>
+            <Typography variant="subtitle1">Turnover in INR</Typography>
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 6, md: 8 }}>
             <Stack direction="row" spacing={2}>
               <TextField
                 size="small"
                 label="Total Annual Turnover"
-                sx={{ minWidth: 160 }}
+                sx={{ minWidth: 160, width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                 name="totalTurnover"
                 value={turnoverFormik.values.turnover_in_inr.totalTurnover}
                 onChange={(e) => {
@@ -1347,7 +1560,12 @@ const FinancialLocationDetails = ({
               <TextField
                 size="small"
                 label="Export Turnover"
-                sx={{ minWidth: 160 }}
+                sx={{ minWidth: 160,
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                 name="exportTurnover"
                 value={turnoverFormik.values.turnover_in_inr.exportTurnover}
                 onChange={(e) => {
@@ -1357,7 +1575,13 @@ const FinancialLocationDetails = ({
               <TextField
                 size="small"
                 label="Net Domestic Turnover"
-                sx={{ minWidth: 180 }}
+                sx={{ minWidth: 180,
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
+                 
                 name="domesticTurnover"
                 value={turnoverFormik.values.turnover_in_inr.domesticTurnover}
                 onChange={(e) => {
@@ -1368,10 +1592,16 @@ const FinancialLocationDetails = ({
           </Grid2>
           {/* Investment in Plant & Machinery */}
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }} display="flex" alignItems="center">
-            <Typography varient="subtitle1">Investment in Plant & Machinery</Typography>
+            <Typography variant="subtitle1">Investment in Plant & Machinery</Typography>
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 6, md: 8 }}>
             <TextField
+              sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
               fullWidth
               size="small"
               name="investment_in_plant_and_machinery"
@@ -1383,22 +1613,56 @@ const FinancialLocationDetails = ({
           </Grid2>
           {/* ITR for previous year */}
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }} display="flex" alignItems="center">
-            <Typography varient="subtitle1">Have you filed ITR for previous year?</Typography>
+            <Typography variant="subtitle1">Have you filed ITR for previous year?</Typography>
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 6, md: 8 }}>
-            <RadioGroup
+            {/* <RadioGroup
               row
               name="have_you_filed_itr_previous_year"
-              value={turnoverFormik.values.have_you_filed_itr_previous_year}
-              onChange={turnoverFormik.handleChange}
+              //  value={turnoverFormik.values.have_you_filed_itr_previous_year}
+              //   onChange={turnoverFormik.handleChange}
+              value={String(turnoverFormik.values.have_you_filed_itr_previous_year)}
+    onChange={(e) =>
+      turnoverFormik.setFieldValue(
+        'have_you_filed_itr_previous_year',
+        e.target.value === 'true'
+      )
+    }
             >
-              <FormControlLabel value="yes" control={<Radio color="primary" />} label="Yes" />
-              <FormControlLabel value="no" control={<Radio color="primary" />} label="No" />
-            </RadioGroup>
+              <FormControlLabel value="true" control={<Radio color="primary" />} label="Yes" />
+              <FormControlLabel value="false" control={<Radio color="primary" />} label="No" />
+            </RadioGroup> */}
+            <RadioGroup row name="have_you_filed_itr_previous_year">
+  <FormControlLabel
+    label="Yes"
+    control={
+      <Radio
+        color="primary"
+        checked={turnoverFormik.values.have_you_filed_itr_previous_year === true}
+        onChange={() =>
+          turnoverFormik.setFieldValue('have_you_filed_itr_previous_year', true)
+        }
+      />
+    }
+  />
+  <FormControlLabel
+    label="No"
+    control={
+      <Radio
+        color="primary"
+        checked={turnoverFormik.values.have_you_filed_itr_previous_year === false}
+        onChange={() =>
+          turnoverFormik.setFieldValue('have_you_filed_itr_previous_year', false)
+        }
+      />
+    }
+  />
+</RadioGroup>
+
           </Grid2>
           {/* Registered under GST */}
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }} display="flex" alignItems="center">
-            <Typography varient="subtitle1">Are you registered under GST?</Typography>
+            <Typography variant="subtitle1">Are you registered under GST?</Typography>
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
             <Stack direction="row" spacing={2}>
@@ -1453,7 +1717,7 @@ const FinancialLocationDetails = ({
             </Stack>
           </Grid2>
         </Grid2>
-        <Box display="flex" justifyContent="flex-end" mt={2} gap={1}>
+         <Box display="flex" justifyContent="flex-end" mt={2} gap={1}>
           <Button type="submit" size="medium" variant="contained" color="primary">
             Save Turnover & Investment
           </Button>
@@ -1494,12 +1758,18 @@ const FinancialLocationDetails = ({
         <Grid2 container spacing={2} mb={2}>
           {/* Official address of enterprise */}
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }} display="flex" alignItems="center">
-            <Typography varient="subtitle1">Official address of enterprise</Typography>
+            <Typography variant="subtitle1">Official address of enterprise</Typography>
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 6, md: 8 }}>
             <Grid2 container spacing={2}>
               <Grid2 size={{ xs: 12, md: 6 }}>
                 <TextField
+                sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                   fullWidth
                   size="small"
                   label="Flat/Door/Block No"
@@ -1508,10 +1778,27 @@ const FinancialLocationDetails = ({
                   onChange={(e) => {
                     addressFormik.setFieldValue('official_address_of_enterprise.flat', e.target.value);
                   }}
+                   onBlur={() =>
+                  addressFormik.setFieldTouched('official_address_of_enterprise.flat', true)
+                }
+                error={
+                  !!addressFormik.touched.official_address_of_enterprise?.flat &&
+                  !!addressFormik.errors.official_address_of_enterprise?.flat
+                }
+                helperText={
+                  addressFormik.touched.official_address_of_enterprise?.flat &&
+                  addressFormik.errors.official_address_of_enterprise?.flat
+                }
                 />
               </Grid2>
               <Grid2 size={{ xs: 12, md: 6 }}>
                 <TextField
+                sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                   fullWidth
                   size="small"
                   label="Name of Premise/Building"
@@ -1520,10 +1807,27 @@ const FinancialLocationDetails = ({
                   onChange={(e) => {
                     addressFormik.setFieldValue('official_address_of_enterprise.building', e.target.value);
                   }}
+                   onBlur={() =>
+                    addressFormik.setFieldTouched('official_address_of_enterprise.building', true)
+                  }
+                  error={
+                    !!addressFormik.touched.official_address_of_enterprise?.building &&
+                    !!addressFormik.errors.official_address_of_enterprise?.building
+                  }
+                  helperText={
+                    addressFormik.touched.official_address_of_enterprise?.building &&
+                    addressFormik.errors.official_address_of_enterprise?.building
+                  }
                 />
               </Grid2>
               <Grid2 size={{ xs: 12, md: 4 }}>
                 <TextField
+                sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                   fullWidth
                   size="small"
                   label="Road/Street/Lane"
@@ -1532,10 +1836,27 @@ const FinancialLocationDetails = ({
                   onChange={(e) => {
                     addressFormik.setFieldValue('official_address_of_enterprise.street', e.target.value);
                   }}
+                   onBlur={() =>
+                  addressFormik.setFieldTouched('official_address_of_enterprise.street', true)
+                }
+                error={
+                  !!addressFormik.touched.official_address_of_enterprise?.street &&
+                  !!addressFormik.errors.official_address_of_enterprise?.street
+                }
+                helperText={
+                  addressFormik.touched.official_address_of_enterprise?.street &&
+                  addressFormik.errors.official_address_of_enterprise?.street
+                }
                 />
               </Grid2>
               <Grid2 size={{ xs: 12, md: 4 }}>
                 <TextField
+                sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                   fullWidth
                   size="small"
                   label="Village/Town"
@@ -1544,10 +1865,27 @@ const FinancialLocationDetails = ({
                   onChange={(e) => {
                     addressFormik.setFieldValue('official_address_of_enterprise.village', e.target.value);
                   }}
+                  onBlur={() =>
+                  addressFormik.setFieldTouched('official_address_of_enterprise.village', true)
+                }
+                error={
+                  !!addressFormik.touched.official_address_of_enterprise?.village &&
+                  !!addressFormik.errors.official_address_of_enterprise?.village
+                }
+                helperText={
+                  addressFormik.touched.official_address_of_enterprise?.village &&
+                  addressFormik.errors.official_address_of_enterprise?.village
+                }
                 />
               </Grid2>
               <Grid2 size={{ xs: 12, md: 4 }}>
                 <TextField
+                sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                   fullWidth
                   size="small"
                   label="City"
@@ -1556,10 +1894,27 @@ const FinancialLocationDetails = ({
                   onChange={(e) => {
                     addressFormik.setFieldValue('official_address_of_enterprise.city', e.target.value);
                   }}
-                />
+                  onBlur={() =>
+                  addressFormik.setFieldTouched('official_address_of_enterprise.city', true)
+                }
+                error={
+                  !!addressFormik.touched.official_address_of_enterprise?.city &&
+                  !!addressFormik.errors.official_address_of_enterprise?.city
+                }
+                helperText={
+                  addressFormik.touched.official_address_of_enterprise?.city &&
+                  addressFormik.errors.official_address_of_enterprise?.city
+                }
+                              />
               </Grid2>
               <Grid2 size={{ xs: 12, md: 4 }}>
                 <TextField
+                sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                   fullWidth
                   size="small"
                   label="District"
@@ -1568,10 +1923,27 @@ const FinancialLocationDetails = ({
                   onChange={(e) => {
                     addressFormik.setFieldValue('official_address_of_enterprise.district', e.target.value);
                   }}
-                />
+                   onBlur={() =>
+                    addressFormik.setFieldTouched('official_address_of_enterprise.district', true)
+                  }
+                  error={
+                    !!addressFormik.touched.official_address_of_enterprise?.district &&
+                    !!addressFormik.errors.official_address_of_enterprise?.district
+                  }
+                  helperText={
+                    addressFormik.touched.official_address_of_enterprise?.district &&
+                    addressFormik.errors.official_address_of_enterprise?.district
+                  }
+                                />
               </Grid2>
               <Grid2 size={{ xs: 12, md: 4 }}>
                 <TextField
+                sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                   fullWidth
                   size="small"
                   label="State"
@@ -1580,10 +1952,27 @@ const FinancialLocationDetails = ({
                   onChange={(e) => {
                     addressFormik.setFieldValue('official_address_of_enterprise.state', e.target.value);
                   }}
+                   onBlur={() =>
+                  addressFormik.setFieldTouched('official_address_of_enterprise.state', true)
+                }
+                error={
+                  !!addressFormik.touched.official_address_of_enterprise?.state &&
+                  !!addressFormik.errors.official_address_of_enterprise?.state
+                }
+                helperText={
+                  addressFormik.touched.official_address_of_enterprise?.state &&
+                  addressFormik.errors.official_address_of_enterprise?.state
+                }
                 />
               </Grid2>
               <Grid2 size={{ xs: 12, md: 4 }}>
                 <TextField
+                sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                   fullWidth
                   size="small"
                   label="Pin Code"
@@ -1592,10 +1981,27 @@ const FinancialLocationDetails = ({
                   onChange={(e) => {
                     addressFormik.setFieldValue('official_address_of_enterprise.pin', e.target.value);
                   }}
+                  onBlur={() =>
+                addressFormik.setFieldTouched('official_address_of_enterprise.pin', true)
+              }
+              error={
+                !!addressFormik.touched.official_address_of_enterprise?.pin &&
+                !!addressFormik.errors.official_address_of_enterprise?.pin
+              }
+              helperText={
+                addressFormik.touched.official_address_of_enterprise?.pin &&
+                addressFormik.errors.official_address_of_enterprise?.pin
+              }
                 />
               </Grid2>
               <Grid2 size={{ xs: 12, md: 4 }}>
                 <TextField
+                sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                   fullWidth
                   size="small"
                   label="Latitude"
@@ -1608,6 +2014,12 @@ const FinancialLocationDetails = ({
               </Grid2>
               <Grid2 size={{ xs: 12, md: 4 }}>
                 <TextField
+                sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                   fullWidth
                   size="small"
                   label="Longitude"
@@ -1622,7 +2034,7 @@ const FinancialLocationDetails = ({
           </Grid2>
           {/* Bank statement/Cancelled Cheque */}
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }} display="flex" alignItems="center">
-            <Typography varient="subtitle1">Bank statement/Cancelled Cheque</Typography>
+            <Typography variant="subtitle1">Bank statement/Cancelled Cheque</Typography>
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 6, md: 8 }}>
             <Button size="small" variant="contained" color="primary" component="label">
@@ -1657,7 +2069,7 @@ const FinancialLocationDetails = ({
           </Grid2>
           {/* Official address proof */}
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }} display="flex" alignItems="center">
-            <Typography varient="subtitle1">Official address proof (Rental agreement/Utility bill)</Typography>
+            <Typography variant="subtitle1">Official address proof (Rental agreement/Utility bill)</Typography>
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 6, md: 8 }}>
             <Button size="small" variant="contained" color="primary" component="label">
@@ -1706,19 +2118,22 @@ const FinancialLocationDetails = ({
             control={
               <Checkbox
                 size="small"
-                checked={registeredAddressUnitsData?.location_of_plant === 'yes'}
+                checked={registeredAddressUnitsData?.location_of_plant === true
+
+                }
                 onChange={async (e) => {
                   let url = '/msme/registration-address-details/';
                   let type = 'post';
                   if (registeredAddressUnitsData?.id !== null) {
-                    url = url + registeredAddressUnitsData?.id + '/';
+                    url = url + registeredAddressUnitsData?.id + '/'; 
                     type = 'put';
                   }
                   const formData = new FormData();
                   formData.append('service_request', service_id);
                   formData.append('service_task', sectionData.tasks['Registered Address'].task_id);
                   formData.append('status', 'in progress');
-                  formData.append('location_of_plant', e.target.checked ? 'yes' : 'no');
+                  formData.append('location_of_plant', e.target.checked ? true : false);
+
                   const response = await Factory(type, url, formData);
                   if (response.res.status_cd === 0) {
                     setRegisteredAddressUnitsData(response.res.data);
@@ -1730,7 +2145,7 @@ const FinancialLocationDetails = ({
           />
         </Stack>
 
-        {registeredAddressUnitsData?.location_of_plant === 'yes' &&
+        {(registeredAddressUnitsData?.location_of_plant === true || registeredAddressUnitsData?.location_of_plant === true) &&
           plantUnits.map((unit, idx) => (
             <Box key={idx} sx={{ border: '1px solid #e0e0e0', borderRadius: 2, p: 2, mb: 2, bgcolor: '#f8fafc' }}>
               <Typography variant="subtitle1" mb={2}>
@@ -1739,6 +2154,12 @@ const FinancialLocationDetails = ({
               <Grid2 container spacing={2}>
                 <Grid2 size={{ xs: 12, md: 4 }}>
                   <TextField
+                  sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                     fullWidth
                     size="small"
                     label="Unit Name"
@@ -1753,6 +2174,12 @@ const FinancialLocationDetails = ({
                 </Grid2>
                 <Grid2 size={{ xs: 12, md: 4 }}>
                   <TextField
+                  sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                     fullWidth
                     size="small"
                     label="Flat/Door/Block No"
@@ -1767,6 +2194,12 @@ const FinancialLocationDetails = ({
                 </Grid2>
                 <Grid2 size={{ xs: 12, md: 4 }}>
                   <TextField
+                  sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                     fullWidth
                     size="small"
                     label="Name of Premise/Building"
@@ -1781,6 +2214,12 @@ const FinancialLocationDetails = ({
                 </Grid2>
                 <Grid2 size={{ xs: 12, md: 4 }}>
                   <TextField
+                  sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                     fullWidth
                     size="small"
                     label="Village/Town"
@@ -1795,6 +2234,12 @@ const FinancialLocationDetails = ({
                 </Grid2>
                 <Grid2 size={{ xs: 12, md: 4 }}>
                   <TextField
+                  sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                     fullWidth
                     size="small"
                     label="Road/Street/Lane"
@@ -1809,6 +2254,12 @@ const FinancialLocationDetails = ({
                 </Grid2>
                 <Grid2 size={{ xs: 12, md: 4 }}>
                   <TextField
+                  sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                     fullWidth
                     size="small"
                     label="City"
@@ -1819,10 +2270,17 @@ const FinancialLocationDetails = ({
                       newUnits[idx].unit_details.city = e.target.value;
                       setPlantUnits(newUnits);
                     }}
+                    
                   />
                 </Grid2>
                 <Grid2 size={{ xs: 12, md: 4 }}>
                   <TextField
+                  sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                     fullWidth
                     size="small"
                     label="District"
@@ -1837,6 +2295,12 @@ const FinancialLocationDetails = ({
                 </Grid2>
                 <Grid2 size={{ xs: 12, md: 4 }}>
                   <TextField
+                  sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                     fullWidth
                     size="small"
                     label="State"
@@ -1851,6 +2315,12 @@ const FinancialLocationDetails = ({
                 </Grid2>
                 <Grid2 size={{ xs: 12, md: 4 }}>
                   <TextField
+                  sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
                     fullWidth
                     size="small"
                     label="Pin Code"
@@ -1871,10 +2341,11 @@ const FinancialLocationDetails = ({
               </Box>
             </Box>
           ))}
-        {registeredAddressUnitsData?.location_of_plant === 'yes' && (
-          <Box display="flex" justifyContent="flex-end" mt={2} gap={1}>
+         {console.log("xdfvgbhnjkl",registeredAddressUnitsData?.location_of_plant)}
+         <Box display="flex" justifyContent="flex-end" mt={2} gap={1}>
+        {(registeredAddressUnitsData?.location_of_plant === true || registeredAddressUnitsData?.location_of_plant === true) && (
+          <Box>
             <Button
-              size="small"
               variant="outlined"
               color="primary"
               onClick={() =>
@@ -1898,8 +2369,12 @@ const FinancialLocationDetails = ({
               }
             >
               Add Plant/Unit
-            </Button>
-            <GetActionButtons
+            </Button> 
+          </Box>
+        )}
+        <Box>
+   <Stack direction="row" spacing={1} justifyContent="flex-end">
+        <GetActionButtons
               type="put"
               data={sectionData?.tasks?.['Registered Address']}
               status={registeredAddressUnitsData?.status}
@@ -1916,8 +2391,9 @@ const FinancialLocationDetails = ({
                 }
               }}
             />
-          </Box>
-        )}
+            </Stack>
+            </Box>
+            </Box>
       </form>
     </Box>
   );

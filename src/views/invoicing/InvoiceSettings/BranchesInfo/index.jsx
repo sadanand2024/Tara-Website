@@ -17,59 +17,69 @@ import {
   TableContainer,
   IconButton,
   Box,
-  Card,
-  Pagination
+  CircularProgress,
+  Tooltip
 } from '@mui/material';
-import { Edit, Delete } from '@mui/icons-material';
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
+import { Edit, Delete, Add as AddIcon } from '@mui/icons-material';
 import { useSelector } from 'react-redux';
-import Modal from 'ui-component/extended/Modal';
-import CustomInput from 'utils/CustomInput';
 import { useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { IconPlus } from '@tabler/icons-react';
-import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
+import BusinessIcon from '@mui/icons-material/Business';
+import DeleteConfirmationDialog from 'utils/DeleteConfirmationDialog';
 
 import AddBranchDialog from './AddBranchDialog';
+
 export default function BranchesInfo({ handleBack, handleNext, fetchBusinessDetails }) {
   const [branches, setBranches] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteIndex, setDeleteIndex] = useState(null);
   const dispatch = useDispatch();
   const user = useSelector((state) => state.accountReducer.user);
-  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [type, setType] = useState('add');
   const [selectedRecord, setSelectedRecord] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const handlePageChange = (event, value) => {
-    setCurrentPage(value);
-  };
+
   const handleClose = () => {
     setOpen(false);
     setType('');
     setSelectedRecord(null);
   };
+
   const getBranches = async () => {
+    setIsLoading(true);
     const { res } = await Factory('get', `/user_management/branches/${user.active_context.business_id}/`, {}, {});
     if (res.status_cd === 0) {
       setBranches(res.data);
-    }
-    if (res.status_cd === 1) {
+    } else {
       dispatch(
         openSnackbar({
-          message: res.message || 'Failed to get branches',
+          message: JSON.stringify(res.data) || 'Failed to get branches',
           variant: 'alert',
           alert: { color: 'error' },
           close: false
         })
       );
     }
+    setIsLoading(false);
   };
-  const handleRemoveBranch = async (index) => {
-    let url = `/user_management/branches/${branches[index].id}/`;
 
+  const handleDeleteClick = (index) => {
+    setDeleteIndex(index);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteClose = () => {
+    setDeleteDialogOpen(false);
+    setDeleteIndex(null);
+  };
+
+  const handleRemoveBranch = async () => {
+    let url = `/user_management/branches/${branches[deleteIndex].id}/`;
     let response = await Factory('delete', url, {});
+
     if (response.res.status_cd === 0) {
+      setBranches(branches.filter((_, i) => i !== deleteIndex));
       dispatch(
         openSnackbar({
           open: true,
@@ -79,18 +89,19 @@ export default function BranchesInfo({ handleBack, handleNext, fetchBusinessDeta
           close: false
         })
       );
-      getBranches();
     } else {
       dispatch(
         openSnackbar({
-          message: response.res.message || 'Failed to delete branch',
+          message: JSON.stringify(response.res.data) || 'Failed to delete branch',
           variant: 'alert',
           alert: { color: 'error' },
           close: false
         })
       );
     }
+    handleDeleteClose();
   };
+
   const handleOpenDialog = () => {
     setOpen(true);
     setType('add');
@@ -101,108 +112,167 @@ export default function BranchesInfo({ handleBack, handleNext, fetchBusinessDeta
     setType('edit');
     setSelectedRecord(branches[index]);
   };
+
   useEffect(() => {
     getBranches();
   }, []);
+
+  if (isLoading) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '400px',
+          flexDirection: 'column',
+          gap: 2
+        }}
+      >
+        <CircularProgress size={50} />
+        <Typography variant="h5" color="text.secondary">
+          Loading Branches...
+        </Typography>
+      </Box>
+    );
+  }
+
   return (
-    <Grid2 container spacing={2}>
-      <Grid2 size={{ xs: 12 }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center">
-          <Typography variant="h4">Branches Info</Typography>
-          <Button size="small" startIcon={<IconPlus size={16} />} variant="contained" color="primary" onClick={handleOpenDialog}>
-            Add Branch
-          </Button>
-        </Stack>
-      </Grid2>
-      <Grid2 size={{ xs: 12 }}>
-        <Card
-          elevation={2}
+    <MainCard
+      title="Branches Info"
+      subtitle="Manage your business branches for invoice generation and business operations"
+      action={
+        <Button
+          variant="contained"
+          size="small"
+          startIcon={<AddIcon />}
+          onClick={handleOpenDialog}
           sx={{
-            mb: 2,
-            '& .MuiTableContainer-root': {
-              borderRadius: 0
-            },
-            '& .MuiTableCell-root': {
-              color: 'text.primary'
-            },
-            '& .MuiTableHead-root .MuiTableCell-root': {
-              py: 1,
-              backgroundColor: 'primary.main',
-              color: '#fff'
-            }
+            textTransform: 'none',
+            fontWeight: 600,
+            fontSize: '0.9rem'
           }}
         >
-          <TableContainer>
-            <Table size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell>Branch Name</TableCell>
-                  <TableCell>Branch Code</TableCell>
-                  <TableCell align="center">Actions</TableCell>
-                </TableRow>
-              </TableHead>
-
-              <TableBody>
-                {branches.map((branch, index) => (
-                  <TableRow key={branch.id}>
-                    <TableCell>{branch.branch_name}</TableCell>
-                    <TableCell>{branch.branch_code}</TableCell>
-                    <TableCell align="center">
-                      <IconButton color="primary" size="small" onClick={() => handleEditBranch(index)}>
-                        <Edit />
-                      </IconButton>
-                      <IconButton color="error" size="small" onClick={() => handleRemoveBranch(index)}>
-                        <Delete />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Card>
-
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Button
-            variant="outlined"
-            startIcon={<ArrowBackIcon />}
-            onClick={() => {
-              navigate('/app/invoice');
+          Add Branch
+        </Button>
+      }
+    >
+      <TableContainer
+        component={Paper}
+        sx={{
+          width: '100%',
+          borderRadius: 2,
+          boxShadow: 1,
+          overflowX: 'auto',
+          mb: 3
+        }}
+      >
+        <Table size="small">
+          <TableHead
+            sx={{
+              backgroundColor: 'primary.main',
+              '& .MuiTableCell-root': {
+                color: '#ffffff !important'
+              }
             }}
-            size="small"
           >
-            Back to Dashboard
-          </Button>
+            <TableRow>
+              <TableCell sx={{ fontWeight: 600 }}>Branch Name</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>Branch Code</TableCell>
+              <TableCell align="center" sx={{ fontWeight: 600 }}>
+                Actions
+              </TableCell>
+            </TableRow>
+          </TableHead>
 
-          {branches.length === 0 && (
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                py: 3,
-                width: '100%',
-                color: 'text.secondary'
-              }}
-            >
-              No branches added yet
-            </Box>
-          )}
-          {branches.length > 0 && (
-            <Stack direction="row" justifyContent="center" sx={{ py: 2 }}>
-              <Pagination count={Math.ceil(branches.length / rowsPerPage)} page={currentPage} onChange={handlePageChange} />
-            </Stack>
-          )}
-          <Stack direction="row" spacing={2}>
-            <Button variant="outlined" size="small" onClick={handleBack}>
-              Back
-            </Button>
-            <Button variant="contained" size="small" onClick={handleNext}>
-              Next
-            </Button>
-          </Stack>
-        </Box>
-      </Grid2>
+          <TableBody>
+            {branches.length > 0 ? (
+              branches.map((branch, index) => (
+                <TableRow key={branch.id} hover>
+                  <TableCell>
+                    <Typography variant="body2" fontWeight={500}>
+                      {branch.branch_name}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body2">{branch.branch_code}</Typography>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Stack direction="row" spacing={1} justifyContent="center">
+                      <Tooltip title="Edit Branch">
+                        <IconButton
+                          color="primary"
+                          size="small"
+                          onClick={() => handleEditBranch(index)}
+                          sx={{
+                            backgroundColor: 'primary.50',
+                            '&:hover': { backgroundColor: 'primary.100' }
+                          }}
+                        >
+                          <Edit fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Delete Branch">
+                        <IconButton
+                          color="error"
+                          size="small"
+                          onClick={() => handleDeleteClick(index)}
+                          sx={{
+                            backgroundColor: 'error.50',
+                            '&:hover': { backgroundColor: 'error.100' }
+                          }}
+                        >
+                          <Delete fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </Stack>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={3} align="center">
+                  <Box
+                    sx={{
+                      textAlign: 'center',
+                      py: 4
+                    }}
+                  >
+                    <BusinessIcon sx={{ fontSize: 60, color: 'grey.400', mb: 2 }} />
+                    <Typography variant="h6" color="text.secondary" gutterBottom>
+                      No Branches Added
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                      Start by adding your first business branch for invoice generation
+                    </Typography>
+                    <Button
+                      variant="outlined"
+                      onClick={handleOpenDialog}
+                      startIcon={<AddIcon />}
+                      sx={{ borderRadius: 2, textTransform: 'none' }}
+                    >
+                      Add First Branch
+                    </Button>
+                  </Box>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
+        <Button startIcon={<ArrowBackIcon />} variant="outlined" size="small" onClick={handleBack} sx={{ textTransform: 'none' }}>
+          Back
+        </Button>
+
+        <Stack direction="row" spacing={2}>
+          <Button variant="contained" size="small" onClick={handleNext} sx={{ textTransform: 'none' }}>
+            Next
+          </Button>
+        </Stack>
+      </Box>
+
       <AddBranchDialog
         open={open}
         handleClose={handleClose}
@@ -210,6 +280,15 @@ export default function BranchesInfo({ handleBack, handleNext, fetchBusinessDeta
         getBranches={getBranches}
         setSelectedRecord={setSelectedRecord}
       />
-    </Grid2>
+
+      <DeleteConfirmationDialog
+        open={deleteDialogOpen}
+        onClose={handleDeleteClose}
+        onConfirm={handleRemoveBranch}
+        title="Delete Branch"
+        message="Are you sure you want to delete this branch? This action cannot be undone."
+        itemName={deleteIndex !== null ? `Branch: ${branches[deleteIndex]?.branch_name}` : ''}
+      />
+    </MainCard>
   );
 }

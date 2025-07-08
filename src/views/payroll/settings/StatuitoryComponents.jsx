@@ -33,7 +33,7 @@ const StatutoryComponents = ({ handleNext }) => {
   const handleBack = () => setActiveTab((prev) => (prev > 0 ? prev - 1 : prev));
 
   return (
-    <MainCard title="Statutory Components">
+    <MainCard title="Statutory Components" subtitle="Manage your statutory components for seamless operations">
       <Paper
         elevation={0}
         sx={{

@@ -122,9 +122,7 @@ const ProposalCompanyDetails = ({taskId}) => {
                             .min(10, 'Mobile Number must be at least 10 digits')
                             .max(10, 'Mobile Number must not exceed 10 digits'),
       email: Yup.string().required('Email Address is required'),
-      nic_code: Yup.string()
-                .matches(/^[0-9]{5}$/, 'NIC Code must be exactly 5 digits')
-                .max(5, 'NIC Code must be exactly 5 digits')
+      
     }),
 
    onSubmit: async (values) => {

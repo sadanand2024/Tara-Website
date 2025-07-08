@@ -11,6 +11,8 @@ import Autocomplete from '@mui/material/Autocomplete';
 import  Box  from '@mui/material/Box';
 import RaiseRequest from '../../RaiseRequest';
 import GetActionButtons from '../../FormHelpers';
+import CircularProgressComponent from 'utils/CircularProgressComponent';
+
 const DESIGNATION_CHOICES = [
   { value: 'partner', label: 'Partner' },
   { value: 'director', label: 'Director' },
@@ -60,6 +62,8 @@ const fields = [
 const ApplicantDetails = ({applicantTaskId}) => {
 
   const [searchParams] = useSearchParams();
+     const [isLoading, setIsLoading] = useState(false);
+  
     const service_id = searchParams.get('service_id');
     const [applicantInfo, setapplicantInfo] = useState({
         task_id: null
@@ -108,6 +112,7 @@ const ApplicantDetails = ({applicantTaskId}) => {
       
     }),
     onSubmit: async (values) => {
+      setIsLoading(true);
       let formData = new FormData();
     
       formData.append('service_request',service_id);
@@ -154,6 +159,7 @@ const ApplicantDetails = ({applicantTaskId}) => {
         );
         getApplicantDetails();
       }
+      setIsLoading(false);
     }
   });
   const renderField = (field) => {
@@ -226,6 +232,7 @@ const ApplicantDetails = ({applicantTaskId}) => {
     }
   };
   const getApplicantDetails = async () => {
+   
     let url = `/tradelicense/applicant-details/by-request-or-task?service_request_id=${service_id}`;
     const { res } = await Factory('get', url);
     if (res.status_cd === 1) {
@@ -243,11 +250,16 @@ const ApplicantDetails = ({applicantTaskId}) => {
         passport_photo: res.data.passport_photo ? res.data.passport_photo : ''
       });
       setapplicantInfo(res.data);
+      
     }
   };
   useEffect(() => {
     getApplicantDetails();
   }, []);
+   if (isLoading) {
+        console.log('Loading promoter data...', isLoading);
+        return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading promoter Data'} />;
+      }
   const { values, handleChange, handleBlur, setFieldValue, touched, errors, handleSubmit, setValues } = formik;
   
   return (

@@ -25,11 +25,13 @@ import Factory from 'utils/Factory';
 import { useSearchParams } from 'react-router-dom';
 import RaiseRequest from '../../RaiseRequest';
 import GetActionButtons from '../../FormHelpers';
+import CircularProgressComponent from 'utils/CircularProgressComponent';
 
 import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
 
 const PromoterSignatorySection = ({ taskId }) => {
    const [searchParams] = useSearchParams();
+   const [isLoading, setIsLoading] = useState(false);
       const service_id = searchParams.get('service_id');
       const [promoterTaskId, setPromoterTaskId] = useState({
           id: null,
@@ -38,49 +40,103 @@ const PromoterSignatorySection = ({ taskId }) => {
   const dispatch = useDispatch();
   const [saveIndex, setSaveIndex] = useState(null); // <-- index of promoter to save
 
-  const getSignatoryDetails = async () => {
-    const url = `/tradelicense/signatory-details/by-request-or-task?service_request_id=${service_id}`;
-    const { res } = await Factory('get', url);
+  // const getSignatoryDetails = async () => {
+  //   const url = `/tradelicense/signatory-details/by-request-or-task?service_request_id=${service_id}`;
+  //   const { res } = await Factory('get', url);
 
     
-      const signatoryinfo = res?.data?.signatory_info ?? res?.signatory_info ?? [];
-      if (res.status_cd === 0 && Array.isArray(signatoryinfo)) {
+  //     const signatoryinfo = res?.data?.signatory_info ?? res?.signatory_info ?? [];
+  //     if (res.status_cd === 0 && Array.isArray(signatoryinfo)) {
 
 
-    // if (res.status_cd === 0) {
+  //   // if (res.status_cd === 0) {
 
-      const promoters =
-        signatoryinfo.map((item) => ({
-          name: item.name || '',
-          aadhar_image: item.aadhar_image || null,
-          pan_image: item.pan_image || null,
-          passport_photo: item.passport_photo || null,
-          address: item.address || '',
-          email: item.email || '',
-          mobile_number: item.mobile_number || '',
-          residential_address: item.residential_address === true,
-          id: item.id || ''
-        })) || [];
+  //     const promoters =
+  //       signatoryinfo.map((item) => ({
+  //         name: item.name || '',
+  //         aadhar_image: item.aadhar_image || null,
+  //         pan_image: item.pan_image || null,
+  //         passport_photo: item.passport_photo || null,
+  //         address: item.address || '',
+  //         email: item.email || '',
+  //         mobile_number: item.mobile_number || '',
+  //         residential_address: item.residential_address === true,
+  //         id: item.id || ''
+  //       })) || [];
 
-      if (promoters.length) {
-        formik.setFieldValue('promoters', promoters);
-      }
+  //     if (promoters.length) {
+  //       formik.setFieldValue('promoters', promoters);
+  //     }
        
-         setPromoterTaskId(res.data);
-    }
+  //        setPromoterTaskId(res.data);
+  //   }
+    
 
-    if (res.status_cd === 1) {
-      dispatch(
-        openSnackbar({
-          open: true,
-          message: JSON.stringify(res.data.data) || 'Something went wrong',
-          variant: 'alert',
-          alert: { color: 'error' },
-          close: false
-        })
-      );
-    }
-  };
+  //   if (res.status_cd === 1) {
+  //     dispatch(
+  //       openSnackbar({
+  //         open: true,
+  //         message: JSON.stringify(res.data.data) || 'Something went wrong',
+  //         variant: 'alert',
+  //         alert: { color: 'error' },
+  //         close: false
+  //       })
+  //     );
+  //   }
+  // };
+const getSignatoryDetails = async () => {
+  
+  const url = `/tradelicense/signatory-details/by-request-or-task?service_request_id=${service_id}`;
+  const { res } = await Factory('get', url);
+
+  const signatoryinfo = res?.data?.signatory_info ?? res?.signatory_info ?? [];
+
+  if (res.status_cd === 0 && Array.isArray(signatoryinfo)) {
+    const apiMapped = signatoryinfo.map((item) => ({
+      name: item.name || '',
+      aadhar_image: item.aadhar_image || null,
+      pan_image: item.pan_image || null,
+      passport_photo: item.passport_photo || null,
+      address: item.address || '',
+      email: item.email || '',
+      mobile_number: item.mobile_number || '',
+      residential_address: item.residential_address === true,
+      id: item.id || ''
+    }));
+
+    const currentPromoters = formik.values.promoters || [];
+
+    // Reorder based on current Formik order
+    const reordered = currentPromoters
+      .map((existing) => apiMapped.find((api) => api.id && api.id === existing.id) || existing)
+      .filter((item) => item.id); // filter invalid entries
+
+    // Append any new promoters that are not in the current formik values
+    const newOnes = apiMapped.filter(
+      (api) => !reordered.find((r) => r.id === api.id)
+    );
+
+    const finalPromoters = [...reordered, ...newOnes];
+
+    formik.setFieldValue('promoters', finalPromoters);
+    setPromoterTaskId(res.data);
+  }
+
+  if (res.status_cd === 1) {
+    dispatch(
+      openSnackbar({
+        open: true,
+        message: JSON.stringify(res.data.data) || 'Something went wrong',
+        variant: 'alert',
+        alert: { color: 'error' },
+        close: false
+      })
+      
+    );
+    
+  }
+ 
+};
 
   const formik = useFormik({
     initialValues: {
@@ -116,11 +172,13 @@ const PromoterSignatorySection = ({ taskId }) => {
       )
     }),
     onSubmit: async (values) => {
+    
       if (saveIndex === null) return; // No promoter to save
 
       const promoter = values.promoters[saveIndex];
 
       try {
+        setIsLoading(true);
         let formData = new FormData();
         formData.append('service_request', service_id);
         formData.append('service_task', taskId);
@@ -166,7 +224,9 @@ const PromoterSignatorySection = ({ taskId }) => {
               close: false
             })
           );
-           try {
+
+          
+          try {
                   const reviewFormData = new FormData();
                   reviewFormData.append('service_request', service_id);
                   reviewFormData.append('service_task', taskId);
@@ -192,6 +252,7 @@ const PromoterSignatorySection = ({ taskId }) => {
       }
 
       setSaveIndex(null); // Reset after save
+      setIsLoading(false);
     }
   });
 
@@ -253,6 +314,9 @@ const PromoterSignatorySection = ({ taskId }) => {
   useEffect(() => {
     getSignatoryDetails();
   }, []);
+  if (isLoading) {
+    return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading promoter Data'} />;
+  }
   return (
     <form onSubmit={formik.handleSubmit}>
       <Card sx={{ p: 3, mt: 4 }}>

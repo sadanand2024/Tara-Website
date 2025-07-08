@@ -156,7 +156,6 @@ export default function LeaveManagementDialog({ open, handleClose, selectedRecor
     ));
   };
   const { values, setValues, errors, touched, handleSubmit, handleBlur, setFieldValue, resetForm } = formik;
-  console.log(errors);
   return (
     <Modal
       open={open}

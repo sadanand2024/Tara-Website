@@ -591,47 +591,55 @@ const StepTwo = ({ step, setStep }) => {
 
   const addDirector = () => {
     if (values.directors.length < 20) {
-      const updated = [
-        ...values.directors,
-        {
-          director_first_name: '',
-          middle_name: '',
-          last_name: '',
-          category_of_directorship: '',
-          pan_card_file: null,
-          aadhaar_card_file: null,
-          passport_photo_file: null,
-          mobile_number: '',
-          email: '',
-          occupation: '',
-          area_of_occupation: '',
-          qualification: '',
-          gender: '',
-          nationality: '',
-          father_first_name: '',
-          father_middle_name: '',
-          father_last_name: '',
-          residential_address_proof: '',
-          residential_address_proof_file: '',
-          form_dir2: null,
-          specimen_signature_of_director: null,
-          authorised_signatory_name: '',
-          dsc: false,
-          din_number: false,
-          is_this_director_also_shareholder: false,
-          residential_same_as_aadhaar_address: false,
-          details_of_existing_directorships: false,
-          existing_directorships_details: [
-            {
-              company_name: '',
-              cin: '',
-              type_of_company: '',
-              position_held: ''
-            }
-          ]
-        }
-      ];
+      const newDirector = {
+        director_first_name: '',
+        middle_name: '',
+        last_name: '',
+        category_of_directorship: '',
+        pan_card_file: null,
+        aadhaar_card_file: null,
+        passport_photo_file: null,
+        mobile_number: '',
+        email: '',
+        occupation: '',
+        area_of_occupation: '',
+        qualification: '',
+        gender: '',
+        nationality: '',
+        father_first_name: '',
+        father_middle_name: '',
+        father_last_name: '',
+        residential_address_proof: '',
+        residential_address_proof_file: '',
+        form_dir2: null,
+        specimen_signature_of_director: null,
+        authorised_signatory_name: '',
+        dsc: false,
+        din_number: false,
+        is_this_director_also_shareholder: false,
+        residential_same_as_aadhaar_address: false,
+        details_of_existing_directorships: false,
+        existing_directorships_details: [
+          {
+            company_name: '',
+            cin: '',
+            type_of_company: '',
+            position_held: ''
+          }
+        ]
+      };
+      const updated = [...values.directors, newDirector];
       setFieldValue('directors', updated);
+
+      // Reset touched for the new director
+      formik.setTouched({
+        ...formik.touched,
+        directors: [
+          ...(formik.touched.directors || []),
+          {} // No fields touched for the new director
+        ]
+      });
+
       setTabIndex(updated.length - 1);
     }
   };
@@ -705,7 +713,7 @@ const StepTwo = ({ step, setStep }) => {
               }}
               onBlur={handleBlur}
               error={Boolean(error)}
-              helperText={error || ''}
+              helperText={error || '\u00A0'}
               sx={{ width: '100%', '& .MuiInputBase-input': { color: 'grey.600' } }}
               inputProps={inputProps}
             />
@@ -727,7 +735,7 @@ const StepTwo = ({ step, setStep }) => {
               onChange={handleChange}
               onBlur={handleBlur}
               error={Boolean(error)}
-              helperText={error || ''}
+              helperText={error || '\u00A0'}
               sx={{ width: '100%', '& .MuiInputBase-input': { color: 'grey.600' } }}
             >
               {field.options.map((opt) => (
@@ -766,8 +774,13 @@ const StepTwo = ({ step, setStep }) => {
                   <Button
                     variant="outlined"
                     size="small"
-      
-                    sx={{ height: 31, width: 135 }}
+                    sx={{
+                      height: 31,
+                      width: 145,
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis'
+                    }}
                     href="/templates/DIR2-draft-format.docx"
                     download
                   >
@@ -840,7 +853,13 @@ const StepTwo = ({ step, setStep }) => {
                 <Button
                   variant="outlined"
                   size="small"
-                  sx={{ height: 34, width: 180, minWidth: 120 }}
+                  sx={{
+                    height: 31,
+                    width: 180,
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis'
+                  }}
                   href="/templates/DIR2-draft-format.docx"
                   download
                 >
@@ -1283,7 +1302,7 @@ const StepTwo = ({ step, setStep }) => {
                           onChange={handleChange}
                           onBlur={handleBlur}
                           error={Boolean(error)}
-                          helperText={error || ''}
+                          helperText={error || '\u00A0'}
                           sx={{ width: '100%', '& .MuiInputBase-input': { color: 'grey.600' } }}
                         />
                       </Box>
@@ -1382,7 +1401,7 @@ const StepTwo = ({ step, setStep }) => {
                             <Button
                               variant="contained"
                               size="small"
-                              sx={{ marginBottom: '0px' }}
+                              sx={{ marginBottom: '23px' }}
                               onClick={async () => {
                                 const allErrors = await formik.validateForm();
                                 const entryErrors =
@@ -1425,7 +1444,7 @@ const StepTwo = ({ step, setStep }) => {
                               variant="outlined"
                               color="error"
                               size="small"
-                              sx={{ marginBottom: '0px' }}
+                              sx={{ marginBottom: '23px' }}
                               onClick={() => {
                                 const updated = values.directors[idx].existing_directorships_details.filter((_, i) => i !== edIdx);
                                 setFieldValue(`directors[${idx}].existing_directorships_details`, updated);

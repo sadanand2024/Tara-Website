@@ -1,44 +1,39 @@
 import React, { useState, useEffect } from 'react';
 import {
+  Grid2,
+  Typography,
+  TextField,
+  Button,
+  IconButton,
   Box,
-  Card,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Typography,
-  Button,
-  IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Grid,
-  TextField,
+  CircularProgress,
   Stack,
   Tooltip,
-  InputAdornment,
-  Select,
-  MenuItem,
-  InputLabel,
+  Paper,
   FormControl,
-  CircularProgress,
-  Snackbar,
-  Alert
+  InputLabel,
+  Select,
+  MenuItem
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import CloseIcon from '@mui/icons-material/Close';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import SecurityIcon from '@mui/icons-material/Security';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { useSelector } from 'store';
+import { useSelector, useDispatch } from 'store';
 import Factory from 'utils/Factory';
 import DeleteConfirmationDialog from 'utils/DeleteConfirmationDialog';
+import MainCard from 'ui-component/cards/MainCard';
+import Modal from 'ui-component/extended/Modal';
+import { openSnackbar } from 'store/slices/snackbar';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 const dscTypes = ['Class 2', 'Class 3'];
 const issuingAuthorities = ['eMudhra', 'Sify', 'Capricorn', 'NSDL'];
@@ -57,34 +52,62 @@ const validationSchema = Yup.object().shape({
   location: Yup.string().required('Location is required')
 });
 
-const DSCRegister = () => {
+const fields = [
+  { name: 'name', label: 'Name', type: 'text' },
+  { name: 'dsc_number', label: 'DSC Number', type: 'text' },
+  { name: 'dsc_type', label: 'DSC Type', type: 'select', options: dscTypes },
+  { name: 'issue_authority', label: 'Issuing Authority', type: 'select', options: issuingAuthorities },
+  { name: 'date_of_issue', label: 'Date of Issue', type: 'date' },
+  { name: 'date_of_expiry', label: 'Date of Expiry', type: 'date' },
+  { name: 'email', label: 'Email', type: 'email' },
+  { name: 'mobile_number', label: 'Mobile Number', type: 'text' },
+  { name: 'location', label: 'Location', type: 'text' }
+];
+
+const DSCRegister = ({ handleBack, handleNext }) => {
   const [dscList, setDscList] = useState([]);
   const [open, setOpen] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteIndex, setDeleteIndex] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
   const user = useSelector((state) => state).accountReducer.user;
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: '',
-    severity: 'success'
-  });
+  const dispatch = useDispatch();
 
   useEffect(() => {
     fetchDSCList();
   }, []);
 
   const fetchDSCList = async () => {
+    setIsLoading(true);
     try {
       const response = await Factory('get', `/user_management/dsc-details/${user.active_context.business_id}/`, {}, {});
       if (response.res.status_cd === 0) {
         setDscList(response.res.data);
       } else {
-        showNotification('Failed to fetch DSC list', 'error');
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: JSON.stringify(response?.res?.data || 'Failed to fetch DSC list'),
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
       }
     } catch (error) {
       console.error('Error fetching DSC list:', error);
-      showNotification('Failed to fetch DSC list', 'error');
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Failed to fetch DSC list',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -116,31 +139,40 @@ const DSCRegister = () => {
       const response = await Factory('delete', `/user_management/dsc-details/${dscList[deleteIndex].id}/`, {}, {});
       if (response.res.status_cd === 0) {
         setDscList(dscList.filter((_, i) => i !== deleteIndex));
-        showNotification('DSC deleted successfully');
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'DSC deleted successfully',
+            variant: 'alert',
+            alert: { color: 'success' },
+            close: false
+          })
+        );
       } else {
-        showNotification('Failed to delete DSC', 'error');
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: JSON.stringify(response?.res?.data || 'Failed to delete DSC'),
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
       }
     } catch (error) {
       console.error('Error deleting DSC:', error);
-      showNotification('Failed to delete DSC', 'error');
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Failed to delete DSC',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     } finally {
       handleDeleteClose();
     }
-  };
-
-  const handleSnackbarClose = (event, reason) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-    setSnackbar({ ...snackbar, open: false });
-  };
-
-  const showNotification = (message, severity = 'success') => {
-    setSnackbar({
-      open: true,
-      message,
-      severity
-    });
   };
 
   const formik = useFormik({
@@ -177,250 +209,263 @@ const DSCRegister = () => {
             const updated = [...dscList];
             updated[editIndex] = response.res.data;
             setDscList(updated);
-            showNotification('DSC updated successfully');
+            dispatch(
+              openSnackbar({
+                open: true,
+                message: 'DSC updated successfully',
+                variant: 'alert',
+                alert: { color: 'success' },
+                close: false
+              })
+            );
           } else {
             setDscList([...dscList, response.res]);
-            showNotification('DSC added successfully');
+            dispatch(
+              openSnackbar({
+                open: true,
+                message: 'DSC added successfully',
+                variant: 'alert',
+                alert: { color: 'success' },
+                close: false
+              })
+            );
           }
           handleClose();
         } else {
-          showNotification(response.res.status_msg || 'Failed to save DSC', 'error');
+          dispatch(
+            openSnackbar({
+              open: true,
+              message: JSON.stringify(response?.res?.data || 'Failed to save DSC'),
+              variant: 'alert',
+              alert: { color: 'error' },
+              close: false
+            })
+          );
         }
       } catch (error) {
         console.error('Error submitting DSC:', error);
-        showNotification('Failed to save DSC', 'error');
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'Failed to save DSC',
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
       } finally {
         setSubmitting(false);
       }
     }
   });
 
-  return (
-    <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
-        <Typography variant="h4" color="text.primary" gutterBottom>
-          DSC Register
-        </Typography>
-        <Button variant="contained" startIcon={<AddIcon />} size="small" onClick={handleOpen}>
-          Add DSC
-        </Button>
-      </Box>
-      <Card
-        elevation={2}
+  const renderFields = () => {
+    return fields.map((field) => (
+      <Grid2 key={field.name} size={{ xs: 12, sm: 6 }}>
+        {field.type === 'select' ? (
+          <FormControl fullWidth size="small" error={formik.touched[field.name] && Boolean(formik.errors[field.name])}>
+            <InputLabel>{field.label}</InputLabel>
+            <Select
+              name={field.name}
+              value={formik.values[field.name]}
+              label={field.label}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+            >
+              {field.options.map((option) => (
+                <MenuItem key={option} value={option}>
+                  {option}
+                </MenuItem>
+              ))}
+            </Select>
+            {formik.touched[field.name] && formik.errors[field.name] && (
+              <Typography variant="caption" color="error" sx={{ mt: 0.5 }}>
+                {formik.errors[field.name]}
+              </Typography>
+            )}
+          </FormControl>
+        ) : (
+          <TextField
+            fullWidth
+            label={field.label}
+            size="small"
+            name={field.name}
+            type={field.type}
+            value={formik.values[field.name]}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            InputLabelProps={field.type === 'date' ? { shrink: true } : {}}
+            error={formik.touched[field.name] && Boolean(formik.errors[field.name])}
+            helperText={formik.touched[field.name] && formik.errors[field.name] ? formik.errors[field.name] : ''}
+          />
+        )}
+      </Grid2>
+    ));
+  };
+
+  if (isLoading) {
+    return (
+      <Box
         sx={{
-          mb: 2,
-          '& .MuiTableContainer-root': { borderRadius: 0 },
-          '& .MuiTableCell-root': { color: 'text.primary' },
-          '& .MuiTableHead-root .MuiTableCell-root': { py: 1, backgroundColor: 'primary.dark', color: '#fff' }
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '400px',
+          flexDirection: 'column',
+          gap: 2
         }}
       >
-        <TableContainer>
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell>Name</TableCell>
-                <TableCell>DSC Number</TableCell>
-                <TableCell>Type</TableCell>
-                <TableCell>Valid Till</TableCell>
-                <TableCell>Location</TableCell>
-                <TableCell align="right">Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {dscList.map((row, idx) => (
+        <CircularProgress size={50} />
+        <Typography variant="h5" color="text.secondary">
+          Loading DSC Register...
+        </Typography>
+      </Box>
+    );
+  }
+
+  return (
+    <MainCard
+      title="DSC Register"
+      subtitle="Manage your Digital Signature Certificates for secure digital transactions"
+      action={
+        <Button
+          variant="contained"
+          size="small"
+          startIcon={<AddIcon />}
+          onClick={handleOpen}
+          sx={{
+            textTransform: 'none',
+            fontWeight: 600,
+            fontSize: '0.9rem'
+          }}
+        >
+          Add DSC
+        </Button>
+      }
+    >
+      <TableContainer
+        component={Paper}
+        sx={{
+          width: '100%',
+          borderRadius: 2,
+          boxShadow: 1,
+          overflowX: 'auto'
+        }}
+      >
+        <Table size="small">
+          <TableHead
+            sx={{
+              backgroundColor: 'primary.main',
+              '& .MuiTableCell-root': {
+                color: '#ffffff !important'
+              }
+            }}
+          >
+            <TableRow>
+              <TableCell sx={{ fontWeight: 600 }}>Name</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>DSC Number</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>Type</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>Valid Till</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>Location</TableCell>
+              <TableCell align="center" sx={{ fontWeight: 600 }}>
+                Actions
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {dscList.length > 0 ? (
+              dscList.map((dsc, idx) => (
                 <TableRow key={idx} hover>
-                  <TableCell>{row.name}</TableCell>
-                  <TableCell>{row.dsc_number}</TableCell>
-                  <TableCell>{row.dsc_type}</TableCell>
-                  <TableCell>{row.date_of_expiry}</TableCell>
-                  <TableCell>{row.location}</TableCell>
-                  <TableCell align="right">
-                    <Stack direction="row" spacing={1} justifyContent="flex-end">
-                      <Tooltip title="Edit">
-                        <IconButton size="small" color="primary" onClick={() => handleEdit(idx)}>
+                  <TableCell>
+                    <Typography variant="body2" fontWeight={500}>
+                      {dsc.name}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body2">{dsc.dsc_number}</Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body2">{dsc.dsc_type}</Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body2">{dsc.date_of_expiry}</Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body2">{dsc.location}</Typography>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Stack direction="row" spacing={1} justifyContent="center">
+                      <Tooltip title="Edit DSC">
+                        <IconButton
+                          color="primary"
+                          size="small"
+                          onClick={() => handleEdit(idx)}
+                          sx={{
+                            backgroundColor: 'primary.50',
+                            '&:hover': { backgroundColor: 'primary.100' }
+                          }}
+                        >
                           <EditIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
-                      <IconButton size="small" color="error" onClick={() => handleDeleteClick(idx)}>
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
+                      <Tooltip title="Delete DSC">
+                        <IconButton
+                          color="error"
+                          size="small"
+                          onClick={() => handleDeleteClick(idx)}
+                          sx={{
+                            backgroundColor: 'error.50',
+                            '&:hover': { backgroundColor: 'error.100' }
+                          }}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
                     </Stack>
                   </TableCell>
                 </TableRow>
-              ))}
-              {dscList.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
-                    No DSCs added yet
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Card>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={6} align="center">
+                  <Box
+                    sx={{
+                      textAlign: 'center',
+                      py: 4
+                    }}
+                  >
+                    <SecurityIcon sx={{ fontSize: 60, color: 'grey.400', mb: 2 }} />
+                    <Typography variant="h6" color="text.secondary" gutterBottom>
+                      No DSCs Added
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                      Start by adding your first Digital Signature Certificate for secure digital transactions
+                    </Typography>
+                    <Button variant="outlined" onClick={handleOpen} startIcon={<AddIcon />} sx={{ borderRadius: 2, textTransform: 'none' }}>
+                      Add First DSC
+                    </Button>
+                  </Box>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
 
-      {/* Add/Edit DSC Dialog */}
-      <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-        <DialogTitle sx={{ color: 'text.primary' }}>
-          {editIndex !== null ? 'Edit DSC' : 'Add DSC'}
-          <IconButton aria-label="close" onClick={handleClose} sx={{ position: 'absolute', right: 8, top: 8 }}>
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-        <form autoComplete="off" onSubmit={formik.handleSubmit}>
-          <DialogContent dividers>
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  id="name"
-                  name="name"
-                  label="Name"
-                  value={formik.values.name}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  error={formik.touched.name && Boolean(formik.errors.name)}
-                  helperText={formik.touched.name && formik.errors.name}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  id="dsc_number"
-                  name="dsc_number"
-                  label="DSC Number"
-                  value={formik.values.dsc_number}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  error={formik.touched.dsc_number && Boolean(formik.errors.dsc_number)}
-                  helperText={formik.touched.dsc_number && formik.errors.dsc_number}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <FormControl fullWidth size="small" error={formik.touched.dsc_type && Boolean(formik.errors.dsc_type)}>
-                  <InputLabel>DSC Type</InputLabel>
-                  <Select
-                    id="dsc_type"
-                    name="dsc_type"
-                    value={formik.values.dsc_type}
-                    label="DSC Type"
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                  >
-                    {dscTypes.map((type) => (
-                      <MenuItem key={type} value={type}>
-                        {type}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <FormControl fullWidth size="small" error={formik.touched.issue_authority && Boolean(formik.errors.issue_authority)}>
-                  <InputLabel>Issuing Authority</InputLabel>
-                  <Select
-                    id="issue_authority"
-                    name="issue_authority"
-                    value={formik.values.issue_authority}
-                    label="Issuing Authority"
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                  >
-                    {issuingAuthorities.map((auth) => (
-                      <MenuItem key={auth} value={auth}>
-                        {auth}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  id="date_of_issue"
-                  name="date_of_issue"
-                  label="Date of Issue"
-                  type="date"
-                  value={formik.values.date_of_issue}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  InputLabelProps={{ shrink: true }}
-                  error={formik.touched.date_of_issue && Boolean(formik.errors.date_of_issue)}
-                  helperText={formik.touched.date_of_issue && formik.errors.date_of_issue}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  id="date_of_expiry"
-                  name="date_of_expiry"
-                  label="Date of Expiry"
-                  type="date"
-                  value={formik.values.date_of_expiry}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  InputLabelProps={{ shrink: true }}
-                  error={formik.touched.date_of_expiry && Boolean(formik.errors.date_of_expiry)}
-                  helperText={formik.touched.date_of_expiry && formik.errors.date_of_expiry}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  id="email"
-                  name="email"
-                  label="Email"
-                  value={formik.values.email}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  error={formik.touched.email && Boolean(formik.errors.email)}
-                  helperText={formik.touched.email && formik.errors.email}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  id="mobile_number"
-                  name="mobile_number"
-                  label="Mobile Number"
-                  value={formik.values.mobile_number}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  error={formik.touched.mobile_number && Boolean(formik.errors.mobile_number)}
-                  helperText={formik.touched.mobile_number && formik.errors.mobile_number}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  id="location"
-                  name="location"
-                  label="Location"
-                  value={formik.values.location}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  error={formik.touched.location && Boolean(formik.errors.location)}
-                  helperText={formik.touched.location && formik.errors.location}
-                />
-              </Grid>
-            </Grid>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleClose} size="small" sx={{ color: 'text.primary' }}>
+      <Modal
+        open={open}
+        showClose={true}
+        title={editIndex !== null ? 'Edit DSC' : 'Add DSC'}
+        handleClose={handleClose}
+        footer={
+          <Stack direction="row" sx={{ width: 1, justifyContent: 'space-between', gap: 2 }}>
+            <Button onClick={handleClose} variant="outlined" color="error">
               Cancel
             </Button>
-            <Button 
-              type="submit" 
-              variant="contained" 
-              size="small" 
+            <Button
+              onClick={formik.handleSubmit}
+              type="submit"
+              variant="contained"
               color="primary"
               disabled={formik.isSubmitting}
               sx={{ position: 'relative', minWidth: '100px' }}
@@ -445,9 +490,15 @@ const DSCRegister = () => {
                 'Save'
               )}
             </Button>
-          </DialogActions>
-        </form>
-      </Dialog>
+          </Stack>
+        }
+      >
+        <Box component="form" onSubmit={formik.handleSubmit} sx={{ padding: 2 }}>
+          <Grid2 container spacing={2}>
+            {renderFields()}
+          </Grid2>
+        </Box>
+      </Modal>
 
       <DeleteConfirmationDialog
         open={deleteDialogOpen}
@@ -457,18 +508,17 @@ const DSCRegister = () => {
         message="Are you sure you want to delete this DSC? This action cannot be undone."
         itemName={deleteIndex !== null ? `DSC: ${dscList[deleteIndex]?.dsc_number}` : ''}
       />
-
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={6000}
-        onClose={handleSnackbarClose}
-        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-      >
-        <Alert onClose={handleSnackbarClose} severity={snackbar.severity} variant="filled">
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
-    </Box>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', mt: 2 }}>
+        <Button startIcon={<ArrowBackIcon />} variant="outlined" onClick={handleBack}>
+          Back
+        </Button>
+        <Stack direction="row" spacing={2}>
+          <Button variant="contained" onClick={handleNext}>
+            Next
+          </Button>
+        </Stack>
+      </Box>
+    </MainCard>
   );
 };
 

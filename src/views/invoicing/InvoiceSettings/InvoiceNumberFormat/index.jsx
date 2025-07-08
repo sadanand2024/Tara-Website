@@ -26,6 +26,7 @@ import { useDispatch } from 'react-redux';
 import { openSnackbar } from 'store/slices/snackbar';
 import { useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import MainCard from 'ui-component/cards/MainCard';
 
 const InvoiceNumberFormatComponent = ({ businessDetails, handleBack, handleNext }) => {
   const dispatch = useDispatch();
@@ -371,11 +372,7 @@ const InvoiceNumberFormatComponent = ({ businessDetails, handleBack, handleNext 
   }
 
   return (
-    <Box>
-      <Typography variant="h4" gutterBottom>
-        Invoice Number Format Configuration
-      </Typography>
-
+    <MainCard title="Invoice Number Format" subtitle="Manage your invoice number format for invoice generation and business operations">
       <FormControlLabel
         control={
           <Checkbox
@@ -570,25 +567,16 @@ const InvoiceNumberFormatComponent = ({ businessDetails, handleBack, handleNext 
           ))}
       </Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
-        <Button
-          variant="outlined"
-          startIcon={<ArrowBackIcon />}
-          onClick={() => {
-            navigate('/app/invoice');
-          }}
-        >
-          Back to Dashboard
+        <Button startIcon={<ArrowBackIcon />} variant="outlined" onClick={handleBack}>
+          Back
         </Button>
         <Stack direction="row" spacing={2}>
-          <Button variant="outlined" onClick={handleBack}>
-            Back
-          </Button>
           <Button variant="contained" onClick={handleSave}>
             Save
           </Button>
         </Stack>
       </Box>
-    </Box>
+    </MainCard>
   );
 };
 

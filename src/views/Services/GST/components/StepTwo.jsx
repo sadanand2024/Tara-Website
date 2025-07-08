@@ -30,18 +30,22 @@ import RaiseRequest from '../../RaiseRequest';
 import GetActionButtons from '../../FormHelpers';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import CircularProgressComponent from 'utils/CircularProgressComponent';
 
-const StepTwo = ({ step, setStep}) => {
+const StepTwo = ({ step, setStep }) => {
   const [searchParams] = useSearchParams();
   const service_id = searchParams.get('service_id');
   const dispatch = useDispatch();
   const [saveIndex, setSaveIndex] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+
   const [promoterTaskId, setPromoterTaskId] = useState({
     id: null,
     task_id: null
   }); // <-- index of promoter to save
 
   const getSignatoryDetails = async () => {
+    setIsLoading(true);
     const url = `/gst/service-request-section-data?service_request_id=${service_id}&section=director_promoter_details`;
     const { res } = await Factory('get', url);
     const data = res?.data?.task_data['Promoter Signatory Details']?.data;
@@ -61,7 +65,8 @@ const StepTwo = ({ step, setStep}) => {
             mobile: item.mobile || '',
             gender: item.gender || '',
             designation: item.designation || '',
-            residential_same_as_aadhaar_address: item.residential_same_as_aadhaar_address === true || item.residential_same_as_aadhaar_address === 'true',
+            residential_same_as_aadhaar_address:
+              item.residential_same_as_aadhaar_address === true || item.residential_same_as_aadhaar_address === 'true',
 
             id: item.id || '',
             task_id: res.data?.task_data['Promoter Signatory Details']?.task_id || null
@@ -70,17 +75,94 @@ const StepTwo = ({ step, setStep}) => {
         if (promoters.length) {
           formik.setFieldValue('promoters', promoters);
         }
+
         setPromoterTaskId({
           ...data,
           task_id: res.data?.task_data['Promoter Signatory Details']?.task_id || null
         });
+
       }
     } else {
       setPromoterTaskId({
         task_id: res?.data?.task_data['Promoter Signatory Details']?.task_id || null
       });
     }
+        setIsLoading(false);
+
   };
+  // onSubmit: async (values) => {
+  //   if (saveIndex === null) return;
+
+  //   const promoter = values.promoters[saveIndex];
+
+  //   try {
+  //     let formData = new FormData();
+  //     formData.append('service_request', service_id);
+  //     formData.append('service_task', taskId);
+  //     formData.append('name', promoter.name);
+  //     formData.append('aadhaar', promoter.aadhaar);
+  //     formData.append('pan', promoter.pan);
+  //     formData.append('photo', promoter.photo);
+  //     formData.append('residential_address', promoter.residential_address);
+  //     formData.append('email', promoter.email);
+  //     formData.append('mobile', promoter.mobile);
+  //     formData.append('gender', promoter.gender);
+  //     formData.append('designation', promoter.designation);
+  //     formData.append('residential_same_as_aadhaar_address', JSON.stringify(promoter.residential_same_as_aadhaar_address));
+  //     formData.append('status', 'in progress');
+
+  //     let url = promoter.id
+  //       ? `/gst/promoter-signatory-details/${promoter.id}/`
+  //       : `/gst/promoter-signatory-details/`;
+
+  //     const { res } = await Factory(promoter.id ? 'put' : 'post', url, formData);
+
+  //     if (res.status_cd === 0) {
+  //       dispatch(
+  //         openSnackbar({
+  //           open: true,
+  //           message: promoter.id ? 'Data Updated Successfully' : 'Data Saved Successfully',
+  //           variant: 'alert',
+  //           alert: { color: 'success' },
+  //           close: false
+  //         })
+  //       );
+
+  //       // 🔄 Update the specific promoter in the list without reshuffling
+  //       const updatedPromoter = {
+  //         ...promoter,
+  //         id: res?.data?.id || promoter.id // use returned ID
+  //       };
+
+  //       const updatedList = [...formik.values.promoters];
+  //       updatedList[saveIndex] = updatedPromoter;
+  //       formik.setFieldValue('promoters', updatedList);
+
+  //     } else {
+  //       dispatch(
+  //         openSnackbar({
+  //           open: true,
+  //           message: JSON.stringify(res?.data?.data) || 'Something went wrong',
+  //           variant: 'alert',
+  //           alert: { color: 'error' },
+  //           close: false
+  //         })
+  //       );
+  //     }
+  //   } catch (error) {
+  //     dispatch(
+  //       openSnackbar({
+  //         open: true,
+  //         message: 'An error occurred while saving data.',
+  //         variant: 'alert',
+  //         alert: { color: 'error' },
+  //         close: false
+  //       })
+  //     );
+  //   }
+
+  //   setSaveIndex(null);
+  // };
 
   const formik = useFormik({
     initialValues: {
@@ -109,28 +191,27 @@ const StepTwo = ({ step, setStep}) => {
           // residential_address: Yup.string().required('residential_address is required'),
           email: Yup.string().email('Invalid email').required('Email is required'),
           // mobile: Yup.string().required('Mobile is required'),
-            mobile: Yup.string()
-                            .required('Mobile Number is required')
-                            .matches(/^[0-9]+$/, 'Mobile Number must be a number')
-                            .min(10, 'Mobile Number must be at least 10 digits')
-                            .max(10, 'Mobile Number must not exceed 10 digits'),
+          mobile: Yup.string()
+            .required('Mobile Number is required')
+            .matches(/^[0-9]+$/, 'Mobile Number must be a number')
+            .min(10, 'Mobile Number must be at least 10 digits')
+            .max(10, 'Mobile Number must not exceed 10 digits'),
           gender: Yup.string().required('gender is required'),
           designation: Yup.string().required('designation is required'),
-          residential_same_as_aadhaar_address: Yup.boolean().required('Please choose an option'),
-          
-          
-
+          residential_same_as_aadhaar_address: Yup.boolean().required('Please choose an option')
         })
       )
     }),
     onSubmit: async (values) => {
       const task_id = promoterTaskId.task_id;
-     
+
       if (saveIndex === null) return; // No promoter to save
 
       const promoter = values.promoters[saveIndex];
+   
 
       try {
+         setIsLoading(true);
         let formData = new FormData();
         formData.append('service_request', service_id);
         formData.append('service_task', task_id);
@@ -180,16 +261,16 @@ const StepTwo = ({ step, setStep}) => {
               close: false
             })
           );
-                  try {
-        const reviewFormData = new FormData();
-        reviewFormData.append('service_request', service_id);
-        reviewFormData.append('service_task', task_id);
-        reviewFormData.append('status', 'in progress');
+          //             try {
+          //   const reviewFormData = new FormData();
+          //   reviewFormData.append('service_request', service_id);
+          //   reviewFormData.append('service_task', task_id);
+          //   reviewFormData.append('status', 'in progress');
 
-        await Factory('post', '/gst/promoter-signatory-details/', reviewFormData);
-      } catch (err) {
-        // console.error('Review status API error:', err);
-      }
+          //   await Factory('post', '/gst/promoter-signatory-details/', reviewFormData);
+          // } catch (err) {
+          //   // console.error('Review status API error:', err);
+          // }
           getSignatoryDetails();
         }
       } catch (error) {
@@ -203,8 +284,11 @@ const StepTwo = ({ step, setStep}) => {
           })
         );
       }
+      finally {
+    setIsLoading(false);
 
       setSaveIndex(null); // Reset after save
+      }
     }
   });
 
@@ -268,6 +352,11 @@ const StepTwo = ({ step, setStep}) => {
   useEffect(() => {
     getSignatoryDetails();
   }, []);
+
+  if (isLoading) {
+    console.log('Loading promoter data...', isLoading);
+    return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading promoter Data'} />;
+  }
 
   return (
     <form onSubmit={formik.handleSubmit}>
@@ -548,32 +637,32 @@ const StepTwo = ({ step, setStep}) => {
         </TableContainer>
         {/* {console.log('Promoter Task ID gst:', promoterTaskId)}; */}
         <Grid2 size={{ xs: 12 }}>
-        <Stack direction="row" spacing={2} justifyContent="flex-end" mt={3}> 
-          <GetActionButtons
-            type="post"
-            urlEndpoint="/gst/promoter-signatory-details/"
-            recId={promoterTaskId.id}
-            status={promoterTaskId.status}
-            data={promoterTaskId}
-            service_request={service_id}
-            task_id={promoterTaskId.task_id}
-            urlKey="gst"
-            urlBool={true}
-          />
+          <Stack direction="row" spacing={2} justifyContent="flex-end" mt={3}>
+            <GetActionButtons
+              type="post"
+              urlEndpoint="/gst/promoter-signatory-details/"
+              recId={promoterTaskId.id}
+              status={promoterTaskId.status}
+              data={promoterTaskId}
+              service_request={service_id}
+              task_id={promoterTaskId.task_id}
+              urlKey="gst"
+              urlBool={true}
+            />
           </Stack>
         </Grid2>
       </Card>
-       <Box display="flex" justifyContent="space-between" mt={2}>
+      <Box display="flex" justifyContent="space-between" mt={2}>
         <Button variant="outlined" size="small" onClick={() => setStep(step - 1)} startIcon={<ArrowBackIcon />}>
           Back
         </Button>
-        <Button variant="contained" color="primary"  size="small" onClick={() => setStep(step + 1)} endIcon={<ArrowForwardIcon />}>
+        <Button variant="contained" color="primary" size="small" onClick={() => setStep(step + 1)} endIcon={<ArrowForwardIcon />}>
           Continue
         </Button>
       </Box>
     </form>
-    
-  );0
+  );
+  0;
 };
 
 export default StepTwo;

@@ -8,10 +8,14 @@ import Factory from 'utils/Factory';
 import * as Yup from 'yup';
 import RaiseRequest from '../../RaiseRequest';
 import GetActionButtons from '../../FormHelpers';
+import CircularProgressComponent from 'utils/CircularProgressComponent';
+// import { LoadingButton } from '@mui/lab'; // Add this import
+
 
 import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
 const BasicBusinessInfo = () => {
   const [searchParams] = useSearchParams();
+  const [isLoading, setIsLoading] = useState(false);
   const service_id = searchParams.get('service_id');
   const [basicInfo, setbasicInfo] = useState({
     id: null,
@@ -104,6 +108,7 @@ const BasicBusinessInfo = () => {
       })
     }),
     onSubmit: async (values) => {
+      setIsLoading(true); // Start loading
       const task_id = basicInfo.task_id;
       let url = basicInfo.id ? `/gst/basic-business-info/${basicInfo.id}/` : `/gst/basic-business-info/`;
       let formData = new FormData();
@@ -133,6 +138,8 @@ const BasicBusinessInfo = () => {
       }
 
       const { res } = await Factory(basicInfo.id ? 'put' : 'post', url, formData);
+      setIsLoading(false); // Stop loading
+
       if (res.status_cd === 0) {
         dispatch(
           openSnackbar({
@@ -160,6 +167,7 @@ const BasicBusinessInfo = () => {
   });
 
   const getbasicInfo = async () => {
+    setIsLoading(true);
     // const url = `/gst/basic-business-info/by-service-request/?service_request_id=${service_id}`;
     const url = `/gst/service-request-section-data?service_request_id=${service_id}&section=business_details`;
     const { res } = await Factory('get', url);
@@ -191,6 +199,7 @@ const BasicBusinessInfo = () => {
         });
       }
     }
+    setIsLoading(false);
   };
   const renderField = (field) => {
     switch (field.type) {
@@ -318,6 +327,10 @@ const BasicBusinessInfo = () => {
   useEffect(() => {
     getbasicInfo();
   }, []);
+  if (isLoading) {
+      console.log('Loading promoter data...', isLoading);
+      return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading Business Data'} />;
+    }
   
 
   return (
@@ -387,6 +400,14 @@ const BasicBusinessInfo = () => {
                 <Button variant="contained" color="primary" type="submit">
                   Save
                 </Button>
+                {/* <LoadingButton
+    variant="contained"
+    color="primary"
+    type="submit"
+    loading={isLoading}
+  >
+    Save
+  </LoadingButton> */}
                 <GetActionButtons
                   type="put"
                   urlEndpoint="basic-business-info"

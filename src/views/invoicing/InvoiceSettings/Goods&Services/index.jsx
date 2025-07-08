@@ -12,6 +12,7 @@ import ItemList from './ItemList';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
 import EmptyDataPlaceholder from 'ui-component/extended/EmptyDataPlaceholder';
+import MainCard from 'ui-component/cards/MainCard';
 
 export default function GoodsServicesComponent({ businessDetails, handleNext, handleBack }) {
   const [open, setOpen] = useState(false);
@@ -45,46 +46,45 @@ export default function GoodsServicesComponent({ businessDetails, handleNext, ha
   }, [businessDetails]);
 
   return (
-    <>
-      <Grid2 container spacing={2}>
-        {/* Header Section */}
-        <Grid2 size={{ xs: 12 }}>
-          <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={2}>
-            <Typography variant="h4">Goods & Services</Typography>
-            <Button size="small" variant="contained" startIcon={<IconPlus size={16} />} onClick={handleOpen}>
-              Add Item
-            </Button>
-            <AddItem
-              businessDetailsData={businessDetails}
-              open={open}
-              setType={setType}
-              handleOpen={handleOpen}
-              handleClose={handleClose}
-              get_Goods_and_Services_Data={fetchItems}
-            />
-          </Stack>
-        </Grid2>
-
-        {/* Items List */}
-        <Grid2 size={{ xs: 12 }}>
-          {items.length === 0 ? (
-            <EmptyDataPlaceholder title="No Items Found" subtitle="Start by adding your first item using the 'Add Item' button above." />
-          ) : (
-            <ItemList
-              type={type}
-              open={open}
-              handleOpen={handleOpen}
-              handleClose={handleClose}
-              setType={setType}
-              businessDetailsData={businessDetails}
-              itemsData={items}
-              get_Goods_and_Services_Data={fetchItems}
-              handleBack={handleBack}
-              handleNext={handleNext}
-            />
-          )}
-        </Grid2>
-      </Grid2>
-    </>
+    <MainCard
+      title="Goods & Services"
+      subtitle="Manage your business goods and services for invoice generation and business operations"
+      action={
+        <Button
+          variant="contained"
+          size="small"
+          startIcon={<IconPlus />}
+          onClick={handleOpen}
+          sx={{
+            textTransform: 'none',
+            fontWeight: 600,
+            fontSize: '0.9rem'
+          }}
+        >
+          Add Item
+        </Button>
+      }
+    >
+      <AddItem
+        businessDetailsData={businessDetails}
+        open={open}
+        setType={setType}
+        handleOpen={handleOpen}
+        handleClose={handleClose}
+        get_Goods_and_Services_Data={fetchItems}
+      />
+      <ItemList
+        type={type}
+        open={open}
+        handleOpen={handleOpen}
+        handleClose={handleClose}
+        setType={setType}
+        businessDetailsData={businessDetails}
+        itemsData={items}
+        get_Goods_and_Services_Data={fetchItems}
+        handleBack={handleBack}
+        handleNext={handleNext}
+      />
+    </MainCard>
   );
 }

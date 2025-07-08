@@ -11,14 +11,66 @@ import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
 import RaiseRequest from '../../RaiseRequest';
 import GetActionButtons from '../../FormHelpers';
 import AdditionalPlaceOfBusiness from './AdditionalPlaceOfBusiness';
-const BusinessPremisesSection = ({taskId}) => {
+import CircularProgressComponent from 'utils/CircularProgressComponent';
+
+const BusinessPremisesSection = ({ taskId }) => {
   const [searchParams] = useSearchParams();
   const service_id = searchParams.get('service_id');
+  const [isLoading, setIsLoading] = useState(false);
   const [businessPremises, setBusinessPremises] = useState({
     id: null,
     additional_space: 'no'
   });
   const dispatch = useDispatch();
+  const tradePremises = [
+    'Shop',
+    'Office',
+    'Godown / Warehouse',
+    'Factory / Workshop',
+    'Restaurant / Hotel / Eateries',
+    'Stall / Kiosk / Cabin',
+    'Residential Premises (Commercial Use)',
+    'Clinic / Dispensary / Lab',
+    'Beauty Parlour / Salon / Spa',
+    'Garage / Vehicle Repair Center',
+    'Educational / Coaching Center',
+    'Mobile Unit / Vehicle-based Trade',
+    'Cold Storage / Refrigerated Unit',
+    'Open Land / Yard'
+  ];
+  const tradeDescriptions = [
+    'Grocery Store / Kirana Shop',
+    'Vegetable and Fruit Seller',
+    'Medical Shop / Pharmacy',
+    'Restaurant / Dhaba / Café',
+    'Tea Stall / Juice Shop',
+    'Sweet Shop / Bakery',
+    'Clothing / Garments Shop',
+    'Footwear Shop',
+    'Mobile and Electronics Shop',
+    'Computer Sales and Service',
+    'Printing Press / DTP Center',
+    'Cyber Café / Internet Center',
+    'Hardware / Electrical Goods Shop',
+    'Salon / Hair Cutting / Beauty Parlour',
+    'Jewelry / Goldsmith Shop',
+    'Stationery / Book Shop',
+    'Tailoring / Boutique',
+    'Courier / Logistics Services',
+    'Coaching Center / Tuition Classes',
+    'Travel Agency / Tour Operator',
+    'Auto Garage / Mechanic Workshop',
+    'Furniture Shop / Wood Works',
+    'Pet Shop / Aquarium',
+    'Photography Studio',
+    'Real Estate / Property Dealer Office',
+    'Consultancy / CA / Legal Services Office',
+    'Event Management Services',
+    'Catering Services',
+    'Cold Storage / Ice Factory',
+    'Godown / Warehouse (Storage of Goods)'
+  ];
+
   let mainFields = [
     {
       label: 'Address Line 1',
@@ -108,18 +160,19 @@ const BusinessPremisesSection = ({taskId}) => {
       city: Yup.string().required('City is required'),
       // district: Yup.string().required('District is required'),
       state: Yup.string().required('State is required'),
-       pincode: Yup.string()
-          .matches(/^[1-9][0-9]{5}$/, 'Pincode must be exactly 6 digits')
-          .required('Pincode is required'),
+      pincode: Yup.string()
+        .matches(/^[1-9][0-9]{5}$/, 'Pincode must be exactly 6 digits')
+        .required('Pincode is required'),
       nature_of_possession: Yup.string().required('Nature of possession is required'),
       trade_area: Yup.string().required('Trade Area is required'),
       road_type: Yup.string().required('Road Type is required'),
       address_proof: Yup.mixed().required('Address proof is required'),
-      rental_agreement: Yup.mixed().required('Rental Agreement/NOC is required'),
+      rental_agreement: Yup.mixed().required('Rental Agreement/NOC is required')
       // bankStatement: Yup.mixed().required('Bank Statement/Cancelled Cheque is required'),
       // additional_space: Yup.string().required('Please select if you have additional space')
     }),
     onSubmit: async (values) => {
+      setIsLoading(true);
       let url = businessPremises.id ? `/tradelicense/business-location/${businessPremises.id}/` : `/tradelicense/business-location/`;
       let formData = new FormData();
       formData.append('service_request', service_id);
@@ -177,10 +230,12 @@ const BusinessPremisesSection = ({taskId}) => {
           })
         );
       }
+      setIsLoading(false);
     }
   });
 
   const getBusinessPremises = async () => {
+    
     const url = `/tradelicense/business-location/by-request-or-task?service_request_id=${service_id}`;
     const { res } = await Factory('get', url);
     if (res.status_cd === 0 && res.data) {
@@ -199,16 +254,17 @@ const BusinessPremisesSection = ({taskId}) => {
         trade_description: data.trade_description || '',
         address_proof: data.address_proof || null,
         rental_agreement: data.rental_agreement || null,
-        bankStatement: data.bank_statement || null,
+        bankStatement: data.bank_statement || null
         // additional_space: data.additional_space || null,
       };
 
       formik.setValues(formValues);
       //  setbusinessPremises(res.data);
       setBusinessPremises({
-        ...data,
+        ...data
         // additional_space: data.additional_space || 'no'
       });
+        
     }
   };
   const renderField = (field, formikContext) => {
@@ -216,7 +272,11 @@ const BusinessPremisesSection = ({taskId}) => {
 
     switch (field.type) {
       case 'text':
-        return field.name === 'state' || field.name === 'nature_of_possession' || field.name === 'road_type' ? (
+        return field.name === 'state' ||
+          field.name === 'nature_of_possession' ||
+          field.name === 'road_type' ||
+          field.name === 'trade_premises' ||
+          field.name === 'trade_description' ? (
           <>
             <Typography variant="subtitle1" mb={1}>
               {field.label}
@@ -229,7 +289,11 @@ const BusinessPremisesSection = ({taskId}) => {
                   ? indian_States_And_UTs
                   : field.name === 'nature_of_possession'
                     ? ['Self Owned', 'Rented', 'Leased']
-                    : ['Single lane', 'Double lane', 'More than 2 lanes']
+                    : field.name === 'trade_premises'
+                      ? tradePremises
+                      : field.name === 'trade_description'
+                        ? tradeDescriptions
+                        : ['Single lane', 'Double lane', 'More than 2 lanes']
               }
               value={values[field.name]}
               onChange={(e, value) => setFieldValue(field.name, value)}
@@ -240,11 +304,11 @@ const BusinessPremisesSection = ({taskId}) => {
                   error={touched[field.name] && Boolean(errors[field.name])}
                   helperText={touched[field.name] && errors[field.name]}
                   sx={{
-              width: '100%',
-              '& .MuiInputBase-input': {
-                color: 'grey.600'
-              }
-            }}
+                    width: '100%',
+                    '& .MuiInputBase-input': {
+                      color: 'grey.600'
+                    }
+                  }}
                 />
               )}
             />
@@ -265,11 +329,11 @@ const BusinessPremisesSection = ({taskId}) => {
               error={touched[field.name] && Boolean(errors[field.name])}
               helperText={touched[field.name] && errors[field.name]}
               sx={{
-              width: '100%',
-              '& .MuiInputBase-input': {
-                color: 'grey.600'
-              }
-            }}
+                width: '100%',
+                '& .MuiInputBase-input': {
+                  color: 'grey.600'
+                }
+              }}
             />
           </>
         );
@@ -299,45 +363,45 @@ const BusinessPremisesSection = ({taskId}) => {
   useEffect(() => {
     getBusinessPremises();
   }, []);
+  if (isLoading) {
+    return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading business premises data...'} />;
+  }
   return (
     <>
       <Card sx={{ p: 3, mt: 4 }}>
         <form onSubmit={handleSubmit}>
           <Grid2 container spacing={2}>
             <Grid2 container alignItems="center" justifyContent="space-between" mb={2}>
-      <Grid2>
-    <Typography variant="h4" fontWeight={700}>
-      <span style={{ textDecoration: 'underline' }}>Business premises, location & proofs</span>
-    </Typography>
-  </Grid2>
-  <Grid2 sx={{ flexGrow: 1, ml: 95 }}>
-    <Box display="flex" justifyContent="flex-end" gap={1}>
-    
-      <RaiseRequest
-        fields={[
-                    'addressLine1',
-                    'addressLine2',
-                    'city',
-                    'district',
-                    'state',
-                    'pincode',
-                    'nature_of_possession',
-                    'trade_area',
-                    'road_type',
-                    'address_proof',
-                    'rental_agreement',
-                    'bankStatement',
-                    'additional_space',
-                    'trade_premises',
-                    'trade_description'
-        
-        ]}
-      
-        task_id={taskId}
-      />
-    </Box>
-  </Grid2>
-</Grid2>
+              <Grid2>
+                <Typography variant="h4" fontWeight={700}>
+                  <span style={{ textDecoration: 'underline' }}>Business premises, location & proofs</span>
+                </Typography>
+              </Grid2>
+              <Grid2 sx={{ flexGrow: 1, ml: 95 }}>
+                <Box display="flex" justifyContent="flex-end" gap={1}>
+                  <RaiseRequest
+                    fields={[
+                      'addressLine1',
+                      'addressLine2',
+                      'city',
+                      'district',
+                      'state',
+                      'pincode',
+                      'nature_of_possession',
+                      'trade_area',
+                      'road_type',
+                      'address_proof',
+                      'rental_agreement',
+                      'bankStatement',
+                      'additional_space',
+                      'trade_premises',
+                      'trade_description'
+                    ]}
+                    task_id={taskId}
+                  />
+                </Box>
+              </Grid2>
+            </Grid2>
             {[
               { label: 'Trade Premises', name: 'trade_premises', type: 'text' },
               { label: 'Trade Description', name: 'trade_description', type: 'text' }
@@ -397,7 +461,7 @@ const BusinessPremisesSection = ({taskId}) => {
                 <Button variant="contained" color="primary" type="submit">
                   Save
                 </Button>
-            
+
                 {/* <GetActionButtons
                   type="put"
                   urlEndpoint="business-location"
@@ -414,10 +478,11 @@ const BusinessPremisesSection = ({taskId}) => {
           </Grid2>
         </form>
       </Card>
-       <AdditionalPlaceOfBusiness 
+      <AdditionalPlaceOfBusiness
         businessPremises={businessPremises}
-           setBusinessPremises={setBusinessPremises} // ✅ Pass this down
-           taskId={taskId} />
+        setBusinessPremises={setBusinessPremises} // ✅ Pass this down
+        taskId={taskId}
+      />
     </>
   );
 };
