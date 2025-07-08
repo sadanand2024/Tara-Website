@@ -6,6 +6,8 @@ import BusinessIdentityStructureSection from './BusinessIdentityStructureSection
 import PromoterSignatorySection from './PromoterSignatorySection';
 import BusinessPremisesSection from './BusinessPremisesSection';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import CircularProgressComponent from 'utils/CircularProgressComponent';
+
 
 
 const StepOne = ({step, setStep}) => {
@@ -17,8 +19,12 @@ const StepOne = ({step, setStep}) => {
     promoterSignatoryTaskId: null,
     businessPremisesTaskId: null
   });
+    const [isLoading, setIsLoading] = useState(true);
+
 
   const fetchTaskIds = async () => {
+        setIsLoading(true);
+
     const url = `/labourlicense/service-request-section-data?service_request_id=${service_id}&section=applicant_and_business_info`;
     const { res } = await Factory('get', url);
     if (res.status_cd === 0 && res.data?.task_data) {
@@ -30,11 +36,16 @@ const StepOne = ({step, setStep}) => {
 
       
     }
+        setIsLoading(false);
+
   };
 
   useEffect(() => {
     fetchTaskIds();
   }, []);
+   if (isLoading) {
+    return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading business sections...'} />;
+  }
 
   return (
     <Box>

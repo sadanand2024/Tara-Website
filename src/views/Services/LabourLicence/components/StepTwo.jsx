@@ -12,8 +12,12 @@ import Factory from 'utils/Factory';
 import { useSearchParams } from 'react-router-dom';
 import RaiseRequest from '../../RaiseRequest';
 import GetActionButtons from '../../FormHelpers';
+import CircularProgressComponent from 'utils/CircularProgressComponent';
+
 const StepTwo = ({taskId, step, setStep}) => {
   const [searchParams] = useSearchParams();
+    const [isLoading, setIsLoading] = useState(false); // <-- Add loading state
+
   const service_id = searchParams.get('service_id');
    const [businessDocument, setbusinessDocument] = useState({
          task_id: null
@@ -34,6 +38,8 @@ const StepTwo = ({taskId, step, setStep}) => {
       memorandum_of_articles: Yup.mixed().required('MOA is required')
     }),
     onSubmit: async (values) => {
+            setIsLoading(true); // <-- Start loading
+
     
       let url = values.id ? `/labourlicense/registration-documents/${values.id}/` : `/labourlicense/registration-documents/`;
       const formData = new FormData();
@@ -76,19 +82,28 @@ const StepTwo = ({taskId, step, setStep}) => {
           })
         );
       }
+      setIsLoading(false); // <-- Stop loading
+
     }
   });
   const getRegistrationDocuments = async () => {
+        setIsLoading(true); // <-- Start loading
+
     const url = `/labourlicense/registration-documents/by-request-or-task?service_request_id=${service_id}`;
     const { res } = await Factory('get', url);
     if (res.status_cd === 0) {
       formik.setValues(res.data);
        setbusinessDocument(res.data);
     }
+        setIsLoading(false); // <-- Stop loading
+
   };
   useEffect(() => {
     getRegistrationDocuments();
   }, []);
+  if (isLoading) {
+    return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading registration documents...'} />;
+  }
   return (
     <>
     <Card sx={{ p: 3 }}>

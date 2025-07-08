@@ -10,6 +10,8 @@ import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
 import ApplicantDetails from './ApplicantDetails';
 import RaiseRequest from '../../RaiseRequest';
 import GetActionButtons from '../../FormHelpers';
+import CircularProgressComponent from 'utils/CircularProgressComponent';
+
 const typeOfBusinessOptions = [
   'Proprietorship',
   'Partnership',
@@ -78,6 +80,8 @@ const BusinessIdentityStructureSection = ({ taskId, applicantTaskId }) => {
   const [searchParams] = useSearchParams();
   const service_id = searchParams.get('service_id');
   const dispatch = useDispatch();
+   const [isLoading, setIsLoading] = useState(false);
+
   const [businessIdentityposttype, setBusinessIdentityposttype] = useState('post');
   const [businessInfo, setbusinessInfo] = useState({
     task_id: null
@@ -98,6 +102,7 @@ const BusinessIdentityStructureSection = ({ taskId, applicantTaskId }) => {
       business_pan: Yup.mixed().required('PAN is required')
     }),
     onSubmit: async (values) => {
+       setIsLoading(true);
       const url = businessIdentityposttype === 'put' ? `/tradelicense/business-identity/${values.id}/` : `/tradelicense/business-identity/`;
 
       const formData = new FormData();
@@ -135,7 +140,9 @@ const BusinessIdentityStructureSection = ({ taskId, applicantTaskId }) => {
           })
         );
         getBusinessIdentity();
+
       }
+       setIsLoading(false);
     }
   });
   const renderField = (field) => {
@@ -253,6 +260,10 @@ const BusinessIdentityStructureSection = ({ taskId, applicantTaskId }) => {
   useEffect(() => {
     getBusinessIdentity();
   }, []);
+   if (isLoading) {
+        console.log('Loading promoter data...', isLoading);
+        return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading promoter Data'} />;
+      }
   return (
     <Box>
       <Card sx={{ p: 3 }}>
