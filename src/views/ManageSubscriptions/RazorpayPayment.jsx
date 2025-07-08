@@ -14,7 +14,8 @@ export default function RazorparPayment({
   service_id,
   status,
   service_request_id,
-  moduleId
+  moduleId,
+  fromSub
 }) {
   const navigate = useNavigate();
   // console.log(service_id);
@@ -51,8 +52,6 @@ export default function RazorparPayment({
       } else {
         if (onFailure) onFailure();
       }
-      if (status === 'pending') navigate('/app/manage-tasks');
-      else navigate('/app/subscriptions');
     } catch (err) {
       if (onFailure) onFailure();
     }

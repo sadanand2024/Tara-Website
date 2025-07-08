@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { useNavigate } from 'react-router-dom';
 
 // material-ui
 import { Box, Button, Drawer, IconButton, Typography, Stack } from '@mui/material';
@@ -41,6 +42,7 @@ import SvgIcon from '@mui/material/SvgIcon';
 import IconArrowLeft from '@mui/icons-material/ArrowBack';
 
 const PlanDrawer = ({ open, onClose, moduleId, type, selectedTask }) => {
+  const navigate = useNavigate();
   const theme = useTheme();
   const [searchParams] = useSearchParams();
   const { themeDirection } = useConfig();
@@ -145,16 +147,19 @@ const PlanDrawer = ({ open, onClose, moduleId, type, selectedTask }) => {
             type="service"
             label="Purchase Now"
             status={'pending'}
+            fromSub={true}
             service_id={plan.service}
             contextId={user.active_context.id}
             userId={user.user.id}
             service_request_id={selectedTask?.id || ''}
             plan={plan}
             onSuccess={(response) => {
-              console.log('Payment Success:', response);
+              console.log('Payment Success');
+              navigate('/app/subscriptions');
             }}
             onFailure={() => {
               console.log('Payment Cancelled');
+              navigate('/app/subscriptions');
             }}
           />
         )}

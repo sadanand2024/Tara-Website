@@ -30,7 +30,8 @@ import {
   TableRow,
   Typography,
   IconButton,
-  Paper
+  Paper,
+  Pagination
 } from '@mui/material';
 
 // icons
@@ -248,8 +249,17 @@ const ManageSubscriptions = () => {
   const [openPlanDrawer, setOpenPlanDrawer] = useState(false);
   const [selectedServiceRequest, setSelectedServiceRequest] = useState(null);
   const [servicesPurchased, setServicesPurchased] = useState([]);
+  const [servicesPage, setServicesPage] = useState(1);
+  const [paymentPage, setPaymentPage] = useState(1);
+  const rowsPerPage = 5;
   const navigate = useNavigate();
   const user = useSelector((state) => state).accountReducer.user;
+
+  // Calculate paginated data
+  const totalServicesPages = Math.ceil(servicesPurchased.length / rowsPerPage);
+  const paginatedServices = servicesPurchased.slice((servicesPage - 1) * rowsPerPage, servicesPage * rowsPerPage);
+  const totalPaymentPages = Math.ceil(paymentHistory.length / rowsPerPage);
+  const paginatedPayments = paymentHistory.slice((paymentPage - 1) * rowsPerPage, paymentPage * rowsPerPage);
 
   useEffect(() => {
     const getPaymentHistory = async () => {
@@ -471,8 +481,8 @@ const ManageSubscriptions = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {servicesPurchased.length > 0 ? (
-                servicesPurchased.map((task, index) => (
+              {paginatedServices.length > 0 ? (
+                paginatedServices.map((task, index) => (
                   <TableRow
                     hover
                     key={task.id}
@@ -482,7 +492,7 @@ const ManageSubscriptions = () => {
                       }
                     }}
                   >
-                    <TableCell sx={{ pl: 3 }}>{index + 1}</TableCell>
+                    <TableCell sx={{ pl: 3 }}>{(servicesPage - 1) * rowsPerPage + index + 1}</TableCell>
                     <TableCell>{task.id}</TableCell>
                     <TableCell>{task?.service_label || '-'}</TableCell>
                     <TableCell>{task?.plan_name?.charAt(0)?.toUpperCase() + task?.plan_name?.slice(1) || '-'}</TableCell>
@@ -529,6 +539,16 @@ const ManageSubscriptions = () => {
             </TableBody>
           </Table>
         </TableContainer>
+        {servicesPurchased.length > rowsPerPage && (
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+            <Pagination
+              count={totalServicesPages}
+              page={servicesPage}
+              onChange={(e, value) => setServicesPage(value)}
+              color="primary"
+            />
+          </Box>
+        )}
       </Box>
 
       {/* Payment History */}
@@ -590,8 +610,8 @@ const ManageSubscriptions = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {paymentHistory?.length > 0 ? (
-                paymentHistory.map((payment) => (
+              {paginatedPayments?.length > 0 ? (
+                paginatedPayments.map((payment) => (
                   <TableRow key={payment.id}>
                     <TableCell>
                       <Typography variant="body1" color="text" fontWeight={500}>
@@ -653,6 +673,16 @@ const ManageSubscriptions = () => {
             </TableBody>
           </Table>
         </TableContainer>
+        {paymentHistory.length > rowsPerPage && (
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+            <Pagination
+              count={totalPaymentPages}
+              page={paymentPage}
+              onChange={(e, value) => setPaymentPage(value)}
+              color="primary"
+            />
+          </Box>
+        )}
       </Box>
       <PlanDrawer
         type="service"
