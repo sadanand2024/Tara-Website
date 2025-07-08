@@ -119,7 +119,6 @@ const AddItem = ({ type, setType, open, from, handleClose, selectedItem, busines
   const { values, setValues, touched, errors, handleSubmit, setFieldValue, handleBlur, resetForm } = formik;
 
   useEffect(() => {
-    console.log(type);
     if (type === 'edit' && selectedItem !== undefined) {
       setValues({
         type: selectedItem.type || 'Goods',
