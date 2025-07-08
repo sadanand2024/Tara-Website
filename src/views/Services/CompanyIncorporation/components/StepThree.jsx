@@ -19,6 +19,7 @@ import {
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import CircularProgressComponent from 'utils/CircularProgressComponent';
 
 import { useFormik, getIn } from 'formik';
 import RaiseRequest from '../../RaiseRequest';
@@ -40,11 +41,11 @@ const TabPanel = ({ children, value, index }) => {
 
 const StepThree = ({ step, setStep, onShareholderDelete }) => {
   const [searchParams] = useSearchParams();
+  const [isLoading, setIsLoading] = useState(false);
   const service_id = searchParams.get('service_id');
   const dispatch = useDispatch();
   const [tabIndex, setTabIndex] = useState(0);
   const [saveIndex, setSaveIndex] = useState(null);
-  const [loading, setLoading] = useState(false);
   const [taskIds, setTaskIds] = useState({
       shareHolder: null
     });
@@ -64,7 +65,7 @@ const StepThree = ({ step, setStep, onShareholderDelete }) => {
   // Fetch common data from backend on mount
         useEffect(() => {
     const fetchCommonShareholders = async () => {
-      setLoading(true);
+      setIsLoading(true);
       try {
         const url = `/companyincorporation/shareholders/by-request/?service_request_id=${service_id}`;
         const { res } = await Factory('get', url);
@@ -83,15 +84,18 @@ const StepThree = ({ step, setStep, onShareholderDelete }) => {
         }
       } catch (error) {
         setCommonShareholders([]);
-      } finally {
-        setLoading(false);
       }
+      //  finally {
+      //   setLoading(false);
+      // }
+      setIsLoading(false);
     };
           if (service_id) {
             fetchTaskId();
       fetchCommonShareholders();
           }
         }, [service_id]);
+        
 
 
   const shareholderFields = [
@@ -220,7 +224,7 @@ const StepThree = ({ step, setStep, onShareholderDelete }) => {
       )
     }),
     onSubmit: async (values, { setSubmitting, setErrors }) => {
-      setLoading(true);
+      setIsLoading(true); // Start loading
       try {
         const shareholder = values.shareholders[tabIndex];
         const formData = new FormData();
@@ -276,6 +280,7 @@ const StepThree = ({ step, setStep, onShareholderDelete }) => {
           ? `/companyincorporation/shareholders/${shareholder.id}/`
           : '/companyincorporation/shareholders/';
         const { res } = await Factory(shareholder.id ? 'put' : 'post', url, formData);
+        setIsLoading(false); // Stop loading
         if (res.status_cd === 0) {
           dispatch(openSnackbar({
             open: true,
@@ -321,16 +326,18 @@ const StepThree = ({ step, setStep, onShareholderDelete }) => {
         }));
         setErrors({ submit: error.message });
       } finally {
-        setLoading(false);
+        // setLoading(false);
         setSubmitting(false);
       }
+      setIsLoading(false);
     }
+    
   });
 
   const { values, errors, touched, handleChange, handleBlur, setFieldValue } = formik;
 
   const fetchShareholders = async () => {
-    setLoading(true);
+    setIsLoading(true);
     try {
       const url = `/companyincorporation/shareholders/by-request/?service_request_id=${service_id}`;
       const { res } = await Factory('get', url);
@@ -378,7 +385,7 @@ const StepThree = ({ step, setStep, onShareholderDelete }) => {
         close: false
       }));
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -620,6 +627,10 @@ const StepThree = ({ step, setStep, onShareholderDelete }) => {
         return null;
     }
   };
+  if (isLoading) {
+             
+              return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading Shareholders Details...'} />;
+            }
   return (
     <form onSubmit={formik.handleSubmit}>
       <Card sx={{ p: 3, mt: 4 }}>
