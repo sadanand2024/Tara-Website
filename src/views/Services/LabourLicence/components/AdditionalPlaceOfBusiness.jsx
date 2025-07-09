@@ -20,6 +20,9 @@ import Factory from 'utils/Factory';
 import GetActionButtons from '../../FormHelpers';
 import { indian_States_And_UTs } from 'utils/indian_States_And_UT';
 import * as Yup from 'yup';
+import CircularProgressComponent from 'utils/CircularProgressComponent';
+
+
 
 const additionalFields = [
   {
@@ -77,6 +80,8 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
 
   const [additionalSpace, setAdditionalSpace] = useState(businessPremises?.additional_space || null);
   const [workplace, seWorkPlace] = useState(businessPremises?.workplace || null);
+    const [isLoading, setIsLoading] = useState(false); // <-- Add loading state
+
 
     const clearFormFields = () => {
     setValues({
@@ -121,6 +126,8 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
       rental_agreement_additional: Yup.mixed().required('Rental Agreement/NOC is required')
     }),
     onSubmit: async (values) => {
+            setIsLoading(true); // <-- Start loading
+
       const url = values.id ? `/labourlicense/additional-space/${values.id}/` : `/labourlicense/additional-space/`;
       const formData = new FormData();
       formData.append('business_location_proofs', businessPremises.id);
@@ -171,6 +178,8 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
           })
         );
       }
+            setIsLoading(false); // <-- Stop loading
+
     }
   });
 
@@ -233,6 +242,9 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
   useEffect(() => {
     setAdditionalSpace(businessPremises?.additional_space ?? null);
   }, [businessPremises?.additional_space]);
+   if (isLoading) {
+    return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading additional place of business...'} />;
+  }
 
   const renderField = (field) => {
     switch (field.type) {

@@ -26,8 +26,12 @@ import { useSearchParams } from 'react-router-dom';
 import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
 import RaiseRequest from '../../RaiseRequest';
 import GetActionButtons from '../../FormHelpers';
+import CircularProgressComponent from 'utils/CircularProgressComponent';
+
 
 const PromoterSignatorySection = ({ taskId }) => {
+    const [isLoading, setIsLoading] = useState(false); 
+
   const [searchParams] = useSearchParams();
     const service_id = searchParams.get('service_id');
   const dispatch = useDispatch();
@@ -78,6 +82,7 @@ const PromoterSignatorySection = ({ taskId }) => {
   // };
   
   const getSignatoryDetails = async () => {
+    
   const url = `/labourlicense/signatory-details/by-request?service_request_id=${service_id}`;
   const { res } = await Factory('get', url);
   const signatorydetailsinfo = res?.data?.signatory_details_info ?? res?.signatory_details_info ?? [];
@@ -161,6 +166,7 @@ const PromoterSignatorySection = ({ taskId }) => {
     }),
     onSubmit: async (values) => {
       if (saveIndex === null) return; // No promoter to save
+      setIsLoading(true);
 
       const promoter = values.promoters[saveIndex];
 
@@ -233,6 +239,7 @@ const PromoterSignatorySection = ({ taskId }) => {
           })
         );
       }
+      setIsLoading(false);
 
       setSaveIndex(null); // Reset after save
     }
@@ -296,6 +303,9 @@ const PromoterSignatorySection = ({ taskId }) => {
   useEffect(() => {
     getSignatoryDetails();
   }, []);
+    if (isLoading) {
+    return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading promoter/signatory data...'} />;
+  }
 
   return (
     <form onSubmit={formik.handleSubmit}>

@@ -28,6 +28,7 @@ import { useSearchParams } from 'react-router-dom';
 import GetActionButtons from '../../FormHelpers';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import CircularProgressComponent from 'utils/CircularProgressComponent';
 
 
 const TabPanel = ({ children, value, index }) => {
@@ -40,10 +41,10 @@ const TabPanel = ({ children, value, index }) => {
 
 const StepTwo = ({ step, setStep }) => {
   const [searchParams] = useSearchParams();
+  const [isLoading, setIsLoading] = useState(false);
   const service_id = searchParams.get('service_id');
   const dispatch = useDispatch();
   const [tabIndex, setTabIndex] = useState(0);
-  const [loading, setLoading] = useState(false);
   const [directors, setDirectors] = useState([]);
  
 
@@ -324,7 +325,7 @@ const StepTwo = ({ step, setStep }) => {
     }),
    
     onSubmit: async (values, { setSubmitting, setErrors }) => {
-      setLoading(true);
+      setIsLoading(true); // Start loading
      
       try {
         const director = values.directors[tabIndex];
@@ -401,6 +402,7 @@ const StepTwo = ({ step, setStep }) => {
           : '/companyincorporation/directors/';
 
         const { res } = await Factory(director.id ? 'put' : 'post', url, formData);
+        setIsLoading(false); // Stop loading
         
         if (res.status_cd === 0) {
           dispatch(openSnackbar({
@@ -445,7 +447,7 @@ const StepTwo = ({ step, setStep }) => {
 
 
   const fetchDirectors = async () => {
-    setLoading(true);
+    setIsLoading(true);
     try {
       const url = `/companyincorporation/directors/by-request/?service_request_id=${service_id}`;
       const { res } = await Factory('get', url);
@@ -577,9 +579,11 @@ const StepTwo = ({ step, setStep }) => {
         alert: { color: 'error' },
         close: false
       }));
-    } finally {
-      setLoading(false);
-    }
+    } 
+    // finally {
+    //   setIsLoading(false);
+    // }
+    setIsLoading(false);
   };
 
 
@@ -588,6 +592,9 @@ const StepTwo = ({ step, setStep }) => {
       fetchDirectors();
     }
   }, [service_id]);
+  if (isLoading) {
+        return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading Director Details...'} />;
+      }
 
   const addDirector = () => {
     if (values.directors.length < 20) {

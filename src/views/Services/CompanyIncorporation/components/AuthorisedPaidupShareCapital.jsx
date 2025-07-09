@@ -8,6 +8,7 @@ import { useSearchParams } from 'react-router-dom';
 import {openSnackbar} from 'store/slices/snackbar';
 import RaiseRequest from '../../RaiseRequest';
 import GetActionButtons from '../../FormHelpers';
+import CircularProgressComponent from 'utils/CircularProgressComponent';
 
 
 // Utility function to format numbers with commas
@@ -25,9 +26,9 @@ const parseFormattedNumber = (value) => {
 
 const AuthorisedPaidupShareCapital = ({ taskId }) => {
   const [searchParams] = useSearchParams();
+  const [isLoading, setIsLoading] = useState(false);
   const service_id = searchParams.get('service_id');
   const dispatch = useDispatch();
-  const [isLoading, setIsLoading] = useState(false);
   const [authorisedPaidUp, setAuthorisedPaidUp] = useState({
     task_Id: null,
     id: null
@@ -109,6 +110,7 @@ const AuthorisedPaidupShareCapital = ({ taskId }) => {
     },
     validationSchema,
     onSubmit: async (values) => {
+      setIsLoading(true); // Start loading
       try {
         setIsLoading(true);
         const task_id = authorisedPaidUp.task_Id || taskId;
@@ -127,6 +129,7 @@ const AuthorisedPaidupShareCapital = ({ taskId }) => {
         formData.append('status', 'in progress');
 
         const { res } = await Factory(authorisedPaidUp.id ? 'put' : 'post', url, formData);
+        setIsLoading(false); // Stop loading
 
         if (res.status_cd === 0) {
           dispatch(
@@ -196,6 +199,7 @@ const AuthorisedPaidupShareCapital = ({ taskId }) => {
     } finally {
       setIsLoading(false);
     }
+    setIsLoading(false);
   };
 
   // Calculate number of shares when paid up capital or face value changes
@@ -215,6 +219,9 @@ const AuthorisedPaidupShareCapital = ({ taskId }) => {
   useEffect(() => {
     fetchAuthorisedPaidUp();
   }, [service_id]);
+  if (isLoading) {
+        return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading Authorised & Paidup Share Capital...'} />;
+      }
 
   const handleNumberInput = (e, fieldName) => {
     const value = e.target.value.replace(/[^0-9]/g, '');

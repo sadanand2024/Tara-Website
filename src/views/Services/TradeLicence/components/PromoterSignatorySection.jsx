@@ -25,11 +25,13 @@ import Factory from 'utils/Factory';
 import { useSearchParams } from 'react-router-dom';
 import RaiseRequest from '../../RaiseRequest';
 import GetActionButtons from '../../FormHelpers';
+import CircularProgressComponent from 'utils/CircularProgressComponent';
 
 import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
 
 const PromoterSignatorySection = ({ taskId }) => {
    const [searchParams] = useSearchParams();
+   const [isLoading, setIsLoading] = useState(false);
       const service_id = searchParams.get('service_id');
       const [promoterTaskId, setPromoterTaskId] = useState({
           id: null,
@@ -83,6 +85,7 @@ const PromoterSignatorySection = ({ taskId }) => {
   //   }
   // };
 const getSignatoryDetails = async () => {
+  
   const url = `/tradelicense/signatory-details/by-request-or-task?service_request_id=${service_id}`;
   const { res } = await Factory('get', url);
 
@@ -128,8 +131,11 @@ const getSignatoryDetails = async () => {
         alert: { color: 'error' },
         close: false
       })
+      
     );
+    
   }
+ 
 };
 
   const formik = useFormik({
@@ -166,11 +172,13 @@ const getSignatoryDetails = async () => {
       )
     }),
     onSubmit: async (values) => {
+    
       if (saveIndex === null) return; // No promoter to save
 
       const promoter = values.promoters[saveIndex];
 
       try {
+        setIsLoading(true);
         let formData = new FormData();
         formData.append('service_request', service_id);
         formData.append('service_task', taskId);
@@ -244,6 +252,7 @@ const getSignatoryDetails = async () => {
       }
 
       setSaveIndex(null); // Reset after save
+      setIsLoading(false);
     }
   });
 
@@ -305,6 +314,9 @@ const getSignatoryDetails = async () => {
   useEffect(() => {
     getSignatoryDetails();
   }, []);
+  if (isLoading) {
+    return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading promoter Data'} />;
+  }
   return (
     <form onSubmit={formik.handleSubmit}>
       <Card sx={{ p: 3, mt: 4 }}>

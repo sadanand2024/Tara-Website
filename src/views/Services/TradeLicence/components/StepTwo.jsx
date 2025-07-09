@@ -2,6 +2,8 @@ import React, { useEffect,useState } from 'react';
 import { Box, Typography, Button, Grid2,Card } from '@mui/material';
 import IconSave from '@mui/icons-material/Save';
 import { useFormik } from 'formik';
+import CircularProgressComponent from 'utils/CircularProgressComponent';
+
 
 
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
@@ -20,6 +22,8 @@ const StepTwo = ({taskId,tradelicencedetailsTaskId, step, setStep}) => {
 
   const [searchParams] = useSearchParams();
   const service_id = searchParams.get('service_id');
+    const [isLoading, setIsLoading] = useState(false);
+  
    const [tradeLicense, settradeLicense] = useState({
        task_id: null
     });
@@ -52,6 +56,7 @@ const StepTwo = ({taskId,tradelicencedetailsTaskId, step, setStep}) => {
       })
     }),
     onSubmit: async (values) => {
+       setIsLoading(true);
       // console.log(values);
       let url = values.id ? `/tradelicense/trade-license-exist/${values.id}/` : `/tradelicense/trade-license-exist/`;
       const formData = new FormData();
@@ -92,11 +97,13 @@ const StepTwo = ({taskId,tradelicencedetailsTaskId, step, setStep}) => {
           })
         );
       }
+      setIsLoading(false);
     }
   });
 
   // Fetch and set values for both forms
   const getTradeLicenseDeclaration = async () => {
+    setIsLoading(true);
     const url = `/tradelicense/trade-license-exist/by-request-or-task?service_request_id=${service_id}`;
     const { res } = await Factory('get', url);
     if (res.status_cd === 0) {
@@ -110,10 +117,15 @@ const StepTwo = ({taskId,tradelicencedetailsTaskId, step, setStep}) => {
       setValues(formattedData);
     settradeLicense(res.data);
     }
+      setIsLoading(false);
   };
   useEffect(() => {
     getTradeLicenseDeclaration();
   }, []);
+  if (isLoading) {
+      console.log('Loading promoter data...', isLoading);
+      return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading promoter Data'} />;
+    }
   const { values, setValues, setFieldValue, handleChange, errors, touched, handleSubmit, handleBlur } = formik;
   return (
     <>

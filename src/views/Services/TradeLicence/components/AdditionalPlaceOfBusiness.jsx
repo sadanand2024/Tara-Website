@@ -20,6 +20,8 @@ import Factory from 'utils/Factory';
 import { indian_States_And_UTs } from 'utils/indian_States_And_UT';
 import * as Yup from 'yup';
 import GetActionButtons from '../../FormHelpers';
+import CircularProgressComponent from 'utils/CircularProgressComponent';
+
 
 
 const additionalFields = [
@@ -38,7 +40,9 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
     const service_id = businessPremises?.service_request;
 
   const dispatch = useDispatch();
+
   const [additionalSpace, setAdditionalSpace] = useState(businessPremises?.additional_space || null);
+  const [isLoading, setIsLoading] = useState(false); 
 
   const formik = useFormik({
     initialValues: {
@@ -69,6 +73,7 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
       rental_agreement_additional: Yup.mixed().required('Rental Agreement/NOC is required')
     }),
     onSubmit: async (values) => {
+       setIsLoading(true);
       const url = values.id
         ? `/tradelicense/additional-space/${values.id}/`
         : `/tradelicense/additional-space/`;
@@ -95,6 +100,7 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
       }
 
       const { res } = await Factory(values.id ? 'put' : 'post', url, formData);
+        setIsLoading(false);
       if (res.status_cd === 0) {
         dispatch(
           openSnackbar({
@@ -153,6 +159,7 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
   };
 
   const fetchData = async () => {
+     
     if (businessPremises?.id && additionalSpace === true) {
       const url = `/tradelicense/additional-space/${businessPremises.id}/`;
       const { res } = await Factory('get', url);
@@ -173,6 +180,7 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
         });
       }
     }
+    
   };
 
   useEffect(() => {
@@ -194,6 +202,10 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
 
   fetchAdditionalSpace();
 }, [businessPremises?.service_request]);
+ if (isLoading) {
+    return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading additional place of business...'} />;
+  }
+
 
   const renderField = (field) => {
     switch (field.type) {
