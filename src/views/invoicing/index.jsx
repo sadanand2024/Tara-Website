@@ -116,7 +116,7 @@ const AnalyticsOverview = () => {
             <Button
               variant="outlined"
               size="small"
-              onClick={() => navigate('/app/invoice/settings')}
+              onClick={() => navigate('/app/invoice/settings?tabValue=0')}
               startIcon={<IconSettings2 size={18} />}
               sx={{
                 borderRadius: 2,

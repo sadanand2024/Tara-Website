@@ -58,7 +58,7 @@ export default function PayrollStatusSummary({ payrollId, financialYear, monthWi
           </Stack>
         ) : (
           <>
-            <Typography variant="h4" sx={{ mb: 2, fontWeight: 600 }}>
+            <Typography variant="h4" sx={{ mb: 2, color: 'primary.main' }}>
               Payroll Status Summary
             </Typography>
             <TableContainer component={Paper} sx={{ boxShadow: 3, borderRadius: 2 }}>
@@ -90,13 +90,13 @@ export default function PayrollStatusSummary({ payrollId, financialYear, monthWi
                         if (header === 'CTC') {
                           return (
                             <TableCell key={month} align="center">
-                              {data.ctc || 'NA'}
+                              {data.ctc || 0}
                             </TableCell>
                           );
                         } else if (header === 'Status') {
                           return (
                             <TableCell key={month} align="center">
-                              {data.status || 'NA'}
+                              {data.status || 0}
                             </TableCell>
                           );
                         } else if (header === 'Action') {
@@ -123,7 +123,7 @@ export default function PayrollStatusSummary({ payrollId, financialYear, monthWi
                                   </span>
                                 </Stack>
                               ) : (
-                                'NA'
+                                '-'
                               )}
                             </TableCell>
                           );

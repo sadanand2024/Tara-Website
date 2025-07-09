@@ -74,7 +74,7 @@ const PayrollSummaryGrid = ({ data, config, showJoineesExits = true }) => {
                   letterSpacing: '-0.5px'
                 }}
               >
-                {data ? Number(data[card.key] ?? 0).toLocaleString() : '0'}
+                {data ? Number(data[card.key] ?? 0).toLocaleString('en-IN') : '0'}
               </Typography>
               <Divider sx={{ my: 1, opacity: 0.6 }} />
               <Typography
@@ -157,11 +157,11 @@ const PayrollSummaryGrid = ({ data, config, showJoineesExits = true }) => {
                 }}
               >
                 <Box component="span" sx={{ color: 'success.main' }}>
-                  {data ? Number(data.total_new_joinees ?? 0).toLocaleString() : '0'}
+                  {data ? Number(data.total_new_joinees ?? 0).toLocaleString('en-IN') : '0'}
                 </Box>
                 {' / '}
                 <Box component="span" sx={{ color: 'error.main' }}>
-                  {data ? Number(data.total_exits ?? 0).toLocaleString() : '0'}
+                  {data ? Number(data.total_exits ?? 0).toLocaleString('en-IN') : '0'}
                 </Box>
               </Typography>
               <Divider sx={{ my: 1.5, opacity: 0.6 }} />

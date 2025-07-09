@@ -22,6 +22,7 @@ import { IconPlus } from '@tabler/icons-react';
 
 import { generateFinancialYears } from 'utils/FinancialYearsList';
 import MainCard from '../../ui-component/cards/MainCard';
+import { size } from 'lodash-es';
 /***************************  ANALYTICS - OVERVIEW  ***************************/
 
 const PayrollDashboard = () => {
@@ -224,7 +225,7 @@ const PayrollDashboard = () => {
         // background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
         // boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.15)',
         borderRadius: 4,
-        p: { xs: 1, md: 2 },
+        p: { xs: 1, md: 1 },
         animation: 'fadeIn 0.7s',
         '@keyframes fadeIn': {
           from: { opacity: 0, transform: 'translateY(24px)' },
@@ -234,7 +235,7 @@ const PayrollDashboard = () => {
       title={
         <Stack direction="row" alignItems="center" spacing={2}>
           {/* <IconSparkles size={28} color="#1976d2" /> */}
-          <Typography variant="h3" sx={{ fontWeight: 800, color: 'primary.main', letterSpacing: 1 }}>
+          <Typography variant="h4" sx={{ color: 'primary.main' }}>
             Payroll for {businessDetails?.nameOfBusiness}
           </Typography>
         </Stack>
@@ -300,7 +301,7 @@ const PayrollDashboard = () => {
       <Grid2 container spacing={{ xs: 2, md: 3 }}>
         <Grid2 size={{ xs: 12 }}>
           <Stack sx={{ gap: 4 }}>
-            <MainCard sx={{ boxShadow: '0 4px 24px 0 rgba(25, 118, 210, 0.08)', borderRadius: 3, p: { xs: 2, md: 3 } }}>
+            <MainCard sx={{ boxShadow: '0 4px 24px 0 rgba(25, 118, 210, 0.08)', borderRadius: 3, p: { xs: 2, md: 1 } }}>
               <Stack sx={{ gap: 3 }}>
                 <Stack direction="row" sx={{ gap: 2 }}>
                   <Stack
@@ -313,10 +314,7 @@ const PayrollDashboard = () => {
                     <Typography
                       variant="h4"
                       sx={{
-                        fontWeight: 700,
-                        color: 'primary.dark',
-                        letterSpacing: 0.5,
-                        textShadow: '0 2px 8px rgba(25, 118, 210, 0.08)'
+                        color: 'primary.main'
                       }}
                     >
                       Payroll for the Month of

@@ -389,7 +389,7 @@ const InvoiceDetails = ({
       // Normalize state values for comparison
       const normalizeState = (state) => (state ? state.toString().trim().toLowerCase() : '');
       // console.log(businessDetailsData);
-      const supplierStateDetails = businessDetailsData.gst_details.find((item) => item.gstin);
+      const supplierStateDetails = (businessDetailsData.gst_details || []).find((item) => item.gstin);
 
       const supplierState = normalizeState(supplierStateDetails.state);
 
