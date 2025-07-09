@@ -388,15 +388,20 @@ const InvoiceDetails = ({
 
       // Normalize state values for comparison
       const normalizeState = (state) => (state ? state.toString().trim().toLowerCase() : '');
+      // console.log(businessDetailsData);
+      const supplierStateDetails = businessDetailsData.gst_details.find((item) => item.gstin);
+
+      const supplierState = normalizeState(supplierStateDetails.state);
 
       const placeOfSupply = normalizeState(values.place_of_supply);
       const billingState = normalizeState(values.billing_address.state);
       const shippingState = values.shipping_address.state; // Don't normalize shipping state to check for exact "NA"
 
       // If shipping state is "NA" or empty string, consider it as same as billing state for GST calculation
-      const effectiveShippingState = shippingState === 'NA' || shippingState === '' ? billingState : normalizeState(shippingState);
+      // const effectiveShippingState = shippingState === 'NA' || shippingState === '' ? billingState : normalizeState(shippingState);
 
-      const isIntraState = placeOfSupply === billingState && placeOfSupply === effectiveShippingState;
+      // const isIntraState = placeOfSupply === billingState && placeOfSupply === effectiveShippingState;
+      const isIntraState = supplierState === placeOfSupply;
 
       if (isIntraState) {
         // If place of supply and both addresses are in same state, CGST and SGST
