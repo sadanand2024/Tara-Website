@@ -126,6 +126,12 @@ const StepTwo = ({taskId,tradelicencedetailsTaskId, step, setStep}) => {
       console.log('Loading promoter data...', isLoading);
       return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading promoter Data'} />;
     }
+    const getLabelWithAsterisk = (label, isRequired = true) => (
+  <span>
+    {label}
+    {isRequired && <span style={{ color: 'red', fontSize: '1.3em' }}> *</span>}
+  </span>
+);
   const { values, setValues, setFieldValue, handleChange, errors, touched, handleSubmit, handleBlur } = formik;
   return (
     <>
@@ -156,7 +162,10 @@ const StepTwo = ({taskId,tradelicencedetailsTaskId, step, setStep}) => {
         </Grid2>
           <Grid2 container spacing={2} alignItems="center">
             <Grid2 size={{ sm: 3, md: 3, xs: 12 }}>
-              <Typography variant="subtitle1">Apply for a new Trade Licence</Typography>
+              {/* <Typography variant="subtitle1">Apply for a new Trade Licence</Typography> */}
+              <Typography variant="subtitle1">
+  {getLabelWithAsterisk('Apply for a new Trade Licence')}
+</Typography>
             </Grid2>
             <Grid2 size={{ sm: 3, md: 3, xs: 12 }}>
               <Autocomplete
@@ -186,7 +195,10 @@ const StepTwo = ({taskId,tradelicencedetailsTaskId, step, setStep}) => {
             {values.apply_new_license?.value === false && (
               <>
                 <Grid2 size={{ sm: 3, md: 3, xs: 12 }}>
-                  <Typography style={{ whiteSpace: 'nowrap' }}>Enter TIN Number</Typography>
+                  {/* <Typography style={{ whiteSpace: 'nowrap' }}>Enter TIN Number</Typography> */}
+                  <Typography style={{ whiteSpace: 'nowrap' }}>
+  {getLabelWithAsterisk('Enter TIN Number')}
+</Typography>
                 </Grid2>
                 <Grid2 size={{ sm: 3, md: 3, xs: 12 }}>
                   <TextField

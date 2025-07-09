@@ -71,34 +71,40 @@ const fields = [
     label: 'Classification of Establishment',
     name: 'classification_of_establishment',
     type: 'autocomplete',
-    options: typeOfBusinessOptions
+    options: typeOfBusinessOptions,
+    required: true
   },
   {
     label: 'Category of Establishment',
     name: 'category_of_establishment',
     type: 'autocomplete',
-    options: categoryOfEstablishmentOptions
+    options: categoryOfEstablishmentOptions,
+    required: true
   },
   {
     label: 'Legal Name of Business',
     name: 'legalNameOfBusiness',
-    type: 'text'
+    type: 'text',
+    required: true
   },
   {
     label: 'Nature of Business',
     name: 'nature_of_business',
     type: 'autocomplete',
-    options: natureOfBusinessOptions
+    options: natureOfBusinessOptions,
+    required: true
   },
   {
     label: 'Date of Commencement',
     name: 'date_of_commencement',
-    type: 'date'
+    type: 'date',
+    required: true
   },
   {
     label: 'PAN',
     name: 'business_pan',
-    type: 'file'
+    type: 'file',
+    required: true
   }
 ];
 const BusinessIdentityStructureSection = ({ taskId }) => {
@@ -181,6 +187,12 @@ const BusinessIdentityStructureSection = ({ taskId }) => {
       setIsLoading(false);
     }
   });
+    const getLabelWithAsterisk = (label, isRequired = true) => (
+  <span>
+    {label}
+    {isRequired && <span style={{ color: 'red', fontSize: '1.3em' }}> *</span>}
+  </span>
+);
   const renderField = (field) => {
     switch (field.type) {
       case 'autocomplete':
@@ -344,9 +356,12 @@ const BusinessIdentityStructureSection = ({ taskId }) => {
         <Grid2 container spacing={2}>
           {fields.map((field) => (
             <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4 }}>
-              <Typography variant="subtitle1" mb={1}>
+              {/* <Typography variant="subtitle1" mb={1}>
                 {field.label}
-              </Typography>
+              </Typography> */}
+              <Typography variant="subtitle1" mb={1}>
+    {getLabelWithAsterisk(field.label, field.required)}
+  </Typography>
               {renderField(field)}
             </Grid2>
           ))}

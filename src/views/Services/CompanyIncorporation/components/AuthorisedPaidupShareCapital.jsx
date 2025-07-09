@@ -40,21 +40,24 @@ const AuthorisedPaidupShareCapital = ({ taskId }) => {
       name: 'authorized_share_capital',
       type: 'text',
       placeholder: 'Enter amount',
-      fullWidth: true
+      fullWidth: true,
+      required: true
     },
     {
       label: 'Paid Up Share Capital',
       name: 'paid_up_share_capital',
       type: 'text',
       placeholder: 'Enter amount',
-      fullWidth: true
+      fullWidth: true,
+      required: true
     },
     {
       label: 'Face Value Per Share',
       name: 'face_value_per_share',
       type: 'text',
       placeholder: 'Enter face value',
-      fullWidth: true
+      fullWidth: true,
+      required: true
     },
     {
       label: 'No. of Shares',
@@ -62,14 +65,16 @@ const AuthorisedPaidupShareCapital = ({ taskId }) => {
       type: 'text',
       placeholder: 'Auto-calculated',
       disabled: true,
-      fullWidth: true
+      fullWidth: true,
+      required: true
     },
     {
       label: 'Name of the Bank',
       name: 'bank_name',
       type: 'text',
       placeholder: 'Enter bank name',
-      fullWidth: true
+      fullWidth: true,
+      required: true
     }
   ];
 
@@ -255,6 +260,12 @@ const AuthorisedPaidupShareCapital = ({ taskId }) => {
       disabled={field.disabled || isLoading}
     />
   );
+  const getLabelWithAsterisk = (label, isRequired = true) => (
+  <span>
+    {label}
+    {isRequired && <span style={{ color: 'red', fontSize: '1.2em' }}> *</span>}
+  </span>
+);
 
   return (
     <Box mt={4}>
@@ -281,9 +292,14 @@ const AuthorisedPaidupShareCapital = ({ taskId }) => {
           <Grid2 container spacing={2}>
             {formFields.map((field) => (
               <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4 }}>
-                <Typography variant='subtitle1' mb={1}>
+                {/* <Typography variant='subtitle1' mb={1}>
                   {field.label}
+                </Typography> */}
+                 <Typography variant='subtitle1' mb={1}>
+                   {getLabelWithAsterisk(field.label, field.required)}
+
                 </Typography>
+                
                 {renderField(field)}
               </Grid2>
             ))}

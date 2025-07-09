@@ -24,38 +24,45 @@ const fields = [
   {
     label: 'Name',
     name: 'name',
-    type: 'text'
+    type: 'text',
+       required: true
   },
   {
     label: 'Designation',
     name: 'designation',
     type: 'autocomplete',
-    options: DESIGNATION_CHOICES
+    options: DESIGNATION_CHOICES,
+    required: true
   },
   {
     label: 'Mobile Number',
     name: 'mobile_number',
-    type: 'text'
+    type: 'text',
+    required: true
   },
   {
     label: 'Email',
     name: 'email',
-    type: 'text'
+    type: 'text',
+    required: true
   },
   {
     label: 'Aadhaar Image',
     name: 'aadhaar_image',
-    type: 'file'
+    type: 'file',
+    required: true
   },
   {
     label: 'PAN Image',
     name: 'pan_image',
-    type: 'file'
+    type: 'file',
+    required: true
   },
   {
     label: 'Photo',
     name: 'passport_photo',
-    type: 'file'
+    type: 'file',
+    required: true
   }
 ];
 
@@ -261,6 +268,12 @@ const ApplicantDetails = ({ applicantTaskId }) => {
         console.log('Loading promoter data...', isLoading);
         return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading promoter Data'} />;
       }
+      const getLabelWithAsterisk = (label, isRequired = true) => (
+  <span>
+    {label}
+    {isRequired && <span style={{ color: 'red', fontSize: '1.3em' }}> *</span>}
+  </span>
+);
   const { values, handleChange, handleBlur, setFieldValue, touched, errors, handleSubmit, setValues } = formik;
 
   return (
@@ -294,9 +307,12 @@ const ApplicantDetails = ({ applicantTaskId }) => {
         <Grid2 container spacing={2}>
           {fields.map((field) => (
             <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4 }}>
-              <Typography variant="subtitle1" mb={1}>
+              {/* <Typography variant="subtitle1" mb={1}>
                 {field.label}
-              </Typography>
+              </Typography> */}
+              <Typography variant="subtitle1" mb={1}>
+  {getLabelWithAsterisk(field.label, field.required)}
+</Typography>
               {renderField(field)}
             </Grid2>
           ))}

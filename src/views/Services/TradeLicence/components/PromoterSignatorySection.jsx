@@ -317,6 +317,14 @@ const getSignatoryDetails = async () => {
   if (isLoading) {
     return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading promoter Data'} />;
   }
+  const getLabelWithAsterisk = (label, isRequired = false) => {
+  return (
+    <span>
+      {label}
+      {isRequired && <span style={{ color: 'red',fontSize: '1.3em' }}> *</span>}
+    </span>
+  );
+};
   return (
     <form onSubmit={formik.handleSubmit}>
       <Card sx={{ p: 3, mt: 4 }}>
@@ -385,6 +393,7 @@ const getSignatoryDetails = async () => {
                 <TableRow key={idx}>
                   {/* Name */}
                   <TableCell>
+                    
                     <TextField
                       fullWidth
                       sx={{
@@ -392,7 +401,9 @@ const getSignatoryDetails = async () => {
                         maxWidth: 200
                       }}
                       size="small"
-                      label="Name"
+                      // label="Name"
+                       label={getLabelWithAsterisk('Name', true)}
+                      
                       name={`promoters[${idx}].name`}
                       value={promoter.name}
                       onChange={handleChange}
@@ -405,7 +416,9 @@ const getSignatoryDetails = async () => {
                   {/* Aadhaar Upload */}
                   <TableCell>
                     <RenderFileUpload
-                      label="Aadhaar"
+                      // label="Aadhaar"
+                    label={getLabelWithAsterisk('Aadhaar', true)}
+
                       fieldName={`promoters[${idx}].aadhar_image`}
                       file={promoter.aadhar_image}
                       setFieldValue={setFieldValue}
@@ -417,7 +430,9 @@ const getSignatoryDetails = async () => {
                   {/* PAN Upload */}
                   <TableCell>
                     <RenderFileUpload
-                      label="PAN"
+                      // label="PAN"
+                     label={getLabelWithAsterisk('PAN', true)}
+
                       fieldName={`promoters[${idx}].pan_image`}
                       file={promoter.pan_image}
                       setFieldValue={setFieldValue}
@@ -429,7 +444,9 @@ const getSignatoryDetails = async () => {
                   {/* Photo Upload */}
                   <TableCell>
                     <RenderFileUpload
-                      label="Photo"
+                      // label="Photo"
+                    label={getLabelWithAsterisk('Photo', true)}
+
                       fieldName={`promoters[${idx}].passport_photo`}
                       file={promoter.passport_photo}
                       setFieldValue={setFieldValue}
@@ -443,7 +460,9 @@ const getSignatoryDetails = async () => {
                     <TextField
                       fullWidth
                       size="small"
-                      label="Mobile"
+                      // label="Mobile"
+                  label={getLabelWithAsterisk('Mobile', true)}
+
                       sx={{
                         minWidth: 150,
                         maxWidth: 150
@@ -462,7 +481,9 @@ const getSignatoryDetails = async () => {
                     <TextField
                       fullWidth
                       size="small"
-                      label="Email"
+                      // label="Email"
+                    label={getLabelWithAsterisk('Email', true)}
+
                       sx={{
                         minWidth: 150,
                         maxWidth: 150
@@ -486,7 +507,8 @@ const getSignatoryDetails = async () => {
                       <TextField
                         fullWidth
                         size="small"
-                        label="Address"
+                        // label="Address"
+                        label={getLabelWithAsterisk('Address', true)}
                         name={`promoters[${idx}].address`}
                         value={promoter.address}
                         onChange={handleChange}

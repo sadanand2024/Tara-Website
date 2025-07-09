@@ -27,52 +27,62 @@ const BusinessPremisesSection = ({ taskId }) => {
     {
       label: 'Address Line 1',
       name: 'addressLine1',
-      type: 'text'
+      type: 'text',
+      required: true
     },
     {
       label: 'Address Line 2',
       name: 'addressLine2',
-      type: 'text'
+      type: 'text',
+      required: true
     },
     {
       label: 'City',
       name: 'city',
-      type: 'text'
+      type: 'text',
+      required: true
     },
     {
       label: 'District',
       name: 'district',
-      type: 'text'
+      type: 'text',
+      required: true
     },
     {
       label: 'State',
       name: 'state',
-      type: 'text'
+      type: 'text',
+      required: true
     },
     {
       label: 'Pincode',
       name: 'pincode',
-      type: 'text'
+      type: 'text',
+      required: true,
     },
     {
       label: 'Nature of possession',
       name: 'nature_of_possession',
-      type: 'text'
+      type: 'text',
+      required: true
     },
     {
       label: 'Address proof',
       name: 'address_proof',
-      type: 'file'
+      type: 'file',
+      required: true
     },
     {
       label: 'Rental Agreement/NOC',
       name: 'rental_agreement',
-      type: 'file'
+      type: 'file',
+      required: true
     },
     {
       label: 'Bank Statement/Cancelled Cheque',
       name: 'bankStatement',
-      type: 'file'
+      type: 'file',
+      required: true
     }
   ];
 
@@ -198,6 +208,12 @@ const BusinessPremisesSection = ({ taskId }) => {
       });
     }
   };
+   const getLabelWithAsterisk = (label, isRequired) => (
+  <span>
+    {label}
+    {isRequired && <span style={{ color: 'red', fontSize: '1.3rem' }}> *</span>}
+  </span>
+);
   const renderField = (field, formikContext) => {
     const { values, errors, touched, handleChange, handleBlur, setFieldValue } = formikContext;
 
@@ -205,9 +221,12 @@ const BusinessPremisesSection = ({ taskId }) => {
       case 'text':
         return field.name === 'state' || field.name === 'nature_of_possession' ? (
           <>
-            <Typography variant="subtitle1" mb={1}>
+            {/* <Typography variant="subtitle1" mb={1}>
               {field.label}
-            </Typography>
+            </Typography> */}
+             <Typography variant="subtitle1" mb={1}>
+                         {getLabelWithAsterisk(field.label, field.required)}
+                      </Typography>
             <Autocomplete
               fullWidth
               size="small"
@@ -232,9 +251,12 @@ const BusinessPremisesSection = ({ taskId }) => {
           </>
         ) : (
           <>
-            <Typography variant="subtitle1" mb={1}>
+            {/* <Typography variant="subtitle1" mb={1}>
               {field.label}
-            </Typography>
+            </Typography> */}
+             <Typography variant="subtitle1" mb={1}>
+              {getLabelWithAsterisk(field.label, field.required)}
+             </Typography>
             <TextField
               fullWidth
               size="small"
@@ -259,9 +281,12 @@ const BusinessPremisesSection = ({ taskId }) => {
       case 'file':
         return (
           <>
-            <Typography variant="subtitle1" mb={1}>
+            {/* <Typography variant="subtitle1" mb={1}>
               {field.label}
-            </Typography>
+            </Typography> */}
+            <Typography variant="subtitle1" mb={1}>
+                {getLabelWithAsterisk(field.label, field.required)}
+              </Typography>
             <RenderFileUpload
               label={field.label}
               fieldName={field.name}

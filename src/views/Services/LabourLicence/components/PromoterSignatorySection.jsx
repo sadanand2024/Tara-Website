@@ -306,6 +306,14 @@ const PromoterSignatorySection = ({ taskId }) => {
     if (isLoading) {
     return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading promoter/signatory data...'} />;
   }
+  const getLabelWithAsterisk = (label, isRequired = false) => {
+  return (
+    <span>
+      {label}
+      {isRequired && <span style={{ color: 'red',fontSize: '1.3em' }}> *</span>}
+    </span>
+  );
+};
 
   return (
     <form onSubmit={formik.handleSubmit}>
@@ -382,7 +390,9 @@ const PromoterSignatorySection = ({ taskId }) => {
                         minWidth: 150,
                         maxWidth: 150
                       }}
-                      label="Name"
+                      // label="Name"
+                   label={getLabelWithAsterisk('Name', true)}
+
                       name={`promoters[${idx}].name`}
                       value={promoter.name}
                       onChange={handleChange}
@@ -395,7 +405,9 @@ const PromoterSignatorySection = ({ taskId }) => {
                   {/* Aadhaar Upload */}
                   <TableCell>
                     <RenderFileUpload
-                      label="Aadhaar"
+                      // label="Aadhaar"
+                 label={getLabelWithAsterisk('Aadhaar', true)}
+
                       fieldName={`promoters[${idx}].aadhar_image`}
                       file={promoter.aadhar_image}
                       
@@ -408,7 +420,9 @@ const PromoterSignatorySection = ({ taskId }) => {
                   {/* PAN Upload */}
                   <TableCell>
                     <RenderFileUpload
-                      label="PAN"
+                      // label="PAN"
+                     label={getLabelWithAsterisk('PAN', true)}
+
                       fieldName={`promoters[${idx}].pan_image`}
                       file={promoter.pan_image}
                       setFieldValue={setFieldValue}
@@ -420,7 +434,9 @@ const PromoterSignatorySection = ({ taskId }) => {
                   {/* Photo Upload */}
                   <TableCell>
                     <RenderFileUpload
-                      label="Photo"
+                      // label="Photo"
+                    label={getLabelWithAsterisk('Photo', true)}
+
                       fieldName={`promoters[${idx}].photo_image`}
                       file={promoter.photo_image}
                       setFieldValue={setFieldValue}
@@ -434,7 +450,8 @@ const PromoterSignatorySection = ({ taskId }) => {
                     <TextField
                       fullWidth
                       size="small"
-                      label="Mobile"
+                      // label="Mobile"
+                    label={getLabelWithAsterisk('Mobile', true)}
                       sx={{
                         minWidth: 150,
                         maxWidth: 150
@@ -453,7 +470,8 @@ const PromoterSignatorySection = ({ taskId }) => {
                     <TextField
                       fullWidth
                       size="small"
-                      label="Email"
+                      // label="Email"
+                    label={getLabelWithAsterisk('Email', true)}
                        sx={{
                         minWidth: 150,
                         maxWidth: 150
@@ -477,7 +495,8 @@ const PromoterSignatorySection = ({ taskId }) => {
                       <TextField
                         fullWidth
                         size="small"
-                        label="Address"
+                        // label="Address"
+                      label={getLabelWithAsterisk('Address', true)}
                         sx={{
                         minWidth: 150,
                         maxWidth: 150

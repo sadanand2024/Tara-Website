@@ -60,43 +60,51 @@ const ProposalCompanyDetails = ({taskId}) => {
     {
       label: 'Proposed Company Name1',
       name: 'name_1',
-      type: 'text'
+      type: 'text',
+      required: true
     },
     {
       label: 'Proposed Company Name2',
       name: 'name_2',
-      type: 'text'
+      type: 'text',
+       required: true
     },
     {
       label: 'Proposed Company Name3',
       name: 'name_3',
-      type: 'text'
+      type: 'text',
+       required: true
     },
     {
       label: 'Main objectives of the company',
       name: 'objectives_of_company',
-      type: 'text'
+      type: 'text',
+       required: true
     },
     {
       label: 'Business Activity',
       name: 'business_activity',
       type: 'autocomplete',
-      options: typeOfBusinessActivityOptions
+      options: typeOfBusinessActivityOptions,
+       required: true
     },
     {
       label: 'NIC Code',
       name: 'nic_code',
-      type: 'text'
+      type: 'text',
+       required: true
     },
     {
       label: 'Mobile Number',
       name: 'mobile_number',
-      type: 'text'
+      type: 'text',
+       required: true
     },
     {
       label: 'Email Address',
       name: 'email',
-      type: 'text'
+      type: 'text',
+       required: true
     }
   ];
 
@@ -213,6 +221,12 @@ const ProposalCompanyDetails = ({taskId}) => {
   }
   setIsLoading(false);
 };
+const getLabelWithAsterisk = (label, isRequired = true) => (
+  <span>
+    {label}
+    {isRequired && <span style={{ color: 'red', fontSize: '1.2em' }}> *</span>}
+  </span>
+);
 
 
 
@@ -327,8 +341,11 @@ const ProposalCompanyDetails = ({taskId}) => {
             {fields.map((field) => (
               <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4 }}>
                 <Typography variant='subtitle1' mb={1}>
-                  {field.label}
+                   {getLabelWithAsterisk(field.label, field.required)}
+
                 </Typography>
+                
+                
                 {renderField(field)}
               </Grid2>
             ))}
