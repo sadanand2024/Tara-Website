@@ -86,7 +86,7 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
       country: Yup.string().required('Country is required'),
       state: Yup.string().required('State is required'),
       postal_code: Yup.number().typeError('Pincode must be a number').required('Pincode is required'),
-      email: Yup.string().email('Invalid email').required('Email is required'),
+      // email: Yup.string().email('Invalid email').required('Email is required'),
       mobile_number: Yup.string().required('Mobile number is required'),
       opening_balance: Yup.number().typeError('Opening Balance must be a number').required('Opening Balance is required'),
       has_multiple_branches: Yup.boolean().required('Please select if you have multiple branches'),

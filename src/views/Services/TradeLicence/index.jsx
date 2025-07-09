@@ -12,35 +12,34 @@ const steps = [
 ];
 
 const TradeLicenceRegistration = () => {
-
-const [searchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const service_id = searchParams.get('service_id');
   const [step, setStep] = React.useState(0);
   const activeStep = step;
   const handleStepClick = (targetStep) => {
     if (targetStep <= step + 1) setStep(targetStep);
   };
-   const [taskIds, setTaskIds] = useState({
+  const [taskIds, setTaskIds] = useState({
     businessdocumentdetails: null,
-  tradelicencedetails: null
+    tradelicencedetails: null
   });
-      const fetchTaskId = async () => {
-      const url = `/tradelicense/service-request-section-data?service_request_id=${service_id}&section=document_related_info`;
-      const { res } = await Factory('get', url);
-     if (res.status_cd === 0 && res.data?.tasks) {
+  const fetchTaskId = async () => {
+    const url = `/tradelicense/service-request-section-data?service_request_id=${service_id}&section=document_related_info`;
+    const { res } = await Factory('get', url);
+    if (res.status_cd === 0 && res.data?.tasks) {
       const tasks = res.data.tasks;
-        setTaskIds({businessdocumentdetails: tasks["Business Document Details"]?.task_id || null,
-          tradelicencedetails: tasks["Trade License Details"]?.task_id || null});
-        
-      }
-    };
-  
-    useEffect(() => {
-     
-      if (service_id) {
-        fetchTaskId();
-      }
-    }, [service_id]);
+      setTaskIds({
+        businessdocumentdetails: tasks['Business Document Details']?.task_id || null,
+        tradelicencedetails: tasks['Trade License Details']?.task_id || null
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (service_id) {
+      fetchTaskId();
+    }
+  }, [service_id]);
 
   return (
     <Card sx={{ minHeight: '100vh', p: { xs: 1, md: 4 } }}>
@@ -91,16 +90,16 @@ const [searchParams] = useSearchParams();
             ))}
           </Box>
 
-          {step === 0 && <StepOne  step={step} setStep={setStep}/>}
+          {step === 0 && <StepOne step={step} setStep={setStep} />}
 
-{step === 1 && (
-  <StepTwo
-    taskId={taskIds.businessdocumentdetails}
-    tradelicencedetailsTaskId={taskIds.tradelicencedetails}
-    step={step}
-          setStep={setStep}
-  />
-)}
+          {step === 1 && (
+            <StepTwo
+              taskId={taskIds.businessdocumentdetails}
+              tradelicencedetailsTaskId={taskIds.tradelicencedetails}
+              step={step}
+              setStep={setStep}
+            />
+          )}
 
           {step === 2 && <StepThree step={step} setStep={setStep} />}
         </Paper>
