@@ -261,8 +261,6 @@ const BookConsultationPage = () => {
     const newErrors = validate();
     setErrors(newErrors);
 
-    // Format the date to YYYY-MM-DD
-    // const formattedDate = selectedDateObj.toISOString().split('T')[0];
     const formattedDate = `${selectedDateObj.getFullYear()}-${String(selectedDateObj.getMonth() + 1).padStart(2, '0')}-${String(selectedDateObj.getDate()).padStart(2, '0')}`;
 
     let data = {
@@ -271,7 +269,7 @@ const BookConsultationPage = () => {
       mobile_number: form.mobile_number,
       message: form.notes,
       date: formattedDate,
-      time: selectedTime
+      time: to24HourFormat(selectedTime) // <-- convert to 24-hour format here
     };
 
     if (Object.keys(newErrors).length === 0) {
@@ -284,7 +282,6 @@ const BookConsultationPage = () => {
             anchorOrigin: { vertical: 'top', horizontal: 'right' },
             autoHideDuration: 3000
           });
-          // getBookedConsultations(formattedDate);
           handleReset();
         })
         .catch((error) => {
@@ -562,9 +559,11 @@ const BookConsultationPage = () => {
                 No available time slots for this day.
               </Typography>
             ) : (
-              timeSlots
-                .filter((slot) => !bookedSlots.includes(slot))
-                .map((slot) => (
+              timeSlots.map((slot) => {
+                // Convert slot to 24-hour format for comparison
+                const slot24 = to24HourFormat(slot);
+                const isBooked = bookedSlots.includes(slot24);
+                return (
                   <Box
                     key={slot}
                     sx={{
@@ -577,6 +576,7 @@ const BookConsultationPage = () => {
                     <Button
                       variant={selectedTime === slot ? 'contained' : 'outlined'}
                       color={selectedTime === slot ? 'inherit' : 'primary'}
+                      disabled={isBooked}
                       sx={{
                         ...styles.timeSlotButton,
                         width: selectedTime === slot ? 96 : 200,
@@ -584,12 +584,16 @@ const BookConsultationPage = () => {
                         color: selectedTime === slot ? '#fff' : theme.palette.primary.main,
                         borderColor: selectedTime === slot ? theme.palette.primary.dark : theme.palette.primary.main,
                         boxShadow: selectedTime === slot ? 2 : 0,
+                        opacity: isBooked ? 0.5 : 1,
+                        cursor: isBooked ? 'not-allowed' : 'pointer',
                         '&:hover': {
                           bgcolor: selectedTime === slot ? theme.palette.primary.dark : theme.palette.primary.main,
                           color: '#fff'
                         }
                       }}
-                      onClick={() => setSelectedTime(slot)}
+                      onClick={() => {
+                        if (!isBooked) setSelectedTime(slot);
+                      }}
                     >
                       {slot}
                     </Button>
@@ -603,7 +607,7 @@ const BookConsultationPage = () => {
                         verticalAlign: 'middle'
                       }}
                     >
-                      {selectedTime === slot && (
+                      {selectedTime === slot && !isBooked && (
                         <Button
                           variant="contained"
                           color="primary"
@@ -625,7 +629,8 @@ const BookConsultationPage = () => {
                       )}
                     </Box>
                   </Box>
-                ))
+                );
+              })
             )}
           </Box>
         </Box>
@@ -636,7 +641,7 @@ const BookConsultationPage = () => {
     <Box sx={styles.rightPanel}>
       <Box sx={{ px: { xs: 2, sm: 6 }, pt: { xs: 2, sm: 6 }, pb: 0, maxWidth: 600, width: '100%' }}>
         <Typography variant="h6" sx={{ mb: { xs: 1, sm: 3 }, color: theme.palette.text.primary, fontSize: { xs: 16, sm: 22 } }}>
-          Enter Details
+          Enter Detail
         </Typography>
         <Box component="form" noValidate autoComplete="off" onSubmit={handleSubmit}>
           <Typography variant="subtitle1" sx={{ textAlign: 'left', mb: 0.5, color: theme.palette.text.primary }}>
@@ -744,32 +749,8 @@ const BookConsultationPage = () => {
     try {
       const response = await axios.get(`${baseURL}/user_management/booked-consultations/?date=${date}`);
       if (response.data && response.data.booked_times) {
-        // Convert booked times to 12-hour format to match our timeSlots format
-        const formattedBookedSlots = response.data.booked_times.map((time) => {
-          const [hours, minutes] = time.split(':');
-          let hour = parseInt(hours);
-          let ampm = 'AM';
-
-          // For hours 1-6, they should be PM
-          if (hour >= 1 && hour <= 6) {
-            ampm = 'PM';
-            if (hour === 12) {
-              hour = 12;
-            } else {
-              hour = hour + 12; // Convert to 24-hour format first
-            }
-          }
-
-          // Now convert to 12-hour format
-          if (hour > 12) {
-            hour = hour - 12;
-          } else if (hour === 0) {
-            hour = 12;
-          }
-
-          return `${hour}:${minutes}${ampm}`;
-        });
-        setBookedSlots(formattedBookedSlots);
+        // Keep bookedSlots in 24-hour format as received from backend
+        setBookedSlots(response.data.booked_times);
       }
     } catch (error) {
       setBookedSlots([]);
@@ -812,3 +793,14 @@ const BookConsultationPage = () => {
 };
 
 export default BookConsultationPage;
+
+function to24HourFormat(time12h) {
+  if (!time12h) return '';
+  const match = time12h.match(/^(\d{1,2}):(\d{2})(AM|PM)$/i);
+  if (!match) return time12h;
+  let [_, hour, minute, ampm] = match;
+  hour = parseInt(hour, 10);
+  if (ampm.toUpperCase() === 'PM' && hour !== 12) hour += 12;
+  if (ampm.toUpperCase() === 'AM' && hour === 12) hour = 0;
+  return `${hour.toString().padStart(2, '0')}:${minute}`;
+}

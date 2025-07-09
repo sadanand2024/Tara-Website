@@ -5,6 +5,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import IconButton from '@mui/material/IconButton';
 import GetActionButtons from '../FormHelpers';
 import { useSnackbar } from 'notistack';
+import CircularProgress from '@mui/material/CircularProgress';
+
 import {
   Box,
   Typography,
@@ -115,6 +117,8 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
     }
   };
   const { enqueueSnackbar } = useSnackbar();
+  const [isLoading, setIsLoading] = useState(false);
+
   const [investments, setInvestments] = React.useState([{ investment: '', amount: '', file: null }]);
   const [donations, setDonations] = React.useState([{ name: '', amount: '', mode: '', file: null }]);
   const [mediclaim, setMediclaim] = React.useState({
@@ -199,6 +203,13 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
       }
     }
   }, [deductions]);
+   if (isLoading) {
+    return (
+      <Box sx={{ textAlign: 'center', py: 6 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Box>
@@ -307,6 +318,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                             variant="contained"
                             color="primary"
                             onClick={async () => {
+                              setIsLoading(true);
                               const formData = new FormData();
                               formData.append('deductions', deductions.data.id);
                               formData.append('name', row.name || '');
@@ -339,6 +351,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                                   variant: 'error'
                                 });
                               }
+                              setIsLoading(false);
                             }}
                           >
                             Save
@@ -396,6 +409,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
         }}
         enableReinitialize
         onSubmit={async (values) => {
+          setIsLoading(true);
           const formData = new FormData();
           formData.append('deductions', deductions.data.id);
           formData.append('amount', values.amount || '');
@@ -420,6 +434,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
               variant: 'error'
             });
           }
+          setIsLoading(false);
         }}
       >
         {({ values, setFieldValue }) => (
@@ -547,6 +562,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
         }}
         enableReinitialize
         onSubmit={async (values) => {
+          setIsLoading(true);
           const formData = new FormData();
           formData.append('deductions', deductions.data.id);
           formData.append('loan_outstanding_as_on_31st_march', values.loan_outstanding_as_on_31st_march || '');
@@ -569,6 +585,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
               variant: 'error'
             });
           }
+          setIsLoading(false);
         }}
       >
         {({ values, setFieldValue }) => (
@@ -660,6 +677,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
         }}
         enableReinitialize
         onSubmit={async (values) => {
+          setIsLoading(true);
           const formData = new FormData();
           formData.append('vehicle_registration_number', values.vehicle_registration_number || '');
           formData.append('deductions', deductions.data.id);
@@ -681,6 +699,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
               variant: 'error'
             });
           }
+          setIsLoading(false);
         }}
       >
         {({ values, setFieldValue }) => (
@@ -762,6 +781,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
         }}
         enableReinitialize
         onSubmit={async (values) => {
+          setIsLoading(true);
           const formData = new FormData();
           formData.append('deductions', deductions.data.id);
           formData.append('total_saving_interest', values.total_saving_interest || '');
@@ -797,6 +817,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
               variant: 'error'
             });
           }
+          setIsLoading(false);
         }}
       >
         {({ values, setFieldValue }) => (
@@ -1098,6 +1119,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                             variant="contained"
                             color="primary"
                             onClick={async () => {
+                              setIsLoading(true);
                               const formData = new FormData();
                               formData.append('deductions', deductions.data.id || '');
                               formData.append('investment', row.investment || '');
@@ -1126,6 +1148,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                                   variant: 'error'
                                 });
                               }
+                              setIsLoading(false);
                             }}
                           >
                             Save
@@ -1172,6 +1195,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
           enableReinitialize
           validationSchema={mediclaimSchema}
           onSubmit={async (values) => {
+            setIsLoading(true);
             const formData = new FormData();
             formData.append('deductions', deductions.data.id || '');
             formData.append('self_family_non_senior_citizen', values.self_family_non_senior_citizen || '');
@@ -1197,6 +1221,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                 variant: 'error'
               });
             }
+            setIsLoading(false);
           }}
         >
           {({ values, setFieldValue, errors }) => (
@@ -1325,6 +1350,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
             files: Yup.mixed().required('Medical bills are required')
           })}
           onSubmit={async (values) => {
+            setIsLoading(true);
             // Handle form submission
             const formData = new FormData();
             formData.append('deductions', deductions.data.id);
@@ -1345,6 +1371,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                 variant: 'error'
               });
             }
+            setIsLoading(false);
           }}
         >
           {({ values, errors, touched, setFieldValue, handleSubmit }) => (

@@ -98,7 +98,7 @@ const YearlyStats = ({ theme, title, setTitle, financialYear, setFinancialYear, 
                     transition: 'all 0.3s ease-in-out',
                     '&:hover': {
                       transform: 'translateY(-4px)',
-                      boxShadow: theme.customShadows.z4
+                      boxShadow: theme.shadows[4]
                     },
                     borderTop: `3px solid ${theme.palette[item.color.split('.')[0]][item.color.split('.')[1]]}`
                   }}

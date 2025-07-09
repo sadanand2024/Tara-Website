@@ -18,8 +18,29 @@ const AnalyticsOverview = () => {
   const [open, setOpen] = useState(false);
   const [type, setType] = useState('');
   const [loading, setLoading] = useState(false);
+  const [invoiceUsage, setInvoiceUsage] = useState({});
   const [invoicing_profile_data, setInvoicing_profile_data] = useState(null);
   const user = useSelector((state) => state.accountReducer.user);
+
+  const getInvoiceUsage = async () => {
+    const res = await Factory('get', '/user_management/usage-summary/21/?module_id=2', {});
+    if (res.res.status_cd === 0) {
+      let response = res.res.data.data || [];
+      let usage = {};
+      usage.invoice_count = response.find((item) => item.feature_key === 'invoices_count') || {};
+      usage.users_count = response.find((item) => item.feature_key === 'users_count') || {};
+      usage.gstin = response.find((item) => item.feature_key === 'gstin') || {};
+      setInvoiceUsage(usage);
+    }
+  };
+
+  useEffect(() => {
+    getInvoiceUsage();
+  }, []);
+
+  useEffect(() => {
+    console.log(invoiceUsage);
+  }, [invoiceUsage]);
 
   const handleClose = () => {
     setOpen(false);

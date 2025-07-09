@@ -12,6 +12,7 @@ import TableChartIcon from '@mui/icons-material/TableChart';
 import Grid from '@mui/material/Grid2';
 import Tooltip from '@mui/material/Tooltip';
 import Divider from '@mui/material/Divider';
+import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
 import Stack from '@mui/material/Stack';
 import Dialog from '@mui/material/Dialog';
@@ -38,6 +39,7 @@ import MenuItem from '@mui/material/MenuItem';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { IconFileTypeJs, IconJson, IconCode, IconBrandJavascript } from '@tabler/icons-react';
+import SearchUI from './searchUI';
 
 const folders = {
   PermanentWorkingPapers: 'Permanent Working Papers',
@@ -151,7 +153,9 @@ const EmptyState = ({ type = 'folder', onAction }) => (
     <Typography variant="body2" sx={{ mb: 2 }}>
       {type === 'folder'
         ? 'There are no folders here yet. Create a new folder to get started!'
-        : 'There are no files in this folder yet. Upload files to see them here.'}
+        : type === 'search'
+          ? 'No Files found with the matching keyword'
+          : 'There are no files in this folder yet. Upload files to see them here.'}
     </Typography>
     {onAction && (
       <Button variant="contained" color="primary" onClick={onAction}>
@@ -181,6 +185,7 @@ const DocumentWallet = () => {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [menuAnchorEl, setMenuAnchorEl] = useState(null);
+  const [searchResults, setSearchResults] = useState(null);
   const [menuTarget, setMenuTarget] = useState(null);
   const [actions, setActions] = useState({
     data: null,
@@ -190,6 +195,7 @@ const DocumentWallet = () => {
   const [folderName, setFolderName] = useState('');
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const resetActions = () => {
     setStartYear('');
@@ -197,12 +203,6 @@ const DocumentWallet = () => {
     setActions({ data: null, edit: false, delete: false });
     setNewFolderPopup(false);
   };
-
-  useEffect(() => {
-    if (actions.data) {
-      setFolderName(actions.data.name);
-    }
-  }, [actions.data]);
 
   const createInitialFolders = async () => {
     setLoading(true);
@@ -252,19 +252,11 @@ const DocumentWallet = () => {
     const response = await Factory('get', `/docwallet/list_last_10_uploaded_files?context_id=${user.active_context.id}`, {}, {});
     if (response.res.status_cd === 0) {
       setRecentFiles(response.res.data);
+    } else {
+      setRecentFiles([]);
     }
     setLoading(false);
   };
-
-  useEffect(() => {
-    if (user.active_context) {
-      setCurrentFolderId(null);
-      setBreadcrumbs([]);
-      fetchFolderContents(null, null, true);
-    }
-    getInitialFolders();
-    getRecentFiles();
-  }, [user.active_context]);
 
   const handleUploadClick = () => {
     fileInputRef.current.click();
@@ -304,12 +296,10 @@ const DocumentWallet = () => {
     setLoading(false);
   };
 
-  // Handler for root folder click
   const handleRootFolderClick = (folder) => {
     fetchFolderContents(folder.id, folder.name, true);
   };
 
-  // Fetch folder contents by id
   const fetchFolderContents = async (folderId, folderName, isRoot = false, customBreadcrumbs = null, refresh = true) => {
     setLoading(true);
     try {
@@ -340,7 +330,6 @@ const DocumentWallet = () => {
     setLoading(false);
   };
 
-  // Breadcrumb click handler
   const handleBreadcrumbClick = (idx) => {
     const crumb = breadcrumbs[idx];
     const newTrail = breadcrumbs.slice(0, idx + 1);
@@ -482,6 +471,7 @@ const DocumentWallet = () => {
       if (response.res.status_cd === 0) {
         if (currentFolderId) fetchFolderContents(currentFolderId, breadcrumbs[breadcrumbs.length - 1]?.name, false, null, false);
         getRecentFiles();
+        handleSearch(searchQuery);
         enqueueSnackbar('File name changed successfully.', { variant: 'success', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
       } else {
         enqueueSnackbar('Failed to upload files.', { variant: 'error', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
@@ -509,6 +499,32 @@ const DocumentWallet = () => {
       handleMenuClose();
     }
   };
+
+  const handleSearch = async (val) => {
+    setSearchQuery(val);
+    if (val.length >= 2) {
+      const res = await Factory('get', `/docwallet/files/search-autocomplete/?q=${val}`, {});
+      if (res.res.status_cd === 0) {
+        setSearchResults(res.res.data.results);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (user.active_context) {
+      setCurrentFolderId(null);
+      setBreadcrumbs([]);
+      fetchFolderContents(null, null, true);
+    }
+    getInitialFolders();
+    getRecentFiles();
+  }, [user.active_context]);
+
+  useEffect(() => {
+    if (actions.data) {
+      setFolderName(actions.data.name);
+    }
+  }, [actions.data]);
 
   return (
     <Box
@@ -566,201 +582,104 @@ const DocumentWallet = () => {
             ))}
           </Breadcrumbs>
         </Box>
-        {currentFolderId !== null && (
-          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', width: { xs: '100%', sm: 'auto' } }}>
-            <Button variant="contained" startIcon={<AddIcon />} onClick={handleUploadClick} color="primary">
-              Upload File
-            </Button>
-            <input type="file" ref={fileInputRef} style={{ display: 'none' }} multiple onChange={handleFileInputChange} />
-            <Button
-              startIcon={<AddIcon />}
-              variant="outlined"
-              color="primary"
-              onClick={() => {
-                setNewFolderPopup(true);
-              }}
-            >
-              New Folder
-            </Button>
+        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', width: { xs: '100%', sm: 'auto' } }}>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              alignItems: 'center',
+              background: '#f7f8fa',
+              borderRadius: 2,
+              px: 1.5,
+              py: 0.5,
+              border: '1px solid #e3e3e3'
+            }}
+          >
+            <InputBase
+              label="Search"
+              placeholder="Search"
+              value={searchQuery}
+              onChange={(e) => handleSearch(e.target.value)}
+              size="small"
+            />
+            <IconButton size="small" sx={{ color: '#888', fontSize: '20px', p: 0 }}>
+              <SearchIcon sx={{ fontSize: '20px', p: 0 }} />
+            </IconButton>
           </Box>
-        )}
-      </Box>
-      {/* Folders */}
-      {currentFolderId === null ? (
-        <Box sx={{ mb: 4 }}>
-          <Typography fontWeight={500} sx={{ mb: 1, fontSize: { xs: 15, sm: 17 } }}>
-            Folders
-          </Typography>
-          {initialFolders.length === 0 ? (
-            <EmptyState type="folder" onAction={() => setNewFolderPopup(true)} />
-          ) : (
-            <Grid container spacing={2}>
-              {initialFolders.map((folder, idx) => (
-                <Grid
-                  key={folder.id}
-                  size={{ xs: 12, sm: 6, md: 4, lg: 3, xl: 2.6 }}
-                  onClick={() => handleRootFolderClick(folder)}
-                  sx={{
-                    cursor: 'pointer',
-                    transition: 'transform 0.2s ease-in-out',
-                    '&:hover': {
-                      transform: 'translateY(-2px)'
-                    }
-                  }}
-                >
-                  <Box
-                    className="folder-item"
-                    sx={{
-                      border: '1px solid #ededed',
-                      boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                      borderRadius: 1.5,
-                      p: 2,
-                      minWidth: 0,
-                      width: '100%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 1.5
-                    }}
-                  >
-                    <FolderIcon fontSize="large" sx={{ color: '#fbc02d', flexShrink: 0 }} />
-                    <Box sx={{ width: 0, flex: 1, minWidth: 0 }}>
-                      <TooltipMUI name={folders[folder.name]} placement="bottom">
-                        <Typography
-                          fontWeight={500}
-                          sx={{
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            width: '100%',
-                            maxWidth: '100%',
-                            fontSize: { xs: 13, sm: 15 }
-                          }}
-                        >
-                          {folders[folder.name] || folder.name}
-                        </Typography>
-                      </TooltipMUI>
-                      <Typography variant="caption" color="text.secondary"></Typography>
-                    </Box>
-                  </Box>
-                </Grid>
-              ))}
-            </Grid>
+          {currentFolderId !== null && (
+            <>
+              <Button variant="contained" startIcon={<AddIcon />} onClick={handleUploadClick} color="primary" size="small">
+                Upload File
+              </Button>
+              <input type="file" ref={fileInputRef} style={{ display: 'none' }} multiple onChange={handleFileInputChange} />
+              <Button
+                size="small"
+                startIcon={<AddIcon />}
+                variant="outlined"
+                color="primary"
+                onClick={() => {
+                  setNewFolderPopup(true);
+                }}
+              >
+                New Folder
+              </Button>
+            </>
           )}
         </Box>
+      </Box>
+      {searchQuery && searchQuery?.length >= 2 ? (
+        <SearchUI
+          files={searchResults}
+          MUIGrid={MUIGrid}
+          handleMenuOpen={handleMenuOpen}
+          setActions={setActions}
+          viewFile={viewFile}
+          getFileIcon={getFileIcon}
+          getFileType={getFileType}
+          EmptyState={EmptyState}
+        />
       ) : (
         <>
-          <Box sx={{ mb: 3 }}>
-            <Typography fontWeight={500} sx={{ mb: 1, fontSize: { xs: 15, sm: 17 } }}>
-              Folders
-            </Typography>
-            {currentContents.subFolders.length === 0 ? (
-              <EmptyState type="folder" onAction={() => setNewFolderPopup(true)} />
-            ) : (
-              <Grid container spacing={2}>
-                {currentContents.subFolders.map((folder, idx) => (
-                  <Grid
-                    key={folder.id}
-                    size={{ xs: 12, sm: 6, md: 4, lg: 3, xl: 2.6 }}
-                    onClick={() => fetchFolderContents(folder.id, folder.name)}
-                    sx={{
-                      cursor: 'pointer',
-                      transition: 'transform 0.2s ease-in-out',
-                      '&:hover': {
-                        transform: 'translateY(-2px)'
-                      }
-                    }}
-                  >
-                    <Box
-                      className="folder-item"
+          {/* Folders */}
+          {currentFolderId === null ? (
+            <Box sx={{ mb: 4 }}>
+              <Typography fontWeight={500} sx={{ mb: 1, fontSize: { xs: 15, sm: 17 } }}>
+                Folders
+              </Typography>
+              {initialFolders.length === 0 ? (
+                <EmptyState type="folder" onAction={() => setNewFolderPopup(true)} />
+              ) : (
+                <Grid container spacing={2}>
+                  {initialFolders.map((folder, idx) => (
+                    <Grid
+                      key={folder.id}
+                      size={{ xs: 12, sm: 6, md: 4, lg: 3, xl: 2.6 }}
+                      onClick={() => handleRootFolderClick(folder)}
                       sx={{
-                        border: '1px solid #ededed',
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                        borderRadius: 1.5,
-                        p: 2,
-                        minWidth: 0,
-                        width: '100%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 1.5
+                        cursor: 'pointer',
+                        transition: 'transform 0.2s ease-in-out',
+                        '&:hover': {
+                          transform: 'translateY(-2px)'
+                        }
                       }}
                     >
-                      <FolderIcon fontSize="large" sx={{ color: '#fbc02d', flexShrink: 0 }} />
-                      <Box sx={{ width: 0, flex: 1, minWidth: 0 }}>
-                        <Tooltip title={folder.name} placement="bottom">
-                          <Typography
-                            fontWeight={500}
-                            sx={{
-                              whiteSpace: 'nowrap',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              width: '100%',
-                              maxWidth: '100%',
-                              fontSize: { xs: 13, sm: 15 }
-                            }}
-                          >
-                            {folder.name}
-                          </Typography>
-                        </Tooltip>
-                        <Typography variant="caption" color="text.secondary">
-                          {''}
-                        </Typography>
-                      </Box>
-                      {(() => {
-                        const isCWP = breadcrumbs[breadcrumbs.length - 2]?.name === 'Current Working Papers';
-                        if (!isCWP || (isCWP && idx > 2)) {
-                          return (
-                            <IconButton
-                              size="small"
-                              onClick={(e) => {
-                                setActions({
-                                  data: folder,
-                                  edit: true,
-                                  delete: false
-                                });
-                                handleMenuOpen(e, folder);
-                              }}
-                              sx={{ ml: 1 }}
-                            >
-                              <MoreVertIcon />
-                            </IconButton>
-                          );
-                        }
-                        return null;
-                      })()}
-                    </Box>
-                  </Grid>
-                ))}
-              </Grid>
-            )}
-          </Box>
-          <Box>
-            {currentContents.files.length === 0 ? (
-              <EmptyState type="file" onAction={handleUploadClick} />
-            ) : (
-              <>
-                <Typography fontWeight={500} sx={{ mb: 1, fontSize: { xs: 15, sm: 17 } }}>
-                  Files
-                </Typography>
-                <Grid container spacing={2}>
-                  {currentContents.files.map((file, idx) => (
-                    <MUIGrid name={file.name} details={file} detailskey={'file'} key={idx} idx={idx} viewFile={viewFile}>
-                      <Stack
-                        direction="row"
-                        className="file-item"
+                      <Box
+                        className="folder-item"
                         sx={{
                           border: '1px solid #ededed',
                           boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
                           borderRadius: 1.5,
                           p: 2,
-                          gap: 1.5,
-                          alignItems: 'center',
                           minWidth: 0,
-                          width: '100%'
+                          width: '100%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1.5
                         }}
                       >
-                        {getFileIcon(getFileType(file))}
+                        <FolderIcon fontSize="large" sx={{ color: '#fbc02d', flexShrink: 0 }} />
                         <Box sx={{ width: 0, flex: 1, minWidth: 0 }}>
-                          <Tooltip title={file.name} placement="bottom">
+                          <TooltipMUI name={folders[folder.name]} placement="bottom">
                             <Typography
                               fontWeight={500}
                               sx={{
@@ -772,31 +691,173 @@ const DocumentWallet = () => {
                                 fontSize: { xs: 13, sm: 15 }
                               }}
                             >
-                              {file.name}
+                              {folders[folder.name] || folder.name}
                             </Typography>
-                          </Tooltip>
-                          <Typography variant="caption" color="text.secondary">
-                            Uploaded :
-                            {new Date(file.uploaded_at).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' })}
-                          </Typography>
+                          </TooltipMUI>
+                          <Typography variant="caption" color="text.secondary"></Typography>
                         </Box>
-                        <IconButton
-                          size="small"
-                          onClick={(e) => {
-                            setActions({ data: file, edit: true, delete: false });
-                            handleMenuOpen(e, file);
-                          }}
-                          sx={{ ml: 1 }}
-                        >
-                          <MoreVertIcon />
-                        </IconButton>
-                      </Stack>
-                    </MUIGrid>
+                      </Box>
+                    </Grid>
                   ))}
                 </Grid>
-              </>
-            )}
-          </Box>
+              )}
+            </Box>
+          ) : (
+            <>
+              <Box sx={{ mb: 3 }}>
+                <Typography fontWeight={500} sx={{ mb: 1, fontSize: { xs: 15, sm: 17 } }}>
+                  Folders
+                </Typography>
+                {currentContents.subFolders.length === 0 ? (
+                  <EmptyState type="folder" onAction={() => setNewFolderPopup(true)} />
+                ) : (
+                  <Grid container spacing={2}>
+                    {currentContents.subFolders.map((folder, idx) => (
+                      <Grid
+                        key={folder.id}
+                        size={{ xs: 12, sm: 6, md: 4, lg: 3, xl: 2.6 }}
+                        onClick={() => fetchFolderContents(folder.id, folder.name)}
+                        sx={{
+                          cursor: 'pointer',
+                          transition: 'transform 0.2s ease-in-out',
+                          '&:hover': {
+                            transform: 'translateY(-2px)'
+                          }
+                        }}
+                      >
+                        <Box
+                          className="folder-item"
+                          sx={{
+                            border: '1px solid #ededed',
+                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                            borderRadius: 1.5,
+                            p: 2,
+                            minWidth: 0,
+                            width: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1.5
+                          }}
+                        >
+                          <FolderIcon fontSize="large" sx={{ color: '#fbc02d', flexShrink: 0 }} />
+                          <Box sx={{ width: 0, flex: 1, minWidth: 0 }}>
+                            <Tooltip title={folder.name} placement="bottom">
+                              <Typography
+                                fontWeight={500}
+                                sx={{
+                                  whiteSpace: 'nowrap',
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis',
+                                  width: '100%',
+                                  maxWidth: '100%',
+                                  fontSize: { xs: 13, sm: 15 }
+                                }}
+                              >
+                                {folder.name}
+                              </Typography>
+                            </Tooltip>
+                            <Typography variant="caption" color="text.secondary">
+                              {''}
+                            </Typography>
+                          </Box>
+                          {(() => {
+                            const isCWP = breadcrumbs[breadcrumbs.length - 2]?.name === 'Current Working Papers';
+                            if (!isCWP || (isCWP && idx > 2)) {
+                              return (
+                                <IconButton
+                                  size="small"
+                                  onClick={(e) => {
+                                    setActions({
+                                      data: folder,
+                                      edit: true,
+                                      delete: false
+                                    });
+                                    handleMenuOpen(e, folder);
+                                  }}
+                                  sx={{ ml: 1 }}
+                                >
+                                  <MoreVertIcon />
+                                </IconButton>
+                              );
+                            }
+                            return null;
+                          })()}
+                        </Box>
+                      </Grid>
+                    ))}
+                  </Grid>
+                )}
+              </Box>
+              <Box>
+                {currentContents.files.length === 0 ? (
+                  <EmptyState type="file" onAction={handleUploadClick} />
+                ) : (
+                  <>
+                    <Typography fontWeight={500} sx={{ mb: 1, fontSize: { xs: 15, sm: 17 } }}>
+                      Files
+                    </Typography>
+                    <Grid container spacing={2}>
+                      {currentContents.files.map((file, idx) => (
+                        <MUIGrid name={file.name} details={file} detailskey={'file'} key={idx} idx={idx} viewFile={viewFile}>
+                          <Stack
+                            direction="row"
+                            className="file-item"
+                            sx={{
+                              border: '1px solid #ededed',
+                              boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                              borderRadius: 1.5,
+                              p: 2,
+                              gap: 1.5,
+                              alignItems: 'center',
+                              minWidth: 0,
+                              width: '100%'
+                            }}
+                          >
+                            {getFileIcon(getFileType(file))}
+                            <Box sx={{ width: 0, flex: 1, minWidth: 0 }}>
+                              <Tooltip title={file.name} placement="bottom">
+                                <Typography
+                                  fontWeight={500}
+                                  sx={{
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    width: '100%',
+                                    maxWidth: '100%',
+                                    fontSize: { xs: 13, sm: 15 }
+                                  }}
+                                >
+                                  {file.name}
+                                </Typography>
+                              </Tooltip>
+                              <Typography variant="caption" color="text.secondary">
+                                Uploaded :
+                                {new Date(file.uploaded_at).toLocaleDateString('en-US', {
+                                  day: '2-digit',
+                                  month: 'short',
+                                  year: 'numeric'
+                                })}
+                              </Typography>
+                            </Box>
+                            <IconButton
+                              size="small"
+                              onClick={(e) => {
+                                setActions({ data: file, edit: true, delete: false });
+                                handleMenuOpen(e, file);
+                              }}
+                              sx={{ ml: 1 }}
+                            >
+                              <MoreVertIcon />
+                            </IconButton>
+                          </Stack>
+                        </MUIGrid>
+                      ))}
+                    </Grid>
+                  </>
+                )}
+              </Box>
+            </>
+          )}
         </>
       )}
       <Divider sx={{ my: 2 }} />

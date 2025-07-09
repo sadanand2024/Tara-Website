@@ -12,6 +12,8 @@ import DownloadIcon from '@mui/icons-material/Download';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import RaiseRequest from '../../RaiseRequest';
 import GetActionButtons from '../../FormHelpers';
+import CircularProgressComponent from 'utils/CircularProgressComponent';
+
 
 const typeOfBusinessOptions = [
   'Proprietorship',
@@ -103,6 +105,8 @@ const BusinessIdentityStructureSection = ({ taskId }) => {
   const [searchParams] = useSearchParams();
   const service_id = searchParams.get('service_id');
   const dispatch = useDispatch();
+    const [isLoading, setIsLoading] = useState(false); 
+
   const [businessIdentityposttype, setBusinessIdentityposttype] = useState('post');
   const [businessInfo, setBusinessInfo] = useState({
     taskId: null
@@ -131,6 +135,8 @@ const BusinessIdentityStructureSection = ({ taskId }) => {
       nature_of_business: Yup.string().required('Nature of Business is required')
     }),
     onSubmit: async (values) => {
+        setIsLoading(true); 
+
       const url =
         businessIdentityposttype === 'put' ? `/labourlicense/business-identity/${values.id}/` : `/labourlicense/business-identity/`;
 
@@ -172,6 +178,7 @@ const BusinessIdentityStructureSection = ({ taskId }) => {
         );
         getBusinessIdentity();
       }
+      setIsLoading(false);
     }
   });
   const renderField = (field) => {
@@ -263,6 +270,7 @@ const BusinessIdentityStructureSection = ({ taskId }) => {
   };
   const { values, setValues, handleChange, errors, touched, handleSubmit, handleBlur, resetForm, setFieldValue } = formik;
   const getBusinessIdentity = async () => {
+   
     const url = `/labourlicense/business-identity/by-request-or-task?service_request_id=${service_id}`;
     const { res } = await Factory('get', url);
     if (res.status_cd === 0) {
@@ -299,10 +307,14 @@ const BusinessIdentityStructureSection = ({ taskId }) => {
       );
       setBusinessIdentityposttype('post');
     }
+    
   };
   useEffect(() => {
     getBusinessIdentity();
   }, []);
+   if (isLoading) {
+    return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading business identity...'} />;
+  }
 
   return (
     <Card sx={{ p: 3 }}>

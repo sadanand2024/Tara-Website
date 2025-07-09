@@ -502,9 +502,11 @@ export default function BusinessProfileComponnet({ businessDetails = {}, postTyp
 
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mt: 4 }}>
         <Stack direction="row" spacing={2}>
-          <Button variant="contained" onClick={handleSubmit}>
-            Save & Continue
-          </Button>
+        <div className="INV-Step-3">
+            <Button variant="contained" onClick={handleSubmit}>
+              Save & Continue
+            </Button>
+          </div>
         </Stack>
       </Box>
     </MainCard>

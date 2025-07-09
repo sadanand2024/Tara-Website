@@ -30,7 +30,8 @@ import {
   TableRow,
   Typography,
   IconButton,
-  Paper
+  Paper,
+  Pagination
 } from '@mui/material';
 
 // icons
@@ -248,8 +249,17 @@ const ManageSubscriptions = () => {
   const [openPlanDrawer, setOpenPlanDrawer] = useState(false);
   const [selectedServiceRequest, setSelectedServiceRequest] = useState(null);
   const [servicesPurchased, setServicesPurchased] = useState([]);
+  const [servicesPage, setServicesPage] = useState(1);
+  const [paymentPage, setPaymentPage] = useState(1);
+  const rowsPerPage = 5;
   const navigate = useNavigate();
   const user = useSelector((state) => state).accountReducer.user;
+
+  // Calculate paginated data
+  const totalServicesPages = Math.ceil(servicesPurchased.length / rowsPerPage);
+  const paginatedServices = servicesPurchased.slice((servicesPage - 1) * rowsPerPage, servicesPage * rowsPerPage);
+  const totalPaymentPages = Math.ceil(paymentHistory.length / rowsPerPage);
+  const paginatedPayments = paymentHistory.slice((paymentPage - 1) * rowsPerPage, paymentPage * rowsPerPage);
 
   useEffect(() => {
     const getPaymentHistory = async () => {
@@ -471,8 +481,8 @@ const ManageSubscriptions = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {servicesPurchased.length > 0 ? (
-                servicesPurchased.map((task, index) => (
+              {paginatedServices.length > 0 ? (
+                paginatedServices.map((task, index) => (
                   <TableRow
                     hover
                     key={task.id}
@@ -482,7 +492,7 @@ const ManageSubscriptions = () => {
                       }
                     }}
                   >
-                    <TableCell sx={{ pl: 3 }}>{index + 1}</TableCell>
+                    <TableCell sx={{ pl: 3 }}>{(servicesPage - 1) * rowsPerPage + index + 1}</TableCell>
                     <TableCell>{task.id}</TableCell>
                     <TableCell>{task?.service_label || '-'}</TableCell>
                     <TableCell>{task?.plan_name?.charAt(0)?.toUpperCase() + task?.plan_name?.slice(1) || '-'}</TableCell>
@@ -504,7 +514,9 @@ const ManageSubscriptions = () => {
                     <TableCell>{task?.payment_order_id || '-'}</TableCell>
                     <TableCell>
                       <Typography variant="body1" color="text" fontWeight={500}>
-                        {task?.created_at ? new Date(task?.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '-'}
+                        {task?.created_at
+                          ? new Date(task?.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+                          : '-'}
                       </Typography>
                       <Typography variant="body1" color="text.secondary">
                         {task?.created_at ? new Date(task?.created_at).toLocaleTimeString() : '-'}
@@ -527,6 +539,16 @@ const ManageSubscriptions = () => {
             </TableBody>
           </Table>
         </TableContainer>
+        {servicesPurchased.length > rowsPerPage && (
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+            <Pagination
+              count={totalServicesPages}
+              page={servicesPage}
+              onChange={(e, value) => setServicesPage(value)}
+              color="primary"
+            />
+          </Box>
+        )}
       </Box>
 
       {/* Payment History */}
@@ -578,7 +600,7 @@ const ManageSubscriptions = () => {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>Date</TableCell>
+                <TableCell>Paid Date</TableCell>
                 <TableCell>Plan</TableCell>
                 <TableCell>Amount</TableCell>
                 <TableCell>Status</TableCell>
@@ -588,10 +610,20 @@ const ManageSubscriptions = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {paymentHistory?.length > 0 ? (
-                paymentHistory.map((payment) => (
+              {paginatedPayments?.length > 0 ? (
+                paginatedPayments.map((payment) => (
                   <TableRow key={payment.id}>
-                    <TableCell>{new Date(payment?.created_at).toLocaleDateString()}</TableCell>
+                    <TableCell>
+                      <Typography variant="body1" color="text" fontWeight={500}>
+                        {payment?.paid_at
+                          ? new Date(payment?.paid_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+                          : '-'}
+                      </Typography>
+                      <Typography variant="body1" color="text.secondary">
+                        {payment?.paid_at ? new Date(payment?.paid_at).toLocaleTimeString() : '-'}
+                      </Typography>
+                    </TableCell>
+
                     <TableCell>
                       <Typography variant="subtitle2">{payment?.plan_name || payment?.suite_name}</Typography>
                     </TableCell>
@@ -602,17 +634,15 @@ const ManageSubscriptions = () => {
                     </TableCell>
                     <TableCell>
                       <Chip
-                        label={payment?.status === 'paid' && payment?.payment_captured ? 'Paid' : 'Failed'}
-                        color={payment?.status === 'paid' && payment?.payment_captured ? 'success' : 'error'}
+                        label={payment?.status === 'captured' && payment?.captured ? 'Paid' : 'Failed'}
+                        color={payment?.status === 'captured' && payment?.captured ? 'success' : 'error'}
                         size="small"
                         sx={{ fontWeight: 500 }}
                       />
                     </TableCell>
                     <TableCell>
                       <Typography variant="body2">
-                            {payment?.payment_method
-                          ? payment?.payment_method?.charAt(0)?.toUpperCase() + payment?.payment_method?.slice(1)
-                          : ''}
+                        {payment?.method ? payment?.method?.charAt(0)?.toUpperCase() + payment?.method?.slice(1) : ''}
                         {payment?.card_last4 ? ` ••••${payment?.card_last4}` : ''}
                       </Typography>
                     </TableCell>
@@ -643,6 +673,16 @@ const ManageSubscriptions = () => {
             </TableBody>
           </Table>
         </TableContainer>
+        {paymentHistory.length > rowsPerPage && (
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+            <Pagination
+              count={totalPaymentPages}
+              page={paymentPage}
+              onChange={(e, value) => setPaymentPage(value)}
+              color="primary"
+            />
+          </Box>
+        )}
       </Box>
       <PlanDrawer
         type="service"

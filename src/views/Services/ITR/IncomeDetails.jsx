@@ -21,6 +21,8 @@ import {
   Typography
 } from '@mui/material';
 import { FieldArray, FormikProvider, useFormik } from 'formik';
+import CircularProgress from '@mui/material/CircularProgress';
+
 
 
 import { useSnackbar } from 'notistack';
@@ -139,6 +141,7 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
     enableReinitialize: true,
     // validationSchema: docsSchema,
     onSubmit: async (values) => {
+       setIsLoading(true);
       let type = salary_income?.data?.length > 0 ? 'put' : 'post';
       let url =
         salary_income?.data?.length > 0
@@ -188,6 +191,7 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
           anchorOrigin: { vertical: 'top', horizontal: 'right' }
         });
       }
+      setIsLoading(false);
     }
   });
 
@@ -204,6 +208,7 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
     enableReinitialize: true,
     // validationSchema: foreignSchema,
     onSubmit: async (values) => {
+      setIsLoading(true);
       let url = '/income_tax_returns/nri-salary-details/upsert/';
       let employment_history = [
         { from_date: values.periodFrom, to_date: values.periodTo, country: values.country, salary_received: values.salaryReceivedIn }
@@ -252,6 +257,7 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
           anchorOrigin: { vertical: 'top', horizontal: 'right' }
         });
       }
+      setIsLoading(false);
     }
   });
 
@@ -280,6 +286,13 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
       }
     }
   };
+   if (isLoading) {
+  return (
+    <Box sx={{ textAlign: 'center', py: 4 }}>
+      <CircularProgress />
+    </Box>
+  );
+}
 
   return (
     <>
@@ -713,6 +726,8 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
   let _wholeData = data[0];
   data = data[0]?.data[0]?.property_info;
   const { enqueueSnackbar } = useSnackbar();
+  const [isLoading, setIsLoading] = useState(false);
+
   const [numProperties, setNumProperties] = React.useState(data?.length > 0 ? data?.length : 1);
   const initialProperties = {
     id: null,
@@ -820,6 +835,7 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
 
   // Add this async function to post a single property
   const postProperty = async (property, idx) => {
+    setIsLoading(true);
     const formData = new FormData();
     formData.append('service_request', service_id);
     formData.append('service_task', _wholeData.task_id);
@@ -843,6 +859,7 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
     try {
       const res = await Factory('post', '/income_tax_returns/house-property-details/upsert/', formData, {});
       if (res.res?.data?.property_info) {
+
         // After successful POST, call the GET API
         const getRes = await Factory(
           'get',
@@ -861,18 +878,28 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
           }));
           setProperties(updatedProperties);
         }
+            setIsLoading(false);
         enqueueSnackbar(`Property ${idx + 1} saved!`, {
           variant: 'success',
           anchorOrigin: { vertical: 'top', horizontal: 'right' }
         });
       } else {
         enqueueSnackbar(`Error saving property ${idx + 1}`, { variant: 'error', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
+          setIsLoading(false);
       }
     } catch (err) {
       if (enqueueSnackbar)
         enqueueSnackbar(`Error saving property ${idx + 1}`, { variant: 'error', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
+       setIsLoading(false);
     }
   };
+   if (isLoading) {
+    return (
+      <Box sx={{ textAlign: 'center', py: 4 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <form>
@@ -1420,6 +1447,8 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
   const [properties, setProperties] = React.useState(initialState);
   const [showReview, setShowReview] = useState([]);
   const [numOtherGains, setNumOtherGains] = React.useState(1);
+  const [isLoading, setIsLoading] = React.useState(false); // <-- Add this line
+
   const { enqueueSnackbar } = useSnackbar();
   const propertyTypes = ['land', 'plot', 'building'];
   const gainTypes = ['Equity shares', 'Mutual funds', 'Property/Land', 'Foreign equity', 'Others'];
@@ -1499,6 +1528,7 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
   };
 
   const handleCamsSave = async () => {
+    setIsLoading(true);
     const formData = new FormData();
     formData.append('service_request', service_id);
     formData.append('service_task', cg_equity_mutual.task_id);
@@ -1522,7 +1552,15 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
         variant: 'error'
       });
     }
+    setIsLoading(false);
   };
+   if (isLoading) {
+    return (
+      <Box sx={{ textAlign: 'center', py: 6 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Box>
@@ -1927,6 +1965,7 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                 variant="contained"
                 color="primary"
                 onClick={async () => {
+                setIsLoading(true);
                   const propertyToSave = properties[idx];
                   const formData = new FormData();
                   formData.append('service_request', service_id);
@@ -1936,7 +1975,7 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                   formData.append('status', 'in progress');
                   formData.append('gains_applicable', selectedTypes);
                   
-                    {console.log("dfghjklsdfghjk;",cg_property_land)}
+                  
                   Object.entries(propertyToSave).forEach(([key, value]) => {
                     if (value) {
                       if (key === 'purchase_doc' || key === 'sale_doc' || key === 'reinvestment_details_docs') {
@@ -1951,6 +1990,7 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                         }
                       }
                     }
+                      setIsLoading(false);
                   });
 
                   let type = properties[idx].id ? 'put' : 'post';
@@ -2290,6 +2330,7 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                         variant="contained"
                         color="primary"
                         onClick={async () => {
+                            setIsLoading(true);
                           const row = otherGainsRows?.[idx] || {};
                           const formData = new FormData();
                           formData.append('service_request', service_id);
@@ -2319,6 +2360,7 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                               variant: 'error'
                             });
                           }
+                            setIsLoading(false);
                         }}
                       >
                         Save
@@ -2468,6 +2510,8 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
   const [selectedSection, setSelectedSection] = React.useState([]);
   const [businessRows, setBusinessRows] = React.useState([]);
   const businessTypes = ['Trading', 'Manufacturing', 'Profession', 'Other'];
+    const [isLoading, setIsLoading] = React.useState(false); // <-- Add this line
+
 
   useEffect(() => {
     if (data?.data?.length > 0 && data?.data[0]?.business_professional_income_info?.length > 0) {
@@ -2500,6 +2544,7 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
   }, [data]);
 
   const saveBusinessRow = async (idx) => {
+      setIsLoading(true);
     const businessData = {
       ...businessRows[idx],
         opting_for_presumptive_taxation: !!businessRows[idx]?.opting_for_presumptive_taxation,
@@ -2562,7 +2607,7 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
       }
     });
     
-    console.log(formData)
+  
     let type = 'post';
     let url = '/income_tax_returns/business-professional-income/';
     const res = await Factory(type, url, formData);
@@ -2580,10 +2625,12 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
         anchorOrigin: { vertical: 'top', horizontal: 'right' }
       });
     }
+     setIsLoading(false);
   };
   
 
   const removeBusinessIncome = async (row, idx) => {
+     setIsLoading(true);
     const res = await Factory('delete', `/income_tax_returns/business-professional-income/${row.id}/delete/`, {});
 
     if (res.res.status_cd === 0) {
@@ -2603,7 +2650,15 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
         anchorOrigin: { vertical: 'top', horizontal: 'right' }
       });
     }
+      setIsLoading(false);
   };
+    if (isLoading) {
+    return (
+      <Box sx={{ textAlign: 'center', py: 4 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Box>
@@ -3640,6 +3695,9 @@ const winningsSources = ['Lottery', 'Game Show', 'Others'];
 
 const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDialogFilesData, service_id }) => {
   const { enqueueSnackbar } = useSnackbar();
+    const [isLoading, setIsLoading] = React.useState(false); // <-- Add this line
+
+  
   const [interest_income, setInterestIncome] = React.useState(data.find((item) => item.category_name === 'Interest Income'));
   const [dividend_income, setDividendIncome] = React.useState(data.find((item) => item.category_name === 'Dividend Income'));
   const [gift_income, setGiftIncome] = React.useState(data.find((item) => item.category_name === 'Gift Income'));
@@ -3719,6 +3777,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
   }, [winning_income]);
 
   const postIncomeApplicability = async (v, urlEndPoint, key, task_id) => {
+    setIsLoading(true);
     const res = await Factory('post', `/income_tax_returns/${urlEndPoint}/upsert/`, {
       service_request: parseInt(service_id),
       service_task: parseInt(task_id),
@@ -3751,12 +3810,15 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
         __winning_income.data[0] = res.res.data;
         setWinningIncome(__winning_income);
       }
+       setIsLoading(false);
       return true;
     }
+     setIsLoading(false);
   };
 
   // Save functions for each section
   const saveInterestRow = async (row, idx) => {
+    setIsLoading(true);
     let type = row.id ? 'put' : 'post';
     let url = row.id ? `/income_tax_returns/interest-income-doc/${row.id}/update/` : `/income_tax_returns/interest-income-doc/add/`;
     let formData = new FormData();
@@ -3778,9 +3840,11 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
     } else {
       enqueueSnackbar('Error saving ', { variant: 'error', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
     }
+     setIsLoading(false);
   };
 
   const saveDividendRow = async (row, idx) => {
+     setIsLoading(true);
     let type = row.id ? 'put' : 'post';
     let url = row.id
       ? `/income_tax_returns/dividend-income-document/${row.id}/update/`
@@ -3803,9 +3867,12 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
     } else {
       enqueueSnackbar('Error saving', { variant: 'error', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
     }
+     setIsLoading(false);
   };
 
   const saveGiftRow = async (row, idx) => {
+
+     setIsLoading(true);
     let type = row.id ? 'put' : 'post';
     let url = row.id ? `/income_tax_returns/gift-income-document/${row.id}/update/` : `/income_tax_returns/gift-income-document/add/`;
     let formData = new FormData();
@@ -3826,9 +3893,11 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
     } else {
       enqueueSnackbar('Error saving', { variant: 'error', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
     }
+     setIsLoading(false);
   };
 
   const saveFamilyRow = async (row, idx) => {
+      setIsLoading(true);
     let type = row.id ? 'put' : 'post';
     let url = row.id
       ? `/income_tax_returns/family-pension-income-documents/${row.id}/`
@@ -3849,9 +3918,11 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
     } else {
       enqueueSnackbar('Error saving', { variant: 'error', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
     }
+    setIsLoading(false);
   };
 
   const saveForeignRow = async (row, idx) => {
+     setIsLoading(true);
     let type = row.id ? 'put' : 'post';
     let url = row.id ? `/income_tax_returns/foreign-income-info/${row.id}/update/` : `/income_tax_returns/foreign-income-info/add/`;
     let formData = new FormData();
@@ -3875,9 +3946,11 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
     } else {
       enqueueSnackbar('Error saving', { variant: 'error', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
     }
+     setIsLoading(false);
   };
 
   const saveWinningsRow = async (row, idx) => {
+     setIsLoading(true);
     let type = row.id ? 'put' : 'post';
     let url = row.id ? `/income_tax_returns/winning-income-docs/${row.id}/update/` : `/income_tax_returns/winning-income-docs/add/`;
     let formData = new FormData();
@@ -3898,6 +3971,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
     } else {
       enqueueSnackbar('Error saving', { variant: 'error', anchorOrigin: { vertical: 'top', horizontal: 'right' } });
     }
+     setIsLoading(false);
   };
 
   const removeRow = async (id, type, idx) => {
@@ -3947,6 +4021,13 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
       }
     }
   };
+   if (isLoading) {
+    return (
+      <Box sx={{ textAlign: 'center', py: 4 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
   return (
     <Box>
       {/* Interest Income Section */}
@@ -4857,6 +4938,8 @@ const AgricultureIncome = ({ data, service_id, setFileDialogOpen, fileDialogOpen
   };
   data = data[0];
   const [agricultureIncome, setAgricultureIncome] = React.useState(initialData);
+  const [isLoading, setIsLoading] = React.useState(false); // <-- Add this line
+
 
   useEffect(() => {
     if (data?.data?.length > 0) {
@@ -4868,6 +4951,7 @@ const AgricultureIncome = ({ data, service_id, setFileDialogOpen, fileDialogOpen
     }
   }, [data]);
   const postIncomeApplicability = async (v) => {
+     setIsLoading(true); 
     let formData = new FormData();
     formData.append('service_request', parseInt(service_id));
     formData.append('service_task', parseInt(data.task_id));
@@ -4880,10 +4964,13 @@ const AgricultureIncome = ({ data, service_id, setFileDialogOpen, fileDialogOpen
         __data.agriculture_income_docs = { amount: '', file: '' };
       }
       setAgricultureIncome(__data);
+       setIsLoading(false);
       return true;
     }
+    setIsLoading(false);
   };
   const postAgriculturalIncome = async () => {
+     setIsLoading(true);
     let formData = new FormData();
     let id = agricultureIncome?.agriculture_income_docs?.id || null;
     let type = 'post';
@@ -4915,7 +5002,16 @@ const AgricultureIncome = ({ data, service_id, setFileDialogOpen, fileDialogOpen
     } else {
       enqueueSnackbar('Error saving agricultural income', { anchorOrigin: { vertical: 'top', horizontal: 'right' }, variant: 'error' });
     }
+    setIsLoading(false);
   };
+   if (isLoading) {
+    return (
+      <Box sx={{ textAlign: 'center', py: 4 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   
  return (
     <Box>
