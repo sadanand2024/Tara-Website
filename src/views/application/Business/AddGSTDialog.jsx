@@ -339,7 +339,6 @@ const AddGSTDialog = ({ open, selectedGST, handleClose, fetchGSTList }) => {
       setValues(selectedGST);
     }
   }, [selectedGST]);
-  console.log(errors);
   return (
     <Modal
       open={open}

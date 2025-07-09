@@ -233,7 +233,7 @@ const PayrollDashboard = () => {
       }}
       title={
         <Stack direction="row" alignItems="center" spacing={2}>
-          <IconSparkles size={28} color="#1976d2" />
+          {/* <IconSparkles size={28} color="#1976d2" /> */}
           <Typography variant="h3" sx={{ fontWeight: 800, color: 'primary.main', letterSpacing: 1 }}>
             Payroll for {businessDetails?.nameOfBusiness}
           </Typography>
@@ -340,7 +340,7 @@ const PayrollDashboard = () => {
                         }}
                       />
 
-                      <Chip
+                      {/* <Chip
                         variant="filled"
                         label="In Progress"
                         color="warning"
@@ -352,7 +352,7 @@ const PayrollDashboard = () => {
                           textTransform: 'uppercase',
                           letterSpacing: 1
                         }}
-                      />
+                      /> */}
 
                       <Button
                         variant="contained"

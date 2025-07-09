@@ -312,6 +312,13 @@ const GSTSettings = ({ handleBack, handleNext }) => {
           </Button>
         </Stack>
       </Box>
+      <DeleteConfirmationDialog
+        open={deleteDialogOpen}
+        onClose={handleDeleteClose}
+        onConfirm={handleDelete}
+        title="Delete GST"
+        description="Are you sure you want to delete this GST detail? This action cannot be undone."
+      />
     </MainCard>
   );
 };

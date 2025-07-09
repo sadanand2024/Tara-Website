@@ -229,9 +229,7 @@ export default function Index() {
     <MainCard
       title={
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Typography variant="h3" sx={{ fontWeight: 700 }}>
-            {`Monthly Payroll Dashboard of `}
-          </Typography>
+          <Typography variant="h4">{`Monthly Payroll Dashboard of `}</Typography>
           <CustomAutocomplete
             value={selectedMonth ? months[selectedMonth - 1] : ''}
             onChange={handleMonthChange}
@@ -308,6 +306,7 @@ export default function Index() {
                         overflow: 'hidden'
                       }}
                     >
+                      {/* Background Icon Overlay */}
                       <Box
                         sx={{
                           position: 'absolute',
@@ -324,139 +323,121 @@ export default function Index() {
                       >
                         {item.icon}
                       </Box>
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          mb: 1.5
-                        }}
-                      >
+
+                      {/* Content Section with flexGrow */}
+                      <Box sx={{ flexGrow: 1 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              width: 44,
+                              height: 44,
+                              borderRadius: '50%',
+                              bgcolor: alpha(item.color, 0.13),
+                              color: item.color,
+                              mr: 1.5,
+                              fontSize: 28
+                            }}
+                          >
+                            {item.icon}
+                          </Box>
+                          <Typography
+                            variant="subtitle1"
+                            fontWeight="700"
+                            sx={{
+                              color: 'text.primary',
+                              fontSize: '1.05rem',
+                              letterSpacing: 0.2
+                            }}
+                          >
+                            {item.title}
+                          </Typography>
+                        </Box>
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{
+                            fontSize: '0.85rem',
+                            lineHeight: 1.5
+                          }}
+                        >
+                          Manage {item.title.toLowerCase()} related payroll processes and workflows
+                        </Typography>
+                      </Box>
+
+                      <Divider sx={{ my: 1.5 }} />
+
+                      {/* Bottom Action Section */}
+                      {doneStatus[index] ? (
                         <Box
                           sx={{
                             display: 'flex',
+                            justifyContent: 'space-between',
                             alignItems: 'center',
-                            justifyContent: 'center',
-                            width: 44,
-                            height: 44,
-                            borderRadius: '50%',
-                            bgcolor: alpha(item.color, 0.13),
-                            color: item.color,
-                            mr: 1.5,
-                            fontSize: 28
+                            gap: 1
                           }}
+                          onClick={(e) => e.stopPropagation()}
                         >
-                          {item.icon}
-                        </Box>
-                        <Typography
-                          variant="subtitle1"
-                          fontWeight="700"
-                          sx={{
-                            color: 'text.primary',
-                            fontSize: '1.05rem',
-                            letterSpacing: 0.2
-                          }}
-                        >
-                          {item.title}
-                        </Typography>
-                      </Box>
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{
-                          fontSize: '0.85rem',
-                          lineHeight: 1.5
-                        }}
-                      >
-                        Manage {item.title.toLowerCase()} related payroll processes and workflows
-                      </Typography>
-                      <Divider />
-
-                      {doneStatus[index] ? (
-                        <>
-                          <Box
-                            sx={{
-                              mt: 1,
-                              display: 'flex',
-                              // flexDirection: 'column',
-                              justifyContent: 'center',
-                              alignItems: 'center',
-                              gap: 1
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              putStatusApicall(index, 'in progress');
                             }}
-                            onClick={(e) => e.stopPropagation()}
                           >
-                            <Button
-                              variant="outlined"
-                              size="small"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                putStatusApicall(index, 'in progress');
-                              }}
-                            >
-                              Edit
-                            </Button>
-                            <FormControlLabel
-                              control={
-                                <Checkbox
-                                  checked={doneStatus[index]}
-                                  size="medium"
-                                  onChange={(e) => {
-                                    e.stopPropagation();
-                                    handleMarkAsDoneClick(index);
-                                  }}
-                                  color="success"
-                                />
-                              }
-                              label="Done"
-                            />
-                          </Box>
-                        </>
+                            Edit
+                          </Button>
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                checked={doneStatus[index]}
+                                size="medium"
+                                onChange={(e) => {
+                                  e.stopPropagation();
+                                  handleMarkAsDoneClick(index);
+                                }}
+                                color="success"
+                              />
+                            }
+                            label="Done"
+                          />
+                        </Box>
                       ) : (
-                        <>
-                          {/* <Box
-                            sx={{ mt: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}
-                            onClick={(e) => e.stopPropagation()}
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            gap: 1
+                          }}
+                        >
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            size="small"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleWorkClick(item.href, index);
+                            }}
                           >
-                            <FormControlLabel
-                              control={
-                                <Checkbox
-                                  checked={doneStatus[index]}
-                                  size="large"
-                                  onChange={(e) => {
-                                    e.stopPropagation();
-                                    handleMarkAsDoneClick(index);
-                                  }}
-                                  color="success"
-                                />
-                              }
-                              label="Done"
-                            />
-                          </Box> */}
-                          <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center', gap: 1 }}>
-                            <Button
-                              variant="contained"
-                              color="primary"
-                              size="small"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleWorkClick(item.href, index);
-                              }}
-                            >
-                              Work
-                            </Button>
-                            <Button
-                              variant="outlined"
-                              color="success"
-                              size="small"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleMarkAsDoneClick(index);
-                              }}
-                              disabled={doneStatus[index]}
-                            >
-                              Mark as Done
-                            </Button>
-                          </Box>
-                        </>
+                            Work on it
+                          </Button>
+                          <Button
+                            variant="outlined"
+                            color="success"
+                            size="small"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleMarkAsDoneClick(index);
+                            }}
+                            disabled={doneStatus[index]}
+                          >
+                            Mark as Done
+                          </Button>
+                        </Box>
                       )}
                     </Box>
                   </Paper>
