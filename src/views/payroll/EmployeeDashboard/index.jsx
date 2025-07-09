@@ -386,6 +386,7 @@ export default function Index() {
                             onClick={(e) => {
                               e.stopPropagation();
                               putStatusApicall(index, 'in progress');
+                              handleCardClick(item.href, index);
                             }}
                           >
                             Edit

@@ -244,7 +244,7 @@ const PayrollWorkflows = ({ type }) => {
       tagline="Payroll Workflow"
       secondary={
         <Stack direction="row" sx={{ gap: 2 }}>
-          <Button startIcon={<ArrowBackIcon />} variant="outlined" color="primary" onClick={() => navigate('/app/payroll')}>
+          <Button startIcon={<ArrowBackIcon />} variant="outlined" color="primary" onClick={() => navigate(-1)}>
             Back to dashboard
           </Button>
           <Button variant="contained" color="primary" onClick={handleButtonClick}>

@@ -118,15 +118,21 @@ const GSTSettings = ({ handleBack, handleNext }) => {
     }
   };
 
-  const handleDownload = (documentUrl, fileName) => {
-    if (documentUrl) {
-      const link = document.createElement('a');
-      link.href = documentUrl;
-      link.setAttribute('download', fileName || 'gst-document');
-      link.setAttribute('target', '_blank');
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+  const handleDownload = async (documentUrl, fileName) => {
+    const response = await Factory('get', `/docwallet/generate_presigned_url?url=${documentUrl}`, {}, {});
+    if (response.res.status_cd === 0) {
+      let url = response.res.data.url;
+      window.open(url, '_blank');
+    } else {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(response?.res?.error || 'Failed to Download'),
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     }
   };
 
