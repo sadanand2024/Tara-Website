@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { useSnackbar } from 'notistack';
 
 // material-ui
 import Button from '@mui/material/Button';
@@ -12,6 +13,8 @@ import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
+import Box from '@mui/material/Box';
+import Card from '@mui/material/Card';
 
 // project imports
 import UserList from './UserList';
@@ -30,6 +33,7 @@ import AddIcon from '@mui/icons-material/Add';
 // ==============================|| MANAGE USERS ||============================== //
 
 export default function ManageUsers() {
+  const { enqueueSnackbar } = useSnackbar();
   const user = useSelector((state) => state).accountReducer.user;
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [openAddDialog, setOpenAddDialog] = React.useState(false);
@@ -43,11 +47,32 @@ export default function ManageUsers() {
   const [masterPermissions, setMasterPermissions] = React.useState([]);
   const [users, setUsers] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
+  const [invoiceUsage, setInvoiceUsage] = React.useState({});
+  const invoiceId = import.meta.env.VITE_APP_INVOICE_ID;
+
   const [snackbar, setSnackbar] = React.useState({
     open: false,
     message: '',
     severity: 'success'
   });
+
+  const getInvoiceUsage = async () => {
+    const res = await Factory('get', `/user_management/usage-summary/${user.active_context.id}/?module_id=${invoiceId}`, {});
+    if (res.res.status_cd === 0) {
+      let response = res.res.data.data || [];
+      let usage = {};
+      usage.invoice_count = response.find((item) => item.feature_key === 'invoices_count') || {};
+      usage.users_count = response.find((item) => item.feature_key === 'users_count') || {};
+      usage.gstin = response.find((item) => item.feature_key === 'gstin') || {};
+      setInvoiceUsage(usage);
+    } else if (res.res.status === 404) {
+      console.log('NOT FOUND');
+    }
+  };
+
+  useEffect(() => {
+    getInvoiceUsage();
+  }, []);
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -210,37 +235,40 @@ export default function ManageUsers() {
 
   return (
     <>
-      <MainCard
-        title={
-          <Grid container spacing={gridSpacing} sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
-            <Grid>
-              <Typography variant="h3" sx={{ p: 0 }}>
-                Users List
-              </Typography>
-            </Grid>
-            <Grid>
-              <Stack direction="row" spacing={2}>
-                <Button variant="contained" startIcon={<AddIcon />} onClick={handleAddDialogOpen} size="small">
-                  Add User
-                </Button>
-                <OutlinedInput
-                  id="input-search-list-style1"
-                  placeholder="Search"
-                  value={searchQuery}
-                  onChange={handleSearch}
-                  startAdornment={
-                    <InputAdornment position="start">
-                      <IconSearch stroke={1.5} size="16px" />
-                    </InputAdornment>
-                  }
-                  size="small"
-                />
-              </Stack>
-            </Grid>
-          </Grid>
-        }
-        content={false}
-      >
+      <Card>
+        <Stack direction="row" spacing={gridSpacing} sx={{ alignItems: 'center', justifyContent: 'space-between', p: 2 }}>
+          <Typography variant="h3" sx={{ p: 0 }}>
+            Users List
+          </Typography>
+          <Stack direction="row" spacing={2}>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() => {
+                if (invoiceUsage && Object.keys(invoiceUsage.users_count).length > 0) {
+                  if (Number(invoiceUsage.users_count.usage_count) >= Number(invoiceUsage.users_count.actual_count)) {
+                    enqueueSnackbar('Usage limit exceeded. Please upgrade your plan!', { variant: 'warning' });
+                  } else handleAddDialogOpen();
+                } else handleAddDialogOpen();
+              }}
+              size="small"
+            >
+              Add User
+            </Button>
+            <OutlinedInput
+              id="input-search-list-style1"
+              placeholder="Search"
+              value={searchQuery}
+              onChange={handleSearch}
+              startAdornment={
+                <InputAdornment position="start">
+                  <IconSearch stroke={1.5} size="16px" />
+                </InputAdornment>
+              }
+              size="small"
+            />
+          </Stack>
+        </Stack>
         <UserList
           page={page}
           rowsPerPage={rowsPerPage}
@@ -299,7 +327,7 @@ export default function ManageUsers() {
           onSave={handleSavePermissions}
           masterPermissions={masterPermissions}
         />
-      </MainCard>
+      </Card>
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}

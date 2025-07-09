@@ -21,9 +21,10 @@ const AnalyticsOverview = () => {
   const [invoiceUsage, setInvoiceUsage] = useState({});
   const [invoicing_profile_data, setInvoicing_profile_data] = useState(null);
   const user = useSelector((state) => state.accountReducer.user);
+  const invoiceId = import.meta.env.VITE_APP_INVOICE_ID;
 
   const getInvoiceUsage = async () => {
-    const res = await Factory('get', '/user_management/usage-summary/21/?module_id=2', {});
+    const res = await Factory('get', `/user_management/usage-summary/${user.active_context.id}/?module_id=${invoiceId}`, {});
     if (res.res.status_cd === 0) {
       let response = res.res.data.data || [];
       let usage = {};
