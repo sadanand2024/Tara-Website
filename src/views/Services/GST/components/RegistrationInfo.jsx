@@ -188,6 +188,12 @@ const RegistrationInfo = () => {
     if (isLoading) {
     return <CircularProgressComponent isLoading={isLoading} displayContent="Saving..." />;
   }
+  const getLabelWithAsterisk = (label, isRequired = true) => (
+  <Typography variant="subtitle1" component="legend" fontWeight={500}>
+    {label}
+    {isRequired && <span style={{ color: 'red', fontSize: '1.2em' }}> *</span>}
+  </Typography>
+);
 
   return (
     <Box sx={{ pt: 4 }}>
@@ -216,16 +222,17 @@ const RegistrationInfo = () => {
                 fullWidth
                 sx={{ mt: 2 }}
               >
-                <FormLabel variant="subtitle1" component="legend">{item.label}</FormLabel>
-               <RadioGroup
-  row
-  name={item.stateKey}
-  value={formik.values[item.stateKey] === true ? 'true' : 'false'}
-  onChange={(e) => {
-    formik.setFieldValue(item.stateKey, e.target.value === 'true');
-  }}
-  onBlur={formik.handleBlur}
->
+                {/* <FormLabel variant="subtitle1" component="legend">{item.label}</FormLabel> */}
+                {getLabelWithAsterisk(item.label)}
+              <RadioGroup
+                row
+                name={item.stateKey}
+              value={formik.values[item.stateKey] === true ? 'true' : 'false'}
+              onChange={(e) => {
+                formik.setFieldValue(item.stateKey, e.target.value === 'true');
+                  }}
+                  onBlur={formik.handleBlur}
+                      >
                   <FormControlLabel value="true" control={<Radio />} label="Yes" />
                   <FormControlLabel value="false" control={<Radio />} label="No" />
                 </RadioGroup>
@@ -244,8 +251,10 @@ const RegistrationInfo = () => {
                 </Typography>
                 <Grid2 container spacing={2}>
                   <Grid2 size={{ xs: 12, sm: 2 }}>
+                    {getLabelWithAsterisk('Registration No.')}
+
                     <TextField
-                      label="Registration No."
+                      // label="Registration No."
                       name="registration_number"
                       fullWidth
                       size="small"
@@ -258,8 +267,10 @@ const RegistrationInfo = () => {
                     />
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 2 }}>
+                    {getLabelWithAsterisk('Date of Registration')}
+
                     <TextField
-                      label="Date of Registration"
+                      // label="Date of Registration"
                       name="date_of_registration"
                       type="date"
                       InputLabelProps={{ shrink: true }}

@@ -37,67 +37,80 @@ const PrincipleOfBusiness = () => {
     {
       label: 'pincode ',
       name: 'pincode',
-      type: 'text'
+      type: 'text',
+      required: true
     },
     {
       label: 'State',
       name: 'state',
-      type: 'text'
+      type: 'text',
+      required: true
     },
     {
       label: 'District',
       name: 'district',
-      type: 'text'
+      type: 'text',
+      required: true
     },
     {
       label: 'City/Town/Village',
       name: 'city',
-      type: 'text'
+      type: 'text',
+      required: true
     },
     {
       label: 'Road/Street/Locality',
       name: 'road_street_locality',
-      type: 'text'
+      type: 'text',
+      required: true
     },
     {
       label: 'Building/PlatNo',
       name: 'building_flat_no',
-      type: 'text'
+      type: 'text',
+      required: true
     },
     {
       label: 'Latitude',
       name: 'latitude',
-      type: 'text'
+      type: 'text',
+      required: true
     },
     {
       label: 'Longitude',
       name: 'longitude',
-      type: 'text'
+      type: 'text',
+      required: true
     },
     {
       label: 'Nature of Possession of Premises',
       name: 'nature_of_possession_of_premise',
-      type: 'text'
+      type: 'text',
+      required: true
     },
     {
       label: 'Address Proof',
       name: 'address_proof',
-      type: 'text'
+      type: 'text',
+      required: true
     },
     {
       label: 'Upload Address Proof',
       name: 'address_proof_file',
-      type: 'file'
+      type: 'file',
+      required: true
     },
     {
       label: 'Rental Agreement/NOC',
       name: 'rental_agreement_or_noc',
-      type: 'file'
+      type: 'file',
+      required: true
     },
     {
       label: 'Upload Bank Statement/Cancelled Cheque',
       name: 'bank_statement_or_cancelled_cheque',
-      type: 'file'
+      type: 'file',
+      required: true
     }
   ];
 
@@ -256,9 +269,11 @@ const PrincipleOfBusiness = () => {
       case 'text':
         return ['nature_of_possession_of_premise', 'address_proof', 'state'].includes(field.name) ? (
           <>
-            <Typography variant="subtitle1" mb={1}>
+            {/* <Typography variant="subtitle1" mb={1}>
               {field.label}
-            </Typography>
+            </Typography> */}
+             {getLabelWithAsterisk(field.label, field.required)}
+
             <Autocomplete
               fullWidth
               size="small"
@@ -289,9 +304,11 @@ const PrincipleOfBusiness = () => {
           </>
         ) : (
           <>
-            <Typography variant="subtitle1"  mb={1}>
+            {/* <Typography variant="subtitle1"  mb={1}>
               {field.label}
-            </Typography>
+            </Typography> */}
+            {getLabelWithAsterisk(field.label, field.required)}
+
             <TextField
               fullWidth
               size="small"
@@ -313,9 +330,11 @@ const PrincipleOfBusiness = () => {
       case 'file':
         return (
           <>
-            <Typography variant="subtitle1"  mb={1}>
+            {/* <Typography variant="subtitle1"  mb={1}>
               {field.label}
-            </Typography>
+            </Typography> */}
+                {getLabelWithAsterisk(field.label, field.required)}
+
             <RenderFileUpload
               label={field.label}
               fieldName={field.name}
@@ -343,6 +362,13 @@ const PrincipleOfBusiness = () => {
    if (isLoading) {
     return <CircularProgressComponent isLoading={isLoading} displayContent="Saving..." />;
   }
+  const getLabelWithAsterisk = (label, isRequired = true) => (
+  <Typography variant="subtitle1" mb={1} fontWeight={500}>
+    {label}
+    {isRequired && <span style={{ color: 'red', fontSize: '1.2em' }}> *</span>}
+  </Typography>
+);
+
 
   return (
     <Box mt={4}>
@@ -358,20 +384,20 @@ const PrincipleOfBusiness = () => {
               <Box display="flex" justifyContent="flex-end" gap={1}>
                 <RaiseRequest
                   fields={[
-  'Pincode',
-  'State',
-  'District',
-  'City',
-  'Road / Street / Locality',
-  'Building / Flat No.',
-  'Latitude',
-  'Longitude',
-  'Nature of Possession of Premise',
-  'Address Proof',
-  'Address Proof File',
-  'Rental Agreement or NOC',
-  'Bank Statement or Cancelled Cheque'
-]}
+                  'Pincode',
+                    'State',
+                 'District',
+                   'City',
+                 'Road / Street / Locality',
+                 'Building / Flat No.',
+                   'Latitude',
+                 'Longitude',
+                 'Nature of Possession of Premise',
+                  'Address Proof',
+               'Address Proof File',
+                   'Rental Agreement or NOC',
+                 'Bank Statement or Cancelled Cheque'
+                   ]}
 
                 task_id={prinicipalBusiness.task_id}
               />
