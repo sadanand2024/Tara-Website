@@ -137,7 +137,7 @@ const ChooseAccountDialog = ({ open, onContinue }) => {
       <DialogContent>
         <Typography textAlign="center" mb={3} fontSize={14}>
           {/* If you need more info, please check out <a href="#">Help Page</a>. */}
-          Tell us what kind of user you are to proceeds.
+          Tell us what kind of user you are to proceed.
         </Typography>
 
         <Grid container spacing={2}>
