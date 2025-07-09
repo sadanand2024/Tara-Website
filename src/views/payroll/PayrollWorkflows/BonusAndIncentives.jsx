@@ -8,7 +8,19 @@ import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
 
 export default function BonusAndIncentives({ employeeMasterData, from, openDialog, fields, setOpenDialog, handleBack, handleNext }) {
-  const headerData = ['Employee ID', 'Employee Name', 'Department', 'Designation', 'Type', 'Amount', 'Month', 'Financial Year'];
+  const headerData = [
+    'Employee ID',
+    'Employee Name',
+    'Department',
+    'Designation',
+    'Type',
+    'Amount',
+    'Committed Bonus',
+    'Ytd Bonus',
+    'Remaining Balance'
+    // 'Month',
+    // 'Financial Year'
+  ];
 
   const body_keys = [
     'associate_id',
@@ -16,9 +28,12 @@ export default function BonusAndIncentives({ employeeMasterData, from, openDialo
     'department',
     'designation',
     'bonus_type',
-    'current_bonus',
-    'month',
-    'financial_year'
+    'amount',
+    'committed_bonus',
+    'ytd',
+    'remaining_balance'
+    // 'month',
+    // 'financial_year'
   ];
   const [payrollid, setPayrollId] = useState(null);
   const [loading, setLoading] = useState(false);

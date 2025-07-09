@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { Box, Typography, Button, Grid2 } from '@mui/material';
+import { Box, Typography, Autocomplete, Grid2 } from '@mui/material';
 import CustomInput from 'utils/CustomInput';
 import Factory from 'utils/Factory';
 import CustomAutocomplete from 'utils/CustomAutocomplete';
@@ -65,7 +65,12 @@ function SalaryDetails({
       benefits: [],
       total_ctc: { monthly: 0, annually: 0 },
       deductions: [],
-      net_salary: { monthly: 0, annually: 0 }
+      net_salary: { monthly: 0, annually: 0 },
+      is_variable_bonus: false,
+      variable_bonus: {
+        bonus_amount: 0,
+        pay_cycle_frequency: 'quarterly'
+      }
     },
     validationSchema,
 
@@ -189,7 +194,11 @@ function SalaryDetails({
           <>
             <Typography variant="subtitle2" sx={{ color: 'grey.800', mb: 0.5 }}>
               {field.label}
+              <Box component="span" sx={{ color: 'red', pl: 1 }}>
+                *
+              </Box>
             </Typography>
+
             <TextField
               fullWidth
               name="annual_ctc"
@@ -205,6 +214,8 @@ function SalaryDetails({
                   setFieldValue('errorMessage', ''); // ✅ clear previous error
                 }
               }}
+              error={touched.annual_ctc && Boolean(errors.annual_ctc)}
+              helperText={touched.annual_ctc && errors.annual_ctc}
               inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
             />
           </>
@@ -250,6 +261,8 @@ function SalaryDetails({
       setSubmitRef(formik.submitForm);
     }
   }, [setSubmitRef, formik.submitForm]);
+  console.log(errors);
+
   return (
     <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -275,7 +288,73 @@ function SalaryDetails({
           setEnablePreviewButton={setEnablePreviewButton}
           createdEmployeeId={employeeData?.id || createdEmployeeId}
         />
-        <Grid2 size={{ xs: 12, sm: 6, md: 4 }} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 4 }} sx={{ display: 'flex', justifyContent: 'space-between' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 2
+            }}
+          >
+            {/* Variable Bonus Section */}
+            <Box display="flex" alignItems="center" gap={2}>
+              <Typography variant="subtitle1" color="grey.800">
+                Variable Bonus?
+              </Typography>
+              <FormGroup row>
+                <FormControlLabel
+                  label="Yes"
+                  control={<Radio checked={values.is_variable_bonus === true} onChange={() => setFieldValue('is_variable_bonus', true)} />}
+                />
+                <FormControlLabel
+                  label="No"
+                  control={
+                    <Radio checked={values.is_variable_bonus === false} onChange={() => setFieldValue('is_variable_bonus', false)} />
+                  }
+                />
+              </FormGroup>
+            </Box>
+
+            {/* Inline Bonus Fields */}
+            {values.is_variable_bonus && (
+              <Box display="flex" gap={2}>
+                <TextField
+                  fullWidth
+                  label="Bonus Amount"
+                  name="bonus_amount"
+                  size="small"
+                  type="number"
+                  value={values.variable_bonus.bonus_amount}
+                  onChange={(e) =>
+                    setFieldValue('variable_bonus', {
+                      ...values.variable_bonus,
+                      bonus_amount: Number(e.target.value)
+                    })
+                  }
+                  inputProps={{ min: 0 }}
+                  sx={{ minWidth: 200 }}
+                />
+
+                <Autocomplete
+                  size="small"
+                  fullWidth
+                  options={['Quarterly', 'Monthly', 'Yearly']}
+                  value={values.variable_bonus.pay_cycle_frequency || null}
+                  onChange={(e, newValue) =>
+                    setFieldValue('variable_bonus', {
+                      ...values.variable_bonus,
+                      pay_cycle_frequency: newValue || ''
+                    })
+                  }
+                  renderInput={(params) => <TextField {...params} label="Pay Cycle Frequency" name="pay_cycle_frequency" />}
+                  sx={{ minWidth: 200 }}
+                />
+              </Box>
+            )}
+          </Box>
+
           <Box display="flex" alignItems="center" gap={2}>
             <Typography variant="subtitle1" color="grey.800">
               Tax Regime Opted?
