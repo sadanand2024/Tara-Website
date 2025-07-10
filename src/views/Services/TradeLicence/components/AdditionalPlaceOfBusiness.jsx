@@ -25,15 +25,15 @@ import CircularProgressComponent from 'utils/CircularProgressComponent';
 
 
 const additionalFields = [
-  { label: 'Address Line 1', name: 'addressLine1', type: 'text' },
-  { label: 'Address Line 2', name: 'addressLine2', type: 'text' },
-  { label: 'City', name: 'city', type: 'text' },
-  { label: 'District', name: 'district', type: 'text' },
-  { label: 'State', name: 'state', type: 'text' },
-  { label: 'Pincode', name: 'pincode', type: 'text' },
-  { label: 'Nature of possession', name: 'nature_of_possession', type: 'text' },
-  { label: 'Address proof (Additional)', name: 'address_proof_additional', type: 'file' },
-  { label: 'Rental Agreement/NOC (Additional)', name: 'rental_agreement_additional', type: 'file' }
+  { label: 'Address Line 1', name: 'addressLine1', type: 'text',required: true },
+  { label: 'Address Line 2', name: 'addressLine2', type: 'text',required: true },
+  { label: 'City', name: 'city', type: 'text' ,required: true},
+  { label: 'District', name: 'district', type: 'text',required: true },
+  { label: 'State', name: 'state', type: 'text',required: true },
+  { label: 'Pincode', name: 'pincode', type: 'text',required: true },
+  { label: 'Nature of possession', name: 'nature_of_possession', type: 'text',required: true },
+  { label: 'Address proof (Additional)', name: 'address_proof_additional', type: 'file',required: true },
+  { label: 'Rental Agreement/NOC (Additional)', name: 'rental_agreement_additional', type: 'file',required: true }
 ];
 
 const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, taskId = null }) => {
@@ -205,6 +205,12 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
  if (isLoading) {
     return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading additional place of business...'} />;
   }
+   const getLabelWithAsterisk = (label, isRequired = true) => (
+  <span>
+    {label}
+    {isRequired && <span style={{ color: 'red', fontSize: '1.3em' }}> *</span>}
+  </span>
+);
 
 
   const renderField = (field) => {
@@ -212,9 +218,12 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
       case 'text':
         return field.name === 'state' || field.name === 'nature_of_possession' || field.name === 'road_type' ? (
           <>
-            <Typography variant="subtitle1" mb={1}>
+            {/* <Typography variant="subtitle1" mb={1}>
               {field.label}
-            </Typography>
+            </Typography> */}
+            <Typography variant="subtitle1" mb={1}>
+  {getLabelWithAsterisk(field.label, field.required)}
+</Typography>
             <Autocomplete
               fullWidth
               size="small"
@@ -245,9 +254,12 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
           </>
         ) : (
           <>
-            <Typography variant="subtitle1" mb={1}>
+            {/* <Typography variant="subtitle1" mb={1}>
               {field.label}
-            </Typography>
+            </Typography> */}
+            <Typography variant="subtitle1" mb={1}>
+  {getLabelWithAsterisk(field.label, field.required)}
+</Typography>
             <TextField
               fullWidth
               size="small"
@@ -270,9 +282,12 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
       case 'file':
         return (
           <>
-            <Typography variant="subtitle1" mb={1}>
+            {/* <Typography variant="subtitle1" mb={1}>
               {field.label}
-            </Typography>
+            </Typography> */}
+            <Typography variant="subtitle1" mb={1}>
+  {getLabelWithAsterisk(field.label, field.required)}
+</Typography>
             <RenderFileUpload
               label={field.label}
               fieldName={field.name}

@@ -745,7 +745,7 @@ date_of_commencement: Yup.string().when('has_business_commenced', {
                 </Grid2>
                 {/* 7. UAM Registered */}
                 <Grid2 size={{ xs: 12, sm: 6, md: 5 }} display="flex" alignItems="center">
-                  <Typography variant="subtitle1">Are you previously registered under Udyog Aadhaar? (UAM)</Typography>
+                  <Typography variant="subtitle1">Are you previously registered under Udyog Aadhaar? (UAM)<span style={{ color: 'red' }}> *</span></Typography>
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 7 }}>
                   <Stack direction="row" alignItems="center" spacing={2}>
@@ -799,7 +799,7 @@ date_of_commencement: Yup.string().when('has_business_commenced', {
                 </Grid2>
                 {/* 8. Business Commenced */}
                 <Grid2 size={{ xs: 12, sm: 6, md: 5 }} gap={2} display="flex" alignItems="center">
-                  <Typography variant="subtitle1">Has Business Commenced?</Typography>
+                  <Typography variant="subtitle1">Has Business Commenced? <span style={{ color: 'red' }}> *</span></Typography>
                    {/* <RadioGroup
     row
     value={businessIdentityFormik?.values?.has_business_commenced}
@@ -912,7 +912,7 @@ date_of_commencement: Yup.string().when('has_business_commenced', {
               <Grid2 container spacing={2}>
                 {/* 1. Major Activity */}
                 <Grid2 size={{ xs: 12, sm: 6, md: 4 }} display="flex" alignItems="center">
-                  <Typography variant="subtitle1">Major Activity</Typography>
+                  <Typography variant="subtitle1">Major Activity<span style={{ color: 'red' }}> *</span></Typography>
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 8 }}>
                   <RadioGroup
@@ -926,7 +926,7 @@ date_of_commencement: Yup.string().when('has_business_commenced', {
                 </Grid2>
                 {/* 2. Nature of Business */}
                 <Grid2 size={{ xs: 12, sm: 6, md: 4 }} display="flex" alignItems="center">
-                  <Typography variant="subtitle1">Nature of Business</Typography>
+                  <Typography variant="subtitle1">Nature of Business <span style={{ color: 'red' }}> *</span></Typography>
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 8 }}>
                   <TextField
@@ -944,7 +944,7 @@ date_of_commencement: Yup.string().when('has_business_commenced', {
                 </Grid2>
                 {/* 3. NIC Codes */}
                 <Grid2 size={{ xs: 12, sm: 6, md: 4 }} display="flex" alignItems="center">
-                  <Typography variant="subtitle1">NIC Codes</Typography>
+                  <Typography variant="subtitle1">NIC Codes <span style={{ color: 'red' }}> *</span></Typography>
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 8 }}>
                   <Stack direction="row" spacing={2}>
@@ -982,7 +982,7 @@ date_of_commencement: Yup.string().when('has_business_commenced', {
                 </Grid2>
                 {/* 4. Number of persons employed */}
                 <Grid2 size={{ xs: 12, sm: 6, md: 4 }} display="flex" alignItems="center">
-                  <Typography variant="subtitle1">Number of persons employed</Typography>
+                  <Typography variant="subtitle1">Number of persons employed <span style={{ color: 'red' }}> *</span></Typography>
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 8 }}>
                   <Stack direction="row" spacing={2}>
@@ -1539,7 +1539,7 @@ const FinancialLocationDetails = ({
         <Grid2 container spacing={2} mb={2}>
           {/* Turnover in INR */}
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }} display="flex" alignItems="center">
-            <Typography variant="subtitle1">Turnover in INR</Typography>
+            <Typography variant="subtitle1">Turnover in INR <span style={{ color: 'red' }}> *</span></Typography>
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 6, md: 8 }}>
             <Stack direction="row" spacing={2}>
@@ -1592,7 +1592,7 @@ const FinancialLocationDetails = ({
           </Grid2>
           {/* Investment in Plant & Machinery */}
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }} display="flex" alignItems="center">
-            <Typography variant="subtitle1">Investment in Plant & Machinery</Typography>
+            <Typography variant="subtitle1">Investment in Plant & Machinery <span style={{ color: 'red' }}> *</span></Typography>
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 6, md: 8 }}>
             <TextField
@@ -1613,7 +1613,7 @@ const FinancialLocationDetails = ({
           </Grid2>
           {/* ITR for previous year */}
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }} display="flex" alignItems="center">
-            <Typography variant="subtitle1">Have you filed ITR for previous year?</Typography>
+            <Typography variant="subtitle1">Have you filed ITR for previous year? <span style={{ color: 'red' }}> *</span></Typography>
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 6, md: 8 }}>
             {/* <RadioGroup
@@ -1662,7 +1662,7 @@ const FinancialLocationDetails = ({
           </Grid2>
           {/* Registered under GST */}
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }} display="flex" alignItems="center">
-            <Typography variant="subtitle1">Are you registered under GST?</Typography>
+            <Typography variant="subtitle1">Are you registered under GST? <span style={{ color: 'red' }}> *</span></Typography>
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
             <Stack direction="row" spacing={2}>
@@ -1758,7 +1758,7 @@ const FinancialLocationDetails = ({
         <Grid2 container spacing={2} mb={2}>
           {/* Official address of enterprise */}
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }} display="flex" alignItems="center">
-            <Typography variant="subtitle1">Official address of enterprise</Typography>
+            <Typography variant="subtitle1">Official address of enterprise <span style={{ color: 'red' }}> *</span></Typography>
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 6, md: 8 }}>
             <Grid2 container spacing={2}>
@@ -2034,7 +2034,7 @@ const FinancialLocationDetails = ({
           </Grid2>
           {/* Bank statement/Cancelled Cheque */}
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }} display="flex" alignItems="center">
-            <Typography variant="subtitle1">Bank statement/Cancelled Cheque</Typography>
+            <Typography variant="subtitle1">Bank statement/Cancelled Cheque <span style={{ color: 'red' }}> *</span></Typography>
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 6, md: 8 }}>
             <Button size="small" variant="contained" color="primary" component="label">
@@ -2069,7 +2069,7 @@ const FinancialLocationDetails = ({
           </Grid2>
           {/* Official address proof */}
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }} display="flex" alignItems="center">
-            <Typography variant="subtitle1">Official address proof (Rental agreement/Utility bill)</Typography>
+            <Typography variant="subtitle1">Official address proof (Rental agreement/Utility bill) <span style={{ color: 'red' }}> *</span></Typography>
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 6, md: 8 }}>
             <Button size="small" variant="contained" color="primary" component="label">

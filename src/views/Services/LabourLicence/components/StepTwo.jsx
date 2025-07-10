@@ -104,6 +104,12 @@ const StepTwo = ({taskId, step, setStep}) => {
   if (isLoading) {
     return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading registration documents...'} />;
   }
+  const getLabelWithAsterisk = (label, isRequired = true) => (
+  <span>
+    {label}
+    {isRequired && <span style={{ color: 'red', fontSize: '1.3em' }}> *</span>}
+  </span>
+);
   return (
     <>
     <Card sx={{ p: 3 }}>
@@ -134,7 +140,10 @@ const StepTwo = ({taskId, step, setStep}) => {
           <Grid2 container spacing={2} alignItems="center">
             {/* 1. Incorporation certificate / Partnership deed */}
             <Grid2 size={{ sm: 6, md: 6 }}>
-              <Typography variant="subtitle1">Incorporation certificate / Partnership deed</Typography>
+              {/* <Typography variant="subtitle1">Incorporation certificate / Partnership deed</Typography> */}
+              <Typography variant="subtitle1">
+              {getLabelWithAsterisk('Incorporation certificate / Partnership deed')}
+             </Typography>
             </Grid2>
             <Grid2 size={{ sm: 6, md: 3 }} sx={{ ml: 15 }}>
               <RenderFileUpload
@@ -148,7 +157,10 @@ const StepTwo = ({taskId, step, setStep}) => {
             </Grid2>
             {/* 2. Letter of Authorisation / Board resolution */}
             <Grid2 size={{ sm: 6, md: 6 }}>
-              <Typography variant="subtitle1">Letter of Authorisation / Board resolution</Typography>
+              {/* <Typography variant="subtitle1">Letter of Authorisation / Board resolution</Typography> */}
+                 <Typography variant="subtitle1">
+              {getLabelWithAsterisk('Letter of Authorisation / Board resolution')}
+             </Typography>
             </Grid2>
             <Grid2 size={{ sm: 6, md: 3 }}  sx={{ ml: 15 }}>
               <RenderFileUpload
@@ -162,7 +174,10 @@ const StepTwo = ({taskId, step, setStep}) => {
             </Grid2>
             {/* 3. Local language name board photo of business */}
             <Grid2 size={{ sm: 6, md: 6 }}>
-              <Typography variant="subtitle1">Local language name board photo of business</Typography>
+              {/* <Typography variant="subtitle1">Local language name board photo of business</Typography> */}
+               <Typography variant="subtitle1">
+              {getLabelWithAsterisk('Local language name board photo of business')}
+             </Typography>
             </Grid2>
             <Grid2 size={{ sm: 6, md: 3 }} sx={{ ml: 15 }}>
               <RenderFileUpload
@@ -176,8 +191,11 @@ const StepTwo = ({taskId, step, setStep}) => {
             </Grid2>
             {/* 4. Memorandum of Articles (MOA) */}
             <Grid2 size={{ sm: 6, md: 6 }}>
-              <Typography variant="subtitle1">
+              {/* <Typography variant="subtitle1">
                 Memorandum of Articles (MOA) <span style={{ fontSize: 12, color: '#888' }}>(in case of companies)</span>
+              </Typography> */}
+              <Typography variant="subtitle1">
+               {getLabelWithAsterisk('Memorandum of Articles (MOA)')} <span style={{ fontSize: 12, color: '#888' }}>(in case of companies)</span>
               </Typography>
             </Grid2>
             <Grid2 size={{ sm: 6, md: 3 }} sx={{ ml: 15 }}>

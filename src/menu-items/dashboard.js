@@ -114,17 +114,17 @@ const dashboard = {
       icon: icons.IconFolder,
       breadcrumbs: false,
       caption: ''
-    }
+    },
 
-    // {
-    //   id: 'document-drafting',
-    //   title: 'document-drafting',
-    //   type: 'item',
-    //   url: '/app/drafting',
-    //   icon: icons.IconFileText,
-    //   breadcrumbs: false,
-    //   caption: ''
-    // },
+    {
+      id: 'document-drafting',
+      title: 'document-drafting',
+      type: 'item',
+      url: '/app/drafting',
+      icon: icons.IconFileText,
+      breadcrumbs: false,
+      caption: ''
+    },
     // {
     //   id: 'income-tax',
     //   title: 'income-tax',

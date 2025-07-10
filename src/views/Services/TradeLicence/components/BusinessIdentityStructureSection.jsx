@@ -264,6 +264,12 @@ const BusinessIdentityStructureSection = ({ taskId, applicantTaskId }) => {
         console.log('Loading promoter data...', isLoading);
         return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading promoter Data'} />;
       }
+      const getLabelWithAsterisk = (label, isRequired = true) => (
+  <span>
+    {label}
+    {isRequired && <span style={{ color: 'red', fontSize: '1.2em' }}> *</span>}
+  </span>
+);
   return (
     <Box>
       <Card sx={{ p: 3 }}>
@@ -287,9 +293,17 @@ const BusinessIdentityStructureSection = ({ taskId, applicantTaskId }) => {
           <Grid2 container spacing={2}>
             {fields.map((field) => (
               <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4 }}>
-                <Typography variant="subtitle1" mb={1}>
+                {/* <Typography variant="subtitle1" mb={1}>
                   {field.label}
-                </Typography>
+                </Typography> */}
+                <Typography variant="subtitle1" mb={1}>
+                 {getLabelWithAsterisk(field.label, [
+                        'type_of_business',
+                   'legal_name_of_business',
+                  'nature_of_business',
+                    'business_pan'
+             ].includes(field.name))}
+              </Typography>
                 {renderField(field)}
               </Grid2>
             ))}

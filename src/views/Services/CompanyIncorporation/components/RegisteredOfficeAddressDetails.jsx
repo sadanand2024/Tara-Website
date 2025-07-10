@@ -27,57 +27,68 @@ const RegisteredOfficeAddressDetails = ({taskId}) => {
       label: 'Ownership Type',
       name: 'ownership_type',
       type: 'autocomplete',
-      options: typeOfOwnershipOptions
+      options: typeOfOwnershipOptions,
+      required: true
     },
     {
       label: 'Address Line 1',
       name: 'address_line_1',
-      type: 'text'
+      type: 'text',
+      required: true
     },
     {
       label: 'Address Line 2',
       name: 'address_line_2',
-      type: 'text'
+      type: 'text',
+      required: true
     },
     {
       label: 'City',
       name: 'city',
-      type: 'text'
+      type: 'text',
+      required: true
     },
     {
       label: 'District',
       name: 'district',
-      type: 'text'
+      type: 'text',
+      required: true
     },
     {
       label: 'State',
       name: 'state',
-      type: 'text'
+      type: 'text',
+      required: true
     },
     {
       label: 'Pincode',
       name: 'pincode',
-      type: 'text'
+      type: 'text',
+      required: true
     },
     {
       label: 'Utility Bill',
       name: 'utility_bill_file',
-      type: 'file'
+      type: 'file',
+      required: true
     },
     {
       label: 'NOC File',
       name: 'NOC_file',
-      type: 'file'
+      type: 'file',
+      required: true
     },
     {
       label: 'Rental Agreement',
       name: 'rent_agreement_file',
-      type: 'file'
+      type: 'file',
+      required: true
     },
     {
       label: 'Property tax Receipt',
       name: 'property_tax_receipt_file',
-      type: 'file'
+      type: 'file',
+      required: true
     }
   ];
 
@@ -292,6 +303,12 @@ const RegisteredOfficeAddressDetails = ({taskId}) => {
         console.log('Loading Registered Office Address Details...', isLoading);
         return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading Registered Office Address Details...'} />;
       }
+      const getLabelWithAsterisk = (label, isRequired = true) => (
+  <span>
+    {label}
+    {isRequired && <span style={{ color: 'red', fontSize: '1.2em' }}> *</span>}
+  </span>
+);
 
   return (
     <Box mt={4}>
@@ -329,8 +346,12 @@ const RegisteredOfficeAddressDetails = ({taskId}) => {
           <Grid2 container spacing={2}>
             {fields.map((field) => (
               <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4 }}>
-                <Typography variant='subtitle1' mb={1}>
+                {/* <Typography variant='subtitle1' mb={1}>
                   {field.label}
+                </Typography> */}
+                 <Typography variant='subtitle1' mb={1}>
+                   {getLabelWithAsterisk(field.label, field.required)}
+
                 </Typography>
                 {renderField(field)}
               </Grid2>

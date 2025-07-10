@@ -427,6 +427,12 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
                               placeholder="Details"
                               value={row?.details}
                               onChange={(e) => otherIncomeFormik.setFieldValue(`otherIncome[${idx}].details`, e.target.value)}
+                               sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                               
                             />
                           </TableCell>
@@ -438,6 +444,12 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
                               type="number"
                               value={row?.amount}
                               onChange={(e) => otherIncomeFormik.setFieldValue(`otherIncome[${idx}].amount`, e.target.value)}
+                               sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                             />
                           </TableCell>
                           <TableCell>
@@ -447,6 +459,12 @@ const SalaryIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setD
                               placeholder="Notes"
                               value={row?.notes}
                               onChange={(e) => otherIncomeFormik.setFieldValue(`otherIncome[${idx}].notes`, e.target.value)}
+                               sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                             />
                           </TableCell>
                           <TableCell>
@@ -941,7 +959,7 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
             </Typography>
             <Grid2 container spacing={2} alignItems="center" mb={2}>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography variant="subtitle1">Type of Property</Typography>
+                <Typography variant="subtitle1">Type of Property <span style={{ color: 'red' }}> *</span></Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <Autocomplete
@@ -960,7 +978,7 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
                 />
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography variant="subtitle1">Country (if Foreign)</Typography>
+                <Typography variant="subtitle1">Country (if Foreign) <span style={{ color: 'red' }}> *</span></Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <Autocomplete
@@ -979,7 +997,7 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
                 />
               </Grid2>{' '}
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography variant="subtitle1">Property Address</Typography>
+                <Typography variant="subtitle1">Property Address <span style={{ color: 'red' }}> *</span></Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 9 }}>
                 <Grid2 container spacing={1}>
@@ -1050,7 +1068,7 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
                 </Grid2>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography variant="subtitle1">Is it Co-owned Property?</Typography>
+                <Typography variant="subtitle1">Is it Co-owned Property? <span style={{ color: 'red' }}> *</span></Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
               
@@ -1079,7 +1097,7 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
 
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography variant="subtitle1">Ownership Percentage</Typography>
+                <Typography variant="subtitle1">Ownership Percentage <span style={{ color: 'red' }}> *</span></Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <TextField
@@ -1104,7 +1122,7 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
             </Typography>
             <Grid2 container spacing={2} alignItems="center" mb={2}>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography variant="subtitle1">Is this property let-out?</Typography>
+                <Typography variant="subtitle1">Is this property let-out? <span style={{ color: 'red' }}> *</span></Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
               
@@ -1133,7 +1151,7 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
 
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography variant="subtitle1">Annual Rent Received</Typography>
+                <Typography variant="subtitle1">Annual Rent Received <span style={{ color: 'red' }}> *</span></Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <TextField
@@ -1152,7 +1170,7 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
                 />
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography variant="subtitle1">Rent Received In</Typography>
+                <Typography variant="subtitle1">Rent Received In <span style={{ color: 'red' }}> *</span></Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <Autocomplete
@@ -1171,7 +1189,7 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
                 />
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography variant="subtitle1">Did you pay municipal taxes?</Typography>
+                <Typography variant="subtitle1">Did you pay municipal taxes? <span style={{ color: 'red' }}> *</span></Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
     
@@ -1201,7 +1219,7 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
 
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography variant="subtitle1">Municipal tax paid</Typography>
+                <Typography variant="subtitle1">Municipal tax paid <span style={{ color: 'red' }}> *</span></Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <TextField
@@ -1220,7 +1238,7 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
                 />
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography variant="subtitle1">Municipal tax receipt</Typography>
+                <Typography variant="subtitle1">Municipal tax receipt <span style={{ color: 'red' }}> *</span></Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <Button size="small" variant="contained" component="label">
@@ -1251,7 +1269,7 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
             </Typography>
             <Grid2 container spacing={2} alignItems="center">
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography variant="subtitle1">Home loan on this property?</Typography>
+                <Typography variant="subtitle1">Home loan on this property? <span style={{ color: 'red' }}> *</span></Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
               
@@ -1280,7 +1298,7 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
 
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography variant="subtitle1">Interest paid during the FY</Typography>
+                <Typography variant="subtitle1">Interest paid during the FY <span style={{ color: 'red' }}> *</span></Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <TextField
@@ -1293,7 +1311,7 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
                 />
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography variant="subtitle1">Principal paid during the FY</Typography>
+                <Typography variant="subtitle1">Principal paid during the FY <span style={{ color: 'red' }}> *</span></Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <TextField
@@ -1312,7 +1330,7 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
                 />
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography variant="subtitle1">Upload loan interest certificate</Typography>
+                <Typography variant="subtitle1">Upload loan interest certificate <span style={{ color: 'red' }}> *</span></Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <Button size="small" variant="contained" component="label">
@@ -1341,7 +1359,7 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
                 )}
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography variant="subtitle1">Loan statement</Typography>
+                <Typography variant="subtitle1">Loan statement <span style={{ color: 'red' }}> *</span></Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <Button size="small" variant="contained" component="label">
@@ -1634,7 +1652,7 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
             </Typography>
             <Grid2 container spacing={2} alignItems="center" mb={2}>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography variant="subtitle1">Property Type</Typography>
+                <Typography variant="subtitle1">Property Type<span style={{ color: 'red' }}> *</span> </Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <Autocomplete
@@ -1659,7 +1677,7 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                 />
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography variant="subtitle1">Date of Purchase</Typography>
+                <Typography variant="subtitle1">Date of Purchase <span style={{ color: 'red' }}> *</span></Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <TextField
@@ -1682,7 +1700,7 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                 />
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography variant="subtitle1">Purchase Cost</Typography>
+                <Typography variant="subtitle1">Purchase Cost <span style={{ color: 'red' }}> *</span></Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <TextField
@@ -1705,7 +1723,7 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                 />
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography variant="subtitle1">Date of Sale</Typography>
+                <Typography variant="subtitle1">Date of Sale <span style={{ color: 'red' }}> *</span></Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <TextField
@@ -1728,7 +1746,7 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                 />
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography variant="subtitle1">Sale Value</Typography>
+                <Typography variant="subtitle1">Sale Value <span style={{ color: 'red' }}> *</span></Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <TextField
@@ -1751,7 +1769,7 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                 />
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography variant="subtitle1">Upload purchase doc</Typography>
+                <Typography variant="subtitle1">Upload purchase doc <span style={{ color: 'red' }}> *</span></Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <Button size="small" variant="contained" component="label" sx={{ mr: 1 }}>
@@ -1789,7 +1807,7 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                 )}
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography variant="subtitle1">Upload sale doc</Typography>
+                <Typography variant="subtitle1">Upload sale doc <span style={{ color: 'red' }}> *</span></Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <Button size="small" variant="contained" component="label">
@@ -1828,7 +1846,7 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                 )}
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography variant="subtitle1">Reinvestment made</Typography>
+                <Typography variant="subtitle1">Reinvestment made <span style={{ color: 'red' }}> *</span></Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
               
@@ -2086,7 +2104,7 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
         <Paper sx={{ p: 2, mb: 3, border: '1px solid #e0e0e0', bgcolor: '#fff' }}>
           {/* 1. Instrument checkboxes */}
           <Box mb={2}>
-            <Typography mb={1}>Which instrument(s) did you sell?</Typography>
+            <Typography mb={1}>Which instrument(s) did you sell? <span style={{ color: 'red' }}> *</span></Typography>
             <Box display="flex" flexWrap="wrap" gap={2}>
               {eqMfTypes?.map((type) => (
                 <FormControlLabel
@@ -2099,7 +2117,7 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
           </Box>
           {/* 2. File upload for CAMS/Broker statements */}
           <Box mb={2}>
-            <Typography mb={1}>Upload CAMS / Broker statements:</Typography>
+            <Typography mb={1}>Upload CAMS / Broker statements: <span style={{ color: 'red' }}> *</span></Typography>
             <Stack direction="row" spacing={2} alignItems="center">
               <Button size="small" variant="contained" component="label">
                 Upload
@@ -2125,7 +2143,7 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
           </Box>
           {/* 3. Did you sell any foreign shares? */}
           <Stack direction="row" spacing={2} alignItems="center" mb={2}>
-            <Typography mb={1}>Did you sell any foreign shares?</Typography>
+            <Typography mb={1}>Did you sell any foreign shares? <span style={{ color: 'red' }}> *</span></Typography>
            
             <RadioGroup row>
               <FormControlLabel
@@ -2153,7 +2171,7 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
           </Stack>
           {/* 4. Did you sell any unlisted shares? */}
           <Stack direction="row" spacing={2} alignItems="center" mb={2}>
-            <Typography mb={1}>Did you sell any unlisted shares?</Typography>
+            <Typography mb={1}>Did you sell any unlisted shares? <span style={{ color: 'red' }}> *</span></Typography>
           
             <RadioGroup row>
               <FormControlLabel
@@ -2233,6 +2251,12 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                           updated[idx].asset_details = e.target.value;
                           setOtherGainsRows(updated);
                         }}
+                         sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                       />
                     </TableCell>
                     <TableCell sx={{ px: 0.5, py: 1 }}>
@@ -2249,6 +2273,12 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                           updated[idx].purchase_date = e.target.value;
                           setOtherGainsRows(updated);
                         }}
+                         sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                       />
                     </TableCell>
                     <TableCell sx={{ px: 0.5, py: 1 }}>
@@ -2263,6 +2293,12 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                           updated[idx].purchase_value = e.target.value;
                           setOtherGainsRows(updated);
                         }}
+                         sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                       />
                     </TableCell>
                     <TableCell sx={{ px: 0.5, py: 1 }}>
@@ -2279,6 +2315,12 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                           updated[idx].sale_date = e.target.value;
                           setOtherGainsRows(updated);
                         }}
+                         sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                       />
                     </TableCell>
                     <TableCell sx={{ px: 0.5, py: 1 }}>
@@ -2293,6 +2335,12 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
                           updated[idx].sale_value = e.target.value;
                           setOtherGainsRows(updated);
                         }}
+                         sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                       />
                     </TableCell>
                     <TableCell sx={{ px: 0.5, py: 1 }}>
@@ -2698,7 +2746,7 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
             </Typography>
             <Grid2 container spacing={2} alignItems="center" mb={2}>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography>Business Name</Typography>
+                <Typography variant="subtitle1">Business Name <span style={{ color: 'red' }}> *</span></Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <TextField
@@ -2711,10 +2759,16 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                     updated[idx].business_name = e.target.value;
                     setBusinessRows(updated);
                   }}
+                   sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                 />
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography>Business Type</Typography>
+                <Typography variant="subtitle1">Business Type <span style={{ color: 'red' }}> *</span></Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <Autocomplete
@@ -2727,11 +2781,17 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                     updated[idx].business_type = v || '';
                     setBusinessRows(updated);
                   }}
+                    sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                   renderInput={(params) => <TextField {...params} placeholder="Select type" />}
                 />
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                <Typography>Opting for presumptive?</Typography>
+                <Typography variant="subtitle1">Opting for presumptive? <span style={{ color: 'red' }}> *</span></Typography>
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                 <RadioGroup
@@ -2784,7 +2844,7 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
               <Box mb={2}>
                 <Grid2 container spacing={2} alignItems="center">
                   <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                    <Typography>Section/Type of</Typography>
+                    <Typography variant="subtitle1">Section/Type of <span style={{ color: 'red' }}> *</span></Typography>
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
                     <Autocomplete
@@ -2803,11 +2863,17 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                         arr[idx] = v || '';
                         setSelectedSection(arr);
                       }}
+                        sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                       renderInput={(params) => <TextField {...params} placeholder="Select section/type" />}
                     />
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                    <Typography>Nature</Typography>
+                    <Typography variant="subtitle1">Nature <span style={{ color: 'red' }}> *</span></Typography>
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
                     <TextField
@@ -2821,10 +2887,16 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                         updated[idx].nature = e.target.value;
                         setBusinessRows(updated);
                       }}
+                        sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                     />
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                    <Typography>Presumptive Rate</Typography>
+                    <Typography variant="subtitle1">Presumptive Rate <span style={{ color: 'red' }}> *</span></Typography>
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
                     <TextField
@@ -2838,10 +2910,16 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                         updated[idx].presumptive_rate = e.target.value;
                         setBusinessRows(updated);
                       }}
+                        sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                     />
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                    <Typography>Presumptive Income</Typography>
+                    <Typography variant="subtitle1">Presumptive Income <span style={{ color: 'red' }}> *</span></Typography>
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
                     <TextField
@@ -2855,10 +2933,16 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                         setBusinessRows(updated);
                       }}
                       InputProps={{ readOnly: true }}
+                        sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                     />
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                    <Typography>Grossturnover/receipts</Typography>
+                    <Typography variant="subtitle1">Grossturnover/receipts <span style={{ color: 'red' }}> *</span></Typography>
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
                     <TextField
@@ -2871,10 +2955,16 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                         updated[idx].grossturnover_or_receipts = e.target.value;
                         setBusinessRows(updated);
                       }}
+                        sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                     />
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                    <Typography>Digital Percentage Receipts</Typography>
+                    <Typography variant="subtitle1">Digital Percentage Receipts <span style={{ color: 'red' }}> *</span></Typography>
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
                     <TextField
@@ -2887,10 +2977,16 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                         updated[idx].digital_receipts = e.target.value;
                         setBusinessRows(updated);
                       }}
+                        sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                     />
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                    <Typography>Upload Bank Statements</Typography>
+                    <Typography variant="subtitle1">Upload Bank Statements <span style={{ color: 'red' }}> *</span></Typography>
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                     <Stack direction="row" spacing={1}>
@@ -2907,6 +3003,12 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                               setBusinessRows(updatedBank);
                             }
                           }}
+                            sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                         />
                       </Button>
                       {businessRows[idx]?.bank_statements_files && (
@@ -2928,7 +3030,7 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                     </Stack>
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                    <Typography>Upload 26AS</Typography>
+                    <Typography variant="subtitle1">Upload 26AS <span style={{ color: 'red' }}> *</span></Typography>
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                     <Button size="small" variant="contained" component="label">
@@ -2961,7 +3063,7 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                     )}
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                    <Typography>Upload AIS</Typography>
+                    <Typography variant="subtitle1">Upload AIS <span style={{ color: 'red' }}> *</span></Typography>
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                     <Button size="small" variant="contained" component="label">
@@ -2994,7 +3096,7 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                     )}
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                    <Typography>Any other relevant docs</Typography>
+                    <Typography variant="subtitle1">Any other relevant docs <span style={{ color: 'red' }}> *</span></Typography>
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                     <Button size="small" variant="contained" component="label">
@@ -3034,7 +3136,7 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
               <Box mb={2}>
                 <Grid2 container spacing={2} alignItems="center">
                   <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                    <Typography>Gross Turnover</Typography>
+                    <Typography variant="subtitle1">Gross Turnover <span style={{ color: 'red' }}> *</span></Typography>
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                     <TextField
@@ -3047,10 +3149,16 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                         updated[idx].grossturnover_or_receipts = e.target.value;
                         setBusinessRows(updated);
                       }}
+                        sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                     />
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                    <Typography>Digital Percentage Receipts</Typography>
+                    <Typography variant="subtitle1">Digital Percentage Receipts <span style={{ color: 'red' }}> *</span></Typography>
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                     <TextField
@@ -3063,10 +3171,16 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                         updated[idx].digital_receipts = e.target.value;
                         setBusinessRows(updated);
                       }}
+                        sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                     />
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                    <Typography>Net Profit</Typography>
+                    <Typography variant="subtitle1">Net Profit <span style={{ color: 'red' }}> *</span></Typography>
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                     <TextField
@@ -3079,10 +3193,16 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                         updated[idx].netProfit = e.target.value;
                         setBusinessRows(updated);
                       }}
+                        sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                     />
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                    <Typography>Upload Bank Statement</Typography>
+                    <Typography variant="subtitle1">Upload Bank Statement <span style={{ color: 'red' }}> *</span></Typography>
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                     <Stack direction="row" spacing={1}>
@@ -3120,7 +3240,7 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                     </Stack>
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                    <Typography>Books Maintained?</Typography>
+                    <Typography variant="subtitle1">Books Maintained? <span style={{ color: 'red' }}> *</span></Typography>
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 9 }}>
                    
@@ -3160,7 +3280,7 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                   {businessRows[idx]?.book_maintained === true && (
                     <>
                       <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                        <Typography>Profit & Loss</Typography>
+                        <Typography variant="subtitle1">Profit & Loss <span style={{ color: 'red' }}> *</span></Typography>
                       </Grid2>
                       <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                         <Button size="small" variant="contained" component="label">
@@ -3196,7 +3316,7 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                         )}
                       </Grid2>
                       <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                        <Typography>Balance Sheet</Typography>
+                        <Typography variant="subtitle1">Balance Sheet <span style={{ color: 'red' }}> *</span></Typography>
                       </Grid2>
                       <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                         <Button size="small" variant="contained" component="label">
@@ -3234,7 +3354,7 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                     </>
                   )}
                   <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                    <Typography>GST Registered?</Typography>
+                    <Typography variant="subtitle1">GST Registered? <span style={{ color: 'red' }}> *</span></Typography>
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                    
@@ -3274,7 +3394,7 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                   {businessRows[idx]?.gst_registered === true && (
                     <>
                       <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                        <Typography>GST Returns</Typography>
+                        <Typography variant="subtitle1">GST Returns <span style={{ color: 'red' }}> *</span></Typography>
                       </Grid2>
                       <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                         <Button size="small" variant="contained" component="label">
@@ -3312,7 +3432,7 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                     </>
                   )}
                   <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                    <Typography>Upload 26AS</Typography>
+                    <Typography variant="subtitle1">Upload 26AS <span style={{ color: 'red' }}> *</span></Typography>
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                     <Button size="small" variant="contained" component="label">
@@ -3345,7 +3465,7 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                     )}
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                    <Typography>Upload AIS</Typography>
+                    <Typography variant="subtitle1">Upload AIS <span style={{ color: 'red' }}> *</span></Typography>
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                     <Button size="small" variant="contained" component="label">
@@ -3378,7 +3498,7 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
                     )}
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                    <Typography>Any other relevant docs</Typography>
+                    <Typography variant="subtitle1">Any other relevant docs <span style={{ color: 'red' }}> *</span></Typography>
                   </Grid2>
                   <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                     <Button size="small" variant="contained" component="label">
@@ -4038,7 +4158,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
         sx={{ mb: interestApplicable === 'Applicable' ? 1 : 2, justifyContent: 'space-between' }}
       >
         <Stack direction="row" spacing={2} alignItems="center">
-          <Typography>Interest Income: </Typography>
+          <Typography>Interest Income: <span style={{ color: 'red' }}> *</span> </Typography>
           <RadioGroup
             row
             value={interestApplicable}
@@ -4081,6 +4201,12 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                           setInterestRows(updated);
                         }}
                         renderInput={(params) => <TextField {...params} placeholder="Interest Type" />}
+                         sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                       />
                     </TableCell>
                     <TableCell>
@@ -4094,6 +4220,12 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                           updated[idx].interest_earned = e.target.value;
                           setInterestRows(updated);
                         }}
+                         sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                       />
                     </TableCell>
                     <TableCell>
@@ -4107,6 +4239,12 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                           updated[idx].bank_name = e.target.value;
                           setInterestRows(updated);
                         }}
+                         sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                       />
                     </TableCell>
                     <TableCell align="center">
@@ -4192,7 +4330,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
         }}
       >
         <Stack direction="row" spacing={2} alignItems="center">
-          <Typography>Dividend Income: </Typography>
+          <Typography>Dividend Income:<span style={{ color: 'red' }}> *</span></Typography>
           <RadioGroup
             row
             value={dividendApplicable}
@@ -4233,6 +4371,12 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                           updated[idx].received_from = e.target.value;
                           setDividendRows(updated);
                         }}
+                         sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                       />
                     </TableCell>
                     <TableCell>
@@ -4247,6 +4391,12 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                           updated[idx].dividend_received = e.target.value;
                           setDividendRows(updated);
                         }}
+                         sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                       />
                     </TableCell>
                     <TableCell align="center">
@@ -4324,7 +4474,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
         sx={{ mb: giftApplicable === 'Applicable' ? 1 : 2, justifyContent: 'space-between', mt: 2 }}
       >
         <Stack direction="row" spacing={2} alignItems="center">
-          <Typography>Gift Income: </Typography>
+          <Typography>Gift Income:<span style={{ color: 'red' }}> *</span> </Typography>
           <RadioGroup
             row
             value={giftApplicable}
@@ -4370,6 +4520,12 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                           updated[idx].amount = e.target.value;
                           setGiftRows(updated);
                         }}
+                         sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                       />
                     </TableCell>
                     <TableCell sx={{ p: 0.5, py: 1 }}>
@@ -4383,6 +4539,12 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                           updated[idx].received_from = e.target.value;
                           setGiftRows(updated);
                         }}
+                         sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                       />
                     </TableCell>
                     <TableCell sx={{ p: 0.5, py: 1 }}>
@@ -4396,6 +4558,12 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                           updated[idx].relation = v;
                           setGiftRows(updated);
                         }}
+                         sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                         renderInput={(params) => <TextField {...params} placeholder="Relation" />}
                       />
                     </TableCell>
@@ -4412,6 +4580,12 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                           updated[idx].date_received = e.target.value;
                           setGiftRows(updated);
                         }}
+                         sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                       />
                     </TableCell>
                     <TableCell sx={{ p: 0.5, py: 1 }} align="center">
@@ -4490,7 +4664,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
         sx={{ mb: familyApplicable === 'Applicable' ? 1 : 2, justifyContent: 'space-between', mt: 2 }}
       >
         <Stack direction="row" spacing={2} alignItems="center">
-          <Typography>Family Pension Income: </Typography>
+          <Typography>Family Pension Income:<span style={{ color: 'red' }}> *</span> </Typography>
           <RadioGroup
             row
             value={familyApplicable}
@@ -4531,6 +4705,12 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                           updated[idx].amount = e.target.value;
                           setFamilyRows(updated);
                         }}
+                         sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                       />
                     </TableCell>
                     <TableCell>
@@ -4545,6 +4725,12 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                           setFamilyRows(updated);
                         }}
                         renderInput={(params) => <TextField {...params} placeholder="Source" />}
+                         sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                       />
                     </TableCell>
 
@@ -4595,7 +4781,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
         sx={{ mb: foreignApplicable === 'Applicable' ? 1 : 2, justifyContent: 'space-between', mt: 2 }}
       >
         <Stack direction="row" spacing={2} alignItems="center">
-          <Typography>Foreign Income: </Typography>
+          <Typography>Foreign Income:<span style={{ color: 'red' }}> *</span> </Typography>
           <RadioGroup
             row
             value={foreignApplicable}
@@ -4643,6 +4829,12 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                           updated[idx].type_of_income = v;
                           setForeignRows(updated);
                         }}
+                         sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                         renderInput={(params) => <TextField {...params} placeholder="Type of Income" />}
                       />
                     </TableCell>
@@ -4657,6 +4849,12 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                           updated[idx].country = v;
                           setForeignRows(updated);
                         }}
+                         sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                         renderInput={(params) => <TextField {...params} placeholder="Country" />}
                       />
                     </TableCell>
@@ -4671,6 +4869,12 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                           updated[idx].currency = v;
                           setForeignRows(updated);
                         }}
+                         sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                         renderInput={(params) => <TextField {...params} placeholder="Currency" />}
                       />
                     </TableCell>
@@ -4686,6 +4890,12 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                           updated[idx].amount = e.target.value;
                           setForeignRows(updated);
                         }}
+                         sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                       />
                     </TableCell>
                     <TableCell sx={{ p: 0.5, py: 1 }}>
@@ -4697,6 +4907,12 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                           updated[idx].tax_paid_abroad = v === 'true';
                           setForeignRows(updated);
                         }}
+                         sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                       >
                         <FormControlLabel
                           value="true"
@@ -4796,7 +5012,7 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
         sx={{ mb: winningsApplicable === 'Applicable' ? 1 : 2, justifyContent: 'space-between', mt: 2 }}
       >
         <Stack direction="row" spacing={2} alignItems="center">
-          <Typography>Winnings/Lottery Income: </Typography>
+          <Typography>Winnings/Lottery Income:<span style={{ color: 'red' }}> *</span> </Typography>
           <RadioGroup
             row
             value={winningsApplicable}
@@ -4837,6 +5053,12 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                           updated[idx].source = v;
                           setWinningsRows(updated);
                         }}
+                         sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                         renderInput={(params) => <TextField {...params} placeholder="Source of Income" />}
                       />
                     </TableCell>
@@ -4852,6 +5074,12 @@ const OtherIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData, setDi
                           updated[idx].amount = e.target.value;
                           setWinningsRows(updated);
                         }}
+                         sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                       />
                     </TableCell>
                     <TableCell align="center">
@@ -5017,7 +5245,7 @@ const AgricultureIncome = ({ data, service_id, setFileDialogOpen, fileDialogOpen
     <Box>
       <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
         <Box>
-          <Typography>Do you have agricultural income during F.Y.? </Typography>
+          <Typography>Do you have agricultural income during F.Y.? <span style={{ color: 'red' }}> *</span> </Typography>
           <RadioGroup
             row
             value={agricultureIncome.agriculture}
@@ -5034,11 +5262,18 @@ const AgricultureIncome = ({ data, service_id, setFileDialogOpen, fileDialogOpen
       </Stack>
       {agricultureIncome.agriculture === 'Applicable' && (
         <Stack direction="row" spacing={1} alignItems="center" mb={2}>
-          <Typography>If yes, enter net agricultural income earned</Typography>
+          <Typography>If yes, enter net agricultural income earned <span style={{ color: 'red' }}> *</span></Typography>
           <TextField
             size="small"
             fullWidth
-            sx={{ maxWidth: 200 }}
+            // sx={{ maxWidth: 200 }}
+             sx={{
+                                  // width: '100%',
+                                  maxWidth: 200,
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
             value={agricultureIncome?.agriculture_income_docs?.amount}
             onChange={(e) =>
               setAgricultureIncome({
@@ -5046,6 +5281,7 @@ const AgricultureIncome = ({ data, service_id, setFileDialogOpen, fileDialogOpen
                 agriculture_income_docs: { ...agricultureIncome.agriculture_income_docs, amount: e.target.value }
               })
             }
+            
             placeholder="Agricultural Income"
           />
           <Button size="small" variant="contained" component="label">
