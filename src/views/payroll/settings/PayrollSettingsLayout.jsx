@@ -375,7 +375,9 @@ const PayrollSettingsLayout = () => {
       setMarkingComplete(false);
     }
   };
-
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' }); // or 'auto'
+  }, [value]);
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="50vh">

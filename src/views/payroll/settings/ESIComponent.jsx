@@ -225,27 +225,6 @@ function ESIComponent({ handleNext, handleBack }) {
                             disabled
                           />
                         </Grid2>
-
-                        <Grid2 size={12}>
-                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
-                            <Button
-                              variant="outlined"
-                              size="small"
-                              startIcon={<ArrowBackIcon />}
-                              onClick={() => {
-                                router.back();
-                              }}
-                            >
-                              Back to Dashboard
-                            </Button>
-                            {/* <Button size="small" variant="contained" onClick={handleBack} sx={{ mr: 2 }}>
-                              Back
-                            </Button>
-                            <Button size="small" variant="contained" onClick={handleNext}>
-                              Next
-                            </Button> */}
-                          </Box>
-                        </Grid2>
                       </>
                     ) : (
                       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 5 }}>

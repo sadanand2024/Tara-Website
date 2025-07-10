@@ -6,6 +6,7 @@ import { IconBuildingBank, IconCertificate, IconReceipt } from '@tabler/icons-re
 import EpfComponent from './EPFComponent';
 import ESIComponent from './ESIComponent';
 import ProfessionalTax from './ProfessionalTax';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 const TabPanel = ({ children, value, index }) => (
   <div role="tabpanel" hidden={value !== index} style={{ width: '100%', height: '100%' }}>
@@ -19,7 +20,7 @@ TabPanel.propTypes = {
   index: PropTypes.number.isRequired
 };
 
-const StatutoryComponents = ({ handleNext }) => {
+const StatutoryComponents = () => {
   const [activeTab, setActiveTab] = useState(0);
 
   const tabConfig = [
@@ -29,7 +30,7 @@ const StatutoryComponents = ({ handleNext }) => {
   ];
 
   const handleTabChange = (_event, newValue) => setActiveTab(newValue);
-  // const handleNext = () => setActiveTab((prev) => (prev < tabConfig.length - 1 ? prev + 1 : prev));
+  const handleNext = () => setActiveTab((prev) => (prev < tabConfig.length - 1 ? prev + 1 : prev));
   const handleBack = () => setActiveTab((prev) => (prev > 0 ? prev - 1 : prev));
 
   return (
@@ -83,21 +84,27 @@ const StatutoryComponents = ({ handleNext }) => {
 
       <Box>
         <TabPanel value={activeTab} index={0}>
-          <EpfComponent handleNext={handleNext} />
+          <EpfComponent />
         </TabPanel>
         <TabPanel value={activeTab} index={1}>
-          <ESIComponent handleNext={handleNext} handleBack={handleBack} />
+          <ESIComponent />
         </TabPanel>
         <TabPanel value={activeTab} index={2}>
-          <ProfessionalTax handleNext={handleNext} handleBack={handleBack} />
+          <ProfessionalTax />
         </TabPanel>
       </Box>
+      <Stack direction="row" spacing={2} justifyContent="space-between" sx={{ mt: 3 }}>
+        <Button startIcon={<ArrowBackIcon />} variant="outlined" onClick={handleBack} disabled={activeTab === 0}>
+          Back
+        </Button>
+        <Button variant="contained" onClick={handleNext} disabled={activeTab === tabConfig.length - 1}>
+          Next
+        </Button>
+      </Stack>
     </MainCard>
   );
 };
 
-StatutoryComponents.propTypes = {
-  type: PropTypes.any
-};
+StatutoryComponents.propTypes = {};
 
 export default StatutoryComponents;
