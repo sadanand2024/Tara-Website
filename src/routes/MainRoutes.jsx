@@ -49,6 +49,8 @@ const AppBusinessSettings = Loadable(lazy(() => import('views/application/Busine
 const AppAccountSettings = Loadable(lazy(() => import('views/application/users/Account')));
 const ManagePlans = Loadable(lazy(() => import('views/ManageSubscriptions/ManagePlans')));
 const ManageTasks = Loadable(lazy(() => import('views/application/ManageTasks')));
+const DocumentDrafting = Loadable(lazy(() => import('views/application/DocumentDrafting')));
+
 const DocumentWallet = Loadable(lazy(() => import('views/application/Document-Wallet')));
 const ContactUsInfo = Loadable(lazy(() => import('views/ContactUsInfo')));
 const ConsultationInfo = Loadable(lazy(() => import('views/ConsultationInfo')));
@@ -200,6 +202,11 @@ const MainRoutes = {
       path: '/app/manage-tasks',
       element: <ManageTasks />
     },
+     {
+      path: '/app/drafting',
+      element: < DocumentDrafting />
+    },
+   
     {
       path: '/app/subscriptions',
       element: <ManageSubscriptions />
