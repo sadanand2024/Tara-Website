@@ -112,8 +112,8 @@ export default function PayrollMonthwise({ payrollId, financialYear }) {
                 <CustomAutocomplete
                   value={months[selectedMonth - 1]}
                   onChange={handleMonthChange}
-                  options={['Please select', ...months]}
-                  placeholder="Select Month"
+                  options={[...months]}
+                  label="Select Month"
                   size="small"
                   sx={{
                     minWidth: 180,

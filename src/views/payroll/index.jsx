@@ -324,8 +324,8 @@ const PayrollDashboard = () => {
                       <CustomAutocomplete
                         value={months[selectedMonth - 1]}
                         onChange={handleMonthChange}
-                        options={['Please select', ...months]}
-                        placeholder="Select Month"
+                        options={[...months]}
+                        lable="Select Month"
                         size="small"
                         sx={{
                           minWidth: 180,
