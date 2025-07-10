@@ -172,7 +172,9 @@ export default function SimpleTabs() {
     }
     setLoading(false);
   };
-
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' }); // or 'auto'
+  }, [value]);
   useEffect(() => {
     fetch_Invoicing_profile();
   }, [value]);

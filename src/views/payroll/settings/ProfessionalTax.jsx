@@ -128,11 +128,7 @@ const ProfessionalTax = ({ handleNext, handleBack }) => {
 
             {ptData.length > 0 && (
               <Grid2 size={{ xs: 12 }}>
-                <Stack direction="row" justifyContent="space-between" sx={{ mt: 2 }}>
-                  <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigate(-1)}>
-                    Back to Dashboard
-                  </Button>
-
+                <Stack direction="row" justifyContent="center" sx={{ mt: 2 }}>
                   <Pagination
                     count={Math.ceil(ptData.length / rowsPerPage)}
                     page={currentPage}
@@ -140,14 +136,6 @@ const ProfessionalTax = ({ handleNext, handleBack }) => {
                     shape="rounded"
                     color="primary"
                   />
-                  <Stack direction="row" spacing={2}>
-                    <Button startIcon={<ArrowBackIcon />} variant="outlined" onClick={handleBack}>
-                      Back
-                    </Button>
-                    <Button variant="contained" onClick={handleNext}>
-                      Next
-                    </Button>
-                  </Stack>
                 </Stack>
               </Grid2>
             )}
