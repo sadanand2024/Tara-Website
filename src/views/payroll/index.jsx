@@ -263,7 +263,7 @@ const PayrollDashboard = () => {
           <Button
             variant="contained"
             onClick={() => {
-              navigate(`/payroll/settings/add-employee?payrollid=${businessDetails?.payroll_id}`);
+              navigate(`/app/payroll/settings/employee-master?payrollid=${businessDetails?.payroll_id}`);
             }}
             startIcon={<IconPlus size={16} />}
             sx={{

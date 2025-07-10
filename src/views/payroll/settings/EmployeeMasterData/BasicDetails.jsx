@@ -11,6 +11,10 @@ import { useSearchParams } from 'react-router-dom';
 import Factory from 'utils/Factory';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
+import DepartmentDialog from '../DepartmentDialog';
+import DesignationDialog from '../DesignationDialog';
+import { IconPlus } from '@tabler/icons-react';
+
 const employeeFields = [
   { name: 'first_name', label: 'First Name' },
   { name: 'middle_name', label: 'Middle Name' },
@@ -35,6 +39,28 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
   const [workLocations, setWorkLocations] = useState([]); // Stores the list of work locations
   const [designations, setDesignations] = useState([]); // State to store designations data
   const [departments, setDepartments] = useState([]); // State to store departments data
+
+  // Dialog state and handlers for Department
+  const [openDepartmentDialog, setOpenDepartmentDialog] = useState(false);
+  const [departmentDialogType, setDepartmentDialogType] = useState('add');
+  const [selectedDepartment, setSelectedDepartment] = useState(null);
+  const handleOpenDepartmentDialog = () => {
+    setDepartmentDialogType('add');
+    setSelectedDepartment(null);
+    setOpenDepartmentDialog(true);
+  };
+  const handleCloseDepartmentDialog = () => setOpenDepartmentDialog(false);
+
+  // Dialog state and handlers for Designation
+  const [openDesignationDialog, setOpenDesignationDialog] = useState(false);
+  const [designationDialogType, setDesignationDialogType] = useState('add');
+  const [selectedDesignation, setSelectedDesignation] = useState(null);
+  const handleOpenDesignationDialog = () => {
+    setDesignationDialogType('add');
+    setSelectedDesignation(null);
+    setOpenDesignationDialog(true);
+  };
+  const handleCloseDesignationDialog = () => setOpenDesignationDialog(false);
 
   useEffect(() => {
     const id = searchParams.get('payrollid');
@@ -209,6 +235,73 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
               : field.name === 'designation'
                 ? { getOptionLabel: (option) => option?.designation_name || '' }
                 : field.name === 'department' && { getOptionLabel: (option) => option?.dept_name || '' })}
+            ListboxProps={
+              field.name === 'designation'
+                ? {
+                    style: { maxHeight: 250 },
+                    component: React.forwardRef(function CustomListboxComponent(props, ref) {
+                      const { children, ...rest } = props;
+                      return (
+                        <ul ref={ref} {...rest}>
+                          {children}
+                          <li style={{ padding: '8px 16px' }}>
+                            <Button
+                              startIcon={<IconPlus />}
+                              variant="contained"
+                              fullWidth
+                              size="small"
+                              sx={{
+                                bgcolor: 'primary.main',
+                                '&:hover': {
+                                  bgcolor: 'primary.dark'
+                                }
+                              }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleOpenDesignationDialog();
+                              }}
+                            >
+                              Add Designation
+                            </Button>
+                          </li>
+                        </ul>
+                      );
+                    })
+                  }
+                : field.name === 'department'
+                  ? {
+                      style: { maxHeight: 250 },
+                      component: React.forwardRef(function CustomListboxComponent(props, ref) {
+                        const { children, ...rest } = props;
+                        return (
+                          <ul ref={ref} {...rest}>
+                            {children}
+                            <li style={{ padding: '8px 16px' }}>
+                              <Button
+                                startIcon={<IconPlus />}
+                                variant="contained"
+                                fullWidth
+                                size="small"
+                                sx={{
+                                  bgcolor: 'primary.main',
+                                  '&:hover': {
+                                    bgcolor: 'primary.dark'
+                                  }
+                                }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleOpenDepartmentDialog();
+                                }}
+                              >
+                                Add Department
+                              </Button>
+                            </li>
+                          </ul>
+                        );
+                      })
+                    }
+                  : undefined
+            }
           />
         ) : field.name === 'doj' ? (
           <CustomDatePicker
@@ -529,6 +622,25 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
           />
         </FormGroup>
       </form>
+      {/* Department and Designation Dialogs */}
+      <DepartmentDialog
+        open={openDepartmentDialog}
+        handleClose={handleCloseDepartmentDialog}
+        handleOpenDialog={handleOpenDepartmentDialog}
+        selectedRecord={selectedDepartment}
+        type={departmentDialogType}
+        setType={setDepartmentDialogType}
+        fetchDepartments={fetchDepartments}
+      />
+      <DesignationDialog
+        open={openDesignationDialog}
+        handleClose={handleCloseDesignationDialog}
+        handleOpenDialog={handleOpenDesignationDialog}
+        selectedRecord={selectedDesignation}
+        type={designationDialogType}
+        setType={setDesignationDialogType}
+        fetchDesignations={fetchDesignations}
+      />
     </Box>
   );
 }

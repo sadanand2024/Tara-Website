@@ -249,11 +249,11 @@ const MainRoutes = {
       element: <PayrollSettingsLayout />
     },
     {
-      path: '/payroll/settings/salary-template',
+      path: '/app/payroll/settings/salary-template',
       element: <SalaryTemplate />
     },
     {
-      path: '/payroll/settings/add-employee',
+      path: '/app/payroll/settings/add-employee',
       element: <AddEmployee />
     },
     {

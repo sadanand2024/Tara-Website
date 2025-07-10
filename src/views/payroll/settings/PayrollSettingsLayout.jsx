@@ -47,6 +47,8 @@ import SalaryTemplateList from './SalaryTemplateList';
 import EmployeeMaster from './EmployeeMasterData/Index';
 import PaySchedule from './PaySchedule';
 import LeaveAttendance from './LeaveAttendance';
+import SalaryTemplate from './SalaryTemplate';
+import AddEmployee from './EmployeeMasterData/AddEmployee';
 
 const PAYROLL_STEPS = [
   {
@@ -580,10 +582,28 @@ const PayrollSettingsLayout = () => {
               <SalaryComponents handleBack={handleBack} handleNext={handleNext} />
             </TabPanel>
             <TabPanel value={value} index={6}>
-              <SalaryTemplateList handleBack={handleBack} handleNext={handleNext} />
+              {/* Conditional rendering for create/edit form */}
+              {(() => {
+                const params = new URLSearchParams(location.search);
+                const action = params.get('action');
+                const templateId = params.get('template_id');
+                if (action === 'new' || templateId) {
+                  return <SalaryTemplate />;
+                }
+                return <SalaryTemplateList handleBack={handleBack} handleNext={handleNext} />;
+              })()}
             </TabPanel>
             <TabPanel value={value} index={7}>
-              <EmployeeMaster handleBack={handleBack} handleNext={handleNext} />
+              {/* Conditional rendering for add/edit employee */}
+              {(() => {
+                const params = new URLSearchParams(location.search);
+                const action = params.get('action');
+                const employeeId = params.get('employee_id');
+                if (action === 'add' || employeeId) {
+                  return <AddEmployee />;
+                }
+                return <EmployeeMaster handleBack={handleBack} handleNext={handleNext} />;
+              })()}
             </TabPanel>
             <TabPanel value={value} index={8}>
               <PaySchedule handleBack={handleBack} handleNext={handleNext} />
