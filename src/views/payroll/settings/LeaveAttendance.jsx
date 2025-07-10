@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Button, Stack, Tabs, Tab, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import MainCard from 'ui-component/cards/MainCard';
@@ -36,7 +36,9 @@ const LeaveAttendance = ({ type }) => {
   const handleBack = () => {
     if (activeTab > 0) setActiveTab((prev) => prev - 1);
   };
-
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' }); // or 'auto'
+  }, [activeTab]);
   return (
     <MainCard title="Leave & Attendance" subtitle="Manage Leave & Attendance for seamless operations">
       <Box sx={{ width: '100%' }}>

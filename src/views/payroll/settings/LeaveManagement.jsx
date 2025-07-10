@@ -27,6 +27,7 @@ import { useDispatch } from 'store';
 import { IconButton } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
 import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 function LeaveManagement({ handleBack, handleNext }) {
   const [leaveType, setLeaveType] = useState('All');
@@ -178,7 +179,10 @@ function LeaveManagement({ handleBack, handleNext }) {
           </TableContainer>
         )}
         {filteredData.length > 0 && (
-          <Stack direction="row" justifyContent="center" py={2}>
+          <Stack direction="row" justifyContent="space-between" py={2}>
+            <Button size="small" startIcon={<ArrowBackIcon />} variant="outlined" onClick={handleBack}>
+              Back
+            </Button>
             <Pagination
               count={Math.ceil(filteredData.length / rowsPerPage)}
               page={page}
@@ -186,6 +190,7 @@ function LeaveManagement({ handleBack, handleNext }) {
               shape="rounded"
               color="primary"
             />
+            <Typography></Typography>
           </Stack>
         )}
       </Stack>
