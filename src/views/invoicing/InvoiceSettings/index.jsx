@@ -26,7 +26,7 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
 import { useSearchParams } from 'react-router-dom';
 import InvoiceOnboarding from '../../../ui-component/onBoarding/InvoiceOnboarding';
-
+import { useNavigate } from 'react-router-dom';
 function TabPanel({ children, value, index, ...other }) {
   return (
     <div role="tabpanel" hidden={value !== index} id={`simple-tabpanel-${index}`} aria-labelledby={`simple-tab-${index}`} {...other}>
@@ -57,7 +57,7 @@ export default function SimpleTabs() {
   const user = useSelector((state) => state.accountReducer?.user);
   const [searchParams] = useSearchParams();
   const [invoiceOnboarding, setInvoiceOnboarding] = useState(false);
-
+  const navigate = useNavigate();
   const getInvoicingUsage = async () => {
     //   const moduleUsageRes = await Factory('post', `/user_management/usage-summary/${}`, {});
     //   if (moduleUsageRes.res.status_cd === 0) {
@@ -75,8 +75,17 @@ export default function SimpleTabs() {
       setValue(tabValue);
     }
   }, [searchParams]);
+
+  useEffect(() => {
+    const tabValue = searchParams.get('tabValue');
+    if (tabValue) setValue(Number(tabValue));
+  }, [searchParams]);
+
   const handleChange = (event, newValue) => {
     setValue(newValue);
+    const params = new URLSearchParams(searchParams);
+    params.set('tabValue', newValue);
+    navigate({ search: params.toString() }, { replace: true });
   };
 
   const handleNext = () => {

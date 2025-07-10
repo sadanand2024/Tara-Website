@@ -229,7 +229,12 @@ export default function Index() {
     <MainCard
       title={
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Typography variant="h4">{`Monthly Payroll Dashboard of `}</Typography>
+          <Typography
+            variant="h4"
+            sx={{
+              color: 'primary.main'
+            }}
+          >{`Monthly Payroll Dashboard of `}</Typography>
           <CustomAutocomplete
             value={selectedMonth ? months[selectedMonth - 1] : ''}
             onChange={handleMonthChange}
@@ -269,7 +274,7 @@ export default function Index() {
             )}
           </Grid2>
           <Grid2 size={12}>
-            <Typography variant="h4" sx={{ mb: 2, fontWeight: 700, letterSpacing: 0.5 }}>
+            <Typography variant="h4" sx={{ mb: 2, color: 'primary.main' }}>
               Payroll Workflows
             </Typography>
             <Grid2 container spacing={2}>

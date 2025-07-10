@@ -242,7 +242,7 @@ function Worklocation({ handleBack, handleNext }) {
                   </TableCell>
 
                   <TableCell align="center">{location.address_state || 'N/A'}</TableCell>
-                  <TableCell align="center">{location.employees || 0}</TableCell>
+                  <TableCell align="center">{location.employee_count || 0}</TableCell>
                   <TableCell align="center">
                     {index !== 0 && (
                       <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
