@@ -257,7 +257,7 @@ function EpfComponent({ handleNext }) {
                   </Divider>
                 </Grid2>
                 <Grid2 size={12}>
-                  <FormGroup column>
+                  <FormGroup row={false}>
                     <FormControlLabel
                       control={<Checkbox checked={epfData.include_employer_contribution_in_ctc} />}
                       label={<Typography variant="body2">Include Employer's Contribution in the CTC</Typography>}

@@ -138,7 +138,7 @@ const ViewSlabs = ({ viewSlabsDialog, setViewSlabsDialog, selectedRecord, setSel
               </TableHead>
               <TableBody>
                 {selectedRecord?.slab?.length > 0 ? (
-                  selectedRecord.slab.map((item, idx) => (
+                  selectedRecord.slab.slice(0, -1).map((item, idx) => (
                     <TableRow key={idx}>
                       <TableCell>{item['Monthly Salary (₹)'] || '-'}</TableCell>
                       <TableCell>{item['Professional Tax (₹ per month)'] || '-'}</TableCell>

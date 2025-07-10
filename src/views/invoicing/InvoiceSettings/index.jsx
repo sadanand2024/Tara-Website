@@ -4,10 +4,18 @@ import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import MainCard from '../../../ui-component/cards/MainCard';
 import { ThemeMode } from 'config';
-import PersonOutlineTwoToneIcon from '@mui/icons-material/PersonOutlineTwoTone';
-import PanoramaTwoToneIcon from '@mui/icons-material/PanoramaTwoTone';
-import PeopleAltTwoToneIcon from '@mui/icons-material/PeopleAltTwoTone';
-import RecentActorsTwoToneIcon from '@mui/icons-material/RecentActorsTwoTone';
+import {
+  IconBuilding,
+  IconMapPin,
+  IconGitBranch,
+  IconIdBadge,
+  IconGavel,
+  IconCurrencyDollar,
+  IconFileDescription,
+  IconUsers,
+  IconCalendarTime,
+  IconCalendarEvent
+} from '@tabler/icons-react';
 import Factory from 'utils/Factory';
 import BusinessProfile from './BusinessProfile';
 import BranchesInfo from './BranchesInfo';
@@ -182,7 +190,7 @@ export default function SimpleTabs() {
   const tabsOption = [
     {
       label: 'Business Profile',
-      icon: <PersonOutlineTwoToneIcon />
+      icon: <IconBuilding />
     },
     {
       label: 'GST Settings',
@@ -190,20 +198,20 @@ export default function SimpleTabs() {
     },
     {
       label: 'Branches - Info',
-      icon: <LocationCityIcon />
+      icon: <IconMapPin />
     },
 
     {
       label: 'Customers',
-      icon: <RecentActorsTwoToneIcon />
+      icon: <IconUsers />
     },
     {
       label: 'Goods & Services',
-      icon: <PeopleAltTwoToneIcon />
+      icon: <IconCurrencyDollar />
     },
     {
       label: 'Invoice Number Format',
-      icon: <PanoramaTwoToneIcon />
+      icon: <IconFileDescription />
     }
   ];
 
