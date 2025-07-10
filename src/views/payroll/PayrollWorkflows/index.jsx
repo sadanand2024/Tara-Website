@@ -211,7 +211,7 @@ const PayrollWorkflows = ({ type }) => {
     if (tabs[activeTab].label === 'Attendance') {
       generateAttandance();
     } else if (tabs[activeTab].label === 'New Joiners') {
-      navigate(`/payroll/settings/add-employee?payrollid=${payrollId}`);
+      navigate(`/app/payroll/settings/add-employee?payrollid=${payrollId}`);
     } else {
       setOpenDialog(true);
     }
