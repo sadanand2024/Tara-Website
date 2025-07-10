@@ -1,6 +1,8 @@
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import { Box, Button, Card, CardContent, Grid, MenuItem, Select, Stack, Typography } from '@mui/material';
+import { Box, Button, Card, CardContent, MenuItem, Select, Stack, Typography } from '@mui/material';
+import Grid2 from '@mui/material/Grid2';
 import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import Factory from 'utils/Factory';
 import SelectedEvent from './SelectedEvent';
 
@@ -32,7 +34,8 @@ const tabButtonStyle = (active) => ({
   },
 });
 
-const Event = () => {
+const Event = ({ contextId }) => {
+  const user = useSelector((state) => state.accountReducer.user);
   const [category, setCategory] = useState('');
   const [event, setEvent] = useState('');
   const [categoryOptions, setCategoryOptions] = useState([]);
@@ -42,12 +45,13 @@ const Event = () => {
   const [activeTab, setActiveTab] = useState('event'); // 'event' or 'document'
   const [documents, setDocuments] = useState([]);
   const [showSelectedEvent, setShowSelectedEvent] = useState(false);
+  const [selectedEventInstanceId, setSelectedEventInstanceId] = useState(null);
 
   useEffect(() => {
     setFiltersLoading(true);
     Promise.all([
-      Factory('get', '/documentdrafting/category-events-list/', {}, {}),
-      Factory('get', '/documentdrafting/events-list/', {}, {})
+      Factory('get', '/documentdrafting/categories/', {}, {}),
+      Factory('get', '/documentdrafting/events/', {}, {})
 
     ])
       .then(([catRes, eventRes]) => {
@@ -62,6 +66,13 @@ const Event = () => {
       
       .finally(() => setFiltersLoading(false));
   }, []);
+
+  // When documents are loaded, select all by default
+  useEffect(() => {
+    if (documents && documents.length > 0) {
+      setSelected(documents.map(doc => doc.id));
+    }
+  }, [documents]);
 
   const handleCategoryChange = (catId) => {
     setCategory(catId);
@@ -96,10 +107,19 @@ const Event = () => {
     }
 
     // Build query string dynamically
-    let queryString = `?event_id=${eventId}`;
-    if (category) {
-      queryString += `&category_id=${category}`;
-    }
+    // let queryString = ?event_id=${eventId};
+    // if (category) {
+    //   queryString += &category_id=${category};
+    // }
+//     let queryString = ?event_id=${eventId};
+// if (category) {
+//   queryString += &category_id=${category};
+// }
+let queryString = `?event_id=${eventId}`;
+if (category) {
+  queryString += `&category_id=${category}`;
+}
+
 
     // Build payload dynamically
     const payload = { event_id: eventId };
@@ -108,8 +128,8 @@ const Event = () => {
     }
 
     Factory(
-      'get',
-      `/documentdrafting/category-or-events-wise-document-list/${queryString}`,
+      'get', `/documentdrafting/category-or-events-wise-document-list/${queryString}`,
+
       payload,
       {}
     ).then(response => {
@@ -117,6 +137,7 @@ const Event = () => {
       setDocuments(docs || []);
       setSelected([]); // Reset selection after new documents are loaded
     });
+    console.log("wertyui",user.user.id)
   };
   
 
@@ -126,24 +147,93 @@ const Event = () => {
     );
   };
 
-  if (showSelectedEvent) {
-    return <SelectedEvent selected={selected} documents={documents} />;
+  const handleProceed = async (eventId, documentIds, userId, contextId) => {
+    const payload = {
+      event: eventId,
+      context: contextId,
+      documents: documentIds, // send all selected document IDs
+      status: 'yet_to_start',
+      created_by: userId
+    };
+    const response = await Factory(
+      'post',
+      '/documentdrafting/create-events/',
+      payload
+    );
+    if (response.res?.status_cd === 0 && response.res?.event_instance_id) {
+      setSelectedEventInstanceId(response.res.event_instance_id);
+    } else {
+      // handle error
+    }
+  };
+
+  const handleBackToDashboard = () => {
+    setSelectedEventInstanceId(null);
+  };
+
+  if (selectedEventInstanceId) {
+    return <SelectedEvent eventInstanceId={selectedEventInstanceId} onBack={handleBackToDashboard} />;
   }
 
   return (
     <Box sx={{ p: 4 }}>
+       <Typography
+          variant="h2"
+          component="a"
+          href="/app/drafting"
+          sx={{
+            fontWeight: 400,
+            // color: 'primary.main',
+            cursor: 'pointer',
+            textDecoration: 'underline',
+            '&:hover': { textDecoration: 'underline' },
+          }}
+        >
+          Document Drafting
+        </Typography>
       {/* Breadcrumb */}
-      <Typography variant="body2" color="text.secondary" mb={1}>
+      {/* <Typography variant="body2" color="text.secondary" mb={1}>
         <b>Document Drafting</b> &gt; <b>Document / Event Creation</b>
-      </Typography>
+      </Typography> */}
 
       {/* Title */}
-      <Typography variant="h4" fontWeight={700} mb={3}>
+      {/* <Typography variant="h4" fontWeight={700} mb={3}>
         Document Drafting
-      </Typography>
+      </Typography> */}
+       <Typography variant="body2" color="text.secondary" component="span">/</Typography>
+        <Typography
+          variant="h2"
+          component="span"
+          sx={{
+            fontWeight: activeTab === 'document' ? 700 : 400,
+            color: activeTab === 'document' ? 'primary.main' : 'text.secondary',
+            cursor: 'pointer',
+            textDecoration: activeTab === 'document' ? 'underline' : 'none',
+            '&:hover': { textDecoration: 'underline' },
+          }}
+          onClick={() => setActiveTab('document')}
+        >
+          Document Selection
+        </Typography>
+        <Typography variant="body2" color="text.secondary" component="span">/</Typography>
+        <Typography
+          variant="h2"
+          component="span"
+          sx={{
+            fontWeight: activeTab === 'event' ? 700 : 400,
+            color: activeTab === 'event' ? 'primary.main' : 'text.secondary',
+            cursor: 'pointer',
+            textDecoration: activeTab === 'event' ? 'underline' : 'none',
+            '&:hover': { textDecoration: 'underline' },
+          }}
+          onClick={() => setActiveTab('event')}
+        >
+          Create an Event
+        </Typography>
+
 
       {/* Toggle Tabs */}
-      <Stack direction="row" spacing={2} mb={4} justifyContent="center" width="100%">
+      <Stack direction="row" spacing={2} mt={4} justifyContent="center" width="100%">
         <Button
           sx={tabButtonStyle(activeTab === 'document')}
           onClick={() => setActiveTab('document')}
@@ -166,7 +256,7 @@ const Event = () => {
       ) : (
         <>
           {/* Filters */}
-          <Stack direction="row" spacing={4} mb={6} justifyContent="left">
+          <Stack direction="row" spacing={4} mt={6} justifyContent="left">
             {/* Category Filter */}
             <Select
               value={category}
@@ -215,10 +305,15 @@ const Event = () => {
             </Select>
           </Stack>
 
+          {/* Note about default selection */}
+          {/* <Typography variant="body2" sx={{ color: '#1976d2', mb: 2, fontStyle: 'italic' }}>
+            Note: By default, all templates are selected. If you do not want a template, please uncheck it.
+          </Typography> */}
+
           {/* Document Cards */}
-          <Grid container spacing={4} justifyContent="center" mb={6}>
+          <Grid2 container spacing={4} justifyContent="center" mt={6}>
             {(documents.length > 0 ? documents : documents).map((doc, idx) => (
-              <Grid item xs={12} sm={6} md={4} key={idx} display="flex" justifyContent="center">
+              <Grid2 item xs={12} sm={6} md={4} key={idx} display="flex" justifyContent="center">
                 <Card
                   variant="outlined"
                   onClick={() => handleCardClick(doc.id)}
@@ -266,21 +361,29 @@ const Event = () => {
                     </Typography>
                   </CardContent>
                 </Card>
-              </Grid>
+              </Grid2>
             ))}
-          </Grid>
+          </Grid2>
 
           {/* Footer */}
           <Box display="flex" alignItems="center" justifyContent="center" mt={4}>
-            <Typography color="text.secondary" mr={2}>Create with {selected.length} documents</Typography>
-            <Button variant="contained" disabled={selected.length === 0} onClick={() => setShowSelectedEvent(true)}>
+            <Button
+              variant="contained"
+              disabled={selected.length === 0}
+              onClick={() => handleProceed(event, selected, user.user.id, contextId)}
+            >
               Proceed
             </Button>
+            
           </Box>
+          <Typography variant="body2" sx={{ color: '#1976d2', mt: 2, fontStyle: 'italic' }}>
+            Note: By default, all templates are selected. If you do not want a template, please uncheck it.
+          </Typography>
+
         </>
       )}
     </Box>
   );
 };
 
-export default Event;
+export default Event;
