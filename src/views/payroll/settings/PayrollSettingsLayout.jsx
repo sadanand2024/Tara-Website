@@ -24,17 +24,29 @@ import { openSnackbar } from 'store/slices/snackbar';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
-// MUI Icons for PAYROLL_STEPS
-import BusinessIcon from '@mui/icons-material/Business';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
-import AccountTreeIcon from '@mui/icons-material/AccountTree';
-import BadgeIcon from '@mui/icons-material/Badge';
-import GavelIcon from '@mui/icons-material/Gavel';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import DescriptionIcon from '@mui/icons-material/Description';
-import PeopleIcon from '@mui/icons-material/People';
-import ScheduleIcon from '@mui/icons-material/Schedule';
-import EventNoteIcon from '@mui/icons-material/EventNote';
+// Remove MUI Icons for PAYROLL_STEPS
+// import BusinessIcon from '@mui/icons-material/Business';
+// import LocationOnIcon from '@mui/icons-material/LocationOn';
+// import AccountTreeIcon from '@mui/icons-material/AccountTree';
+// import BadgeIcon from '@mui/icons-material/Badge';
+// import GavelIcon from '@mui/icons-material/Gavel';
+// import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+// import DescriptionIcon from '@mui/icons-material/Description';
+// import PeopleIcon from '@mui/icons-material/People';
+// import ScheduleIcon from '@mui/icons-material/Schedule';
+// import EventNoteIcon from '@mui/icons-material/EventNote';
+import {
+  IconBuilding,
+  IconMapPin,
+  IconGitBranch,
+  IconIdBadge,
+  IconGavel,
+  IconCurrencyDollar,
+  IconFileDescription,
+  IconUsers,
+  IconCalendarTime,
+  IconCalendarEvent
+} from '@tabler/icons-react';
 
 // Import all the payroll settings components
 import OrganizationDetails from './Organizationdetails';
@@ -50,76 +62,77 @@ import LeaveAttendance from './LeaveAttendance';
 import SalaryTemplate from './SalaryTemplate';
 import AddEmployee from './EmployeeMasterData/AddEmployee';
 
+// Update PAYROLL_STEPS to use Tabler Icons
 const PAYROLL_STEPS = [
   {
     nameKey: 'Business profile',
     path: '/app/payroll/settings/organization-details',
     dataKey: 'organisation_details',
     component: OrganizationDetails,
-    icon: BusinessIcon
+    icon: IconBuilding
   },
   {
     nameKey: 'Set up Work Location',
     path: '/app/payroll/settings/work-location',
     dataKey: 'work_locations',
     component: WorkLocation,
-    icon: LocationOnIcon
+    icon: IconMapPin
   },
   {
     nameKey: 'Set up Departments',
     path: '/app/payroll/settings/departments',
     dataKey: 'departments',
     component: Departments,
-    icon: AccountTreeIcon
+    icon: IconGitBranch
   },
   {
     nameKey: 'Set up Designations',
     path: '/app/payroll/settings/designations',
     dataKey: 'designations',
     component: Designations,
-    icon: BadgeIcon
+    icon: IconIdBadge
   },
   {
     nameKey: 'Set up Statutory Components',
     path: '/app/payroll/settings/statutory-components',
     dataKey: 'statutory_component',
     component: StatuitoryComponents,
-    icon: GavelIcon
+    icon: IconGavel
   },
   {
     nameKey: 'Set up Salary Components',
     path: '/app/payroll/settings/salary-components',
     dataKey: 'salary_component',
     component: SalaryComponents,
-    icon: AttachMoneyIcon
+    icon: IconCurrencyDollar
   },
   {
     nameKey: 'Set up Salary Template',
     path: '/app/payroll/settings/salary-template-list',
     dataKey: 'salary_template',
     component: SalaryTemplateList,
-    icon: DescriptionIcon
+    icon: IconFileDescription
   },
   {
     nameKey: 'Set up Employee Master',
     path: '/app/payroll/settings/employee-master',
     dataKey: 'employee_master',
     component: EmployeeMaster,
-    icon: PeopleIcon
+    icon: IconUsers
   },
   {
     nameKey: 'Set up Pay & Schedule',
     path: '/app/payroll/settings/pay-schedule',
     dataKey: 'pay_schedule',
     component: PaySchedule,
-    icon: ScheduleIcon
+    icon: IconCalendarTime
   },
   {
     nameKey: 'Leave & Attendance',
     path: '/app/payroll/settings/leave-attendance',
     dataKey: 'leave_and_attendance',
     component: LeaveAttendance,
-    icon: EventNoteIcon
+    icon: IconCalendarEvent
   }
 ];
 
@@ -457,7 +470,7 @@ const PayrollSettingsLayout = () => {
               color: mode === 'dark' ? 'grey.600' : 'grey.900',
               minHeight: 'auto',
               minWidth: isSmallScreen ? 'auto' : '100%',
-              py: 1.5,
+              py: 1.2,
               px: 1,
               mb: 1,
               display: 'flex',
@@ -491,71 +504,15 @@ const PayrollSettingsLayout = () => {
             return (
               <Tab
                 key={index}
-                // icon={
-                //   <Box
-                //     sx={{
-                //       width: 24,
-                //       height: 24,
-                //       borderRadius: '50%',
-                //       backgroundColor: step.completed ? '#4CAF50' : value === index ? '#4A90E2' : '#E0E0E0',
-                //       display: 'flex',
-                //       alignItems: 'center',
-                //       justifyContent: 'center',
-                //       flexShrink: 0
-                //     }}
-                //   >
-                //     {step.completed ? (
-                //       <Typography variant="h6" sx={{ color: '#FFFFFF', fontSize: 18 }}>
-                //         ✓
-                //       </Typography>
-                //     ) : (
-                //       <Typography variant="h6" sx={{ color: '#FFFFFF', fontSize: 16 }}>
-                //         {index + 1}
-                //       </Typography>
-                //     )}
-                //   </Box>
-                // }
-                label={
-                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 0.5, mt: 0.5 }}>
-                    <Stack direction="row" spacing={2}>
-                      <IconComponent />
-                      <Typography variant="subtitle1" sx={{ fontWeight: 500 }} noWrap>
-                        {step.nameKey}
-                      </Typography>
-                    </Stack>
-                    {step.dataKey === 'statutory_component' && !step.completed && (
-                      <Box
-                        component="span"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleMarkStatutoryComplete();
-                        }}
-                        sx={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          minWidth: 'auto',
-                          px: 1,
-                          py: 0.25,
-                          fontSize: '0.65rem',
-                          height: 24,
-                          border: '1px solid',
-                          borderColor: 'primary.main',
-                          borderRadius: 1,
-                          color: 'primary.main',
-                          cursor: markingComplete ? 'not-allowed' : 'pointer',
-                          opacity: markingComplete ? 0.6 : 1,
-                          '&:hover': {
-                            backgroundColor: markingComplete ? 'transparent' : 'primary.main',
-                            color: markingComplete ? 'primary.main' : 'white'
-                          }
-                        }}
-                      >
-                        {markingComplete ? <CircularProgress size={12} /> : 'Mark Complete'}
-                      </Box>
-                    )}
-                  </Box>
-                }
+                icon={IconComponent ? <IconComponent /> : null}
+                sx={{
+                  mt: 0.2,
+                  color: 'text.primary',
+                  '&:hover': {
+                    backgroundColor: 'primary.light'
+                  }
+                }}
+                label={step.nameKey}
                 {...a11yProps(index)}
               />
             );
