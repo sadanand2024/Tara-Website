@@ -112,7 +112,9 @@ function StepperComponent() {
       navigate({ search: params.toString() }, { replace: true });
     }
   }, [activeStep]);
-
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' }); // or 'auto'
+  }, [activeStep]);
   return (
     <>
       {loading ? (

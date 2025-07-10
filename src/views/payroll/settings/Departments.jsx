@@ -245,7 +245,7 @@ function Departments({ handleBack, handleNext }) {
         </TableContainer>
 
         <Grid2 size={12} sx={{ mt: 2 }}>
-          <Stack direction="row" justifyContent="space-between">
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
             <Button size="small" variant="outlined" startIcon={<ArrowBackIcon />} onClick={handleBack}>
               Back
             </Button>
@@ -262,7 +262,7 @@ function Departments({ handleBack, handleNext }) {
             <Button size="small" variant="contained" onClick={handleNext}>
               Next
             </Button>
-          </Stack>
+          </Box>
         </Grid2>
       </Grid2>
     </MainCard>
