@@ -69,6 +69,8 @@ const UserManagement = Loadable(lazy(() => import('views/SuperAdmin/UserManageme
 const NewRequests = Loadable(lazy(() => import('views/SuperAdmin/ServiceManagement/NewRequests')));
 const TaskManagement = Loadable(lazy(() => import('views/SuperAdmin/ServiceManagement/TaskManagement')));
 const ServiceSummary = Loadable(lazy(() => import('views/SuperAdmin/ServiceManagement/ServiceSummary')));
+
+const FaceRecognition = Loadable(lazy(() => import('views/application/AttendanceTest')));
 // ==============================|| MAIN ROUTING ||============================== //
 
 const MainRoutes = {
@@ -84,6 +86,10 @@ const MainRoutes = {
     {
       path: '/dashboard',
       element: <Dashboard />
+    },
+    {
+      path: '/app/face-recognition',
+      element: <FaceRecognition />
     },
     {
       path: '/dashboard/super-admin',
@@ -202,11 +208,11 @@ const MainRoutes = {
       path: '/app/manage-tasks',
       element: <ManageTasks />
     },
-     {
+    {
       path: '/app/drafting',
-      element: < DocumentDrafting />
+      element: <DocumentDrafting />
     },
-   
+
     {
       path: '/app/subscriptions',
       element: <ManageSubscriptions />
