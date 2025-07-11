@@ -211,7 +211,7 @@ const PayrollWorkflows = ({ type }) => {
     if (tabs[activeTab].label === 'Attendance') {
       generateAttandance();
     } else if (tabs[activeTab].label === 'New Joiners') {
-      navigate(`/payroll/settings/add-employee?payrollid=${payrollId}`);
+      navigate(`/app/payroll/settings/add-employee?payrollid=${payrollId}`);
     } else {
       setOpenDialog(true);
     }
@@ -244,7 +244,7 @@ const PayrollWorkflows = ({ type }) => {
       tagline="Payroll Workflow"
       secondary={
         <Stack direction="row" sx={{ gap: 2 }}>
-          <Button startIcon={<ArrowBackIcon />} variant="outlined" color="primary" onClick={() => navigate('/app/payroll')}>
+          <Button startIcon={<ArrowBackIcon />} variant="outlined" color="primary" onClick={() => navigate(-1)}>
             Back to dashboard
           </Button>
           <Button variant="contained" color="primary" onClick={handleButtonClick}>

@@ -47,7 +47,7 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
       pan_number: '',
       entity_type: '',
       gst_registered: false,
-      gst_type: '',
+      gst_type: 'NA',
       gstin: 'NA',
       address_line1: '',
       address_line2: '',
@@ -86,7 +86,7 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
       country: Yup.string().required('Country is required'),
       state: Yup.string().required('State is required'),
       postal_code: Yup.number().typeError('Pincode must be a number').required('Pincode is required'),
-      email: Yup.string().email('Invalid email').required('Email is required'),
+      // email: Yup.string().email('Invalid email').required('Email is required'),
       mobile_number: Yup.string().required('Mobile number is required'),
       opening_balance: Yup.number().typeError('Opening Balance must be a number').required('Opening Balance is required'),
       has_multiple_branches: Yup.boolean().required('Please select if you have multiple branches'),
@@ -387,25 +387,30 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
               <RadioGroup
                 row
                 name="gst_registered"
-                value={values.gst_registered}
+                value={String(values.gst_registered)} // ensure value is a string for the RadioGroup
                 onChange={(e) => {
-                  const value = e.target.value;
-                  setFieldValue('gst_registered', value);
-                  if (value === false) {
+                  const isRegistered = e.target.value === 'true'; // Convert string to boolean
+                  setFieldValue('gst_registered', isRegistered);
+
+                  if (!isRegistered) {
                     setFieldValue('gstin', 'NA');
-                    setFieldValue('gst_type', '');
+                    setFieldValue('gst_type', 'NA');
                     formik.setFieldTouched('gstin', false);
+                    formik.setFieldTouched('gst_type', false);
                     formik.setFieldError('gstin', '');
+                    formik.setFieldError('gst_type', '');
                   } else {
                     setFieldValue('gstin', '');
+                    setFieldValue('gst_type', '');
                   }
                 }}
               >
-                <FormControlLabel value={true} control={<Radio />} label="Yes" />
-                <FormControlLabel value={false} control={<Radio />} label="No" />
+                <FormControlLabel value="true" control={<Radio />} label="Yes" />
+                <FormControlLabel value="false" control={<Radio />} label="No" />
               </RadioGroup>
             </FormControl>
           </Grid2>
+
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
             <Typography sx={{ mb: 1 }}>GST Type</Typography>
             <CustomAutocomplete

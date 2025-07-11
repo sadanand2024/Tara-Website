@@ -277,7 +277,6 @@ export default function BusinessProfileComponnet({ businessDetails = {}, postTyp
       }
     }
   };
-
   return (
     <MainCard title="Business Profile" subtitle="Manage your business profile for invoice generation and business operations">
       <Grid2 container spacing={2}>
@@ -329,24 +328,24 @@ export default function BusinessProfileComponnet({ businessDetails = {}, postTyp
                     <RadioGroup
                       row
                       name="gst_registered"
-                      value={values.gst_registered}
+                      value={String(values.gst_registered)} // always pass string for HTML binding
                       onChange={(e) => {
-                        const value = e.target.value;
-                        setFieldValue('gst_registered', value);
+                        const isRegistered = e.target.value === 'true'; // convert string to boolean
+                        setFieldValue('gst_registered', isRegistered);
 
-                        // Handle conditional logic for GSTIN field
-                        if (value === false) {
+                        if (!isRegistered) {
                           setFieldValue('gstin', 'NA');
                           formik.setFieldTouched('gstin', false);
                           formik.setFieldError('gstin', '');
-                        } else if (value === true) {
+                        } else {
                           setFieldValue('gstin', '');
                         }
                       }}
                     >
-                      <FormControlLabel value={true} control={<Radio />} label="Yes" />
-                      <FormControlLabel value={false} control={<Radio />} label="No" />
+                      <FormControlLabel value="true" control={<Radio />} label="Yes" />
+                      <FormControlLabel value="false" control={<Radio />} label="No" />
                     </RadioGroup>
+
                     {touched.gst_registered && errors.gst_registered && (
                       <Typography variant="caption" color="error">
                         {errors.gst_registered}
@@ -372,7 +371,7 @@ export default function BusinessProfileComponnet({ businessDetails = {}, postTyp
                           error={touched[item.name] && Boolean(errors[item.name])}
                           helperText={touched[item.name] && errors[item.name]}
                           name={item.name}
-                          disabled={values.gst_registered === 'No'} // Disable gstin field if gst_registered is 'No'
+                          disabled={values.gst_registered === false} // Disable gstin field if gst_registered is 'No'
                           disableClearable
                           customTextField={(params) => (
                             <TextField
@@ -503,9 +502,11 @@ export default function BusinessProfileComponnet({ businessDetails = {}, postTyp
 
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mt: 4 }}>
         <Stack direction="row" spacing={2}>
-          <Button variant="contained" onClick={handleSubmit}>
-            Save & Continue
-          </Button>
+        <div className="INV-Step-3">
+            <Button variant="contained" onClick={handleSubmit}>
+              Save & Continue
+            </Button>
+          </div>
         </Stack>
       </Box>
     </MainCard>

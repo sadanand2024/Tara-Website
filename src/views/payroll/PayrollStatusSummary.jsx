@@ -58,7 +58,7 @@ export default function PayrollStatusSummary({ payrollId, financialYear, monthWi
           </Stack>
         ) : (
           <>
-            <Typography variant="h4" sx={{ mb: 2, fontWeight: 600 }}>
+            <Typography variant="h4" sx={{ mb: 2, color: 'primary.main' }}>
               Payroll Status Summary
             </Typography>
             <TableContainer component={Paper} sx={{ boxShadow: 3, borderRadius: 2 }}>

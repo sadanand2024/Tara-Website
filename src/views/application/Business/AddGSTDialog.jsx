@@ -17,8 +17,8 @@ const validationSchema = Yup.object().shape({
     .matches(/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/, 'Invalid GST Number format'),
   legal_name: Yup.string().required('Legal Name is required'),
   trade_name: Yup.string().required('Trade Name is required'),
-  gst_username: Yup.string().required('Username in GST is required'),
-  gst_password: Yup.string().required('Password is required'),
+  // gst_username: Yup.string().required('Username in GST is required'),
+  // gst_password: Yup.string().required('Password is required'),
   address: Yup.string().required('Address is required'),
   state: Yup.string().required('State is required'),
   pincode: Yup.string()
@@ -85,17 +85,20 @@ const fields = [
   {
     name: 'gstin',
     label: 'GST Number',
-    type: 'text'
+    type: 'text',
+    required: true
   },
   {
     name: 'legal_name',
     label: 'Legal Name',
-    type: 'text'
+    type: 'text',
+    required: true
   },
   {
     name: 'trade_name',
     label: 'Trade Name',
-    type: 'text'
+    type: 'text',
+    required: true
   },
   {
     name: 'branch_name',
@@ -106,17 +109,20 @@ const fields = [
     name: 'state',
     label: 'State',
     type: 'select',
-    options: INDIAN_STATES
+    options: INDIAN_STATES,
+    required: true
   },
   {
     name: 'address',
     label: 'Address',
-    type: 'text'
+    type: 'text',
+    required: true
   },
   {
     name: 'pincode',
     label: 'Pincode',
-    type: 'text'
+    type: 'text',
+    required: true
   },
   {
     name: 'authorized_signatory_pan',
@@ -136,43 +142,56 @@ const fields = [
   {
     name: 'gst_document',
     label: 'GST Document',
-    type: 'file'
+    type: 'file',
+    required: true
   }
 ];
 const fields_lut = [
   {
     name: 'lut_reg_no',
     label: 'LUT Reg. No (ex: LUT123456789012345)',
-    type: 'text'
+    type: 'text',
+  
   },
   {
     name: 'dob',
     label: 'Date of registration',
-    type: 'date'
+    type: 'date',
+    required: true
   },
   {
     name: 'financial_year',
     label: 'Financial Year',
     type: 'select',
-    options: financialYearOptions
+    options: financialYearOptions,
+    required: true
   },
   {
     name: 'lut_letter',
     label: 'LUT Letter',
-    type: 'file'
+    type: 'file',
+    required: true
   }
 ];
 const AddGSTDialog = ({ open, selectedGST, handleClose, fetchGSTList }) => {
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
   const user = useSelector((state) => state.accountReducer.user);
+  const getLabelWithAsterisk = (label, isRequired) => (
+  <Typography variant="subtitle1" gutterBottom color="text.secondary">
+    {label}
+    {isRequired && <span style={{ color: 'red', fontSize: '1.2em' }}> *</span>}
+  </Typography>
+);
 
   const renderFields = (fields) => {
     return fields.map((field) => (
       <Grid2 size={{ xs: 12, sm: 6, md: 4 }} key={field.name}>
-        <Typography variant="subtitle1" gutterBottom color="text.secondary">
+        {/* <Typography variant="subtitle1" gutterBottom color="text.secondary">
           {field.label}
-        </Typography>
+        </Typography> */}
+      {getLabelWithAsterisk(field.label, field.required)}
+
         {field.type === 'text' ? (
           <TextField
             fullWidth
@@ -339,7 +358,6 @@ const AddGSTDialog = ({ open, selectedGST, handleClose, fetchGSTList }) => {
       setValues(selectedGST);
     }
   }, [selectedGST]);
-  console.log(errors);
   return (
     <Modal
       open={open}

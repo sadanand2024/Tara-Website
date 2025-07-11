@@ -30,6 +30,7 @@ import { IconButton, Tooltip } from '@mui/material'; // Add these if not already
 import { Edit, Delete } from '@mui/icons-material';
 import BulkUploadDialog from 'ui-component/extended/BulkUploadDialog';
 import AddIcon from '@mui/icons-material/Add';
+
 function Worklocation({ handleBack, handleNext }) {
   const [openDialog, setOpenDialog] = useState(false);
   const [workLocations, setWorkLocations] = useState([]);
@@ -242,7 +243,7 @@ function Worklocation({ handleBack, handleNext }) {
                   </TableCell>
 
                   <TableCell align="center">{location.address_state || 'N/A'}</TableCell>
-                  <TableCell align="center">{location.employees || 0}</TableCell>
+                  <TableCell align="center">{location.employee_count || 0}</TableCell>
                   <TableCell align="center">
                     {index !== 0 && (
                       <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
@@ -271,7 +272,7 @@ function Worklocation({ handleBack, handleNext }) {
           }}
         />
       </TableContainer>
-      <Stack direction="row" justifyContent="space-between" sx={{ mt: 2 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
         <Button size="small" variant="outlined" startIcon={<ArrowBackIcon />} onClick={handleBack}>
           Back
         </Button>
@@ -287,7 +288,7 @@ function Worklocation({ handleBack, handleNext }) {
         <Button size="small" variant="contained" onClick={handleNext}>
           Next
         </Button>
-      </Stack>
+      </Box>
     </MainCard>
   );
 }

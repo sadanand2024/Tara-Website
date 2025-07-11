@@ -69,7 +69,6 @@ const RenderTable = ({
   };
   const safeTableData = Array.isArray(tableData) ? tableData : [];
   const paginatedData = safeTableData.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
-  console.log(from);
   return (
     <Stack>
       {loading ? (
@@ -119,7 +118,7 @@ const RenderTable = ({
                           onClick={() => {
                             if (row.employee_id !== '' && row.employee_id !== null) {
                               navigate(
-                                `/payroll/settings/add-employee?employee_id=${row.employee_id}&payrollid=${payrollId}&from=${'Salary Revisions'}&tabValue=${Number(1)}&month=${month}&financial_year=${financial_year}`
+                                `/app/payroll/settings/add-employee?employee_id=${row.employee_id}&payrollid=${payrollId}&from=${'Salary Revisions'}&tabValue=${Number(1)}&month=${month}&financial_year=${financial_year}`
                               );
                             }
                           }}

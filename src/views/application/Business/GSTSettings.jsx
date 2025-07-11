@@ -29,9 +29,11 @@ import { Pagination } from '@mui/material';
 import AddGSTDialog from './AddGSTDialog';
 import { useNavigate } from 'react-router-dom';
 import MainCard from 'ui-component/cards/MainCard';
+import { useSnackbar } from 'notistack';
 import GroupIcon from '@mui/icons-material/Group';
 
 const GSTSettings = ({ handleBack, handleNext }) => {
+  const { enqueueSnackbar } = useSnackbar();
   const [gstList, setGstList] = useState([]);
   const [open, setOpen] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
@@ -45,6 +47,26 @@ const GSTSettings = ({ handleBack, handleNext }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [paginatedData, setPaginatedData] = useState([]);
   const navigate = useNavigate();
+  const [invoiceUsage, setInvoiceUsage] = React.useState({});
+  const invoiceId = import.meta.env.VITE_APP_INVOICE_ID;
+
+  const getInvoiceUsage = async () => {
+    const res = await Factory('get', `/user_management/usage-summary/${user.active_context.id}/?module_id=${invoiceId}`, {});
+    if (res.res.status_cd === 0) {
+      let response = res.res.data.data || [];
+      let usage = {};
+      usage.invoice_count = response.find((item) => item.feature_key === 'invoices_count') || {};
+      usage.users_count = response.find((item) => item.feature_key === 'users_count') || {};
+      usage.gstin = response.find((item) => item.feature_key === 'gstin') || {};
+      setInvoiceUsage(usage);
+    } else if (res.res.status === 404) {
+      console.log('NOT FOUND');
+    }
+  };
+
+  useEffect(() => {
+    getInvoiceUsage();
+  }, []);
 
   const handlePageChange = (event, value) => {
     setCurrentPage(value);
@@ -118,15 +140,21 @@ const GSTSettings = ({ handleBack, handleNext }) => {
     }
   };
 
-  const handleDownload = (documentUrl, fileName) => {
-    if (documentUrl) {
-      const link = document.createElement('a');
-      link.href = documentUrl;
-      link.setAttribute('download', fileName || 'gst-document');
-      link.setAttribute('target', '_blank');
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+  const handleDownload = async (documentUrl, fileName) => {
+    const response = await Factory('get', `/docwallet/generate_presigned_url?url=${documentUrl}`, {}, {});
+    if (response.res.status_cd === 0) {
+      let url = response.res.data.url;
+      window.open(url, '_blank');
+    } else {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(response?.res?.error || 'Failed to Download'),
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     }
   };
 
@@ -134,7 +162,7 @@ const GSTSettings = ({ handleBack, handleNext }) => {
     setIsLoading(true);
     const response = await Factory('get', `/user_management/gst-details/${user.active_context.business_id}/`, {}, {});
     if (response.res.status_cd === 0) {
-      const results = response.res.data.results || [];
+      const results = response.res.data || [];
       setGstList(results);
       setPaginatedData(results.slice(0, rowsPerPage));
       dispatch(
@@ -196,7 +224,13 @@ const GSTSettings = ({ handleBack, handleNext }) => {
           variant="contained"
           size="small"
           startIcon={<AddIcon />}
-          onClick={handleOpen}
+          onClick={() => {
+            if (invoiceUsage && Object.keys(invoiceUsage.gstin).length > 0) {
+              if (Number(invoiceUsage.gstin.usage_count) >= Number(invoiceUsage.gstin.actual_count)) {
+                enqueueSnackbar('Usage limit exceeded. Please upgrade your plan!', { variant: 'warning' });
+              } else handleOpen();
+            } else handleOpen();
+          }}
           sx={{
             textTransform: 'none',
             fontWeight: 600,
@@ -312,6 +346,13 @@ const GSTSettings = ({ handleBack, handleNext }) => {
           </Button>
         </Stack>
       </Box>
+      <DeleteConfirmationDialog
+        open={deleteDialogOpen}
+        onClose={handleDeleteClose}
+        onConfirm={handleDelete}
+        title="Delete GST"
+        description="Are you sure you want to delete this GST detail? This action cannot be undone."
+      />
     </MainCard>
   );
 };

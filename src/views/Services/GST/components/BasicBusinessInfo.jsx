@@ -27,43 +27,51 @@ const BasicBusinessInfo = () => {
     {
       label: 'Legal Name of the Business',
       name: 'legal_name_of_business',
-      type: 'text'
+      type: 'text',
+      required: true
     },
     {
       label: 'Trade Name of the Business',
       name: 'trade_name_of_business',
-      type: 'text'
+      type: 'text',
+      required: true
     },
     {
       label: 'PAN of the Business',
       name: 'business_pan',
-      type: 'file'
+      type: 'file',
+      required: true
     },
     {
       label: 'constitution of the Business',
       name: 'constitution_of_business',
-      type: 'text'
+      type: 'text',
+      required: true
     },
 
     {
       label: 'Date of Commencement of Business',
       name: 'business_commencement_date',
-      type: 'date'
+      type: 'date',
+      required: true
     },
     {
       label: 'Nature Of Business',
       name: 'nature_of_business',
-      type: 'text'
+      type: 'text',
+      required: true
     },
     {
       label: 'Email Address',
       name: 'email_address',
-      type: 'text'
+      type: 'text',
+      required: true
     },
     {
       label: 'Mobile Number',
       name: 'mobile_number',
-      type: 'text'
+      type: 'text',
+      required: true
     }
   ];
 
@@ -201,15 +209,22 @@ const BasicBusinessInfo = () => {
     }
     setIsLoading(false);
   };
+  const getLabelWithAsterisk = (label, isRequired) => (
+  <Typography variant="subtitle1" mb={1} fontWeight={500}>
+    {label}
+    {isRequired && <span style={{ color: 'red', fontSize: '1.2em' }}> *</span>}
+  </Typography>
+);
   const renderField = (field) => {
     switch (field.type) {
       case 'text':
         if (field.name === 'constitution_of_business') {
           return (
             <>
-              <Typography variant="subtitle1" mb={1}>
+                {getLabelWithAsterisk(field.label, field.required)}
+              {/* <Typography variant="subtitle1" mb={1}>
                 {field.label}
-              </Typography>
+              </Typography> */}
               <Autocomplete
                 fullWidth
                 size="small"
@@ -247,9 +262,10 @@ const BasicBusinessInfo = () => {
 
         return (
           <>
-            <Typography variant="subtitle1"  mb={1}>
+            {/* <Typography variant="subtitle1"  mb={1}>
               {field.label}
-            </Typography>
+            </Typography> */}
+                {getLabelWithAsterisk(field.label, field.required)}
             <TextField
               fullWidth
               size="small"
@@ -271,9 +287,10 @@ const BasicBusinessInfo = () => {
       case 'date':
         return (
           <>
-            <Typography variant="subtitle1"  mb={1}>
+            {/* <Typography variant="subtitle1"  mb={1}>
               {field.label}
-            </Typography>
+            </Typography> */}
+                {getLabelWithAsterisk(field.label, field.required)}
             <TextField
               fullWidth
               size="small"
@@ -297,9 +314,10 @@ const BasicBusinessInfo = () => {
       case 'file':
         return (
           <>
-            <Typography variant="subtitle1"  mb={1}>
+            {/* <Typography variant="subtitle1"  mb={1}>
               {field.label}
-            </Typography>
+            </Typography> */}
+             {getLabelWithAsterisk(field.label, field.required)}
             <RenderFileUpload
               label={field.label}
               fieldName={field.name}
@@ -377,7 +395,8 @@ const BasicBusinessInfo = () => {
                     {
                       label: 'Certificate of Incorporation',
                       name: 'certificate_of_incorporation',
-                      type: 'file'
+                      type: 'file',
+                      required: true
                     },
                     formik
                   )}
@@ -387,7 +406,8 @@ const BasicBusinessInfo = () => {
                     {
                       label: 'MOA & AOA',
                       name: 'MOA_AOA',
-                      type: 'file'
+                      type: 'file',
+                      required: true
                     },
 
                     formik

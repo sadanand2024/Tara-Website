@@ -394,6 +394,7 @@ export default function Business() {
                   boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.25)}`
                 }
               }}
+              onClick={() => navigate('/app/subscriptions/modules-and-services')}
             >
               Add Module
             </Button>
@@ -409,6 +410,7 @@ export default function Business() {
                   transform: 'translateY(-1px)'
                 }
               }}
+              onClick={() => navigate('/app/subscriptions/modules-and-services')}
             >
               Buy Service
             </Button>
@@ -650,6 +652,7 @@ export default function Business() {
                       variant="outlined"
                       endIcon={<ArrowForwardIcon />}
                       size="small"
+                      onClick={() => navigate('/app/manage-tasks')}
                       sx={{
                         mt: 1,
                         '&:hover': {

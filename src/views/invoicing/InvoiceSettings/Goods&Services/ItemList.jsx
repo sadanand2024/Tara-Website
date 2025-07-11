@@ -68,6 +68,7 @@ const ItemList = ({
   }, [itemsData]);
 
   const handleEdit = (item) => {
+    console.log(item);
     setSelectedItem(item);
     setType('edit');
     handleOpen();
@@ -102,10 +103,6 @@ const ItemList = ({
     setLoading(false);
   };
 
-  const handleCloseModal = () => {
-    setSelectedItem(null);
-    handleClose();
-  };
   if (loading) {
     return (
       <Box
@@ -225,6 +222,16 @@ const ItemList = ({
             heading: 'Are you sure?',
             description: 'This action will permanently delete the record.'
           }}
+        />
+        <AddItem
+          businessDetailsData={businessDetailsData}
+          open={open}
+          setType={setType}
+          type={type}
+          handleOpen={handleOpen}
+          handleClose={handleClose}
+          get_Goods_and_Services_Data={get_Goods_and_Services_Data}
+          selectedItem={selectedItem}
         />
       </TableContainer>
 

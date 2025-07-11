@@ -1,0 +1,60 @@
+import React, { useEffect, useRef, useState } from 'react';
+import { useSelector } from 'react-redux';
+import Factory from 'utils/Factory';
+import Drafting from './components/Drafting';
+
+const Index = () => {
+  const user = useSelector((state) => state.accountReducer.user);
+  const [exists, setExists] = useState(null);
+  const [draftId, setDraftId] = useState(null);
+  const myEventsRef = useRef(null);
+
+  useEffect(() => {
+    if (user?.active_context?.id && !draftId) {
+      const fetchDraftExists = async () => {
+        const response = await Factory(
+          'get',
+          `/documentdrafting/document-drafts-exists/${user.active_context.id}/`,
+          {},
+          {}
+        );
+        if (response.res?.status === 200) {
+          setExists(true);
+          // Extract id from response
+          const id = response.res?.data?.id;
+          setDraftId(id);
+        } else if (response.res?.status === 404) {
+          setExists(false);
+          // If GET returns 404, call POST
+          const postRes = await Factory(
+            'post',
+            '/documentdrafting/document-drafts-create',
+            { context: user.active_context.id },
+            {}
+          );
+          // Extract id from POST response if available
+          const id = postRes.res?.data?.id;
+          setDraftId(id);
+        } else {
+          setExists(null); // handle other statuses if needed
+          setDraftId(null);
+        }
+      };
+      fetchDraftExists();
+    }
+  }, [user?.active_context?.id, draftId]);
+
+  const handleShowMyEvents = () => {
+    if (myEventsRef.current) {
+      myEventsRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  return (
+    <>
+      <Drafting id={draftId} />      
+    </>
+  );
+};
+
+export default Index;

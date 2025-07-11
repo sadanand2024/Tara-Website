@@ -19,6 +19,7 @@ import AnimateButton from 'ui-component/extended/AnimateButton';
 import { gridSpacing } from 'store/constant';
 import { useSelector } from 'store';
 import { useSearchParams } from 'react-router-dom';
+
 // assets
 import ApartmentTwoToneIcon from '@mui/icons-material/ApartmentTwoTone'; // Business Profile
 import GroupsTwoToneIcon from '@mui/icons-material/GroupsTwoTone'; // Key Managerial Personnel
@@ -132,6 +133,9 @@ export default function Profile2() {
   const handleBack = () => {
     setValue(value - 1);
   };
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' }); // or 'auto'
+  }, [value]);
   return (
     <Card
       sx={{

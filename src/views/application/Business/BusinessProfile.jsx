@@ -15,7 +15,7 @@ import {
   Grid2,
   InputLabel,
   MenuItem,
-  Select,
+  CircularProgress,
   TextField,
   Typography,
   RadioGroup,
@@ -483,11 +483,21 @@ const BusinessProfile = ({ tabChange, tabval }) => {
       }
     }
   };
+ const getLabelWithAsterisk = (label, isRequired) => {
+  return (
+    <span>
+      {label}
+      {isRequired && <span style={{ color: 'red', fontSize: '1.3em' }}> *</span>}
+    </span>
+  );
+};
+
 
   const renderField = (field) => {
     const getNestedValue = (obj, path) => {
       return path.split('.').reduce((acc, part) => (acc ? acc[part] : undefined), obj);
     };
+    
 
     const commonTextFieldProps = {
       fullWidth: true,
@@ -527,7 +537,9 @@ const BusinessProfile = ({ tabChange, tabval }) => {
                 {...params}
                 {...commonTextFieldProps}
                 name={field.name}
-                label={field.label}
+                // label={field.label}
+                label={getLabelWithAsterisk(field.label, field.required)}
+
                 error={touched[field.name] && Boolean(errors[field.name])}
                 helperText={touched[field.name] && errors[field.name] ? errors[field.name] : ''}
               />
@@ -539,7 +551,8 @@ const BusinessProfile = ({ tabChange, tabval }) => {
           <TextField
             {...commonTextFieldProps}
             name={field.name}
-            label={field.label}
+           label={getLabelWithAsterisk(field.label, field.required)}
+
             value={getNestedValue(values, field.name)}
             onChange={(e) => {
               if (field.name === 'pan') {
@@ -562,7 +575,9 @@ const BusinessProfile = ({ tabChange, tabval }) => {
             {...commonTextFieldProps}
             type="date"
             name={field.name}
-            label={field.label}
+            // label={field.label}
+            label={getLabelWithAsterisk(field.label, field.required)}
+
             value={getNestedValue(values, field.name)}
             onChange={(e) => setFieldValue(field.name, e.target.value)}
             onBlur={handleBlur}
@@ -664,9 +679,9 @@ const BusinessProfile = ({ tabChange, tabval }) => {
     </Card>
   );
 
-if(isLoading) {
-  return <CircularProgressComponent isLoading = {isLoading} displayContent= {"Loading Business Profile Data"}/>
-}
+  if (isLoading) {
+    return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading Business Profile Data'} />;
+  }
   const { values, handleChange, errors, touched, handleSubmit, handleBlur, setFieldValue } = formik;
 
   return (
@@ -758,7 +773,10 @@ if(isLoading) {
               <CardContent sx={{ p: 3 }}>
                 <Box sx={{ mb: 3 }}>
                   <Typography variant="subtitle1" color="text.primary" fontWeight={500} gutterBottom>
-                    Is your business MSME Registered?
+                     <span>
+                       Is your business MSME Registered?
+                       <span style={{ color: 'red', fontSize: '1.2em' }}> *</span>
+                          </span>
                   </Typography>
                   <RadioGroup row name="is_msme_registered" value={values.is_msme_registered} onChange={handleChange} sx={{ mt: 1 }}>
                     <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" sx={{ mr: 4 }} />

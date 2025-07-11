@@ -47,7 +47,7 @@ import AgricultureIcon from '@mui/icons-material/Agriculture';
 import Avatar from '@mui/material/Avatar';
 import StepContent from '@mui/material/StepContent';
 import CircularProgress from '@mui/material/CircularProgress';
-import CircularProgressComponent from 'utils/CircularProgressComponent'; // Add this import
+
 
 import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined';
 import RaiseRequest from '../RaiseRequest';
@@ -493,7 +493,7 @@ export default function ITR() {
                           <Grid2 container spacing={2} alignItems="center">
                             {/* Upload PAN */}
                             <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                              <Typography variant="subtitle1">Upload PAN</Typography>
+                              <Typography variant="subtitle1">Upload PAN <span style={{ color: 'red' }}> *</span></Typography>
                             </Grid2>
                             <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
                               <Button size="small" variant="contained" component="label">
@@ -531,7 +531,7 @@ export default function ITR() {
                             </Grid2>
                             {/* Upload Aadhaar */}
                             <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                              <Typography variant="subtitle1">Upload Aadhaar</Typography>
+                              <Typography variant="subtitle1">Upload Aadhaar <span style={{ color: 'red' }}> *</span></Typography>
                             </Grid2>
                             <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
                               <Button size="small" variant="contained" component="label">
@@ -569,7 +569,7 @@ export default function ITR() {
                             </Grid2>
                             {/* Mobile number */}
                             <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                              <Typography variant="subtitle1">Mobile number</Typography>
+                              <Typography variant="subtitle1">Mobile number <span style={{ color: 'red' }}> *</span></Typography>
                             </Grid2>
                             <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
                               <Field
@@ -590,7 +590,7 @@ export default function ITR() {
                             </Grid2>
                             {/* Email Id */}
                             <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                              <Typography variant="subtitle1">Email Id</Typography>
+                              <Typography variant="subtitle1">Email Id <span style={{ color: 'red' }}> *</span></Typography>
                             </Grid2>
                             <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
                               <Field
@@ -611,7 +611,7 @@ export default function ITR() {
                             </Grid2>
                             {/* Name (3 fields) */}
                             <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                              <Typography variant="subtitle1">Name</Typography>
+                              <Typography variant="subtitle1">Name <span style={{ color: 'red' }}> *</span></Typography>
                             </Grid2>
                             <Grid2 size={{ xs: 12, sm: 6, md: 4 }} container spacing={1}>
                               <Grid2 size={{ xs: 12, sm: 4 }}>
@@ -667,7 +667,7 @@ export default function ITR() {
                             </Grid2>
                             {/* Gender */}
                             <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                              <Typography variant="subtitle1">Gender</Typography>
+                              <Typography variant="subtitle1">Gender <span style={{ color: 'red' }}> *</span></Typography>
                             </Grid2>
                             <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
                               <RadioGroup row value={values?.gender} onChange={(e) => setFieldValue('gender', e.target.value)}>
@@ -682,7 +682,7 @@ export default function ITR() {
                             </Grid2>
                             {/* Residential Status */}
                             <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                              <Typography variant="subtitle1">Residential Status</Typography>
+                              <Typography variant="subtitle1">Residential Status <span style={{ color: 'red' }}> *</span></Typography>
                             </Grid2>
                             <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
                               <Autocomplete
@@ -822,7 +822,7 @@ export default function ITR() {
                           <Grid2 container spacing={2} alignItems="center">
                             {/* Upload 26AS */}
                             <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                              <Typography variant="subtitle1">Upload 26AS</Typography>
+                              <Typography variant="subtitle1">Upload 26AS <span style={{ color: 'red' }}> *</span></Typography>
                             </Grid2>
                             <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
                               <Button size="small" variant="contained" component="label">
@@ -861,7 +861,7 @@ export default function ITR() {
                             </Grid2>
                             {/* Upload AIS */}
                             <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                              <Typography variant="subtitle1">Upload AIS</Typography>
+                              <Typography variant="subtitle1">Upload AIS <span style={{ color: 'red' }}> *</span></Typography>
                             </Grid2>
                             <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                               <Button size="small" variant="contained" component="label">
@@ -900,7 +900,7 @@ export default function ITR() {
                             </Grid2>
                             {/* Advance tax / Self Assisted Tax Challan */}
                             <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                              <Typography variant="subtitle1">Advance tax / Self Assisted Tax Challan</Typography>
+                              <Typography variant="subtitle1">Advance tax / Self Assisted Tax Challan <span style={{ color: 'red' }}> *</span></Typography>
                             </Grid2>
                             <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
                               <Box display="flex" alignItems="center" gap={1}>

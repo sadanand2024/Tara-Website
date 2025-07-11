@@ -28,47 +28,56 @@ const additionalFields = [
   {
     label: 'Address Line 1',
     name: 'addressLine1',
-    type: 'text'
+    type: 'text',
+    required: true
   },
   {
     label: 'Address Line 2',
     name: 'addressLine2',
-    type: 'text'
+    type: 'text',
+    required: true
   },
   {
     label: 'City',
     name: 'city',
-    type: 'text'
+    type: 'text',
+    required: true
   },
   {
     label: 'District',
     name: 'district',
-    type: 'text'
+    type: 'text',
+    required: true
   },
   {
     label: 'State',
     name: 'state',
-    type: 'text'
+    type: 'text',
+    required: true
   },
   {
     label: 'Pincode',
     name: 'pincode',
-    type: 'text'
+    type: 'text',
+    required: true,
   },
   {
     label: 'Nature of possession',
     name: 'nature_of_possession',
-    type: 'text'
+    type: 'text',
+    required: true
   },
   {
     label: 'Address proof (Additional)',
     name: 'address_proof_additional',
-    type: 'file'
+    type: 'file',
+    required: true
   },
   {
     label: 'Rental Agreement/NOC (Additional)',
     name: 'rental_agreement_additional',
-    type: 'file'
+    type: 'file',
+    required: true
   }
 ];
 
@@ -245,14 +254,23 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
    if (isLoading) {
     return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading additional place of business...'} />;
   }
+   const getLabelWithAsterisk = (label, isRequired = true) => (
+  <span>
+    {label}
+    {isRequired && <span style={{ color: 'red', fontSize: '1.3em' }}> *</span>}
+  </span>
+);
 
   const renderField = (field) => {
     switch (field.type) {
       case 'text':
         return field.name === 'state' || field.name === 'nature_of_possession' ? (
           <>
-            <Typography variant="subtitle1" mb={1}>
+            {/* <Typography variant="subtitle1" mb={1}>
               {field.label}
+            </Typography> */}
+             <Typography variant="subtitle1" mb={1}>
+              {getLabelWithAsterisk(field.label, field.required)}
             </Typography>
             <Autocomplete
               fullWidth
@@ -278,8 +296,11 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
           </>
         ) : (
           <>
-            <Typography variant="subtitle1" mb={1}>
+            {/* <Typography variant="subtitle1" mb={1}>
               {field.label}
+            </Typography> */}
+             <Typography variant="subtitle1" mb={1}>
+              {getLabelWithAsterisk(field.label, field.required)}
             </Typography>
             <TextField
               fullWidth
@@ -302,8 +323,11 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
       case 'file':
         return (
           <>
-            <Typography variant="subtitle1" mb={1}>
+            {/* <Typography variant="subtitle1" mb={1}>
               {field.label}
+            </Typography> */}
+             <Typography variant="subtitle1" mb={1}>
+              {getLabelWithAsterisk(field.label, field.required)}
             </Typography>
             <RenderFileUpload
               label={field.label}
@@ -511,6 +535,7 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
                   <TextField
                     {...params}
                     label="Workplace"
+
                     error={touched.workplace && Boolean(errors.workplace)}
                     helperText={touched.workplace && errors.workplace}
                   />

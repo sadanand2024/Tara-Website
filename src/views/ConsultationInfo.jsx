@@ -151,7 +151,7 @@ const ConsultationInfo = () => {
                       <Typography variant="body2">
                         <b>Date & Time</b>
                         <br />
-                        {new Date(`${info.created_date} ${info.created_time}`).toLocaleString('en-US', {
+                        {new Date(`${info.date} ${info.time}`).toLocaleString('en-US', {
                           year: 'numeric',
                           month: 'short',
                           day: 'numeric',

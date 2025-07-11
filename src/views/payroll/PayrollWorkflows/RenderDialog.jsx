@@ -715,7 +715,7 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
               onClick={() => {
                 if (values.employee !== '' && values.employee !== null) {
                   navigate(
-                    `/payroll/settings/add-employee?employee_id=${values.employee}&payrollid=${payrollid}&from=${'Salary Revisions'}&tabValue=${Number(1)}&month=${month}&financial_year=${financial_year}`
+                    `/app/payroll/settings/add-employee?employee_id=${values.employee}&payrollid=${payrollid}&from=${'Salary Revisions'}&tabValue=${Number(1)}&month=${month}&financial_year=${financial_year}`
                   );
                 } else {
                   dispatch(

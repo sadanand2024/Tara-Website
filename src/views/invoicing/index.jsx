@@ -18,8 +18,30 @@ const AnalyticsOverview = () => {
   const [open, setOpen] = useState(false);
   const [type, setType] = useState('');
   const [loading, setLoading] = useState(false);
+  const [invoiceUsage, setInvoiceUsage] = useState({});
   const [invoicing_profile_data, setInvoicing_profile_data] = useState(null);
   const user = useSelector((state) => state.accountReducer.user);
+  const invoiceId = import.meta.env.VITE_APP_INVOICE_ID;
+
+  const getInvoiceUsage = async () => {
+    const res = await Factory('get', `/user_management/usage-summary/${user.active_context.id}/?module_id=${invoiceId}`, {});
+    if (res.res.status_cd === 0) {
+      let response = res.res.data.data || [];
+      let usage = {};
+      usage.invoice_count = response.find((item) => item.feature_key === 'invoices_count') || {};
+      usage.users_count = response.find((item) => item.feature_key === 'users_count') || {};
+      usage.gstin = response.find((item) => item.feature_key === 'gstin') || {};
+      setInvoiceUsage(usage);
+    }
+  };
+
+  useEffect(() => {
+    getInvoiceUsage();
+  }, []);
+
+  useEffect(() => {
+    console.log(invoiceUsage);
+  }, [invoiceUsage]);
 
   const handleClose = () => {
     setOpen(false);
@@ -94,7 +116,7 @@ const AnalyticsOverview = () => {
             <Button
               variant="outlined"
               size="small"
-              onClick={() => navigate('/app/invoice/settings')}
+              onClick={() => navigate('/app/invoice/settings?tabValue=0')}
               startIcon={<IconSettings2 size={18} />}
               sx={{
                 borderRadius: 2,

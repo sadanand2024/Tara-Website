@@ -92,11 +92,11 @@ const validationSchema = Yup.object().shape({
 });
 
 const fields = [
-  { name: 'name', label: 'Name' },
-  { name: 'designation', label: 'Designation' },
-  { name: 'pan_number', label: 'PAN Number' },
-  { name: 'role', label: 'Role', type: 'select', options: roles },
-  { name: 'status', label: 'Status', type: 'select', options: ['active', 'inactive'] }
+  { name: 'name', label: 'Name',required: true },
+  { name: 'designation', label: 'Designation',required: true },
+  { name: 'pan_number', label: 'PAN Number',required: true },
+  { name: 'role', label: 'Role', type: 'select', options: roles,required: true },
+  { name: 'status', label: 'Status', type: 'select', options: ['active', 'inactive',],required: false }
 ];
 
 const KeyManagerialPersonnel = ({ user, handleNext, handleBack, tabChange, tabval }) => {
@@ -217,13 +217,21 @@ const KeyManagerialPersonnel = ({ user, handleNext, handleBack, tabChange, tabva
       setSubmitting(false);
     }
   });
+  const getLabelWithAsterisk = (label, isRequired) => (
+  <Typography variant="subtitle1" gutterBottom fontWeight={500}>
+    {label}
+    {isRequired && <span style={{ color: 'red', fontSize: '1.2em' }}> *</span>}
+  </Typography>
+);
 
   const renderFields = () => {
     return fields.map((field) => (
       <Grid2 key={field.name} size={{ xs: 12, sm: 6 }}>
-        <Typography variant="subtitle1" gutterBottom>
+      {getLabelWithAsterisk(field.label, field.required)}
+
+        {/* <Typography variant="subtitle1" gutterBottom>
           {field.label}
-        </Typography>
+        </Typography> */}
         {field.type === 'select' ? (
           <FormControl fullWidth size="small">
             <Select

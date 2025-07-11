@@ -641,7 +641,9 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
           </TableRow>
           <TableRow>
             <TableCell>
-              <Typography variant="h5">Fixed Allowance (Monthly CTC - Sum of all other components - Benefits)</Typography>
+              <Typography variant="h5" sx={{ whiteSpace: 'nowrap' }}>
+                Fixed Allowance (Monthly CTC - Sum of all other components - Benefits)
+              </Typography>
             </TableCell>
             <TableCell>Remaining Balance</TableCell>
             <TableCell>

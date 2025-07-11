@@ -49,6 +49,8 @@ const AppBusinessSettings = Loadable(lazy(() => import('views/application/Busine
 const AppAccountSettings = Loadable(lazy(() => import('views/application/users/Account')));
 const ManagePlans = Loadable(lazy(() => import('views/ManageSubscriptions/ManagePlans')));
 const ManageTasks = Loadable(lazy(() => import('views/application/ManageTasks')));
+const DocumentDrafting = Loadable(lazy(() => import('views/application/DocumentDrafting')));
+
 const DocumentWallet = Loadable(lazy(() => import('views/application/Document-Wallet')));
 const ContactUsInfo = Loadable(lazy(() => import('views/ContactUsInfo')));
 const ConsultationInfo = Loadable(lazy(() => import('views/ConsultationInfo')));
@@ -67,6 +69,8 @@ const UserManagement = Loadable(lazy(() => import('views/SuperAdmin/UserManageme
 const NewRequests = Loadable(lazy(() => import('views/SuperAdmin/ServiceManagement/NewRequests')));
 const TaskManagement = Loadable(lazy(() => import('views/SuperAdmin/ServiceManagement/TaskManagement')));
 const ServiceSummary = Loadable(lazy(() => import('views/SuperAdmin/ServiceManagement/ServiceSummary')));
+
+const FaceRecognition = Loadable(lazy(() => import('views/application/AttendanceTest')));
 // ==============================|| MAIN ROUTING ||============================== //
 
 const MainRoutes = {
@@ -82,6 +86,10 @@ const MainRoutes = {
     {
       path: '/dashboard',
       element: <Dashboard />
+    },
+    {
+      path: '/app/face-recognition',
+      element: <FaceRecognition />
     },
     {
       path: '/dashboard/super-admin',
@@ -201,6 +209,11 @@ const MainRoutes = {
       element: <ManageTasks />
     },
     {
+      path: '/app/drafting',
+      element: <DocumentDrafting />
+    },
+
+    {
       path: '/app/subscriptions',
       element: <ManageSubscriptions />
     },
@@ -249,11 +262,11 @@ const MainRoutes = {
       element: <PayrollSettingsLayout />
     },
     {
-      path: '/payroll/settings/salary-template',
+      path: '/app/payroll/settings/salary-template',
       element: <SalaryTemplate />
     },
     {
-      path: '/payroll/settings/add-employee',
+      path: '/app/payroll/settings/add-employee',
       element: <AddEmployee />
     },
     {

@@ -48,7 +48,7 @@ const gstRatesDropdown = ['0', '5', '12', '18', '28'];
 
 const AddItem = ({ type, setType, open, from, handleClose, selectedItem, businessDetailsData, get_Goods_and_Services_Data }) => {
   const dispatch = useDispatch();
-
+  // console.log(selectedItem);
   const formik = useFormik({
     initialValues: {
       type: 'Goods',
@@ -119,7 +119,7 @@ const AddItem = ({ type, setType, open, from, handleClose, selectedItem, busines
   const { values, setValues, touched, errors, handleSubmit, setFieldValue, handleBlur, resetForm } = formik;
 
   useEffect(() => {
-    if (type === 'edit' && selectedItem) {
+    if (type === 'edit' && selectedItem !== undefined) {
       setValues({
         type: selectedItem.type || 'Goods',
         name: selectedItem.name || '',

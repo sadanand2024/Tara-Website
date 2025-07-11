@@ -4,10 +4,18 @@ import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import MainCard from '../../../ui-component/cards/MainCard';
 import { ThemeMode } from 'config';
-import PersonOutlineTwoToneIcon from '@mui/icons-material/PersonOutlineTwoTone';
-import PanoramaTwoToneIcon from '@mui/icons-material/PanoramaTwoTone';
-import PeopleAltTwoToneIcon from '@mui/icons-material/PeopleAltTwoTone';
-import RecentActorsTwoToneIcon from '@mui/icons-material/RecentActorsTwoTone';
+import {
+  IconBuilding,
+  IconMapPin,
+  IconGitBranch,
+  IconIdBadge,
+  IconGavel,
+  IconCurrencyDollar,
+  IconFileDescription,
+  IconUsers,
+  IconCalendarTime,
+  IconCalendarEvent
+} from '@tabler/icons-react';
 import Factory from 'utils/Factory';
 import BusinessProfile from './BusinessProfile';
 import BranchesInfo from './BranchesInfo';
@@ -25,6 +33,8 @@ import GSTSettings from 'views/application/Business/GSTSettings';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
 import { useSearchParams } from 'react-router-dom';
+import InvoiceOnboarding from '../../../ui-component/onBoarding/InvoiceOnboarding';
+import { useNavigate } from 'react-router-dom';
 function TabPanel({ children, value, index, ...other }) {
   return (
     <div role="tabpanel" hidden={value !== index} id={`simple-tabpanel-${index}`} aria-labelledby={`simple-tab-${index}`} {...other}>
@@ -54,6 +64,18 @@ export default function SimpleTabs() {
   const [customers, setCustomers] = useState([]);
   const user = useSelector((state) => state.accountReducer?.user);
   const [searchParams] = useSearchParams();
+  const [invoiceOnboarding, setInvoiceOnboarding] = useState(false);
+  const navigate = useNavigate();
+  const getInvoicingUsage = async () => {
+    //   const moduleUsageRes = await Factory('post', `/user_management/usage-summary/${}`, {});
+    //   if (moduleUsageRes.res.status_cd === 0) {
+    //     console.log(moduleUsageRes.res);
+    //   }
+  };
+  useEffect(() => {
+    getInvoicingUsage();
+  }, []);
+
   useEffect(() => {
     const from = searchParams.get('from');
     const tabValue = Number(searchParams.get('tab'));
@@ -61,8 +83,17 @@ export default function SimpleTabs() {
       setValue(tabValue);
     }
   }, [searchParams]);
+
+  useEffect(() => {
+    const tabValue = searchParams.get('tabValue');
+    if (tabValue) setValue(Number(tabValue));
+  }, [searchParams]);
+
   const handleChange = (event, newValue) => {
     setValue(newValue);
+    const params = new URLSearchParams(searchParams);
+    params.set('tabValue', newValue);
+    navigate({ search: params.toString() }, { replace: true });
   };
 
   const handleNext = () => {
@@ -149,14 +180,17 @@ export default function SimpleTabs() {
     }
     setLoading(false);
   };
-
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' }); // or 'auto'
+  }, [value]);
   useEffect(() => {
     fetch_Invoicing_profile();
   }, [value]);
+
   const tabsOption = [
     {
       label: 'Business Profile',
-      icon: <PersonOutlineTwoToneIcon />
+      icon: <IconBuilding />
     },
     {
       label: 'GST Settings',
@@ -164,173 +198,186 @@ export default function SimpleTabs() {
     },
     {
       label: 'Branches - Info',
-      icon: <LocationCityIcon />
+      icon: <IconMapPin />
     },
 
     {
       label: 'Customers',
-      icon: <RecentActorsTwoToneIcon />
+      icon: <IconUsers />
     },
     {
       label: 'Goods & Services',
-      icon: <PeopleAltTwoToneIcon />
+      icon: <IconCurrencyDollar />
     },
     {
       label: 'Invoice Number Format',
-      icon: <PanoramaTwoToneIcon />
+      icon: <IconFileDescription />
     }
   ];
 
   return (
-    <Card
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        width: '100%',
-        // height: '100%',
-        minHeight: '800px',
-        overflow: 'hidden'
-      }}
-    >
-      {/* Header at the top */}
-      <CardHeader title="Invoicing Settings" />
-      <Divider />
-      {/* Main content area: Tabs + TabPanels */}
-      <Box
+    <>
+      {invoiceOnboarding && <InvoiceOnboarding onFinish={() => setInvoiceOnboarding(false)} />}
+      <Card
         sx={{
           display: 'flex',
-          flexDirection: isSmallScreen ? 'column' : 'row',
-          flexGrow: 1,
+          flexDirection: 'column',
+          width: '100%',
+          // height: '100%',
+          minHeight: '800px',
           overflow: 'hidden'
         }}
       >
-        {/* Tabs section */}
-        <Tabs
-          value={value}
-          onChange={handleChange}
-          orientation={isSmallScreen ? 'horizontal' : 'vertical'}
-          variant="scrollable"
+        {/* Header at the top */}
+        <CardHeader title="Invoicing Settings" />
+        <Divider />
+        {/* Main content area: Tabs + TabPanels */}
+        <Box
           sx={{
-            minWidth: isSmallScreen ? '100%' : 240,
-            borderRight: isSmallScreen ? 'none' : '1px solid',
-            borderBottom: isSmallScreen ? '1px solid' : 'none',
-            borderColor: 'divider',
-            '& .MuiTabs-flexContainer': {
-              flexDirection: isSmallScreen ? 'row' : 'column'
-            },
-            '& button': {
-              color: mode === ThemeMode.DARK ? 'grey.600' : 'grey.900',
-              minHeight: 'auto',
-              minWidth: isSmallScreen ? 'auto' : '100%',
-              py: 1.5,
-              px: 2,
-              display: 'flex',
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'flex-start',
-              gap: 1,
-              borderRadius: `${borderRadius}px`,
-              mx: isSmallScreen ? 0.5 : 0
-            },
-            '& .Mui-selected': {
-              color: 'primary.main',
-              bgcolor: mode === ThemeMode.DARK ? 'dark.main' : 'primary.light'
-            },
-            '& button > svg': {
-              height: 20,
-              width: 20
-            },
-            '& > div > span': {
-              display: 'none'
-            },
-            padding: 2
-          }}
-        >
-          {tabsOption.map((tab, index) => (
-            <Tab
-              key={index}
-              icon={tab.icon}
-              sx={{
-                mt: 0.5,
-                '&:hover': {
-                  backgroundColor: 'primary.light'
-                }
-              }}
-              label={tab.label}
-              {...a11yProps(index)}
-            />
-          ))}
-        </Tabs>
-
-        {/* TabPanels content section */}
-        <CardContent
-          sx={{
-            paddingTop: 0,
-            paddingBottom: 0,
-            paddingLeft: isSmallScreen ? 0 : 0,
-            paddingRight: 0,
+            display: 'flex',
+            flexDirection: isSmallScreen ? 'column' : 'row',
             flexGrow: 1,
-            width: '100%',
-            overflowY: 'auto'
+            overflow: 'hidden'
           }}
         >
-          <TabPanel value={value} index={0}>
-            <BusinessProfile
-              businessDetails={businessDetails}
-              setBusinessDetails={setBusinessDetails}
-              postType={postType}
-              handleNext={handleNext}
-              setTabValue={setValue}
-            />
-          </TabPanel>
-          <TabPanel value={value} index={1}>
-            <GSTSettings
-              user={user}
-              tabChange={handleChange}
-              tabval={value}
-              from="invoice"
-              handleBack={handleBack}
-              handleNext={handleNext}
-            />
-          </TabPanel>
-          <TabPanel value={value} index={2}>
-            <BranchesInfo
-              businessDetails={businessDetails}
-              setBusinessDetails={setBusinessDetails}
-              postType={postType}
-              handleNext={handleNext}
-              handleBack={handleBack}
-            />
-          </TabPanel>
-          <TabPanel value={value} index={3}>
-            <Customers
-              getCustomersData={getCustomersData}
-              customers={customers}
-              businessDetails={businessDetails}
-              setBusinessDetails={setBusinessDetails}
-              handleNext={handleNext}
-              handleBack={handleBack}
-            />
-          </TabPanel>
-          <TabPanel value={value} index={4}>
-            <GoodsServices
-              businessDetails={businessDetails}
-              setBusinessDetails={setBusinessDetails}
-              handleNext={handleNext}
-              handleBack={handleBack}
-            />
-          </TabPanel>
-          <TabPanel value={value} index={5}>
-            <InvoiceNumberFormat
-              getCustomersData={getCustomersData}
-              customers={customers}
-              businessDetails={businessDetails}
-              setBusinessDetails={setBusinessDetails}
-              handleBack={handleBack}
-            />
-          </TabPanel>
-        </CardContent>
-      </Box>
-    </Card>
+          {/* Tabs section */}
+          <div className="INV-Step-1">
+            <Tabs
+              value={value}
+              onChange={handleChange}
+              orientation={isSmallScreen ? 'horizontal' : 'vertical'}
+              variant="scrollable"
+              sx={{
+                height: '100%',
+                minWidth: isSmallScreen ? '100%' : 240,
+                borderRight: isSmallScreen ? 'none' : '1px solid',
+                borderBottom: isSmallScreen ? '1px solid' : 'none',
+                borderColor: 'divider',
+                '& .MuiTabs-flexContainer': {
+                  flexDirection: isSmallScreen ? 'row' : 'column'
+                },
+                '& button': {
+                  color: mode === ThemeMode.DARK ? 'grey.600' : 'grey.900',
+                  minHeight: 'auto',
+                  minWidth: isSmallScreen ? 'auto' : '100%',
+                  py: 1.5,
+                  px: 2,
+                  display: 'flex',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'flex-start',
+                  gap: 1,
+                  borderRadius: `${borderRadius}px`,
+                  mx: isSmallScreen ? 0.5 : 0
+                },
+                '& .Mui-selected': {
+                  color: 'primary.main',
+                  bgcolor: mode === ThemeMode.DARK ? 'dark.main' : 'primary.light'
+                },
+                '& button > svg': {
+                  height: 20,
+                  width: 20
+                },
+                '& > div > span': {
+                  display: 'none'
+                },
+                padding: 2
+              }}
+            >
+              {tabsOption.map((tab, index) => (
+                <Tab
+                  key={index}
+                  icon={tab.icon}
+                  sx={{
+                    mt: 0.5,
+                    color: 'text.primary',
+                    '&:hover': {
+                      backgroundColor: 'primary.light'
+                    }
+                  }}
+                  label={tab.label}
+                  {...a11yProps(index)}
+                />
+              ))}
+            </Tabs>
+          </div>
+          {/* TabPanels content section */}
+          <div
+            className="INV-Step-2"
+            style={{
+              width: '100%'
+            }}
+          >
+            <CardContent
+              sx={{
+                paddingTop: 0,
+                paddingBottom: 0,
+                paddingLeft: isSmallScreen ? 0 : 0,
+                paddingRight: 0,
+                flexGrow: 1,
+                width: '100%',
+                overflowY: 'auto'
+              }}
+            >
+              <TabPanel value={value} index={0}>
+                <BusinessProfile
+                  businessDetails={businessDetails}
+                  setBusinessDetails={setBusinessDetails}
+                  postType={postType}
+                  handleNext={handleNext}
+                  setTabValue={setValue}
+                />
+              </TabPanel>
+              <TabPanel value={value} index={1}>
+                <GSTSettings
+                  user={user}
+                  tabChange={handleChange}
+                  tabval={value}
+                  from="invoice"
+                  handleBack={handleBack}
+                  handleNext={handleNext}
+                />
+              </TabPanel>
+              <TabPanel value={value} index={2}>
+                <BranchesInfo
+                  businessDetails={businessDetails}
+                  setBusinessDetails={setBusinessDetails}
+                  postType={postType}
+                  handleNext={handleNext}
+                  handleBack={handleBack}
+                />
+              </TabPanel>
+              <TabPanel value={value} index={3}>
+                <Customers
+                  getCustomersData={getCustomersData}
+                  customers={customers}
+                  businessDetails={businessDetails}
+                  setBusinessDetails={setBusinessDetails}
+                  handleNext={handleNext}
+                  handleBack={handleBack}
+                />
+              </TabPanel>
+              <TabPanel value={value} index={4}>
+                <GoodsServices
+                  businessDetails={businessDetails}
+                  setBusinessDetails={setBusinessDetails}
+                  handleNext={handleNext}
+                  handleBack={handleBack}
+                />
+              </TabPanel>
+              <TabPanel value={value} index={5}>
+                <InvoiceNumberFormat
+                  getCustomersData={getCustomersData}
+                  customers={customers}
+                  businessDetails={businessDetails}
+                  setBusinessDetails={setBusinessDetails}
+                  handleBack={handleBack}
+                />
+              </TabPanel>
+            </CardContent>
+          </div>
+        </Box>
+      </Card>
+    </>
   );
 }

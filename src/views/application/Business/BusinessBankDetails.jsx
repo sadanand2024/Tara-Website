@@ -203,13 +203,27 @@ const BusinessBankDetails = ({ user, handleNext, handleBack, tabChange, tabval }
       }
     }
   });
+ const getLabelWithAsterisk = (label, isRequired) => (
+  <Typography
+    variant="body2"
+    fontWeight={500}
+    gutterBottom
+    sx={{ display: 'inline-block' }}
+  >
+    {label}
+    {isRequired && <span style={{ color: 'red', fontSize: '1.2em' }}> *</span>}
+  </Typography>
+);
   const renderFields = () => {
+      const requiredFields = ['bank_name', 'account_number', 'branch_name', 'ifsc_code'];
+
     return fields.map((field) => (
       <Grid2 key={field.name} size={{ xs: 12, sm: 6 }}>
+      {getLabelWithAsterisk(field.label, requiredFields.includes(field.name))}
         <TextField
           fullWidth
           size="small"
-          label={field.label}
+          // label={field.label}
           name={field.name}
           value={values[field.name] || ''}
           onChange={(e) => {
@@ -229,6 +243,7 @@ const BusinessBankDetails = ({ user, handleNext, handleBack, tabChange, tabval }
           onBlur={handleBlur}
           error={touched[field.name] && Boolean(errors[field.name])}
           helperText={touched[field.name] && errors[field.name] ? errors[field.name] : ''}
+          
         />
       </Grid2>
     ));

@@ -94,7 +94,8 @@ const Header = ({ hamburgerDisplay = 'block' }) => {
         reduxDispatch(storeUser(data));
         enqueueSnackbar(`Switched to ${response.res.data.active_context.name}`, {
           variant: 'success',
-          anchorOrigin: { vertical: 'top', horizontal: 'right' }
+          anchorOrigin: { vertical: 'top', horizontal: 'right' },
+          autoHideDuration: 1200
         });
         // window.location.reload();
         navigate('/dashboard/business');

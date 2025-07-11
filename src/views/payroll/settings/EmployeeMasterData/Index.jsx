@@ -28,6 +28,7 @@ import { IconButton } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
 import DeleteDialog from 'ui-component/extended/DeleteDialog';
 import EmployeeBulkUploadDialog from 'ui-component/extended/EmployeeBulkUploadDialog';
+import AddEmployee from './AddEmployee';
 function EmployeeList({ handleBack, handleNext }) {
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -119,7 +120,9 @@ function EmployeeList({ handleBack, handleNext }) {
   }, [payrollId]);
 
   const handleEdit = (item) => {
-    navigate(`/payroll/settings/add-employee?employee_id=${encodeURIComponent(item.id)}&payrollid=${encodeURIComponent(payrollId)}`);
+    const params = new URLSearchParams(searchParams);
+    params.set('employee_id', item.id);
+    navigate({ search: params.toString() });
   };
   return (
     <>
@@ -136,7 +139,14 @@ function EmployeeList({ handleBack, handleNext }) {
               <Button variant="outlined" color="secondary" onClick={() => setOpenBulkDialog(true)}>
                 Bulk Upload
               </Button>
-              <Button variant="contained" onClick={() => navigate(`/payroll/settings/add-employee?payrollid=${payrollId}`)}>
+              <Button
+                variant="contained"
+                onClick={() => {
+                  const params = new URLSearchParams(searchParams);
+                  params.set('action', 'add');
+                  navigate({ search: params.toString() });
+                }}
+              >
                 Add Employee
               </Button>
             </Stack>
@@ -247,4 +257,12 @@ function EmployeeList({ handleBack, handleNext }) {
   );
 }
 
-export default EmployeeList;
+export default function EmployeeMasterDataIndex(props) {
+  const [searchParams] = useSearchParams();
+  const action = searchParams.get('action');
+  const employeeId = searchParams.get('employee_id');
+  if (action === 'add' || employeeId) {
+    return <AddEmployee />;
+  }
+  return <EmployeeList {...props} />;
+}

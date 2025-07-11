@@ -357,6 +357,12 @@ const StepTwo = ({ step, setStep }) => {
     console.log('Loading promoter data...', isLoading);
     return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading promoter Data'} />;
   }
+  const getLabelWithAsterisk = (label, isRequired = true) => (
+  <span>
+    {label}
+    {isRequired && <span style={{ color: 'red', fontSize: '1.3em' }}> *</span>}
+  </span>
+);
 
   return (
     <form onSubmit={formik.handleSubmit}>
@@ -445,7 +451,8 @@ const StepTwo = ({ step, setStep }) => {
                         minWidth: 150,
                         maxWidth: 150
                       }}
-                      label="Name"
+                      // label="Name"
+                      label={getLabelWithAsterisk("Name")}
                       name={`promoters[${idx}].name`}
                       value={promoter.name}
                       onChange={handleChange}
@@ -463,7 +470,8 @@ const StepTwo = ({ step, setStep }) => {
                         minWidth: 150,
                         maxWidth: 150
                       }}
-                      label="Mobile"
+                      // label="Mobile"
+                      label={getLabelWithAsterisk("Mobile")}
                       name={`promoters[${idx}].mobile`}
                       value={promoter.mobile}
                       onChange={handleChange}
@@ -482,7 +490,8 @@ const StepTwo = ({ step, setStep }) => {
                         minWidth: 150,
                         maxWidth: 150
                       }}
-                      label="Email"
+                      // label="Email"
+                      label={getLabelWithAsterisk("Email")}
                       name={`promoters[${idx}].email`}
                       value={promoter.email}
                       onChange={handleChange}
@@ -494,7 +503,8 @@ const StepTwo = ({ step, setStep }) => {
                   {/* PAN Upload */}
                   <TableCell>
                     <RenderFileUpload
-                      label="PAN"
+                      // label="PAN"
+                      label={getLabelWithAsterisk("PAN")}
                       fieldName={`promoters[${idx}].pan`}
                       file={promoter.pan}
                       setFieldValue={setFieldValue}
@@ -506,7 +516,8 @@ const StepTwo = ({ step, setStep }) => {
                   {/* Aadhaar Upload */}
                   <TableCell>
                     <RenderFileUpload
-                      label="Aadhaar"
+                      // label="Aadhaar"
+                      label={getLabelWithAsterisk("Aadhaar")}
                       fieldName={`promoters[${idx}].aadhaar`}
                       file={promoter.aadhaar}
                       setFieldValue={setFieldValue}
@@ -518,7 +529,8 @@ const StepTwo = ({ step, setStep }) => {
                   {/* Photo Upload */}
                   <TableCell>
                     <RenderFileUpload
-                      label="Photo"
+                      // label="Photo"
+                      label={getLabelWithAsterisk("Photo")}
                       fieldName={`promoters[${idx}].photo`}
                       file={promoter.photo}
                       setFieldValue={setFieldValue}
@@ -545,7 +557,9 @@ const StepTwo = ({ step, setStep }) => {
                       renderInput={(params) => (
                         <TextField
                           {...params}
-                          label="Gender"
+                          // label="Gender"
+                         label={getLabelWithAsterisk("Gender")}
+
                           name={`promoters[${idx}].gender`}
                           error={touched.promoters?.[idx]?.gender && Boolean(errors.promoters?.[idx]?.gender)}
                           helperText={touched.promoters?.[idx]?.gender && errors.promoters?.[idx]?.gender}
@@ -562,7 +576,8 @@ const StepTwo = ({ step, setStep }) => {
                         minWidth: 150,
                         maxWidth: 150
                       }}
-                      label="Designation"
+                      // label="Designation"
+                      label={getLabelWithAsterisk("Designation")}
                       name={`promoters[${idx}].designation`}
                       value={promoter.designation || ''}
                       onChange={handleChange}

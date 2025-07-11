@@ -1,4 +1,4 @@
-import React, { useEffect,useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { Typography, TextField, Grid2, Button, FormControlLabel, Checkbox, Card, Stack } from '@mui/material';
@@ -8,7 +8,7 @@ import { useDispatch } from 'react-redux';
 import { openSnackbar } from 'store/slices/snackbar';
 import { useSearchParams } from 'react-router-dom';
 import Autocomplete from '@mui/material/Autocomplete';
-import  Box  from '@mui/material/Box';
+import Box from '@mui/material/Box';
 import RaiseRequest from '../../RaiseRequest';
 import GetActionButtons from '../../FormHelpers';
 import CircularProgressComponent from 'utils/CircularProgressComponent';
@@ -17,57 +17,65 @@ const DESIGNATION_CHOICES = [
   { value: 'partner', label: 'Partner' },
   { value: 'director', label: 'Director' },
   { value: 'owner', label: 'Owner' },
-  { value: 'other', label: 'Other' },
+  { value: 'other', label: 'Other' }
 ];
 
 const fields = [
   {
     label: 'Name',
     name: 'name',
-    type: 'text'
+    type: 'text',
+       required: true
   },
   {
     label: 'Designation',
     name: 'designation',
     type: 'autocomplete',
-    options: DESIGNATION_CHOICES
+    options: DESIGNATION_CHOICES,
+    required: true
   },
   {
     label: 'Mobile Number',
     name: 'mobile_number',
-    type: 'text'
+    type: 'text',
+    required: true
   },
   {
     label: 'Email',
     name: 'email',
-    type: 'text'
+    type: 'text',
+    required: true
   },
   {
     label: 'Aadhaar Image',
     name: 'aadhaar_image',
-    type: 'file'
+    type: 'file',
+    required: true
   },
   {
     label: 'PAN Image',
     name: 'pan_image',
-    type: 'file'
+    type: 'file',
+    required: true
   },
   {
     label: 'Photo',
     name: 'passport_photo',
-    type: 'file'
+    type: 'file',
+    required: true
   }
 ];
 
-const ApplicantDetails = ({applicantTaskId}) => {
-
+const ApplicantDetails = ({ applicantTaskId }) => {
   const [searchParams] = useSearchParams();
+
      const [isLoading, setIsLoading] = useState(false);
   
     const service_id = searchParams.get('service_id');
     const [applicantInfo, setapplicantInfo] = useState({
         task_id: null
       });
+
   const dispatch = useDispatch();
   const formik = useFormik({
     initialValues: {
@@ -95,28 +103,26 @@ const ApplicantDetails = ({applicantTaskId}) => {
         .required('Mobile Number is required')
         .matches(/^[0-9]+$/, 'Mobile Number must be a number')
         .min(10, 'Mobile Number must be at least 10 digits')
-        .max(10, 'Mobile Number must not exceed 10 digits'),  
+        .max(10, 'Mobile Number must not exceed 10 digits'),
       email: Yup.string().email('Invalid email format').required('Email is required'),
       aadhaar_image: Yup.mixed().required('Aadhaar Image is required'),
 
       pan_image: Yup.mixed().required('PAN Image is required'),
       passport_photo: Yup.mixed().required('Passport Photo is required'),
-      address: Yup.string()
-    .when('residential_address', {
-      is: false,
-      then: (schema) => schema.required('Address is required when residential is not same'),
-      otherwise: (schema) => schema.notRequired(),
-    }),
+      address: Yup.string().when('residential_address', {
+        is: false,
+        then: (schema) => schema.required('Address is required when residential is not same'),
+        otherwise: (schema) => schema.notRequired()
+      }),
       // residential_address: Yup.string().oneOf(['yes', 'no'], 'Residential address must be either yes or no')
       residential_address: Yup.boolean().required('Required')
-      
     }),
     onSubmit: async (values) => {
       setIsLoading(true);
       let formData = new FormData();
-    
-      formData.append('service_request',service_id);
-      formData.append('service_task',applicantTaskId);
+
+      formData.append('service_request', service_id);
+      formData.append('service_task', applicantTaskId);
       formData.append('name', values.name);
       formData.append('designation', values.designation);
       formData.append('mobile_number', values.mobile_number);
@@ -141,7 +147,7 @@ const ApplicantDetails = ({applicantTaskId}) => {
         dispatch(
           openSnackbar({
             open: true,
-            message: JSON.stringify(res.data.data) || 'Something went wrong',
+            message: JSON.stringify(res.data.error) || 'Something went wrong',
             variant: 'alert',
             alert: { color: 'error' },
             close: false
@@ -184,33 +190,32 @@ const ApplicantDetails = ({applicantTaskId}) => {
             }}
           />
         );
-        case 'autocomplete':
+      case 'autocomplete':
         return (
-    <Autocomplete
-      fullWidth
-      size="small"
-      options={field.options}
-      value={field.options.find(option => option.value === values[field.name]) || null}
-      onChange={(e, value) => setFieldValue(field.name, value ? value.value : '')}
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          name={field.name}
-          onChange={handleChange}
-          error={touched[field.name] && Boolean(errors[field.name])}
-          helperText={touched[field.name] && errors[field.name]}
-          sx={{
-              width: '100%',
-              '& .MuiInputBase-input': {
-                color: 'grey.600'
-              }
-            }}
-        />
-      )}
-    />
-  );
+          <Autocomplete
+            fullWidth
+            size="small"
+            options={field.options}
+            value={field.options.find((option) => option.value === values[field.name]) || null}
+            onChange={(e, value) => setFieldValue(field.name, value ? value.value : '')}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                name={field.name}
+                onChange={handleChange}
+                error={touched[field.name] && Boolean(errors[field.name])}
+                helperText={touched[field.name] && errors[field.name]}
+                sx={{
+                  width: '100%',
+                  '& .MuiInputBase-input': {
+                    color: 'grey.600'
+                  }
+                }}
+              />
+            )}
+          />
+        );
 
-              
       case 'file':
         return (
           <RenderFileUpload
@@ -225,8 +230,8 @@ const ApplicantDetails = ({applicantTaskId}) => {
     }
   };
   const handleCheckboxChange = (event) => {
-    console.log(event.target.checked)
-    setFieldValue('residential_address', event.target.checked );
+    console.log(event.target.checked);
+    setFieldValue('residential_address', event.target.checked);
     if (event.target.checked) {
       setFieldValue('address', '');
     }
@@ -239,7 +244,10 @@ const ApplicantDetails = ({applicantTaskId}) => {
       dispatch(
         openSnackbar({
           open: true,
-          message: JSON.stringify(res.data.data) || 'Something went wrong'
+          message: JSON.stringify(res.data.error) || 'Something went wrong',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
         })
       );
     } else {
@@ -260,44 +268,51 @@ const ApplicantDetails = ({applicantTaskId}) => {
         console.log('Loading promoter data...', isLoading);
         return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading promoter Data'} />;
       }
+      const getLabelWithAsterisk = (label, isRequired = true) => (
+  <span>
+    {label}
+    {isRequired && <span style={{ color: 'red', fontSize: '1.3em' }}> *</span>}
+  </span>
+);
   const { values, handleChange, handleBlur, setFieldValue, touched, errors, handleSubmit, setValues } = formik;
-  
+
   return (
     <Card sx={{ p: 3, mt: 3 }}>
-        <Grid2 container alignItems="center" justifyContent="space-between" mb={2}>
-      <Grid2>
-        <Typography variant="h4" fontWeight={700}>
-          <span style={{ textDecoration: 'underline' }}>Applicant Details</span>
-        </Typography>
+      <Grid2 container alignItems="center" justifyContent="space-between" mb={2}>
+        <Grid2>
+          <Typography variant="h4" fontWeight={700}>
+            <span style={{ textDecoration: 'underline' }}>Applicant Details</span>
+          </Typography>
+        </Grid2>
+        <Grid2 sx={{ flexGrow: 1, ml: 95 }}>
+          <Box display="flex" justifyContent="flex-end" gap={1}>
+            <RaiseRequest
+              fields={[
+                'Name',
+                'Designation',
+                'Mobile Number',
+                'Email',
+                'Aadhaar Image',
+                'Pan Image',
+                'Passport Photo',
+                'Address',
+                'Residential_Address'
+              ]}
+              task_id={applicantTaskId}
+            />
+          </Box>
+        </Grid2>
       </Grid2>
-      <Grid2 sx={{ flexGrow: 1, ml: 95 }}>
-        <Box display="flex" justifyContent="flex-end" gap={1}>
-          
-          <RaiseRequest
-            fields={[
-              'Name',
-              'Designation',
-              'Mobile Number',
-              'Email',
-              'Aadhaar Image',
-              'Pan Image',
-              'Passport Photo',
-              'Address',
-              'Residential_Address'
-            ]}
-            
-            task_id={applicantTaskId}
-          />
-        </Box>
-      </Grid2>
-    </Grid2>
       <form onSubmit={handleSubmit}>
         <Grid2 container spacing={2}>
           {fields.map((field) => (
             <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4 }}>
-              <Typography variant="subtitle1" mb={1}>
+              {/* <Typography variant="subtitle1" mb={1}>
                 {field.label}
-              </Typography>
+              </Typography> */}
+              <Typography variant="subtitle1" mb={1}>
+  {getLabelWithAsterisk(field.label, field.required)}
+</Typography>
               {renderField(field)}
             </Grid2>
           ))}
@@ -308,7 +323,7 @@ const ApplicantDetails = ({applicantTaskId}) => {
               <span style={{ textDecoration: 'underline' }}>Residential Address</span>
             </Typography>
             <FormControlLabel
-              control={<Checkbox checked={values.residential_address } onChange={handleCheckboxChange} />}
+              control={<Checkbox checked={values.residential_address} onChange={handleCheckboxChange} />}
               label="Same as in Aadhaar"
             />
             {values.residential_address === false && (
@@ -324,11 +339,11 @@ const ApplicantDetails = ({applicantTaskId}) => {
                 error={touched.address && Boolean(errors.address)}
                 helperText={touched.address && errors.address}
                 sx={{
-              width: '100%',
-              '& .MuiInputBase-input': {
-                color: 'grey.600'
-              }
-            }}
+                  width: '100%',
+                  '& .MuiInputBase-input': {
+                    color: 'grey.600'
+                  }
+                }}
               />
             )}
           </Grid2>
@@ -338,16 +353,16 @@ const ApplicantDetails = ({applicantTaskId}) => {
             Save
           </Button>
           <GetActionButtons
-                                        type="put"
-                                        urlEndpoint="applicant-details"
-                                        recId={applicantInfo.id}
-                                        status={applicantInfo.status}
-                                        data={applicantInfo}
-                                        service_request={service_id}
-                                        task_id={applicantTaskId}
-                                        urlKey="tradelicense"
-                                        urlBool={true}
-                                      />
+            type="put"
+            urlEndpoint="applicant-details"
+            recId={applicantInfo.id}
+            status={applicantInfo.status}
+            data={applicantInfo}
+            service_request={service_id}
+            task_id={applicantTaskId}
+            urlKey="tradelicense"
+            urlBool={true}
+          />
         </Stack>
       </form>
     </Card>

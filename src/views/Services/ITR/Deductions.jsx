@@ -5,6 +5,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import IconButton from '@mui/material/IconButton';
 import GetActionButtons from '../FormHelpers';
 import { useSnackbar } from 'notistack';
+import CircularProgress from '@mui/material/CircularProgress';
+
 import {
   Box,
   Typography,
@@ -115,6 +117,8 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
     }
   };
   const { enqueueSnackbar } = useSnackbar();
+  const [isLoading, setIsLoading] = useState(false);
+
   const [investments, setInvestments] = React.useState([{ investment: '', amount: '', file: null }]);
   const [donations, setDonations] = React.useState([{ name: '', amount: '', mode: '', file: null }]);
   const [mediclaim, setMediclaim] = React.useState({
@@ -199,6 +203,13 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
       }
     }
   }, [deductions]);
+   if (isLoading) {
+    return (
+      <Box sx={{ textAlign: 'center', py: 6 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Box>
@@ -238,6 +249,12 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                           }}
                           error={Boolean(errors.donations?.[idx]?.name)}
                           helperText={errors.donations?.[idx]?.name}
+                            sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                         />
                       </TableCell>
                       <TableCell>
@@ -253,6 +270,12 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                           }}
                           error={Boolean(errors.donations?.[idx]?.amount)}
                           helperText={errors.donations?.[idx]?.amount}
+                           sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                         />
                       </TableCell>
                       <TableCell>
@@ -267,6 +290,12 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                             setFieldValue('donations', newArr);
                           }}
                           renderInput={(params) => <TextField {...params} placeholder="Mode" />}
+                           sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                         />
                       </TableCell>
                       <TableCell>
@@ -280,6 +309,12 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                               newArr[idx].file = e.target.files[0];
                               setFieldValue('donations', newArr);
                             }}
+                             sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                           />
                         </Button>
                         {row.file && (
@@ -295,6 +330,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                                 window.open(URL.createObjectURL(row.file), '_blank');
                               }
                             }}
+                            
                           >
                             View
                           </Button>
@@ -307,6 +343,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                             variant="contained"
                             color="primary"
                             onClick={async () => {
+                              setIsLoading(true);
                               const formData = new FormData();
                               formData.append('deductions', deductions.data.id);
                               formData.append('name', row.name || '');
@@ -339,6 +376,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                                   variant: 'error'
                                 });
                               }
+                              setIsLoading(false);
                             }}
                           >
                             Save
@@ -396,6 +434,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
         }}
         enableReinitialize
         onSubmit={async (values) => {
+          setIsLoading(true);
           const formData = new FormData();
           formData.append('deductions', deductions.data.id);
           formData.append('amount', values.amount || '');
@@ -420,6 +459,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
               variant: 'error'
             });
           }
+          setIsLoading(false);
         }}
       >
         {({ values, setFieldValue }) => (
@@ -430,7 +470,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
               </Typography>
               <Grid2 container spacing={2} alignItems="center" mb={2}>
                 <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                  <Typography>Loan Amount</Typography>
+                  <Typography variant="subtitle1">Loan Amount <span style={{ color: 'red' }}> *</span></Typography>
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
                   <TextField
@@ -441,10 +481,16 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                     name="amount"
                     value={values.amount}
                     onChange={(e) => setFieldValue('amount', e.target.value)}
+                     sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                   />
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                  <Typography>Education of</Typography>
+                  <Typography variant="subtitle1">Education of  <span style={{ color: 'red' }}> *</span></Typography>
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
                   <Autocomplete
@@ -455,10 +501,16 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                     value={values.education_of ?? ''}
                     onChange={(_, v) => setFieldValue('education_of', v)}
                     renderInput={(params) => <TextField {...params} placeholder="Education of" />}
+                     sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                   />
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-                  <Typography>Borrower Name</Typography>
+                  <Typography variant="subtitle1">Borrower Name  <span style={{ color: 'red' }}> *</span></Typography>
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
                   <TextField
@@ -468,10 +520,16 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                     name="borrower_name"
                     value={values.borrower_name}
                     onChange={(e) => setFieldValue('borrower_name', e.target.value)}
+                     sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                   />
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-                  <Typography>Is it an approved Bank/NBFC?</Typography>
+                  <Typography variant="subtitle1">Is it an approved Bank/NBFC?  <span style={{ color: 'red' }}> *</span></Typography>
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                   <RadioGroup row value={values.is_it_approved_bank} onChange={(_, v) => setFieldValue('is_it_approved_bank', v)}>
@@ -480,7 +538,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                   </RadioGroup>
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 5 }}>
-                  <Typography>Upload sanction letter/interest Certificate/Other documents</Typography>
+                  <Typography variant="subtitle1">Upload sanction letter/interest Certificate/Other documents <span style={{ color: 'red' }}> *</span></Typography>
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 7 }}>
                   <Box>
@@ -517,7 +575,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                   </Box>
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 12, md: 5 }}>
-                  <Typography>Loan outstanding amount as on 31st March</Typography>
+                  <Typography variant="subtitle1">Loan outstanding amount as on 31st March  <span style={{ color: 'red' }}> *</span></Typography>
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 12, md: 7 }}>
                   <TextField
@@ -527,6 +585,12 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                     name="loan_outstanding_as_on_31st_march"
                     value={values.loan_outstanding_as_on_31st_march}
                     onChange={(e) => setFieldValue('loan_outstanding_as_on_31st_march', e.target.value)}
+                     sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                   />
                 </Grid2>
               </Grid2>
@@ -547,6 +611,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
         }}
         enableReinitialize
         onSubmit={async (values) => {
+          setIsLoading(true);
           const formData = new FormData();
           formData.append('deductions', deductions.data.id);
           formData.append('loan_outstanding_as_on_31st_march', values.loan_outstanding_as_on_31st_march || '');
@@ -569,6 +634,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
               variant: 'error'
             });
           }
+          setIsLoading(false);
         }}
       >
         {({ values, setFieldValue }) => (
@@ -579,7 +645,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
               </Typography>
               <Grid2 container spacing={2} alignItems="center" mb={2}>
                 <Grid2 size={{ xs: 12, sm: 6, md: 5 }}>
-                  <Typography>Upload sanction letter/interest Certificate ( other documents )</Typography>
+                  <Typography variant="subtitle1">Upload sanction letter/interest Certificate ( other documents )  <span style={{ color: 'red' }}> *</span></Typography>
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                   <Box>
@@ -630,7 +696,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                   </Box>
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 5 }}>
-                  <Typography>Loan amount outstanding as on 31st march</Typography>
+                  <Typography variant="subtitle1">Loan amount outstanding as on 31st march  <span style={{ color: 'red' }}> *</span></Typography>
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 6 }}>
                   <TextField
@@ -639,6 +705,12 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                     name="loan_outstanding_as_on_31st_march"
                     value={values.loan_outstanding_as_on_31st_march}
                     onChange={(e) => setFieldValue('loan_outstanding_as_on_31st_march', e.target.value)}
+                     sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                   />
                 </Grid2>
               </Grid2>
@@ -660,6 +732,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
         }}
         enableReinitialize
         onSubmit={async (values) => {
+          setIsLoading(true);
           const formData = new FormData();
           formData.append('vehicle_registration_number', values.vehicle_registration_number || '');
           formData.append('deductions', deductions.data.id);
@@ -681,6 +754,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
               variant: 'error'
             });
           }
+          setIsLoading(false);
         }}
       >
         {({ values, setFieldValue }) => (
@@ -691,7 +765,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
               </Typography>
               <Grid2 container spacing={2} alignItems="center" mb={2}>
                 <Grid2 size={{ xs: 12, sm: 6, md: 5 }}>
-                  <Typography>Upload sanction letter/interest Certificate (other documents )</Typography>
+                  <Typography variant="subtitle1">Upload sanction letter/interest Certificate (other documents ) <span style={{ color: 'red' }}> *</span></Typography>
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                   <Box>
@@ -728,7 +802,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                   </Box>
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 5 }}>
-                  <Typography>Vehicle Registration Number</Typography>
+                  <Typography variant="subtitle1">Vehicle Registration Number  <span style={{ color: 'red' }}> *</span></Typography>
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 6 }}>
                   <TextField
@@ -737,6 +811,12 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                     name="vehicle_registration_number"
                     value={values.vehicle_registration_number}
                     onChange={(e) => setFieldValue('vehicle_registration_number', e.target.value)}
+                     sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                   />
                 </Grid2>
               </Grid2>
@@ -762,6 +842,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
         }}
         enableReinitialize
         onSubmit={async (values) => {
+          setIsLoading(true);
           const formData = new FormData();
           formData.append('deductions', deductions.data.id);
           formData.append('total_saving_interest', values.total_saving_interest || '');
@@ -797,6 +878,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
               variant: 'error'
             });
           }
+          setIsLoading(false);
         }}
       >
         {({ values, setFieldValue }) => (
@@ -815,6 +897,12 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                     name="total_saving_interest"
                     value={values.total_saving_interest}
                     onChange={(e) => setFieldValue('total_saving_interest', e.target.value)}
+                     sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                   />
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
@@ -825,6 +913,12 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                     name="total_fd_interest"
                     value={values.total_fd_interest}
                     onChange={(e) => setFieldValue('total_fd_interest', e.target.value)}
+                     sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                   />
                 </Grid2>
               </Grid2>
@@ -842,6 +936,12 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                     value={values.nature_of_disability ?? ''}
                     onChange={(_, v) => setFieldValue('nature_of_disability', v)}
                     renderInput={(params) => <TextField {...params} label="Nature of Disability" />}
+                     sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                   />
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
@@ -852,6 +952,12 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                     value={values.severity ?? ''}
                     onChange={(_, v) => setFieldValue('severity', v)}
                     renderInput={(params) => <TextField {...params} label="Severity" />}
+                     sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                   />
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
@@ -863,6 +969,12 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                     name="deduction_amount"
                     value={values.deduction_amount}
                     onChange={(e) => setFieldValue('deduction_amount', e.target.value)}
+                     sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                   />
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
@@ -895,7 +1007,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
               {/* Did you pay Rent without receiving HRA? */}
               <Grid2 container alignItems="center" spacing={2} mb={3}>
                 <Grid2 size={{ xs: 12, sm: 4 }}>
-                  <Typography>Did you pay Rent without receiving HRA?</Typography>
+                  <Typography variant="subtitle1">Did you pay Rent without receiving HRA?  <span style={{ color: 'red' }}> *</span></Typography>
                   <RadioGroup
                     row
                     value={values.pay_rent_without_recieving_hra}
@@ -923,7 +1035,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
               {/* Are you a first time homebuyer? */}
               <Grid2 container alignItems="center" spacing={2} mb={3}>
                 <Grid2 size={{ xs: 12, sm: 3 }}>
-                  <Typography>Are you a first time homebuyer?</Typography>
+                  <Typography variant="subtitle1">Are you a first time homebuyer?  <span style={{ color: 'red' }}> *</span></Typography>
                   <RadioGroup
                     row
                     value={values.are_you_first_time_homebuyer}
@@ -937,26 +1049,38 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                   <>
                     <Grid2 size={{ xs: 12, sm: 4.5 }}>
                       <Box display="flex" alignItems="center" gap={2} mt={1}>
-                        <Typography>Amount of interest paid</Typography>
+                        <Typography variant="subtitle1">Amount of interest paid</Typography>
                         <TextField
                           size="small"
                           type="number"
                           value={values.amount_of_interest_paid}
                           onChange={(e) => setFieldValue('amount_of_interest_paid', e.target.value)}
-                          sx={{ maxWidth: 200 }}
+                          // sx={{ maxWidth: 200 }}
+                           sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                         />
                       </Box>
                     </Grid2>
                     <Grid2 size={{ xs: 12, sm: 4.5 }}>
                       <Box display="flex" alignItems="center" gap={2} mt={1}>
-                        <Typography>Date of Loan Sanctioned</Typography>
+                        <Typography variant="subtitle1">Date of Loan Sanctioned</Typography>
                         <TextField
                           size="small"
                           type="date"
                           value={values.date_of_loan_sanctioned}
                           onChange={(e) => setFieldValue('date_of_loan_sanctioned', e.target.value)}
                           InputLabelProps={{ shrink: true }}
-                          sx={{ maxWidth: 200 }}
+                          // sx={{ maxWidth: 200 }}
+                           sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                         />
                       </Box>
                     </Grid2>
@@ -967,7 +1091,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
               {/* Donations made to political/party (80GGC)? */}
               <Grid2 container alignItems="center" spacing={2} mb={3}>
                 <Grid2 size={{ xs: 12, sm: 4 }}>
-                  <Typography>Donations made to political/rural i&d org?</Typography>
+                  <Typography variant="subtitle1">Donations made to political/rural i&d org?  <span style={{ color: 'red' }}> *</span></Typography>
                   <RadioGroup
                     row
                     value={values.donation_made_to_political_party}
@@ -980,13 +1104,19 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                 <Grid2 size={{ xs: 12, sm: 8 }}>
                   {values.donation_made_to_political_party === true && (
                     <Box display="flex" alignItems="center" gap={2} mt={1}>
-                      <Typography>Amount</Typography>
+                      <Typography variant="subtitle1">Amount</Typography>
                       <TextField
                         size="small"
                         type="number"
                         value={values.donation_amount}
                         onChange={(e) => setFieldValue('donation_amount', e.target.value)}
-                        sx={{ maxWidth: 200 }}
+                        // sx={{ maxWidth: 200 }}
+                         sx={{
+                                  width: '20%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                       />
                     </Box>
                   )}
@@ -1040,6 +1170,12 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                               placeholder="Investment/Payment"
                               error={Boolean(errors.investments?.[idx]?.investment)}
                               helperText={errors.investments?.[idx]?.investment}
+                               sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                             />
                           )}
                         />
@@ -1058,6 +1194,12 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                           }}
                           error={Boolean(errors.investments?.[idx]?.amount)}
                           helperText={errors.investments?.[idx]?.amount}
+                           sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                         />
                       </TableCell>
                       <TableCell>
@@ -1098,6 +1240,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                             variant="contained"
                             color="primary"
                             onClick={async () => {
+                              setIsLoading(true);
                               const formData = new FormData();
                               formData.append('deductions', deductions.data.id || '');
                               formData.append('investment', row.investment || '');
@@ -1126,6 +1269,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                                   variant: 'error'
                                 });
                               }
+                              setIsLoading(false);
                             }}
                           >
                             Save
@@ -1172,6 +1316,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
           enableReinitialize
           validationSchema={mediclaimSchema}
           onSubmit={async (values) => {
+            setIsLoading(true);
             const formData = new FormData();
             formData.append('deductions', deductions.data.id || '');
             formData.append('self_family_non_senior_citizen', values.self_family_non_senior_citizen || '');
@@ -1197,13 +1342,14 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                 variant: 'error'
               });
             }
+            setIsLoading(false);
           }}
         >
           {({ values, setFieldValue, errors }) => (
             <Form>
               <Grid2 container spacing={2} alignItems="center" mb={2}>
                 <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                  <Typography>Self & Family (Non-senior citizen)</Typography>
+                  <Typography variant="subtitle1">Self & Family (Non-senior citizen)  <span style={{ color: 'red' }}> *</span></Typography>
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
                   <TextField
@@ -1215,10 +1361,16 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                     onChange={(e) => setFieldValue('self_family_non_senior_citizen', e.target.value)}
                     error={Boolean(errors.self_family_non_senior_citizen)}
                     helperText={errors.self_family_non_senior_citizen}
+                     sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                   />
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                  <Typography>Self (Senior Citizen)</Typography>
+                  <Typography variant="subtitle1">Self (Senior Citizen)  <span style={{ color: 'red' }}> *</span></Typography>
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
                   <TextField
@@ -1230,10 +1382,16 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                     onChange={(e) => setFieldValue('self_senior_citizen', e.target.value)}
                     error={Boolean(errors.self_senior_citizen)}
                     helperText={errors.self_senior_citizen}
+                     sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                   />
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                  <Typography>Parents (Non-senior)</Typography>
+                  <Typography variant="subtitle1">Parents (Non-senior)  <span style={{ color: 'red' }}> *</span></Typography>
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
                   <TextField
@@ -1245,10 +1403,16 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                     onChange={(e) => setFieldValue('parents_non_senior_citizen', e.target.value)}
                     error={Boolean(errors.parents_non_senior_citizen)}
                     helperText={errors.parents_non_senior_citizen}
+                     sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                   />
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                  <Typography>Parents (Senior)</Typography>
+                  <Typography variant="subtitle1">Parents (Senior)  <span style={{ color: 'red' }}> *</span></Typography>
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
                   <TextField
@@ -1260,10 +1424,16 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                     onChange={(e) => setFieldValue('parents_senior_citizen', e.target.value)}
                     error={Boolean(errors.parents_senior_citizen)}
                     helperText={errors.parents_senior_citizen}
+                     sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                   />
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                  <Typography>Preventive Health Checkup</Typography>
+                  <Typography variant="subtitle1">Preventive Health Checkup  <span style={{ color: 'red' }}> *</span></Typography>
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
                   <TextField
@@ -1275,10 +1445,16 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                     onChange={(e) => setFieldValue('preventive_health_checkup', e.target.value)}
                     error={Boolean(errors.preventive_health_checkup)}
                     helperText={errors.preventive_health_checkup}
+                     sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                   />
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                  <Typography>Upload premium receipts</Typography>
+                  <Typography variant="subtitle1">Upload premium receipts  <span style={{ color: 'red' }}> *</span></Typography>
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
                   <Stack direction="row" spacing={1} justifyContent="flex-end">
@@ -1325,6 +1501,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
             files: Yup.mixed().required('Medical bills are required')
           })}
           onSubmit={async (values) => {
+            setIsLoading(true);
             // Handle form submission
             const formData = new FormData();
             formData.append('deductions', deductions.data.id);
@@ -1345,6 +1522,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                 variant: 'error'
               });
             }
+            setIsLoading(false);
           }}
         >
           {({ values, errors, touched, setFieldValue, handleSubmit }) => (
@@ -1354,7 +1532,7 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
               </Typography>
               <Grid2 container spacing={2} alignItems="center" mb={2}>
                 <Grid2 size={{ xs: 12, sm: 6, md: 5 }}>
-                  <Typography>Name of Specified disease</Typography>
+                  <Typography variant="subtitle1">Name of Specified disease  <span style={{ color: 'red' }}> *</span></Typography>
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 6 }}>
                   <TextField
@@ -1366,10 +1544,16 @@ const Deductions = ({ deductions, setDeductions, service_id, step, setStep, setF
                     onChange={(e) => setFieldValue('name_of_disease', e.target.value)}
                     error={Boolean(touched.name_of_disease && errors.name_of_disease)}
                     helperText={touched.name_of_disease && errors.name_of_disease}
+                     sx={{
+                                  width: '100%',
+                                   '& .MuiInputBase-input': {
+                                     color: 'grey.600'
+                                     }
+                                   }}
                   />
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 5 }}>
-                  <Typography>Upload medical bills</Typography>
+                  <Typography variant="subtitle1">Upload medical bills  <span style={{ color: 'red' }}> *</span></Typography>
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
                   <Box>

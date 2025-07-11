@@ -51,7 +51,7 @@ const StepTwo = ({ step, setStep }) => {
   const [taskIds, setTaskIds] = useState({
       director: null,
     });
-  
+ 
     const fetchTaskId = async () => {
         const url = `/companyincorporation/service-request-section-data?service_request_id=${service_id}&section=Directors`;
         const { res } = await Factory('get', url);
@@ -60,7 +60,7 @@ const StepTwo = ({ step, setStep }) => {
          setTaskIds({ director: taskData['Directors'] || {} });
        }
       };
-    
+   
       useEffect(() => {
         if (service_id) {
           fetchTaskId();
@@ -69,9 +69,9 @@ const StepTwo = ({ step, setStep }) => {
 
 
   const directorFields = [
-    { label: 'Director First Name', name: 'director_first_name', type: 'text' },
-    { label: 'Middle Name', name: 'middle_name', type: 'text' },
-    { label: 'Last Name', name: 'last_name', type: 'text' },
+    { label: 'Director First Name', name: 'director_first_name', type: 'text',required: true },
+    { label: 'Middle Name', name: 'middle_name', type: 'text',  required: false },
+    { label: 'Last Name', name: 'last_name', type: 'text', required: true },
     {
       label: 'Category of Directorship in the Company',
       name: 'category_of_directorship',
@@ -93,16 +93,17 @@ const StepTwo = ({ step, setStep }) => {
               'Non-Resident Director',
               'Woman Director',
               'Other'
-              ]
+              ],
+      required: true
     },
-    { label: 'PAN', name: 'pan_card_file', type: 'file' },
-    { label: 'Aadhar', name: 'aadhaar_card_file', type: 'file' },
-    { label: 'Passport Size Photo', name: 'passport_photo_file', type: 'file' },
-    { label: 'Mobile', name: 'mobile_number', type: 'text' },
-    { label: 'Email', name: 'email', type: 'text' },
-    { label: 'Occupation', name: 'occupation', type: 'text' },
-    { label: 'Area of Occupation', name: 'area_of_occupation', type: 'text' },
-    { label: 'Educational Qualification', name: 'qualification', type: 'autocomplete', 
+    { label: 'PAN', name: 'pan_card_file', type: 'file', required: true },
+    { label: 'Aadhar', name: 'aadhaar_card_file', type: 'file', required: true },
+    { label: 'Passport Size Photo', name: 'passport_photo_file', type: 'file', required: true },
+    { label: 'Mobile', name: 'mobile_number', type: 'text',required: true },
+    { label: 'Email', name: 'email', type: 'text',required: true },
+    { label: 'Occupation', name: 'occupation', type: 'text',required: true },
+    { label: 'Area of Occupation', name: 'area_of_occupation', type: 'text',required: true },
+    { label: 'Educational Qualification', name: 'qualification', type: 'autocomplete',
       options: ['Below SSC',
       'SSC/Matriculation',
       'HSC/Intermediate/12th passed',
@@ -110,12 +111,12 @@ const StepTwo = ({ step, setStep }) => {
       'Post Graduate',
       'Doctorate',
       'Professional Degree',
-      'Other'] },
-      { label: 'Father First Name', name: 'father_first_name', type: 'text' },
-    { label: 'Middle Name', name: 'father_middle_name', type: 'text' },
-    { label: 'Last Name', name: 'father_last_name', type: 'text' },
-    { label: 'Gender', name: 'gender', type: 'autocomplete', options: ['Male', 'Female', 'Other'] },
-    { label: 'Nationality', name: 'nationality', type: 'autocomplete', options: ['Indian', 'Foreign National'] },
+      'Other'],required: true },
+      { label: 'Father First Name', name: 'father_first_name', type: 'text',required: true },
+    { label: 'Middle Name', name: 'father_middle_name', type: 'text',required: true },
+    { label: 'Last Name', name: 'father_last_name', type: 'text',required: true },
+    { label: 'Gender', name: 'gender', type: 'autocomplete', options: ['Male', 'Female', 'Other'],required: true },
+    { label: 'Nationality', name: 'nationality', type: 'autocomplete', options: ['Indian', 'Foreign National'],required: true },
    
     {
       label: 'Residential Address Proof Type',
@@ -126,14 +127,14 @@ const StepTwo = ({ step, setStep }) => {
         'Telephone/Mobile Bill',
         'Electricity Bill',
         'Property Tax Receipt',
-        'Lease/Rent Agreement']
+        'Lease/Rent Agreement'],required: true
     },
-    { label: 'Residential Address Proof', name: 'residential_address_proof_file', type: 'file' },
+    { label: 'Residential Address Proof', name: 'residential_address_proof_file', type: 'file',required: true },
     { label: 'Form DIR 2', name: 'form_dir2', type: 'file' },
-    { label: 'Specimen Signature Of the Director', name: 'specimen_signature_of_director', type: 'file' },
-    { label: 'Authorised Signatory Name of Director', name: 'authorised_signatory_name', type: 'text' },
-    { label: 'DSC: Apply?', name: 'dsc', type: 'radio', options: ['Yes', 'No'] },
-    { label: 'DIN', name: 'din_number', type: 'radio', options: ['Yes', 'No'] },
+    { label: 'Specimen Signature Of the Director', name: 'specimen_signature_of_director', type: 'file',required: true },
+    { label: 'Authorised Signatory Name of Director', name: 'authorised_signatory_name', type: 'text',required: true },
+    { label: 'DSC: Apply?', name: 'dsc', type: 'radio', options: ['Yes', 'No'],required: true },
+    { label: 'DIN', name: 'din_number', type: 'radio', options: ['Yes', 'No'],required: true },
     {
       type: 'shareholding',
       label: 'Is this Director, also a Shareholder?',
@@ -141,23 +142,23 @@ const StepTwo = ({ step, setStep }) => {
       options: [
         { value: 'Yes', label: 'Yes' },
         { value: 'No', label: 'No' }
-      ]
+      ],required: true
     }
   ];
 
   const nestedAddressFields = [
-    { key: 'address_line_1', label: 'Address Line 1' },
-    { key: 'address_line_2', label: 'Address Line 2' },
-    { key: 'city', label: 'City' },
-    { key: 'state', label: 'State' },
-    { key: 'pincode', label: 'Pincode' }
+    { key: 'address_line_1', label: 'Address Line 1',required: true },
+    { key: 'address_line_2', label: 'Address Line 2',required: true },
+    { key: 'city', label: 'City',required: true },
+    { key: 'state', label: 'State',required: true },
+    { key: 'pincode', label: 'Pincode',required: true }
   ];
 
   const nestedDirectorFields = [
-    { label: 'Company Name', name: 'company_name', type: 'text' },
+    { label: 'Company Name', name: 'company_name', type: 'text',required: true },
     { label: 'CIN', name: 'cin', type: 'text' },
-    { label: 'Type of Company', name: 'type_of_company', type: 'text' },
-    { label: 'Position Held', name: 'position_held', type: 'text' }
+    { label: 'Type of Company', name: 'type_of_company', type: 'text',required: true },
+    { label: 'Position Held', name: 'position_held', type: 'text',required: true }
   ];
 
   const formik = useFormik({
@@ -281,8 +282,9 @@ const StepTwo = ({ step, setStep }) => {
                   return !!value;
                 }
                 return true;
-              })
-              .matches(/^[LU][0-9]{5}[A-Z]{2}[0-9]{4}[A-Z]{3}[0-9]{6}$/, 'CIN must be in format U12345MH2024PTC123456'),
+              }),
+              // .matches(/^[LU][0-9]{5}[A-Z]{2}[0-9]{4}[A-Z]{3}[0-9]{6}$/, 'CIN must be in format U12345MH2024PTC123456'),
+              // .matches(/^[LU][0-9]{5}[A-Z]{2}[0-9]{4}[A-Z]{3}[0-9]{6}$/, 'CIN is required'),
               type_of_company: Yup.string().test('required-when-has-existing', 'Company Type is required', function (value) {
                 const parentDirector = this.options.from[1]?.value;
                 if (parentDirector?.details_of_existing_directorships === true) {
@@ -330,11 +332,11 @@ const StepTwo = ({ step, setStep }) => {
       try {
         const director = values.directors[tabIndex];
         const formData = new FormData();
-        
+       
         formData.append('service_request', service_id);
         formData.append('service_task', taskIds?.director?.task_id );
         formData.append('status', 'in progress');
-        
+       
 
         // Send residential address as empty object if 'Yes', otherwise send address fields
         formData.append(
@@ -357,7 +359,7 @@ const StepTwo = ({ step, setStep }) => {
             ? JSON.stringify(director.existing_directorships_details)
             : JSON.stringify([])
         );
-        
+       
 
         // Always append boolean fields, even if false
         ['dsc', 'din_number', 'is_this_director_also_shareholder', 'details_of_existing_directorships', 'residential_same_as_aadhaar_address'].forEach((key) => {
@@ -397,13 +399,13 @@ const StepTwo = ({ step, setStep }) => {
           }
         });
 
-        const url = director.id 
+        const url = director.id
           ? `/companyincorporation/directors/${director.id}/`
           : '/companyincorporation/directors/';
 
         const { res } = await Factory(director.id ? 'put' : 'post', url, formData);
         setIsLoading(false); // Stop loading
-        
+       
         if (res.status_cd === 0) {
           dispatch(openSnackbar({
             open: true,
@@ -511,7 +513,7 @@ const StepTwo = ({ step, setStep }) => {
 
           formik.setFieldValue('directors', transformedData);
           setDirectors(transformedData);
-        } 
+        }
         else {
           const emptyDirector = {
             director_first_name: '',
@@ -579,7 +581,7 @@ const StepTwo = ({ step, setStep }) => {
         alert: { color: 'error' },
         close: false
       }));
-    } 
+    }
     // finally {
     //   setIsLoading(false);
     // }
@@ -658,6 +660,12 @@ const StepTwo = ({ step, setStep }) => {
       if (tabIndex >= updated.length) setTabIndex(updated.length - 1);
     }
   };
+   const getLabelWithAsterisk = (label, isRequired = true) => (
+  <span>
+    {label}
+    {isRequired && <span style={{ color: 'red', fontSize: '1.2em' }}> *</span>}
+  </span>
+);
  
 
   const renderField = (field, idx, path = 'directors', parentIdx = null) => {
@@ -688,9 +696,13 @@ const StepTwo = ({ step, setStep }) => {
         if (field.name === 'cin') inputProps = { pattern: '[LUlu][0-9]{5}[A-Za-z]{2}[0-9]{4}[A-Za-z]{3}[0-9]{6}', maxLength: 21, style: { textTransform: 'uppercase' } };
         return (
           <Box>
-            <Typography variant="subtitle1" mb={0.5}>
+            {/* <Typography variant="subtitle1" mb={0.5}>
               {field.label}
-            </Typography>
+            </Typography> */}
+             <Typography variant='subtitle1' mb={1}>
+                               {getLabelWithAsterisk(field.label, field.required)}
+            
+                            </Typography>
             <TextField
               fullWidth
               size="small"
@@ -730,9 +742,13 @@ const StepTwo = ({ step, setStep }) => {
       case 'autocomplete':
         return (
           <Box>
-            <Typography variant="subtitle1" mb={0.5}>
+            {/* <Typography variant="subtitle1" mb={0.5}>
               {field.label}
-            </Typography>
+            </Typography> */}
+             <Typography variant='subtitle1' mb={1}>
+                               {getLabelWithAsterisk(field.label, field.required)}
+            
+                            </Typography>
             <TextField
               fullWidth
               select
@@ -753,14 +769,18 @@ const StepTwo = ({ step, setStep }) => {
             </TextField>
           </Box>
         );
-      
+     
       case 'file':
           if (field.name === 'form_dir2') {
             return (
               <Box>
-                <Typography variant="subtitle1" mb={0.5}>
+                {/* <Typography variant="subtitle1" mb={0.5}>
                   {field.label}
-                </Typography>
+                </Typography> */}
+                 <Typography variant='subtitle1' mb={1}>
+                                   {getLabelWithAsterisk(field.label, field.required)}
+                
+                                </Typography>
                 <Box display="flex" alignItems="center" gap={1} width={400}>
                   <Box  width={225}>
                   <RenderFileUpload
@@ -799,9 +819,13 @@ const StepTwo = ({ step, setStep }) => {
           }
           return (
             <Box>
-              <Typography variant="subtitle1" mb={0.5}>
+              {/* <Typography variant="subtitle1" mb={0.5}>
                 {field.label}
-              </Typography>
+              </Typography> */}
+               <Typography variant='subtitle1' mb={1}>
+                                 {getLabelWithAsterisk(field.label, field.required)}
+              
+                              </Typography>
               <RenderFileUpload
                 fieldName={fieldName}
                 file={value}
@@ -878,9 +902,13 @@ const StepTwo = ({ step, setStep }) => {
         }
         return (
           <Box>
-            <Typography variant="subtitle1" mb={0.5}>
+            {/* <Typography variant="subtitle1" mb={0.5}>
               {field.label}
-            </Typography>
+            </Typography> */}
+             <Typography variant='subtitle1' mb={1}>
+                               {getLabelWithAsterisk(field.label, field.required)}
+            
+                            </Typography>
             <RenderFileUpload
               fieldName={fieldName}
               file={value}
@@ -901,7 +929,13 @@ const StepTwo = ({ step, setStep }) => {
         return (
           <Box key={field.name}>
             <FormControl component="fieldset">
-              <FormLabel><Typography variant="subtitle1">{field.label}</Typography></FormLabel>
+              <FormLabel>
+                {/* <Typography variant="subtitle1">{field.label}</Typography> */}
+                 <Typography variant='subtitle1' mb={1}>
+                                   {getLabelWithAsterisk(field.label, field.required)}
+                
+                                </Typography>
+              </FormLabel>
               <RadioGroup
                 row
                 name={shareRadioPath}
@@ -917,9 +951,12 @@ const StepTwo = ({ step, setStep }) => {
               <Grid2 container spacing={13} mt={1} >
                 <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
                   <Box sx={{ width: 150 }}>
-                    <Typography variant="subtitle1" mb={1} >
+                    {/* <Typography variant="subtitle1" mb={1} >
                       No. of Shares
-                    </Typography>
+                    </Typography> */}
+                    <Typography variant="subtitle1" mb={1}>
+                          {getLabelWithAsterisk('No. of Shares', true)}
+                   </Typography>
                     <TextField
                       size="small"
                       name={`${sharePrefixPath}.no_of_shares`}
@@ -938,9 +975,12 @@ const StepTwo = ({ step, setStep }) => {
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
                   <Box  sx={{ width: 150 }}>
-                    <Typography variant="subtitle1" mb={1} >
+                    {/* <Typography variant="subtitle1" mb={1} >
                       Percentage of Holding
-                    </Typography>
+                    </Typography> */}
+                    <Typography variant="subtitle1" mb={1}>
+                   {getLabelWithAsterisk('Percentage Holding', true)}
+                  </Typography>
                     <TextField
                       size="small"
                       name={`${sharePrefixPath}.shareholding_percentage`}
@@ -964,9 +1004,12 @@ const StepTwo = ({ step, setStep }) => {
                 </Grid2>
                 <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
                   <Box sx={{ width: 150}}>
-                    <Typography variant="subtitle1" mb={1} >
+                    {/* <Typography variant="subtitle1" mb={1} >
                       Paid Up Capital
-                    </Typography>
+                    </Typography> */}
+                    <Typography variant="subtitle1" mb={1}>
+                        {getLabelWithAsterisk('  Paid Up Capital', true)}
+                      </Typography>
                     <TextField
                       size="small"
                       name={`${sharePrefixPath}.paid_up_capital`}
@@ -984,6 +1027,7 @@ const StepTwo = ({ step, setStep }) => {
                   </Box>
                 </Grid2>
               </Grid2>
+             
             )}
           </Box>
         );
@@ -992,7 +1036,13 @@ const StepTwo = ({ step, setStep }) => {
         return (
           <>
             <FormControl component="fieldset" error={Boolean(error)}>
-              <FormLabel><Typography variant="subtitle1">{field.label}</Typography></FormLabel>
+              <FormLabel>
+                {/* <Typography variant="subtitle1">{field.label}</Typography> */}
+                 <Typography variant='subtitle1' mb={1}>
+                   {getLabelWithAsterisk(field.label, field.required)}
+
+                </Typography>
+                </FormLabel>
               <RadioGroup
                 row
                 name={fieldName}
@@ -1249,7 +1299,7 @@ const StepTwo = ({ step, setStep }) => {
               ]}
               task_id={taskIds?.director?.task_id}
             />
-            
+           
           </Box>
         </Box>
 
@@ -1298,9 +1348,12 @@ const StepTwo = ({ step, setStep }) => {
                   return (
                     <Grid2 size={{ xs: 2, sm: 6, md: 4 }} key={key}>
                       <Box>
-                        <Typography variant="subtitle1" mb={0.5}>
+                        {/* <Typography variant="subtitle1" mb={0.5}>
                           {label}
-                        </Typography>
+                        </Typography> */}
+                        <Typography variant="subtitle1" mb={0.5}>
+                           {getLabelWithAsterisk(label, true)} {/* or use `getLabelWithAsterisk(label, required)` if dynamic */}
+                       </Typography>
                         <TextField
                           fullWidth
                           size="small"
@@ -1387,7 +1440,7 @@ const StepTwo = ({ step, setStep }) => {
 
                   {Array.isArray(values.directors[idx].existing_directorships_details) &&
                     values.directors[idx].existing_directorships_details.map((_, edIdx) => (
-                      <Card key={edIdx} sx={{ mb: 2, p: 2 }}>
+                      <Card key={edIdx} sx={{ mb: -2, p: 2 }}>
                         <Typography fontWeight={600} mb={1}>
                           Director {edIdx + 1}
                         </Typography>
@@ -1404,11 +1457,12 @@ const StepTwo = ({ step, setStep }) => {
                           <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
                             <Box>{renderField(nestedDirectorFields[3], edIdx, `directors[${idx}].existing_directorships_details`, idx)}</Box>
                           </Grid2>
-                          <Grid2 size={{ xs: 12, sm: 12, md: 2 }} display="flex" alignItems="center" justifyContent="flex-end" gap={1}>
+                          <Grid2 size={{ xs: 12, sm: 12, md: 2 }} display="flex" alignItems="center" justifyContent="flex-end" sx={{ml:-2,mb:3.5}} gap={1}>
                             <Button
                               variant="contained"
                               size="small"
-                              sx={{ marginBottom: '23px' }}
+                              // sx={{ marginBottom: '28px' }}
+                             
                               onClick={async () => {
                                 const allErrors = await formik.validateForm();
                                 const entryErrors =
@@ -1451,7 +1505,7 @@ const StepTwo = ({ step, setStep }) => {
                               variant="outlined"
                               color="error"
                               size="small"
-                              sx={{ marginBottom: '23px' }}
+                              // sx={{ marginBottom: '28px' }}
                               onClick={() => {
                                 const updated = values.directors[idx].existing_directorships_details.filter((_, i) => i !== edIdx);
                                 setFieldValue(`directors[${idx}].existing_directorships_details`, updated);
@@ -1471,32 +1525,240 @@ const StepTwo = ({ step, setStep }) => {
               <Box display="flex" justifyContent="flex-end" mt={2} gap={1}>
                 <Button
                   variant="contained"
-                  // sx={{ height: 36 }}
                   onClick={async () => {
-                    const allErrors = await formik.validateForm();
-                    const entryErrors = allErrors.directors && allErrors.directors[idx];
-                    if (!entryErrors || Object.keys(entryErrors).length === 0) {
-                      formik.handleSubmit();
-                    } else {
-                      formik.setTouched({
-                        ...formik.touched,
-                        directors: values.directors.map((dir, i) =>
-                          i === idx
-                            ? {
-                                ...Object.fromEntries(Object.keys(dir).map((k) => [k, true])),
-                                ...(dir.residential_same_as_aadhaar_address === false
-                                  ? {
-                                      address_line_1: true,
-                                      address_line_2: true,
-                                      city: true,
-                                      state: true,
-                                      pincode: true
-                                    }
-                                  : {})
-                              }
-                            : formik.touched.directors?.[i] || Object.fromEntries(Object.keys(dir).map((k) => [k, false]))
-                        )
+                    // Mark all fields for this specific tab as touched
+                    const currentDirector = values.directors[idx];
+                    const touchedFields = {};
+                    Object.keys(currentDirector).forEach(key => {
+                      touchedFields[key] = true;
+                    });
+                    // Mark residential address fields as touched if needed
+                    if (currentDirector.residential_same_as_aadhaar_address === false) {
+                      ['address_line_1', 'address_line_2', 'city', 'state', 'pincode'].forEach(field => {
+                        touchedFields[field] = true;
                       });
+                    }
+                    formik.setTouched({
+                      ...formik.touched,
+                      directors: values.directors.map((dir, i) =>
+                        i === idx ? touchedFields : formik.touched.directors?.[i] || {}
+                      )
+                    });
+                    // Build a Yup schema for a single director
+                    const singleDirectorSchema = Yup.object({
+                      director_first_name: Yup.string().required('Director First Name is required'),
+                      last_name: Yup.string().required('Last Name is required'),
+                      category_of_directorship: Yup.string().required('Category Directorship is required'),
+                      pan_card_file: Yup.mixed().required('PAN is required'),
+                      aadhaar_card_file: Yup.mixed().required('Aadhaar is required'),
+                      passport_photo_file: Yup.mixed().required('Passport Photo is required'),
+                      mobile_number: Yup.string()
+                        .required('Mobile Number is required')
+                        .matches(/^[0-9]{10}$/, 'Mobile Number must be exactly 10 digits'),
+                      email: Yup.string().email('Invalid email').required('Email is required'),
+                      occupation: Yup.string().required('Occupation is required'),
+                      area_of_occupation: Yup.string().required('Area of Occupation is required'),
+                      qualification: Yup.string().required('Educational Qualification is required'),
+                      gender: Yup.string().required('Gender is required'),
+                      nationality: Yup.string().required('Nationality is required'),
+                      father_first_name: Yup.string().required('Father First name is required'),
+                      father_last_name: Yup.string().required('Father Last name is required'),
+                      residential_address_proof: Yup.string().required('Residential Address Proof Type is required'),
+                      residential_address_proof_file: Yup.string().required('Resedential Address Proof is required'),
+                      form_dir2: Yup.string().required('Form Dir 2 is required'),
+                      specimen_signature_of_director: Yup.string().required('Specimen Signature od Director is required'),
+                      authorised_signatory_name: Yup.string().required('Authorised Signatory is required'),
+                      dsc: Yup.bool().oneOf([true, false], 'DSC is required').required('DSC is required'),
+                      din_number: Yup.bool().oneOf([true, false], 'DIN is required').required('DIN is required'),
+                      din_number_value: Yup.string().when('din_number', {
+                        is: true,
+                        then: (schema) => schema
+                          .required('DIN Number is required')
+                          .matches(/^[0-9]{8}$/, 'DIN Number must be exactly 8 digits'),
+                        otherwise: (schema) => schema.notRequired(),
+                      }),
+                      is_this_director_also_shareholder: Yup.bool().oneOf([true, false], 'Share Holder is required').required('Share Holder is required'),
+                      residential_same_as_aadhaar_address: Yup.bool().oneOf([true, false]).required('Residential Address Same as Aadhaar is required'),
+                      address_line_1: Yup.string().when('residential_same_as_aadhaar_address', {
+                        is: false,
+                        then: (schema) => schema.required('Address Line 1 is required'),
+                        otherwise: (schema) => schema.notRequired()
+                      }),
+                      address_line_2: Yup.string().when('residential_same_as_aadhaar_address', {
+                        is: false,
+                        then: (schema) => schema.required('Address Line 2 is required'),
+                        otherwise: (schema) => schema.notRequired()
+                      }),
+                      city: Yup.string().when('residential_same_as_aadhaar_address', {
+                        is: false,
+                        then: (schema) => schema.required('City is required'),
+                        otherwise: (schema) => schema.notRequired()
+                      }),
+                      state: Yup.string().when('residential_same_as_aadhaar_address', {
+                        is: false,
+                        then: (schema) => schema.required('State is required'),
+                        otherwise: (schema) => schema.notRequired()
+                      }),
+                      pincode: Yup.string().when('residential_same_as_aadhaar_address', {
+                        is: false,
+                        then: (schema) => schema
+                          .required('Pincode is required')
+                          .matches(/^[0-9]{6}$/, 'Pincode must be exactly 6 digits'),
+                        otherwise: (schema) => schema.notRequired()
+                      }),
+                      details_of_existing_directorships: Yup.bool().oneOf([true, false]).required('Required'),
+                      existing_directorships_details: Yup.array().of(
+                        Yup.object({
+                          company_name: Yup.string().test('required-when-has-existing', 'Company Name is required', function (value) {
+                            const parentDirector = this.options.from[1]?.value;
+                            if (parentDirector?.details_of_existing_directorships === true) {
+                              return !!value;
+                            }
+                            return true;
+                          }),
+                          cin: Yup.string().test('required-when-has-existing', 'CIN is required', function (value) {
+                            const parentDirector = this.options.from[1]?.value;
+                            if (parentDirector?.details_of_existing_directorships === true) {
+                              return !!value;
+                            }
+                            return true;
+                          }),
+                          type_of_company: Yup.string().test('required-when-has-existing', 'Company Type is required', function (value) {
+                            const parentDirector = this.options.from[1]?.value;
+                            if (parentDirector?.details_of_existing_directorships === true) {
+                              return !!value;
+                            }
+                            return true;
+                          }),
+                          position_held: Yup.string().test('required-when-has-existing', 'Position Held is required', function (value) {
+                            const parentDirector = this.options.from[1]?.value;
+                            if (parentDirector?.details_of_existing_directorships === true) {
+                              return !!value;
+                            }
+                            return true;
+                          })
+                        })
+                      ),
+                      no_of_shares: Yup.string().when('is_this_director_also_shareholder', {
+                        is: true,
+                        then: (schema) => schema
+                          .required('No. of Shares is required')
+                          .matches(/^[0-9]+$/, 'No. of Shares must be a number'),
+                        otherwise: (schema) => schema.notRequired(),
+                      }),
+                      shareholding_percentage: Yup.string().when('is_this_director_also_shareholder', {
+                        is: true,
+                        then: (schema) => schema
+                          .required('Percentage of Holding is required')
+                          .matches(/^[0-9]+$/, 'Percentage of Holding must be a number'),
+                        otherwise: (schema) => schema.notRequired(),
+                      }),
+                      paid_up_capital: Yup.string().when('is_this_director_also_shareholder', {
+                        is: true,
+                        then: (schema) => schema
+                          .required('Paid Up Capital is required')
+                          .matches(/^[0-9]+$/, 'Paid Up Capital must be a number'),
+                        otherwise: (schema) => schema.notRequired(),
+                      }),
+                    });
+                    try {
+                      await singleDirectorSchema.validate(currentDirector, { abortEarly: false });
+                      // If valid, manually save just this director
+                      setIsLoading(true);
+                      const formData = new FormData();
+                      formData.append('service_request', service_id);
+                      formData.append('service_task', taskIds?.director?.task_id );
+                      formData.append('status', 'in progress');
+                      formData.append(
+                        'residential_address',
+                        currentDirector.residential_same_as_aadhaar_address === true
+                          ? JSON.stringify({})
+                          : JSON.stringify({
+                              address_line_1: currentDirector.address_line_1 || '',
+                              address_line_2: currentDirector.address_line_2 || '',
+                              city: currentDirector.city || '',
+                              state: currentDirector.state || '',
+                              pincode: currentDirector.pincode || ''
+                            })
+                      );
+                      formData.append(
+                        'existing_directorships_details',
+                        currentDirector.details_of_existing_directorships === true
+                          ? JSON.stringify(currentDirector.existing_directorships_details)
+                          : JSON.stringify([])
+                      );
+                      ['dsc', 'din_number', 'is_this_director_also_shareholder', 'details_of_existing_directorships', 'residential_same_as_aadhaar_address'].forEach((key) => {
+                        if (key in currentDirector) {
+                          formData.append(key, currentDirector[key]);
+                        }
+                      });
+                      Object.entries(currentDirector).forEach(([key, value]) => {
+                        if ([
+                          'address_line_1',
+                          'address_line_2',
+                          'city',
+                          'state',
+                          'pincode',
+                          'residential_address',
+                          'existing_directorships_details',
+                        ].includes(key)) {
+                          return;
+                        }
+                        if (key.endsWith('_file') || key === 'form_dir2' || key === 'specimen_signature_of_director') {
+                          if (value instanceof File) {
+                            formData.append(key, value);
+                          }
+                        } else if (
+                          ['no_of_shares', 'shareholding_percentage', 'paid_up_capital'].includes(key) &&
+                          currentDirector.is_this_director_also_shareholder === false
+                        ) {
+                          formData.append(key, '');
+                        } else if (typeof value === 'string' || typeof value === 'number') {
+                          formData.append(key, value);
+                        } else if (Array.isArray(value)) {
+                          formData.append(key, JSON.stringify(value));
+                        } else if (value && typeof value === 'object') {
+                          formData.append(key, JSON.stringify(value));
+                        }
+                      });
+                      const url = currentDirector.id
+                        ? `/companyincorporation/directors/${currentDirector.id}/`
+                        : '/companyincorporation/directors/';
+                      const { res } = await Factory(currentDirector.id ? 'put' : 'post', url, formData);
+                      setIsLoading(false);
+                      if (res.status_cd === 0) {
+                        dispatch(openSnackbar({
+                          open: true,
+                          message: currentDirector.id ? 'Director updated successfully!' : 'Director saved successfully!',
+                          variant: 'alert',
+                          alert: { color: 'success' },
+                          close: false
+                        }));
+                        await fetchDirectors();
+                        fetchTaskId();
+                      } else {
+                        throw new Error(res.data?.message || 'Failed to save director');
+                      }
+                    } catch (validationError) {
+                      if (validationError.inner) {
+                        const errorObj = {};
+                        validationError.inner.forEach(err => {
+                          errorObj[err.path] = err.message;
+                        });
+                        formik.setErrors({
+                          directors: values.directors.map((dir, i) =>
+                            i === idx ? errorObj : {}
+                          )
+                        });
+                      } else {
+                        dispatch(openSnackbar({
+                          open: true,
+                          message: validationError.message || 'Validation failed',
+                          variant: 'alert',
+                          alert: { color: 'error' },
+                          close: false
+                        }));
+                      }
                     }
                   }}
                 >
@@ -1512,10 +1774,10 @@ const StepTwo = ({ step, setStep }) => {
                 </Button>
               </Box>
             </Grid2>
-            
+           
           </TabPanel>
         ))}
-        
+       
       </Card>
         <Box display="flex" justifyContent="space-between" gap={1}mt={2}>
       {/* Left side: Back button */}

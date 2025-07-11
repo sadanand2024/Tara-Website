@@ -8,6 +8,7 @@ import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
 import MainCard from 'ui-component/cards/MainCard';
 import RenderSalaryTemplateTable from './RenderSalaryTemplateTable';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 const validationSchema = Yup.object({
   template_name: Yup.string().required('Template Name is required'),
@@ -206,7 +207,7 @@ function SalaryTemplate() {
         </Box>
 
         <Stack direction="row" spacing={2} sx={{ mt: 4, justifyContent: 'space-between' }}>
-          <Button variant="outlined" onClick={() => navigate(-1)}>
+          <Button startIcon={<ArrowBackIcon />} variant="outlined" onClick={() => navigate(-1)}>
             Back
           </Button>
           {enablePreviewButton === false && (
