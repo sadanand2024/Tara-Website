@@ -70,6 +70,9 @@ const NewRequests = Loadable(lazy(() => import('views/SuperAdmin/ServiceManageme
 const TaskManagement = Loadable(lazy(() => import('views/SuperAdmin/ServiceManagement/TaskManagement')));
 const ServiceSummary = Loadable(lazy(() => import('views/SuperAdmin/ServiceManagement/ServiceSummary')));
 
+//employee Portal
+const EmployeePortal = Loadable(lazy(() => import('views/application/EmployeePortal')));
+
 const FaceRecognition = Loadable(lazy(() => import('views/application/AttendanceTest')));
 // ==============================|| MAIN ROUTING ||============================== //
 
@@ -213,6 +216,12 @@ const MainRoutes = {
       element: <DocumentDrafting />
     },
 
+    //Employee Portl
+
+    {
+      path: '/app/employee-portal/dashboard',
+      element: <EmployeePortal />
+    },
     {
       path: '/app/subscriptions',
       element: <ManageSubscriptions />
