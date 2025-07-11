@@ -18,6 +18,7 @@ import {
 import Pagination from '@mui/material/Pagination';
 import React, { useEffect, useState } from 'react';
 import Factory from 'utils/Factory';
+import SelectedEvent from './SelectedEvent';
 
 const statusColor = (status) => {
   switch (status?.toLowerCase()) {
@@ -49,6 +50,8 @@ const MyEvents = ({ id }) => {
       .catch(() => setEvents([]))
       .finally(() => setLoading(false));
   }, [id]);
+  
+
 
   const paginatedRows = events.slice((page - 1) * rowsPerPage, page * rowsPerPage);
   const pageCount = Math.ceil(events.length / rowsPerPage);
@@ -139,6 +142,9 @@ const MyEvents = ({ id }) => {
                         sx={{
                           color: '#2F54EB',
                           '&:hover': { color: '#1d39c4', background: 'transparent' },
+                        }}
+                        onClick={() => {
+                          window.location.href = `/app/selected-event/${event.id}`;
                         }}
                       >
                         <EditIcon />
