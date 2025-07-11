@@ -122,8 +122,9 @@ export default function Index() {
     const { res } = await Factory('get', url, {});
     if (res?.status_cd === 0) {
       const data = res.data;
+      // console.log(data);
       const newDoneStatus = workflowFieldMap.map((field) => data[field] === 'completed');
-      setDoneStatus(newDoneStatus);
+      setDoneStatus([...newDoneStatus, { id: data.id }]);
     }
   };
   // Fetch month summary data when month or financialYear changes
@@ -165,7 +166,8 @@ export default function Index() {
   const putStatusApicall = async (index, status) => {
     const field = workflowFieldMap[index];
     if (!field || !payrollId) return;
-    const url = `/payroll/payroll-workflows/${payrollId}/update/`;
+    const objWithId = doneStatus.find((item) => typeof item === 'object' && item !== null && 'id' in item);
+    const url = `/payroll/payroll-workflows/${objWithId?.id}/update/`;
     const payload = {
       payroll: payrollId,
       month: selectedMonth,
@@ -406,6 +408,12 @@ export default function Index() {
                                   handleMarkAsDoneClick(index);
                                 }}
                                 color="success"
+                                sx={{
+                                  color: (theme) => theme.palette.success.darker,
+                                  '&.Mui-checked': {
+                                    color: (theme) => theme.palette.success.darker
+                                  }
+                                }}
                               />
                             }
                             label="Done"
@@ -433,7 +441,12 @@ export default function Index() {
                           </Button>
                           <Button
                             variant="outlined"
-                            color="success"
+                            sx={{
+                              color: (theme) => theme.palette.success.darker,
+                              '&.Mui-checked': {
+                                color: (theme) => theme.palette.success.darker
+                              }
+                            }}
                             size="small"
                             onClick={(e) => {
                               e.stopPropagation();

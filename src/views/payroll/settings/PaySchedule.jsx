@@ -123,7 +123,6 @@ function PaySchedule({ handleBack, handleNext }) {
           close: false
         })
       );
-      navigate(-1);
     } else {
       dispatch(
         openSnackbar({

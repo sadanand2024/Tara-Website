@@ -154,6 +154,19 @@ const PayrollDashboard = () => {
     const url = `/payroll/detail_employee_payroll_salary?payroll_id=${businessDetails?.payroll_id}&month=${selectedMonth}&financial_year=${financialYear}`;
     const { res } = await Factory('get', url, {});
     if (res.status_cd === 0) {
+      if (res.data.message === 'Salary processing will be initiated between the 26th and 30th of the month.') {
+        setRefreshLoading(false);
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: res.data.message,
+            variant: 'alert',
+            alert: { color: 'success' },
+            close: false
+          })
+        );
+        return;
+      }
       get_payrollMonthData(selectedMonth);
 
       dispatch(

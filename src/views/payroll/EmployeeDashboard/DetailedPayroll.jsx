@@ -50,6 +50,12 @@ const TABLE_HEADERS = [
   'Status'
 ];
 
+// Utility function to format numbers with Indian comma separators
+const formatNumberIN = (value) => {
+  if (value === null || value === undefined || value === '' || isNaN(Number(value))) return 'NA';
+  return Number(value).toLocaleString('en-IN');
+};
+
 const DetailedPayroll = ({ payrollId, month }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [detailedSummary, setDetailedSummary] = useState([]);
@@ -156,27 +162,27 @@ const DetailedPayroll = ({ payrollId, month }) => {
                   <TableCell sx={{ whiteSpace: 'nowrap' }}>{item.employee_name}</TableCell>
                   <TableCell sx={{ whiteSpace: 'nowrap' }}>{item.department}</TableCell>
                   <TableCell sx={{ whiteSpace: 'nowrap' }}>{item.designation}</TableCell>
-                  <TableCell>{item.total_days_of_month}</TableCell>
-                  <TableCell>{item.lop}</TableCell>
-                  <TableCell>{item.paid_days}</TableCell>
-                  <TableCell>{item.ctc}</TableCell>
-                  <TableCell>{item.gross_salary}</TableCell>
-                  <TableCell>{item.earned_salary}</TableCell>
-                  <TableCell>{item.basic_salary}</TableCell>
-                  <TableCell>{item.hra}</TableCell>
-                  <TableCell>{item.special_allowance}</TableCell>
-                  <TableCell>{item.bonus}</TableCell>
-                  <TableCell>{item.other_earnings}</TableCell>
-                  <TableCell>{item.benefits_total}</TableCell>
-                  <TableCell>{item.total_deductions}</TableCell>
-                  <TableCell>{item.epf}</TableCell>
-                  <TableCell>{item.esi}</TableCell>
-                  <TableCell>{item.pt}</TableCell>
-                  <TableCell>{item.tds}</TableCell>
-                  <TableCell>{item.loans_advances}</TableCell>
-                  <TableCell>{item.other_deductions}</TableCell>
-                  <TableCell>{item.total_deductions}</TableCell>
-                  <TableCell>{item.net_salary}</TableCell>
+                  <TableCell>{formatNumberIN(item.total_days_of_month)}</TableCell>
+                  <TableCell>{formatNumberIN(item.lop)}</TableCell>
+                  <TableCell>{formatNumberIN(item.paid_days)}</TableCell>
+                  <TableCell>{formatNumberIN(item.ctc)}</TableCell>
+                  <TableCell>{formatNumberIN(item.gross_salary)}</TableCell>
+                  <TableCell>{formatNumberIN(item.earned_salary)}</TableCell>
+                  <TableCell>{formatNumberIN(item.basic_salary)}</TableCell>
+                  <TableCell>{formatNumberIN(item.hra)}</TableCell>
+                  <TableCell>{formatNumberIN(item.special_allowance)}</TableCell>
+                  <TableCell>{formatNumberIN(item.bonus)}</TableCell>
+                  <TableCell>{formatNumberIN(item.other_earnings)}</TableCell>
+                  <TableCell>{formatNumberIN(item.benefits_total)}</TableCell>
+                  <TableCell>{formatNumberIN(item.total_deductions)}</TableCell>
+                  <TableCell>{formatNumberIN(item.epf)}</TableCell>
+                  <TableCell>{formatNumberIN(item.esi)}</TableCell>
+                  <TableCell>{formatNumberIN(item.pt)}</TableCell>
+                  <TableCell>{formatNumberIN(item.tds)}</TableCell>
+                  <TableCell>{formatNumberIN(item.loans_advances)}</TableCell>
+                  <TableCell>{formatNumberIN(item.other_deductions)}</TableCell>
+                  <TableCell>{formatNumberIN(item.total_deductions)}</TableCell>
+                  <TableCell>{formatNumberIN(item.net_salary)}</TableCell>
                   <TableCell>{item.status}</TableCell>
                   <TableCell>
                     <Typography

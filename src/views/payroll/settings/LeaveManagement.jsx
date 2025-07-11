@@ -12,7 +12,9 @@ import {
   Paper,
   Typography,
   Pagination,
-  CircularProgress
+  CircularProgress,
+  Autocomplete,
+  TextField
 } from '@mui/material';
 import { IconPlus } from '@tabler/icons-react';
 import { useSearchParams } from 'react-router-dom';
@@ -104,15 +106,16 @@ function LeaveManagement({ handleBack, handleNext }) {
       title={
         <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2}>
           <Box>
-            <Typography variant="subtitle1">Leave Type</Typography>
-            <CustomAutocomplete
+            <Autocomplete
               value={leaveType}
-              options={['All', 'Paid', 'UnPaid']}
               onChange={(_, val) => setLeaveType(val)}
+              options={['All', 'Paid', 'UnPaid']}
               sx={{ minWidth: 220 }}
+              size="small"
+              renderInput={(params) => <TextField {...params} label="Leave Type" />}
             />
           </Box>
-          <Button variant="contained" startIcon={<IconPlus size={16} />} onClick={() => openDialog('add')}>
+          <Button size="small" variant="contained" startIcon={<IconPlus size={16} />} onClick={() => openDialog('add')}>
             Add Leave
           </Button>
         </Stack>

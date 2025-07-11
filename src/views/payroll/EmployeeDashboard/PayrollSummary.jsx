@@ -36,6 +36,12 @@ const TABLE_HEADERS = [
   'Net Pay'
 ];
 
+// Utility function to format numbers with Indian comma separators
+const formatNumberIN = (value) => {
+  if (value === null || value === undefined || value === '' || isNaN(Number(value))) return 'NA';
+  return Number(value).toLocaleString('en-IN');
+};
+
 const PayrollSummary = ({ payrollId, month, financialYear }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 5;
@@ -195,13 +201,13 @@ const PayrollSummary = ({ payrollId, month, financialYear }) => {
                   <TableCell>{item.employee_name || 'NA'}</TableCell>
                   <TableCell>{item.department || 'NA'}</TableCell>
                   <TableCell>{item.designation || 'NA'}</TableCell>
-                  <TableCell>{item.paid_days || 'NA'}</TableCell>
-                  <TableCell>{item.ctc || 'NA'}</TableCell>
-                  <TableCell>{item.actual_gross || 'NA'}</TableCell>
-                  <TableCell>{item.gross_salary || 'NA'}</TableCell>
-                  <TableCell>{item.earned_salary || 'NA'}</TableCell>
-                  <TableCell>{item.deductions?.['Total'] || 'NA'}</TableCell>
-                  <TableCell>{item.net_salary || 'NA'}</TableCell>
+                  <TableCell>{formatNumberIN(item.paid_days)}</TableCell>
+                  <TableCell>{formatNumberIN(item.ctc)}</TableCell>
+                  <TableCell>{formatNumberIN(item.actual_gross)}</TableCell>
+                  <TableCell>{formatNumberIN(item.gross_salary)}</TableCell>
+                  <TableCell>{formatNumberIN(item.earned_salary)}</TableCell>
+                  <TableCell>{formatNumberIN(item.deductions?.['Total'])}</TableCell>
+                  <TableCell>{formatNumberIN(item.net_salary)}</TableCell>
                   <TableCell>
                     <Typography
                       align="center"
