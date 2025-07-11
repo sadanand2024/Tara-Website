@@ -135,18 +135,30 @@ const AddItem = ({ type, setType, open, from, handleClose, selectedItem, busines
   }, [type, selectedItem]);
 
   const fields = [
-    { name: 'type', label: 'Type' },
-    { name: 'name', label: 'Name' },
-    { name: 'sku_value', label: 'SKU' },
-    { name: 'units', label: 'Units' },
-    { name: 'hsn_sac', label: 'HSN/SAC Code' },
-    { name: 'gst_rate', label: 'GST Rate' },
-    { name: 'tax_preference', label: 'Tax Preference' },
-    { name: 'selling_price', label: 'Selling Rate' },
-    { name: 'description', label: 'Description' }
+    { name: 'type', label: 'Type',required: true },
+    { name: 'name', label: 'Name', required: true },
+    { name: 'sku_value', label: 'SKU',  required:false },
+    { name: 'units', label: 'Units', required: true },
+    { name: 'hsn_sac', label: 'HSN/SAC Code', required: true },
+    { name: 'gst_rate', label: 'GST Rate', required: true },
+    { name: 'tax_preference', label: 'Tax Preference', required: true },
+    { name: 'selling_price', label: 'Selling Rate', required: true },
+    { name: 'description', label: 'Description',  required:false }
   ];
 
   const renderOptions = values.type === 'Goods' ? unitsDropdown : ['NA'];
+//   const getLabelWithAsterisk = (label, isRequired = true) => (
+//   <span>
+//     {label}
+//     {isRequired && <span style={{ color: 'red' }}> *</span>}
+//   </span>
+// );
+  const getLabelWithAsterisk = (label, isRequired) => (
+    <Typography variant="subtitle1" mb={1} fontWeight={500}>
+      {label}
+      {isRequired && <span style={{ color: 'red', fontSize: '1.2em' }}> *</span>}
+    </Typography>
+  );
 
   return (
     <Modal
@@ -182,7 +194,9 @@ const AddItem = ({ type, setType, open, from, handleClose, selectedItem, busines
             <Grid2 size={{ xs: 12, sm: 6 }} key={field.name}>
               {field.name === 'type' ? (
                 <FormControl fullWidth>
-                  <FormLabel>{field.label}</FormLabel>
+                  {/* <FormLabel>{field.label}</FormLabel> */}
+                  <FormLabel>{getLabelWithAsterisk(field.label, field.required)}</FormLabel>
+
                   <RadioGroup
                     row
                     name={field.name}
@@ -199,8 +213,11 @@ const AddItem = ({ type, setType, open, from, handleClose, selectedItem, busines
                 </FormControl>
               ) : field.name === 'units' || field.name === 'gst_rate' || field.name === 'tax_preference' ? (
                 <>
-                  <Typography variant="body1" sx={{ mb: 1 }}>
+                  {/* <Typography variant="body1" sx={{ mb: 1 }}>
                     {field.label}
+                  </Typography> */}
+                  <Typography component="label" sx={{ mb: 1 }}>
+                    {getLabelWithAsterisk(field.label, field.required)}
                   </Typography>
                   <CustomAutocomplete
                     name={field.name}
@@ -219,8 +236,11 @@ const AddItem = ({ type, setType, open, from, handleClose, selectedItem, busines
                 </>
               ) : (
                 <>
-                  <Typography variant="body1" sx={{ mb: 1 }}>
+                  {/* <Typography variant="body1" sx={{ mb: 1 }}>
                     {field.label}
+                  </Typography> */}
+                  <Typography component="label" sx={{ mb: 1 }}>
+                    {getLabelWithAsterisk(field.label, field.required)}
                   </Typography>
                   <CustomInput
                     name={field.name}
