@@ -19,6 +19,7 @@ import {
 } from '@mui/material';
 import Grid2 from '@mui/material/Grid2';
 import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import Factory from 'utils/Factory';
 
 const statusColor = (status) => {
@@ -48,7 +49,8 @@ const summaryValueStyle = {
   fontSize: 16
 };
 
-const SelectedEvent = ({ eventInstanceId, onBack }) => {
+const SelectedEvent = ({ onBack }) => {
+  const { eventInstanceId } = useParams();
   const [eventData, setEventData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -67,6 +69,7 @@ const SelectedEvent = ({ eventInstanceId, onBack }) => {
       })
       .finally(() => setLoading(false));
   }, [eventInstanceId]);
+  
 
   if (loading) return <Box p={4}><Typography>Loading...</Typography></Box>;
   if (error) return <Box p={4}><Typography color="error">{error}</Typography></Box>;
@@ -95,11 +98,29 @@ const SelectedEvent = ({ eventInstanceId, onBack }) => {
       {/* Breadcrumb */}
       <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
         <Typography variant="body2" color="#757575">
-          <b>Document Drafting</b> &gt; <b>Event Creation</b> &gt; <b style={{ color: '#1976d2' }}>{eventName}</b>
+          <b>
+            <span
+              style={{ color: '#757575', textDecoration: 'none', cursor: 'pointer' }}
+              // onClick={() => { window.location.href = '/app/drafting'; }}
+            >
+              Document Drafting
+            </span>
+          </b>
+          &nbsp;&gt;&nbsp;
+          <b>
+            <span
+              style={{ color: '#757575', textDecoration: 'none', cursor: 'pointer' }}
+              // onClick={() => { window.location.href = '/app/event'; }}
+            >
+              Event Creation 
+            </span>
+          </b>
+          &nbsp;&gt;&nbsp;
+          <b style={{ color: '#1976d2' }}>{eventName}</b>
         </Typography>
         <Button
           variant="outlined"
-          onClick={onBack}
+          onClick={() => { window.location.href = '/app/drafting'; }} // Update path if needed
           startIcon={<ArrowBackIcon />}
           sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600, px: 2 }}
         >
@@ -119,7 +140,7 @@ const SelectedEvent = ({ eventInstanceId, onBack }) => {
         }}
       >
         <CardContent sx={{ pb: 0 }}>
-          <Grid2 container spacing={33} alignItems="center" sx={{ mb: 2 }}>
+          <Grid2 container spacing={23} alignItems="center" sx={{ mb: 2 }}>
             <Grid2 xs={12} sm={3}>
               <Typography sx={summaryLabelStyle}>Event Name</Typography>
               <Typography sx={summaryValueStyle}>{eventName}</Typography>
@@ -177,7 +198,7 @@ const SelectedEvent = ({ eventInstanceId, onBack }) => {
                     </TableCell>
                     <TableCell>
                       <Chip
-                        label={doc.document?.template ? doc.document.template : 'Template'}
+                        label={'Template'}
                         sx={{
                           bgcolor: '#1138e7',
                           color: '#fff',
@@ -229,4 +250,4 @@ const SelectedEvent = ({ eventInstanceId, onBack }) => {
   );
 };
 
-export default SelectedEvent;
+export default SelectedEvent;
