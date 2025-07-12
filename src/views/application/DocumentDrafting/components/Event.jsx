@@ -5,6 +5,7 @@ import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import Factory from 'utils/Factory';
 import SelectedEvent from './SelectedEvent';
+import DocumentSelectionPage from './DocumentSelectionPage';
 
 const documents = [
   {
@@ -34,7 +35,7 @@ const tabButtonStyle = (active) => ({
   },
 });
 
-const Event = ({ contextId }) => {
+const Event = ({ contextId, initialTab = 'event' }) => {
   const user = useSelector((state) => state.accountReducer.user);
   const [category, setCategory] = useState('');
   const [event, setEvent] = useState('');
@@ -42,10 +43,14 @@ const Event = ({ contextId }) => {
   const [eventOptions, setEventOptions] = useState([]);
   const [filtersLoading, setFiltersLoading] = useState(true);
   const [selected, setSelected] = useState([]); // array of selected document IDs
-  const [activeTab, setActiveTab] = useState('event'); // 'event' or 'document'
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [documents, setDocuments] = useState([]);
   const [showSelectedEvent, setShowSelectedEvent] = useState(false);
   const [selectedEventInstanceId, setSelectedEventInstanceId] = useState(null);
+
+  useEffect(() => {
+    setActiveTab(initialTab);
+  }, [initialTab]);
 
   useEffect(() => {
     setFiltersLoading(true);
@@ -172,11 +177,14 @@ if (category) {
   };
 
   if (selectedEventInstanceId) {
-    return <SelectedEvent eventInstanceId={selectedEventInstanceId} onBack={handleBackToDashboard} />;
+    // return <SelectedEvent eventInstanceId={selectedEventInstanceId} onBack={handleBackToDashboard} />;
+     window.location.href = `/app/selected-event/${selectedEventInstanceId}`;
+ 
   }
 
   return (
-    <Box sx={{ p: 4 }}>
+    // <Box sx={{ p: 4 }}>
+    <Box sx={{ p: { xs: 1, md: 4 }, background: '#fff', minHeight: '100vh' }}>
        <Typography
           variant="h2"
           component="a"
@@ -211,7 +219,7 @@ if (category) {
             textDecoration: activeTab === 'document' ? 'underline' : 'none',
             '&:hover': { textDecoration: 'underline' },
           }}
-          onClick={() => setActiveTab('document')}
+          // onClick={() => setActiveTab('document')}
         >
           Document Selection
         </Typography>
@@ -226,10 +234,21 @@ if (category) {
             textDecoration: activeTab === 'event' ? 'underline' : 'none',
             '&:hover': { textDecoration: 'underline' },
           }}
-          onClick={() => setActiveTab('event')}
+          // onClick={() => setActiveTab('event')}
         >
-          Create an Event
+          Create an Events
         </Typography>
+
+          {/* <Button
+     
+          variant="outlined"
+          onClick={() => { window.location.href = '/app/drafting'; }} // Update path if needed
+          //startIcon={<ArrowBackIcon />}
+          sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600, px: 2,ml:60 }}
+        >
+          Back to Dashboard
+        </Button> */}
+ 
 
 
       {/* Toggle Tabs */}
@@ -251,7 +270,7 @@ if (category) {
       {/* Tab Content */}
       {activeTab === 'document' ? (
         <Box display="flex" alignItems="center" justifyContent="center" minHeight="300px">
-          <Typography variant="h5" color="text.secondary">Getting ready...</Typography>
+          <DocumentSelectionPage contextId={contextId}/>
         </Box>
       ) : (
         <>
@@ -386,4 +405,4 @@ if (category) {
   );
 };
 
-export default Event;
+export default Event;
