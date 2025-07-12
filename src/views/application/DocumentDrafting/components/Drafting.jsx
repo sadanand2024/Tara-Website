@@ -8,12 +8,18 @@ import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import EventIcon from '@mui/icons-material/Event';
 import PersonIcon from '@mui/icons-material/Person';
 import SearchIcon from '@mui/icons-material/Search';
-import { Box, Button, Chip, Grid, IconButton, InputAdornment, MenuItem, Paper, Stack, Table, TableBody, TableCell, TableHead, TableRow, TextField, Typography } from '@mui/material';
+import { Box, Button, Chip, Grid2, IconButton, InputAdornment, MenuItem, Paper, Stack, Table, TableBody, TableCell, TableHead, TableRow, TextField, Typography } from '@mui/material';
 import Pagination from '@mui/material/Pagination';
 import React, { useEffect, useState } from 'react';
 import Factory from 'utils/Factory';
 import Event from './Event';
 import MyEvents from './MyEvent';
+import DocumentSelectionPage from './DocumentSelectionPage';
+import { useLocation } from 'react-router-dom';
+import StarIcon from '@mui/icons-material/Star';
+import HistoryIcon from '@mui/icons-material/History';
+import StarBorderOutlinedIcon from '@mui/icons-material/StarBorderOutlined';
+import HistoryOutlinedIcon from '@mui/icons-material/HistoryOutlined';
 
 const filters = [
   { label: 'Category', options: ['All', 'Company', 'HR', 'Finance'] },
@@ -33,14 +39,17 @@ const statusChip = (status) => {
 };
 
 export default function Drafting({ id, onShowMyEvents }) {
+  const location = useLocation();
   const [tableRows, setTableRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showEvent, setShowEvent] = useState(false);
+  const [eventInitialTab, setEventInitialTab] = useState('document');
   const myEventsRef = React.useRef(null);
   const [stats, setStats] = useState([]);
   const [statsLoading, setStatsLoading] = useState(true);
   const [page, setPage] = useState(1);
   const rowsPerPage = 10;
+  const [showDocumentSelection, setShowDocumentSelection] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -80,8 +89,19 @@ export default function Drafting({ id, onShowMyEvents }) {
       .finally(() => setStatsLoading(false));
   }, [id]);
 
+  useEffect(() => {
+    if (location.state?.showEvent) {
+      setShowEvent(true);
+      setEventInitialTab(location.state.eventInitialTab || 'document');
+    }
+  }, [location.state]);
+
+  if (showDocumentSelection) {
+    {console.log("qwertyujnbvc", {id})}
+    return <DocumentSelectionPage contextId={id}/>;
+  }
   if (showEvent) {
-    return <Event contextId={id}/>;
+    return <Event contextId={id} initialTab={eventInitialTab}/>;
   }
 
   const scrollToMyEvents = () => {
@@ -132,8 +152,8 @@ export default function Drafting({ id, onShowMyEvents }) {
       <Box display="flex" flexDirection={{ xs: 'column', md: 'row' }} alignItems={{ xs: 'flex-start', md: 'center' }} justifyContent="space-between" mb={4} gap={2}>
         <Typography variant="h4" fontWeight={700}>Document Drafting</Typography>
         <Stack direction="row" spacing={2}>
-          <Button variant="outlined" startIcon={<AddIcon />}onClick={() => setShowEvent(true)} >Create New Document</Button>
-          <Button variant="contained" startIcon={<EventIcon />} onClick={() => setShowEvent(true)}>Create New Event</Button>
+          <Button variant="outlined" startIcon={<AddIcon />} onClick={() => { setShowEvent(true); setEventInitialTab('document'); }} >Create New Document</Button>
+          <Button variant="contained" startIcon={<EventIcon />} onClick={() => { setShowEvent(true); setEventInitialTab('event'); }}>Create New Event</Button>
           <Button
             variant="outlined"
             startIcon={<PersonIcon />}
@@ -176,16 +196,16 @@ export default function Drafting({ id, onShowMyEvents }) {
       </Box>
 
       {/* Stats Cards */}
-      <Grid container spacing={3} mb={4}>
+      <Grid2 container spacing={3} mb={4}>
         {statsLoading ? (
-          <Grid item xs={12}><Typography align="center">Loading stats...</Typography></Grid>
+          <Grid2 size ={{xs:12}}><Typography align="center">Loading stats...</Typography></Grid2>
         ) : stats.length === 0 ? (
-          <Grid item xs={12}><Typography align="center">No stats found</Typography></Grid>
+          <Grid2 size ={{xs:12}}><Typography align="center">No stats found</Typography></Grid2>
         ) : (
           stats.map((stat) => {
             const style = statStyles[stat.label] || {};
             return (
-              <Grid item xs={12} sm={6} md={3} key={stat.label}>
+              <Grid2 size ={{xs:12, md:3, sm:3}} key={stat.label}>
                 <Paper
                   elevation={0}
                   sx={{
@@ -249,11 +269,11 @@ export default function Drafting({ id, onShowMyEvents }) {
                     View
                   </Button>
                 </Paper>
-              </Grid>
+              </Grid2>
             );
           })
         )}
-      </Grid>
+      </Grid2>
 
       {/* Table */}
       <Paper elevation={1} sx={{ borderRadius: 3, overflow: 'hidden' }}>
@@ -288,7 +308,7 @@ export default function Drafting({ id, onShowMyEvents }) {
                   <TableCell>{row.lastEdited}</TableCell>
                   <TableCell>{row.creator}</TableCell>
                   <TableCell>
-                    <IconButton color="primary"><EditIcon /></IconButton>
+                    <IconButton color="primary" onClick={() => window.location.href = `/app/drafting/fill/${row.id}`}><EditIcon /></IconButton>
                     <IconButton color="error"><DeleteIcon /></IconButton>
                   </TableCell>
                 </TableRow>
@@ -311,10 +331,92 @@ export default function Drafting({ id, onShowMyEvents }) {
           />
         </Box>
       )}
+      {/* Quick Access Panel */}
+      <Box
+        mt={5}
+        mb={5}
+        sx={{
+          border: '1.5px solid #E5EAF2',
+          borderRadius: 3,
+          p: 4,
+          background: '#fff',
+          boxShadow: '0 2px 8px 0 rgba(24, 39, 75, 0.05)'
+        }}
+      >
+        <Typography variant="h6" fontWeight={700} mb={3} sx={{ color: '#0A1F44' }}>
+          Quick Access Panel
+        </Typography>
+        <Grid2 container spacing={4}>
+          {/* Favourites */}
+          <Grid2 size ={{xs:12, md:4}}>
+            <Typography fontWeight={700} sx={{ color: '#0A1F44', mb: 2 }}>Favourites</Typography>
+            <Stack spacing={2}>
+              {["Board Resolution", "Shareholder Resolution", "DIN", "Appointment Letter"].map((text) => (
+                <Box key={text} display="flex" alignItems="center" gap={1}>
+                  <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+                    <DescriptionOutlinedIcon sx={{ color: '#A3AED0', fontSize: 28, bgcolor: '#F5F7FA', borderRadius: 2, p: 0.5 }} />
+                    <StarBorderOutlinedIcon
+                      sx={{
+                        color: '#3B82F6',
+                        fontSize: 14,
+                        position: 'absolute',
+                        top: 2,
+                        right: 2,
+                        bgcolor: '#fff',
+                        borderRadius: '50%',
+                      }}
+                    />
+                  </Box>
+                  <Typography sx={{ color: '#222' }}>{text}</Typography>
+                </Box>
+              ))}
+            </Stack>
+          </Grid2>
+          {/* Recently Used */}
+          <Grid2 size ={{xs:12, md:4}}>
+            <Typography fontWeight={700} sx={{ color: '#0A1F44', mb: 2 }}>Recently Used</Typography>
+            <Stack spacing={2}>
+              {["Board Resolution", "Shareholder Resolution", "DIN", "Appointment Letter"].map((text) => (
+                <Box key={text} display="flex" alignItems="center" gap={1}>
+                  <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+                    <DescriptionOutlinedIcon sx={{ color: '#A3AED0', fontSize: 28, bgcolor: '#F5F7FA', borderRadius: 2, p: 0.5 }} />
+                    <HistoryOutlinedIcon
+                      sx={{
+                        color: '#F59E42',
+                        fontSize: 14,
+                        position: 'absolute',
+                        top: 2,
+                        right: 2,
+                        bgcolor: '#fff',
+                        borderRadius: '50%',
+                      }}
+                    />
+                  </Box>
+                  <Typography sx={{ color: '#222' }}>{text}</Typography>
+                </Box>
+              ))}
+            </Stack>
+          </Grid2>
+          {/* Recent Events */}
+          <Grid2 size ={{xs:12, md:4}}>
+            <Typography fontWeight={700} sx={{ color: '#0A1F44', mb: 2 }}>Recent Events</Typography>
+            <Stack spacing={2}>
+              {["Director Appointment", "New Employee", "Share Holder Event", "Appointment Letter"].map((text) => (
+                <Box key={text} display="flex" alignItems="center" gap={1}>
+                  <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+                    <DescriptionOutlinedIcon sx={{ color: '#A3AED0', fontSize: 28, bgcolor: '#F5F7FA', borderRadius: 2, p: 0.5 }} />
+                  </Box>
+                  <Typography sx={{ color: '#222' }}>{text}</Typography>
+                </Box>
+              ))}
+            </Stack>
+          </Grid2>
+        </Grid2>
+      </Box>
       {/* MyEvents section at the bottom of the page */}
       <Box mt={6} ref={myEventsRef}>
         <MyEvents id={id} />
       </Box>
-    </Box>
-  );
+    </Box>
+  );
 }
