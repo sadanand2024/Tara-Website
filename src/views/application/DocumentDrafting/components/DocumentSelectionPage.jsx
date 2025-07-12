@@ -1,14 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Button, Paper, Grid2, TextField } from '@mui/material';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import LinearProgress from '@mui/material/LinearProgress';
 import Factory from '/src/utils/Factory.js';
 import { useNavigate, useParams } from 'react-router-dom';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { openSnackbar } from 'store/slices/snackbar';
 
 
 export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, contextId }) {
+  const dispatch = useDispatch();
   const user = useSelector((state) => state.accountReducer.user);
   const { contextEventId } = useParams();
   const navigate = useNavigate();
@@ -25,6 +30,63 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
   const [savingDraft, setSavingDraft] = useState(false);
   const [finalizing, setFinalizing] = useState(false);
   const [fileUrl, setFileUrl] = useState(null); // Store file URL for download
+  const [favoriteStates, setFavoriteStates] = useState({});
+  // Add: API call to add to favourites
+  const handleToggleFavorite = async (id) => {
+    // If already favorite, just toggle local state (no API for unfavorite as per user request)
+    if (favoriteStates[id]) {
+      setFavoriteStates((prev) => ({ ...prev, [id]: false }));
+      return;
+    }
+    // POST to /documentdrafting/favourites/
+    try {
+      const payload = { document: id, draft: contextId };
+      const result = await Factory('post', '/documentdrafting/favourites/', payload);
+      if (result.res && result.res.status_cd === 0) {
+        setFavoriteStates((prev) => ({ ...prev, [id]: true }));
+        dispatch(openSnackbar({
+          open: true,
+          message: 'Added to favourites',
+          variant: 'alert',
+          alert: { color: 'success' },
+          close: false
+        }));
+      } else {
+        dispatch(openSnackbar({
+          open: true,
+          message: result.message || 'Failed to add to favourites',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        }));
+      }
+    } catch (err) {
+      dispatch(openSnackbar({
+        open: true,
+        message: 'Failed to add to favourites',
+        variant: 'alert',
+        alert: { color: 'error' },
+        close: false
+      }));
+    }
+  };
+
+  // Fetch favorites on mount to make love symbol persistent
+  useEffect(() => {
+    if (!contextId) return;
+    Factory('get', `/documentdrafting/favourites/by-draft/${contextId}/`, {}, {})
+      .then(response => {
+        const data = response?.res?.data || response?.res || response;
+        // Build a map of { [documentId]: true }
+        const favMap = {};
+        (data || []).forEach(fav => {
+          const docId = typeof fav.document === 'object' ? fav.document.id : fav.document;
+          favMap[docId] = true;
+        });
+        setFavoriteStates(favMap);
+      })
+      .catch(() => setFavoriteStates({}));
+  }, [contextId]);
 
   useEffect(() => {
     if (contextEventId) {
@@ -97,11 +159,30 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
         const contextEventId = result.res.id;
         // Navigate to split view route
         navigate(`/app/drafting/fill/${contextEventId}`);
+        dispatch(openSnackbar({
+          open: true,
+          message: 'Drafting context created',
+          variant: 'alert',
+          alert: { color: 'success' },
+          close: false
+        }));
       } else {
-        alert(result.message || 'Failed to create document drafting context');
+        dispatch(openSnackbar({
+          open: true,
+          message: result.message || 'Failed to create document drafting context',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        }));
       }
     } catch (err) {
-      alert('Failed to create document drafting context');
+      dispatch(openSnackbar({
+        open: true,
+        message: 'Failed to create document drafting context',
+        variant: 'alert',
+        alert: { color: 'error' },
+        close: false
+      }));
     }
   };
 
@@ -113,8 +194,19 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
   const renderTemplateWithValues = () => {
     let html = templateHtml;
     Object.entries(formValues).forEach(([key, value]) => {
-      // Replace all occurrences of {{key}} with value
-      html = html.replaceAll(new RegExp(`{{\s*${key}\s*}}`, 'g'), value || '');
+      let displayValue = value;
+      // If this key is a date field, format it
+      const field = fields.find(f => f.field_name === key);
+      if (field && field.field_type === 'date' && value) {
+        // Format YYYY-MM-DD to DD-MM-YYYY if value is in that format
+        if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+          const [yyyy, mm, dd] = value.split('-');
+          displayValue = `${dd}-${mm}-${yyyy}`;
+        }
+      }
+      // Wrap in highlight span
+      const highlighted = `<span style="background:rgba(54, 80, 174, 0.24); border-radius: 4px; padding: 0 4px;">${displayValue}</span>`;
+      html = html.replaceAll(new RegExp(`{{\s*${key}\s*}}`, 'g'), value ? highlighted : '');
     });
     // Extract and scope <style> tags from the HTML
         let scopedStyles = '';
@@ -142,7 +234,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
         const styledHtml = `
       <style>
         ${scopedStyles}
-        .offer-letter-preview, .offer-letter-preview * { font-family: 'Roboto', Arial, sans-serif !important; background: #fff !important; color: #222 !important; }
+        .offer-letter-preview { font-family: 'Roboto', Arial, sans-serif !important; background: #fff !important; color: #222 !important; }
         .offer-letter-preview h1, .offer-letter-preview h2, .offer-letter-preview h3, .offer-letter-preview h4, .offer-letter-preview h5, .offer-letter-preview h6 { font-family: 'Roboto', Arial, sans-serif !important; }
         .offer-letter-preview p { margin: 1em 0 !important; line-height: 1.7 !important; }
         .offer-letter-preview table { width: 100% !important; border-collapse: collapse !important; }
@@ -172,13 +264,25 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
   // Save Draft handler
   const handleSaveDraft = async () => {
     if (!contextEventId) {
-      alert('Context event ID missing. Please try again.');
+      dispatch(openSnackbar({
+        open: true,
+        message: 'Context event ID missing. Please try again.',
+        variant: 'alert',
+        alert: { color: 'error' },
+        close: false
+      }));
       return;
     }
     // Check if all fields are filled
     const emptyField = (fields || []).find(f => !formValues[f.field_name] || String(formValues[f.field_name]).trim() === '');
     if (emptyField) {
-      alert(`Please fill all fields before saving. Missing: ${emptyField.label || emptyField.field_name}`);
+      dispatch(openSnackbar({
+        open: true,
+        message: `Please fill all fields before saving. Missing: ${emptyField.label || emptyField.field_name}`,
+        variant: 'alert',
+        alert: { color: 'error' },
+        close: false
+      }));
       return;
     }
     setSavingDraft(true);
@@ -198,8 +302,21 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
           } else {
             fetchAndSetFileUrl(result.res.id);
           }
+          dispatch(openSnackbar({
+            open: true,
+            message: 'Draft saved successfully',
+            variant: 'alert',
+            alert: { color: 'success' },
+            close: false
+          }));
         } else {
-          alert(result.message || 'Failed to save draft');
+          dispatch(openSnackbar({
+            open: true,
+            message: result.message || 'Failed to save draft',
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          }));
         }
       } else {
         // Subsequent: PUT
@@ -210,12 +327,31 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
           } else {
             fetchAndSetFileUrl(draftDetailId);
           }
+          dispatch(openSnackbar({
+            open: true,
+            message: 'Draft updated successfully',
+            variant: 'alert',
+            alert: { color: 'success' },
+            close: false
+          }));
         } else {
-          alert(result.message || 'Failed to update draft');
+          dispatch(openSnackbar({
+            open: true,
+            message: result.message || 'Failed to update draft',
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          }));
         }
       }
     } catch (err) {
-      alert('Failed to save draft');
+      dispatch(openSnackbar({
+        open: true,
+        message: 'Failed to save draft',
+        variant: 'alert',
+        alert: { color: 'error' },
+        close: false
+      }));
     }
     setSavingDraft(false);
   };
@@ -223,13 +359,25 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
   // Finalize handler
   const handleFinalize = async () => {
     if (!contextEventId) {
-      alert('Context event ID missing. Please try again.');
+      dispatch(openSnackbar({
+        open: true,
+        message: 'Context event ID missing. Please try again.',
+        variant: 'alert',
+        alert: { color: 'error' },
+        close: false
+      }));
       return;
     }
     // Check if all fields are filled
     const emptyFieldFinalize = (fields || []).find(f => !formValues[f.field_name] || String(formValues[f.field_name]).trim() === '');
     if (emptyFieldFinalize) {
-      alert(`Please fill all fields before finalizing. Missing: ${emptyFieldFinalize.label || emptyFieldFinalize.field_name}`);
+      dispatch(openSnackbar({
+        open: true,
+        message: `Please fill all fields before finalizing. Missing: ${emptyFieldFinalize.label || emptyFieldFinalize.field_name}`,
+        variant: 'alert',
+        alert: { color: 'error' },
+        close: false
+      }));
       return;
     }
     setFinalizing(true);
@@ -249,8 +397,21 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
           } else {
             fetchAndSetFileUrl(result.res.id);
           }
+          dispatch(openSnackbar({
+            open: true,
+            message: 'Document finalized successfully',
+            variant: 'alert',
+            alert: { color: 'success' },
+            close: false
+          }));
         } else {
-          alert(result.message || 'Failed to finalize');
+          dispatch(openSnackbar({
+            open: true,
+            message: result.message || 'Failed to finalize',
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          }));
         }
       } else {
         // Subsequent: PUT
@@ -261,12 +422,31 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
           } else {
             fetchAndSetFileUrl(draftDetailId);
           }
+          dispatch(openSnackbar({
+            open: true,
+            message: 'Document finalized successfully',
+            variant: 'alert',
+            alert: { color: 'success' },
+            close: false
+          }));
         } else {
-          alert(result.message || 'Failed to finalize');
+          dispatch(openSnackbar({
+            open: true,
+            message: result.message || 'Failed to finalize',
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          }));
         }
       }
     } catch (err) {
-      alert('Failed to finalize');
+      dispatch(openSnackbar({
+        open: true,
+        message: 'Failed to finalize',
+        variant: 'alert',
+        alert: { color: 'error' },
+        close: false
+      }));
     }
     setFinalizing(false);
   };
@@ -274,7 +454,13 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
   // Download handler (presigned URL logic)
   const handleDownload = async () => {
     if (!fileUrl) {
-      alert('No file available for download. Please finalize the document first.');
+      dispatch(openSnackbar({
+        open: true,
+        message: 'No file available for download. Please finalize the document first.',
+        variant: 'alert',
+        alert: { color: 'error' },
+        close: false
+      }));
       return;
     }
     try {
@@ -284,11 +470,30 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
       if (result.res && result.res.status_cd === 0 && result.res.data && presignedUrl) {
         // Open the presigned URL in a new tab (temporary workaround for CORS)
         window.open(presignedUrl, '_blank');
+        dispatch(openSnackbar({
+          open: true,
+          message: 'Download started',
+          variant: 'alert',
+          alert: { color: 'success' },
+          close: false
+        }));
       } else {
-        alert(result.message || 'Failed to get presigned URL');
+        dispatch(openSnackbar({
+          open: true,
+          message: result.message || 'Failed to get presigned URL',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        }));
       }
     } catch (err) {
-      alert('Failed to download file');
+      dispatch(openSnackbar({
+        open: true,
+        message: 'Failed to download file',
+        variant: 'alert',
+        alert: { color: 'error' },
+        close: false
+      }));
       console.error('Download error:', err);
     }
   };
@@ -301,6 +506,13 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
       return acc;
     }, {});
     setFormValues(resetValues);
+    dispatch(openSnackbar({
+      open: true,
+      message: 'All fields reset',
+      variant: 'alert',
+      alert: { color: 'success' },
+      close: false
+    }));
   };
 
   if (splitView) {
@@ -333,59 +545,115 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
             > 
           {/* Left: Dynamic Form */}
           <Paper elevation={2} sx={{flex: 1, minWidth: { xs: '100%', sm: 320, md: 400 }, maxWidth: 700, height: 585, maxHeight: 1000, display: 'flex', flexDirection: 'column', pb: 2, mr: 2, overflow: 'hidden' }}>
-            
-            <ScrollableCard showArrows>
-              <Typography variant="h5" fontWeight={700} mb={2} sx={{ p: 2.5, pb: 0 }}>Fill Details</Typography>
-              <Box sx={{ p: 2.5, pt: 0 }}>
-                {(fields || []).length > 0 ? (
-                  <Grid2 container spacing={2}>
-                    {fields.map((field, idx) => (
-                      <Grid2 size={{xs:12,md:6}} key={field.field_name}>
-                        <TextField
-                          fullWidth
-                          label={field.label || field.field_name}
-                          value={formValues[field.field_name] || ''}
-                          onChange={e => handleFormChange(field.field_name, e.target.value)}
-                          type={field.field_type || 'text'}
-                          variant="outlined"
-                          slotProps={{ inputLabel: { shrink: true } }}
-                          placeholder={field.placeholder || (field.field_type === 'date' ? 'DD-MM-YYYY' : '')}
-                          sx={
-                            field.field_type === 'date'
-                              ? {
-                                  backgroundColor: '#f7f9fb',
-                                  '& .MuiOutlinedInput-root': {
-                                    backgroundColor: '#f7f9fb',
-                                    borderRadius: '24px',
-                                    '& input::placeholder': {
-                                      color: '#b0b8c4',
-                                      opacity: 1,
-                                      fontWeight: 600,
-                                      fontSize: 32,
-                                      textAlign: 'center',
-                                    },
-                                  },
-                                }
-                              : {}
-                          }
-                        />
-                      </Grid2>
-                    ))}
-                  </Grid2>
-                ) : (
-                  <Typography>No fields to fill.</Typography>
-                )}
+            {/* Progress Bar */}
+            {fields.length > 0 && (
+              <Box sx={{ width: '100%', mb: 2, position: 'relative' }}>
+                {(() => {
+                  const totalFields = fields.length;
+                  const filledFields = fields.filter(f => formValues[f.field_name] && String(formValues[f.field_name]).trim() !== '').length;
+                  const progress = totalFields > 0 ? (filledFields / totalFields) * 100 : 0;
+                  return <>
+                    <LinearProgress
+                      variant="determinate"
+                      value={progress}
+                      sx={{
+                        height: 8,
+                        borderRadius: 4,
+                        backgroundColor: '#E3EAFE',
+                        '& .MuiLinearProgress-bar': {
+                          backgroundColor: '#3650AE',
+                        },
+                      }}
+                    />
+                    <Typography variant="caption" sx={{ position: 'absolute', right: 16, top: 4, color: '#3650AE', fontWeight: 600 }}>
+                      {Math.round(progress)}%
+                    </Typography>
+                  </>;
+                })()}
               </Box>
-            </ScrollableCard>
+            )}
+            {/* Fixed Fill Details Heading */}
+            <Typography variant="h5" fontWeight={700} mb={2} sx={{ p: 2, pb: 0 }}>Fill Details</Typography>
+            <Box sx={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+              <ScrollableCard showArrows>
+                <Box sx={{ p: 2.5, pb: 2 }}>
+                  {(fields || []).length > 0 ? (
+                    <Grid2 container spacing={2}>
+                      {fields.map((field, idx) => (
+                        <Grid2 size={{xs:12,md:6}} key={field.field_name}>
+                          <TextField
+                            fullWidth
+                            label={field.label || field.field_name}
+                            value={formValues[field.field_name] || ''}
+                            onChange={e => handleFormChange(field.field_name, e.target.value)}
+                            type={field.field_type || 'text'}
+                            variant="outlined"
+                            slotProps={{ inputLabel: { shrink: true } }}
+                            placeholder={field.placeholder || (field.field_type === 'date' ? 'DD-MM-YYYY' : '')}
+                            sx={
+                              field.field_type === 'date'
+                                ? {
+                                    backgroundColor: '#f7f9fb',
+                                    '& .MuiOutlinedInput-root': {
+                                      backgroundColor: '#f7f9fb',
+                                      borderRadius: '24px',
+                                      '& input::placeholder': {
+                                        color: '#b0b8c4',
+                                        opacity: 1,
+                                        fontWeight: 600,
+                                        fontSize: 32,
+                                        textAlign: 'center',
+                                      },
+                                    },
+                                  }
+                                : {}
+                            }
+                          />
+                        </Grid2>
+                      ))}
+                    </Grid2>
+                  ) : (
+                    <Typography>No fields to fill.</Typography>
+                  )}
+                </Box>
+              </ScrollableCard>
+            </Box>
           </Paper>
           {/* Right: Live Template Preview */}
-          <Paper elevation={2} sx={{ position: 'relative', flex: 1, minWidth: { xs: '100%', sm: 320, md: 400 }, maxWidth: 700, height: 585, maxHeight: 1000, display: 'flex', flexDirection: 'column', overflow: 'hidden', p: 2 }}>
+          <Paper elevation={2} sx={{ position: 'relative', flex: 1, minWidth: { xs: '100%', sm: 320, md: 400 }, maxWidth: 700, height: 585, maxHeight: 1000, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            {/* Progress Bar (same as left) */}
+            {fields.length > 0 && (
+              <Box sx={{ width: '100%', mb: 2, position: 'relative' }}>
+                {(() => {
+                  const totalFields = fields.length;
+                  const filledFields = fields.filter(f => formValues[f.field_name] && String(formValues[f.field_name]).trim() !== '').length;
+                  const progress = totalFields > 0 ? (filledFields / totalFields) * 100 : 0;
+                  return <>
+                    <LinearProgress
+                      variant="determinate"
+                      value={progress}
+                      sx={{
+                        height: 8,
+                        borderRadius: 4,
+                        backgroundColor: '#E3EAFE',
+                        '& .MuiLinearProgress-bar': {
+                          backgroundColor: '#3650AE',
+                        },
+                      }}
+                    />
+                    <Typography variant="caption" sx={{ position: 'absolute', right: 16, top: 4, color: '#3650AE', fontWeight: 600 }}>
+                      {Math.round(progress)}%
+                    </Typography>
+                  </>;
+                })()}
+              </Box>
+            )}
             {(() => {
               const templateBoxRef = React.createRef();
               return (
                 <ScrollableCard showArrows containerRef={templateBoxRef}>
                   <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-                    <Typography variant="h5" fontWeight={700} mb={2}>Document Preview</Typography>
+                    <Typography variant="h5" fontWeight={700} mb={2} sx={{ p: 2, pb: 0 }}>Document Preview</Typography>
                     <Box
                       ref={templateBoxRef}
                       sx={{
@@ -399,11 +667,26 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
                         background: 'transparent',
                         borderRadius: 0,
                         boxSizing: 'border-box',
+                        // Custom scrollbar styles
+                        '&::-webkit-scrollbar': {
+                          width: 8,
+                          backgroundColor: '#E3EAFE',
+                          borderRadius: 4,
+                        },
+                        '&::-webkit-scrollbar-thumb': {
+                          backgroundColor: '#3650AE',
+                          borderRadius: 4,
+                        },
+                        '&::-webkit-scrollbar-thumb:hover': {
+                          backgroundColor: '#00329E',
+                        },
+                        scrollbarWidth: 'thin',
+                        scrollbarColor: '#3650AE #E3EAFE',
                         '& .offer-letter-preview': {
                           width: '100%',
                           marginTop: 2,
                           marginBottom: 2,
-                          padding: 0,
+                          padding: 2,
                         },
                         '& *': {
                           maxWidth: '100%',
@@ -428,24 +711,27 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
         
         {/* Action Buttons: centered below both columns */}
         <Box sx={{ display: 'flex', gap: 2, mt: 6, justifyContent: 'center' }}>
-          <Button variant="outlined" sx={{ height: 40, minWidth: 120, fontSize: 16, px: 3, py: 0 }} onClick={() => navigate('/app/drafting', { state: { showEvent: true, eventInitialTab: 'document' } })}>{'< Back'}</Button>
-          <Button variant="contained" color="primary" sx={{ height: 40, minWidth: 120, fontSize: 16, px: 3, py: 0 }} onClick={handleSaveDraft} disabled={savingDraft}>
+          <Button variant="outlined" sx={{ height: 40, minWidth: 120, fontSize: 16, px: 3, py: 0, borderColor: '#00329E', color: '#00329E', '&:hover': { borderColor: '#00329E', background: 'rgba(0,50,158,0.04)' } }} onClick={() => navigate('/app/drafting', { state: { showEvent: true, eventInitialTab: 'document' } })}>{'< Back'}</Button>
+          <Button variant="contained" color="primary" sx={{ height: 40, minWidth: 120, fontSize: 16, px: 3, py: 0, background: '#00329E', color: '#fff', '&:hover': { background: '#002266' } }} onClick={handleSaveDraft} disabled={savingDraft}>
             {savingDraft ? 'Saving...' : 'Save Draft'}
           </Button>
-          <Button variant="contained" color="primary" sx={{ height: 40, minWidth: 120, fontSize: 16, px: 3, py: 0 }} onClick={handleFinalize} disabled={finalizing}>
+          <Button variant="contained" color="primary" sx={{ height: 40, minWidth: 120, fontSize: 16, px: 3, py: 0, background: '#00329E', color: '#fff', '&:hover': { background: '#002266' } }} onClick={handleFinalize} disabled={finalizing}>
             {finalizing ? 'Finalizing...' : 'Finalize'}
         </Button>
         <Button
             variant="contained"
-            color="primary"
+            color="success"
           sx={{
               height: 40,
               minWidth: 120,
               fontSize: 16,
-            px: 3,
+              px: 3,
               py: 0,
+              background: '#00329E',
+              color: '#fff',
+              '&:hover': { background: '#002266' },
               '&.Mui-disabled': {
-                backgroundColor: '#2196f3',
+                backgroundColor: '#00329E',
                 color: '#fff',
                 opacity: 1,
               },
@@ -455,7 +741,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
           >
             Download
         </Button>
-          <Button variant="outlined" color="primary" sx={{ height: 40, minWidth: 120, fontSize: 16, px: 3, py: 0 }} onClick={handleResetAll}>Reset All</Button>
+          <Button variant="outlined" color="primary" sx={{ height: 40, minWidth: 120, fontSize: 16, px: 3, py: 0, borderColor: '#00329E', color: '#00329E', '&:hover': { borderColor: '#00329E', background: 'rgba(0,50,158,0.04)' } }} onClick={handleResetAll}>Reset All</Button>
         </Box>
       
     </Box>
@@ -470,51 +756,78 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
       ) : error ? (
         <Box sx={{ textAlign: 'center', color: 'red', my: 4 }}>{error}</Box>
       ) : (
-        <Grid2 container spacing={3} sx={{ mb: 4, maxWidth: 1200, mx: 'auto' }} justifyContent="center">
+        <Grid2 container spacing={3} sx={{ mb: 4, maxWidth: 1200, mx: 'auto' }} justifyContent="flex-start">
           {(templates || []).map((template) => (
               <Grid2 size={{xs:12,sm:6,md:4}} key={template.id}>
                 <Paper
                   sx={{
-                  border: '1.5px solid #b0b8c4',
+                    border: '1.5px solid #b0b8c4',
                     borderRadius: 3,
                     p: 3,
                     minWidth: 350,
                     maxWidth: 350,
-                    minHeight: 190,
-                    maxHeight: 190,
+                    minHeight: 180,
+                    maxHeight: 180,
                     boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
                     position: 'relative',
-                    transition: 'border 0.2s',
-                  cursor: 'default',
+                    transition: 'border 0.2s, box-shadow 0.2s, transform 0.2s',
+                    cursor: 'pointer',
                     display: 'flex',
                     flexDirection: 'column',
-                    justifyContent: 'center',
+                    justifyContent: 'space-between',
+                    '&:hover': {
+                      border: '1.5px solid #00329E',
+                      boxShadow: '0 6px 24px rgba(2, 78, 153, 0.15)',
+                      transform: 'scale(1.03)',
+                      zIndex: 2,
+                    },
                   }}
               >
+                  {/* Love (heart) icon at top right */}
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      top: 12,
+                      right: 12,
+                      zIndex: 3,
+                      cursor: 'pointer',
+                      transition: 'color 0.2s',
+                      color: favoriteStates[template.id] ? '#00329E' : '#b0b8c4',
+                    }}
+                    onClick={e => {
+                      e.stopPropagation();
+                      handleToggleFavorite(template.id);
+                    }}
+                  >
+                    {favoriteStates[template.id] ? (
+                      <FavoriteIcon sx={{ fontSize: 28 }} />
+                    ) : (
+                      <FavoriteBorderIcon sx={{ fontSize: 28 }} />
+                    )}
+                  </Box>
                   <Typography fontWeight={700} fontSize={18} mb={1}>
                   {template.title || template.document_name}
                   </Typography>
-                  <Typography fontSize={15} color="text.secondary">
+                  <Typography fontSize={15} color="text.secondary" sx={{ flex: 1 }}>
                     {template.description}
                   </Typography>
-        <Button
-          variant="contained"
-          endIcon={<ArrowForwardIcon />}
-          sx={{
-            background: '#00329E',
-            borderRadius: 2,
-            height: 40,
-            minWidth: 120,
-            fontSize: 16,
-            px: 3,
-            py: 0,
-            fontWeight: 600,
-            mt: 2
-          }}
-                  onClick={() => handleCardProceed(template.id)}
-        >
-                  Proceed
-        </Button>
+                  <Button
+                    variant="contained"
+                    endIcon={<ArrowForwardIcon />}
+                    sx={{
+                      width: 160,
+                      height: 35,
+                      fontSize: 16,
+                      fontWeight: 600,
+                      borderRadius: 2,
+                      mt: 2,
+                      alignSelf: 'center',
+                      background: '#00329E',
+                    }}
+                    onClick={() => handleCardProceed(template.id)}
+                  >
+                    Proceed
+                  </Button>
               </Paper>
             </Grid2>
           ))}
@@ -580,7 +893,27 @@ function ScrollableCard({ children, showArrows, containerRef: externalRef }) {
         </Box>
       )}
       {/* Only attach ref to direct child if not provided externally */}
-      {externalRef ? children : <Box ref={containerRef} sx={{ height: '100%', width: '100%', overflowY: 'auto', pr: 1 }}>{children}</Box>}
+      {externalRef ? children : <Box ref={containerRef} sx={{
+        height: '100%',
+        width: '100%',
+        overflowY: 'auto',
+        pr: 1,
+        // Custom scrollbar styles
+        '&::-webkit-scrollbar': {
+          width: 8,
+          backgroundColor: '#E3EAFE',
+          borderRadius: 4,
+        },
+        '&::-webkit-scrollbar-thumb': {
+          backgroundColor: '#3650AE',
+          borderRadius: 4,
+        },
+        '&::-webkit-scrollbar-thumb:hover': {
+          backgroundColor: '#00329E',
+        },
+        scrollbarWidth: 'thin',
+        scrollbarColor: '#3650AE #E3EAFE',
+      }}>{children}</Box>}
       {showArrows && showDown && (
         <Box sx={{ position: 'absolute', bottom: 8, left: 0, right: 0, display: 'flex', justifyContent: 'center', zIndex: 2 }}>
           <Box

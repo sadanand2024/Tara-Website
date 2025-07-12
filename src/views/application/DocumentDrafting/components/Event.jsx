@@ -183,7 +183,8 @@ if (category) {
   }
 
   return (
-    <Box sx={{ p: 4 }}>
+    // <Box sx={{ p: 4 }}>
+    <Box sx={{ p: { xs: 1, md: 4 }, background: '#fff', minHeight: '100vh' }}>
        <Typography
           variant="h2"
           component="a"
