@@ -14,12 +14,12 @@ const AddBranchDialog = ({ open, handleClose, getBranches, selectedRecord, getBr
   const user = useSelector((state) => state.accountReducer.user);
 
   const branchFields = [
-    { name: 'branch_name', label: 'Branch Name',required: true },
-    { name: 'branch_code', label: 'Branch Code',required: true }
+    { name: 'branch_name', label: 'Branch Name',required: false },
+    { name: 'branch_code', label: 'Branch Code',required: false }
   ];
   const validationSchema = Yup.object().shape({
-    branch_name: Yup.string().required('Branch Name is required'),
-    branch_code: Yup.string().required('Branch Code is required')
+    // branch_name: Yup.string().required('Branch Name is required'),
+    // branch_code: Yup.string().required('Branch Code is required')
   });
 //   const getLabelWithAsterisk = (label, isRequired) => (
 //   <span>
