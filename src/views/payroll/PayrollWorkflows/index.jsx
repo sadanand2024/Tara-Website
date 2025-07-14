@@ -247,9 +247,11 @@ const PayrollWorkflows = ({ type }) => {
           <Button startIcon={<ArrowBackIcon />} variant="outlined" color="primary" onClick={() => navigate(-1)}>
             Back to dashboard
           </Button>
-          <Button variant="contained" color="primary" onClick={handleButtonClick}>
-            {renderButtonLabel()}
-          </Button>
+          {tabs[activeTab].label !== 'Bonus & Incentives' && (
+            <Button variant="contained" color="primary" onClick={handleButtonClick}>
+              {renderButtonLabel()}
+            </Button>
+          )}
         </Stack>
       }
     >

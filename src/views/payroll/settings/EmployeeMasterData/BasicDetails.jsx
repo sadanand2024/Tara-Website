@@ -492,7 +492,7 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
 
         <Divider sx={{ my: 2 }} />
 
-        <Typography variant="h6" sx={{ mb: 1 }}>
+        <Typography variant="h4" sx={{ mb: 1 }}>
           Statutory Components
         </Typography>
         <FormGroup sx={{ mt: 1 }}>
