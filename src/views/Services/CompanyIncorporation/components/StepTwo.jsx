@@ -822,8 +822,8 @@ const StepTwo = ({ step, setStep }) => {
               {/* <Typography variant="subtitle1" mb={0.5}>
                 {field.label}
               </Typography> */}
-               <Typography variant='subtitle1' mb={1}>
-                                 {getLabelWithAsterisk(field.label, field.required)}
+              <Typography variant='subtitle1' mb={1}>
+                            {getLabelWithAsterisk(field.label, field.required)}
               
                               </Typography>
               <RenderFileUpload
@@ -833,7 +833,7 @@ const StepTwo = ({ step, setStep }) => {
                 touched={touched[path]?.[idx]?.[field.name]}
                 errors={error}
                 accept="*/*"
-                 sx={{
+                sx={{
                   width: '100%',
                   '& .MuiInputBase-input': {
                     color: 'grey.600'
@@ -905,8 +905,8 @@ const StepTwo = ({ step, setStep }) => {
             {/* <Typography variant="subtitle1" mb={0.5}>
               {field.label}
             </Typography> */}
-             <Typography variant='subtitle1' mb={1}>
-                               {getLabelWithAsterisk(field.label, field.required)}
+            <Typography variant='subtitle1' mb={1}>
+                              {getLabelWithAsterisk(field.label, field.required)}
             
                             </Typography>
             <RenderFileUpload
@@ -931,8 +931,8 @@ const StepTwo = ({ step, setStep }) => {
             <FormControl component="fieldset">
               <FormLabel>
                 {/* <Typography variant="subtitle1">{field.label}</Typography> */}
-                 <Typography variant='subtitle1' mb={1}>
-                                   {getLabelWithAsterisk(field.label, field.required)}
+                <Typography variant='subtitle1' mb={1}>
+                                  {getLabelWithAsterisk(field.label, field.required)}
                 
                                 </Typography>
               </FormLabel>
@@ -956,7 +956,7 @@ const StepTwo = ({ step, setStep }) => {
                     </Typography> */}
                     <Typography variant="subtitle1" mb={1}>
                           {getLabelWithAsterisk('No. of Shares', true)}
-                   </Typography>
+                  </Typography>
                     <TextField
                       size="small"
                       name={`${sharePrefixPath}.no_of_shares`}
@@ -979,7 +979,7 @@ const StepTwo = ({ step, setStep }) => {
                       Percentage of Holding
                     </Typography> */}
                     <Typography variant="subtitle1" mb={1}>
-                   {getLabelWithAsterisk('Percentage Holding', true)}
+                 {getLabelWithAsterisk('Percentage Holding', true)}
                   </Typography>
                     <TextField
                       size="small"
@@ -1316,7 +1316,7 @@ const StepTwo = ({ step, setStep }) => {
             </Typography> */}
             <Grid2 container spacing={2}  >
               {directorFields.map((field) => (
-                <Grid2 key={field.name} size={{ xs: 2, sm: 6, md: 4 }} sx={{mt:1}}>
+                <Grid2 key={field.name} size={{ xs: 2, sm: 6, md: 4 }} >
                   {renderField(field, idx)}
                 </Grid2>
               ))}
@@ -1762,7 +1762,7 @@ const StepTwo = ({ step, setStep }) => {
                     }
                   }}
                 >
-                   Save Director {idx + 1}
+                  Save Director {idx + 1}
                 </Button>
                 <Button
                   variant="outlined"

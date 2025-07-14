@@ -32,7 +32,7 @@ import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
 
 const pfFields = [
-  { name: 'epf_number', label: 'EPF Number (EX: ABCDE2405151000)' },
+  { name: 'epf_number', label: 'EPF Number (EX: ABCDE2405151000)',required: true },
   { name: 'employee_contribution_rate', label: 'Employee Contribution Rate' },
   { name: 'employer_contribution_rate', label: 'Employer Contribution Rate' }
 ];
@@ -133,6 +133,12 @@ function EpfComponent({ handleNext }) {
       setPostType('post');
     }
   };
+    const getLabelWithAsterisk = (label, isRequired) => (
+  <>
+    {label}
+    {isRequired && <span style={{ color: 'red', fontSize: '1.3rem' }}> *</span>}
+  </>
+);
 
   // Effect to trigger API call when either businessId or payrollid is set
   useEffect(() => {
@@ -357,6 +363,7 @@ function EpfComponent({ handleNext }) {
                     <Typography variant="subtitle1" sx={{ mb: 0.5 }}>
                       {field.label}
                     </Typography>
+                   
                     <CustomAutocomplete
                       value={values[field.name]}
                       name={field.name}
@@ -369,8 +376,8 @@ function EpfComponent({ handleNext }) {
                   </Box>
                 ) : (
                   <Box>
-                    <Typography variant="subtitle1" sx={{ mb: 0.5 }}>
-                      {field.label}
+                    <Typography variant="subtitle1" gutterBottom>
+                      {getLabelWithAsterisk(field.label, field.required)}
                     </Typography>
                     <TextField
                       size="small"

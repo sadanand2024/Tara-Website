@@ -65,15 +65,15 @@ function Organizationdetails({ handleNext }) {
   };
 
   const fields = [
-    { name: 'business_name', label: 'Business Name' },
+    { name: 'business_name', label: 'Business Name',required: true },
     // { name: 'logo', label: 'Logo' },
     { name: 'business_nature', label: 'Business Nature' },
     { name: 'pan', label: 'Business PAN' },
     { name: 'entityType', label: 'Entity Type' },
     { name: 'registration_number', label: 'CIN/ LLPIN / Reg. No' },
-    { name: 'dob_or_incorp_date', label: 'DOB / DOI' },
+    { name: 'dob_or_incorp_date', label: 'DOB / DOI' ,reqiured:true},
     { name: 'primary_email', label: 'Primary Email' },
-    { name: 'sender_email', label: 'Sender Email' }
+    { name: 'sender_email', label: 'Sender Email',required:true }
   ];
 
   const organizationAddress = [
@@ -181,6 +181,13 @@ function Organizationdetails({ handleNext }) {
       }
     }
   });
+const getLabelWithAsterisk = (label, isRequired) => (
+  <>
+    {label}
+    {isRequired && <span style={{ color: 'red', fontSize: '1.3rem' }}> *</span>}
+  </>
+);
+
 
   const renderFields = (fields) => {
     return fields.map((field) => {
@@ -209,9 +216,13 @@ function Organizationdetails({ handleNext }) {
       ) {
         return (
           <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-            <Typography variant="subtitle1" gutterBottom>
+            {/* <Typography variant="subtitle1" gutterBottom>
               {field.label}
-            </Typography>
+            </Typography> */}
+            <Typography variant="subtitle1" gutterBottom>
+                      {getLabelWithAsterisk(field.label, field.name)}
+                </Typography>
+
             <CustomAutocomplete
               value={values[field.name]}
               name={field.name}
@@ -232,9 +243,12 @@ function Organizationdetails({ handleNext }) {
       if (field.name === 'dob_or_incorp_date') {
         return (
           <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-            <Typography variant="subtitle1" gutterBottom>
+            {/* <Typography variant="subtitle1" gutterBottom>
               {field.label}
-            </Typography>
+            </Typography> */}
+            <Typography variant="subtitle1" gutterBottom>
+  {getLabelWithAsterisk(field.label, field.name)}
+</Typography>
             <CustomDatePicker
               name="dob_or_incorp_date"
               value={formik.values.dob_or_incorp_date}
@@ -255,13 +269,13 @@ function Organizationdetails({ handleNext }) {
       return (
         <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
           <Typography variant="subtitle1" gutterBottom>
-            {field.label}
-            {field.name === 'sender_email' && (
-              <Tooltip title="Pay slips, offer letters, and emails will be sent through this email." placement="right" arrow>
-                <InfoOutlinedIcon sx={{ fontSize: 18, ml: 0.5, color: 'gray', cursor: 'pointer' }} />
-              </Tooltip>
-            )}
-          </Typography>
+  {getLabelWithAsterisk(field.label, field.name)}
+  {field.name === 'sender_email' && (
+    <Tooltip title="Pay slips, offer letters, and emails will be sent through this email." placement="right" arrow>
+      <InfoOutlinedIcon sx={{ fontSize: 18, ml: 0.5, color: 'gray', cursor: 'pointer' }} />
+    </Tooltip>
+  )}
+</Typography>
           <TextField
             name={field.name}
             size="small"
