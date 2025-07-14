@@ -220,7 +220,7 @@ const KeyManagerialPersonnel = ({ user, handleNext, handleBack, tabChange, tabva
   const getLabelWithAsterisk = (label, isRequired) => (
   <Typography variant="subtitle1" gutterBottom fontWeight={500}>
     {label}
-    {isRequired && <span style={{ color: 'red', fontSize: '1.2em' }}> *</span>}
+    {isRequired && <span style={{ color: 'red' }}> *</span>}
   </Typography>
 );
 

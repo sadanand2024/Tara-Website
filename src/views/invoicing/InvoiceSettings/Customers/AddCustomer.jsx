@@ -165,7 +165,7 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
   const getLabelWithAsterisk = (label, isRequired = true) => (
   <Typography variant="subtitle1">
     {label}
-    {isRequired && <span style={{ color: 'red', fontSize: '1.2rem' }}> *</span>}
+    {isRequired && <span style={{ color: 'red' }}> *</span>}
   </Typography>
 );
 
