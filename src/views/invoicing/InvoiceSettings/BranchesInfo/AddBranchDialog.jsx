@@ -30,7 +30,7 @@ const AddBranchDialog = ({ open, handleClose, getBranches, selectedRecord, getBr
  const getLabelWithAsterisk = (label, isRequired) => (
   <Typography variant="subtitle1" >
     {label}
-    {isRequired && <span style={{ color: 'red', fontSize: '1.2em' }}> *</span>}
+    {isRequired && <span style={{ color: 'red' }}> *</span>}
   </Typography>
 );
   const formik = useFormik({

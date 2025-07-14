@@ -63,7 +63,7 @@ function ESIComponent({ handleNext, handleBack }) {
    const getLabelWithAsterisk = (label, isRequired) => (
   <>
     {label}
-    {isRequired && <span style={{ color: 'red', fontSize: '1.3rem' }}> *</span>}
+    {isRequired && <span style={{ color: 'red' }}> *</span>}
   </>
 );
 

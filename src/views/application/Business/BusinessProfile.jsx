@@ -483,21 +483,19 @@ const BusinessProfile = ({ tabChange, tabval }) => {
       }
     }
   };
- const getLabelWithAsterisk = (label, isRequired) => {
-  return (
-    <span>
-      {label}
-      {isRequired && <span style={{ color: 'red', fontSize: '1.3em' }}> *</span>}
-    </span>
-  );
-};
-
+  const getLabelWithAsterisk = (label, isRequired) => {
+    return (
+      <span>
+        {label}
+        {isRequired && <span style={{ color: 'red', fontSize: '1.3em' }}> *</span>}
+      </span>
+    );
+  };
 
   const renderField = (field) => {
     const getNestedValue = (obj, path) => {
       return path.split('.').reduce((acc, part) => (acc ? acc[part] : undefined), obj);
     };
-    
 
     const commonTextFieldProps = {
       fullWidth: true,
@@ -539,7 +537,6 @@ const BusinessProfile = ({ tabChange, tabval }) => {
                 name={field.name}
                 // label={field.label}
                 label={getLabelWithAsterisk(field.label, field.required)}
-
                 error={touched[field.name] && Boolean(errors[field.name])}
                 helperText={touched[field.name] && errors[field.name] ? errors[field.name] : ''}
               />
@@ -551,8 +548,7 @@ const BusinessProfile = ({ tabChange, tabval }) => {
           <TextField
             {...commonTextFieldProps}
             name={field.name}
-           label={getLabelWithAsterisk(field.label, field.required)}
-
+            label={getLabelWithAsterisk(field.label, field.required)}
             value={getNestedValue(values, field.name)}
             onChange={(e) => {
               if (field.name === 'pan') {
@@ -577,7 +573,6 @@ const BusinessProfile = ({ tabChange, tabval }) => {
             name={field.name}
             // label={field.label}
             label={getLabelWithAsterisk(field.label, field.required)}
-
             value={getNestedValue(values, field.name)}
             onChange={(e) => setFieldValue(field.name, e.target.value)}
             onBlur={handleBlur}
@@ -773,10 +768,10 @@ const BusinessProfile = ({ tabChange, tabval }) => {
               <CardContent sx={{ p: 3 }}>
                 <Box sx={{ mb: 3 }}>
                   <Typography variant="subtitle1" color="text.primary" fontWeight={500} gutterBottom>
-                     <span>
-                       Is your business MSME Registered?
-                       <span style={{ color: 'red', fontSize: '1.2em' }}> *</span>
-                          </span>
+                    <span>
+                      Is your business MSME Registered?
+                      <span style={{ color: 'red', fontSize: '1.2em' }}> *</span>
+                    </span>
                   </Typography>
                   <RadioGroup row name="is_msme_registered" value={values.is_msme_registered} onChange={handleChange} sx={{ mt: 1 }}>
                     <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" sx={{ mr: 4 }} />
@@ -964,7 +959,23 @@ const BusinessProfile = ({ tabChange, tabval }) => {
                                   </Typography>
                                 </TableCell>
                                 <TableCell>
-                                  <Chip label={branch.branch_code} size="small" color="primary" variant="outlined" />
+                                  {/* <Chip label={branch.branch_code} size="small" color="primary" variant="outlined" /> */}
+                                  <Typography
+                                    variant="body2"
+                                    // sx={{
+                                    //   px: 1,
+                                    //   py: 0.3,
+                                    //   display: 'inline-block',
+                                    //   border: '1px solid',
+                                    //   borderColor: 'primary.main',
+                                    //   color: 'primary.main',
+                                    //   borderRadius: '8px',
+                                    //   fontSize: '0.75rem',
+                                    //   fontWeight: 500
+                                    // }}
+                                  >
+                                    {branch.branch_code}
+                                  </Typography>
                                 </TableCell>
                                 <TableCell align="center">
                                   <Stack direction="row" spacing={1} justifyContent="center">
