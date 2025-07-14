@@ -15,6 +15,7 @@ import {
   Grid2,
   CircularProgress
 } from '@mui/material';
+import SearchBar from 'ui-component/extended/SearchBar';
 import MainCard from 'ui-component/cards/MainCard';
 import ActionCell from 'ui-component/extended/ActionCell';
 import DepartmentDialog from './DepartmentDialog';
@@ -42,6 +43,7 @@ function Departments({ handleBack, handleNext }) {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
   const [openBulkDialog, setOpenBulkDialog] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const handleOpenDeleteDialog = (row) => {
     setSelectedRow(row);
     setOpenDeleteDialog(true);
@@ -50,7 +52,16 @@ function Departments({ handleBack, handleNext }) {
     handleDelete(selectedRow);
     setOpenDeleteDialog(false);
   };
-  const paginatedData = departments.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+  // Filter departments based on searchQuery
+  const filteredDepartments = departments.filter((department) => {
+    const query = searchQuery.toLowerCase();
+    return (
+      department.department_name?.toLowerCase().includes(query) ||
+      department.department_code?.toLowerCase().includes(query) ||
+      department.description?.toLowerCase().includes(query)
+    );
+  });
+  const paginatedData = filteredDepartments.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 
   const payrollid = searchParams.get('payrollid');
   const closeBulkDialog = () => {
@@ -134,12 +145,19 @@ function Departments({ handleBack, handleNext }) {
       title="Departments Details"
       subtitle="Manage your departments for seamless operations"
       secondary={
-        <Stack direction="row" spacing={2}>
-          <Button size="small" variant="outlined" color="secondary" onClick={() => setOpenBulkDialog(true)}>
+        <Stack direction="row" spacing={2} alignItems="center">
+          <SearchBar
+            placeholder="Search department..."
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setCurrentPage(1);
+            }}
+          />
+          <Button variant="outlined" color="secondary" onClick={() => setOpenBulkDialog(true)}>
             Bulk Upload
           </Button>
           <Button
-            size="small"
             variant="contained"
             color="primary"
             onClick={() => {
@@ -202,15 +220,15 @@ function Departments({ handleBack, handleNext }) {
               {paginatedData.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} align="center" sx={{ height: 300 }}>
-                    <EmptyDataPlaceholder title="No Departments Found" subtitle="Start by adding a new department." />
+                    <EmptyDataPlaceholder title="No Data Found" subtitle="Start by adding new data." />
                   </TableCell>
                 </TableRow>
               ) : (
                 paginatedData.map((department, idx) => (
                   <TableRow key={department.id} hover sx={{ minHeight: 56, '&:hover': { bgcolor: 'action.hover' } }}>
                     <TableCell align="center">{(currentPage - 1) * rowsPerPage + idx + 1}</TableCell>
-                    <TableCell>{department.dept_name || 'N/A'}</TableCell>
-                    <TableCell>{department.dept_code || 'N/A'}</TableCell>
+                    <TableCell>{department.department_name || 'N/A'}</TableCell>
+                    <TableCell>{department.department_code || 'N/A'}</TableCell>
                     <TableCell>
                       <Typography noWrap sx={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {department.description || 'N/A'}
@@ -251,7 +269,7 @@ function Departments({ handleBack, handleNext }) {
             </Button>
             {departments.length > 0 && (
               <Pagination
-                count={Math.ceil(departments.length / rowsPerPage)}
+                count={Math.ceil(filteredDepartments.length / rowsPerPage)}
                 page={currentPage}
                 onChange={handlePageChange}
                 shape="rounded"

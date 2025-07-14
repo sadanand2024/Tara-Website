@@ -49,7 +49,7 @@ function NewJoiners({ handleBack, handleNext, from }) {
     const { res, error } = await Factory('get', url, {});
     setLoading(false);
     if (res.status_cd === 0) {
-      setNewJoinersData(res.data || []);
+      setNewJoinersData(Array.isArray(res.data) ? res.data : []);
     } else {
       setNewJoinersData([]);
 

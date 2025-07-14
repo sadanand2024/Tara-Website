@@ -470,7 +470,7 @@ const PayrollSettingsLayout = () => {
               color: mode === 'dark' ? 'grey.600' : 'grey.900',
               minHeight: 'auto',
               minWidth: isSmallScreen ? 'auto' : '100%',
-              py: 1.2,
+              py: 1,
               px: 1,
               mb: 1,
               display: 'flex',
@@ -535,7 +535,7 @@ const PayrollSettingsLayout = () => {
               <Designations handleBack={handleBack} handleNext={handleNext} />
             </TabPanel>
             <TabPanel value={value} index={4}>
-              <StatuitoryComponents handleBack={handleBack} handleNext={handleNext} />
+              <StatuitoryComponents handleBack={handleBack} handleNextTab={handleNext} />
             </TabPanel>
             <TabPanel value={value} index={5}>
               <SalaryComponents handleBack={handleBack} handleNext={handleNext} />

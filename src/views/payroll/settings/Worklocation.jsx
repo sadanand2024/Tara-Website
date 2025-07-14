@@ -14,6 +14,7 @@ import {
   Grid2,
   Typography
 } from '@mui/material';
+import SearchBar from 'ui-component/extended/SearchBar';
 import MainCard from 'ui-component/cards/MainCard';
 import ActionCell from '../../../ui-component/extended/ActionCell';
 import WorkLocationDialog from './WorkLocationDialog';
@@ -43,7 +44,17 @@ function Worklocation({ handleBack, handleNext }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [currentPage, setCurrentPage] = useState(1);
-  const paginatedData = workLocations.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+  const [searchQuery, setSearchQuery] = useState('');
+  // Filter workLocations based on searchQuery
+  const filteredWorkLocations = workLocations.filter((location) => {
+    const query = searchQuery.toLowerCase();
+    return (
+      location.location_name?.toLowerCase().includes(query) ||
+      location.location_code?.toLowerCase().includes(query) ||
+      location.address?.toLowerCase().includes(query)
+    );
+  });
+  const paginatedData = filteredWorkLocations.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
   const handlePageChange = (event, value) => setCurrentPage(value);
 
   const handleOpenDialog = () => setOpenDialog(true);
@@ -149,20 +160,30 @@ function Worklocation({ handleBack, handleNext }) {
     <MainCard
       title="Work Location"
       subtitle="Manage your work locations for seamless operations"
-      action={
-        <Button
-          variant="contained"
-          size="small"
-          startIcon={<AddIcon />}
-          onClick={handleOpenDialog}
-          sx={{
-            textTransform: 'none',
-            fontWeight: 600,
-            fontSize: '0.9rem'
-          }}
-        >
-          Add Work Location
-        </Button>
+      secondary={
+        <Stack direction="row" spacing={2} alignItems="center">
+          <SearchBar
+            placeholder="Search work location..."
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setCurrentPage(1);
+            }}
+          />
+          <Button
+            variant="contained"
+            size="small"
+            startIcon={<AddIcon />}
+            onClick={handleOpenDialog}
+            sx={{
+              textTransform: 'none',
+              fontWeight: 600,
+              fontSize: '0.9rem'
+            }}
+          >
+            Add Work Location
+          </Button>
+        </Stack>
       }
     >
       <BulkUploadDialog
@@ -278,7 +299,7 @@ function Worklocation({ handleBack, handleNext }) {
         </Button>
         {workLocations.length > 0 && (
           <Pagination
-            count={Math.ceil(workLocations.length / rowsPerPage)}
+            count={Math.ceil(filteredWorkLocations.length / rowsPerPage)}
             page={currentPage}
             onChange={handlePageChange}
             shape="rounded"

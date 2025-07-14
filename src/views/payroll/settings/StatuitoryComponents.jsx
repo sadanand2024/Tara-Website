@@ -20,7 +20,7 @@ TabPanel.propTypes = {
   index: PropTypes.number.isRequired
 };
 
-const StatutoryComponents = () => {
+const StatutoryComponents = ({ handleNextTab }) => {
   const [activeTab, setActiveTab] = useState(0);
 
   const tabConfig = [
@@ -30,7 +30,13 @@ const StatutoryComponents = () => {
   ];
 
   const handleTabChange = (_event, newValue) => setActiveTab(newValue);
-  const handleNext = () => setActiveTab((prev) => (prev < tabConfig.length - 1 ? prev + 1 : prev));
+  const handleNext = () => {
+    if (activeTab === tabConfig.length - 1) {
+      handleNextTab();
+    } else {
+      setActiveTab((prev) => (prev < tabConfig.length - 1 ? prev + 1 : prev));
+    }
+  };
   const handleBack = () => setActiveTab((prev) => (prev > 0 ? prev - 1 : prev));
 
   return (
@@ -97,7 +103,7 @@ const StatutoryComponents = () => {
         <Button startIcon={<ArrowBackIcon />} variant="outlined" onClick={handleBack} disabled={activeTab === 0}>
           Back
         </Button>
-        <Button variant="contained" onClick={handleNext} disabled={activeTab === tabConfig.length - 1}>
+        <Button variant="contained" onClick={handleNext}>
           Next
         </Button>
       </Stack>
