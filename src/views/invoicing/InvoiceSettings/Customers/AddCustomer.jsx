@@ -62,9 +62,7 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
     },
     validationSchema: Yup.object({
       name: Yup.string().required('Customer Name is required'),
-      pan_number: Yup.string()
-        .matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN format')
-        .required('PAN is required'),
+     
       entity_type: Yup.string().required('Entity Type is required'),
 
       gst_type: Yup.string().when('gst_registered', {
@@ -82,12 +80,12 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
       }),
       gst_registered: Yup.boolean().required('GST Registered is required'),
       address_line1: Yup.string().required('Address Line 1 is required'),
-      address_line2: Yup.string().required('Address Line 2 is required'),
+     
       country: Yup.string().required('Country is required'),
       state: Yup.string().required('State is required'),
-      postal_code: Yup.number().typeError('Pincode must be a number').required('Pincode is required'),
-      // email: Yup.string().email('Invalid email').required('Email is required'),
-      mobile_number: Yup.string().required('Mobile number is required'),
+ 
+
+     
       opening_balance: Yup.number().typeError('Opening Balance must be a number').required('Opening Balance is required'),
       has_multiple_branches: Yup.boolean().required('Please select if you have multiple branches'),
       branches: Yup.array().when('has_multiple_branches', {
@@ -369,8 +367,8 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
             />
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-            {/* <Typography sx={{ mb: 1 }}>PAN</Typography> */}
-            {getLabelWithAsterisk('PAN', true)}
+            <Typography sx={{ mb: 1 }}>PAN</Typography>
+          
             <CustomInput
               name="pan_number"
               value={values.pan_number.toUpperCase()}
@@ -448,7 +446,8 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
 
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
             {/* <Typography sx={{ mb: 1 }}>GST Type</Typography> */}
-            {getLabelWithAsterisk('GST Type', true)}
+            {getLabelWithAsterisk('GST Type', false)}
+           
             <CustomAutocomplete
               name="gst_type"
               value={values.gst_type}
@@ -492,7 +491,7 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
             {/* <Typography sx={{ mb: 1 }}>Address Line 2</Typography> */}
-             {getLabelWithAsterisk('Address Line 2', true)}
+             {getLabelWithAsterisk('Address Line 2', false)}
             <CustomInput
               name="address_line2"
               value={values.address_line2}
@@ -548,7 +547,7 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
             {/* <Typography sx={{ mb: 1 }}>Pincode</Typography> */}
-            {getLabelWithAsterisk('Pincode', true)}
+            {getLabelWithAsterisk('Pincode', false)}
             <CustomInput
               name="postal_code"
               value={values.postal_code}
@@ -565,8 +564,8 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
             />
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-            <Typography variant="subtitle1" sx={{ mb: 1 }}>Email </Typography>
-            {/* {getLabelWithAsterisk('Email')} */}
+            {/* <Typography variant="subtitle1" sx={{ mb: 1 }}>Email </Typography> */}
+            {getLabelWithAsterisk('Email',false)}
             <CustomInput
               name="email"
               value={values.email}
@@ -584,7 +583,7 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
             {/* <Typography sx={{ mb: 1 }}>Mobile</Typography> */}
-            {getLabelWithAsterisk('Mobile', true)}
+            {getLabelWithAsterisk('Mobile', false)}
             <CustomInput
               name="mobile_number"
               value={values.mobile_number}

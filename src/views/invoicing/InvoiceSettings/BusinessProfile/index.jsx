@@ -43,7 +43,7 @@ export default function BusinessProfileComponnet({ businessDetails = {}, postTyp
   const [busineesprofileFields] = useState({
     basic_details: [
       { name: 'nameOfBusiness', label: 'Business Name',required: true },
-      { name: 'registrationNumber', label: 'Business Registration Number',required: true },
+      { name: 'registrationNumber', label: 'Business Registration Number',required: false },
       { name: 'logo', label: 'Logo',required: true },
       { name: 'gst_registered', label: 'GST Registered ?',required: true },
       { name: 'gstin', label: 'GSTIN',required: true },
