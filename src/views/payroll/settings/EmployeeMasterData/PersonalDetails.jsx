@@ -44,7 +44,7 @@ const PersonalDetails = ({ fetchEmployeeData, employeeData, createdEmployeeId, s
     guardian_name: '',
     pan: '',
     aadhar: '',
-    age: '',
+    age: '', // keep for display, but will be auto-calculated
     alternate_contact_number: '',
     marital_status: '',
     blood_group: '',
@@ -66,7 +66,7 @@ const PersonalDetails = ({ fetchEmployeeData, employeeData, createdEmployeeId, s
     aadhar: Yup.string()
       .required()
       .matches(/^\d{12}$/, 'Must be 12 digits'),
-    age: Yup.number().required().positive().integer(),
+    // age: Yup.number().required().positive().integer(), // REMOVE age validation
     // alternate_contact_number: Yup.string()
     //   .required()
     //   .matches(/^\d{10}$/, 'Must be 10 digits'),
@@ -142,11 +142,39 @@ const PersonalDetails = ({ fetchEmployeeData, employeeData, createdEmployeeId, s
     }
   }, [employeeData]);
 
+  // Add useEffect to calculate age from dob
+  useEffect(() => {
+    if (values.dob) {
+      const today = dayjs();
+      const birthDate = dayjs(values.dob);
+      let age = today.diff(birthDate, 'year');
+      setFieldValue('age', age);
+    } else {
+      setFieldValue('age', '');
+    }
+    // eslint-disable-next-line
+  }, [values.dob]);
+
   const renderField = (field, prefix = '') => {
     const fieldName = prefix ? `${prefix}.${field.name}` : field.name;
     const value = prefix ? values[prefix]?.[field.name] : values[field.name];
     const error = prefix ? errors[prefix]?.[field.name] : errors[field.name];
     const isTouched = prefix ? touched[prefix]?.[field.name] : touched[field.name];
+
+    if (field.name === 'age') {
+      return (
+        <>
+          <Typography variant="subtitle1">{field.label}</Typography>
+          <CustomInput
+            fullWidth
+            name={fieldName}
+            value={value || ''}
+            disabled
+            sx={{ width: '100%', '& .MuiInputBase-input': { color: 'grey.600' } }}
+          />
+        </>
+      );
+    }
 
     return (
       <>
