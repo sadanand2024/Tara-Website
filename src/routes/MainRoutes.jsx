@@ -4,6 +4,7 @@ import { lazy } from 'react';
 import MainLayout from 'layout/MainLayout';
 import Loadable from 'ui-component/Loadable';
 import AuthGuard from 'utils/route-guard/AuthGuard';
+import DocumentSelectionPage from 'views/application/DocumentDrafting/components/DocumentSelectionPage';
 // import RoleGuard from 'utils/route-guard/roleguard';
 // payroll module
 const PayrollDashboard = Loadable(lazy(() => import('views/payroll'))); // ✅ works because index.jsx exists
@@ -50,6 +51,8 @@ const AppAccountSettings = Loadable(lazy(() => import('views/application/users/A
 const ManagePlans = Loadable(lazy(() => import('views/ManageSubscriptions/ManagePlans')));
 const ManageTasks = Loadable(lazy(() => import('views/application/ManageTasks')));
 const DocumentDrafting = Loadable(lazy(() => import('views/application/DocumentDrafting')));
+const Event = Loadable(lazy(() => import('views/application/DocumentDrafting/components/Event')));
+const SelectedEvent = Loadable(lazy(() => import('views/application/DocumentDrafting/components/SelectedEvent')));
 
 const DocumentWallet = Loadable(lazy(() => import('views/application/Document-Wallet')));
 const ContactUsInfo = Loadable(lazy(() => import('views/ContactUsInfo')));
@@ -215,6 +218,14 @@ const MainRoutes = {
       path: '/app/drafting',
       element: <DocumentDrafting />
     },
+    {
+      path: '/app/event',
+      element: <Event />
+    },
+    {
+      path: '/app/selected-event/:eventInstanceId',
+      element: <SelectedEvent />
+    },
 
     //Employee Portl
 
@@ -237,6 +248,10 @@ const MainRoutes = {
     {
       path: '/app/document-wallet',
       element: <DocumentWallet />
+    },
+    {
+      path: '/app/drafting/fill/:contextEventId',
+      element: <DocumentSelectionPage />
     },
     {
       path: '/app/contact-us',
@@ -271,11 +286,11 @@ const MainRoutes = {
       element: <PayrollSettingsLayout />
     },
     {
-      path: '/payroll/settings/salary-template',
+      path: '/app/payroll/settings/salary-template',
       element: <SalaryTemplate />
     },
     {
-      path: '/payroll/settings/add-employee',
+      path: '/app/payroll/settings/add-employee',
       element: <AddEmployee />
     },
     {

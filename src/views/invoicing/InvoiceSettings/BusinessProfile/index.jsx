@@ -42,25 +42,25 @@ export default function BusinessProfileComponnet({ businessDetails = {}, postTyp
   const [fileInputRef, setFileInputRef] = useState(null);
   const [busineesprofileFields] = useState({
     basic_details: [
-      { name: 'nameOfBusiness', label: 'Business Name' },
-      { name: 'registrationNumber', label: 'Business Registration Number' },
-      { name: 'logo', label: 'Logo' },
-      { name: 'gst_registered', label: 'GST Registered ?' },
-      { name: 'gstin', label: 'GSTIN' },
-      { name: 'pan', label: 'PAN' },
-      { name: 'entityType', label: 'Business Type' },
-      { name: 'address_line1', label: 'Address Line 1' },
-      { name: 'address_line2', label: 'Address Line 2' },
-      { name: 'country', label: 'Country' },
-      { name: 'state', label: 'State/Union Territory' },
-      { name: 'pincode', label: 'Pincode' },
-      { name: 'email', label: 'Email' },
-      { name: 'mobile_number', label: 'Mobile' }
+      { name: 'nameOfBusiness', label: 'Business Name',required: true },
+      { name: 'registrationNumber', label: 'Business Registration Number',required: true },
+      { name: 'logo', label: 'Logo',required: true },
+      { name: 'gst_registered', label: 'GST Registered ?',required: true },
+      { name: 'gstin', label: 'GSTIN',required: true },
+      { name: 'pan', label: 'PAN',required: true },
+      { name: 'entityType', label: 'Business Type',required: true },
+      { name: 'address_line1', label: 'Address Line 1',required: true },
+      { name: 'address_line2', label: 'Address Line 2',required: false },
+      { name: 'country', label: 'Country',required: true },
+      { name: 'state', label: 'State/Union Territory',required: true },
+      { name: 'pincode', label: 'Pincode',required: true },
+      { name: 'email', label: 'Email',required: true },
+      { name: 'mobile_number', label: 'Mobile',required: true }
     ],
     bank_details: [
-      { name: 'account_number', label: 'Bank A/C No' },
-      { name: 'bank_name', label: 'Bank Name' },
-      { name: 'ifsc_code', label: 'IFSC Code' },
+      { name: 'account_number', label: 'Bank A/C No',required: true },
+      { name: 'bank_name', label: 'Bank Name',required: true },
+      { name: 'ifsc_code', label: 'IFSC Code',required: true },
       { name: 'swift_code', label: 'Swift Code' }
     ]
   });
@@ -242,6 +242,20 @@ export default function BusinessProfileComponnet({ businessDetails = {}, postTyp
       </Box>
     );
   }
+//   const getLabelWithAsterisk = (label, isRequired) => {
+//   return (
+//     <span>
+//       {label}
+//       {isRequired && <span style={{ color: 'red', fontSize: '1.3em' }}> *</span>}
+//     </span>
+//   );
+// };
+    const getLabelWithAsterisk = (label, isRequired) => (
+    <Typography variant="subtitle1" >
+      {label}
+      {isRequired && <span style={{ color: 'red', fontSize: '1.2em' }}> *</span>}
+    </Typography>
+  );
   const handleLogoChange = async (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -324,8 +338,11 @@ export default function BusinessProfileComponnet({ businessDetails = {}, postTyp
               <FormControl fullWidth>
                 {item.name === 'gst_registered' ? (
                   <Stack spacing={1}>
-                    <FormLabel sx={{ fontWeight: 500 }}>GST Registered ?</FormLabel>
-                    <RadioGroup
+                    {/* <FormLabel sx={{ fontWeight: 500 }}>GST Registered ?</FormLabel> */}
+                    <FormLabel sx={{ variant:"subtitle1" }}>
+                        {getLabelWithAsterisk('GST Registered ?', true)}
+                      </FormLabel>
+                      <RadioGroup
                       row
                       name="gst_registered"
                       value={String(values.gst_registered)} // always pass string for HTML binding
@@ -354,9 +371,12 @@ export default function BusinessProfileComponnet({ businessDetails = {}, postTyp
                   </Stack>
                 ) : item.name === 'gstin' ? (
                   <>
-                    <Typography component="label" sx={{ mb: 1 }}>
+                    {/* <Typography component="label" sx={{ mb: 1 }}>
                       {item.label}
-                    </Typography>
+                    </Typography> */}
+                    <Typography sx={{ mb: 1 }}>
+                          {getLabelWithAsterisk(item.label, item.required)}
+                      </Typography>
 
                     <Grid2 container spacing={1} alignItems="center">
                       <Grid2 size={{ xs: 8 }}>
@@ -382,6 +402,12 @@ export default function BusinessProfileComponnet({ businessDetails = {}, postTyp
                                 readOnly: true, // 🔑 Prevents typing
                                 style: { cursor: 'pointer' } // Optional: cursor looks clickable
                               }}
+                                sx={{
+                                width: '100%',
+                                '& .MuiInputBase-input': {
+                                color: 'grey.600'
+                                    }
+                                    }}
                             />
                           )}
                         />
@@ -409,7 +435,10 @@ export default function BusinessProfileComponnet({ businessDetails = {}, postTyp
                   </>
                 ) : item.name === 'state' || item.name === 'entityType' ? (
                   <>
-                    <Typography sx={{ mb: 1 }}>{item.label}</Typography>
+                    {/* <Typography sx={{ mb: 1 }}>{item.label}</Typography> */}
+                    <Typography sx={{ mb: 1 }}>
+                      {getLabelWithAsterisk(item.label, item.required)}
+                    </Typography>
                     <CustomAutocomplete
                       value={values[item.name] || ''}
                       onChange={(e, newValue) => setFieldValue(item.name, newValue)}
@@ -423,12 +452,24 @@ export default function BusinessProfileComponnet({ businessDetails = {}, postTyp
                       error={touched[item.name] && Boolean(errors[item.name])}
                       helperText={touched[item.name] && errors[item.name]}
                       name={item.name}
+                      sx={{
+                                width: '100%',
+                                '& .MuiInputBase-input': {
+                                color: 'grey.600'
+                                    }
+                                    }}
                     />
                   </>
                 ) : (
                   <>
-                    <Typography component="label" sx={{ mb: 1 }}>
+                    {/* <Typography component="label" sx={{ mb: 1 }}>
                       {item.name === 'nameOfBusiness' ? <span style={{ color: 'red' }}>*</span> : ''} {item.label}
+                    </Typography> */}
+                    {/* <Typography component="label" sx={{ mb: 1 }}>
+  {item.name === 'nameOfBusiness' ? <span style={{ color: 'red' }}>*</span> : ''} {item.label}
+</Typography> */}
+                <Typography component="label" sx={{ mb: 1 }}>
+                    {getLabelWithAsterisk(item.label, item.required)}
                     </Typography>
 
                     <CustomInput
@@ -461,6 +502,12 @@ export default function BusinessProfileComponnet({ businessDetails = {}, postTyp
                       error={touched[item.name] && Boolean(errors[item.name])}
                       helperText={touched[item.name] && errors[item.name]}
                       disabled={item.name === 'country'}
+                      sx={{
+                                width: '100%',
+                                '& .MuiInputBase-input': {
+                                color: 'grey.600'
+                                    }
+                                    }}
                     />
                   </>
                 )}
@@ -478,7 +525,10 @@ export default function BusinessProfileComponnet({ businessDetails = {}, postTyp
         {busineesprofileFields.bank_details.map((item) => (
           <Grid2 size={{ xs: 12, sm: 6 }} key={item.name}>
             <FormControl fullWidth>
-              <Typography sx={{ mb: 1 }}>{item.label}</Typography>{' '}
+              {/* <Typography sx={{ mb: 1 }}>{item.label}</Typography>{' '} */}
+              <Typography component="label" sx={{ mb: 1 }}>
+                  {getLabelWithAsterisk(item.label, item.required)}
+                </Typography>
               <TextField
                 name={item.name}
                 value={values[item.name]}
@@ -494,6 +544,12 @@ export default function BusinessProfileComponnet({ businessDetails = {}, postTyp
                 error={touched[item.name] && Boolean(errors[item.name])}
                 helperText={touched[item.name] && errors[item.name]}
                 required
+                sx={{
+                width: '100%',
+                '& .MuiInputBase-input': {
+                color: 'grey.600'
+                }
+              }}
               />
             </FormControl>
           </Grid2>

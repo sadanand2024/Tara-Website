@@ -140,7 +140,7 @@ function Designations({ handleBack, handleNext }) {
         getData={fetchDesignations}
         payrollid={payrollid}
         type="Designations"
-        bulkUploadUrl="/payroll/designations/"
+        bulkUploadUrl="/payroll/designations/bulk-designations-upload/"
         xlsxTemplateUrl="/payroll/download-template/xlsx?type=designation"
         csvTemplateUrl="/payroll/download-template/csv?type=designation"
       />

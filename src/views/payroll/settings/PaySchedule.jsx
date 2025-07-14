@@ -123,7 +123,6 @@ function PaySchedule({ handleBack, handleNext }) {
           close: false
         })
       );
-      navigate(-1);
     } else {
       dispatch(
         openSnackbar({
@@ -234,7 +233,7 @@ function PaySchedule({ handleBack, handleNext }) {
         </Box>
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
-          <Button variant="outlined" type="button" onClick={() => handleBack()}>
+          <Button startIcon={<ArrowBackIcon />} variant="outlined" type="button" onClick={() => handleBack()}>
             Back
           </Button>
           <Box sx={{ display: 'flex', gap: 1 }}>

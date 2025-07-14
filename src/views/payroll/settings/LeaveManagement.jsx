@@ -12,7 +12,9 @@ import {
   Paper,
   Typography,
   Pagination,
-  CircularProgress
+  CircularProgress,
+  Autocomplete,
+  TextField
 } from '@mui/material';
 import { IconPlus } from '@tabler/icons-react';
 import { useSearchParams } from 'react-router-dom';
@@ -27,6 +29,7 @@ import { useDispatch } from 'store';
 import { IconButton } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
 import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 function LeaveManagement({ handleBack, handleNext }) {
   const [leaveType, setLeaveType] = useState('All');
@@ -103,15 +106,16 @@ function LeaveManagement({ handleBack, handleNext }) {
       title={
         <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2}>
           <Box>
-            <Typography variant="subtitle1">Leave Type</Typography>
-            <CustomAutocomplete
+            <Autocomplete
               value={leaveType}
-              options={['All', 'Paid', 'UnPaid']}
               onChange={(_, val) => setLeaveType(val)}
+              options={['All', 'Paid', 'UnPaid']}
               sx={{ minWidth: 220 }}
+              size="small"
+              renderInput={(params) => <TextField {...params} label="Leave Type" />}
             />
           </Box>
-          <Button variant="contained" startIcon={<IconPlus size={16} />} onClick={() => openDialog('add')}>
+          <Button size="small" variant="contained" startIcon={<IconPlus size={16} />} onClick={() => openDialog('add')}>
             Add Leave
           </Button>
         </Stack>
@@ -178,7 +182,10 @@ function LeaveManagement({ handleBack, handleNext }) {
           </TableContainer>
         )}
         {filteredData.length > 0 && (
-          <Stack direction="row" justifyContent="center" py={2}>
+          <Stack direction="row" justifyContent="space-between" py={2}>
+            <Button size="small" startIcon={<ArrowBackIcon />} variant="outlined" onClick={handleBack}>
+              Back
+            </Button>
             <Pagination
               count={Math.ceil(filteredData.length / rowsPerPage)}
               page={page}
@@ -186,6 +193,7 @@ function LeaveManagement({ handleBack, handleNext }) {
               shape="rounded"
               color="primary"
             />
+            <Typography></Typography>
           </Stack>
         )}
       </Stack>

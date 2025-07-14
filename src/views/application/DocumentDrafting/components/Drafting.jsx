@@ -8,39 +8,17 @@ import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import EventIcon from '@mui/icons-material/Event';
 import PersonIcon from '@mui/icons-material/Person';
 import SearchIcon from '@mui/icons-material/Search';
-import { Box, Button, Chip, Grid, IconButton, InputAdornment, MenuItem, Paper, Stack, Table, TableBody, TableCell, TableHead, TableRow, TextField, Typography } from '@mui/material';
+import { Box, Button, Chip, Grid2, IconButton, InputAdornment, MenuItem, Paper, Stack, Table, TableBody, TableCell, TableHead, TableRow, TextField, Typography } from '@mui/material';
+import Pagination from '@mui/material/Pagination';
 import React, { useEffect, useState } from 'react';
 import Factory from 'utils/Factory';
 import Event from './Event';
 import MyEvents from './MyEvent';
-
-const stats = [
-  {
-    label: 'Total Documents',
-    value: 20,
-    icon: <DescriptionOutlinedIcon color="primary" fontSize="large" />,
-    color: 'primary',
-  },
-  {
-    label: 'Drafts',
-    value: 8,
-    icon: <DraftsOutlinedIcon color="warning" fontSize="large" />,
-    color: 'warning',
-  },
-  {
-    label: 'Finalized',
-    value: 15,
-    icon: <CheckCircleOutlineIcon color="success" fontSize="large" />,
-    color: 'success',
-  },
-  {
-    label: 'Action Pending',
-    value: 4,
-    icon: <ErrorOutlineIcon color="error" fontSize="large" />,
-    color: 'error',
-  },
-];
-
+// import DocumentSelectionPage from './DocumentSelectionPage';
+import HistoryOutlinedIcon from '@mui/icons-material/HistoryOutlined';
+import StarBorderOutlinedIcon from '@mui/icons-material/StarBorderOutlined';
+import { useLocation } from 'react-router-dom';
+ 
 const filters = [
   { label: 'Category', options: ['All', 'Company', 'HR', 'Finance'] },
   { label: 'Events', options: ['All', 'Director Appointment', 'DIN'] },
@@ -49,7 +27,7 @@ const filters = [
   { label: 'Creator', options: ['All', 'Srinivas', 'Surya'] },
   { label: 'Date', options: ['All', '23/12/22', '12/09/22'] },
 ];
-
+ 
 const statusChip = (status) => {
   if (status === 'Processed')
     return <Chip label="Processed" sx={{ bgcolor: '#FFF9C4', color: '#FBC02D', fontWeight: 500 }} />;
@@ -57,13 +35,26 @@ const statusChip = (status) => {
     return <Chip label="Completed" sx={{ bgcolor: '#C8E6C9', color: '#388E3C', fontWeight: 500 }} />;
   return <Chip label={status} />;
 };
-
+ 
 export default function Drafting({ id, onShowMyEvents }) {
+  const location = useLocation();
   const [tableRows, setTableRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showEvent, setShowEvent] = useState(false);
+  const [eventInitialTab, setEventInitialTab] = useState('document');
   const myEventsRef = React.useRef(null);
-
+  const [stats, setStats] = useState([]);
+  const [statsLoading, setStatsLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const rowsPerPage = 10;
+  const [favourites, setFavourites] = useState([]);
+  const [favouritesLoading, setFavouritesLoading] = useState(true);
+  const [recentDocuments, setRecentDocuments] = useState([]);
+  const [recentDocumentsLoading, setRecentDocumentsLoading] = useState(true);
+  const [recentEvents, setRecentEvents] = useState([]);
+  const [recentEventsLoading, setRecentEventsLoading] = useState(true);
+  const [showDocumentSelection, setShowDocumentSelection] = useState(false);
+ 
   useEffect(() => {
     if (!id) return;
     setLoading(true);
@@ -85,23 +76,124 @@ export default function Drafting({ id, onShowMyEvents }) {
       .catch(() => setTableRows([]))
       .finally(() => setLoading(false));
   }, [id]);
-
-  if (showEvent) {
-    return <Event />;
+ 
+  useEffect(() => {
+    if (!id) return;
+    setStatsLoading(true);
+    // Factory('get', /documentdrafting/documents-summary-by-context/?doc_draft_id=${id}, {}, {})
+    Factory('get', `/documentdrafting/documents-summary-by-context/?doc_draft_id=${id}`, {}, {})
+ 
+      .then(response => {
+        const resData = response?.res?.data || response?.res || response;
+        // Convert object to array of { label, value }
+        const statsArr = Object.entries(resData || {}).map(([label, value]) => ({ label, value }));
+        setStats(statsArr);
+      })
+      .catch(() => setStats([]))
+      .finally(() => setStatsLoading(false));
+  }, [id]);
+ 
+  useEffect(() => {
+    if (!id) return;
+    setFavouritesLoading(true);
+    Factory('get', `/documentdrafting/favourites/by-draft/${id}/`, {}, {})
+      .then(response => {
+        const data = response?.res?.data || response?.res || response;
+        setFavourites(data || []);
+      })
+      .catch(() => setFavourites([]))
+      .finally(() => setFavouritesLoading(false));
+  }, [id]);
+ 
+  useEffect(() => {
+    if (!id) return;
+    setRecentDocumentsLoading(true);
+    Factory('get', `/documentdrafting/context/${id}/recent-documents/`, {}, {})
+      .then(response => {
+        const data = response?.res?.data || response?.res || response;
+        setRecentDocuments(data || []);
+      })
+      .catch(() => setRecentDocuments([]))
+      .finally(() => setRecentDocumentsLoading(false));
+  }, [id]);
+ 
+  useEffect(() => {
+    if (!id) return;
+    setRecentEventsLoading(true);
+    Factory('get', `/documentdrafting/context/${id}/recent-events/`, {}, {})
+      .then(response => {
+        const data = response?.res?.data || response?.res || response;
+        setRecentEvents(data || []);
+      })
+      .catch(() => setRecentEvents([]))
+      .finally(() => setRecentEventsLoading(false));
+  }, [id]);
+ 
+  useEffect(() => {
+    if (location.state?.showEvent) {
+      setShowEvent(true);
+      setEventInitialTab(location.state.eventInitialTab || 'document');
+    }
+  }, [location.state]);
+ 
+  if (showDocumentSelection) {
+    {console.log("qwertyujnbvc", {id})}
+    return <DocumentSelectionPage contextId={id}/>;
   }
-
+  if (showEvent) {
+    return <Event contextId={id} initialTab={eventInitialTab}/>;
+  }
+ 
   const scrollToMyEvents = () => {
     myEventsRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
-
+ 
+  const statIcons = {
+    "Total Document": <DescriptionOutlinedIcon color="primary" fontSize="large" />,
+    "Draft": <DraftsOutlinedIcon color="warning" fontSize="large" />,
+    "Finalized": <CheckCircleOutlineIcon color="success" fontSize="large" />,
+    "Action Pending": <ErrorOutlineIcon color="error" fontSize="large" />,
+  };
+ 
+  const statStyles = {
+    "Total Document": {
+      iconBg: "#E3EAFE",
+      iconColor: "#2F54EB",
+      buttonBg: "#E3EAFE",
+      buttonColor: "#2F54EB"
+    },
+    "Draft": {
+      iconBg: "#FFF7E3",
+      iconColor: "#FAAD14",
+      buttonBg: "#F0F0F0",
+      buttonColor: "#595959"
+    },
+    "Finalized": {
+      iconBg: "#E6FAF0",
+      iconColor: "#52C41A",
+      buttonBg: "#F0F0F0",
+      buttonColor: "#595959"
+    },
+    "Action Pending": {
+      iconBg: "#FFF1F0",
+      iconColor: "#FF4D4F",
+      buttonBg: "#F0F0F0",
+      buttonColor: "#595959"
+    }
+  };
+ 
+  // Calculate paginated rows
+  const paginatedRows = tableRows.slice((page - 1) * rowsPerPage, page * rowsPerPage);
+  const pageCount = Math.ceil(tableRows.length / rowsPerPage);
+ 
   return (
     <Box sx={{ p: { xs: 1, md: 4 }, background: '#fff', minHeight: '100vh' }}>
       {/* Title and Actions */}
       <Box display="flex" flexDirection={{ xs: 'column', md: 'row' }} alignItems={{ xs: 'flex-start', md: 'center' }} justifyContent="space-between" mb={4} gap={2}>
         <Typography variant="h4" fontWeight={700}>Document Drafting</Typography>
         <Stack direction="row" spacing={2}>
-          <Button variant="outlined" startIcon={<AddIcon />}onClick={() => setShowEvent(true)} >Create New Document</Button>
-          <Button variant="contained" startIcon={<EventIcon />} onClick={() => setShowEvent(true)}>Create New Event</Button>
+          <Button variant="outlined" startIcon={<AddIcon />} onClick={() => { setShowEvent(true); setEventInitialTab('document'); }} >Create New Document</Button>
+          <Button variant="contained" startIcon={<EventIcon />} onClick={() => { setShowEvent(true); setEventInitialTab('event'); }}>Create New Event</Button>
           <Button
             variant="outlined"
             startIcon={<PersonIcon />}
@@ -112,7 +204,7 @@ export default function Drafting({ id, onShowMyEvents }) {
           </Button>
         </Stack>
       </Box>
-
+ 
       {/* Filters */}
       <Box display="flex" flexWrap="wrap" gap={2} mb={3}>
         <TextField
@@ -142,26 +234,92 @@ export default function Drafting({ id, onShowMyEvents }) {
           </TextField>
         ))}
       </Box>
-
+ 
       {/* Stats Cards */}
-      <Grid container spacing={3} mb={4}>
-        {stats.map((stat) => (
-          <Grid item xs={12} sm={6} md={3} key={stat.label}>
-            <Paper elevation={2} sx={{ p: 3, borderRadius: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: 140 }}>
-              <Box mb={1}>{stat.icon}</Box>
-              <Typography variant="subtitle1" color="text.secondary" gutterBottom>{stat.label}</Typography>
-              <Typography variant="h4" fontWeight={700}>{String(stat.value).padStart(2, '0')}</Typography>
-              <Button variant="contained" sx={{ mt: 2, bgcolor: '#F5F7FA', color: '#222', boxShadow: 'none', fontWeight: 500, borderRadius: 2, textTransform: 'none' }} size="small">View</Button>
-            </Paper>
-          </Grid>
-        ))}
-      </Grid>
-
+      <Grid2 container spacing={3} mb={4}>
+        {statsLoading ? (
+          <Grid2 size ={{xs:12}}><Typography align="center">Loading stats...</Typography></Grid2>
+        ) : stats.length === 0 ? (
+          <Grid2 size ={{xs:12}}><Typography align="center">No stats found</Typography></Grid2>
+        ) : (
+          stats.map((stat) => {
+            const style = statStyles[stat.label] || {};
+            return (
+              <Grid2 size ={{xs:12, md:3, sm:3}} key={stat.label}>
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 3,
+                    borderRadius: 3,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    minHeight: 140,
+                    border: '1.5px solid #E5EAF2',
+                    boxShadow: '0 2px 8px 0 rgba(24, 39, 75, 0.05)',
+                    transition: 'box-shadow 0.2s, border-color 0.2s',
+                    '&:hover': {
+                      boxShadow: '0 4px 16px 0 rgba(24, 39, 75, 0.12)',
+                      borderColor: style.iconColor || '#2F54EB',
+                      '.stat-view-btn': {
+                        background: style.iconColor || '#2F54EB',
+                        color: '#fff'
+                      }
+                    }
+                  }}
+                >
+                  <Box
+                    mb={2}
+                    sx={{
+                      width: 44,
+                      height: 44,
+                      borderRadius: '50%',
+                      background: style.iconBg,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    {React.cloneElement(statIcons[stat.label] || <DescriptionOutlinedIcon />, {
+                      style: { color: style.iconColor, fontSize: 28 }
+                    })}
+                  </Box>
+                  <Typography variant="subtitle1" color="text.secondary" gutterBottom>
+                    {stat.label === "Total Document" ? "Total Documents" : stat.label}
+                  </Typography>
+                  <Typography variant="h4" fontWeight={700} sx={{ color: '#0A1F44', mb: 1 }}>
+                    {String(stat.value).padStart(2, '0')}
+                  </Typography>
+                  <Button
+                    className="stat-view-btn"
+                    variant="contained"
+                    disableElevation
+                    sx={{
+                      mt: 1,
+                      background: style.buttonBg,
+                      color: style.buttonColor,
+                      fontWeight: 500,
+                      borderRadius: 2,
+                      textTransform: 'none',
+                      boxShadow: 'none',
+                      minWidth: 64,
+                      transition: 'background 0.2s, color 0.2s'
+                    }}
+                  >
+                    View
+                  </Button>
+                </Paper>
+              </Grid2>
+            );
+          })
+        )}
+      </Grid2>
+ 
       {/* Table */}
       <Paper elevation={1} sx={{ borderRadius: 3, overflow: 'hidden' }}>
         <Table>
           <TableHead>
-            <TableRow>
+            <TableRow sx={{ background: '#F5F6F8' }}>
               <TableCell>Name</TableCell>
               <TableCell>Category</TableCell>
               <TableCell>Event</TableCell>
@@ -181,19 +339,16 @@ export default function Drafting({ id, onShowMyEvents }) {
                 <TableCell colSpan={7} align="center">No data found</TableCell>
               </TableRow>
             ) : (
-              tableRows.map((row, idx) => (
+              paginatedRows.map((row, idx) => (
                 <TableRow key={row.id || idx}>
-                  <TableCell>
-                    {row.name}
-                    
-                  </TableCell>
+                  <TableCell>{row.name}</TableCell>
                   <TableCell>{row.category}</TableCell>
                   <TableCell>{row.event}</TableCell>
                   <TableCell>{statusChip(row.status)}</TableCell>
                   <TableCell>{row.lastEdited}</TableCell>
                   <TableCell>{row.creator}</TableCell>
                   <TableCell>
-                    <IconButton color="primary"><EditIcon /></IconButton>
+                    <IconButton color="primary" onClick={() => window.location.href = `/app/drafting/fill/${row.id}`}><EditIcon /></IconButton>
                     <IconButton color="error"><DeleteIcon /></IconButton>
                   </TableCell>
                 </TableRow>
@@ -202,6 +357,120 @@ export default function Drafting({ id, onShowMyEvents }) {
           </TableBody>
         </Table>
       </Paper>
+      {/* Pagination Controls */}
+      {pageCount > 1 && (
+        <Box display="flex" justifyContent="center" alignItems="center" mt={2}>
+          <Pagination
+            count={pageCount}
+            page={page}
+            onChange={(e, value) => setPage(value)}
+            color="primary"
+            shape="rounded"
+            // showFirstButton
+            // showLastButton
+          />
+        </Box>
+      )}
+      {/* Quick Access Panel */}
+      <Box
+        mt={5}
+        mb={5}
+        sx={{
+          border: '1.5px solid #E5EAF2',
+          borderRadius: 3,
+          p: 4,
+          background: '#fff',
+          boxShadow: '0 2px 8px 0 rgba(24, 39, 75, 0.05)'
+        }}
+      >
+        <Typography variant="h6" fontWeight={700} mb={3} sx={{ color: '#0A1F44' }}>
+          Quick Access Panel
+        </Typography>
+        <Grid2 container spacing={4}>
+          {/* Favourites */}
+          <Grid2 size ={{xs:12, md:4}}>
+            <Typography fontWeight={700} sx={{ color: '#0A1F44', mb: 2 }}>Favourites</Typography>
+            <Stack spacing={2}>
+              {favouritesLoading ? (
+                <Typography>Loading favourites...</Typography>
+              ) : favourites.length === 0 ? (
+                <Typography>No favourites found</Typography>
+              ) : (
+                favourites.map((favourite) => (
+                  <Box key={favourite.id} display="flex" alignItems="center" gap={1}>
+                    <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+                      <DescriptionOutlinedIcon sx={{ color: '#A3AED0', fontSize: 28, bgcolor: '#F5F7FA', borderRadius: 2, p: 0.5 }} />
+                      <StarBorderOutlinedIcon
+                        sx={{
+                          color: '#3B82F6',
+                          fontSize: 14,
+                          position: 'absolute',
+                          top: 2,
+                          right: 2,
+                          bgcolor: '#fff',
+                          borderRadius: '50%',
+                        }}
+                      />
+                    </Box>
+                    <Typography sx={{ color: '#222' }}>{favourite.document?.name || favourite.name || favourite.title || favourite.document_name || 'Unnamed Document'}</Typography>
+                  </Box>
+                ))
+              )}
+            </Stack>
+          </Grid2>
+          {/* Recently Used */}
+          <Grid2 size ={{xs:12, md:4}}>
+            <Typography fontWeight={700} sx={{ color: '#0A1F44', mb: 2 }}>Recently Used</Typography>
+            <Stack spacing={2}>
+              {recentDocumentsLoading ? (
+                <Typography>Loading recent documents...</Typography>
+              ) : recentDocuments.length === 0 ? (
+                <Typography>No recent documents found</Typography>
+              ) : (
+                recentDocuments.map((document) => (
+                  <Box key={document.id} display="flex" alignItems="center" gap={1}>
+                    <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+                      <DescriptionOutlinedIcon sx={{ color: '#A3AED0', fontSize: 28, bgcolor: '#F5F7FA', borderRadius: 2, p: 0.5 }} />
+                      <HistoryOutlinedIcon
+                        sx={{
+                          color: '#F59E42',
+                          fontSize: 14,
+                          position: 'absolute',
+                          top: 2,
+                          right: 2,
+                          bgcolor: '#fff',
+                          borderRadius: '50%',
+                        }}
+                      />
+                    </Box>
+                    <Typography sx={{ color: '#222' }}>{document.document?.name || document.name || document.title || document.document_name || 'Unnamed Document'}</Typography>
+                  </Box>
+                ))
+              )}
+            </Stack>
+          </Grid2>
+          {/* Recent Events */}
+          <Grid2 size ={{xs:12, md:4}}>
+            <Typography fontWeight={700} sx={{ color: '#0A1F44', mb: 2 }}>Recent Events</Typography>
+            <Stack spacing={2}>
+              {recentEventsLoading ? (
+                <Typography>Loading recent events...</Typography>
+              ) : recentEvents.length === 0 ? (
+                <Typography>No recent events found</Typography>
+              ) : (
+                recentEvents.map((event) => (
+                  <Box key={event.id} display="flex" alignItems="center" gap={1}>
+                    <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+                      <DescriptionOutlinedIcon sx={{ color: '#A3AED0', fontSize: 28, bgcolor: '#F5F7FA', borderRadius: 2, p: 0.5 }} />
+                    </Box>
+                    <Typography sx={{ color: '#222' }}>{event.event?.name || event.name || event.title || event.event_name || 'Unnamed Event'}</Typography>
+                  </Box>
+                ))
+              )}
+            </Stack>
+          </Grid2>
+        </Grid2>
+      </Box>
       {/* MyEvents section at the bottom of the page */}
       <Box mt={6} ref={myEventsRef}>
         <MyEvents id={id} />

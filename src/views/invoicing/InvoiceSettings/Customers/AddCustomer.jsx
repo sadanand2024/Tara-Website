@@ -162,6 +162,13 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
       }
     }
   });
+  const getLabelWithAsterisk = (label, isRequired = true) => (
+  <Typography variant="subtitle1">
+    {label}
+    {isRequired && <span style={{ color: 'red', fontSize: '1.2rem' }}> *</span>}
+  </Typography>
+);
+
 
   const { values, setValues, errors, touched, handleSubmit, handleBlur, setFieldValue, resetForm } = formik;
 
@@ -223,6 +230,7 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
             onChange={(e) => setFieldValue(`branches.${index}.branch_name`, e.target.value)}
             error={touched.branches?.[index]?.branch_name && Boolean(errors.branches?.[index]?.branch_name)}
             helperText={touched.branches?.[index]?.branch_name && errors.branches?.[index]?.branch_name}
+            
           />
         </Grid2>
 
@@ -342,17 +350,27 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
       <Box component="form" onSubmit={handleSubmit} sx={{ p: 2 }}>
         <Grid2 container spacing={2}>
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-            <Typography sx={{ mb: 1 }}>Customer Name</Typography>
+            {/* <Typography sx={{ mb: 1 }}>Customer Name</Typography> */}
+            {getLabelWithAsterisk('Customer Name')}
+
             <CustomInput
               name="name"
               value={values.name}
               onChange={(e) => setFieldValue('name', e.target.value)}
               error={touched.name && Boolean(errors.name)}
               helperText={touched.name && errors.name}
+                sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
+ 
             />
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-            <Typography sx={{ mb: 1 }}>PAN</Typography>
+            {/* <Typography sx={{ mb: 1 }}>PAN</Typography> */}
+            {getLabelWithAsterisk('PAN', true)}
             <CustomInput
               name="pan_number"
               value={values.pan_number.toUpperCase()}
@@ -364,10 +382,18 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
               }}
               error={touched.pan_number && Boolean(errors.pan_number)}
               helperText={touched.pan_number && errors.pan_number}
+                sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
+ 
             />
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-            <Typography sx={{ mb: 1 }}>Entity Type</Typography>
+            {/* <Typography sx={{ mb: 1 }}>Entity Type</Typography> */}
+            {getLabelWithAsterisk('Entity Type', true)}
             <CustomAutocomplete
               name="entity_type"
               value={values.entity_type}
@@ -379,11 +405,19 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
               }
               error={touched.entity_type && Boolean(errors.entity_type)}
               helperText={touched.entity_type && errors.entity_type}
+                sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
+ 
             />
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
             <FormControl fullWidth>
-              <FormLabel>GST Registered</FormLabel>
+              {/* <FormLabel>GST Registered</FormLabel> */}
+              <FormLabel>{getLabelWithAsterisk('GST Registered', true)}</FormLabel>
               <RadioGroup
                 row
                 name="gst_registered"
@@ -391,6 +425,7 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
                 onChange={(e) => {
                   const isRegistered = e.target.value === 'true'; // Convert string to boolean
                   setFieldValue('gst_registered', isRegistered);
+                  
 
                   if (!isRegistered) {
                     setFieldValue('gstin', 'NA');
@@ -412,7 +447,8 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
           </Grid2>
 
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-            <Typography sx={{ mb: 1 }}>GST Type</Typography>
+            {/* <Typography sx={{ mb: 1 }}>GST Type</Typography> */}
+            {getLabelWithAsterisk('GST Type', true)}
             <CustomAutocomplete
               name="gst_type"
               value={values.gst_type}
@@ -425,7 +461,8 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
           </Grid2>
 
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-            <Typography sx={{ mb: 1 }}>GSTIN</Typography>
+            {/* <Typography sx={{ mb: 1 }}>GSTIN</Typography> */}
+            {getLabelWithAsterisk('GSTIN', true)}
             <CustomInput
               name="gstin"
               value={values.gstin}
@@ -436,27 +473,43 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
             />
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-            <Typography sx={{ mb: 1 }}>Address Line 1</Typography>
+            {/* <Typography sx={{ mb: 1 }}>Address Line 1</Typography> */}
+            {getLabelWithAsterisk('Address Line 1', true)}
             <CustomInput
               name="address_line1"
               value={values.address_line1}
               onChange={(e) => setFieldValue('address_line1', e.target.value)}
               error={touched.address_line1 && Boolean(errors.address_line1)}
               helperText={touched.address_line1 && errors.address_line1}
+                sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
+ 
             />
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-            <Typography sx={{ mb: 1 }}>Address Line 2</Typography>
+            {/* <Typography sx={{ mb: 1 }}>Address Line 2</Typography> */}
+             {getLabelWithAsterisk('Address Line 2', true)}
             <CustomInput
               name="address_line2"
               value={values.address_line2}
               onChange={(e) => setFieldValue('address_line2', e.target.value)}
               error={touched.address_line2 && Boolean(errors.address_line2)}
               helperText={touched.address_line2 && errors.address_line2}
+              sx={{
+                width: '100%',
+                '& .MuiInputBase-input': {
+                  color: 'grey.600'
+                }
+              }}
             />
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-            <Typography sx={{ mb: 1 }}>Country</Typography>
+            {/* <Typography sx={{ mb: 1 }}>Country</Typography> */}
+                {getLabelWithAsterisk('Country', true)}
             <CustomAutocomplete
               name="country"
               value={values.country}
@@ -465,10 +518,18 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
               error={touched.country && Boolean(errors.country)}
               helperText={touched.country && errors.country}
               disabled
+                sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
+ 
             />
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-            <Typography sx={{ mb: 1 }}>State</Typography>
+            {/* <Typography sx={{ mb: 1 }}>State</Typography> */}
+            {getLabelWithAsterisk('State', true)}
             <CustomAutocomplete
               name="state"
               value={values.state}
@@ -476,40 +537,72 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
               options={indian_States_And_UTs}
               error={touched.state && Boolean(errors.state)}
               helperText={touched.state && errors.state}
+                sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
+ 
             />
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-            <Typography sx={{ mb: 1 }}>Pincode</Typography>
+            {/* <Typography sx={{ mb: 1 }}>Pincode</Typography> */}
+            {getLabelWithAsterisk('Pincode', true)}
             <CustomInput
               name="postal_code"
               value={values.postal_code}
               onChange={(e) => setFieldValue('postal_code', e.target.value)}
               error={touched.postal_code && Boolean(errors.postal_code)}
               helperText={touched.postal_code && errors.postal_code}
+                sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
+ 
             />
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-            <Typography sx={{ mb: 1 }}>Email </Typography>
+            <Typography variant="subtitle1" sx={{ mb: 1 }}>Email </Typography>
+            {/* {getLabelWithAsterisk('Email')} */}
             <CustomInput
               name="email"
               value={values.email}
               onChange={(e) => setFieldValue('email', e.target.value)}
               error={touched.email && Boolean(errors.email)}
               helperText={touched.email && errors.email}
+                sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
+ 
             />
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-            <Typography sx={{ mb: 1 }}>Mobile</Typography>
+            {/* <Typography sx={{ mb: 1 }}>Mobile</Typography> */}
+            {getLabelWithAsterisk('Mobile', true)}
             <CustomInput
               name="mobile_number"
               value={values.mobile_number}
               onChange={(e) => setFieldValue('mobile_number', e.target.value)}
               error={touched.mobile_number && Boolean(errors.mobile_number)}
               helperText={touched.mobile_number && errors.mobile_number}
+                sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
+ 
             />
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-            <Typography sx={{ mb: 1 }}>Opening Balance</Typography>
+            <Typography variant="subtitle1" sx={{ mb: 1 }}>Opening Balance</Typography>
+            {/* {getLabelWithAsterisk('Opening Balance', true)} */}
             <CustomInput
               name="opening_balance"
               value={values.opening_balance}
@@ -517,11 +610,19 @@ const AddCustomer = ({ type, setType, open, handleClose, selectedCustomer, busin
               error={touched.opening_balance && Boolean(errors.opening_balance)}
               helperText={touched.opening_balance && errors.opening_balance}
               placeholder="₹"
+                sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
+ 
             />
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
             <FormControl fullWidth>
-              <FormLabel>Do You have Multiple branches?</FormLabel>
+              {/* <FormLabel variant="subtitle1">Do You have Multiple branches?</FormLabel> */}
+              <FormLabel>{getLabelWithAsterisk('Do You have Multiple branches?', true)}</FormLabel>
               <RadioGroup
                 row
                 name="has_multiple_branches"

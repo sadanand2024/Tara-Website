@@ -14,7 +14,8 @@ import Factory from 'utils/Factory';
 function StepperComponent() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [activeStep, setActiveStep] = useState(0);
+  const initialTabValue = Number(searchParams.get('tabValue')) || 0;
+  const [activeStep, setActiveStep] = useState(initialTabValue);
   const [payrollId, setPayrollId] = useState(null);
   const [employeeId, setEmployeeId] = useState(null);
   const [employeeData, setEmployeeData] = useState(null);
@@ -92,11 +93,6 @@ function StepperComponent() {
   }, [searchParams]);
 
   useEffect(() => {
-    const tabValue = searchParams.get('tabValue');
-    if (tabValue) setActiveStep(Number(tabValue));
-  }, [searchParams]);
-
-  useEffect(() => {
     const empId = searchParams.get('employee_id');
     if (empId) setEmployeeId(empId);
   }, [searchParams]);
@@ -107,12 +103,38 @@ function StepperComponent() {
   useEffect(() => {
     if (employeeId) fetchEmployeeData(employeeId);
   }, [employeeId]);
+
+  useEffect(() => {
+    const tabValue = searchParams.get('tabValue');
+    if (String(activeStep) !== tabValue) {
+      const params = new URLSearchParams(searchParams);
+      params.set('tabValue', activeStep);
+      navigate({ search: params.toString() }, { replace: true });
+    }
+  }, [activeStep]);
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' }); // or 'auto'
+  }, [activeStep]);
   return (
     <>
       {loading ? (
         <Loader />
       ) : (
-        <MainCard title="Employee Master Data">
+        <MainCard
+          title="Employee Master Data"
+          subtitle="Manage your Employee Master Data by Adding Or Editing the Form"
+
+          // secondary={
+          //   <Stack direction="row" spacing={2}>
+          //     <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigate('/app/payroll')}>
+          //       Back to Employee Dashboard
+          //     </Button>
+          //     <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigate('/app/payroll')}>
+          //       Back to Payroll Dashboard
+          //     </Button>
+          //   </Stack>
+          // }
+        >
           <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 3 }}>
             {steps.map((label, idx) => (
               <Step key={idx}>
@@ -136,10 +158,17 @@ function StepperComponent() {
 
               <Stack direction="row" justifyContent="space-between" mt={4}>
                 <Stack direction="row" spacing={2}>
-                  <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigate('/app/payroll')}>
-                    Back to Dashboard
-                  </Button>
-                  <Button variant="contained" onClick={handleBack} disabled={activeStep === 0}>
+                  <Button
+                    variant="outlined"
+                    startIcon={<ArrowBackIcon />}
+                    onClick={() => {
+                      if (activeStep === 0) {
+                        navigate(-1);
+                      } else {
+                        handleBack();
+                      }
+                    }}
+                  >
                     Back
                   </Button>
                 </Stack>

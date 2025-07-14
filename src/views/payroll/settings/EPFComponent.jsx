@@ -32,7 +32,7 @@ import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
 
 const pfFields = [
-  { name: 'epf_number', label: 'EPF Number (EX: ABCDE2405151000)' },
+  { name: 'epf_number', label: 'EPF Number (EX: ABCDE2405151000)',required: true },
   { name: 'employee_contribution_rate', label: 'Employee Contribution Rate' },
   { name: 'employer_contribution_rate', label: 'Employer Contribution Rate' }
 ];
@@ -133,6 +133,12 @@ function EpfComponent({ handleNext }) {
       setPostType('post');
     }
   };
+    const getLabelWithAsterisk = (label, isRequired) => (
+  <>
+    {label}
+    {isRequired && <span style={{ color: 'red', fontSize: '1.3rem' }}> *</span>}
+  </>
+);
 
   // Effect to trigger API call when either businessId or payrollid is set
   useEffect(() => {
@@ -234,19 +240,19 @@ function EpfComponent({ handleNext }) {
               <>
                 <Grid2 size={12}></Grid2>
                 <Grid2 size={6}>
-                  <Typography>EPF Number:</Typography>
+                  <Typography variant="h5">EPF Number:</Typography>
                 </Grid2>
                 <Grid2 size={6}>
                   <Typography>{epfData.epf_number}</Typography>
                 </Grid2>
                 <Grid2 size={6}>
-                  <Typography>Employee Contribution Rate:</Typography>
+                  <Typography variant="h5">Employee Contribution Rate:</Typography>
                 </Grid2>
                 <Grid2 size={6}>
                   <Typography>{epfData.employee_contribution_rate}</Typography>
                 </Grid2>
                 <Grid2 size={6}>
-                  <Typography>Employer Contribution Rate:</Typography>
+                  <Typography variant="h5">Employer Contribution Rate:</Typography>
                 </Grid2>
                 <Grid2 size={6}>
                   <Typography>{epfData.employer_contribution_rate}</Typography>
@@ -257,7 +263,7 @@ function EpfComponent({ handleNext }) {
                   </Divider>
                 </Grid2>
                 <Grid2 size={12}>
-                  <FormGroup row>
+                  <FormGroup row={false}>
                     <FormControlLabel
                       control={<Checkbox checked={epfData.include_employer_contribution_in_ctc} />}
                       label={<Typography variant="body2">Include Employer's Contribution in the CTC</Typography>}
@@ -281,19 +287,19 @@ function EpfComponent({ handleNext }) {
                   </Divider>
                 </Grid2>
                 <Grid2 size={6}>
-                  <Typography color="text.secondary">Allow employee level override PF contribution rate:</Typography>
+                  <Typography variant="h5">Allow employee level override PF contribution rate:</Typography>
                 </Grid2>
                 <Grid2 size={6}>
                   <Typography>{epfData?.allow_employee_level_override ? 'Yes' : 'No'}</Typography>
                 </Grid2>
                 <Grid2 size={6}>
-                  <Typography color="text.secondary">Pro rate restricted PF wage:</Typography>
+                  <Typography variant="h5">Pro rate restricted PF wage:</Typography>
                 </Grid2>
                 <Grid2 size={6}>
                   <Typography>{epfData?.prorate_restricted_pf_wage ? 'Yes' : 'No'}</Typography>
                 </Grid2>
                 <Grid2 size={6}>
-                  <Typography color="text.secondary">Consider applicable salary components based on LOP:</Typography>
+                  <Typography variant="h5">Consider applicable salary components based on LOP:</Typography>
                 </Grid2>
                 <Grid2 size={6}>
                   <Typography>{epfData?.apply_components_if_wage_below_15k ? 'Yes' : 'No'}</Typography>
@@ -357,6 +363,7 @@ function EpfComponent({ handleNext }) {
                     <Typography variant="subtitle1" sx={{ mb: 0.5 }}>
                       {field.label}
                     </Typography>
+                   
                     <CustomAutocomplete
                       value={values[field.name]}
                       name={field.name}
@@ -369,8 +376,8 @@ function EpfComponent({ handleNext }) {
                   </Box>
                 ) : (
                   <Box>
-                    <Typography variant="subtitle1" sx={{ mb: 0.5 }}>
-                      {field.label}
+                    <Typography variant="subtitle1" gutterBottom>
+                      {getLabelWithAsterisk(field.label, field.required)}
                     </Typography>
                     <TextField
                       size="small"

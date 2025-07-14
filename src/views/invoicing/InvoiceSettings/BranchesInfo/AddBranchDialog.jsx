@@ -14,13 +14,25 @@ const AddBranchDialog = ({ open, handleClose, getBranches, selectedRecord, getBr
   const user = useSelector((state) => state.accountReducer.user);
 
   const branchFields = [
-    { name: 'branch_name', label: 'Branch Name' },
-    { name: 'branch_code', label: 'Branch Code' }
+    { name: 'branch_name', label: 'Branch Name',required: true },
+    { name: 'branch_code', label: 'Branch Code',required: true }
   ];
   const validationSchema = Yup.object().shape({
     branch_name: Yup.string().required('Branch Name is required'),
     branch_code: Yup.string().required('Branch Code is required')
   });
+//   const getLabelWithAsterisk = (label, isRequired) => (
+//   <span>
+//     {label}
+//     {isRequired && <span style={{ color: 'red',fontSize: '1.3rem' }}> *</span>}
+//   </span>
+// );
+ const getLabelWithAsterisk = (label, isRequired) => (
+  <Typography variant="subtitle1" >
+    {label}
+    {isRequired && <span style={{ color: 'red', fontSize: '1.2em' }}> *</span>}
+  </Typography>
+);
   const formik = useFormik({
     initialValues: {
       branch_name: '',
@@ -69,7 +81,10 @@ const AddBranchDialog = ({ open, handleClose, getBranches, selectedRecord, getBr
     return fields.map((field) => {
       return (
         <Grid2 key={field.name} size={{ xs: 12, sm: 6 }}>
-          <Typography gutterBottom>{field.label}</Typography>
+          {/* <Typography gutterBottom>{field.label}</Typography> */}
+          <Typography component="label" sx={{ mb: 1 }}>
+              {getLabelWithAsterisk(field.label, field.required)}
+           </Typography>
           <TextField
             size="small"
             value={values[field.name]}
@@ -78,7 +93,13 @@ const AddBranchDialog = ({ open, handleClose, getBranches, selectedRecord, getBr
             onBlur={handleBlur}
             error={touched[field.name] && Boolean(errors[field.name])}
             helperText={touched[field.name] && errors[field.name]}
-            sx={{ width: '100%' }}
+            // sx={{ width: '100%' }}
+              sx={{
+              width: '100%',
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
           />
         </Grid2>
       );

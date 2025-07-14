@@ -63,7 +63,9 @@ function SalaryTemplateList({ handleBack, handleNext }) {
   };
 
   const handleEdit = (template) => {
-    navigate(`/payroll/settings/salary-template?template_id=${template.id}&payrollid=${payrollid}`);
+    const params = new URLSearchParams(searchParams);
+    params.set('template_id', template.id);
+    navigate({ search: params.toString() });
   };
 
   const handleDelete = async (template) => {
@@ -93,7 +95,15 @@ function SalaryTemplateList({ handleBack, handleNext }) {
       subtitle="Manage your Salary Templates for seamless operations"
       secondary={
         <Stack direction="row" spacing={2}>
-          <Button variant="contained" color="primary" onClick={() => navigate(`/payroll/settings/salary-template?payrollid=${payrollid}`)}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => {
+              const params = new URLSearchParams(searchParams);
+              params.set('action', 'new');
+              navigate({ search: params.toString() });
+            }}
+          >
             Create New Template
           </Button>
         </Stack>

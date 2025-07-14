@@ -133,6 +133,9 @@ export default function Profile2() {
   const handleBack = () => {
     setValue(value - 1);
   };
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' }); // or 'auto'
+  }, [value]);
   return (
     <Card
       sx={{

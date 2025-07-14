@@ -68,7 +68,7 @@ function SalaryDetails({
       net_salary: { monthly: 0, annually: 0 },
       is_variable_bonus: false,
       variable_bonus: {
-        bonus_amount: 0,
+        bonus_amount: '',
         pay_cycle_frequency: 'quarterly'
       }
     },
@@ -325,7 +325,6 @@ function SalaryDetails({
                   label="Bonus Amount"
                   name="bonus_amount"
                   size="small"
-                  type="number"
                   value={values.variable_bonus.bonus_amount}
                   onChange={(e) =>
                     setFieldValue('variable_bonus', {
