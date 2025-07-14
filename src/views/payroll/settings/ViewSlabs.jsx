@@ -115,8 +115,12 @@ const ViewSlabs = ({ viewSlabsDialog, setViewSlabsDialog, selectedRecord, setSel
           </Stack>
 
           <Stack direction="row" alignItems="center" spacing={1}>
-            <Typography variant="body1">
+            {/* <Typography variant="body1">
               <strong>PTIN:</strong>
+            </Typography> */}
+            <Typography variant="body1" component="label" htmlFor="ptin">
+              <strong>PTIN               <span style={{ color: 'red' }}> *</span>
+:</strong>
             </Typography>
             <TextField
               value={ptin}

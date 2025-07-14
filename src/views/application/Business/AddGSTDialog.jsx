@@ -180,7 +180,7 @@ const AddGSTDialog = ({ open, selectedGST, handleClose, fetchGSTList }) => {
   const getLabelWithAsterisk = (label, isRequired) => (
   <Typography variant="subtitle1" gutterBottom color="text.secondary">
     {label}
-    {isRequired && <span style={{ color: 'red', fontSize: '1.2em' }}> *</span>}
+    {isRequired && <span style={{ color: 'red' }}> *</span>}
   </Typography>
 );
 

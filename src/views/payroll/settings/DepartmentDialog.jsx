@@ -15,7 +15,7 @@ export default function DepartmentDialog({ open, handleClose, fetchDepartments, 
   const [payrollid, setPayrollId] = useState(null);
 
   const departmentFields = [
-    { name: 'dept_name', label: 'Department Name',required: true },
+    { name: 'dept_name', label: 'Department Name', required: true },
     { name: 'dept_code', label: 'Department Code', required: true },
     { name: 'description', label: 'Description' }
   ];
@@ -69,12 +69,12 @@ export default function DepartmentDialog({ open, handleClose, fetchDepartments, 
       }
     }
   });
-   const getLabelWithAsterisk = (label, isRequired) => (
-  <>
-    {label}
-    {isRequired && <span style={{ color: 'red', fontSize: '1.3rem' }}> *</span>}
-  </>
-);
+  const getLabelWithAsterisk = (label, isRequired) => (
+    <>
+      {label}
+      {isRequired && <span style={{ color: 'red' }}> *</span>}
+    </>
+  );
 
   const { values, setValues, handleChange, handleBlur, errors, touched, handleSubmit, resetForm } = formik;
 
@@ -126,9 +126,9 @@ export default function DepartmentDialog({ open, handleClose, fetchDepartments, 
               {/* <Typography variant="subtitle1" gutterBottom>
                 {field.label}
               </Typography> */}
-                <Typography variant="subtitle1" gutterBottom>
-                                  {getLabelWithAsterisk(field.label, field.required)}
-                            </Typography>
+              <Typography variant="subtitle1" gutterBottom>
+                {getLabelWithAsterisk(field.label, field.required)}
+              </Typography>
               <CustomInput
                 fullWidth
                 name={field.name}

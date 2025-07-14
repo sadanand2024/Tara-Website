@@ -211,7 +211,7 @@ const BusinessBankDetails = ({ user, handleNext, handleBack, tabChange, tabval }
     sx={{ display: 'inline-block' }}
   >
     {label}
-    {isRequired && <span style={{ color: 'red', fontSize: '1.2em' }}> *</span>}
+    {isRequired && <span style={{ color: 'red' }}> *</span>}
   </Typography>
 );
   const renderFields = () => {

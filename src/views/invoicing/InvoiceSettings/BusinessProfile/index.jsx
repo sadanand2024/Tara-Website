@@ -253,7 +253,7 @@ export default function BusinessProfileComponnet({ businessDetails = {}, postTyp
     const getLabelWithAsterisk = (label, isRequired) => (
     <Typography variant="subtitle1" >
       {label}
-      {isRequired && <span style={{ color: 'red', fontSize: '1.2em' }}> *</span>}
+      {isRequired && <span style={{ color: 'red', }}> *</span>}
     </Typography>
   );
   const handleLogoChange = async (event) => {
