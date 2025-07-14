@@ -77,6 +77,7 @@ const Header = ({ hamburgerDisplay = 'block' }) => {
   };
 
   const handleOptionChange = async (event, newValue) => {
+    if (newValue.id === selectedOption.id) return;
     if (newValue?.isAddOption) {
       setOpenAddDialog(true);
       return;
