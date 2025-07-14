@@ -14,7 +14,7 @@ export default function DesignationDialog({ open, handleClose, fetchDesignations
   const [searchParams] = useSearchParams();
   const [payrollid, setPayrollId] = useState(null);
 
-  const designationFields = [{ name: 'designation_name', label: 'Designation Name' }];
+  const designationFields = [{ name: 'designation_name', label: 'Designation Name',required: true }];
 
   useEffect(() => {
     const id = searchParams.get('payrollid');
@@ -59,6 +59,14 @@ export default function DesignationDialog({ open, handleClose, fetchDesignations
       }
     }
   });
+  const getLabelWithAsterisk = (label, isRequired) => (
+  <>
+    {label}
+    {isRequired && <span style={{ color: 'red', fontSize: '1.3rem' }}> *</span>}
+  </>
+);
+
+  
 
   const { values, handleChange, handleBlur, touched, errors, handleSubmit, setValues, resetForm } = formik;
 
@@ -104,9 +112,12 @@ export default function DesignationDialog({ open, handleClose, fetchDesignations
       <Box component="form" onSubmit={handleSubmit} sx={{ p: 2 }}>
         {designationFields.map((field) => (
           <Grid2 key={field.name} size={{ xs: 12 }}>
-            <Typography variant="subtitle1" gutterBottom>
+            {/* <Typography variant="subtitle1" gutterBottom>
               {field.label}
-            </Typography>
+            </Typography> */}
+              <Typography variant="subtitle1" gutterBottom>
+              {getLabelWithAsterisk(field.label, field.required)}
+              </Typography>
             <TextField
               size="small"
               fullWidth

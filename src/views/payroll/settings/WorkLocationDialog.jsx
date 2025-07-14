@@ -11,12 +11,12 @@ import Modal from 'ui-component/extended/Modal';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
 const filingAddress = [
-  { name: 'location_name', label: 'Location Name' },
-  { name: 'address_line1', label: 'Address Line 1' },
-  { name: 'address_line2', label: 'Address Line 2' },
-  { name: 'address_state', label: 'State' },
-  { name: 'address_city', label: 'City' },
-  { name: 'address_pincode', label: 'Pincode' }
+  { name: 'location_name', label: 'Location Name',required: true },
+  { name: 'address_line1', label: 'Address Line 1', required: true },
+  { name: 'address_line2', label: 'Address Line 2', required: true },
+  { name: 'address_state', label: 'State', required: true },
+  { name: 'address_city', label: 'City' ,required: true },
+  { name: 'address_pincode', label: 'Pincode', required: true }
 ];
 export default function WorkLocationDialog({ open, handleClose, fetchWorkLocations, selectedRecord, type, setType }) {
   const [searchParams] = useSearchParams();
@@ -83,6 +83,12 @@ export default function WorkLocationDialog({ open, handleClose, fetchWorkLocatio
       }
     }
   });
+  const getLabelWithAsterisk = (label, isRequired) => (
+  <>
+    {label}
+    {isRequired && <span style={{ color: 'red', fontSize: '1.3rem' }}> *</span>}
+  </>
+);
   useEffect(() => {
     if (type === 'edit' && selectedRecord) {
       setValues(selectedRecord);
@@ -95,9 +101,12 @@ export default function WorkLocationDialog({ open, handleClose, fetchWorkLocatio
       if (field.name === 'address_state') {
         return (
           <Grid2 key={field.name} size={{ xs: 12, sm: 6 }}>
-            <Typography variant="subtitle1" gutterBottom>
+            {/* <Typography variant="subtitle1" gutterBottom>
               {field.label}
-            </Typography>
+            </Typography> */}
+            <Typography variant="subtitle1" gutterBottom>
+                    {getLabelWithAsterisk(field.label, field.required)}
+              </Typography>
             <CustomAutocomplete
               value={values[field.name]}
               name={field.name}
@@ -117,9 +126,12 @@ export default function WorkLocationDialog({ open, handleClose, fetchWorkLocatio
 
       return (
         <Grid2 key={field.name} size={{ xs: 12, sm: 6 }}>
-          <Typography variant="subtitle1" sx={{ mb: 0.5 }}>
+          {/* <Typography variant="subtitle1" sx={{ mb: 0.5 }}>
             {field.label}
-          </Typography>
+          </Typography> */}
+          <Typography variant="subtitle1" sx={{ mb: 0.5 }}>
+              {getLabelWithAsterisk(field.label, field.required)}
+            </Typography>
           <TextField
             size="small"
             name={field.name}
