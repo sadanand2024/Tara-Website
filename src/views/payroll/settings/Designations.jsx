@@ -17,6 +17,7 @@ import {
   Typography,
   CircularProgress
 } from '@mui/material';
+import SearchBar from 'ui-component/extended/SearchBar';
 import MainCard from 'ui-component/cards/MainCard';
 import DeleteDialog from 'ui-component/extended/DeleteDialog';
 import DesignationDialog from './DesignationDialog';
@@ -37,6 +38,7 @@ function Designations({ handleBack, handleNext }) {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
   const [openBulkDialog, setOpenBulkDialog] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const handleOpenDeleteDialog = (designation) => {
     setSelectedRow(designation);
@@ -53,7 +55,12 @@ function Designations({ handleBack, handleNext }) {
   const [searchParams] = useSearchParams();
   const payrollid = searchParams.get('payrollid');
 
-  const paginatedData = designations.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+  // Filter designations based on searchQuery
+  const filteredDesignations = designations.filter((designation) => {
+    const query = searchQuery.toLowerCase();
+    return designation.designation_name?.toLowerCase().includes(query);
+  });
+  const paginatedData = filteredDesignations.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 
   useEffect(() => {
     if (payrollid) fetchDesignations();
@@ -116,12 +123,19 @@ function Designations({ handleBack, handleNext }) {
       title="Designation Details"
       subtitle="Manage your designations for seamless operations"
       secondary={
-        <Stack direction="row" spacing={2}>
-          <Button size="small" variant="outlined" color="secondary" onClick={() => setOpenBulkDialog(true)}>
+        <Stack direction="row" spacing={2} alignItems="center">
+          <SearchBar
+            placeholder="Search designation..."
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setCurrentPage(1);
+            }}
+          />
+          <Button variant="outlined" color="secondary" onClick={() => setOpenBulkDialog(true)}>
             Bulk Upload
           </Button>
           <Button
-            size="small"
             variant="contained"
             color="primary"
             onClick={() => {
@@ -228,7 +242,7 @@ function Designations({ handleBack, handleNext }) {
             </Button>
             {designations.length > 0 && (
               <Pagination
-                count={Math.ceil(designations.length / rowsPerPage)}
+                count={Math.ceil(filteredDesignations.length / rowsPerPage)}
                 page={currentPage}
                 onChange={handlePageChange}
                 shape="rounded"

@@ -347,10 +347,9 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
         let url = selectedRecord?.id ? `/payroll/bonus-incentives/${selectedRecord?.id}` : `/payroll/bonus-incentives`;
         let method = selectedRecord?.id ? 'put' : 'Post';
         let postData = {
-          ...values,
+          bonus_type: values.bonus_type,
           amount: Number(values.amount)
         };
-        postData.payroll = payrollid;
         const { res, error } = await Factory(method, url, postData);
         setLoading(false);
         if (res.status_cd === 0) {
@@ -485,7 +484,7 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
             sx={{ width: '100%' }}
             error={touched[field.name] && Boolean(errors[field.name])}
             helperText={touched[field.name] && errors[field.name]}
-            disabled={from === 'Attendance' && field.name === 'month'}
+            disabled={(from === 'Attendance' || from === 'Bonus & Incentives') && field.name === 'month'}
           />
         ) : field.name === 'doe' || field.name === 'start_month' ? (
           <CustomDatePicker
@@ -522,6 +521,7 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
                 helperText={touched[field.name] && errors[field.name]}
               />
             )}
+            disabled={from === 'Bonus & Incentives'}
           />
         ) : field.name === 'reset_leave_balance_type' ? (
           <CustomAutocomplete

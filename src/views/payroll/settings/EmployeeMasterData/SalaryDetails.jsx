@@ -261,7 +261,6 @@ function SalaryDetails({
       setSubmitRef(formik.submitForm);
     }
   }, [setSubmitRef, formik.submitForm]);
-  console.log(errors);
 
   return (
     <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>

@@ -26,6 +26,7 @@ import { Edit, Delete } from '@mui/icons-material';
 import DeleteDialog from 'ui-component/extended/DeleteDialog';
 import IconButton from '@mui/material/IconButton';
 import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
+import SearchBar from 'ui-component/extended/SearchBar';
 
 function SalaryTemplateList({ handleBack, handleNext }) {
   const [salaryTemplates, setSalaryTemplates] = useState([]);
@@ -37,7 +38,14 @@ function SalaryTemplateList({ handleBack, handleNext }) {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const paginatedData = salaryTemplates.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Filter salaryTemplates based on searchQuery
+  const filteredTemplates = salaryTemplates.filter((template) => {
+    const query = searchQuery.toLowerCase();
+    return template.template_name?.toLowerCase().includes(query) || template.description?.toLowerCase().includes(query);
+  });
+  const paginatedData = filteredTemplates.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 
   const handleOpenDeleteDialog = (template) => {
     setSelectedRow(template);
@@ -94,7 +102,15 @@ function SalaryTemplateList({ handleBack, handleNext }) {
       title="Salary Templates"
       subtitle="Manage your Salary Templates for seamless operations"
       secondary={
-        <Stack direction="row" spacing={2}>
+        <Stack direction="row" spacing={2} alignItems="center">
+          <SearchBar
+            placeholder="Search template..."
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setCurrentPage(1);
+            }}
+          />
           <Button
             variant="contained"
             color="primary"
@@ -172,9 +188,9 @@ function SalaryTemplateList({ handleBack, handleNext }) {
               <Button size="small" variant="outlined" startIcon={<ArrowBackIcon />} onClick={handleBack}>
                 Back
               </Button>
-              {salaryTemplates.length > 0 && (
+              {filteredTemplates.length > 0 && (
                 <Pagination
-                  count={Math.ceil(salaryTemplates.length / rowsPerPage)}
+                  count={Math.ceil(filteredTemplates.length / rowsPerPage)}
                   page={currentPage}
                   onChange={(e, value) => setCurrentPage(value)}
                   color="primary"

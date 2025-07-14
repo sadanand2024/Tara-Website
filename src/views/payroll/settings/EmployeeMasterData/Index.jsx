@@ -29,12 +29,14 @@ import { Edit, Delete } from '@mui/icons-material';
 import DeleteDialog from 'ui-component/extended/DeleteDialog';
 import EmployeeBulkUploadDialog from 'ui-component/extended/EmployeeBulkUploadDialog';
 import AddEmployee from './AddEmployee';
+import SearchBar from 'ui-component/extended/SearchBar';
 function EmployeeList({ handleBack, handleNext }) {
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(false);
   const [payrollId, setPayrollId] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState(''); // Add searchQuery state
   const dispatch = useDispatch();
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
@@ -58,7 +60,19 @@ function EmployeeList({ handleBack, handleNext }) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const paginatedEmployees = employees.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+  // Filter employees based on searchQuery
+  const filteredEmployees = employees.filter((employee) => {
+    const query = searchQuery.toLowerCase();
+    return (
+      employee.associate_id?.toLowerCase().includes(query) ||
+      `${employee.first_name || ''} ${employee.last_name || ''}`.toLowerCase().includes(query) ||
+      employee.department_name?.toLowerCase().includes(query) ||
+      employee.designation_name?.toLowerCase().includes(query) ||
+      employee.work_email?.toLowerCase().includes(query)
+    );
+  });
+
+  const paginatedEmployees = filteredEmployees.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 
   useEffect(() => {
     const id = searchParams.get('payrollid');
@@ -135,7 +149,16 @@ function EmployeeList({ handleBack, handleNext }) {
           title="Employee Master Data"
           subtitle="Manage your Employee Master Data for seamless operations"
           secondary={
-            <Stack direction="row" spacing={2}>
+            <Stack direction="row" spacing={2} alignItems="center">
+              {/* Search input */}
+              <SearchBar
+                placeholder="Search employee..."
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setCurrentPage(1);
+                }}
+              />
               <Button variant="outlined" color="secondary" onClick={() => setOpenBulkDialog(true)}>
                 Bulk Upload
               </Button>
@@ -195,7 +218,7 @@ function EmployeeList({ handleBack, handleNext }) {
                 <TableBody>
                   {paginatedEmployees.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7} align="center" sx={{ height: 300 }}>
+                      <TableCell colSpan={8} align="center" sx={{ height: 300 }}>
                         <EmptyDataPlaceholder title="No Data Found" subtitle="Start Adding data." />
                       </TableCell>
                     </TableRow>
@@ -241,9 +264,9 @@ function EmployeeList({ handleBack, handleNext }) {
                 <Button size="small" variant="outlined" startIcon={<ArrowBackIcon />} onClick={handleBack}>
                   Back
                 </Button>
-                {employees.length > 0 && (
+                {filteredEmployees.length > 0 && (
                   <Pagination
-                    count={Math.ceil(employees.length / rowsPerPage)}
+                    count={Math.ceil(filteredEmployees.length / rowsPerPage)}
                     page={currentPage}
                     onChange={(e, value) => setCurrentPage(value)}
                     color="primary"
