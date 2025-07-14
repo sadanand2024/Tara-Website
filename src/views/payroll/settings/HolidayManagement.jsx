@@ -213,7 +213,10 @@ function HolidayManagement({ handleBack, handleNext }) {
               <TableHead sx={{ bgcolor: 'primary.main' }}>
                 <TableRow>
                   {['S.No', 'Holiday Name', 'Date', 'Description', 'Locations', 'Actions'].map((header, idx) => (
-                    <TableCell key={idx} sx={{ fontWeight: 'bold', textAlign: 'center', color: '#fff !important' }}>
+                    <TableCell
+                      key={idx}
+                      sx={{ fontWeight: 'bold', textAlign: idx === 0 || idx === 5 ? 'center' : 'left', color: '#fff !important' }}
+                    >
                       {header}
                     </TableCell>
                   ))}
@@ -230,12 +233,12 @@ function HolidayManagement({ handleBack, handleNext }) {
                   paginatedData.map((item, index) => (
                     <TableRow key={item.id} hover>
                       <TableCell align="center">{index + 1}</TableCell>
-                      <TableCell align="center">{item.holiday_name}</TableCell>
-                      <TableCell align="center">{`${item.start_date} - ${item.end_date}`}</TableCell>
-                      <TableCell align="center">
+                      <TableCell align="left">{item.holiday_name}</TableCell>
+                      <TableCell align="left">{`${item.start_date} - ${item.end_date}`}</TableCell>
+                      <TableCell align="left">
                         {item.description?.length > 30 ? `${item.description.slice(0, 30)}...` : item.description || 'N/A'}
                       </TableCell>
-                      <TableCell align="center">{item.applicable_for}</TableCell>
+                      <TableCell align="left">{item.applicable_for}</TableCell>
                       <TableCell align="center">
                         <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
                           <IconButton size="small" color="primary" onClick={() => handleEdit(item)}>

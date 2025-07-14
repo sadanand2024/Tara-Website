@@ -179,7 +179,12 @@ function EmployeeList({ handleBack, handleNext }) {
                       (header, idx) => (
                         <TableCell
                           key={idx}
-                          sx={{ whiteSpace: 'nowrap', fontWeight: 'bold', textAlign: 'center', color: '#fff !important' }}
+                          sx={{
+                            whiteSpace: 'nowrap',
+                            fontWeight: 'bold',
+                            textAlign: idx === 0 || idx === 7 ? 'center' : 'left',
+                            color: '#fff !important'
+                          }}
                         >
                           {header}
                         </TableCell>
@@ -198,12 +203,12 @@ function EmployeeList({ handleBack, handleNext }) {
                     paginatedEmployees.map((employee, index) => (
                       <TableRow key={employee.id} hover sx={{ '&:nth-of-type(odd)': { backgroundColor: 'grey.50' } }}>
                         <TableCell align="center">{(currentPage - 1) * rowsPerPage + index + 1}</TableCell>
-                        <TableCell align="center">{employee.associate_id}</TableCell>
-                        <TableCell align="center">{`${employee.first_name || ''} ${employee.last_name || ''}`}</TableCell>
-                        <TableCell align="center">{employee.department_name || '-'}</TableCell>
-                        <TableCell align="center">{employee.designation_name || '-'}</TableCell>
-                        <TableCell align="center">{employee.work_email || '-'}</TableCell>
-                        <TableCell align="center">{employee.employee_status ? 'Active' : 'Inactive'}</TableCell>
+                        <TableCell align="left">{employee.associate_id}</TableCell>
+                        <TableCell align="left">{`${employee.first_name || ''} ${employee.last_name || ''}`}</TableCell>
+                        <TableCell align="left">{employee.department_name || '-'}</TableCell>
+                        <TableCell align="left">{employee.designation_name || '-'}</TableCell>
+                        <TableCell align="left">{employee.work_email || '-'}</TableCell>
+                        <TableCell align="left">{employee.employee_status ? 'Active' : 'Inactive'}</TableCell>
                         <TableCell align="center">
                           <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
                             <IconButton size="small" color="primary" onClick={() => handleEdit(employee)}>

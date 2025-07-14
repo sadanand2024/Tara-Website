@@ -132,7 +132,10 @@ function LeaveManagement({ handleBack, handleNext }) {
               <TableHead sx={{ bgcolor: 'primary.main' }}>
                 <TableRow>
                   {['S.No', 'Leave Name', 'Code', 'Type', 'Period', 'No of Leaves', 'Actions'].map((head, idx) => (
-                    <TableCell key={idx} align="center" sx={{ fontWeight: 'bold', color: '#fff !important' }}>
+                    <TableCell
+                      key={idx}
+                      sx={{ fontWeight: 'bold', color: '#fff !important', textAlign: idx === 0 || idx === 6 ? 'center' : 'left' }}
+                    >
                       {head}
                     </TableCell>
                   ))}
@@ -149,11 +152,11 @@ function LeaveManagement({ handleBack, handleNext }) {
                   paginatedData.map((item, index) => (
                     <TableRow key={item.id}>
                       <TableCell align="center">{index + 1}</TableCell>
-                      <TableCell align="center">{item.name_of_leave}</TableCell>
-                      <TableCell align="center">{item.code}</TableCell>
-                      <TableCell align="center">{item.leave_type}</TableCell>
-                      <TableCell align="center">{item.employee_leave_period}</TableCell>
-                      <TableCell align="center">{item.number_of_leaves}</TableCell>
+                      <TableCell align="left">{item.name_of_leave}</TableCell>
+                      <TableCell align="left">{item.code}</TableCell>
+                      <TableCell align="left">{item.leave_type}</TableCell>
+                      <TableCell align="left">{item.employee_leave_period}</TableCell>
+                      <TableCell align="left">{item.number_of_leaves}</TableCell>
                       <TableCell align="center">
                         <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
                           <IconButton size="small" color="primary" onClick={() => openDialog('edit', item)}>
