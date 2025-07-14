@@ -532,6 +532,10 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
       setViewPreview(true);
     }
   }, [values.benefits, values.deductions]);
+  const formatNumberIN = (value) => {
+    if (value === '' || value === null || value === undefined || isNaN(value)) return '';
+    return Number(value).toLocaleString('en-IN', { maximumFractionDigits: 2, minimumFractionDigits: 2 });
+  };
   return (
     <TableContainer
       component={Paper}
@@ -623,8 +627,8 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
                   </Stack>
                 </TableCell>
 
-                <TableCell>{earning.monthly.toFixed(2)}</TableCell>
-                <TableCell>{earning.annually.toFixed(2)}</TableCell>
+                <TableCell>{formatNumberIN(earning.monthly.toFixed(2))}</TableCell>
+                <TableCell>{formatNumberIN(earning.annually.toFixed(2))}</TableCell>
                 <TableCell>
                   {index !== 0 && (
                     <Button color="error" onClick={() => handleDeleteEarning(index)}>
@@ -648,12 +652,12 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
             <TableCell>Remaining Balance</TableCell>
             <TableCell>
               <Typography sx={{ color: fixedAllowance.monthly < 0 ? 'error.main' : 'inherit' }}>
-                {fixedAllowance.monthly.toFixed(2)}
+                {formatNumberIN(fixedAllowance.monthly.toFixed(2))}
               </Typography>
             </TableCell>
             <TableCell>
               <Typography sx={{ color: fixedAllowance.annually < 0 ? 'error.main' : 'inherit' }}>
-                {fixedAllowance.annually.toFixed(2)}
+                {formatNumberIN(fixedAllowance.annually.toFixed(2))}
               </Typography>
             </TableCell>
           </TableRow>
@@ -685,12 +689,12 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
             <TableCell sx={{ padding: 2 }}></TableCell>
             <TableCell>
               <Typography variant="h5">
-                {typeof values.gross_salary?.monthly === 'number' ? values.gross_salary.monthly.toFixed(2) : '-'}
+                {typeof values.gross_salary?.monthly === 'number' ? formatNumberIN(values.gross_salary.monthly.toFixed(2)) : '-'}
               </Typography>
             </TableCell>
             <TableCell>
               <Typography variant="h5">
-                {typeof values.gross_salary?.annually === 'number' ? values.gross_salary.annually.toFixed(2) : '-'}
+                {typeof values.gross_salary?.annually === 'number' ? formatNumberIN(values.gross_salary.annually.toFixed(2)) : '-'}
               </Typography>
             </TableCell>
             <TableCell></TableCell>
@@ -708,8 +712,8 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
                 <TableRow key={`benefit-${index}`}>
                   <TableCell>{item.component_name}</TableCell>
                   <TableCell>{item.calculation_type}</TableCell>
-                  <TableCell>{item.monthly === 'NA' ? 'NA' : Number(item.monthly || 0).toFixed(2)}</TableCell>
-                  <TableCell>{item.annually === 'NA' ? 'NA' : Number(item.annually || 0).toFixed(2)}</TableCell>
+                  <TableCell>{item.monthly === 'NA' ? 'NA' : formatNumberIN(Number(item.monthly || 0).toFixed(2))}</TableCell>
+                  <TableCell>{item.annually === 'NA' ? 'NA' : formatNumberIN(Number(item.annually || 0).toFixed(2))}</TableCell>
                   <TableCell></TableCell>
                 </TableRow>
               ))}
@@ -720,10 +724,10 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
                 </TableCell>
                 <TableCell></TableCell>
                 <TableCell>
-                  <Typography variant="h5">{Number(values.total_ctc?.monthly || 0).toFixed(2)}</Typography>
+                  <Typography variant="h5">{formatNumberIN(Number(values.total_ctc?.monthly || 0).toFixed(2))}</Typography>
                 </TableCell>
                 <TableCell>
-                  <Typography variant="h5">{Number(values.total_ctc?.annually || 0).toFixed(2)}</Typography>
+                  <Typography variant="h5">{formatNumberIN(Number(values.total_ctc?.annually || 0).toFixed(2))}</Typography>
                 </TableCell>
                 <TableCell></TableCell>
               </TableRow>
@@ -738,8 +742,8 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
                 <TableRow key={`deduction-${index}`}>
                   <TableCell>{item.component_name}</TableCell>
                   <TableCell>{item.calculation_type}</TableCell>
-                  <TableCell>{item.monthly === 'NA' ? 'NA' : Number(item.monthly || 0).toFixed(2)}</TableCell>
-                  <TableCell>{item.annually === 'NA' ? 'NA' : Number(item.annually || 0).toFixed(2)}</TableCell>
+                  <TableCell>{item.monthly === 'NA' ? 'NA' : formatNumberIN(Number(item.monthly || 0).toFixed(2))}</TableCell>
+                  <TableCell>{item.annually === 'NA' ? 'NA' : formatNumberIN(Number(item.annually || 0).toFixed(2))}</TableCell>
                   <TableCell></TableCell>
                 </TableRow>
               ))}
@@ -750,10 +754,10 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
                 </TableCell>
                 <TableCell></TableCell>
                 <TableCell>
-                  <Typography variant="h5">{Number(values.net_salary?.monthly || 0).toFixed(2)}</Typography>
+                  <Typography variant="h5">{formatNumberIN(Number(values.net_salary?.monthly || 0).toFixed(2))}</Typography>
                 </TableCell>
                 <TableCell>
-                  <Typography variant="h5">{Number(values.net_salary?.annually || 0).toFixed(2)}</Typography>
+                  <Typography variant="h5">{formatNumberIN(Number(values.net_salary?.annually || 0).toFixed(2))}</Typography>
                 </TableCell>
                 <TableCell></TableCell>
               </TableRow>

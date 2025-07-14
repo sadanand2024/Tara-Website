@@ -177,7 +177,7 @@ export default function HolidayManagementDialog({ open, handleClose, selectedRec
         resetForm();
         handleClose(); // Reset form and close dialog
       }}
-      header={{ title: 'Add Holiday', subheader: '' }}
+      title={'Add/ Update Holiday'}
       footer={
         <Stack direction="row" sx={{ width: 1, justifyContent: 'space-between', gap: 2 }}>
           <Button

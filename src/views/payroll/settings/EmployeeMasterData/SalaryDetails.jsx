@@ -339,7 +339,7 @@ function SalaryDetails({
                 <Autocomplete
                   size="small"
                   fullWidth
-                  options={['Quarterly', 'Monthly', 'Yearly']}
+                  options={['Monthly', 'Quarterly', 'Yearly']}
                   value={values.variable_bonus.pay_cycle_frequency || null}
                   onChange={(e, newValue) =>
                     setFieldValue('variable_bonus', {
