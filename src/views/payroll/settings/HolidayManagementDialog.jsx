@@ -1,17 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
-import { Button, Box, Stack, Typography } from '@mui/material';
+import { Box, Button, Stack, Typography } from '@mui/material';
 import Grid2 from '@mui/material/Grid2';
-import CustomInput from 'utils/CustomInput';
-import Factory from 'utils/Factory';
-import { useSearchParams } from 'react-router-dom';
-import Modal from 'ui-component/extended/Modal';
 import dayjs from 'dayjs';
-import CustomDatePicker from 'utils/CustomDateInput';
-import CustomAutocomplete from 'utils/CustomAutocomplete';
+import { useFormik } from 'formik';
+import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
+import Modal from 'ui-component/extended/Modal';
+import CustomAutocomplete from 'utils/CustomAutocomplete';
+import CustomDatePicker from 'utils/CustomDateInput';
+import CustomInput from 'utils/CustomInput';
+import Factory from 'utils/Factory';
+import * as Yup from 'yup';
 export default function HolidayManagementDialog({ open, handleClose, selectedRecord, type, fetchHolidayManagementData, workLocations }) {
   const [searchParams] = useSearchParams();
   const [payrollid, setPayrollId] = useState(null); // Payroll ID fetched from URL
@@ -27,12 +27,13 @@ export default function HolidayManagementDialog({ open, handleClose, selectedRec
   const dispatch = useDispatch();
 
   const departmentFields = [
-    { name: 'holiday_name', label: 'Holiday Name' },
-    { name: 'start_date', label: 'Start Date' },
-    { name: 'end_date', label: 'End Date' },
-    { name: 'applicable_for', label: 'This holiday applicable for?' },
-    { name: 'description', label: 'Description' }
+    { name: 'holiday_name', label: 'Holiday Name', required: true },
+    { name: 'start_date', label: 'Start Date', required: true },
+    { name: 'end_date', label: 'End Date', required: true },
+    { name: 'applicable_for', label: 'This holiday applicable for?', required: true },
+    { name: 'description', label: 'Description', required: true }
   ];
+
 
   // Formik validation schema
   const validationSchema = Yup.object({
@@ -42,6 +43,13 @@ export default function HolidayManagementDialog({ open, handleClose, selectedRec
     applicable_for: Yup.string().required('This field is required'),
     description: Yup.string().required('Description is required')
   });
+  const getLabelWithAsterisk = (label, isRequired) => (
+    <span>
+      {label}
+      {isRequired && <span style={{ color: 'red', fontSize: '1.2em', marginLeft: 2 }}>*</span>}
+    </span>
+  );
+
 
   const formik = useFormik({
     initialValues: {
@@ -105,8 +113,9 @@ export default function HolidayManagementDialog({ open, handleClose, selectedRec
         return (
           <Grid2 key={field.name} size={{ xs: 12, sm: 6 }}>
             <Typography variant="body2" sx={{ mb: 1 }}>
-              {field.label}
+              {getLabelWithAsterisk(field.label, field.required)}
             </Typography>
+
             <CustomDatePicker
               name={field.name}
               value={values[field.name] ? dayjs(values[field.name]) : null}
@@ -122,8 +131,9 @@ export default function HolidayManagementDialog({ open, handleClose, selectedRec
         return (
           <Grid2 key={field.name} size={{ xs: 12, sm: 6 }}>
             <Typography variant="body2" sx={{ mb: 1 }}>
-              {field.label}
+              {getLabelWithAsterisk(field.label, field.required)}
             </Typography>
+
             <CustomAutocomplete
               value={workLocations.find((loc) => loc.location_name === values[field.name]) || null} // Find the full object based on location_name
               onChange={(e, newValue) => {
@@ -143,9 +153,13 @@ export default function HolidayManagementDialog({ open, handleClose, selectedRec
       } else {
         return (
           <Grid2 key={field.name} size={{ xs: 12, sm: 6 }}>
-            <Typography variant="body2" sx={{ mb: 1 }}>
+            {/* <Typography variant="body2" sx={{ mb: 1 }}>
               {field.label}
+            </Typography> */}
+            <Typography variant="body2" sx={{ mb: 1 }}>
+              {getLabelWithAsterisk(field.label, field.required)}
             </Typography>
+
             <CustomInput
               fullWidth
               name={field.name}

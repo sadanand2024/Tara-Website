@@ -1,17 +1,17 @@
 'use client';
-import React, { useEffect, useState } from 'react';
-import { useFormik, FormikProvider } from 'formik';
-import * as Yup from 'yup';
-import { Box, Grid2, Typography, Button } from '@mui/material';
+import { Box, Grid2, Typography } from '@mui/material';
 import dayjs from 'dayjs';
+import { FormikProvider, useFormik } from 'formik';
+import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
-import Factory from 'utils/Factory';
-import CustomInput from 'utils/CustomInput';
 import CustomAutocomplete from 'utils/CustomAutocomplete';
 import CustomDatePicker from 'utils/CustomDateInput';
+import CustomInput from 'utils/CustomInput';
+import Factory from 'utils/Factory';
 import { indian_States_And_UTs } from 'utils/indian_States_And_UT';
+import * as Yup from 'yup';
 
 const PersonalDetails = ({ fetchEmployeeData, employeeData, createdEmployeeId, setSubmitRef, onNext }) => {
   const [searchParams] = useSearchParams();
@@ -21,24 +21,24 @@ const PersonalDetails = ({ fetchEmployeeData, employeeData, createdEmployeeId, s
 
   const [loading, setLoading] = useState(false);
   const employeeFields = [
-    { name: 'dob', label: 'Date of Birth' },
-    { name: 'guardian_name', label: 'Guardian Name' },
-    { name: 'pan', label: 'PAN' },
-    { name: 'aadhar', label: 'Aadhar' },
-    { name: 'age', label: 'Age' },
-    { name: 'alternate_contact_number', label: 'Alternate Contact Number' },
-    { name: 'marital_status', label: 'Marital Status' },
-    { name: 'blood_group', label: 'Blood Group' }
+    { name: 'dob', label: 'Date of Birth', required: false },
+    { name: 'guardian_name', label: 'Guardian Name', required: true },
+    { name: 'pan', label: 'PAN', required: true },
+    { name: 'aadhar', label: 'Aadhar', required: false },
+    { name: 'age', label: 'Age', required: false },
+    { name: 'alternate_contact_number', label: 'Alternate Contact Number', required: false },
+    { name: 'marital_status', label: 'Marital Status', required: false },
+    { name: 'blood_group', label: 'Blood Group', required: false }
   ];
-
+  
   const addressFields = [
-    { name: 'address_line1', label: 'Address Line 1' },
-    { name: 'address_line2', label: 'Address Line 2' },
-
-    { name: 'address_city', label: 'City' },
-    { name: 'address_state', label: 'State' },
-    { name: 'address_pinCode', label: 'Pincode' }
+    { name: 'address_line1', label: 'Address Line 1', required: true },
+    { name: 'address_line2', label: 'Address Line 2', required: false },
+    { name: 'address_city', label: 'City', required: false },
+    { name: 'address_state', label: 'State', required: false },
+    { name: 'address_pinCode', label: 'Pincode', required: false }
   ];
+  
   const initialValues = {
     dob: '',
     guardian_name: '',
@@ -56,29 +56,35 @@ const PersonalDetails = ({ fetchEmployeeData, employeeData, createdEmployeeId, s
       address_pinCode: ''
     }
   };
+  const getLabelWithAsterisk = (label, isRequired) => (
+    <span>
+      {label}
+      {isRequired && <span style={{ color: 'red', fontSize: '1.2em', marginLeft: 2 }}>*</span>}
+    </span>
+  );
 
   const validationSchema = Yup.object({
-    dob: Yup.date().required('Required'),
+    // dob: Yup.date().required('Required'),
     guardian_name: Yup.string().required('Required'),
     pan: Yup.string()
       .required()
       .matches(/^[A-Z]{5}\d{4}[A-Z]{1}$/, 'Invalid PAN'),
-    aadhar: Yup.string()
-      .required()
-      .matches(/^\d{12}$/, 'Must be 12 digits'),
+    // aadhar: Yup.string()
+    //   .required()
+    //   .matches(/^\d{12}$/, 'Must be 12 digits'),
     // age: Yup.number().required().positive().integer(), // REMOVE age validation
     // alternate_contact_number: Yup.string()
     //   .required()
     //   .matches(/^\d{10}$/, 'Must be 10 digits'),
-    marital_status: Yup.string().required('Required'),
-    blood_group: Yup.string().required('Required'),
+    // marital_status: Yup.string().required('Required'),
+    // blood_group: Yup.string().required('Required'),
     address: Yup.object().shape({
       address_line1: Yup.string().required('Required'),
-      address_city: Yup.string().required('Required'),
-      address_state: Yup.string().required('Required'),
-      address_pinCode: Yup.string()
-        .required()
-        .matches(/^\d{6}$/, 'Invalid Pincode')
+      // address_city: Yup.string().required('Required'),
+      // address_state: Yup.string().required('Required'),
+      // address_pinCode: Yup.string()
+      //   .required()
+      //   .matches(/^\d{6}$/, 'Invalid Pincode')
     })
   });
 
@@ -164,7 +170,10 @@ const PersonalDetails = ({ fetchEmployeeData, employeeData, createdEmployeeId, s
     if (field.name === 'age') {
       return (
         <>
-          <Typography variant="subtitle1">{field.label}</Typography>
+          {/* <Typography variant="subtitle1">{field.label}</Typography> */}
+          <Typography variant="subtitle1">
+            {getLabelWithAsterisk(field.label, field.required)}
+          </Typography>
           <CustomInput
             fullWidth
             name={fieldName}
@@ -178,7 +187,10 @@ const PersonalDetails = ({ fetchEmployeeData, employeeData, createdEmployeeId, s
 
     return (
       <>
-        <Typography variant="subtitle1">{field.label}</Typography>
+        {/* <Typography variant="subtitle1">{field.label}</Typography> */}
+        <Typography variant="subtitle1">
+  {getLabelWithAsterisk(field.label, field.required)}
+</Typography>
 
         {field.name === 'dob' ? (
           <CustomDatePicker

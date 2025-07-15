@@ -1,36 +1,34 @@
-import React, { useEffect, useState } from 'react';
+import { Delete, Edit } from '@mui/icons-material';
+import AddIcon from '@mui/icons-material/Add';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import {
+  Box,
+  Button,
+  IconButton,
+  Pagination,
+  Paper,
+  Stack,
   Table,
+  TableBody,
+  TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  TableCell,
-  TableBody,
-  Paper,
-  Button,
-  Stack,
-  Box,
-  Pagination,
-  Grid2,
   Typography
 } from '@mui/material';
-import SearchBar from 'ui-component/extended/SearchBar';
-import MainCard from 'ui-component/cards/MainCard';
-import ActionCell from '../../../ui-component/extended/ActionCell';
-import WorkLocationDialog from './WorkLocationDialog';
-import { useNavigate, useSearchParams } from 'react-router-dom';
 import CircularProgress from '@mui/material/CircularProgress';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
-import Factory from 'utils/Factory';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
-import EmptyDataPlaceholder from 'ui-component/extended/EmptyDataPlaceholder';
-import DeleteDialog from '../../../ui-component/extended/DeleteDialog'; // adjust path accordingly
-import { IconButton, Tooltip } from '@mui/material'; // Add these if not already
-import { Edit, Delete } from '@mui/icons-material';
+import MainCard from 'ui-component/cards/MainCard';
 import BulkUploadDialog from 'ui-component/extended/BulkUploadDialog';
-import AddIcon from '@mui/icons-material/Add';
+import EmptyDataPlaceholder from 'ui-component/extended/EmptyDataPlaceholder';
+import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
+import SearchBar from 'ui-component/extended/SearchBar';
+import Factory from 'utils/Factory';
+import DeleteDialog from '../../../ui-component/extended/DeleteDialog'; // adjust path accordingly
+import WorkLocationDialog from './WorkLocationDialog';
 
 function Worklocation({ handleBack, handleNext }) {
   const [openDialog, setOpenDialog] = useState(false);

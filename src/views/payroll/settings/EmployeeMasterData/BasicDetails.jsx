@@ -1,32 +1,32 @@
-import React, { useState, useEffect } from 'react';
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
-import { FormControlLabel, Checkbox, Stack, Button, Box, Grid2, Typography, Divider, FormGroup, TextField } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-import CustomInput from 'utils/CustomInput';
-import CustomAutocomplete from 'utils/CustomAutocomplete';
+import { Box, Button, Checkbox, Divider, FormControlLabel, FormGroup, Grid2, TextField, Typography } from '@mui/material';
+import { IconPlus } from '@tabler/icons-react';
 import dayjs from 'dayjs';
-import CustomDatePicker from 'utils/CustomDateInput';
+import { useFormik } from 'formik';
+import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import Factory from 'utils/Factory';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
+import CustomAutocomplete from 'utils/CustomAutocomplete';
+import CustomDatePicker from 'utils/CustomDateInput';
+import CustomInput from 'utils/CustomInput';
+import Factory from 'utils/Factory';
+import * as Yup from 'yup';
 import DepartmentDialog from '../DepartmentDialog';
 import DesignationDialog from '../DesignationDialog';
-import { IconPlus } from '@tabler/icons-react';
 
 const employeeFields = [
-  { name: 'first_name', label: 'First Name' },
-  { name: 'middle_name', label: 'Middle Name' },
-  { name: 'last_name', label: 'Last Name' },
-  { name: 'associate_id', label: 'Employee ID' },
-  { name: 'doj', label: 'Date of Joining' },
-  { name: 'work_email', label: 'Work Email' },
-  { name: 'mobile_number', label: 'Mobile Number' },
-  { name: 'gender', label: 'Gender', options: ['Male', 'Female'] },
-  { name: 'work_location', label: 'Work Location' },
-  { name: 'designation', label: 'Designation' },
-  { name: 'department', label: 'Department' }
+  { name: 'first_name', label: 'First Name', required: true },
+  { name: 'middle_name', label: 'Middle Name', required: false },
+  { name: 'last_name', label: 'Last Name', required: false },
+  { name: 'associate_id', label: 'Employee ID', required: false },
+  { name: 'doj', label: 'Date of Joining', required: true },
+  { name: 'work_email', label: 'Work Email', required: true },
+  { name: 'mobile_number', label: 'Mobile Number', required: false },
+  { name: 'gender', label: 'Gender', required: true },
+  { name: 'work_location', label: 'Work Location', required: true },
+  { name: 'designation', label: 'Designation', required: true },
+  { name: 'department', label: 'Department', required: true }
+
 ];
 function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, onNext, setSubmitRef }) {
   const [loading, setLoading] = useState(false); // State for loader
@@ -93,28 +93,30 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
         return Yup.object().shape({
           pf_account_number: parent?.epf_enabled
             ? Yup.string()
-                .required('PF Account Number is required')
-                .matches(/^[A-Z0-9]+$/, 'Invalid PF Account Number')
+              .nullable()
+              .matches(/^[A-Z]{5}\d{10,14}$/, 'Invalid PF Account Number. Format: 5 letters followed by 10–14 digits')
             : Yup.string().nullable(),
+
           uan: parent?.epf_enabled
             ? Yup.string()
-                .required('UAN is required')
-                .matches(/^[0-9]{12}$/, 'UAN must be a 12-digit number')
+              .required('UAN is required')
+              .matches(/^[0-9]{12}$/, 'UAN must be a 12-digit number')
             : Yup.string().nullable()
         });
       }),
 
       employee_state_insurance: Yup.lazy((_, { parent }) => {
         return Yup.object().shape({
-          esi_number: parent?.esi_enabled
-            ? Yup.string()
-                .required('ESI Number is required')
-                .matches(/^[0-9]{10}$/, 'ESI Number must be 10 digits')
-            : Yup.string().nullable()
+          // esi_number: parent?.esi_enabled
+          //   ? Yup.string()
+          //     .required('ESI Number is required')
+          //     .matches(/^[0-9]{10}$/, 'ESI Number must be 10 digits')
+          //   : Yup.string().nullable()
         });
       })
     })
   });
+
 
   const formik = useFormik({
     initialValues: {
@@ -183,10 +185,19 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
       }
     }
   });
+  const getLabelWithAsterisk = (label, isRequired) => (
+    <>
+      {label}
+      {isRequired && <span style={{ color: 'red' }}> *</span>}
+    </>
+  );
   const renderFields = (fields) => {
     return fields.map((field) => (
       <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-        <Typography variant="subtitle1">{field.label}</Typography>
+        {/* <Typography variant="subtitle1">{field.label}</Typography> */}
+        <Typography variant="subtitle1">
+          {getLabelWithAsterisk(field.label, field.required)}
+        </Typography>
         {field.name === 'gender' || field.name === 'work_location' || field.name === 'designation' || field.name === 'department' ? (
           <CustomAutocomplete
             value={
@@ -238,6 +249,38 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
             ListboxProps={
               field.name === 'designation'
                 ? {
+                  style: { maxHeight: 250 },
+                  component: React.forwardRef(function CustomListboxComponent(props, ref) {
+                    const { children, ...rest } = props;
+                    return (
+                      <ul ref={ref} {...rest}>
+                        {children}
+                        <li style={{ padding: '8px 16px' }}>
+                          <Button
+                            startIcon={<IconPlus />}
+                            variant="contained"
+                            fullWidth
+                            size="small"
+                            sx={{
+                              bgcolor: 'primary.main',
+                              '&:hover': {
+                                bgcolor: 'primary.dark'
+                              }
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpenDesignationDialog();
+                            }}
+                          >
+                            Add Designation
+                          </Button>
+                        </li>
+                      </ul>
+                    );
+                  })
+                }
+                : field.name === 'department'
+                  ? {
                     style: { maxHeight: 250 },
                     component: React.forwardRef(function CustomListboxComponent(props, ref) {
                       const { children, ...rest } = props;
@@ -258,48 +301,16 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
                               }}
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleOpenDesignationDialog();
+                                handleOpenDepartmentDialog();
                               }}
                             >
-                              Add Designation
+                              Add Department
                             </Button>
                           </li>
                         </ul>
                       );
                     })
                   }
-                : field.name === 'department'
-                  ? {
-                      style: { maxHeight: 250 },
-                      component: React.forwardRef(function CustomListboxComponent(props, ref) {
-                        const { children, ...rest } = props;
-                        return (
-                          <ul ref={ref} {...rest}>
-                            {children}
-                            <li style={{ padding: '8px 16px' }}>
-                              <Button
-                                startIcon={<IconPlus />}
-                                variant="contained"
-                                fullWidth
-                                size="small"
-                                sx={{
-                                  bgcolor: 'primary.main',
-                                  '&:hover': {
-                                    bgcolor: 'primary.dark'
-                                  }
-                                }}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleOpenDepartmentDialog();
-                                }}
-                              >
-                                Add Department
-                              </Button>
-                            </li>
-                          </ul>
-                        );
-                      })
-                    }
                   : undefined
             }
           />
@@ -516,11 +527,17 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
             <Grid2 container spacing={2} sx={{ mt: 1, ml: 3 }}>
               <Grid2 size={{ xs: 12, sm: 6 }}>
                 <Typography variant="subtitle2" sx={{ color: 'grey.800', mb: 0.5 }}>
-                  PF Account Number{' '}
-                  <Typography component="span" sx={{ fontSize: '0.75rem', color: 'grey.600' }}>
-                    (e.g. ABCD1234567)
-                  </Typography>
+                  {getLabelWithAsterisk(
+                    <>
+                      PF Account Number{' '}
+                      <Typography component="span" sx={{ fontSize: '0.75rem', color: 'grey.600' }}>
+                        (e.g. ABCD1234567)
+                      </Typography>
+                    </>,
+                    false // or false based on conditional logic
+                  )}
                 </Typography>
+
                 <TextField
                   fullWidth
                   value={values.statutory_components?.employee_provident_fund?.pf_account_number || ''}
@@ -538,12 +555,24 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
                 />
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6 }}>
-                <Typography variant="subtitle2" sx={{ color: 'grey.800', mb: 0.5 }}>
+                {/* <Typography variant="subtitle2" sx={{ color: 'grey.800', mb: 0.5 }}>
                   UAN Number{' '}
                   <Typography component="span" sx={{ fontSize: '0.75rem', color: 'grey.600' }}>
                     (e.g. 123456789012)
                   </Typography>
+                </Typography> */}
+                <Typography variant="subtitle2" sx={{ color: 'grey.800', mb: 0.5 }}>
+                  {getLabelWithAsterisk(
+                    <>
+                      UAN Number{' '}
+                      <Typography component="span" sx={{ fontSize: '0.75rem', color: 'grey.600', display: 'inline' }}>
+                        (e.g. 123456789012)
+                      </Typography>
+                    </>,
+                    true // Set to `true` if UAN is required
+                  )}
                 </Typography>
+
                 <TextField
                   fullWidth
                   value={values.statutory_components?.employee_provident_fund?.uan || ''}
@@ -582,11 +611,17 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
             <Grid2 container spacing={2} sx={{ mt: 1, ml: 3 }}>
               <Grid2 size={{ xs: 12, sm: 6 }}>
                 <Typography variant="subtitle2" sx={{ color: 'grey.800', mb: 0.5 }}>
-                  ESI Number{' '}
-                  <Typography component="span" sx={{ fontSize: '0.75rem', color: 'grey.600' }}>
-                    (e.g. 1234567890)
-                  </Typography>
+                  {getLabelWithAsterisk(
+                    <>
+                      ESI Number{' '}
+                      <Typography component="span" sx={{ fontSize: '0.75rem', color: 'grey.600', display: 'inline' }}>
+                        (e.g. 1234567890)
+                      </Typography>
+                    </>,
+                    false // Set this to `true` if ESI Number is required based on conditions
+                  )}
                 </Typography>
+
                 <TextField
                   fullWidth
                   value={values.statutory_components?.employee_state_insurance?.esi_number || ''}
