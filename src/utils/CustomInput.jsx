@@ -18,12 +18,43 @@ const CustomInput = ({
   rows,
   onBlur,
   name,
+  label,
+  required,
+  inputProps,
+  onChange,
   ...props
 }) => {
   const [showPassword, setShowPassword] = useState(false);
 
   const handleTogglePassword = () => {
     setShowPassword((prev) => !prev);
+  };
+
+  // Render label with red asterisk if required
+  let renderedLabel = label;
+  if (label && required) {
+    renderedLabel = (
+      <span>
+        {label}
+        <span style={{ color: 'red' }}> *</span>
+      </span>
+    );
+  }
+
+  // Custom onChange to filter input if pattern is set
+  const handleInputChange = (e) => {
+    if (inputProps && inputProps.pattern === '[0-9]*') {
+      // Block if any non-digit character is present
+      if (/[^0-9]/.test(e.target.value)) {
+        return;
+      }
+    } else if (inputProps && inputProps.pattern) {
+      const regex = new RegExp(inputProps.pattern);
+      if (!regex.test(e.target.value) && e.target.value !== '') {
+        return;
+      }
+    }
+    if (onChange) onChange(e);
   };
 
   return (
@@ -63,6 +94,9 @@ const CustomInput = ({
       multiline={multiline}
       rows={rows}
       maxRows={maxRows}
+      label={renderedLabel}
+      inputProps={inputProps}
+      onChange={handleInputChange}
       {...props}
     />
   );
