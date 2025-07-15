@@ -266,11 +266,11 @@ const MainRoutes = {
       element: <PayrollDashboard />
     },
     {
-      path: '/payroll/employee-dashboard',
+      path: '/app/payroll/employee-dashboard',
       element: <EmployeeDashboard />
     },
     {
-      path: '/payroll/payroll-workflows',
+      path: '/app/payroll/payroll-workflows',
       element: <PayrollWorkflows />
     },
     {

@@ -114,7 +114,7 @@ export default function PayrollStatusSummary({ payrollId, financialYear, monthWi
                                     onClick={() => {
                                       if (businessDetails?.payroll_id) {
                                         navigate(
-                                          `/payroll/employee-dashboard?payrollid=${businessDetails?.payroll_id}&month=${selectedMonth}&financialYear=${financialYear}&monthwisedata=${encodeURIComponent(JSON.stringify(monthWiseData))}&tabvalue=1`
+                                          `/app/payroll/employee-dashboard?payrollid=${businessDetails?.payroll_id}&month=${selectedMonth}&financialYear=${financialYear}&monthwisedata=${encodeURIComponent(JSON.stringify(monthWiseData))}&tabvalue=1`
                                         );
                                       }
                                     }}

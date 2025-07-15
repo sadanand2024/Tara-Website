@@ -371,7 +371,7 @@ const PayrollDashboard = () => {
                         onClick={() => {
                           if (businessDetails?.payroll_id) {
                             navigate(
-                              `/payroll/employee-dashboard?payrollid=${businessDetails?.payroll_id}&month=${selectedMonth}&financialYear=${financialYear}`
+                              `/app/payroll/employee-dashboard?payrollid=${businessDetails?.payroll_id}&month=${selectedMonth}&financialYear=${financialYear}`
                             );
                           }
                         }}

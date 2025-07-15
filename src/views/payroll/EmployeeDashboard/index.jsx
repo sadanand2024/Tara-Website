@@ -118,7 +118,7 @@ export default function Index() {
 
   const getworkFlowStatusData = async () => {
     if (!payrollId || !selectedMonth || !financialYear) return;
-    let url = `/payroll/payroll-workflows/detail-or-create/?payroll=${payrollId}&month=${selectedMonth}&financial_year=${financialYear}`;
+    let url = `/app/payroll/payroll-workflows/detail-or-create/?payroll=${payrollId}&month=${selectedMonth}&financial_year=${financialYear}`;
     const { res } = await Factory('get', url, {});
     if (res?.status_cd === 0) {
       const data = res.data;
@@ -160,14 +160,14 @@ export default function Index() {
   };
 
   const handleCardClick = (href, index) => {
-    navigate(`/payroll${href}?payrollid=${payrollId}&tabValue=${index}&month=${month}&financial_year=${financialYear}`);
+    navigate(`/app/payroll${href}?payrollid=${payrollId}&tabValue=${index}&month=${month}&financial_year=${financialYear}`);
   };
 
   const putStatusApicall = async (index, status) => {
     const field = workflowFieldMap[index];
     if (!field || !payrollId) return;
     const objWithId = doneStatus.find((item) => typeof item === 'object' && item !== null && 'id' in item);
-    const url = `/payroll/payroll-workflows/${objWithId?.id}/update/`;
+    const url = `/app/payroll/payroll-workflows/${objWithId?.id}/update/`;
     const payload = {
       payroll: payrollId,
       month: selectedMonth,

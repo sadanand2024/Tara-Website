@@ -266,16 +266,14 @@ function Worklocation({ handleBack, handleNext }) {
                   <TableCell align="center">{location.address_state || 'N/A'}</TableCell>
                   <TableCell align="center">{location.employee_count || 0}</TableCell>
                   <TableCell align="center">
-                    {index !== 0 && (
-                      <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
-                        <IconButton size="small" color="primary" onClick={() => handleEdit(location)}>
-                          <Edit />
-                        </IconButton>
-                        <IconButton size="small" color="error" onClick={() => handleOpenDeleteDialog(location)}>
-                          <Delete />
-                        </IconButton>
-                      </Box>
-                    )}
+                    <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
+                      <IconButton size="small" color="primary" onClick={() => handleEdit(location)}>
+                        <Edit />
+                      </IconButton>
+                      <IconButton size="small" color="error" onClick={() => handleOpenDeleteDialog(location)}>
+                        <Delete />
+                      </IconButton>
+                    </Box>
                   </TableCell>
                 </TableRow>
               ))

@@ -26,6 +26,7 @@ import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import React from 'react';
 import Tds from './Tds';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import SearchBar from 'ui-component/extended/SearchBar';
 // TabPanel Component
 const TabPanel = ({ children, value, index }) => (
   <div role="tabpanel" hidden={value !== index} id={`tabpanel-${index}`} aria-labelledby={`tab-${index}`}>
@@ -48,10 +49,18 @@ const PayrollWorkflows = ({ type }) => {
   const [loading, setLoading] = useState(false);
   const [employeeMasterData, setEmployeeMasterData] = useState([]);
   const [attendanceData, setAttendanceData] = useState([]);
+  const [exitsData, setExitsData] = useState([]);
+  const [loansData, setLoansData] = useState([]);
+  const [bonusData, setBonusData] = useState([]);
+  const [salaryRevisionData, setSalaryRevisionData] = useState([]);
+  const [tdsData, setTdsData] = useState([]);
   const dispatch = useDispatch();
   const payrollId = searchParams.get('payrollid');
   const month = searchParams.get('month');
   const financialYear = searchParams.get('financial_year');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Fetch functions for each tab
   const fetchEmployeeMasterData = async () => {
     setLoading(true);
     const url = `/payroll/employees?payroll_id=${payrollId}&month=${month}&financial_year=${financialYear}`;
@@ -84,36 +93,80 @@ const PayrollWorkflows = ({ type }) => {
       );
     }
   };
-  const generateAttandance = async () => {
-    if (!month) return;
+
+  const fetchExitsData = async () => {
     setLoading(true);
-    const url = `/payroll/employee_attendance_current_month_automate?payroll_id=${payrollId}&month=${month}&financial_year=${financialYear}`;
-    const { res } = await Factory('post', url, {});
+    const url = `/payroll/payroll-exit-settlement?payroll_id=${payrollId}`;
+    const { res } = await Factory('get', url, {});
     setLoading(false);
     if (res?.status_cd === 0) {
-      dispatch(
-        openSnackbar({
-          open: true,
-          message: res.message,
-          variant: 'alert',
-          alert: { color: 'success' },
-          close: false
-        })
-      );
-      // ✅ Immediately fetch updated attendance
-      getAttandanceData();
+      setExitsData(res.data || []);
     } else {
-      dispatch(
-        openSnackbar({
-          open: true,
-          message: JSON.stringify(res.message),
-          variant: 'alert',
-          alert: { color: 'error' },
-          close: false
-        })
-      );
+      setExitsData([]);
     }
   };
+
+  const fetchLoansData = async () => {
+    setLoading(true);
+    const url = `/payroll/payroll-advance-summary?payroll_id=${payrollId}`;
+    const { res } = await Factory('get', url, {});
+    setLoading(false);
+    if (res?.status_cd === 0) {
+      setLoansData(res.data || []);
+    } else {
+      setLoansData([]);
+    }
+  };
+
+  const fetchBonusData = async () => {
+    setLoading(true);
+    const url = `/payroll/bonus-incentives/by-payroll-month?payroll_id=${payrollId}&month=${month}&financial_year=${financialYear}`;
+    const { res } = await Factory('get', url, {});
+    setLoading(false);
+    if (res?.status_cd === 0) {
+      setBonusData(res.data || []);
+    } else {
+      setBonusData([]);
+    }
+  };
+
+  const fetchSalaryRevisionData = async () => {
+    setLoading(true);
+    const year = financialYear ? financialYear.split('-')[0] : '';
+    const url = `/payroll/salary-revision?payroll_id=${payrollId}&month=${month}&year=${year}`;
+    const { res } = await Factory('get', url, {});
+    setLoading(false);
+    if (res?.status_cd === 0) {
+      setSalaryRevisionData(res.data || []);
+    } else {
+      setSalaryRevisionData([]);
+    }
+  };
+
+  const fetchTdsData = async () => {
+    setLoading(true);
+    const url = `/payroll/employee-tds?payroll_id=${payrollId}&month=${month}&financial_year=${financialYear}`;
+    const { res } = await Factory('get', url, {});
+    setLoading(false);
+    if (res?.status_cd === 0) {
+      setTdsData(res.data || []);
+    } else {
+      setTdsData([]);
+    }
+  };
+
+  // Fetch data when tab or dependencies change
+  useEffect(() => {
+    if (!payrollId) return;
+    if (activeTab === 0) fetchEmployeeMasterData();
+    else if (activeTab === 1) fetchExitsData();
+    else if (activeTab === 2) getAttandanceData();
+    else if (activeTab === 3) fetchLoansData();
+    else if (activeTab === 4) fetchBonusData();
+    else if (activeTab === 5) fetchSalaryRevisionData();
+    else if (activeTab === 6) fetchTdsData();
+    // eslint-disable-next-line
+  }, [activeTab, payrollId, month, financialYear]);
 
   // Tab Configuration
   const tabs = useMemo(
@@ -238,12 +291,86 @@ const PayrollWorkflows = ({ type }) => {
     RemoveCircleOutlineIcon // Other Deductions
   ];
 
+  // Filtering logic for each tab
+  const getFilteredData = () => {
+    const query = searchQuery.toLowerCase();
+    const tabLabel = tabs[activeTab].label;
+    if (tabLabel === 'New Joiners') {
+      return employeeMasterData.filter(
+        (item) =>
+          (item.associate_id || '').toLowerCase().includes(query) ||
+          (item.first_name || '').toLowerCase().includes(query) ||
+          (item.last_name || '').toLowerCase().includes(query) ||
+          (item.department_name || '').toLowerCase().includes(query) ||
+          (item.designation_name || '').toLowerCase().includes(query)
+      );
+    } else if (tabLabel === 'Attendance') {
+      return attendanceData.filter(
+        (item) =>
+          (item.associate_id || '').toLowerCase().includes(query) ||
+          (item.employee_name || '').toLowerCase().includes(query) ||
+          (item.department || '').toLowerCase().includes(query) ||
+          (item.designation || '').toLowerCase().includes(query)
+      );
+    } else if (tabLabel === 'Exits') {
+      return exitsData.filter(
+        (item) =>
+          (item.associate_id || '').toLowerCase().includes(query) ||
+          (item.employee_name || '').toLowerCase().includes(query) ||
+          (item.department || '').toLowerCase().includes(query) ||
+          (item.designation || '').toLowerCase().includes(query) ||
+          (item.exit_date || '').toLowerCase().includes(query)
+      );
+    } else if (tabLabel === 'Loans & Advances') {
+      return loansData.filter(
+        (item) =>
+          (item.associate_id || '').toLowerCase().includes(query) ||
+          (item.employee_name || '').toLowerCase().includes(query) ||
+          (item.department || '').toLowerCase().includes(query) ||
+          (item.designation || '').toLowerCase().includes(query) ||
+          (item.loan_type || '').toLowerCase().includes(query)
+      );
+    } else if (tabLabel === 'Bonus & Incentives') {
+      return bonusData.filter(
+        (item) =>
+          (item.associate_id || '').toLowerCase().includes(query) ||
+          (item.employee_name || '').toLowerCase().includes(query) ||
+          (item.department || '').toLowerCase().includes(query) ||
+          (item.designation || '').toLowerCase().includes(query) ||
+          (item.bonus_type || '').toLowerCase().includes(query)
+      );
+    } else if (tabLabel === 'Salary Revisions') {
+      return salaryRevisionData.filter(
+        (item) =>
+          (item.associate_id || '').toLowerCase().includes(query) ||
+          (item.employee_name || '').toLowerCase().includes(query) ||
+          (item.department || '').toLowerCase().includes(query) ||
+          (item.designation || '').toLowerCase().includes(query)
+      );
+    } else if (tabLabel === 'Tds') {
+      return tdsData.filter(
+        (item) =>
+          (item.associate_id || '').toLowerCase().includes(query) ||
+          (item.employee_name || '').toLowerCase().includes(query) ||
+          (item.pan || '').toLowerCase().includes(query) ||
+          (item.regime || '').toLowerCase().includes(query)
+      );
+    }
+    return undefined;
+  };
+
   return (
     <MainCard
       title="Employee Dashboard"
       tagline="Payroll Workflow"
       secondary={
         <Stack direction="row" sx={{ gap: 2 }}>
+          <SearchBar
+            placeholder={`Search ${tabs[activeTab].label}...`}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            sx={{ minWidth: 250 }}
+          />
           <Button startIcon={<ArrowBackIcon />} variant="outlined" color="primary" onClick={() => navigate(-1)}>
             Back to dashboard
           </Button>
@@ -298,9 +425,10 @@ const PayrollWorkflows = ({ type }) => {
               setOpenDialog={setOpenDialog}
               fields={tab.fields}
               loading={loading}
+              filteredData={getFilteredData()}
               employeeMasterData={employeeMasterData}
               fetchAttendance={tab.label === 'Attendance' ? getAttandanceData : undefined}
-              attendanceData={tab.label === 'Attendance' ? attendanceData : undefined}
+              attendanceData={tab.label === 'Attendance' ? getFilteredData() : undefined}
               handleBack={() => setActiveTab((prev) => prev - 1)}
               handleNext={() => setActiveTab((prev) => prev + 1)}
             />
