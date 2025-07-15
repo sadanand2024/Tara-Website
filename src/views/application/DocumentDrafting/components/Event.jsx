@@ -6,6 +6,8 @@ import { useSelector } from 'react-redux';
 import Factory from 'utils/Factory';
 import SelectedEvent from './SelectedEvent';
 import DocumentSelectionPage from './DocumentSelectionPage';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+ 
 
 const documents = [
   {
@@ -185,20 +187,32 @@ if (category) {
   return (
     // <Box sx={{ p: 4 }}>
     <Box sx={{ p: { xs: 1, md: 4 }, background: '#fff', minHeight: '100vh' }}>
-       <Typography
-          variant="h2"
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+  <Typography variant="h5" fontWeight={600} sx={{ m: 0, fontSize: { xs: 18, sm: 22 } }}>
+    Document Drafting
+  </Typography>
+
+  <Button
+    variant="outlined"
+    onClick={() => { window.location.href = '/app/drafting'; }}
+    sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600, px: 2 }}
+    startIcon={<ArrowBackIcon />}>
+    Back to Dashboard
+  </Button>
+</Box>
+
+
+       {/* <Typography
+          variant="h3"
           component="a"
           href="/app/drafting"
           sx={{
             fontWeight: 400,
             // color: 'primary.main',
-            cursor: 'pointer',
-            textDecoration: 'underline',
-            '&:hover': { textDecoration: 'underline' },
           }}
         >
           Document Drafting
-        </Typography>
+        </Typography> */}
       {/* Breadcrumb */}
       {/* <Typography variant="body2" color="text.secondary" mb={1}>
         <b>Document Drafting</b> &gt; <b>Document / Event Creation</b>
@@ -208,46 +222,34 @@ if (category) {
       {/* <Typography variant="h4" fontWeight={700} mb={3}>
         Document Drafting
       </Typography> */}
-       <Typography variant="body2" color="text.secondary" component="span">/</Typography>
-        <Typography
-          variant="h2"
+       {/* <Typography variant="body2" color="text.secondary" component="span">/</Typography> */}
+        {/* <Typography
+          variant="h3"
           component="span"
           sx={{
             fontWeight: activeTab === 'document' ? 700 : 400,
-            color: activeTab === 'document' ? 'primary.main' : 'text.secondary',
+            // color: activeTab === 'document' ? 'primary.main' : 'text.secondary',
             cursor: 'pointer',
-            textDecoration: activeTab === 'document' ? 'underline' : 'none',
-            '&:hover': { textDecoration: 'underline' },
           }}
           // onClick={() => setActiveTab('document')}
         >
           Document Selection
-        </Typography>
-        <Typography variant="body2" color="text.secondary" component="span">/</Typography>
-        <Typography
-          variant="h2"
+        </Typography> */}
+        {/* <Typography variant="body2" color="text.secondary" component="span">/</Typography> */}
+        {/* <Typography
+          variant="h3"
           component="span"
           sx={{
             fontWeight: activeTab === 'event' ? 700 : 400,
             color: activeTab === 'event' ? 'primary.main' : 'text.secondary',
             cursor: 'pointer',
-            textDecoration: activeTab === 'event' ? 'underline' : 'none',
-            '&:hover': { textDecoration: 'underline' },
-          }}
-          // onClick={() => setActiveTab('event')}
-        >
-          Create an Events
-        </Typography>
+          }} */}
+          {/* // onClick={() => setActiveTab('event')} */}
+        {/* > */}
+          {/* Create an Events */}
+        {/* </Typography> */}
 
-          {/* <Button
-     
-          variant="outlined"
-          onClick={() => { window.location.href = '/app/drafting'; }} // Update path if needed
-          //startIcon={<ArrowBackIcon />}
-          sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600, px: 2,ml:60 }}
-        >
-          Back to Dashboard
-        </Button> */}
+        
  
 
 

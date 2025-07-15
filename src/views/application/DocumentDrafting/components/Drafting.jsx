@@ -18,6 +18,11 @@ import MyEvents from './MyEvent';
 import HistoryOutlinedIcon from '@mui/icons-material/HistoryOutlined';
 import StarBorderOutlinedIcon from '@mui/icons-material/StarBorderOutlined';
 import { useLocation } from 'react-router-dom';
+import DraftingActionCell from './DraftingActionCell';
+import { useDispatch, useSelector } from 'react-redux';
+import { openSnackbar } from 'store/slices/snackbar';
+import { useNavigate } from 'react-router-dom';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
  
 const filters = [
   { label: 'Category', options: ['All', 'Company', 'HR', 'Finance'] },
@@ -33,11 +38,16 @@ const statusChip = (status) => {
     return <Chip label="Processed" sx={{ bgcolor: '#FFF9C4', color: '#FBC02D', fontWeight: 500 }} />;
   if (status === 'Completed')
     return <Chip label="Completed" sx={{ bgcolor: '#C8E6C9', color: '#388E3C', fontWeight: 500 }} />;
+  if (status === 'Yet to Start')
+    return <Chip label="Yet to Start" sx={{ bgcolor: '#FFF1F0', color: '#FF4D4F', fontWeight: 500 }} />;
+  if (status === 'Draft')
+    return <Chip label="Draft" sx={{ bgcolor: '#FFF7E3', color: '#FAAD14', fontWeight: 500, width:90}} />;
   return <Chip label={status} />;
 };
  
 export default function Drafting({ id, onShowMyEvents }) {
   const location = useLocation();
+  const dispatch = useDispatch();
   const [tableRows, setTableRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showEvent, setShowEvent] = useState(false);
@@ -54,6 +64,8 @@ export default function Drafting({ id, onShowMyEvents }) {
   const [recentEvents, setRecentEvents] = useState([]);
   const [recentEventsLoading, setRecentEventsLoading] = useState(true);
   const [showDocumentSelection, setShowDocumentSelection] = useState(false);
+  const user = useSelector((state) => state.accountReducer.user);
+  const navigate = useNavigate();
  
   useEffect(() => {
     if (!id) return;
@@ -70,6 +82,7 @@ export default function Drafting({ id, onShowMyEvents }) {
           lastEdited: item.last_edited || item.created_date || '-',
           creator: item.creator || '-',
           id: item.id,
+          file: item.file || null,
         }));
         setTableRows(rows);
       })
@@ -186,12 +199,88 @@ export default function Drafting({ id, onShowMyEvents }) {
   const paginatedRows = tableRows.slice((page - 1) * rowsPerPage, page * rowsPerPage);
   const pageCount = Math.ceil(tableRows.length / rowsPerPage);
  
+  const handleDeleteDocument = async (row) => {
+    if (!row?.id) return;
+    try {
+      const result = await Factory('delete', `/documentdrafting/context-wise-event-document/${row.id}/`);
+      if (result.res && result.res.status_cd === 0) {
+        dispatch(openSnackbar({
+          open: true,
+          message: 'Document deleted successfully',
+          variant: 'alert',
+          alert: { color: 'success' },
+          close: false
+        }));
+        setTableRows((prev) => prev.filter((doc) => doc.id !== row.id));
+      } else {
+        dispatch(openSnackbar({
+          open: true,
+          message: result.message || 'Failed to delete document',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        }));
+      }
+    } catch (err) {
+      dispatch(openSnackbar({
+        open: true,
+        message: 'Failed to delete document',
+        variant: 'alert',
+        alert: { color: 'error' },
+        close: false
+      }));
+    }
+  };
+ 
+  // Handler for clicking a favourite in Quick Access Panel
+  const handleFavouriteProceed = async (favourite) => {
+    if (!favourite?.document?.id && !favourite?.document) return;
+    const documentId = favourite.document?.id || favourite.document;
+    const payload = {
+      context: favourite.draft, // Use 'draft' instead of 'context'
+      document: documentId,
+      status: 'yet_to_start',
+      created_by: user?.user?.id
+    };
+    try {
+      const result = await Factory('post', '/documentdrafting/context-wise-event-document-create/', payload);
+      if (result.res && result.res.status_cd === 0 && result.res.id) {
+        navigate(`/app/drafting/fill/${result.res.id}`);
+        dispatch(openSnackbar({
+          open: true,
+          message: 'Drafting context created',
+          variant: 'alert',
+          alert: { color: 'success' },
+          close: false
+        }));
+      } else {
+        dispatch(openSnackbar({
+          open: true,
+          message: result.message || 'Failed to create document drafting context',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        }));
+      }
+    } catch (err) {
+      dispatch(openSnackbar({
+        open: true,
+        message: 'Failed to create document drafting context',
+        variant: 'alert',
+        alert: { color: 'error' },
+        close: false
+      }));
+    }
+  };
+ 
   return (
     <Box sx={{ p: { xs: 1, md: 4 }, background: '#fff', minHeight: '100vh' }}>
       {/* Title and Actions */}
       <Box display="flex" flexDirection={{ xs: 'column', md: 'row' }} alignItems={{ xs: 'flex-start', md: 'center' }} justifyContent="space-between" mb={4} gap={2}>
-        <Typography variant="h4" fontWeight={700}>Document Drafting</Typography>
-        <Stack direction="row" spacing={2}>
+      <Typography variant="h5" fontWeight={600} sx={{ m: 0, mb: 2, fontSize: { xs: 18, sm: 22 } }}>
+            Document Drafting
+          </Typography>
+        <Stack direction="row" spacing={2} marginRight={0.5}>
           <Button variant="outlined" startIcon={<AddIcon />} onClick={() => { setShowEvent(true); setEventInitialTab('document'); }} >Create New Document</Button>
           <Button variant="contained" startIcon={<EventIcon />} onClick={() => { setShowEvent(true); setEventInitialTab('event'); }}>Create New Event</Button>
           <Button
@@ -206,34 +295,39 @@ export default function Drafting({ id, onShowMyEvents }) {
       </Box>
  
       {/* Filters */}
-      <Box display="flex" flexWrap="wrap" gap={2} mb={3}>
-        <TextField
-          size="small"
-          placeholder="Search"
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon color="action" />
-              </InputAdornment>
-            ),
-          }}
-          sx={{ minWidth: 180, bgcolor: '#F5F7FA' }}
-        />
-        {filters.map((filter) => (
+      <Grid2 container spacing={2} mb={3}>
+        <Grid2 size={{xs: 12, md: 3}}>
           <TextField
-            key={filter.label}
-            select
-            label={filter.label}
+            fullWidth
             size="small"
-            sx={{ minWidth: 140, bgcolor: '#F5F7FA' }}
-            defaultValue={filter.options[0]}
-          >
-            {filter.options.map((option) => (
-              <MenuItem key={option} value={option}>{option}</MenuItem>
-            ))}
-          </TextField>
+            placeholder="Search"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon color="action" />
+                </InputAdornment>
+              ),
+            }}
+            sx={{ bgcolor: '#F5F7FA' }}
+          />
+        </Grid2>
+        {filters.map((filter) => (
+          <Grid2 size={{xs:12, md:1.5}} key={filter.label}>
+            <TextField
+              fullWidth
+              select
+              label={filter.label}
+              size="small"
+              sx={{ bgcolor: '#F5F7FA' }}
+              defaultValue={filter.options[0]}
+            >
+              {filter.options.map((option) => (
+                <MenuItem key={option} value={option}>{option}</MenuItem>
+              ))}
+            </TextField>
+          </Grid2>
         ))}
-      </Box>
+      </Grid2>
  
       {/* Stats Cards */}
       <Grid2 container spacing={3} mb={4}>
@@ -249,65 +343,80 @@ export default function Drafting({ id, onShowMyEvents }) {
                 <Paper
                   elevation={0}
                   sx={{
-                    p: 3,
+                    p: 0,
                     borderRadius: 3,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
                     minHeight: 140,
                     border: '1.5px solid #E5EAF2',
                     boxShadow: '0 2px 8px 0 rgba(24, 39, 75, 0.05)',
                     transition: 'box-shadow 0.2s, border-color 0.2s',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    position: 'relative',
                     '&:hover': {
-                      boxShadow: '0 4px 16px 0 rgba(24, 39, 75, 0.12)',
-                      borderColor: style.iconColor || '#2F54EB',
+                      boxShadow: '0 4px 16px 0 rgba(64, 66, 74, 0.18)',
+                      // borderColor: '#2F54EB',
                       '.stat-view-btn': {
-                        background: style.iconColor || '#2F54EB',
-                        color: '#fff'
-                      }
-                    }
+                        background: '#2F54EB',
+                        color: '#fff',
+                      },
+                    },
                   }}
                 >
-                  <Box
-                    mb={2}
-                    sx={{
-                      width: 44,
-                      height: 44,
-                      borderRadius: '50%',
-                      background: style.iconBg,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}
-                  >
-                    {React.cloneElement(statIcons[stat.label] || <DescriptionOutlinedIcon />, {
-                      style: { color: style.iconColor, fontSize: 28 }
-                    })}
+                  {/* Left: Icon, Heading, Count */}
+                  <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-start', p: 3 }}>
+                    <Box
+                      mb={2}
+                      sx={{
+                        width: 44,
+                        height: 44,
+                        borderRadius: '50%',
+                        background: style.iconBg,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        mb: 1.5
+                      }}
+                    >
+                      {React.cloneElement(statIcons[stat.label] || <DescriptionOutlinedIcon />, {
+                        style: { color: style.iconColor, fontSize: 28 }
+                      })}
+                    </Box>
+                    <Typography variant="subtitle1" color="text.secondary" gutterBottom sx={{ mb: 0.5 }}>
+                      {stat.label === "Total Document" ? "Total Documents" : stat.label}
+                    </Typography>
+                    <Typography variant="h4" fontWeight={700} sx={{ color: '#0A1F44', mb: 0 }}>
+                      {String(stat.value).padStart(2, '0')}
+                    </Typography>
                   </Box>
-                  <Typography variant="subtitle1" color="text.secondary" gutterBottom>
-                    {stat.label === "Total Document" ? "Total Documents" : stat.label}
-                  </Typography>
-                  <Typography variant="h4" fontWeight={700} sx={{ color: '#0A1F44', mb: 1 }}>
-                    {String(stat.value).padStart(2, '0')}
-                  </Typography>
-                  <Button
-                    className="stat-view-btn"
-                    variant="contained"
-                    disableElevation
-                    sx={{
-                      mt: 1,
-                      background: style.buttonBg,
-                      color: style.buttonColor,
-                      fontWeight: 500,
-                      borderRadius: 2,
-                      textTransform: 'none',
-                      boxShadow: 'none',
-                      minWidth: 64,
-                      transition: 'background 0.2s, color 0.2s'
-                    }}
-                  >
-                    View
-                  </Button>
+                  {/* Right Bottom: View Button */}
+                  <Box sx={{ position: 'absolute', right: 20, bottom: 20 }}>
+                    <Button
+                      className="stat-view-btn"
+                      variant="contained"
+                      disableElevation
+                      sx={{
+                        background: '#F0F0F0',
+                        color: '#595959',
+                        fontWeight: 500,
+                        borderRadius: 2,
+                        textTransform: 'none',
+                        boxShadow: 'none',
+                        minWidth: 48,
+                        height: 32,
+                        fontSize: 14,
+                        px: 2,
+                        py: 0.5,
+                        transition: 'background 0.2s, color 0.2s',
+                        '&:hover': {
+                          background: '#2F54EB',
+                          color: '#fff',
+                        }
+                      }}
+                    >
+                      View
+                    </Button>
+                  </Box>
                 </Paper>
               </Grid2>
             );
@@ -348,8 +457,62 @@ export default function Drafting({ id, onShowMyEvents }) {
                   <TableCell>{row.lastEdited}</TableCell>
                   <TableCell>{row.creator}</TableCell>
                   <TableCell>
-                    <IconButton color="primary" onClick={() => window.location.href = `/app/drafting/fill/${row.id}`}><EditIcon /></IconButton>
-                    <IconButton color="error"><DeleteIcon /></IconButton>
+                    <DraftingActionCell
+                      row={row}
+                      status={row.status}
+                      onEdit={() => window.location.href = `/app/drafting/fill/${row.id}`}
+                      onDownload={async () => {
+                        try {
+                          // 1. Fetch draft details to get file_url
+                          const fileUrl = row.file;
+                          if (!fileUrl) {
+                            dispatch(openSnackbar({
+                              open: true,
+                              message: 'No file available for download. Please finalize the document first.',
+                              variant: 'alert',
+                              alert: { color: 'error' },
+                              close: false
+                            }));
+                            return;
+                          }
+                          // 2. Get presigned URL
+                          const presigned = await Factory('get', `/docwallet/generate_presigned_url?url=${encodeURIComponent(fileUrl)}`);
+                          const presignedUrl = presigned?.res?.data?.presigned_url || presigned?.res?.data?.url;
+                          if (presigned?.res && presigned?.res?.status_cd === 0 && presignedUrl) {
+                            window.open(presignedUrl, '_blank');
+                            dispatch(openSnackbar({
+                              open: true,
+                              message: 'Download started',
+                              variant: 'alert',
+                              alert: { color: 'success' },
+                              close: false
+                            }));
+                          } else {
+                            dispatch(openSnackbar({
+                              open: true,
+                              message: presigned?.res?.message || 'Failed to get presigned URL',
+                              variant: 'alert',
+                              alert: { color: 'error' },
+                              close: false
+                            }));
+                          }
+                        } catch (err) {
+                          dispatch(openSnackbar({
+                            open: true,
+                            message: 'Failed to download file',
+                            variant: 'alert',
+                            alert: { color: 'error' },
+                            close: false
+                          }));
+                        }
+                      }}
+                      onDelete={handleDeleteDocument}
+                      deleteDialogData={{
+                        title: 'Delete file',
+                        heading: 'Are you sure you want to delete this file?',
+                        description: 'This action will permanently remove this file from the list.'
+                      }}
+                    />
                   </TableCell>
                 </TableRow>
               ))
@@ -376,31 +539,51 @@ export default function Drafting({ id, onShowMyEvents }) {
         mt={5}
         mb={5}
         sx={{
-          border: '1.5px solid #E5EAF2',
+          borderBottom: '2px solid rgb(196, 191, 191)', // thick, prominent grey border
+          borderLeft: '0.1px solid #b0b8c4', // thick, prominent grey border
+          borderTop: '0.1px solid #b0b8c4', // thick, prominent grey border
+          borderRight: '0.1px solid #b0b8c4', // thick, prominent grey border
           borderRadius: 3,
           p: 4,
           background: '#fff',
-          boxShadow: '0 2px 8px 0 rgba(24, 39, 75, 0.05)'
+          // boxShadow: '0 5px 10px 0 rgba(24, 39, 75, 0.06)', // thinner, more subtle shadow at the bottom
+
         }}
       >
-        <Typography variant="h6" fontWeight={700} mb={3} sx={{ color: '#0A1F44' }}>
+        <Typography variant="h3" fontWeight={700} mb={3} sx={{ color: '#0A1F44' }}>
           Quick Access Panel
         </Typography>
         <Grid2 container spacing={4}>
           {/* Favourites */}
           <Grid2 size ={{xs:12, md:4}}>
             <Typography fontWeight={700} sx={{ color: '#0A1F44', mb: 2 }}>Favourites</Typography>
-            <Stack spacing={2}>
+            <Stack spacing={0}>
               {favouritesLoading ? (
                 <Typography>Loading favourites...</Typography>
               ) : favourites.length === 0 ? (
                 <Typography>No favourites found</Typography>
               ) : (
                 favourites.map((favourite) => (
-                  <Box key={favourite.id} display="flex" alignItems="center" gap={1}>
+                  <Box
+                    key={favourite.id}
+                    display="flex"
+                    alignItems="center"
+                    gap={1}
+                    sx={{
+                      cursor: 'pointer',
+                      minWidth: 0,
+                      px: 0,
+                      height: 45,
+                      py: 0.5,
+                      borderRadius: 2,
+                      '&:hover': { background: '#f5f5f5', width: 300,
+                        height: 45, }
+                    }}
+                    onClick={() => handleFavouriteProceed(favourite)}
+                  >
                     <Box sx={{ position: 'relative', display: 'inline-flex' }}>
                       <DescriptionOutlinedIcon sx={{ color: '#A3AED0', fontSize: 28, bgcolor: '#F5F7FA', borderRadius: 2, p: 0.5 }} />
-                      <StarBorderOutlinedIcon
+                      <FavoriteBorderIcon
                         sx={{
                           color: '#3B82F6',
                           fontSize: 14,
@@ -412,7 +595,7 @@ export default function Drafting({ id, onShowMyEvents }) {
                         }}
                       />
                     </Box>
-                    <Typography sx={{ color: '#222' }}>{favourite.document?.name || favourite.name || favourite.title || favourite.document_name || 'Unnamed Document'}</Typography>
+                    <Typography sx={{ color: '#222', wordBreak: 'break-word' }}>{favourite.document?.name || favourite.name || favourite.title || favourite.document_name || 'Unnamed Document'}</Typography>
                   </Box>
                 ))
               )}
