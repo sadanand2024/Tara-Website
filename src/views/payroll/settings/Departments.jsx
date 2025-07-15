@@ -56,8 +56,8 @@ function Departments({ handleBack, handleNext }) {
   const filteredDepartments = departments.filter((department) => {
     const query = searchQuery.toLowerCase();
     return (
-      department.department_name?.toLowerCase().includes(query) ||
-      department.department_code?.toLowerCase().includes(query) ||
+      department.dept_name?.toLowerCase().includes(query) ||
+      department.dept_code?.toLowerCase().includes(query) ||
       department.description?.toLowerCase().includes(query)
     );
   });
@@ -227,8 +227,8 @@ function Departments({ handleBack, handleNext }) {
                 paginatedData.map((department, idx) => (
                   <TableRow key={department.id} hover sx={{ minHeight: 56, '&:hover': { bgcolor: 'action.hover' } }}>
                     <TableCell align="center">{(currentPage - 1) * rowsPerPage + idx + 1}</TableCell>
-                    <TableCell>{department.department_name || 'N/A'}</TableCell>
-                    <TableCell>{department.department_code || 'N/A'}</TableCell>
+                    <TableCell>{department.dept_name || 'N/A'}</TableCell>
+                    <TableCell>{department.dept_code || 'N/A'}</TableCell>
                     <TableCell>
                       <Typography noWrap sx={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {department.description || 'N/A'}

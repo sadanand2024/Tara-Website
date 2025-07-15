@@ -133,7 +133,9 @@ export default function PayrollMonthwise({ payrollId, financialYear }) {
                   size="small"
                   onClick={() => {
                     if (payrollId) {
-                      navigate(`/payroll/employee-dashboard?payrollid=${payrollId}&month=${selectedMonth}&financialYear=${financialYear}`);
+                      navigate(
+                        `/app/payroll/employee-dashboard?payrollid=${payrollId}&month=${selectedMonth}&financialYear=${financialYear}`
+                      );
                     }
                   }}
                 >

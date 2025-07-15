@@ -31,8 +31,6 @@ const RenderTable = ({
   body_keys,
   handleEdit,
   handleDelete,
-  openDialog,
-  handleCloseDialog,
   from,
   handleBack,
   handleNext

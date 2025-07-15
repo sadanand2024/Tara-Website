@@ -5,7 +5,17 @@ import Factory from 'utils/Factory';
 import { useSearchParams } from 'react-router-dom';
 import RenderDialog from './RenderDialog';
 
-export default function LoansAndAdvances({ employeeMasterData, from, openDialog, fields, setOpenDialog, handleBack, handleNext }) {
+export default function LoansAndAdvances({
+  employeeMasterData,
+  from,
+  openDialog,
+  fields,
+  setOpenDialog,
+  handleBack,
+  handleNext,
+  filteredData,
+  fetchData
+}) {
   const headerData = [
     'Employee ID',
     'Employee Name',
@@ -30,31 +40,9 @@ export default function LoansAndAdvances({ employeeMasterData, from, openDialog,
     'pending_balance',
     'current_month_deduction'
   ];
-  const [payrollid, setPayrollId] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [data, setData] = useState([]);
   const [selectedRecord, setSelectedRecord] = useState(null);
 
-  const [searchParams] = useSearchParams();
-
-  useEffect(() => {
-    const id = searchParams.get('payrollid');
-    if (id) {
-      setPayrollId(id);
-    }
-  }, [searchParams]);
-
-  const getData = async () => {
-    setLoading(true);
-    const url = `/payroll/payroll-advance-summary?payroll_id=${payrollid}`;
-    const { res, error } = await Factory('get', url, {});
-    setLoading(false);
-    if (res.status_cd === 0) {
-      setData(res.data || []);
-    } else {
-      // showSnackbar(JSON.stringify(res.data.data), 'error');
-    }
-  };
   const handleEdit = async (item) => {
     let url = `/payroll/advance-loans/${item.id}`;
     const { res } = await Factory('get', url, {});
@@ -72,19 +60,14 @@ export default function LoansAndAdvances({ employeeMasterData, from, openDialog,
       // showSnackbar(JSON.stringify(res.data), 'error');
     } else {
       // showSnackbar('Record Deleted Successfully', 'success');
-      getData();
+      if (fetchData) fetchData();
     }
   };
-  useEffect(() => {
-    if (payrollid) {
-      getData();
-    }
-  }, [payrollid]);
   return (
     <>
       <RenderTable
         headerData={headerData}
-        tableData={data}
+        tableData={filteredData}
         handleEdit={handleEdit}
         handleDelete={handleDelete}
         body_keys={body_keys}
@@ -102,10 +85,10 @@ export default function LoansAndAdvances({ employeeMasterData, from, openDialog,
         setOpenDialog={setOpenDialog}
         fields={fields}
         selectedRecord={selectedRecord}
-        setData={setData}
+        setData={() => {}}
         setLoading={setLoading}
         employeeMasterData={employeeMasterData}
-        getData={getData}
+        getData={fetchData}
       />
     </>
   );
