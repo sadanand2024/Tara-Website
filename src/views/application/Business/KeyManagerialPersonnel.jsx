@@ -42,7 +42,7 @@ import GroupIcon from '@mui/icons-material/Group';
 import WorkIcon from '@mui/icons-material/Work';
 import { useSelector } from 'store';
 import Factory from 'utils/Factory';
-import DeleteConfirmationDialog from 'utils/DeleteConfirmationDialog';
+import DeleteDialog from 'ui-component/extended/DeleteDialog';
 import MainCard from 'ui-component/cards/MainCard';
 import Modal from 'ui-component/extended/Modal';
 import { useDispatch } from 'store';
@@ -92,11 +92,11 @@ const validationSchema = Yup.object().shape({
 });
 
 const fields = [
-  { name: 'name', label: 'Name',required: true },
-  { name: 'designation', label: 'Designation',required: true },
-  { name: 'pan_number', label: 'PAN Number',required: true },
-  { name: 'role', label: 'Role', type: 'select', options: roles,required: true },
-  { name: 'status', label: 'Status', type: 'select', options: ['active', 'inactive',],required: false }
+  { name: 'name', label: 'Name', required: true },
+  { name: 'designation', label: 'Designation', required: true },
+  { name: 'pan_number', label: 'PAN Number', required: true },
+  { name: 'role', label: 'Role', type: 'select', options: roles, required: true },
+  { name: 'status', label: 'Status', type: 'select', options: ['active', 'inactive'], required: false }
 ];
 
 const KeyManagerialPersonnel = ({ user, handleNext, handleBack, tabChange, tabval }) => {
@@ -104,6 +104,9 @@ const KeyManagerialPersonnel = ({ user, handleNext, handleBack, tabChange, tabva
   const [personnel, setPersonnel] = useState([]);
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
+  // Add state for delete dialog
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [selectedPersonnel, setSelectedPersonnel] = useState(null);
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
@@ -218,16 +221,16 @@ const KeyManagerialPersonnel = ({ user, handleNext, handleBack, tabChange, tabva
     }
   });
   const getLabelWithAsterisk = (label, isRequired) => (
-  <Typography variant="subtitle1" gutterBottom fontWeight={500}>
-    {label}
-    {isRequired && <span style={{ color: 'red' }}> *</span>}
-  </Typography>
-);
+    <Typography variant="subtitle1" gutterBottom fontWeight={500}>
+      {label}
+      {isRequired && <span style={{ color: 'red' }}> *</span>}
+    </Typography>
+  );
 
   const renderFields = () => {
     return fields.map((field) => (
       <Grid2 key={field.name} size={{ xs: 12, sm: 6 }}>
-      {getLabelWithAsterisk(field.label, field.required)}
+        {getLabelWithAsterisk(field.label, field.required)}
 
         {/* <Typography variant="subtitle1" gutterBottom>
           {field.label}
@@ -415,7 +418,10 @@ const KeyManagerialPersonnel = ({ user, handleNext, handleBack, tabChange, tabva
                         <IconButton
                           color="error"
                           size="small"
-                          onClick={() => handleDelete(person)}
+                          onClick={() => {
+                            setSelectedPersonnel(person);
+                            setOpenDeleteDialog(true);
+                          }}
                           sx={{
                             backgroundColor: 'error.50',
                             '&:hover': { backgroundColor: 'error.100' }
@@ -486,6 +492,21 @@ const KeyManagerialPersonnel = ({ user, handleNext, handleBack, tabChange, tabva
           </Grid2>
         </Box>
       </Modal>
+      {/* Delete Confirmation Dialog */}
+      <DeleteDialog
+        open={openDeleteDialog}
+        onClose={() => setOpenDeleteDialog(false)}
+        onConfirm={() => {
+          if (selectedPersonnel) handleDelete(selectedPersonnel);
+          setOpenDeleteDialog(false);
+          setSelectedPersonnel(null);
+        }}
+        dialogData={{
+          title: 'Delete Personnel',
+          heading: 'Are you sure?',
+          description: 'This action will permanently delete the selected personnel.'
+        }}
+      />
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', mt: 2 }}>
         <Button startIcon={<ArrowBackIcon />} variant="outlined" onClick={handleBack}>
           Back

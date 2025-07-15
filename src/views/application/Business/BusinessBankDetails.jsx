@@ -42,6 +42,7 @@ import Modal from 'ui-component/extended/Modal';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import DeleteDialog from 'ui-component/extended/DeleteDialog';
 const validationSchema = Yup.object().shape({
   bank_name: Yup.string().required('Bank name is required'),
   account_number: Yup.string()
@@ -70,17 +71,28 @@ const BusinessBankDetails = ({ user, handleNext, handleBack, tabChange, tabval }
     resetForm();
     setOpen(false);
   };
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [selectedAccount, setSelectedAccount] = useState(null);
+  const handleDeleteClick = (account) => {
+    setSelectedAccount(account);
+    setOpenDeleteDialog(true);
+  };
+  const handleConfirmDelete = () => {
+    handleDelete(selectedAccount);
+    setOpenDeleteDialog(false);
+    setSelectedAccount(null);
+  };
 
   const fetchBankAccounts = async () => {
     setIsLoading(true);
-    const response = await Factory('get', `/user_management/bank-details/${user.active_context.business_id}/`, {}, {});
-    if (response.res.status_cd === 0) {
-      setBankAccounts(response.res.data);
+    const { res } = await Factory('get', `/user_management/bank-details/${user.active_context.business_id}/`, {}, {});
+    if (res.status_cd === 0) {
+      setBankAccounts(res.data);
     } else {
       dispatch(
         openSnackbar({
           open: true,
-          message: JSON.stringify(response?.res?.data || 'Failed to fetch bank accounts'),
+          message: JSON.stringify(res?.data || 'Failed to fetch bank accounts'),
           variant: 'alert',
           alert: { color: 'error' },
           close: false
@@ -149,40 +161,25 @@ const BusinessBankDetails = ({ user, handleNext, handleBack, tabChange, tabval }
         type = 'put';
       }
 
-      const response = await Factory(type, url, payload, {});
-
-      if (response.res.status_cd === 0) {
-        if (values.id) {
-          const updated = [...bankAccounts];
-          updated[values.id] = response.res.data;
-          setBankAccounts(updated);
-          dispatch(
-            openSnackbar({
-              open: true,
-              message: 'Bank account updated successfully',
-              variant: 'alert',
-              alert: { color: 'success' },
-              close: false
-            })
-          );
-        } else {
-          setBankAccounts([...bankAccounts, response.res]);
-          dispatch(
-            openSnackbar({
-              open: true,
-              message: 'Bank account added successfully',
-              variant: 'alert',
-              alert: { color: 'success' },
-              close: false
-            })
-          );
-        }
+      const { res } = await Factory(type, url, payload, {});
+      if (res.status_cd === 0) {
+        // After successful add or update, fetch the latest bank accounts from the backend
+        fetchBankAccounts();
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'Bank account updated successfully',
+            variant: 'alert',
+            alert: { color: 'success' },
+            close: false
+          })
+        );
         handleClose();
       } else {
         dispatch(
           openSnackbar({
             open: true,
-            message: JSON.stringify(response?.res?.data || 'Failed to save bank account'),
+            message: JSON.stringify(res?.data.data || 'Failed to save bank account'),
             variant: 'alert',
             alert: { color: 'error' },
             close: false
@@ -190,36 +187,20 @@ const BusinessBankDetails = ({ user, handleNext, handleBack, tabChange, tabval }
         );
       }
       setSubmitting(false);
-      if (response.res.status_cd !== 0) {
-        dispatch(
-          openSnackbar({
-            open: true,
-            message: JSON.stringify(response?.res?.data || 'Failed to save bank account'),
-            variant: 'alert',
-            alert: { color: 'error' },
-            close: false
-          })
-        );
-      }
     }
   });
- const getLabelWithAsterisk = (label, isRequired) => (
-  <Typography
-    variant="body2"
-    fontWeight={500}
-    gutterBottom
-    sx={{ display: 'inline-block' }}
-  >
-    {label}
-    {isRequired && <span style={{ color: 'red' }}> *</span>}
-  </Typography>
-);
+  const getLabelWithAsterisk = (label, isRequired) => (
+    <Typography variant="body2" fontWeight={500} gutterBottom sx={{ display: 'inline-block' }}>
+      {label}
+      {isRequired && <span style={{ color: 'red' }}> *</span>}
+    </Typography>
+  );
   const renderFields = () => {
-      const requiredFields = ['bank_name', 'account_number', 'branch_name', 'ifsc_code'];
+    const requiredFields = ['bank_name', 'account_number', 'branch_name', 'ifsc_code'];
 
     return fields.map((field) => (
       <Grid2 key={field.name} size={{ xs: 12, sm: 6 }}>
-      {getLabelWithAsterisk(field.label, requiredFields.includes(field.name))}
+        {getLabelWithAsterisk(field.label, requiredFields.includes(field.name))}
         <TextField
           fullWidth
           size="small"
@@ -243,7 +224,6 @@ const BusinessBankDetails = ({ user, handleNext, handleBack, tabChange, tabval }
           onBlur={handleBlur}
           error={touched[field.name] && Boolean(errors[field.name])}
           helperText={touched[field.name] && errors[field.name] ? errors[field.name] : ''}
-          
         />
       </Grid2>
     ));
@@ -319,8 +299,8 @@ const BusinessBankDetails = ({ user, handleNext, handleBack, tabChange, tabval }
             </TableRow>
           </TableHead>
           <TableBody>
-            {bankAccounts.length > 0 ? (
-              bankAccounts.map((account, index) => (
+            {bankAccounts.filter(Boolean).length > 0 ? (
+              bankAccounts.filter(Boolean).map((account, index) => (
                 <TableRow key={index} hover>
                   <TableCell>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -360,7 +340,7 @@ const BusinessBankDetails = ({ user, handleNext, handleBack, tabChange, tabval }
                         <IconButton
                           color="error"
                           size="small"
-                          onClick={() => handleDelete(account)}
+                          onClick={() => handleDeleteClick(account)}
                           sx={{
                             backgroundColor: 'error.50',
                             '&:hover': { backgroundColor: 'error.100' }
@@ -441,6 +421,16 @@ const BusinessBankDetails = ({ user, handleNext, handleBack, tabChange, tabval }
           </Grid2>
         </Box>
       </Modal>
+      <DeleteDialog
+        open={openDeleteDialog}
+        onClose={() => setOpenDeleteDialog(false)}
+        onConfirm={handleConfirmDelete}
+        dialogData={{
+          title: 'Delete Bank Account',
+          heading: 'Are you sure?',
+          description: 'This action will permanently delete the selected bank account.'
+        }}
+      />
     </MainCard>
   );
 };

@@ -27,7 +27,7 @@ import EmptyDataPlaceholder from 'ui-component/extended/EmptyDataPlaceholder';
 import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
 import SearchBar from 'ui-component/extended/SearchBar';
 import Factory from 'utils/Factory';
-import DeleteDialog from '../../../ui-component/extended/DeleteDialog'; // adjust path accordingly
+import DeleteDialog from '../../../ui-component/extended/DeleteDialog';
 import WorkLocationDialog from './WorkLocationDialog';
 
 function Worklocation({ handleBack, handleNext }) {
@@ -264,14 +264,16 @@ function Worklocation({ handleBack, handleNext }) {
                   <TableCell align="center">{location.address_state || 'N/A'}</TableCell>
                   <TableCell align="center">{location.employee_count || 0}</TableCell>
                   <TableCell align="center">
-                    <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
-                      <IconButton size="small" color="primary" onClick={() => handleEdit(location)}>
-                        <Edit />
-                      </IconButton>
-                      <IconButton size="small" color="error" onClick={() => handleOpenDeleteDialog(location)}>
-                        <Delete />
-                      </IconButton>
-                    </Box>
+                    {(currentPage - 1) * rowsPerPage + index !== 0 && (
+                      <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
+                        <IconButton size="small" color="primary" onClick={() => handleEdit(location)}>
+                          <Edit />
+                        </IconButton>
+                        <IconButton size="small" color="error" onClick={() => handleOpenDeleteDialog(location)}>
+                          <Delete />
+                        </IconButton>
+                      </Box>
+                    )}
                   </TableCell>
                 </TableRow>
               ))
@@ -285,7 +287,7 @@ function Worklocation({ handleBack, handleNext }) {
           dialogData={{
             title: 'Delete Record',
             heading: 'Are you sure?',
-            description: 'This action will permanently delete the record.'
+            description: 'You want to delete this addess'
           }}
         />
       </TableContainer>

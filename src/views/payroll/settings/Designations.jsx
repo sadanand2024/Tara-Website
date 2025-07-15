@@ -228,7 +228,7 @@ function Designations({ handleBack, handleNext }) {
             dialogData={{
               title: 'Delete Record',
               heading: 'Are you sure you want to delete this Record?',
-              description: 'This action will permanently delete the record.'
+              description: 'Deleting this designation will also delete all associated employee records. Proceed only if you are sure.'
             }}
           />
         </TableContainer>
