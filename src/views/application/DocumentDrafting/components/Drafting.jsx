@@ -295,34 +295,39 @@ export default function Drafting({ id, onShowMyEvents }) {
       </Box>
  
       {/* Filters */}
-      <Box display="flex" flexWrap="wrap" gap={2} mb={3}>
-        <TextField
-          size="small"
-          placeholder="Search"
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon color="action" />
-              </InputAdornment>
-            ),
-          }}
-          sx={{ minWidth: 200, bgcolor: '#F5F7FA' }}
-        />
-        {filters.map((filter) => (
+      <Grid2 container spacing={2} mb={3}>
+        <Grid2 size={{xs: 12, md: 3}}>
           <TextField
-            key={filter.label}
-            select
-            label={filter.label}
+            fullWidth
             size="small"
-            sx={{ minWidth:165, bgcolor: '#F5F7FA' }}
-            defaultValue={filter.options[0]}
-          >
-            {filter.options.map((option) => (
-              <MenuItem key={option} value={option}>{option}</MenuItem>
-            ))}
-          </TextField>
+            placeholder="Search"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon color="action" />
+                </InputAdornment>
+              ),
+            }}
+            sx={{ bgcolor: '#F5F7FA' }}
+          />
+        </Grid2>
+        {filters.map((filter) => (
+          <Grid2 size={{xs:12, md:1.5}} key={filter.label}>
+            <TextField
+              fullWidth
+              select
+              label={filter.label}
+              size="small"
+              sx={{ bgcolor: '#F5F7FA' }}
+              defaultValue={filter.options[0]}
+            >
+              {filter.options.map((option) => (
+                <MenuItem key={option} value={option}>{option}</MenuItem>
+              ))}
+            </TextField>
+          </Grid2>
         ))}
-      </Box>
+      </Grid2>
  
       {/* Stats Cards */}
       <Grid2 container spacing={3} mb={4}>
