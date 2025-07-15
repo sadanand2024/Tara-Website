@@ -10,26 +10,27 @@ import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import { useSelector, useDispatch } from 'react-redux';
 import { openSnackbar } from 'store/slices/snackbar';
+import DraftingActionCell from './DraftingActionCell';
 
 
 export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, contextId }) {
   const dispatch = useDispatch();
-  const user = useSelector((state) => state.accountReducer.user);
-  const { contextEventId } = useParams();
-  const navigate = useNavigate();
-  const [templates, setTemplates] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [splitView, setSplitView] = useState(false);
-  const [fields, setFields] = useState([]);
-  const [templateHtml, setTemplateHtml] = useState('');
-  const [formValues, setFormValues] = useState({});
-  const [templateLoading, setTemplateLoading] = useState(false);
-  const [templateError, setTemplateError] = useState(null);
-  const [draftDetailId, setDraftDetailId] = useState(null); // Store draft detail id after first save
-  const [savingDraft, setSavingDraft] = useState(false);
-  const [finalizing, setFinalizing] = useState(false);
-  const [fileUrl, setFileUrl] = useState(null); // Store file URL for download
+    const user = useSelector((state) => state.accountReducer.user);
+    const { contextEventId } = useParams();
+    const navigate = useNavigate();
+    const [templates, setTemplates] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [splitView, setSplitView] = useState(false);
+    const [fields, setFields] = useState([]);
+    const [templateHtml, setTemplateHtml] = useState('');
+    const [formValues, setFormValues] = useState({});
+    const [templateLoading, setTemplateLoading] = useState(false);
+    const [templateError, setTemplateError] = useState(null);
+    const [draftDetailId, setDraftDetailId] = useState(null); // Store draft detail id after first save
+    const [savingDraft, setSavingDraft] = useState(false);
+    const [finalizing, setFinalizing] = useState(false);
+    const [fileUrl, setFileUrl] = useState(null); // Store file URL for download
   const [favoriteStates, setFavoriteStates] = useState({});
   // Add: API call to add to favourites
   const handleToggleFavorite = async (id) => {
@@ -88,77 +89,77 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
       .catch(() => setFavoriteStates({}));
   }, [contextId]);
 
-  useEffect(() => {
-    if (contextEventId) {
-      // If contextEventId is present, fetch fields and template directly (split view mode)
-      setSplitView(true);
-      setTemplateLoading(true);
-      setTemplateError(null);
-      Factory('get', `/documentdrafting/document-fields-and-template/${contextEventId}/`)
-        .then(async (getResult) => {
-          if (getResult.res && getResult.res.status_cd === 0) {
-            const { fields, template, draft_info } = getResult.res.data;
-            const draft_data = draft_info && draft_info.length > 0 ? draft_info[0].draft_data : undefined;
-            const draftDetailIdFromApi = draft_info && draft_info.length > 0 ? draft_info[0].id : null;
-            setDraftDetailId(draftDetailIdFromApi);
-            setFields(fields || []);
-            setFormValues(draft_data || (fields ? Object.fromEntries(fields.filter(f => f.field_name).map(f => [f.field_name, ''])) : {}));
-            try {
-              const resp = await fetch(template);
-              if (!resp.ok) throw new Error('Failed to fetch template HTML');
-              const html = await resp.text();
-              setTemplateHtml(html);
-            } catch (err) {
-              setTemplateHtml('');
-              setTemplateError('Failed to load template HTML');
-            }
-            setTemplateLoading(false);
-          } else {
-            setTemplateError(getResult.message || 'Failed to load document fields/template');
-            setTemplateLoading(false);
-          }
-        })
-        .catch(() => {
-          setTemplateError('Failed to load document fields/template');
-          setTemplateLoading(false);
-        });
-    } else {
-      // No contextEventId, show document selection step
-    setLoading(true);
-    setError(null);
-    Factory('get', '/documentdrafting/documents/')
-      .then(result => {
-        if (result.res && result.res.status_cd === 0) {
-          const docs = result.res.data?.results || result.res.data || [];
-          setTemplates(docs);
+    useEffect(() => {
+        if (contextEventId) {
+            // If contextEventId is present, fetch fields and template directly (split view mode)
+            setSplitView(true);
+            setTemplateLoading(true);
+            setTemplateError(null);
+            Factory('get', `/documentdrafting/document-fields-and-template/${contextEventId}/`)
+                .then(async (getResult) => {
+                    if (getResult.res && getResult.res.status_cd === 0) {
+                        const { fields, template, draft_info } = getResult.res.data;
+                        const draft_data = draft_info && draft_info.length > 0 ? draft_info[0].draft_data : undefined;
+                        const draftDetailIdFromApi = draft_info && draft_info.length > 0 ? draft_info[0].id : null;
+                        setDraftDetailId(draftDetailIdFromApi);
+                        setFields(fields || []);
+                        setFormValues(draft_data || (fields ? Object.fromEntries(fields.filter(f => f.field_name).map(f => [f.field_name, ''])) : {}));
+                        try {
+                            const resp = await fetch(template);
+                            if (!resp.ok) throw new Error('Failed to fetch template HTML');
+                            const html = await resp.text();
+                            setTemplateHtml(html);
+                        } catch (err) {
+                            setTemplateHtml('');
+                            setTemplateError('Failed to load template HTML');
+                        }
+                        setTemplateLoading(false);
+                    } else {
+                        setTemplateError(getResult.message || 'Failed to load document fields/template');
+                        setTemplateLoading(false);
+                    }
+                })
+                .catch(() => {
+                    setTemplateError('Failed to load document fields/template');
+                    setTemplateLoading(false);
+                });
         } else {
-          setError(result.message || 'Failed to load templates');
+            // No contextEventId, show document selection step
+            setLoading(true);
+            setError(null);
+            Factory('get', '/documentdrafting/documents/')
+                .then(result => {
+                    if (result.res && result.res.status_cd === 0) {
+                        const docs = result.res.data?.results || result.res.data || [];
+                        setTemplates(docs);
+                    } else {
+                        setError(result.message || 'Failed to load templates');
+                    }
+                    setLoading(false);
+                })
+                .catch(() => {
+                    setError('Failed to load templates');
+                    setLoading(false);
+                });
         }
-        setLoading(false);
-      })
-        .catch(() => {
-        setError('Failed to load templates');
-        setLoading(false);
-      });
-    }
-  }, [contextEventId]);
+    }, [contextEventId]);
 
-  const handleCardProceed = async (templateId) => {
-    console.log('User:', user);
-    console.log('Context ID:', user.active_context.id);
-    // POST API call to create context-wise event document
-    const payload = {
-      context: contextId, // use contextId prop passed from parent
-      document: templateId,
-      status: 'yet_to_start',
-      created_by: user.user.id // TODO: replace with dynamic user id
-    };
-    try {
-      const result = await Factory('post', '/documentdrafting/context-wise-event-document-create/', payload);
-      if (result.res && result.res.status_cd === 0 && result.res.id) {
-        const contextEventId = result.res.id;
-        // Navigate to split view route
-        navigate(`/app/drafting/fill/${contextEventId}`);
+    const handleCardProceed = async (templateId) => {
+        console.log('User:', user);
+        console.log('Context ID:', user.active_context.id);
+        // POST API call to create context-wise event document
+        const payload = {
+            context: contextId, // use contextId prop passed from parent
+            document: templateId,
+            status: 'yet_to_start',
+            created_by: user.user.id // TODO: replace with dynamic user id
+        };
+        try {
+            const result = await Factory('post', '/documentdrafting/context-wise-event-document-create/', payload);
+            if (result.res && result.res.status_cd === 0 && result.res.id) {
+                const contextEventId = result.res.id;
+                // Navigate to split view route
+                navigate(`/app/drafting/fill/${contextEventId}`);
         dispatch(openSnackbar({
           open: true,
           message: 'Drafting context created',
@@ -166,7 +167,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
           alert: { color: 'success' },
           close: false
         }));
-      } else {
+            } else {
         dispatch(openSnackbar({
           open: true,
           message: result.message || 'Failed to create document drafting context',
@@ -174,8 +175,8 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
           alert: { color: 'error' },
           close: false
         }));
-      }
-    } catch (err) {
+            }
+        } catch (err) {
       dispatch(openSnackbar({
         open: true,
         message: 'Failed to create document drafting context',
@@ -183,17 +184,17 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
         alert: { color: 'error' },
         close: false
       }));
-    }
-  };
+        }
+    };
 
-  const handleFormChange = (name, value) => {
-    setFormValues((prev) => ({ ...prev, [name]: value }));
-  };
+    const handleFormChange = (name, value) => {
+        setFormValues((prev) => ({ ...prev, [name]: value }));
+    };
 
-  // Replace placeholders in templateHtml with formValues
-  const renderTemplateWithValues = () => {
-    let html = templateHtml;
-    Object.entries(formValues).forEach(([key, value]) => {
+    // Replace placeholders in templateHtml with formValues
+    const renderTemplateWithValues = () => {
+        let html = templateHtml;
+        Object.entries(formValues).forEach(([key, value]) => {
       let displayValue = value;
       // If this key is a date field, format it
       const field = fields.find(f => f.field_name === key);
@@ -247,23 +248,30 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
       </div>
     `;
         return styledHtml;
-  };
+    };
 
-  // Helper to fetch latest draft details and update fileUrl
-  const fetchAndSetFileUrl = async (id) => {
-    try {
-      const result = await Factory('get', `/documentdrafting/document-drafts-details/${id}/`);
-      if (result.res && result.res.status_cd === 0 && result.res.data && (result.res.data.file_url || result.res.data.file)) {
-        setFileUrl(result.res.data.file_url || result.res.data.file);
-      }
-    } catch (err) {
-      // Optionally handle error
-    }
-  };
+    // Helper to fetch latest draft details and update fileUrl
+    const fetchAndSetFileUrl = async (id) => {
+        try {
+            const result = await Factory('get', `/documentdrafting/document-drafts-details/${id}/`);
+            if (result.res && result.res.status_cd === 0 && result.res.data && (result.res.data.file_url || result.res.data.file)) {
+                setFileUrl(result.res.data.file_url || result.res.data.file);
+            }
+        } catch (err) {
+            // Optionally handle error
+        }
+    };
 
-  // Save Draft handler
-  const handleSaveDraft = async () => {
-    if (!contextEventId) {
+  // Utility to format date from YYYY-MM-DD to DD-MM-YYYY
+  function formatDateToDDMMYYYY(dateStr) {
+    if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+    const [yyyy, mm, dd] = dateStr.split('-');
+    return `${dd}-${mm}-${yyyy}`;
+  }
+
+    // Save Draft handler
+    const handleSaveDraft = async () => {
+        if (!contextEventId) {
       dispatch(openSnackbar({
         open: true,
         message: 'Context event ID missing. Please try again.',
@@ -283,25 +291,32 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
         alert: { color: 'error' },
         close: false
       }));
-      return;
-    }
-    setSavingDraft(true);
-    const payload = {
-      draft: contextEventId,
-      draft_data: formValues,
-      status: 'draft'
-    };
-    try {
-      if (!draftDetailId) {
-        // First time: POST
-        const result = await Factory('post', '/documentdrafting/document-drafts-details/', payload);
-        if (result.res && result.res.status_cd === 0 && result.res.id) {
-          setDraftDetailId(result.res.id);
-          if (result.res.file_url || result.res.file) {
-            setFileUrl(result.res.file_url || result.res.file);
-          } else {
-            fetchAndSetFileUrl(result.res.id);
-          }
+            return;
+        }
+        setSavingDraft(true);
+    // Format all date fields before sending
+    const formattedFormValues = { ...formValues };
+    fields.forEach(field => {
+      if (field.field_type === 'date' && formattedFormValues[field.field_name]) {
+        formattedFormValues[field.field_name] = formatDateToDDMMYYYY(formattedFormValues[field.field_name]);
+      }
+    });
+        const payload = {
+            draft: contextEventId,
+      draft_data: formattedFormValues,
+            status: 'draft'
+        };
+        try {
+            if (!draftDetailId) {
+                // First time: POST
+                const result = await Factory('post', '/documentdrafting/document-drafts-details/', payload);
+                if (result.res && result.res.status_cd === 0 && result.res.id) {
+                    setDraftDetailId(result.res.id);
+                    if (result.res.file_url || result.res.file) {
+                        setFileUrl(result.res.file_url || result.res.file);
+                    } else {
+                        fetchAndSetFileUrl(result.res.id);
+                    }
           dispatch(openSnackbar({
             open: true,
             message: 'Draft saved successfully',
@@ -309,7 +324,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
             alert: { color: 'success' },
             close: false
           }));
-        } else {
+                } else {
           dispatch(openSnackbar({
             open: true,
             message: result.message || 'Failed to save draft',
@@ -317,16 +332,16 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
             alert: { color: 'error' },
             close: false
           }));
-        }
-      } else {
-        // Subsequent: PUT
-        const result = await Factory('put', `/documentdrafting/document-drafts-details/${draftDetailId}/`, payload);
-        if (result.res && result.res.status_cd === 0) {
-          if (result.res.file_url || result.res.file) {
-            setFileUrl(result.res.file_url || result.res.file);
-          } else {
-            fetchAndSetFileUrl(draftDetailId);
-          }
+                }
+            } else {
+                // Subsequent: PUT
+                const result = await Factory('put', `/documentdrafting/document-drafts-details/${draftDetailId}/`, payload);
+                if (result.res && result.res.status_cd === 0) {
+                    if (result.res.file_url || result.res.file) {
+                        setFileUrl(result.res.file_url || result.res.file);
+                    } else {
+                        fetchAndSetFileUrl(draftDetailId);
+                    }
           dispatch(openSnackbar({
             open: true,
             message: 'Draft updated successfully',
@@ -334,7 +349,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
             alert: { color: 'success' },
             close: false
           }));
-        } else {
+                } else {
           dispatch(openSnackbar({
             open: true,
             message: result.message || 'Failed to update draft',
@@ -342,9 +357,9 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
             alert: { color: 'error' },
             close: false
           }));
-        }
-      }
-    } catch (err) {
+                }
+            }
+        } catch (err) {
       dispatch(openSnackbar({
         open: true,
         message: 'Failed to save draft',
@@ -352,13 +367,13 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
         alert: { color: 'error' },
         close: false
       }));
-    }
-    setSavingDraft(false);
-  };
+        }
+        setSavingDraft(false);
+    };
 
-  // Finalize handler
-  const handleFinalize = async () => {
-    if (!contextEventId) {
+    // Finalize handler
+    const handleFinalize = async () => {
+        if (!contextEventId) {
       dispatch(openSnackbar({
         open: true,
         message: 'Context event ID missing. Please try again.',
@@ -378,68 +393,75 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
         alert: { color: 'error' },
         close: false
       }));
-      return;
-    }
-    setFinalizing(true);
-    const payload = {
-      draft: contextEventId,
-      draft_data: formValues,
-      status: 'completed'
-    };
-    try {
-      if (!draftDetailId) {
-        // First time: POST
-        const result = await Factory('post', '/documentdrafting/document-drafts-details/', payload);
-        if (result.res && result.res.status_cd === 0 && result.res.id) {
-          setDraftDetailId(result.res.id);
-          if (result.res.file_url || result.res.file) {
-            setFileUrl(result.res.file_url || result.res.file);
-          } else {
-            fetchAndSetFileUrl(result.res.id);
-          }
-          dispatch(openSnackbar({
-            open: true,
-            message: 'Document finalized successfully',
-            variant: 'alert',
-            alert: { color: 'success' },
-            close: false
-          }));
-        } else {
-          dispatch(openSnackbar({
-            open: true,
-            message: result.message || 'Failed to finalize',
-            variant: 'alert',
-            alert: { color: 'error' },
-            close: false
-          }));
+            return;
         }
-      } else {
-        // Subsequent: PUT
-        const result = await Factory('put', `/documentdrafting/document-drafts-details/${draftDetailId}/`, payload);
-        if (result.res && result.res.status_cd === 0) {
-          if (result.res.file_url || result.res.file) {
-            setFileUrl(result.res.file_url || result.res.file);
-          } else {
-            fetchAndSetFileUrl(draftDetailId);
-          }
-          dispatch(openSnackbar({
-            open: true,
-            message: 'Document finalized successfully',
-            variant: 'alert',
-            alert: { color: 'success' },
-            close: false
-          }));
-        } else {
-          dispatch(openSnackbar({
-            open: true,
-            message: result.message || 'Failed to finalize',
-            variant: 'alert',
-            alert: { color: 'error' },
-            close: false
-          }));
-        }
+        setFinalizing(true);
+    // Format all date fields before sending
+    const formattedFormValues = { ...formValues };
+    fields.forEach(field => {
+      if (field.field_type === 'date' && formattedFormValues[field.field_name]) {
+        formattedFormValues[field.field_name] = formatDateToDDMMYYYY(formattedFormValues[field.field_name]);
       }
-    } catch (err) {
+    });
+        const payload = {
+            draft: contextEventId,
+      draft_data: formattedFormValues,
+            status: 'completed'
+        };
+        try {
+            if (!draftDetailId) {
+                // First time: POST
+                const result = await Factory('post', '/documentdrafting/document-drafts-details/', payload);
+                if (result.res && result.res.status_cd === 0 && result.res.id) {
+                    setDraftDetailId(result.res.id);
+                    if (result.res.file_url || result.res.file) {
+                        setFileUrl(result.res.file_url || result.res.file);
+                    } else {
+                        fetchAndSetFileUrl(result.res.id);
+                    }
+          dispatch(openSnackbar({
+            open: true,
+            message: 'Document finalized successfully',
+            variant: 'alert',
+            alert: { color: 'success' },
+            close: false
+          }));
+                } else {
+          dispatch(openSnackbar({
+            open: true,
+            message: result.message || 'Failed to finalize',
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          }));
+                }
+            } else {
+                // Subsequent: PUT
+                const result = await Factory('put', `/documentdrafting/document-drafts-details/${draftDetailId}/`, payload);
+                if (result.res && result.res.status_cd === 0) {
+                    if (result.res.file_url || result.res.file) {
+                        setFileUrl(result.res.file_url || result.res.file);
+                    } else {
+                        fetchAndSetFileUrl(draftDetailId);
+                    }
+          dispatch(openSnackbar({
+            open: true,
+            message: 'Document finalized successfully',
+            variant: 'alert',
+            alert: { color: 'success' },
+            close: false
+          }));
+                } else {
+          dispatch(openSnackbar({
+            open: true,
+            message: result.message || 'Failed to finalize',
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          }));
+                }
+            }
+        } catch (err) {
       dispatch(openSnackbar({
         open: true,
         message: 'Failed to finalize',
@@ -447,13 +469,13 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
         alert: { color: 'error' },
         close: false
       }));
-    }
-    setFinalizing(false);
-  };
+        }
+        setFinalizing(false);
+    };
 
-  // Download handler (presigned URL logic)
-  const handleDownload = async () => {
-    if (!fileUrl) {
+    // Download handler (presigned URL logic)
+    const handleDownload = async () => {
+        if (!fileUrl) {
       dispatch(openSnackbar({
         open: true,
         message: 'No file available for download. Please finalize the document first.',
@@ -461,15 +483,15 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
         alert: { color: 'error' },
         close: false
       }));
-      return;
-    }
-    try {
-      const result = await Factory('get', `/docwallet/generate_presigned_url?url=${encodeURIComponent(fileUrl)}`, {}, {});
-      console.log('Presigned URL response:', result);
-      const presignedUrl = result.res.data.presigned_url || result.res.data.url;
-      if (result.res && result.res.status_cd === 0 && result.res.data && presignedUrl) {
-        // Open the presigned URL in a new tab (temporary workaround for CORS)
-        window.open(presignedUrl, '_blank');
+            return;
+        }
+        try {
+            const result = await Factory('get', `/docwallet/generate_presigned_url?url=${encodeURIComponent(fileUrl)}`, {}, {});
+            console.log('Presigned URL response:', result);
+            const presignedUrl = result.res.data.presigned_url || result.res.data.url;
+            if (result.res && result.res.status_cd === 0 && result.res.data && presignedUrl) {
+                // Open the presigned URL in a new tab (temporary workaround for CORS)
+                window.open(presignedUrl, '_blank');
         dispatch(openSnackbar({
           open: true,
           message: 'Download started',
@@ -477,7 +499,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
           alert: { color: 'success' },
           close: false
         }));
-      } else {
+            } else {
         dispatch(openSnackbar({
           open: true,
           message: result.message || 'Failed to get presigned URL',
@@ -485,8 +507,8 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
           alert: { color: 'error' },
           close: false
         }));
-      }
-    } catch (err) {
+            }
+        } catch (err) {
       dispatch(openSnackbar({
         open: true,
         message: 'Failed to download file',
@@ -494,18 +516,18 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
         alert: { color: 'error' },
         close: false
       }));
-      console.error('Download error:', err);
-    }
-  };
+            console.error('Download error:', err);
+        }
+    };
 
-  // Reset All handler
-  const handleResetAll = () => {
-    // Reset all form fields to empty
-    const resetValues = (fields || []).reduce((acc, field) => {
-      acc[field.field_name] = '';
-      return acc;
-    }, {});
-    setFormValues(resetValues);
+    // Reset All handler
+    const handleResetAll = () => {
+        // Reset all form fields to empty
+        const resetValues = (fields || []).reduce((acc, field) => {
+            acc[field.field_name] = '';
+            return acc;
+        }, {});
+        setFormValues(resetValues);
     dispatch(openSnackbar({
       open: true,
       message: 'All fields reset',
@@ -515,11 +537,49 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
     }));
   };
 
-  if (splitView) {
-    // Only render the split view, no header/tabs, with a full white background
-  return (
-    <Box
-      sx={{
+  const handleDeleteDocument = async (row) => {
+    if (!row?.id) return;
+    try {
+      const result = await Factory('delete', `/documentdrafting/context-wise-event-document/${row.id}/`);
+      if (result.res && result.res.status_cd === 0) {
+        dispatch(openSnackbar({
+          open: true,
+          message: 'Document deleted successfully',
+          variant: 'alert',
+          alert: { color: 'success' },
+          close: false
+        }));
+        // Refresh the list (implement as needed, e.g., re-fetch or filter out deleted row)
+        if (typeof getDocuments === 'function') {
+          getDocuments();
+        } else {
+          setTemplates((prev) => prev.filter((doc) => doc.id !== row.id));
+        }
+      } else {
+        dispatch(openSnackbar({
+          open: true,
+          message: result.message || 'Failed to delete document',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        }));
+      }
+    } catch (err) {
+      dispatch(openSnackbar({
+        open: true,
+        message: 'Failed to delete document',
+        variant: 'alert',
+        alert: { color: 'error' },
+        close: false
+      }));
+    }
+    };
+
+    if (splitView) {
+        // Only render the split view, no header/tabs, with a full white background
+        return (
+            <Box
+                sx={{
         p: { xs: 1.5, sm: 2, md: 4 },
         minHeight: '100vh',
         width: '100%',
@@ -535,8 +595,8 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
       
           {/* Your inner content */}
             <Box
-            sx={{
-                display: 'flex',
+                    sx={{
+                        display: 'flex',
                 flexWrap: { xs: 'wrap', md: 'nowrap' }, // Wrap on small screens, side-by-side on md+
                 gap: 3, // space between the papers
                 justifyContent: 'center', // center the row
@@ -566,7 +626,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
                       }}
                     />
                     <Typography variant="caption" sx={{ position: 'absolute', right: 16, top: 4, color: '#3650AE', fontWeight: 600 }}>
-                      {Math.round(progress)}%
+                      {/* {Math.round(progress)}% */}
                     </Typography>
                   </>;
                 })()}
@@ -577,17 +637,17 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
             <Box sx={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
               <ScrollableCard showArrows>
                 <Box sx={{ p: 2.5, pb: 2 }}>
-                  {(fields || []).length > 0 ? (
+                        {(fields || []).length > 0 ? (
                     <Grid2 container spacing={2}>
                       {fields.map((field, idx) => (
                         <Grid2 size={{xs:12,md:6}} key={field.field_name}>
-                          <TextField
-                            fullWidth
-                            label={field.label || field.field_name}
-                            value={formValues[field.field_name] || ''}
-                            onChange={e => handleFormChange(field.field_name, e.target.value)}
-                            type={field.field_type || 'text'}
-                            variant="outlined"
+                                    <TextField
+                                        fullWidth
+                                        label={field.label || field.field_name}
+                                        value={formValues[field.field_name] || ''}
+                                        onChange={e => handleFormChange(field.field_name, e.target.value)}
+                                        type={field.field_type || 'text'}
+                                        variant="outlined"
                             slotProps={{ inputLabel: { shrink: true } }}
                             placeholder={field.placeholder || (field.field_type === 'date' ? 'DD-MM-YYYY' : '')}
                             sx={
@@ -612,13 +672,13 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
                         </Grid2>
                       ))}
                     </Grid2>
-                  ) : (
-                    <Typography>No fields to fill.</Typography>
-                  )}
+                        ) : (
+                            <Typography>No fields to fill.</Typography>
+                        )}
                 </Box>
-              </ScrollableCard>
+                    </ScrollableCard>
             </Box>
-          </Paper>
+                </Paper>
           {/* Right: Live Template Preview */}
           <Paper elevation={2} sx={{ position: 'relative', flex: 1, minWidth: { xs: '100%', sm: 320, md: 400 }, maxWidth: 700, height: 585, maxHeight: 1000, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
             {/* Progress Bar (same as left) */}
@@ -632,7 +692,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
                     <LinearProgress
                       variant="determinate"
                       value={progress}
-                      sx={{
+                    sx={{
                         height: 8,
                         borderRadius: 4,
                         backgroundColor: '#E3EAFE',
@@ -642,7 +702,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
                       }}
                     />
                     <Typography variant="caption" sx={{ position: 'absolute', right: 16, top: 4, color: '#3650AE', fontWeight: 600 }}>
-                      {Math.round(progress)}%
+                      {/* {Math.round(progress)}% */}
                     </Typography>
                   </>;
                 })()}
@@ -656,7 +716,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
                     <Typography variant="h5" fontWeight={700} mb={2} sx={{ p: 2, pb: 0 }}>Document Preview</Typography>
                     <Box
                       ref={templateBoxRef}
-                      sx={{
+                        sx={{
                         flex: 1,
                         p: 0,
                         height: '100%',
@@ -706,74 +766,100 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
                 </ScrollableCard>
               );
             })()}
-          </Paper>
-          </Box>
-        
-        {/* Action Buttons: centered below both columns */}
-        <Box sx={{ display: 'flex', gap: 2, mt: 6, justifyContent: 'center' }}>
+                </Paper>
+            </Box>
+
+        {/* Action Buttons: Back at left, others at right */}
+        <Box sx={{ display: 'flex', gap: 2, mt: 6, justifyContent: 'space-between', alignItems: 'center' }}>
           <Button variant="outlined" sx={{ height: 40, minWidth: 120, fontSize: 16, px: 3, py: 0, borderColor: '#00329E', color: '#00329E', '&:hover': { borderColor: '#00329E', background: 'rgba(0,50,158,0.04)' } }} onClick={() => navigate('/app/drafting', { state: { showEvent: true, eventInitialTab: 'document' } })}>{'< Back'}</Button>
-          <Button variant="contained" color="primary" sx={{ height: 40, minWidth: 120, fontSize: 16, px: 3, py: 0, background: '#00329E', color: '#fff', '&:hover': { background: '#002266' } }} onClick={handleSaveDraft} disabled={savingDraft}>
-            {savingDraft ? 'Saving...' : 'Save Draft'}
-          </Button>
-          <Button variant="contained" color="primary" sx={{ height: 40, minWidth: 120, fontSize: 16, px: 3, py: 0, background: '#00329E', color: '#fff', '&:hover': { background: '#002266' } }} onClick={handleFinalize} disabled={finalizing}>
-            {finalizing ? 'Finalizing...' : 'Finalize'}
-        </Button>
-        <Button
-            variant="contained"
-            color="success"
-          sx={{
-              height: 40,
-              minWidth: 120,
-              fontSize: 16,
-              px: 3,
-              py: 0,
-              background: '#00329E',
-              color: '#fff',
-              '&:hover': { background: '#002266' },
-              '&.Mui-disabled': {
-                backgroundColor: '#00329E',
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <Button variant="contained" color="primary" sx={{ height: 40, minWidth: 120, fontSize: 16, px: 3, py: 0, background: '#00329E', color: '#fff', '&:hover': { background: '#002266' } }} onClick={handleSaveDraft} disabled={savingDraft}>
+              {savingDraft ? 'Saving...' : 'Save Draft'}
+            </Button>
+            <Button variant="contained" color="primary" sx={{ height: 40, minWidth: 120, fontSize: 16, px: 3, py: 0, background: '#00329E', color: '#fff', '&:hover': { background: '#002266' } }} onClick={handleFinalize} disabled={finalizing}>
+              {finalizing ? 'Finalizing...' : 'Finalize'}
+            </Button>
+            <Button
+              variant="contained"
+              color="success"
+              sx={{
+                height: 40,
+                minWidth: 120,
+                fontSize: 16,
+                px: 3,
+                py: 0,
+                background: '#00329E',
                 color: '#fff',
-                opacity: 1,
-              },
-            }}
-            onClick={handleDownload}
-            disabled={!fileUrl}
-          >
-            Download
-        </Button>
-          <Button variant="outlined" color="primary" sx={{ height: 40, minWidth: 120, fontSize: 16, px: 3, py: 0, borderColor: '#00329E', color: '#00329E', '&:hover': { borderColor: '#00329E', background: 'rgba(0,50,158,0.04)' } }} onClick={handleResetAll}>Reset All</Button>
+                '&:hover': { background: '#002266' },
+                '&.Mui-disabled': {
+                  backgroundColor: '#00329E',
+                  color: '#fff',
+                  opacity: 1,
+                },
+              }}
+              onClick={handleDownload}
+              disabled={!fileUrl}
+            >
+              Download
+            </Button>
+            <Button variant="outlined" color="primary" sx={{ height: 40, minWidth: 120, fontSize: 16, px: 3, py: 0, borderColor: '#00329E', color: '#00329E', '&:hover': { borderColor: '#00329E', background: 'rgba(0,50,158,0.04)' } }} onClick={handleResetAll}>Reset All</Button>
+          </Box>
         </Box>
       
     </Box>
-  );
-  }
+        );
+    }
 
-  return (
+    return (
     <Box sx={{ p: { xs: 2, md: 4 } }}>
       {/* Document Cards Grid */}
       {loading ? (
-        <Box sx={{ textAlign: 'center', my: 4 }}>Loading templates...</Box>
-      ) : error ? (
-        <Box sx={{ textAlign: 'center', color: 'red', my: 4 }}>{error}</Box>
-      ) : (
+                <Box sx={{ textAlign: 'center', my: 4 }}>Loading templates...</Box>
+            ) : error ? (
+                <Box sx={{ textAlign: 'center', color: 'red', my: 4 }}>{error}</Box>
+            ) : (
         <Grid2 container spacing={3} sx={{ mb: 4, maxWidth: 1200, mx: 'auto' }} justifyContent="flex-start">
-          {(templates || []).map((template) => (
+                    {(templates || []).map((template) => (
               <Grid2 size={{xs:12,sm:6,md:4}} key={template.id}>
-                <Paper
-                  sx={{
-                    border: '1.5px solid #b0b8c4',
-                    borderRadius: 3,
-                    p: 3,
-                    minWidth: 350,
-                    maxWidth: 350,
+                            <Paper
+                //   sx={{
+                //     background: '#fff',
+                //     border: '1.5px solid #e3eafe',
+                //     borderRadius: 3,
+                //     p: 3,
+                //     minWidth: 350,
+                //     maxWidth: 350,
+                //     minHeight: 180,
+                //     maxHeight: 180,
+                //     boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
+                //     position: 'relative',
+                //     transition: 'border 0.2s, box-shadow 0.2s',
+                //     cursor: 'pointer',
+                //     display: 'flex',
+                //     flexDirection: 'column',
+                //     alignItems: 'center',
+                //     justifyContent: 'center',
+                //     textAlign: 'center',
+                //     '&:hover': {
+                //       border: '2px solid #2563eb',
+                //       boxShadow: '0 4px 16px rgba(37,99,235,0.08)',
+                //       background: '#f5faff',
+                //     },
+                //   }}
+                                sx={{
+                                    border: '1.5px solid #b0b8c4',
+                                    borderRadius: 3,
+                                    p: 3,
+                                    minWidth: 350,
+                                    maxWidth: 350,
                     minHeight: 180,
                     maxHeight: 180,
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
-                    position: 'relative',
+                                    boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
+                                    position: 'relative',
                     transition: 'border 0.2s, box-shadow 0.2s, transform 0.2s',
                     cursor: 'pointer',
-                    display: 'flex',
-                    flexDirection: 'column',
+                                    display: 'flex',
+                                    flexDirection: 'column',
                     justifyContent: 'space-between',
                     '&:hover': {
                       border: '1.5px solid #00329E',
@@ -782,6 +868,8 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
                       zIndex: 2,
                     },
                   }}
+
+
               >
                   {/* Love (heart) icon at top right */}
                   <Box
@@ -800,98 +888,104 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
                     }}
                   >
                     {favoriteStates[template.id] ? (
-                      <FavoriteIcon sx={{ fontSize: 28 }} />
+                      <FavoriteIcon sx={{ fontSize: 25 }} />
                     ) : (
-                      <FavoriteBorderIcon sx={{ fontSize: 28 }} />
+                      <FavoriteBorderIcon sx={{ fontSize: 25 }} />
                     )}
                   </Box>
-                  <Typography fontWeight={700} fontSize={18} mb={1}>
-                  {template.title || template.document_name}
-                  </Typography>
+                                <Typography fontWeight={700} fontSize={18} mb={1}>
+                                    {template.title || template.document_name}
+                                </Typography>
                   <Typography fontSize={15} color="text.secondary" sx={{ flex: 1 }}>
-                    {template.description}
-                  </Typography>
-                  <Button
-                    variant="contained"
-                    endIcon={<ArrowForwardIcon />}
-                    sx={{
-                      width: 160,
-                      height: 35,
-                      fontSize: 16,
+                                    {template.description}
+                                </Typography>
+                                <Button
+                    variant="outlined"
+                                    endIcon={<ArrowForwardIcon />}
+                                    sx={{
+                      height: 30,
+                      minWidth: 100,
+                      fontSize: 14,
                       fontWeight: 600,
-                      borderRadius: 2,
+                                        borderRadius: 2,
                       mt: 2,
-                      alignSelf: 'center',
-                      background: '#00329E',
-                    }}
-                    onClick={() => handleCardProceed(template.id)}
-                  >
-                    Proceed
-                  </Button>
-              </Paper>
+                      alignSelf: 'flex-end',
+                      borderColor: '#00329E',
+                      color: '#00329E',
+                      px: 2,
+                      '&:hover': {
+                        borderColor: '#00329E',
+                        background: 'rgba(0,50,158,0.04)'
+                      }
+                                    }}
+                                    onClick={() => handleCardProceed(template.id)}
+                                >
+                                    Proceed
+                                </Button>
+                            </Paper>
             </Grid2>
-          ))}
+                    ))}
         </Grid2>
       )}
-    </Box>
-  );
+        </Box>
+    );
 }
 
 function ScrollableCard({ children, showArrows, containerRef: externalRef }) {
   const internalRef = React.useRef(null);
   const containerRef = externalRef || internalRef;
-  const [showUp, setShowUp] = React.useState(false);
-  const [showDown, setShowDown] = React.useState(false);
+    const [showUp, setShowUp] = React.useState(false);
+    const [showDown, setShowDown] = React.useState(false);
 
-  const checkScroll = () => {
-    const el = containerRef.current;
-    if (!el) return;
-    setShowUp(el.scrollTop > 0);
+    const checkScroll = () => {
+        const el = containerRef.current;
+        if (!el) return;
+        setShowUp(el.scrollTop > 0);
     setShowDown(el.scrollTop + el.clientHeight < el.scrollHeight - 1); // -1 for rounding
-  };
+    };
 
-  React.useEffect(() => {
-    checkScroll();
-    const el = containerRef.current;
-    if (!el) return;
-    el.addEventListener('scroll', checkScroll);
-    return () => el.removeEventListener('scroll', checkScroll);
+    React.useEffect(() => {
+        checkScroll();
+        const el = containerRef.current;
+        if (!el) return;
+        el.addEventListener('scroll', checkScroll);
+        return () => el.removeEventListener('scroll', checkScroll);
   }, [children]); // re-check when children change
 
-  const handleScroll = (direction) => {
-    const el = containerRef.current;
-    if (!el) return;
-    const amount = 100;
-    if (direction === 'up') {
-      el.scrollBy({ top: -amount, behavior: 'smooth' });
-    } else if (direction === 'down') {
-      el.scrollBy({ top: amount, behavior: 'smooth' });
-    }
-  };
+    const handleScroll = (direction) => {
+        const el = containerRef.current;
+        if (!el) return;
+        const amount = 100;
+        if (direction === 'up') {
+            el.scrollBy({ top: -amount, behavior: 'smooth' });
+        } else if (direction === 'down') {
+            el.scrollBy({ top: amount, behavior: 'smooth' });
+        }
+    };
 
-  return (
-    <Box sx={{ position: 'relative', height: '100%', width: '100%' }}>
+    return (
+        <Box sx={{ position: 'relative', height: '100%', width: '100%' }}>
       {showArrows && showUp && (
-        <Box sx={{ position: 'absolute', top: 8, left: 0, right: 0, display: 'flex', justifyContent: 'center', zIndex: 2 }}>
-          <Box
-            component="button"
-            onClick={() => handleScroll('up')}
-            sx={{
-              border: 'none',
-              background: 'none',
-              cursor: 'pointer',
-              p: 0,
-              m: 0,
-              outline: 'none',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <ArrowUpwardIcon fontSize="small" sx={{ bgcolor: '#fff', borderRadius: '50%', boxShadow: 1, p: 0.2 }} />
-          </Box>
-        </Box>
-      )}
+                <Box sx={{ position: 'absolute', top: 8, left: 0, right: 0, display: 'flex', justifyContent: 'center', zIndex: 2 }}>
+                    <Box
+                        component="button"
+                        onClick={() => handleScroll('up')}
+                        sx={{
+                            border: 'none',
+                            background: 'none',
+                            cursor: 'pointer',
+                            p: 0,
+                            m: 0,
+                            outline: 'none',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }}
+                    >
+                        <ArrowUpwardIcon fontSize="small" sx={{ bgcolor: '#fff', borderRadius: '50%', boxShadow: 1, p: 0.2 }} />
+                    </Box>
+                </Box>
+            )}
       {/* Only attach ref to direct child if not provided externally */}
       {externalRef ? children : <Box ref={containerRef} sx={{
         height: '100%',
@@ -915,26 +1009,26 @@ function ScrollableCard({ children, showArrows, containerRef: externalRef }) {
         scrollbarColor: '#3650AE #E3EAFE',
       }}>{children}</Box>}
       {showArrows && showDown && (
-        <Box sx={{ position: 'absolute', bottom: 8, left: 0, right: 0, display: 'flex', justifyContent: 'center', zIndex: 2 }}>
-          <Box
-            component="button"
-            onClick={() => handleScroll('down')}
-            sx={{
-              border: 'none',
-              background: 'none',
-              cursor: 'pointer',
-              p: 0,
-              m: 0,
-              outline: 'none',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <ArrowDownwardIcon fontSize="small" sx={{ bgcolor: '#fff', borderRadius: '50%', boxShadow: 1, p: 0.2 }} />
-          </Box>
+                <Box sx={{ position: 'absolute', bottom: 8, left: 0, right: 0, display: 'flex', justifyContent: 'center', zIndex: 2 }}>
+                    <Box
+                        component="button"
+                        onClick={() => handleScroll('down')}
+                        sx={{
+                            border: 'none',
+                            background: 'none',
+                            cursor: 'pointer',
+                            p: 0,
+                            m: 0,
+                            outline: 'none',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }}
+                    >
+                        <ArrowDownwardIcon fontSize="small" sx={{ bgcolor: '#fff', borderRadius: '50%', boxShadow: 1, p: 0.2 }} />
+                    </Box>
+                </Box>
+            )}
         </Box>
-      )}
-    </Box>
-  );
+    );
 } 

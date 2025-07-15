@@ -33,7 +33,7 @@ import { openSnackbar } from 'store/slices/snackbar';
 
 const pfFields = [
   { name: 'epf_number', label: 'EPF Number (EX: ABCDE2405151000)',required: true },
-  { name: 'employee_contribution_rate', label: 'Employee Contribution Rate' },
+  { name: 'employee_contribution_rate', label: 'Employee Contribution Rate',required: true },
   { name: 'employer_contribution_rate', label: 'Employer Contribution Rate' }
 ];
 
@@ -361,7 +361,7 @@ function EpfComponent({ handleNext }) {
                 {field.name === 'employee_contribution_rate' || field.name === 'employer_contribution_rate' ? (
                   <Box sx={{ pb: 1 }}>
                     <Typography variant="subtitle1" sx={{ mb: 0.5 }}>
-                      {field.label}
+                       {getLabelWithAsterisk(field.label, field.required)}
                     </Typography>
                    
                     <CustomAutocomplete

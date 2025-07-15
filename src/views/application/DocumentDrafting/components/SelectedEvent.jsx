@@ -19,7 +19,7 @@ import {
 } from '@mui/material';
 import Grid2 from '@mui/material/Grid2';
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import Factory from 'utils/Factory';
 
 const statusColor = (status) => {
@@ -51,6 +51,7 @@ const summaryValueStyle = {
 
 const SelectedEvent = ({ onBack }) => {
   const { eventInstanceId } = useParams();
+  const navigate = useNavigate();
   const [eventData, setEventData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -205,8 +206,16 @@ const SelectedEvent = ({ onBack }) => {
                           fontWeight: 600,
                           px: 2,
                           borderRadius: 2,
-                          fontSize: 15
+                          fontSize: 15,
+                          cursor: 'pointer',
+                          transition: 'box-shadow 0.2s',
+                          boxShadow: 0,
+                          '&:hover': {
+                            boxShadow: 2,
+                            bgcolor: '#00329E',
+                          },
                         }}
+                        onClick={() => navigate(`/app/drafting/fill/${doc.id}`)}
                       />
                     </TableCell>
                     <TableCell>
@@ -250,4 +259,4 @@ const SelectedEvent = ({ onBack }) => {
   );
 };
 
-export default SelectedEvent;
+export default SelectedEvent;

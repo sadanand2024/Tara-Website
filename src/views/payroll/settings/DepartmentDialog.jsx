@@ -16,7 +16,7 @@ export default function DepartmentDialog({ open, handleClose, fetchDepartments, 
 
   const departmentFields = [
     { name: 'dept_name', label: 'Department Name', required: true },
-    { name: 'dept_code', label: 'Department Code', required: true },
+    { name: 'dept_code', label: 'Department Code', required: false },
     { name: 'description', label: 'Description' }
   ];
 
@@ -33,7 +33,7 @@ export default function DepartmentDialog({ open, handleClose, fetchDepartments, 
     },
     validationSchema: Yup.object({
       dept_name: Yup.string().required('Department Name is required'),
-      dept_code: Yup.string().required('Department Code is required')
+      // dept_code: Yup.string().required('Department Code is required')
       // description: Yup.string().required('Description is required')
     }),
     onSubmit: async (values) => {

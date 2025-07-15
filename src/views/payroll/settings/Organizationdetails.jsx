@@ -64,26 +64,25 @@ function Organizationdetails({ handleNext }) {
     filling_address_location_name: ''
   };
 
-  const fields = [
-    { name: 'business_name', label: 'Business Name',required: true },
-    // { name: 'logo', label: 'Logo' },
-    { name: 'business_nature', label: 'Business Nature' },
-    { name: 'pan', label: 'Business PAN' },
-    { name: 'entityType', label: 'Entity Type' },
-    { name: 'registration_number', label: 'CIN/ LLPIN / Reg. No' },
-    { name: 'dob_or_incorp_date', label: 'DOB / DOI' ,reqiured:true},
-    { name: 'primary_email', label: 'Primary Email' },
-    { name: 'sender_email', label: 'Sender Email',required:true }
-  ];
+ const fields = [
+  { name: 'business_name', label: 'Business Name', required: true },
+  { name: 'business_nature', label: 'Business Nature', required: true },
+  { name: 'pan', label: 'Business PAN', required: true },
+  { name: 'entityType', label: 'Entity Type', required: true },
+  { name: 'registration_number', label: 'CIN/ LLPIN / Reg. No', required: false },
+  { name: 'dob_or_incorp_date', label: 'DOB / DOI', required: false },
+  { name: 'primary_email', label: 'Primary Email', required: true },
+  { name: 'sender_email', label: 'Sender Email', required: false }
+];
 
-  const organizationAddress = [
-    { name: 'org_address_line1', label: 'Address Line 1' },
-    { name: 'org_address_line2', label: 'Address Line 2' },
-    { name: 'country', label: 'Country' },
-    { name: 'org_address_state', label: 'State' },
-    { name: 'org_address_city', label: 'City' },
-    { name: 'org_address_pincode', label: 'Pincode' }
-  ];
+ const organizationAddress = [
+  { name: 'org_address_line1', label: 'Address Line 1', required: true },
+  { name: 'org_address_line2', label: 'Address Line 2', required: false },
+  { name: 'country', label: 'Country', required: true },
+  { name: 'org_address_state', label: 'State', required: true },
+  { name: 'org_address_city', label: 'City', required: true },
+  { name: 'org_address_pincode', label: 'Pincode', required: true }
+];
 
   const validationSchema = Yup.object({
     business_name: Yup.string().required('Organization name is required'),
@@ -107,7 +106,7 @@ function Organizationdetails({ handleNext }) {
     dob_or_incorp_date: Yup.string().required('This field is required'),
 
     primary_email: Yup.string().email('Invalid email address').required('Email is required'),
-    sender_email: Yup.string().email('Invalid email address').required('Email is required'),
+    // sender_email: Yup.string().email('Invalid email address').required('Email is required'),
     org_address_line1: Yup.string().required('Address Line 1 is required'),
     org_address_state: Yup.string().required('State is required'),
     org_address_city: Yup.string().required('City is required'),
@@ -184,7 +183,7 @@ function Organizationdetails({ handleNext }) {
 const getLabelWithAsterisk = (label, isRequired) => (
   <>
     {label}
-    {isRequired && <span style={{ color: 'red',}}> *</span>}
+    {isRequired && <span style={{ color: 'red'}}> *</span>}
   </>
 );
 
@@ -220,7 +219,7 @@ const getLabelWithAsterisk = (label, isRequired) => (
               {field.label}
             </Typography> */}
             <Typography variant="subtitle1" gutterBottom>
-                      {getLabelWithAsterisk(field.label, field.name)}
+                      {getLabelWithAsterisk(field.label, field.required)}
                 </Typography>
 
             <CustomAutocomplete
@@ -247,7 +246,7 @@ const getLabelWithAsterisk = (label, isRequired) => (
               {field.label}
             </Typography> */}
             <Typography variant="subtitle1" gutterBottom>
-  {getLabelWithAsterisk(field.label, field.name)}
+  {getLabelWithAsterisk(field.label, field.required)}
 </Typography>
             <CustomDatePicker
               name="dob_or_incorp_date"
@@ -269,7 +268,7 @@ const getLabelWithAsterisk = (label, isRequired) => (
       return (
         <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
           <Typography variant="subtitle1" gutterBottom>
-  {getLabelWithAsterisk(field.label, field.name)}
+  {getLabelWithAsterisk(field.label, field.required)}
   {field.name === 'sender_email' && (
     <Tooltip title="Pay slips, offer letters, and emails will be sent through this email." placement="right" arrow>
       <InfoOutlinedIcon sx={{ fontSize: 18, ml: 0.5, color: 'gray', cursor: 'pointer' }} />

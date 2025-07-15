@@ -70,7 +70,7 @@ export default function DesignationDialog({ open, handleClose, fetchDesignations
 
   const { values, handleChange, handleBlur, touched, errors, handleSubmit, setValues, resetForm } = formik;
 
-  useEffect(() => {
+  useEffect(() => { 
     if (type === 'edit' && selectedRecord) {
       setValues({
         designation_name: selectedRecord.designation_name || ''
