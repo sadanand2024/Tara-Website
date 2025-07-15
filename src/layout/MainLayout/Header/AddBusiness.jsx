@@ -15,7 +15,7 @@ import natureOfBusinessOptions from 'utils/natureOfBusinessOptions';
 
 const validationSchema = Yup.object({
   business_name: Yup.string().required('Business name is required'),
-  registration_number: Yup.string().required('Registration number is required'),
+  // registration_number: Yup.string().required('Registration number is required'),
   entity_type: Yup.string().required('Entity type is required'),
   address_line1: Yup.string().required('Address Line 1 is required'),
   city: Yup.string().required('City is required'),
@@ -41,7 +41,7 @@ const AddBusiness = ({ open, onClose, userData, setUserData, getContext }) => {
   const [submitAttempted, setSubmitAttempted] = React.useState(false);
   const Fields = [
     { name: 'business_name', label: 'Business Name', required: true },
-    { name: 'registration_number', label: 'Registration Number', required: true },
+    { name: 'registration_number', label: 'Registration Number', required: false },
     { name: 'entity_type', label: 'Entity Type', type: 'select', options: entityTypes, required: true },
     { name: 'pan', label: 'PAN', required: true },
     { name: 'business_nature', type: 'select', label: 'Business Nature', options: natureOfBusinessOptions, required: true },
@@ -153,10 +153,13 @@ const AddBusiness = ({ open, onClose, userData, setUserData, getContext }) => {
 
   // Helper to render label with red asterisk if required
   const renderLabel = (label, required) => {
+    // Check for special cases (like 'Address Line 2' and 'registration_number')
+    const isSpecialCase = label === 'Address Line 2' || label === 'registration_number';
+
     return (
       <span>
         {label}
-        {required && label !== 'Address Line 2' && <span style={{ color: 'red' }}> *</span>}
+        {required && !isSpecialCase && <span style={{ color: 'red' }}> *</span>}
       </span>
     );
   };

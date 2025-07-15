@@ -13,34 +13,8 @@ const CustomAutocomplete = ({
   textColor,
   getOptionKey,
   customTextField,
-  required,
   ...props
 }) => {
-  // Render label with red asterisk if required
-  let renderedLabel = label;
-  if (label && required) {
-    renderedLabel = (
-      <span>
-        {label}
-        <span style={{ color: 'red' }}> *</span>
-      </span>
-    );
-  }
-
-  const getOptionLabel = (option) => {
-    if (typeof option === 'string') {
-      return option;
-    }
-    return option.label || option.value || option;
-  };
-
-  const isOptionEqualToValue = (option, value) => {
-    if (typeof option === 'string' && typeof value === 'string') {
-      return option === value;
-    }
-    return option.value === value.value;
-  };
-
   return (
     <Autocomplete
       size="small"
@@ -48,17 +22,7 @@ const CustomAutocomplete = ({
       onChange={onChange}
       options={options}
       disableClearable
-      getOptionLabel={getOptionLabel}
-      isOptionEqualToValue={isOptionEqualToValue}
-      renderOption={(props, option) => {
-        // Use a unique key for each option
-        let key = typeof option === 'string' ? option : option.value || option.label;
-        return (
-          <li {...props} key={key}>
-            {getOptionLabel(option)}
-          </li>
-        );
-      }}
+      getOptionKey={(option) => (getOptionKey ? getOptionKey(option) : option.id || option)}
       renderInput={(params) =>
         customTextField ? (
           customTextField(params)
@@ -71,10 +35,10 @@ const CustomAutocomplete = ({
               }
             }}
             {...params}
+            label={label}
             error={error}
             helperText={helperText}
             fullWidth
-            label={renderedLabel}
           />
         )
       }
