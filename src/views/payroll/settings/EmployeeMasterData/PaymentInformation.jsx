@@ -1,13 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { useFormik, FormikProvider } from 'formik';
-import * as Yup from 'yup';
-import { Button, Box, Grid2, Typography } from '@mui/material';
-import { useSearchParams } from 'react-router-dom';
-import Factory from 'utils/Factory'; // Ensure this function is defined
-import CustomInput from 'utils/CustomInput';
+import { Box, Grid2, Typography } from '@mui/material';
+import { FormikProvider, useFormik } from 'formik';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
-import { useNavigate } from 'react-router-dom';
+import CustomInput from 'utils/CustomInput';
+import Factory from 'utils/Factory'; // Ensure this function is defined
+import * as Yup from 'yup';
 function PaymentInformation({ employeeData, createdEmployeeId, onNext, setSubmitRef }) {
   const [payrollid, setPayrollId] = useState(null);
   const [employeeId, setEmployeeId] = useState(null);
@@ -25,12 +24,13 @@ function PaymentInformation({ employeeData, createdEmployeeId, onNext, setSubmit
   }, [searchParams]);
 
   const employeeFields = [
-    { name: 'account_holder_name', label: 'Account Holder Name' },
-    { name: 'bank_name', label: 'Bank Name' },
-    { name: 'account_number', label: 'Account Number' },
-    { name: 'ifsc_code', label: 'IFSC Code' },
-    { name: 'branch_name', label: 'Branch Name' }
+    { name: 'account_holder_name', label: 'Account Holder Name', required: true },
+    { name: 'bank_name', label: 'Bank Name', required: true },
+    { name: 'account_number', label: 'Account Number', required: true },
+    { name: 'ifsc_code', label: 'IFSC Code', required: true },
+    { name: 'branch_name', label: 'Branch Name', required:false }
   ];
+
 
   const validationSchema = Yup.object({
     account_holder_name: Yup.string()
@@ -46,10 +46,16 @@ function PaymentInformation({ employeeData, createdEmployeeId, onNext, setSubmit
     ifsc_code: Yup.string().required('IFSC Code is required'),
     // .matches(/^[A-Za-z]{4}\d{7}$/, 'Invalid IFSC Code. Format: ABCD1234567'),
 
-    branch_name: Yup.string().required('Branch Name is required').max(100, 'Branch Name cannot exceed 100 characters'),
+    // branch_name: Yup.string().required('Branch Name is required').max(100, 'Branch Name cannot exceed 100 characters'),
 
     is_active: Yup.boolean().required('Status is required')
   });
+  const getLabelWithAsterisk = (label, isRequired) => (
+    <span>
+      {label}
+      {isRequired && <span style={{ color: 'red', fontSize: '1.2em', marginLeft: 2 }}>*</span>}
+    </span>
+  );
 
   const formik = useFormik({
     initialValues: {
@@ -107,8 +113,11 @@ function PaymentInformation({ employeeData, createdEmployeeId, onNext, setSubmit
 
       return (
         <Grid2 size={{ sx: 12, sm: 6 }} key={fieldName}>
-          <Typography variant="subtitle2" sx={{ color: 'grey.800', mb: 0.8 }}>
+          {/* <Typography variant="subtitle2" sx={{ color: 'grey.800', mb: 0.8 }}>
             {field.label}
+          </Typography> */}
+          <Typography variant="subtitle2" sx={{ color: 'grey.800', mb: 0.8 }}>
+            {getLabelWithAsterisk(field.label, field.required)}
           </Typography>
 
           <CustomInput
