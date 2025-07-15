@@ -106,7 +106,7 @@ function Organizationdetails({ handleNext }) {
     dob_or_incorp_date: Yup.string().required('This field is required'),
 
     primary_email: Yup.string().email('Invalid email address').required('Email is required'),
-    sender_email: Yup.string().email('Invalid email address').required('Email is required'),
+    // sender_email: Yup.string().email('Invalid email address').required('Email is required'),
     org_address_line1: Yup.string().required('Address Line 1 is required'),
     org_address_state: Yup.string().required('State is required'),
     org_address_city: Yup.string().required('City is required'),
