@@ -15,7 +15,8 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Typography
+  Typography,
+  Paper
 } from '@mui/material';
 import Grid2 from '@mui/material/Grid2';
 import React, { useEffect, useState } from 'react';
@@ -89,15 +90,10 @@ const SelectedEvent = ({ onBack }) => {
 
   return (
     <Box
-      sx={{
-        p: { xs: 1, md: 4 },
-        bgcolor: '#f7f9fb',
-        minHeight: '50vh',
-        width: '90vw',
-      }}
+    sx={{ p: { xs: 1, md: 4 }, background: 'white',borderRadius:2, minHeight: '100vh' }}
     >
       {/* Breadcrumb */}
-      <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+      {/* <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
         <Typography variant="body2" color="#757575">
           <b>
             <span
@@ -127,21 +123,24 @@ const SelectedEvent = ({ onBack }) => {
         >
           Back to Dashboard
         </Button>
-      </Box>
+      </Box> */}
 
       {/* Main Card with summary and table */}
-      <Card
+      <Paper
         sx={{
-          borderRadius: 4,
-          boxShadow: 1,
-          p: 0,
-          width: '100%',
-          maxWidth: 'none',
-          mx: 0
+          borderRadius: 3,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
+          p: { xs: 2, md: 4 },
+          maxWidth: 1400,
+          mx: 'auto',
+          mt: 0,
+          minHeight: { xs: 400, md: 700 },
+          position: 'relative',
+          background: '#fff',
         }}
       >
         <CardContent sx={{ pb: 0 }}>
-          <Grid2 container spacing={23} alignItems="center" sx={{ mb: 2 }}>
+          <Grid2 container spacing={10} alignItems="center" sx={{ mt: -2 }}>
             <Grid2 xs={12} sm={3}>
               <Typography sx={summaryLabelStyle}>Event Name</Typography>
               <Typography sx={summaryValueStyle}>{eventName}</Typography>
@@ -179,16 +178,16 @@ const SelectedEvent = ({ onBack }) => {
             </Grid2>
           </Grid2>
         </CardContent>
-        <Box sx={{ px: 3, pb: 3 }}>
-          <TableContainer>
+        <Box sx={{ mt: 3, borderRadius: 2, overflow: 'hidden', bgcolor: '#fff' }}>
+          <TableContainer sx={{ borderRadius: 2, border: '1px solid #E3EAFE', overflow: 'hidden' }}>
             <Table>
               <TableHead>
                 <TableRow sx={{ bgcolor: '#f5f6fa' }}>
-                  <TableCell sx={{ fontWeight: 700, color: '#1976d2', fontSize: 15, borderTopLeftRadius: 12 }}>Document Name</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: '#1976d2', fontSize: 15 }}>Template</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: '#1976d2', fontSize: 15 }}>Status</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: '#1976d2', fontSize: 15 }}>Last Edited</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: '#1976d2', fontSize: 15, borderTopRightRadius: 12 }}>Action</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: '#1138e7', fontSize: 15, borderTopLeftRadius: 12 }}>Document Name</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: '#1138e7', fontSize: 15 }}>Template</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: '#1138e7', fontSize: 15 }}>Status</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: '#1138e7', fontSize: 15 }}>Last Edited</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: '#1138e7', fontSize: 15, borderTopRightRadius: 12 }}>Action</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -254,7 +253,7 @@ const SelectedEvent = ({ onBack }) => {
             </Table>
           </TableContainer>
         </Box>
-      </Card>
+      </Paper>
     </Box>
   );
 };
