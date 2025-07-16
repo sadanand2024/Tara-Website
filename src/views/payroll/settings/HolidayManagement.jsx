@@ -20,7 +20,6 @@ import EmptyDataPlaceholder from 'ui-component/extended/EmptyDataPlaceholder';
 import { IconButton } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
 
-import MainCard from 'ui-component/cards/MainCard';
 import ActionCell from 'ui-component/extended/ActionCell';
 import Factory from 'utils/Factory';
 import HolidayManagementDialog from './HolidayManagementDialog';
@@ -31,7 +30,8 @@ import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
 import DeleteDialog from 'ui-component/extended/DeleteDialog';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useNavigate } from 'react-router-dom';
-function HolidayManagement({ handleBack, handleNext }) {
+
+function HolidayManagement({ handleBack, handleNext, onAddClick }) {
   const [holidayManagementData, setHolidayManagementData] = useState([]);
   const [workLocations, setWorkLocations] = useState([]);
   const [selectedRecord, setSelectedRecord] = useState(null);
@@ -48,6 +48,21 @@ function HolidayManagement({ handleBack, handleNext }) {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
   const navigate = useNavigate();
+
+  // Expose the dialog opening function to parent
+  useEffect(() => {
+    if (onAddClick) {
+      window.triggerHolidayAddDialog = () => {
+        setPostType('add');
+        setSelectedRecord(null);
+        setOpenDialog(true);
+      };
+    }
+    return () => {
+      delete window.triggerHolidayAddDialog;
+    };
+  }, [onAddClick]);
+
   const handleOpenDeleteDialog = (designation) => {
     setSelectedRow(designation);
     setOpenDeleteDialog(true);
@@ -177,23 +192,19 @@ function HolidayManagement({ handleBack, handleNext }) {
   };
 
   return (
-    <MainCard
-      title={
+    <Box>
+      {/* Action buttons */}
+      {/* <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Stack direction="row" spacing={1}>
-          <Button variant="outlined" startIcon={<IconFilter />} onClick={() => setFilterDialog(true)}>
+          <Button variant="outlined" startIcon={<IconFilter />} onClick={() => setFilterDialog(true)} size="small">
             Filter
           </Button>
-          <Button variant="outlined" startIcon={<IconReload />} onClick={fetchHolidayManagementData}>
+          <Button variant="outlined" startIcon={<IconReload />} onClick={fetchHolidayManagementData} size="small">
             Reset
           </Button>
         </Stack>
-      }
-      secondary={
-        <Button variant="contained" startIcon={<IconPlus />} onClick={handleOpenDialog}>
-          Add Holiday
-        </Button>
-      }
-    >
+      </Box> */}
+
       <Stack spacing={3}>
         {loading ? (
           <Stack direction="row" justifyContent="center" alignItems="center" sx={{ minHeight: 300 }}>
@@ -225,14 +236,14 @@ function HolidayManagement({ handleBack, handleNext }) {
               <TableBody>
                 {paginatedData.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} align="center" sx={{ height: 250 }}>
+                    <TableCell colSpan={6} align="center" sx={{ height: 250 }}>
                       <EmptyDataPlaceholder title="No Data Found" subtitle="Start by adding a new Data." />
                     </TableCell>
                   </TableRow>
                 ) : (
                   paginatedData.map((item, index) => (
                     <TableRow key={item.id} hover>
-                      <TableCell align="center">{index + 1}</TableCell>
+                      <TableCell align="center">{(currentPage - 1) * rowsPerPage + index + 1}</TableCell>
                       <TableCell align="left">{item.holiday_name}</TableCell>
                       <TableCell align="left">{`${item.start_date} - ${item.end_date}`}</TableCell>
                       <TableCell align="left">
@@ -268,7 +279,9 @@ function HolidayManagement({ handleBack, handleNext }) {
         )}
 
         <Stack direction="row" justifyContent="space-between" sx={{ py: 2 }}>
-          <Typography></Typography>
+          <Button size="small" variant="outlined" onClick={handleBack}>
+            Back
+          </Button>
           {holidayManagementData.length > 0 && (
             <Pagination
               count={Math.ceil(holidayManagementData.length / rowsPerPage)}
@@ -298,18 +311,17 @@ function HolidayManagement({ handleBack, handleNext }) {
         workLocations={workLocations}
       />
 
-      {filterDialog && (
-        <FilterDialog
-          financialYear={financialYear}
-          setFinancialYear={setFinancialYear}
-          filterDialog={filterDialog}
-          setFilterDialog={setFilterDialog}
-          workLocations={workLocations}
-          setSelectedWorkLoacation={setSelectedWorkLocation}
-          fetch_by_filter={fetchByFilter}
-        />
-      )}
-    </MainCard>
+      <FilterDialog
+        open={filterDialog}
+        financialYear={financialYear}
+        setFinancialYear={setFinancialYear}
+        setFilterDialog={setFilterDialog}
+        workLocations={workLocations}
+        selectedWorkLocation={selectedWorkLocation}
+        setSelectedWorkLocation={setSelectedWorkLocation}
+        fetch_by_filter={fetchByFilter}
+      />
+    </Box>
   );
 }
 

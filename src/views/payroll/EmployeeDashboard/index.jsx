@@ -32,7 +32,8 @@ const PRODUCTS_DATA = [
   { title: 'Exits', href: '/payroll-workflows', icon: <ExitToAppIcon />, color: '#F44336' },
   { title: 'Attendance', href: '/payroll-workflows', icon: <EventNoteIcon />, color: '#2196F3' },
   { title: 'Loans & Advances', href: '/payroll-workflows', icon: <AccountBalanceWalletIcon />, color: '#FF9800' },
-  { title: 'Bonus & Incentives', href: '/payroll-workflows', icon: <EmojiEventsIcon />, color: '#9C27B0' },
+  { title: 'Variable Bonus', href: '/payroll-workflows', icon: <EmojiEventsIcon />, color: '#9C27B0' },
+  { title: 'Adhoc Bonus & Incentives', href: '/payroll-workflows', icon: <EmojiEventsIcon />, color: '#E91E63' },
   { title: 'Salary Revisions', href: '/payroll-workflows', icon: <UpdateIcon />, color: '#009688' },
   { title: 'TDS', href: '/payroll-workflows', icon: <ReceiptIcon />, color: '#673AB7' }
 ];
@@ -112,6 +113,7 @@ export default function Index() {
     'attendance',
     'loans_and_advances', // If/when available in API, else will be undefined
     'bonuses',
+    'adhoc_bonus', // New field for Adhoc Bonus & Incentives
     'salary_revision',
     'tds'
   ];

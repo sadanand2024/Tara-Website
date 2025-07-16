@@ -14,7 +14,6 @@ import {
   Grid2,
   Pagination
 } from '@mui/material';
-import MainCard from 'ui-component/cards/MainCard';
 import ActionCell from 'ui-component/extended/ActionCell';
 import Factory from 'utils/Factory';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -26,21 +25,18 @@ import { Edit, Delete } from '@mui/icons-material';
 import DeleteDialog from 'ui-component/extended/DeleteDialog';
 import IconButton from '@mui/material/IconButton';
 import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
-import SearchBar from 'ui-component/extended/SearchBar';
 
-function SalaryTemplateList({ handleBack, handleNext }) {
+function SalaryTemplateList({ handleBack, handleNext, searchQuery = '' }) {
   const [salaryTemplates, setSalaryTemplates] = useState([]);
   const [payrollid, setPayrollId] = useState(null);
-  const [openDialog, setOpenDialog] = useState(false);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const dispatch = useDispatch();
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [searchQuery, setSearchQuery] = useState('');
 
-  // Filter salaryTemplates based on searchQuery
+  // Filter salaryTemplates based on searchQuery from props
   const filteredTemplates = salaryTemplates.filter((template) => {
     const query = searchQuery.toLowerCase();
     return template.template_name?.toLowerCase().includes(query) || template.description?.toLowerCase().includes(query);
@@ -98,33 +94,7 @@ function SalaryTemplateList({ handleBack, handleNext }) {
   }, [payrollid]);
 
   return (
-    <MainCard
-      title="Salary Templates"
-      subtitle="Manage your Salary Templates for seamless operations"
-      secondary={
-        <Stack direction="row" spacing={2} alignItems="center">
-          <SearchBar
-            placeholder="Search template..."
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setCurrentPage(1);
-            }}
-          />
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => {
-              const params = new URLSearchParams(searchParams);
-              params.set('action', 'new');
-              navigate({ search: params.toString() });
-            }}
-          >
-            Create New Template
-          </Button>
-        </Stack>
-      }
-    >
+    <Box>
       <Grid2 container>
         <Grid2 size={{ xs: 12 }}>
           <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 1 }}>
@@ -203,10 +173,7 @@ function SalaryTemplateList({ handleBack, handleNext }) {
           </Grid2>
         </Grid2>
       </Grid2>
-      <Grid2 size={{ xs: 12 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}></Box>
-      </Grid2>
-    </MainCard>
+    </Box>
   );
 }
 

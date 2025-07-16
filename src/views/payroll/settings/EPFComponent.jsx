@@ -32,8 +32,8 @@ import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
 
 const pfFields = [
-  { name: 'epf_number', label: 'EPF Number (EX: ABCDE2405151000)',required: true },
-  { name: 'employee_contribution_rate', label: 'Employee Contribution Rate',required: true },
+  { name: 'epf_number', label: 'EPF Number (EX: ABCDE2405151000)', required: true },
+  { name: 'employee_contribution_rate', label: 'Employee Contribution Rate', required: true },
   { name: 'employer_contribution_rate', label: 'Employer Contribution Rate' }
 ];
 
@@ -133,12 +133,12 @@ function EpfComponent({ handleNext }) {
       setPostType('post');
     }
   };
-    const getLabelWithAsterisk = (label, isRequired) => (
-  <>
-    {label}
-    {isRequired && <span style={{ color: 'red' }}> *</span>}
-  </>
-);
+  const getLabelWithAsterisk = (label, isRequired) => (
+    <>
+      {label}
+      {isRequired && <span style={{ color: 'red' }}> *</span>}
+    </>
+  );
 
   // Effect to trigger API call when either businessId or payrollid is set
   useEffect(() => {
@@ -155,7 +155,7 @@ function EpfComponent({ handleNext }) {
     const { res, error } = await Factory(postType, url, postData);
     setLoading(false);
     if (res.status_cd === 0) {
-      dispatchSnackbar(
+      dispatch(
         openSnackbar({
           open: true,
           message: postType === 'post' ? 'Data Saved Successfully' : 'Data Updated Successfully',
@@ -167,7 +167,7 @@ function EpfComponent({ handleNext }) {
       setEpfdisableDialog(false);
       getEPF_Details(payrollid);
     } else {
-      dispatchSnackbar(
+      dispatch(
         openSnackbar({
           open: true,
           message: JSON.stringify(res.data.data),
@@ -199,7 +199,7 @@ function EpfComponent({ handleNext }) {
     );
   }
   return (
-    <Box sx={{ width: '100%', p: { xs: 1, sm: 3 } }}>
+    <Box sx={{ width: '100%', p: { xs: 1, sm: 1 } }}>
       <Card elevation={3} sx={{ maxWidth: 700, mb: 3 }}>
         <CardHeader
           title={
@@ -315,9 +315,14 @@ function EpfComponent({ handleNext }) {
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                     Enable EPF to start managing provident fund settings for your organization.
                   </Typography>
-                  <Button variant="contained" startIcon={<IconPlus size={18} />} onClick={handleOpen} sx={{ mt: 1 }}>
-                    Enable EPF
-                  </Button>
+                  <Stack direction="row" spacing={2} justifyContent="center" sx={{ mt: 2 }}>
+                    <Button variant="contained" startIcon={<IconPlus size={18} />} onClick={handleOpen}>
+                      Enable EPF
+                    </Button>
+                    <Button variant="outlined" color="error" onClick={() => setEpfdisableDialog(true)}>
+                      Disable EPF
+                    </Button>
+                  </Stack>
                 </Paper>
               </Grid2>
             )}
@@ -361,9 +366,9 @@ function EpfComponent({ handleNext }) {
                 {field.name === 'employee_contribution_rate' || field.name === 'employer_contribution_rate' ? (
                   <Box sx={{ pb: 1 }}>
                     <Typography variant="subtitle1" sx={{ mb: 0.5 }}>
-                       {getLabelWithAsterisk(field.label, field.required)}
+                      {getLabelWithAsterisk(field.label, field.required)}
                     </Typography>
-                   
+
                     <CustomAutocomplete
                       value={values[field.name]}
                       name={field.name}
@@ -478,7 +483,7 @@ function EpfComponent({ handleNext }) {
       <Modal
         open={epfdisableDialog}
         showClose={true}
-        maxWidth={'md'}
+        maxWidth={'sm'}
         handleClose={() => {
           resetForm();
           setEpfdisableDialog(false);
@@ -512,7 +517,7 @@ function EpfComponent({ handleNext }) {
           <Box display="flex" justifyContent="center" mb={1}>
             <ErrorOutlineIcon color="primary" fontSize="large" />
           </Box>
-          <Alert severity="warning" sx={{ mb: 2 }}>
+          <Alert severity="error" sx={{ mb: 2 }}>
             If your organisation has 20 or more employees, it is necessary to register for the EPF scheme. Are you sure you want to disable
             EPF for this organisation?
           </Alert>

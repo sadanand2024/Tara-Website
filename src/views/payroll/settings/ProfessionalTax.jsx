@@ -74,7 +74,7 @@ const ProfessionalTax = ({ handleNext, handleBack }) => {
           <CircularProgress />
         </Box>
       ) : (
-        <MainCard title="Professional Tax Details">
+        <MainCard>
           <Grid2 container spacing={2}>
             <TableContainer component={Paper} sx={{ width: '100%', borderRadius: 2, boxShadow: 1, overflowX: 'auto' }}>
               <Table size="small">

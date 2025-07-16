@@ -16,7 +16,7 @@ import PayrollStatusSummary from './PayrollStatusSummary';
 import PayrollComplianceSummary from './PayrollComplianceSummary';
 
 import PayrollMonthwise from './PayrollMonthwise';
-import { Button, Stack, Typography, Grid2, TextField, Chip, CircularProgress } from '@mui/material';
+import { Button, Stack, Typography, Grid2, TextField, Chip, CircularProgress, Tooltip } from '@mui/material';
 import { IconSparkles, IconSettings2 } from '@tabler/icons-react';
 import { IconPlus } from '@tabler/icons-react';
 
@@ -382,20 +382,22 @@ const PayrollDashboard = () => {
                       >
                         Resume Payroll
                       </Button>
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        onClick={() => {
-                          refreshEmployees_on_payroll();
-                        }}
-                        disabled={refreshLoading}
-                        sx={{
-                          fontWeight: 700,
-                          '&:hover': { borderColor: '#2196f3' }
-                        }}
-                      >
-                        {refreshLoading ? 'Refreshing...' : 'Refresh Employees on Your Payroll'}
-                      </Button>
+                      <Tooltip title="Refresh Employees on Your Payroll" arrow placement="top">
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          onClick={() => {
+                            refreshEmployees_on_payroll();
+                          }}
+                          disabled={refreshLoading}
+                          sx={{
+                            fontWeight: 700,
+                            '&:hover': { borderColor: '#2196f3' }
+                          }}
+                        >
+                          {refreshLoading ? 'Refreshing...' : 'Refresh'}
+                        </Button>
+                      </Tooltip>
                     </Stack>
                   </Stack>
                 </Stack>

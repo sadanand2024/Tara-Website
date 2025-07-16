@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Card, Stack, Box, Typography, Grid2 } from '@mui/material';
+import { Button, Card, Stack, Box, Typography, Grid2, TextField } from '@mui/material';
 import { useSearchParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
-import MainCard from '../../../ui-component/cards/MainCard';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import Factory from 'utils/Factory';
 import dayjs from 'dayjs';
-import CustomDatePicker from 'utils/CustomDateInput';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
@@ -36,7 +37,7 @@ function PaySchedule({ handleBack, handleNext }) {
 
   const formik = useFormik({
     initialValues: {
-      payroll_start_month: '',
+      payroll_start_month: null,
       weekOff: {
         SUN: false,
         MON: false,
@@ -78,12 +79,15 @@ function PaySchedule({ handleBack, handleNext }) {
   const submitForm = async (values) => {
     const selectedDays = Object.keys(values.weekOff).filter((day) => values.weekOff[day]);
 
+    // Convert the dayjs object to the required format for API
+    let formattedDate = '';
+    if (values.payroll_start_month && dayjs(values.payroll_start_month).isValid()) {
+      formattedDate = dayjs(values.payroll_start_month).format('MMMM, YYYY');
+    }
+
     const postData = {
       payroll: payrollId,
-      payroll_start_month:
-        values.payroll_start_month && dayjs(values.payroll_start_month).isValid()
-          ? dayjs(values.payroll_start_month).format('MMMM, YYYY')
-          : ''
+      payroll_start_month: formattedDate
     };
 
     const dayMapping = {
@@ -156,8 +160,18 @@ function PaySchedule({ handleBack, handleNext }) {
     if (res?.status_cd === 0) {
       const scheduleData = res?.data;
       if (scheduleData) {
+        // Convert the date string to a dayjs object for DatePicker
+        let monthValue = null;
+        if (scheduleData?.payroll_start_month) {
+          // Parse the date string and convert to dayjs object
+          const parsedDate = dayjs(scheduleData.payroll_start_month, 'MMMM, YYYY');
+          if (parsedDate.isValid()) {
+            monthValue = parsedDate;
+          }
+        }
+
         setValues({
-          payroll_start_month: scheduleData?.payroll_start_month ? dayjs(scheduleData.payroll_start_month, 'MMMM, YYYY') : '',
+          payroll_start_month: monthValue,
           weekOff: {
             SUN: scheduleData.sunday || false,
             MON: scheduleData.monday || false,
@@ -185,104 +199,94 @@ function PaySchedule({ handleBack, handleNext }) {
       get_paySchedule_Details(payrollId);
     }
   }, [payrollId]);
+
   return (
-    <MainCard title="Pay Schedule" subtitle="Manage Pay Schedule seamless operations">
-      <form onSubmit={handleSubmit}>
-        <Typography variant="h5">Select your week off</Typography>
-        <Typography variant="body1" sx={{ mt: 1 }}>
-          Choose your week off days from the calendar
-        </Typography>
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <Box>
+        <form onSubmit={handleSubmit}>
+          <Typography variant="h5">Select your week off</Typography>
+          <Typography variant="body1" sx={{ mt: 1 }}>
+            Choose your week off days from the calendar
+          </Typography>
 
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 2 }}>
-          {weekOffOptions.map((day) => (
-            <Card
-              key={day.short}
-              sx={{
-                padding: 1,
-                borderRadius: 1,
-                boxShadow: 1,
-                cursor: 'pointer',
-                color: values.weekOff[day.short] ? 'white' : 'inherit',
-                backgroundColor: values.weekOff[day.short] ? '#006397' : 'white'
-              }}
-              onClick={() => {
-                setFieldValue(`weekOff.${day.short}`, !values.weekOff[day.short]);
-              }}
-            >
-              <Typography>{day.full}</Typography>
-            </Card>
-          ))}
-        </Box>
-
-        <Box sx={{ mt: 5 }}>
-          <Typography variant="subtitle1">Start your first payroll from</Typography>
-          <Grid2 container>
-            <Grid2 size={{ xs: 12, sm: 4 }}>
-              <CustomDatePicker
-                name="payroll_start_month"
-                value={values.payroll_start_month}
-                onChange={(newDate) => {
-                  setFieldValue('payroll_start_month', newDate || null);
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 2 }}>
+            {weekOffOptions.map((day) => (
+              <Card
+                key={day.short}
+                sx={{
+                  p: 2,
+                  cursor: 'pointer',
+                  border: values.weekOff[day.short] ? '2px solid' : '1px solid',
+                  borderColor: values.weekOff[day.short] ? 'primary.main' : 'divider',
+                  backgroundColor: values.weekOff[day.short] ? 'primary.light' : 'background.paper',
+                  minWidth: 120,
+                  textAlign: 'center',
+                  transition: 'all 0.2s ease-in-out',
+                  '&:hover': {
+                    borderColor: 'primary.main',
+                    backgroundColor: 'primary.light'
+                  }
                 }}
-                onBlur={handleBlur}
-                error={touched.payroll_start_month && Boolean(errors.payroll_start_month)}
-                helperText={touched.payroll_start_month && errors.payroll_start_month}
-              />
-            </Grid2>
-          </Grid2>
-        </Box>
-
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
-          <Button startIcon={<ArrowBackIcon />} variant="outlined" type="button" onClick={() => handleBack()}>
-            Back
-          </Button>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Stack direction="row" spacing={1}>
-              <Button variant="contained" type="submit" onClick={handleSubmit}>
-                Save
-              </Button>
-              <Button variant="contained" type="button" onClick={handleNext}>
-                Next
-              </Button>
-            </Stack>
+                onClick={() => setFieldValue(`weekOff.${day.short}`, !values.weekOff[day.short])}
+              >
+                <Typography variant="h6" fontWeight="bold" color={values.weekOff[day.short] ? 'primary.main' : 'text.primary'}>
+                  {day.short}
+                </Typography>
+                <Typography variant="body2" color={values.weekOff[day.short] ? 'primary.main' : 'text.secondary'}>
+                  {day.full}
+                </Typography>
+              </Card>
+            ))}
           </Box>
-        </Box>
-      </form>
 
-      <Modal
-        open={openConfirmDialog}
-        maxWidth={'sm'}
-        title="Confirm Submission"
-        showClose={true}
-        handleClose={() => {
-          resetForm();
-          setOpenConfirmDialog(false); // Reset form and close dialog
-        }}
-        footer={
-          <Stack direction="row" sx={{ width: 1, justifyContent: 'space-between', gap: 2 }}>
-            <Button
-              onClick={() => {
-                resetForm();
-                setOpenConfirmDialog(false); // Reset form and close dialog
+          <Box sx={{ mt: 3 }}>
+            <Typography variant="h5" gutterBottom>
+              Start your first payroll from
+            </Typography>
+            <DatePicker
+              views={['month', 'year']}
+              value={values.payroll_start_month}
+              onChange={(newValue) => setFieldValue('payroll_start_month', newValue)}
+              slotProps={{
+                textField: {
+                  size: 'small',
+                  error: touched.payroll_start_month && Boolean(errors.payroll_start_month),
+                  helperText: touched.payroll_start_month && errors.payroll_start_month,
+                  sx: { width: '300px' }
+                }
               }}
-              variant="outlined"
-              color="error"
-            >
-              Cancel
+            />
+          </Box>
+
+          <Stack direction="row" spacing={2} justifyContent="space-between" sx={{ mt: 3 }}>
+            <Button startIcon={<ArrowBackIcon />} variant="outlined" onClick={handleBack}>
+              Back
             </Button>
-            <Button onClick={handleConfirmSubmit} type="submit" variant="contained" color="primary">
-              Submit
+            <Button type="submit" variant="contained" onClick={handleNext}>
+              Next
             </Button>
           </Stack>
-        }
-      >
-        <Box component="form" onSubmit={handleSubmit} sx={{ padding: 2 }}>
-          <Grid2 container spacing={3}>
-            <Typography variant="body1">You haven't selected any week off days. Are you sure you want to proceed?</Typography>
-          </Grid2>
-        </Box>
-      </Modal>
-    </MainCard>
+        </form>
+
+        <Modal
+          open={openConfirmDialog}
+          handleClose={() => setOpenConfirmDialog(false)}
+          title="Confirm Submission"
+          footer={
+            <Stack direction="row" spacing={2}>
+              <Button variant="outlined" onClick={() => setOpenConfirmDialog(false)}>
+                Cancel
+              </Button>
+              <Button variant="contained" onClick={handleConfirmSubmit}>
+                Confirm
+              </Button>
+            </Stack>
+          }
+        >
+          <Typography>Are you sure you want to submit without selecting any week off days?</Typography>
+        </Modal>
+      </Box>
+    </LocalizationProvider>
   );
 }
 

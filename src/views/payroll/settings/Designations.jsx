@@ -17,8 +17,6 @@ import {
   Typography,
   CircularProgress
 } from '@mui/material';
-import SearchBar from 'ui-component/extended/SearchBar';
-import MainCard from 'ui-component/cards/MainCard';
 import DeleteDialog from 'ui-component/extended/DeleteDialog';
 import DesignationDialog from './DesignationDialog';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -29,17 +27,24 @@ import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
 import { IconButton } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
 import BulkUploadDialog from 'ui-component/extended/BulkUploadDialog';
-function Designations({ handleBack, handleNext }) {
+
+function Designations({
+  handleBack,
+  handleNext,
+  searchQuery = '',
+  openDialog = false,
+  setOpenDialog,
+  openBulkDialog = false,
+  setOpenBulkDialog
+}) {
   const [designations, setDesignations] = useState([]);
-  const [openDialog, setOpenDialog] = useState(false);
   const [postType, setPostType] = useState('');
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
-  const [openBulkDialog, setOpenBulkDialog] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
+
   const handleOpenDeleteDialog = (designation) => {
     setSelectedRow(designation);
     setOpenDeleteDialog(true);
@@ -55,7 +60,7 @@ function Designations({ handleBack, handleNext }) {
   const [searchParams] = useSearchParams();
   const payrollid = searchParams.get('payrollid');
 
-  // Filter designations based on searchQuery
+  // Filter designations based on searchQuery from props
   const filteredDesignations = designations.filter((designation) => {
     const query = searchQuery.toLowerCase();
     return designation.designation_name?.toLowerCase().includes(query);
@@ -68,7 +73,6 @@ function Designations({ handleBack, handleNext }) {
 
   const handlePageChange = (event, value) => setCurrentPage(value);
 
-  const handleOpenDialog = () => setOpenDialog(true);
   const handleCloseDialog = () => setOpenDialog(false);
 
   const fetchDesignations = async () => {
@@ -88,7 +92,7 @@ function Designations({ handleBack, handleNext }) {
   const handleEdit = (designation) => {
     setPostType('edit');
     setSelectedRecord(designation);
-    handleOpenDialog();
+    setOpenDialog(true);
   };
 
   const handleDelete = async (designation) => {
@@ -119,35 +123,7 @@ function Designations({ handleBack, handleNext }) {
     );
   }
   return (
-    <MainCard
-      title="Designation Details"
-      subtitle="Manage your designations for seamless operations"
-      secondary={
-        <Stack direction="row" spacing={2} alignItems="center">
-          <SearchBar
-            placeholder="Search designation..."
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setCurrentPage(1);
-            }}
-          />
-          <Button variant="outlined" color="secondary" onClick={() => setOpenBulkDialog(true)}>
-            Bulk Upload
-          </Button>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => {
-              setPostType('post');
-              handleOpenDialog();
-            }}
-          >
-            Add Designation
-          </Button>
-        </Stack>
-      }
-    >
+    <Box>
       <BulkUploadDialog
         open={openBulkDialog}
         handleClose={closeBulkDialog}
@@ -163,7 +139,7 @@ function Designations({ handleBack, handleNext }) {
           <DesignationDialog
             open={openDialog}
             handleClose={handleCloseDialog}
-            handleOpenDialog={handleOpenDialog}
+            handleOpenDialog={() => setOpenDialog(true)}
             selectedRecord={selectedRecord}
             type={postType}
             setType={setPostType}
@@ -256,7 +232,7 @@ function Designations({ handleBack, handleNext }) {
           </Stack>
         </Grid2>
       </Grid2>
-    </MainCard>
+    </Box>
   );
 }
 

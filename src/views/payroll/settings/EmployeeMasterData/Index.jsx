@@ -15,7 +15,6 @@ import {
   Grid2,
   CircularProgress
 } from '@mui/material';
-import MainCard from 'ui-component/cards/MainCard';
 import ActionCell from 'ui-component/extended/ActionCell';
 import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
 import Factory from 'utils/Factory';
@@ -29,18 +28,24 @@ import { Edit, Delete } from '@mui/icons-material';
 import DeleteDialog from 'ui-component/extended/DeleteDialog';
 import EmployeeBulkUploadDialog from 'ui-component/extended/EmployeeBulkUploadDialog';
 import AddEmployee from './AddEmployee';
-import SearchBar from 'ui-component/extended/SearchBar';
-function EmployeeList({ handleBack, handleNext }) {
+
+function EmployeeList({
+  handleBack,
+  handleNext,
+  searchQuery = '',
+  openDialog = false,
+  setOpenDialog,
+  openBulkDialog = false,
+  setOpenBulkDialog
+}) {
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(false);
   const [payrollId, setPayrollId] = useState(null);
-  const [openDialog, setOpenDialog] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [searchQuery, setSearchQuery] = useState(''); // Add searchQuery state
   const dispatch = useDispatch();
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
-  const [openBulkDialog, setOpenBulkDialog] = useState(false);
+
   const closeBulkDialog = () => {
     setOpenBulkDialog(false);
   };
@@ -60,7 +65,7 @@ function EmployeeList({ handleBack, handleNext }) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Filter employees based on searchQuery
+  // Filter employees based on searchQuery from props
   const filteredEmployees = employees.filter((employee) => {
     const query = searchQuery.toLowerCase();
     return (
@@ -138,6 +143,7 @@ function EmployeeList({ handleBack, handleNext }) {
     params.set('employee_id', item.id);
     navigate({ search: params.toString() });
   };
+
   return (
     <>
       {loading ? (
@@ -145,36 +151,7 @@ function EmployeeList({ handleBack, handleNext }) {
           <CircularProgress />
         </Box>
       ) : (
-        <MainCard
-          title="Employee Master Data"
-          subtitle="Manage your Employee Master Data for seamless operations"
-          secondary={
-            <Stack direction="row" spacing={2} alignItems="center">
-              {/* Search input */}
-              <SearchBar
-                placeholder="Search employee..."
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setCurrentPage(1);
-                }}
-              />
-              <Button variant="outlined" color="secondary" onClick={() => setOpenBulkDialog(true)}>
-                Bulk Upload
-              </Button>
-              <Button
-                variant="contained"
-                onClick={() => {
-                  const params = new URLSearchParams(searchParams);
-                  params.set('action', 'add');
-                  navigate({ search: params.toString() });
-                }}
-              >
-                Add Employee
-              </Button>
-            </Stack>
-          }
-        >
+        <Box>
           <EmployeeBulkUploadDialog
             open={openBulkDialog}
             handleClose={closeBulkDialog}
@@ -198,40 +175,33 @@ function EmployeeList({ handleBack, handleNext }) {
               <Table size="small">
                 <TableHead sx={{ backgroundColor: 'primary.main' }}>
                   <TableRow>
-                    {['S.No', 'Employee ID', 'Employee Name', 'Department', 'Designation', 'Email', 'Status', 'Actions'].map(
-                      (header, idx) => (
-                        <TableCell
-                          key={idx}
-                          sx={{
-                            whiteSpace: 'nowrap',
-                            fontWeight: 'bold',
-                            textAlign: idx === 0 || idx === 7 ? 'center' : 'left',
-                            color: '#fff !important'
-                          }}
-                        >
-                          {header}
-                        </TableCell>
-                      )
-                    )}
+                    {['S No', 'Employee ID', 'Name', 'Department', 'Designation', 'Email', 'Actions'].map((header, idx) => (
+                      <TableCell
+                        key={idx}
+                        align={['S No', 'Actions'].includes(header) ? 'center' : 'left'}
+                        sx={{ fontWeight: 'bold', whiteSpace: 'nowrap', color: '#fff !important' }}
+                      >
+                        {header}
+                      </TableCell>
+                    ))}
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {paginatedEmployees.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={8} align="center" sx={{ height: 300 }}>
-                        <EmptyDataPlaceholder title="No Data Found" subtitle="Start Adding data." />
+                      <TableCell colSpan={7} align="center" sx={{ height: 300 }}>
+                        <EmptyDataPlaceholder title="No Data Found" subtitle="Start by adding new data." />
                       </TableCell>
                     </TableRow>
                   ) : (
                     paginatedEmployees.map((employee, index) => (
-                      <TableRow key={employee.id} hover sx={{ '&:nth-of-type(odd)': { backgroundColor: 'grey.50' } }}>
+                      <TableRow key={employee.id} hover sx={{ minHeight: 56, '&:hover': { bgcolor: 'action.hover' } }}>
                         <TableCell align="center">{(currentPage - 1) * rowsPerPage + index + 1}</TableCell>
-                        <TableCell align="left">{employee.associate_id}</TableCell>
-                        <TableCell align="left">{`${employee.first_name || ''} ${employee.last_name || ''}`}</TableCell>
-                        <TableCell align="left">{employee.department_name || '-'}</TableCell>
-                        <TableCell align="left">{employee.designation_name || '-'}</TableCell>
-                        <TableCell align="left">{employee.work_email || '-'}</TableCell>
-                        <TableCell align="left">{employee.employee_status ? 'Active' : 'Inactive'}</TableCell>
+                        <TableCell>{employee.associate_id || 'N/A'}</TableCell>
+                        <TableCell>{`${employee.first_name || ''} ${employee.last_name || ''}`.trim() || 'N/A'}</TableCell>
+                        <TableCell>{employee.department_name || 'N/A'}</TableCell>
+                        <TableCell>{employee.designation_name || 'N/A'}</TableCell>
+                        <TableCell>{employee.work_email || 'N/A'}</TableCell>
                         <TableCell align="center">
                           <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
                             <IconButton size="small" color="primary" onClick={() => handleEdit(employee)}>
@@ -268,29 +238,23 @@ function EmployeeList({ handleBack, handleNext }) {
                   <Pagination
                     count={Math.ceil(filteredEmployees.length / rowsPerPage)}
                     page={currentPage}
-                    onChange={(e, value) => setCurrentPage(value)}
+                    onChange={handlePageChange}
+                    shape="rounded"
                     color="primary"
                   />
                 )}
-
                 <Button size="small" variant="contained" onClick={handleNext}>
                   Next
                 </Button>
               </Stack>
             </Grid2>
           </Grid2>
-        </MainCard>
+        </Box>
       )}
     </>
   );
 }
 
 export default function EmployeeMasterDataIndex(props) {
-  const [searchParams] = useSearchParams();
-  const action = searchParams.get('action');
-  const employeeId = searchParams.get('employee_id');
-  if (action === 'add' || employeeId) {
-    return <AddEmployee />;
-  }
   return <EmployeeList {...props} />;
 }

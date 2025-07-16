@@ -21,17 +21,14 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
-import MainCard from 'ui-component/cards/MainCard';
 import BulkUploadDialog from 'ui-component/extended/BulkUploadDialog';
 import EmptyDataPlaceholder from 'ui-component/extended/EmptyDataPlaceholder';
 import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
-import SearchBar from 'ui-component/extended/SearchBar';
 import Factory from 'utils/Factory';
 import DeleteDialog from '../../../ui-component/extended/DeleteDialog';
 import WorkLocationDialog from './WorkLocationDialog';
 
-function Worklocation({ handleBack, handleNext }) {
-  const [openDialog, setOpenDialog] = useState(false);
+function Worklocation({ handleBack, handleNext, searchQuery = '', openDialog = false, setOpenDialog }) {
   const [workLocations, setWorkLocations] = useState([]);
   const [payrollid, setPayrollId] = useState(null);
   const [postType, setPostType] = useState('');
@@ -42,8 +39,8 @@ function Worklocation({ handleBack, handleNext }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [currentPage, setCurrentPage] = useState(1);
-  const [searchQuery, setSearchQuery] = useState('');
-  // Filter workLocations based on searchQuery
+
+  // Filter workLocations based on searchQuery from props
   const filteredWorkLocations = workLocations.filter((location) => {
     const query = searchQuery.toLowerCase();
     return (
@@ -55,7 +52,6 @@ function Worklocation({ handleBack, handleNext }) {
   const paginatedData = filteredWorkLocations.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
   const handlePageChange = (event, value) => setCurrentPage(value);
 
-  const handleOpenDialog = () => setOpenDialog(true);
   const handleCloseDialog = () => setOpenDialog(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
@@ -106,7 +102,7 @@ function Worklocation({ handleBack, handleNext }) {
   const handleEdit = (location) => {
     setPostType('edit');
     setSelectedRecord(location);
-    handleOpenDialog();
+    setOpenDialog(true);
   };
 
   const handleDelete = async (location) => {
@@ -155,35 +151,7 @@ function Worklocation({ handleBack, handleNext }) {
     );
   }
   return (
-    <MainCard
-      title="Work Location"
-      subtitle="Manage your work locations for seamless operations"
-      secondary={
-        <Stack direction="row" spacing={2} alignItems="center">
-          <SearchBar
-            placeholder="Search work location..."
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setCurrentPage(1);
-            }}
-          />
-          <Button
-            variant="contained"
-            size="small"
-            startIcon={<AddIcon />}
-            onClick={handleOpenDialog}
-            sx={{
-              textTransform: 'none',
-              fontWeight: 600,
-              fontSize: '0.9rem'
-            }}
-          >
-            Add Work Location
-          </Button>
-        </Stack>
-      }
-    >
+    <Box>
       <BulkUploadDialog
         open={openBulkDialog}
         handleClose={closeBulkDialog}
@@ -308,7 +276,7 @@ function Worklocation({ handleBack, handleNext }) {
           Next
         </Button>
       </Box>
-    </MainCard>
+    </Box>
   );
 }
 

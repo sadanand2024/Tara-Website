@@ -26,7 +26,7 @@ import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
 
 const esiFields = [
-  { name: 'esi_number', label: 'ESI Number (17 digits)',required: true },
+  { name: 'esi_number', label: 'ESI Number (17 digits)', required: true },
   { name: 'employee_contribution', label: 'Employee Contribution Rate (% of Gross Pay)' },
   { name: 'employer_contribution', label: 'Employer Contribution Rate (% of Gross Pay)' }
 ];
@@ -60,13 +60,12 @@ function ESIComponent({ handleNext, handleBack }) {
     employee_contribution: Yup.number().required('Employee contribution is required'),
     employer_contribution: Yup.number().required('Employer contribution is required')
   });
-   const getLabelWithAsterisk = (label, isRequired) => (
-  <>
-    {label}
-    {isRequired && <span style={{ color: 'red' }}> *</span>}
-  </>
-);
-
+  const getLabelWithAsterisk = (label, isRequired) => (
+    <>
+      {label}
+      {isRequired && <span style={{ color: 'red' }}> *</span>}
+    </>
+  );
 
   const formik = useFormik({
     initialValues: {
@@ -152,7 +151,7 @@ function ESIComponent({ handleNext, handleBack }) {
   }
 
   return (
-    <Box sx={{ width: '100%', p: { xs: 1, sm: 3 } }}>
+    <Box sx={{ width: '100%', p: { xs: 1, sm: 1 } }}>
       <Card elevation={3} sx={{ maxWidth: 700, mb: 3 }}>
         <CardHeader
           title={
@@ -269,14 +268,9 @@ function ESIComponent({ handleNext, handleBack }) {
                   {/* <Typography variant="subtitle1" sx={{ mb: 0.5 }}>
                     {field.label}
                   </Typography> */}
-                 <Typography
-  variant="subtitle1"
-  gutterBottom
-  component="label"
-  htmlFor={field.name}
->
-  {getLabelWithAsterisk(field.label, field.required)}
-</Typography>
+                  <Typography variant="subtitle1" gutterBottom component="label" htmlFor={field.name}>
+                    {getLabelWithAsterisk(field.label, field.required)}
+                  </Typography>
 
                   <TextField
                     size="small"

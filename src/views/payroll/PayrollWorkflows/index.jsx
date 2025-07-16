@@ -11,6 +11,7 @@ import Exits from './Exits';
 import Attendance from './Attendance';
 import LoansAndAdvances from './LoansAndAdvances';
 import BonusAndIncentives from './BonusAndIncentives';
+import AdhocBonus from './AdhocBonus';
 import SalaryRevisions from './SalaryRevisions';
 import OtherDeductions from './OtherDeductions';
 import Factory from 'utils/Factory';
@@ -52,6 +53,7 @@ const PayrollWorkflows = ({ type }) => {
   const [exitsData, setExitsData] = useState([]);
   const [loansData, setLoansData] = useState([]);
   const [bonusData, setBonusData] = useState([]);
+  const [adhocBonusData, setAdhocBonusData] = useState([]);
   const [salaryRevisionData, setSalaryRevisionData] = useState([]);
   const [tdsData, setTdsData] = useState([]);
   const dispatch = useDispatch();
@@ -86,6 +88,48 @@ const PayrollWorkflows = ({ type }) => {
         openSnackbar({
           open: true,
           message: JSON.stringify(res.data.message),
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
+    }
+  };
+
+  const generateAttandance = async () => {
+    if (!payrollId || !financialYear || !month) {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Please select payroll ID, financial year, and month',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
+      return;
+    }
+    setLoading(true);
+    const url = `/payroll/employee_attendance_current_month_automate?payroll_id=${payrollId}&month=${month}&financial_year=${financialYear}`;
+    const { res } = await Factory('post', url, {});
+    setLoading(false);
+    if (res?.status_cd === 0) {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Attendance generated successfully!',
+          variant: 'alert',
+          alert: { color: 'success' },
+          close: false
+        })
+      );
+      // Refresh attendance data after generation
+      getAttandanceData();
+    } else {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: res?.data?.message || res?.data?.data || res?.message || 'Failed to generate attendance',
           variant: 'alert',
           alert: { color: 'error' },
           close: false
@@ -130,6 +174,18 @@ const PayrollWorkflows = ({ type }) => {
     }
   };
 
+  const fetchAdhocBonusData = async () => {
+    setLoading(true);
+    const url = `/payroll/adhoc-bonus/by-payroll-month?payroll_id=${payrollId}&month=${month}&financial_year=${financialYear}`;
+    const { res } = await Factory('get', url, {});
+    setLoading(false);
+    if (res?.status_cd === 0) {
+      setAdhocBonusData(res.data || []);
+    } else {
+      setAdhocBonusData([]);
+    }
+  };
+
   const fetchSalaryRevisionData = async () => {
     setLoading(true);
     const year = financialYear ? financialYear.split('-')[0] : '';
@@ -163,8 +219,9 @@ const PayrollWorkflows = ({ type }) => {
     else if (activeTab === 2) getAttandanceData();
     else if (activeTab === 3) fetchLoansData();
     else if (activeTab === 4) fetchBonusData();
-    else if (activeTab === 5) fetchSalaryRevisionData();
-    else if (activeTab === 6) fetchTdsData();
+    else if (activeTab === 5) fetchAdhocBonusData();
+    else if (activeTab === 6) fetchSalaryRevisionData();
+    else if (activeTab === 7) fetchTdsData();
     // eslint-disable-next-line
   }, [activeTab, payrollId, month, financialYear]);
 
@@ -216,7 +273,7 @@ const PayrollWorkflows = ({ type }) => {
         ]
       },
       {
-        label: 'Bonus & Incentives',
+        label: 'Variable Bonus',
         component: BonusAndIncentives,
         fields: [
           { name: 'employee', label: 'Employee Name' },
@@ -226,6 +283,17 @@ const PayrollWorkflows = ({ type }) => {
           { name: 'amount', label: 'Amount' },
           { name: 'month', label: 'Month' },
           { name: 'financial_year', label: 'Financial Year' }
+        ]
+      },
+      {
+        label: 'Adhoc Bonus & Incentives',
+        component: AdhocBonus,
+        fields: [
+          { name: 'employee', label: 'Employee Name' },
+          { name: 'department', label: 'Department' },
+          { name: 'designation', label: 'Designation' },
+          { name: 'type', label: 'Type' },
+          { name: 'amount', label: 'Amount' }
         ]
       },
       {
@@ -286,9 +354,10 @@ const PayrollWorkflows = ({ type }) => {
     LogoutIcon, // Exits
     CoPresentOutlined, // Attendance
     AccountBalanceWalletIcon, // Loans & Advances
-    EmojiEventsIcon, // Bonus & Incentives
+    EmojiEventsIcon, // Variable Bonus
+    EmojiEventsIcon, // Adhoc Bonus & Incentives
     TrendingUpIcon, // Salary Revisions
-    RemoveCircleOutlineIcon // Other Deductions
+    RemoveCircleOutlineIcon // TDS
   ];
 
   // Filtering logic for each tab
@@ -330,7 +399,7 @@ const PayrollWorkflows = ({ type }) => {
           (item.designation || '').toLowerCase().includes(query) ||
           (item.loan_type || '').toLowerCase().includes(query)
       );
-    } else if (tabLabel === 'Bonus & Incentives') {
+    } else if (tabLabel === 'Variable Bonus') {
       return bonusData.filter(
         (item) =>
           (item.associate_id || '').toLowerCase().includes(query) ||
@@ -338,6 +407,15 @@ const PayrollWorkflows = ({ type }) => {
           (item.department || '').toLowerCase().includes(query) ||
           (item.designation || '').toLowerCase().includes(query) ||
           (item.bonus_type || '').toLowerCase().includes(query)
+      );
+    } else if (tabLabel === 'Adhoc Bonus & Incentives') {
+      return adhocBonusData.filter(
+        (item) =>
+          (item.associate_id || '').toLowerCase().includes(query) ||
+          (item.employee_name || '').toLowerCase().includes(query) ||
+          (item.department || '').toLowerCase().includes(query) ||
+          (item.designation || '').toLowerCase().includes(query) ||
+          (item.type || '').toLowerCase().includes(query)
       );
     } else if (tabLabel === 'Salary Revisions') {
       return salaryRevisionData.filter(
@@ -374,11 +452,9 @@ const PayrollWorkflows = ({ type }) => {
           <Button startIcon={<ArrowBackIcon />} variant="outlined" color="primary" onClick={() => navigate(-1)}>
             Back to dashboard
           </Button>
-          {tabs[activeTab].label !== 'Bonus & Incentives' && (
-            <Button variant="contained" color="primary" onClick={handleButtonClick}>
-              {renderButtonLabel()}
-            </Button>
-          )}
+          <Button variant="contained" color="primary" onClick={handleButtonClick}>
+            {renderButtonLabel()}
+          </Button>
         </Stack>
       }
     >
@@ -427,6 +503,9 @@ const PayrollWorkflows = ({ type }) => {
               loading={loading}
               filteredData={getFilteredData()}
               employeeMasterData={employeeMasterData}
+              fetchData={
+                tab.label === 'Exits' ? fetchExitsData : tab.label === 'Adhoc Bonus & Incentives' ? fetchAdhocBonusData : undefined
+              }
               fetchAttendance={tab.label === 'Attendance' ? getAttandanceData : undefined}
               attendanceData={tab.label === 'Attendance' ? getFilteredData() : undefined}
               handleBack={() => setActiveTab((prev) => prev - 1)}

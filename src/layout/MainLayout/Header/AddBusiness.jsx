@@ -11,7 +11,7 @@ import CustomInput from 'utils/CustomInput';
 import Factory from 'utils/Factory';
 import * as Yup from 'yup';
 import { __IndianStates } from '../../../utils/indianStates';
-import natureOfBusinessOptions from 'utils/natureOfBusinessOptions';
+import { industries } from 'utils/industries';
 
 const validationSchema = Yup.object({
   business_name: Yup.string().required('Business name is required'),
@@ -44,7 +44,7 @@ const AddBusiness = ({ open, onClose, userData, setUserData, getContext }) => {
     { name: 'registration_number', label: 'Registration Number', required: false },
     { name: 'entity_type', label: 'Entity Type', type: 'select', options: entityTypes, required: true },
     { name: 'pan', label: 'PAN', required: true },
-    { name: 'business_nature', type: 'select', label: 'Business Nature', options: natureOfBusinessOptions, required: true },
+    { name: 'business_nature', type: 'select', label: 'Business Nature', options: industries, required: true },
     { name: 'trade_name', label: 'Trade Name', required: true },
     { name: 'mobile_number', label: 'Mobile Number', required: true },
     { name: 'email', label: 'Email', required: true },
