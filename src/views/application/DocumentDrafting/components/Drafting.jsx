@@ -24,6 +24,9 @@ import { openSnackbar } from 'store/slices/snackbar';
 import { useNavigate } from 'react-router-dom';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import CircularProgressComponent from 'utils/CircularProgressComponent';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
  
 const filters = [
   { label: 'Category', options: ['All', 'Company', 'HR', 'Finance'] },
@@ -66,6 +69,7 @@ export default function Drafting({ id, tab = 'document', contextId }) {
   const user = useSelector((state) => state.accountReducer.user);
   const navigate = useNavigate();
   const [selectedCard, setSelectedCard] = useState('all'); // 'all', 'draft', 'completed', 'yet_to_start'
+  const [selectedDate, setSelectedDate] = useState(null);
  
   useEffect(() => {
     if (!id) return;
@@ -323,20 +327,40 @@ export default function Drafting({ id, tab = 'document', contextId }) {
       <Grid2 container spacing={2} mb={3}>
         
         {filters.map((filter) => (
-          <Grid2 size={{xs:12, sm:4,md:2}} key={filter.label}>
-            <TextField
-              fullWidth
-              select
-              label={filter.label}
-              size="small"
-              sx={{ bgcolor: '#F5F7FA' }}
-              defaultValue={filter.options[0]}
-            >
-              {filter.options.map((option) => (
-                <MenuItem key={option} value={option}>{option}</MenuItem>
-              ))}
-            </TextField>
-          </Grid2>
+          filter.label === 'Date' ? (
+            <Grid2 size={{xs:12, sm:4,md:2}} key={filter.label}>
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <DatePicker
+                  label={filter.label}
+                  value={selectedDate}
+                  onChange={newValue => setSelectedDate(newValue)}
+                  slotProps={{
+                    textField: {
+                      fullWidth: true,
+                      size: 'small',
+                      sx: { bgcolor: '#F5F7FA' },
+                      InputLabelProps: { shrink: true },
+                    }
+                  }}
+                />
+              </LocalizationProvider>
+            </Grid2>
+          ) : (
+            <Grid2 size={{xs:12, sm:4,md:2}} key={filter.label}>
+              <TextField
+                fullWidth
+                select
+                label={filter.label}
+                size="small"
+                sx={{ bgcolor: '#F5F7FA' }}
+                defaultValue={filter.options[0]}
+              >
+                {filter.options.map((option) => (
+                  <MenuItem key={option} value={option}>{option}</MenuItem>
+                ))}
+              </TextField>
+            </Grid2>
+          )
         ))}
       </Grid2>
  
