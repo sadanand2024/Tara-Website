@@ -257,7 +257,7 @@ function Departments({ handleBack, handleNext }) {
             dialogData={{
               title: 'Delete Record',
               heading: 'Are you sure?',
-              description: 'This action will permanently delete the record.'
+              description: 'Deleting this department will also delete all associated employee records. Proceed only if you are sure.'
             }}
           />
         </TableContainer>

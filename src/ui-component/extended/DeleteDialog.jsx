@@ -9,7 +9,9 @@ export default function DeleteDialog({ open, onClose, onConfirm, dialogData }) {
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xs" aria-labelledby="delete-dialog-title">
-      <DialogTitle id="delete-dialog-title">{dialogData?.title || 'Delete Record'}</DialogTitle>
+      <DialogTitle textAlign={'center'} id="delete-dialog-title">
+        {dialogData?.title || 'Delete Record'}
+      </DialogTitle>
       <DialogContent dividers>
         <Stack spacing={2.5} alignItems="center">
           <Box sx={{ height: 100 }}>
