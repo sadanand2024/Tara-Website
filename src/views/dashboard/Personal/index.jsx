@@ -196,6 +196,19 @@ export default function Personal() {
         </Typography>
       </GreetingSection>
 
+      {/* Add a Create New Event button at the top for demonstration, or update if already present */}
+      <Box sx={{ mb: 2 }}>
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<EventIcon />}
+          onClick={() => navigate(`/app/drafting/event/${user?.active_context?.id}`)}
+          sx={{ borderRadius: 2, fontWeight: 600 }}
+        >
+          Create New Event
+        </Button>
+      </Box>
+
       {/* Services Cards */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
         {services.map((service, index) => (

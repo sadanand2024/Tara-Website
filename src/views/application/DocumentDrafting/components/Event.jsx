@@ -1,12 +1,14 @@
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import { Box, Button, Card, CardContent, MenuItem, Select, Stack, Typography } from '@mui/material';
+import { Box, Button, Card, CardContent, MenuItem, Select, Stack, Typography, Paper, TextField, InputAdornment } from '@mui/material';
 import Grid2 from '@mui/material/Grid2';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { useNavigate, useParams } from 'react-router-dom';
 import Factory from 'utils/Factory';
 import SelectedEvent from './SelectedEvent';
 import DocumentSelectionPage from './DocumentSelectionPage';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import SearchIcon from '@mui/icons-material/Search';
  
 
 const documents = [
@@ -37,7 +39,8 @@ const tabButtonStyle = (active) => ({
   },
 });
 
-const Event = ({ contextId, initialTab = 'event' }) => {
+const Event = ({ tab = 'document', contextId }) => {
+  const navigate = useNavigate();
   const user = useSelector((state) => state.accountReducer.user);
   const [category, setCategory] = useState('');
   const [event, setEvent] = useState('');
@@ -45,14 +48,15 @@ const Event = ({ contextId, initialTab = 'event' }) => {
   const [eventOptions, setEventOptions] = useState([]);
   const [filtersLoading, setFiltersLoading] = useState(true);
   const [selected, setSelected] = useState([]); // array of selected document IDs
-  const [activeTab, setActiveTab] = useState(initialTab);
+  // Remove local activeTab state
   const [documents, setDocuments] = useState([]);
   const [showSelectedEvent, setShowSelectedEvent] = useState(false);
   const [selectedEventInstanceId, setSelectedEventInstanceId] = useState(null);
+  const [search, setSearch] = useState('');
 
-  useEffect(() => {
-    setActiveTab(initialTab);
-  }, [initialTab]);
+  // useEffect(() => {
+  //   setActiveTab(initialTab);
+  // }, [initialTab]);
 
   useEffect(() => {
     setFiltersLoading(true);
@@ -184,225 +188,233 @@ if (category) {
  
   }
 
+  // Tab click handlers
+  const handleTabClick = (newTab) => {
+    navigate(`/app/drafting/${newTab}/${contextId || ''}`);
+  };
+
   return (
-    // <Box sx={{ p: 4 }}>
-    <Box sx={{ p: { xs: 1, md: 4 }, background: '#fff', minHeight: '100vh' }}>
+    <Box sx={{ p: { xs: 1, md: 4 }, background: 'white',borderRadius:2, minHeight: '100vh' }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-  <Typography variant="h5" fontWeight={600} sx={{ m: 0, fontSize: { xs: 18, sm: 22 } }}>
-    Document Drafting
-  </Typography>
-
-  <Button
-    variant="outlined"
-    onClick={() => { window.location.href = '/app/drafting'; }}
-    sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600, px: 2 }}
-    startIcon={<ArrowBackIcon />}>
-    Back to Dashboard
-  </Button>
-</Box>
-
-
-       {/* <Typography
-          variant="h3"
-          component="a"
-          href="/app/drafting"
-          sx={{
-            fontWeight: 400,
-            // color: 'primary.main',
-          }}
-        >
+        <Typography variant="h5" fontWeight={600} sx={{ m: 0, fontSize: { xs: 18, sm: 22 } }}>
           Document Drafting
-        </Typography> */}
-      {/* Breadcrumb */}
-      {/* <Typography variant="body2" color="text.secondary" mb={1}>
-        <b>Document Drafting</b> &gt; <b>Document / Event Creation</b>
-      </Typography> */}
-
-      {/* Title */}
-      {/* <Typography variant="h4" fontWeight={700} mb={3}>
-        Document Drafting
-      </Typography> */}
-       {/* <Typography variant="body2" color="text.secondary" component="span">/</Typography> */}
-        {/* <Typography
-          variant="h3"
-          component="span"
+        </Typography>
+        <Button
+          variant="outlined"
+          onClick={() => { window.location.href = '/app/drafting'; }}
+          sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600, px: 2 }}
+          startIcon={<ArrowBackIcon />}
+        >
+          Back to Dashboard
+        </Button>
+      </Box>
+      <Paper elevation={2} sx={{ p: { xs: 2, md: 4 }, borderRadius: 3, maxWidth: 1400, mx: 'auto', mt: 4, minHeight: { xs: 400, md: 700 }, position: 'relative' }}>
+        {/* Tabs always centered, search bar right, responsive */}
+        <Box
           sx={{
-            fontWeight: activeTab === 'document' ? 700 : 400,
-            // color: activeTab === 'document' ? 'primary.main' : 'text.secondary',
-            cursor: 'pointer',
+            position: 'relative',
+            mb: 4,
+            minHeight: 56,
+            display: { xs: 'block', md: 'block' },
           }}
-          // onClick={() => setActiveTab('document')}
         >
-          Document Selection
-        </Typography> */}
-        {/* <Typography variant="body2" color="text.secondary" component="span">/</Typography> */}
-        {/* <Typography
-          variant="h3"
-          component="span"
-          sx={{
-            fontWeight: activeTab === 'event' ? 700 : 400,
-            color: activeTab === 'event' ? 'primary.main' : 'text.secondary',
-            cursor: 'pointer',
-          }} */}
-          {/* // onClick={() => setActiveTab('event')} */}
-        {/* > */}
-          {/* Create an Events */}
-        {/* </Typography> */}
-
-        
- 
-
-
-      {/* Toggle Tabs */}
-      <Stack direction="row" spacing={2} mt={4} justifyContent="center" width="100%">
-        <Button
-          sx={tabButtonStyle(activeTab === 'document')}
-          onClick={() => setActiveTab('document')}
-        >
-          Document Selection
-        </Button>
-        <Button
-          sx={tabButtonStyle(activeTab === 'event')}
-          onClick={() => setActiveTab('event')}
-        >
-          Create an Event
-        </Button>
-      </Stack>
-
-      {/* Tab Content */}
-      {activeTab === 'document' ? (
-        <Box display="flex" alignItems="center" justifyContent="center" minHeight="300px">
-          <DocumentSelectionPage contextId={contextId}/>
+          {/* Centered tabs: absolute center on md+, block on xs */}
+          <Box
+            sx={{
+              position: { xs: 'static', md: 'absolute' },
+              left: { md: '50%' },
+              top: { md: '50%' },
+              transform: { md: 'translate(-50%, -50%)' },
+              width: { xs: '100%', md: 'auto' },
+              display: 'flex',
+              justifyContent: 'center',
+              mb: { xs: 2, md: 0 },
+              zIndex: 2,
+            }}
+          >
+            <Stack direction="row" spacing={2} justifyContent="center" alignItems="center">
+              <Button
+                sx={tabButtonStyle(tab === 'document')}
+                onClick={() => handleTabClick('document')}
+              >
+                Document Selection
+              </Button>
+              <Button
+                sx={tabButtonStyle(tab === 'event')}
+                onClick={() => handleTabClick('event')}
+              >
+                Create an Event
+              </Button>
+            </Stack>
+          </Box>
+          {/* Search bar: right on md+, full width below on xs */}
+          {tab === 'document' && (
+            <Box
+              sx={{
+                position: { xs: 'static', md: 'absolute' },
+                right: { md: 0 },
+                top: { md: '50%' },
+                transform: { md: 'translateY(-50%)' },
+                width: { xs: '100%', sm: 285, md: 299 },
+                maxWidth: 335,
+                mt: { xs: 2, md: 0 },
+                mx: { xs: 'auto', md: 0 },
+                zIndex: 1,
+              }}
+            >
+              <TextField
+                fullWidth
+                size="small"
+                placeholder="Search"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon color="action" />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{ bgcolor: '#F5F7FA' }}
+              />
+            </Box>
+          )}
         </Box>
-      ) : (
-        <>
-          {/* Filters */}
-          <Stack direction="row" spacing={4} mt={6} justifyContent="left">
-            {/* Category Filter */}
-            <Select
-              value={category}
-              onChange={e => handleCategoryChange(e.target.value)}
-              displayEmpty
-              sx={{
-                minWidth: 180,
-                bgcolor: '#f5f8ff',
-                border: '2px solid #1976d2',
-                borderRadius: 2,
-                fontWeight: 500,
-                color: '#222',
-                '& .MuiOutlinedInput-notchedOutline': { border: 'none' },
-              }}
-              disabled={filtersLoading}
-            >
-              <MenuItem value="">Select Category</MenuItem>
-              {filtersLoading ? (
-                <MenuItem value="">Loading...</MenuItem>
-              ) : (
-                categoryOptions.map((cat) => (
-                  <MenuItem key={cat.id} value={cat.id}>{cat.category_name}</MenuItem>
-                ))
-              )}
-            </Select>
-            {/* Event Filter (always shown, disabled until category is selected) */}
-            <Select
-              value={event}
-              onChange={e => handleEventChange(e.target.value)}
-              displayEmpty
-              sx={{
-                minWidth: 180,
-                bgcolor: '#f5f8ff',
-                border: '2px solid #1976d2',
-                borderRadius: 2,
-                fontWeight: 500,
-                color: '#222',
-                '& .MuiOutlinedInput-notchedOutline': { border: 'none' },
-              }}
-              disabled={filtersLoading}
-            >
-              <MenuItem value="">Select Event</MenuItem>
-              {eventOptions.map((ev) => (
-                <MenuItem key={ev.id} value={ev.id}>{ev.event_name}</MenuItem>
-              ))}
-            </Select>
-          </Stack>
+        {/* Tab Content */}
+        {tab === 'document' ? (
+          <Box>
+            <DocumentSelectionPage contextId={contextId} search={search} />
+          </Box>
+        ) : (
+          <>
+            {/* Filters */}
+            <Stack direction="row" spacing={4} mt={6} justifyContent="left">
+              {/* Category Filter */}
+              <Select
+                value={category}
+                onChange={e => handleCategoryChange(e.target.value)}
+                displayEmpty
+                sx={{
+                  minWidth: 180,
+                  bgcolor: '#f5f8ff',
+                  border: '2px solid #1976d2',
+                  borderRadius: 2,
+                  fontWeight: 500,
+                  color: '#222',
+                  '& .MuiOutlinedInput-notchedOutline': { border: 'none' },
+                }}
+                disabled={filtersLoading}
+              >
+                <MenuItem value="">Select Category</MenuItem>
+                {filtersLoading ? (
+                  <MenuItem value="">Loading...</MenuItem>
+                ) : (
+                  categoryOptions.map((cat) => (
+                    <MenuItem key={cat.id} value={cat.id}>{cat.category_name}</MenuItem>
+                  ))
+                )}
+              </Select>
+              {/* Event Filter (always shown, disabled until category is selected) */}
+              <Select
+                value={event}
+                onChange={e => handleEventChange(e.target.value)}
+                displayEmpty
+                sx={{
+                  minWidth: 180,
+                  bgcolor: '#f5f8ff',
+                  border: '2px solid #1976d2',
+                  borderRadius: 2,
+                  fontWeight: 500,
+                  color: '#222',
+                  '& .MuiOutlinedInput-notchedOutline': { border: 'none' },
+                }}
+                disabled={filtersLoading}
+              >
+                <MenuItem value="">Select Event</MenuItem>
+                {eventOptions.map((ev) => (
+                  <MenuItem key={ev.id} value={ev.id}>{ev.event_name}</MenuItem>
+                ))}
+              </Select>
+            </Stack>
 
-          {/* Note about default selection */}
-          {/* <Typography variant="body2" sx={{ color: '#1976d2', mb: 2, fontStyle: 'italic' }}>
+            {/* Note about default selection */}
+            {/* <Typography variant="body2" sx={{ color: '#1976d2', mb: 2, fontStyle: 'italic' }}>
             Note: By default, all templates are selected. If you do not want a template, please uncheck it.
           </Typography> */}
 
-          {/* Document Cards */}
-          <Grid2 container spacing={4} justifyContent="center" mt={6}>
-            {(documents.length > 0 ? documents : documents).map((doc, idx) => (
-              <Grid2 item xs={12} sm={6} md={4} key={idx} display="flex" justifyContent="center">
-                <Card
-                  variant="outlined"
-                  onClick={() => handleCardClick(doc.id)}
-                  sx={{
-                    borderRadius: 3,
-                    borderColor: '#1976d2',
-                    borderWidth: 2,
-                    borderStyle: 'solid',
-                    minWidth: 210,
-                    minHeight: 160,
-                    cursor: 'pointer',
-                    position: 'relative',
-                    // boxShadow: selected.includes(idx) ? '0 0 0 2px #1976d2' : undefined,
-                    transition: 'box-shadow 0.2s',
-                    '&:hover': {
-                      // boxShadow: '0 0 0 3px #1976d2',
-                    },
-                  }}
-                >
-                  {selected.includes(doc.id) && (
-                    <Box
-                      sx={{
-                        position: 'absolute',
-                        top: 12,
-                        right: 12,
-                        bgcolor: '#1976d2',
-                        borderRadius: '50%',
-                        width: 28,
-                        height: 28,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        zIndex: 2,
-                      }}
-                    >
-                      <CheckCircleIcon sx={{ color: '#fff', fontSize: 22 }} />
-                    </Box>
-                  )}
-                  <CardContent>
-                    <Typography fontWeight={600} mb={1}>
-                      {doc.title || doc.document_name}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {doc.description}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid2>
-            ))}
-          </Grid2>
+            {/* Document Cards */}
+            <Grid2 container spacing={4} justifyContent="center" mt={6}>
+              {(documents.length > 0 ? documents : documents).map((doc, idx) => (
+                <Grid2 item xs={12} sm={6} md={4} key={idx} display="flex" justifyContent="center">
+                  <Card
+                    variant="outlined"
+                    onClick={() => handleCardClick(doc.id)}
+                    sx={{
+                      borderRadius: 3,
+                      borderColor: '#1976d2',
+                      borderWidth: 2,
+                      borderStyle: 'solid',
+                      minWidth: 210,
+                      minHeight: 160,
+                      cursor: 'pointer',
+                      position: 'relative',
+                      // boxShadow: selected.includes(idx) ? '0 0 0 2px #1976d2' : undefined,
+                      transition: 'box-shadow 0.2s',
+                      '&:hover': {
+                        // boxShadow: '0 0 0 3px #1976d2',
+                      },
+                    }}
+                  >
+                    {selected.includes(doc.id) && (
+                      <Box
+                        sx={{
+                          position: 'absolute',
+                          top: 12,
+                          right: 12,
+                          bgcolor: '#1976d2',
+                          borderRadius: '50%',
+                          width: 28,
+                          height: 28,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          zIndex: 2,
+                        }}
+                      >
+                        <CheckCircleIcon sx={{ color: '#fff', fontSize: 22 }} />
+                      </Box>
+                    )}
+                    <CardContent>
+                      <Typography fontWeight={600} mb={1}>
+                        {doc.title || doc.document_name}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {doc.description}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </Grid2>
+              ))}
+            </Grid2>
 
-          {/* Footer */}
-          <Box display="flex" alignItems="center" justifyContent="center" mt={4}>
-            <Button
-              variant="contained"
-              disabled={selected.length === 0}
-              onClick={() => handleProceed(event, selected, user.user.id, contextId)}
-            >
-              Proceed
-            </Button>
-            
-          </Box>
-          <Typography variant="body2" sx={{ color: '#1976d2', mt: 2, fontStyle: 'italic' }}>
-            Note: By default, all templates are selected. If you do not want a template, please uncheck it.
-          </Typography>
+            {/* Footer */}
+            <Box display="flex" alignItems="center" justifyContent="center" mt={4}>
+              <Button
+                variant="contained"
+                disabled={selected.length === 0}
+                onClick={() => handleProceed(event, selected, user.user.id, contextId)}
+              >
+                Proceed
+              </Button>
+              
+            </Box>
+            <Typography variant="body2" sx={{ color: '#1976d2', mt: 2, fontStyle: 'italic' }}>
+              Note: By default, all templates are selected. If you do not want a template, please uncheck it.
+            </Typography>
 
-        </>
-      )}
+          </>
+        )}
+      </Paper>
     </Box>
   );
 };
