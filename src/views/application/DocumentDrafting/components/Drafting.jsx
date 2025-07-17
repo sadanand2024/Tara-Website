@@ -95,7 +95,7 @@ export default function Drafting({ id, tab = 'document', contextId }) {
     if (selectedEvent && selectedEvent !== 'All') params.push(`event_name=${encodeURIComponent(selectedEvent)}`);
     if (selectedDocument && selectedDocument !== 'All') params.push(`document_name=${encodeURIComponent(selectedDocument)}`);
     if (selectedCreator && selectedCreator !== 'All') params.push(`created_by=${encodeURIComponent(selectedCreator)}`);
-    if (selectedDate) params.push(`date=${encodeURIComponent(selectedDate.format ? selectedDate.format('YYYY-MM-DD') : selectedDate)}`);
+    if (selectedDate) params.push(`created_at=${encodeURIComponent(selectedDate.format ? selectedDate.format('YYYY-MM-DD') : selectedDate)}`);
     return params.length > 0 ? `?${params.join('&')}` : '';
   };
  
@@ -110,7 +110,7 @@ export default function Drafting({ id, tab = 'document', contextId }) {
       .then(response => {
         const resData = response?.res?.data || response?.res || response;
         const rows = (resData?.results || resData || []).map(item => ({
-          name: item?.file_name || item.name || '-',
+          name: item?.file_name || item?.document?.name || '-',
          
           category: item.category?.name || '-',
           event: item.event?.name || '-',
@@ -344,13 +344,13 @@ export default function Drafting({ id, tab = 'document', contextId }) {
   };
  
   return (
-    <Box sx={{ p: { xs: 1, md: 4 }, background: '#fff',borderRadius:2, minHeight: '100vh' }}>
+    <Box sx={{ p: { xs: 1, md: 4 }, background: '#fff',borderRadius:2, minHeight: '100vh', width:'100%' }}>
       {/* Title and Actions */}
       <Box display="flex" flexDirection={{ xs: 'column', md: 'row' }} alignItems={{ xs: 'flex-start', md: 'center' }} justifyContent="space-between" mb={4} gap={2}>
       <Typography variant="h5" fontWeight={600} sx={{ m: 0, mb: 0, fontSize: { xs: 18, sm: 22 } }}>
             Document Drafting
           </Typography>
-        <Stack direction="row" spacing={2} marginRight={0.5}>
+        <Stack direction="row" spacing={2}>
           <Grid2 size={{xs: 12}} width={300}>
             <TextField
               fullWidth
