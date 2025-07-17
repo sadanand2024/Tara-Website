@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Typography, Button, Stepper, Step, StepLabel, StepContent, Stack, IconButton, CircularProgress } from '@mui/material';
-import { enqueueSnackbar } from 'notistack';
-import Factory from 'utils/Factory';
 import DownloadIcon from '@mui/icons-material/Download';
-import GetActionButtons from '../../FormHelpers';
+import { Box, Button, CircularProgress, Stack, Step, StepContent, StepLabel, Stepper, Typography } from '@mui/material';
+import { enqueueSnackbar } from 'notistack';
+import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import Factory from 'utils/Factory';
+import GetActionButtons from '../../FormHelpers';
 
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
@@ -18,7 +18,7 @@ const StepThree = ({step, setStep}) => {
   const [reviewStep, setReviewStep] = useState(0);
   const [loadingStep4, setLoadingStep4] = useState(false);
 
-  const reviewSteps = ['Draft TradeLicence Computation', 'Upload Filed Acknowledgement', 'Download Filed Acknowledgement'];
+  const reviewSteps = ['Draft TradeLicence', 'Upload Filed Acknowledgement', 'Download Filed Acknowledgement'];
 
   const viewFile = async (url) => {
     const response = await Factory('get', `/docwallet/generate_presigned_url?url=${url}`, {}, {});
@@ -93,7 +93,7 @@ const StepThree = ({step, setStep}) => {
                     }}
                   >
                     <Typography variant="subtitle1" mb={3} sx={{ textDecoration: 'underline' }}>
-                      Draft LabourLicence Computation
+                      Draft LabourLicence 
                     </Typography>
                     <Stack direction="row" spacing={2} mb={3}>
                       <Button variant="contained" size="small" onClick={() => document.getElementById('draftGstComputationInput').click()}>

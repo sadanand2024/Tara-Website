@@ -1,15 +1,15 @@
-import { useEffect, useState } from 'react';
-import { Box, Typography, Button, Grid2, Card } from '@mui/material';
-import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
+import { Box, Button, Card, Grid2, Typography } from '@mui/material';
 import { useFormik } from 'formik';
-import * as Yup from 'yup';
-import Factory from 'utils/Factory';
+import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
 import { openSnackbar } from 'store/slices/snackbar';
-import RaiseRequest from '../../RaiseRequest';
-import GetActionButtons from '../../FormHelpers';
+import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
 import CircularProgressComponent from 'utils/CircularProgressComponent';
+import Factory from 'utils/Factory';
+import * as Yup from 'yup';
+import GetActionButtons from '../../FormHelpers';
+import RaiseRequest from '../../RaiseRequest';
 
 
 const BusinessRegistrationDocumenst = ({ taskId }) => {
@@ -93,9 +93,12 @@ const BusinessRegistrationDocumenst = ({ taskId }) => {
         property_tax_receipt: res.data.property_tax_receipt || null,
         rental_agreement: res.data.rental_agreement || null
       });
+      
       setbusinessDocument(res.data);
-      setIsLoading(false);
+     
     }
+    setIsLoading(false);
+    
    
   };
   
@@ -105,13 +108,13 @@ const BusinessRegistrationDocumenst = ({ taskId }) => {
     // eslint-disable-next-line
   }, []);
    if (isLoading) {
-        console.log('Loading promoter data...', isLoading);
+        // console.log('Loading promoter data...', isLoading);
         return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading promoter Data'} />;
       }
       const getLabelWithAsterisk = (label, isRequired = true) => (
   <span>
     {label}
-    {isRequired && <span style={{ color: 'red', fontSize: '1.3em' }}> *</span>}
+    {isRequired && <span style={{ color: 'red' }}> *</span>}
   </span>
 );
 
