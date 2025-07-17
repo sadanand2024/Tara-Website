@@ -20,6 +20,7 @@ import Pagination from '@mui/material/Pagination';
 import React, { useEffect, useState } from 'react';
 import Factory from 'utils/Factory';
 import SelectedEvent from './SelectedEvent';
+import { useNavigate } from 'react-router-dom';
 
 const statusColor = (status) => {
   switch (status?.toLowerCase()) {
@@ -46,11 +47,58 @@ const statusChip = (status) => {
   return <Chip label={status} />;
 };
 
+// ColoredCircularProgress component for colored progress circles
+const getProgressColor = (value) => {
+  if (value <= 25) return '#FBC02D';      // Yellow for 0-25%
+  if (value <= 50) return '#AB47BC';      // Purple for 26-50%
+  if (value <= 75) return '#1976d2';      // Blue for 51-75%
+  return '#388E3C';                       // Green for 76-100%
+};
+
+function ColoredCircularProgress({ value = 0, size = 28, thickness = 5 }) {
+  return (
+    <Box position="relative" display="inline-flex" alignItems="center" justifyContent="center">
+      {/* Background circle */}
+      <CircularProgress
+        variant="determinate"
+        value={100}
+        size={size}
+        thickness={thickness}
+        sx={{ color: '#E0E0E0', position: 'absolute', left: 0, top: 0 }}
+      />
+      {/* Foreground progress */}
+      <CircularProgress
+        variant="determinate"
+        value={value}
+        size={size}
+        thickness={thickness}
+        sx={{ color: getProgressColor(value) }}
+      />
+      {/* Centered label */}
+      <Box
+        top={0}
+        left={0}
+        bottom={0}
+        right={0}
+        position="absolute"
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+      >
+        <Typography variant="caption" component="div" color="text.secondary" fontWeight={600}>
+          {`${Math.round(value)}%`}
+        </Typography>
+      </Box>
+    </Box>
+  );
+}
+
 const MyEvents = ({ id }) => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const rowsPerPage = 5;
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!id) return;
@@ -141,25 +189,28 @@ const MyEvents = ({ id }) => {
                         </TableCell>
                         <TableCell>
                           <Box display="flex" alignItems="center" gap={1}>
-                            <CircularProgress
-                              variant="determinate"
-                              value={event.progress}
-                              size={28}
-                              thickness={5}
-                              sx={{
-                                color:
-                                  event.status && event.status.toLowerCase() === 'completed'
-                                    ? '#52C41A'
-                                    : event.status && event.status.toLowerCase() === 'processed'
-                                    ? '#FAAD14'
-                                    : event.status && event.status.toLowerCase() === 'declined'
-                                    ? '#D1293D'
-                                    : '#E0E0E0', // grey for yet_to_start and others
-                                background: '#F5F6F8',
-                                borderRadius: '50%',
-                              }}
-                            />
-                            <Typography fontWeight={600} sx={{ color: '#0A1F44' }}>{event.progress}%</Typography>
+                            <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+                              {event.progress === 0 ? (
+                                <CircularProgress
+                                  variant="determinate"
+                                  value={100}
+                                  size={28}
+                                  thickness={5}
+                                  sx={{ color: '#E0E0E0' }}
+                                />
+                              ) : (
+                                <CircularProgress
+                                  variant="determinate"
+                                  value={event.progress}
+                                  size={28}
+                                  thickness={5}
+                                  sx={{ color: getProgressColor(Math.round(event.progress)) }}
+                                />
+                              )}
+                            </Box>
+                            <Typography fontWeight={600} sx={{ color: '#0A1F44' }}>
+                              {`${Math.round(event.progress)}%`}
+                            </Typography>
                           </Box>
                         </TableCell>
                         <TableCell>
@@ -169,18 +220,10 @@ const MyEvents = ({ id }) => {
                               '&:hover': { color: '#1d39c4', background: 'transparent' },
                             }}
                             onClick={() => {
-                              window.location.href = `/app/selected-event/${event.id}`;
+                              navigate(`/app/drafting/selected-event/${event.id}`);
                             }}
                           >
                             <EditIcon />
-                          </IconButton>
-                          <IconButton
-                            sx={{
-                              color: '#2F54EB',
-                              '&:hover': { color: '#1d39c4', background: 'transparent' },
-                            }}
-                          >
-                            <DownloadIcon />
                           </IconButton>
                         </TableCell>
                       </TableRow>

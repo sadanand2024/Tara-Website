@@ -274,13 +274,14 @@ if (category) {
     );
   };
 
-  const handleProceed = async (eventId, documentIds, userId, contextId) => {
+  const handleProceed = async (catId,eventId, documentIds, userId, contextId) => {
     const payload = {
       event: eventId,
       context: contextId,
       documents: documentIds, // send all selected document IDs
       status: 'yet_to_start',
-      created_by: userId
+      created_by: userId,
+      category:catId
     };
     const response = await Factory(
       'post',
@@ -299,9 +300,7 @@ if (category) {
   };
 
   if (selectedEventInstanceId) {
-    // return <SelectedEvent eventInstanceId={selectedEventInstanceId} onBack={handleBackToDashboard} />;
-     window.location.href = `/app/selected-event/${selectedEventInstanceId}`;
- 
+    navigate(`/app/drafting/selected-event/${selectedEventInstanceId}`);
   }
 
   // Tab click handlers
@@ -318,7 +317,7 @@ if (category) {
         </Typography>
         <Button
           variant="outlined"
-          onClick={() => { window.location.href = '/app/drafting'; }}
+          onClick={() => { navigate('/app/drafting'); }}
           sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600, px: 2 }}
           startIcon={<ArrowBackIcon />}
         >
@@ -350,7 +349,7 @@ if (category) {
     <Tab label="Create an Event" />
   </Tabs>
   {activeTab === 0 && (
-    <Box sx={{ width: { xs: '100%', sm: 350, md: '24%' }, transform: 'translateX(2%)', ml: { md: 2 }, mt: { xs: 2, md: 0 } }}>
+    <Box sx={{ width: { xs: '100%', sm: 350, md: '24%' }, transform: 'translateX(-3%)', ml: { md: 2 }, mt: { xs: 2, md: 0 } }}>
       <TextField
         fullWidth
         size="small"
@@ -373,13 +372,13 @@ if (category) {
     </Box>
   )}
   {activeTab === 1 && (
-    <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, width: { xs: '100%', sm: '30%' }, ml: { md: 2 }}}>
+    <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, width: { xs: '100%', sm: '35%' }, ml: { md: 2 }}}>
       <TextField
         fullWidth
         select
         label="Category"
         size="small"
-        sx={{ bgcolor: '#F5F7FA', transform: 'translateY(2px)' }}
+        sx={{ bgcolor: '#F5F7FA', transform: 'translateY(2px) translateX(-8px)' }}
         value={category}
         onChange={e => handleCategoryChange(e.target.value)}
         disabled={filtersLoading}
@@ -398,7 +397,7 @@ if (category) {
         select
         label="Event"
         size="small"
-        sx={{ bgcolor: '#F5F7FA', transform: 'translateY(2px)' }}
+        sx={{ bgcolor: '#F5F7FA', transform: 'translateY(2px) translateX(-8px)' }}
         value={event}
         onChange={e => handleEventChange(e.target.value)}
         disabled={filtersLoading}
@@ -441,7 +440,7 @@ if (category) {
               <Grid2
                 container
                 spacing={{xs:2, sm:6, md: 6}}
-                sx={{ mb: 4, width:'100%', mx: 'auto' }}
+                sx={{ mb: 4, width:'100%', mx: 'auto',mt:4}}
                 alignItems="flex-start"
                 justifyContent="flex-start"
               >
@@ -476,7 +475,7 @@ if (category) {
                   }}
                   disabled={selected.length === 0}
 
-                  onClick={() => handleProceed(event, selected, user.user.id, contextId)}
+                  onClick={() => handleProceed(category,event, selected, user.user.id, contextId)}
                 >
                   Proceed
                 </Button>
