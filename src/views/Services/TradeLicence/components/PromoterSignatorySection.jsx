@@ -1,31 +1,31 @@
-import React, { useEffect, useState } from 'react';
 import {
   Box,
-  Typography,
   Button,
+  Card,
+  Checkbox,
+  Grid2,
+  Paper,
+  Stack,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Paper,
-  Checkbox,
-  Stack,
-  Tooltip,
   TextField,
-  Card,
-  Grid2
+  Tooltip,
+  Typography
 } from '@mui/material';
 import { useFormik } from 'formik';
-import * as Yup from 'yup';
+import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { openSnackbar } from 'store/slices/snackbar';
-import Factory from 'utils/Factory';
 import { useSearchParams } from 'react-router-dom';
-import RaiseRequest from '../../RaiseRequest';
-import GetActionButtons from '../../FormHelpers';
+import { openSnackbar } from 'store/slices/snackbar';
 import CircularProgressComponent from 'utils/CircularProgressComponent';
+import Factory from 'utils/Factory';
+import * as Yup from 'yup';
+import GetActionButtons from '../../FormHelpers';
+import RaiseRequest from '../../RaiseRequest';
 
 import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
 
@@ -321,7 +321,7 @@ const getSignatoryDetails = async () => {
   return (
     <span>
       {label}
-      {isRequired && <span style={{ color: 'red',fontSize: '1.3em' }}> *</span>}
+      {isRequired && <span style={{ color: 'red' }}> *</span>}
     </span>
   );
 };

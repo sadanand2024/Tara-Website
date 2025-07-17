@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Typography, TextField, Grid2, Card, Autocomplete, Button,Stack} from '@mui/material';
-import * as Yup from 'yup';
+import { Autocomplete, Box, Button, Card, Grid2, Stack, TextField, Typography } from '@mui/material';
 import { useFormik } from 'formik';
-import Factory from 'utils/Factory';
+import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
-import {openSnackbar} from 'store/slices/snackbar';
-import RaiseRequest from '../../RaiseRequest';
-import GetActionButtons from '../../FormHelpers';
+import { openSnackbar } from 'store/slices/snackbar';
 import CircularProgressComponent from 'utils/CircularProgressComponent';
+import Factory from 'utils/Factory';
+import * as Yup from 'yup';
+import GetActionButtons from '../../FormHelpers';
+import RaiseRequest from '../../RaiseRequest';
 
 
 
@@ -131,7 +131,11 @@ const ProposalCompanyDetails = ({taskId}) => {
                             .matches(/^[0-9]+$/, 'Mobile Number must be a number')
                             .min(10, 'Mobile Number must be at least 10 digits')
                             .max(10, 'Mobile Number must not exceed 10 digits'),
-      email: Yup.string().required('Email Address is required'),
+      // email: Yup.string().required('Email Address is required'),
+      email: Yup.string()
+  .email('Please enter a valid email address')
+  .required('Email address is required'),
+
       
     }),
 

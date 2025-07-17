@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Typography, Button, Stepper, Step, StepLabel, StepContent, Stack, IconButton, CircularProgress } from '@mui/material';
-import { enqueueSnackbar } from 'notistack';
-import Factory from 'utils/Factory';
-import DownloadIcon from '@mui/icons-material/Download';
-import GetActionButtons from '../../FormHelpers';
-import { useSearchParams } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import DownloadIcon from '@mui/icons-material/Download';
+import { Box, Button, CircularProgress, Stack, Step, StepContent, StepLabel, Stepper, Typography } from '@mui/material';
+import { enqueueSnackbar } from 'notistack';
+import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import CircularProgressComponent from 'utils/CircularProgressComponent';
+import Factory from 'utils/Factory';
+import GetActionButtons from '../../FormHelpers';
 
 
 const StepThree = ({step, setStep}) => {
@@ -21,7 +21,7 @@ const StepThree = ({step, setStep}) => {
   const [reviewStep, setReviewStep] = useState(0);
   const [loadingStep4, setLoadingStep4] = useState(false);
 
-  const reviewSteps = ['Draft GST Computation', 'Upload Filed Acknowledgement', 'Download Filed Acknowledgement'];
+  const reviewSteps = ['Draft GST', 'Upload Filed Acknowledgement', 'Download Filed Acknowledgement'];
 
   const viewFile = async (url) => {
     const response = await Factory('get', `/docwallet/generate_presigned_url?url=${url}`, {}, {});
@@ -73,7 +73,7 @@ const StepThree = ({step, setStep}) => {
   }, [service_id, setReviewAndFiling]);
 
     if (isLoading) {
-      console.log('Loading promoter data...', isLoading);
+      // console.log('Loading promoter data...', isLoading);
       return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading review Data'} />;
     }
 
@@ -103,7 +103,7 @@ const StepThree = ({step, setStep}) => {
                     }}
                   >
                     <Typography variant="subtitle1" mb={3} sx={{ textDecoration: 'underline' }}>
-                      Draft GST Computation
+                      Draft GST 
                     </Typography>
                     <Stack direction="row" spacing={2} mb={3}>
                       <Button variant="contained" size="small" onClick={() => document.getElementById('draftGstComputationInput').click()}>
