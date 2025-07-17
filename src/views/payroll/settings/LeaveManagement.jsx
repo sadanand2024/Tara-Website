@@ -17,9 +17,8 @@ import {
   TextField
 } from '@mui/material';
 import { IconPlus } from '@tabler/icons-react';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import DeleteDialog from 'ui-component/extended/DeleteDialog';
-import MainCard from 'ui-component/cards/MainCard';
 import CustomAutocomplete from 'utils/CustomAutocomplete';
 import ActionCell from 'ui-component/extended/ActionCell';
 import LeaveManagementDialog from './LeaveManagementDialog';
@@ -31,8 +30,7 @@ import { Edit, Delete } from '@mui/icons-material';
 import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
-function LeaveManagement({ handleBack, handleNext }) {
-  const [leaveType, setLeaveType] = useState('All');
+function LeaveManagement({ handleBack, handleNext, leaveType = 'All', setLeaveType, onAddClick }) {
   const [loading, setLoading] = useState(false);
   const [payrollId, setPayrollId] = useState(null);
   const [data, setData] = useState([]);
@@ -45,6 +43,21 @@ function LeaveManagement({ handleBack, handleNext }) {
   const dispatch = useDispatch();
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
+  const navigate = useNavigate();
+  // Expose the dialog opening function to parent
+  useEffect(() => {
+    if (onAddClick) {
+      window.triggerLeaveAddDialog = () => {
+        setPostType('add');
+        setSelectedRecord(null);
+        setDialogOpen(true);
+      };
+    }
+    return () => {
+      delete window.triggerLeaveAddDialog;
+    };
+  }, [onAddClick]);
+
   const handleOpenDeleteDialog = (designation) => {
     setSelectedRow(designation);
     setOpenDeleteDialog(true);
@@ -53,6 +66,7 @@ function LeaveManagement({ handleBack, handleNext }) {
     handleDelete(selectedRow);
     setOpenDeleteDialog(false);
   };
+
   useEffect(() => {
     const id = searchParams.get('payrollid');
     if (id) setPayrollId(id);
@@ -78,7 +92,7 @@ function LeaveManagement({ handleBack, handleNext }) {
       dispatch(
         openSnackbar({
           open: true,
-          message: res.error || 'Unkown Error',
+          message: res.error || 'Unknown Error',
           variant: 'alert',
           alert: { color: 'error' },
           close: false
@@ -102,25 +116,7 @@ function LeaveManagement({ handleBack, handleNext }) {
   const paginatedData = filteredData.slice((page - 1) * rowsPerPage, page * rowsPerPage);
 
   return (
-    <MainCard
-      title={
-        <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2}>
-          <Box>
-            <Autocomplete
-              value={leaveType}
-              onChange={(_, val) => setLeaveType(val)}
-              options={['All', 'Paid', 'UnPaid']}
-              sx={{ minWidth: 220 }}
-              size="small"
-              renderInput={(params) => <TextField {...params} label="Leave Type" />}
-            />
-          </Box>
-          <Button size="small" variant="contained" startIcon={<IconPlus size={16} />} onClick={() => openDialog('add')}>
-            Add Leave
-          </Button>
-        </Stack>
-      }
-    >
+    <Box>
       <Stack spacing={3}>
         {loading ? (
           <Stack justifyContent="center" alignItems="center" sx={{ height: 300 }}>
@@ -144,14 +140,14 @@ function LeaveManagement({ handleBack, handleNext }) {
               <TableBody>
                 {paginatedData.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} align="center" sx={{ height: 300 }}>
+                    <TableCell colSpan={7} align="center" sx={{ height: 300 }}>
                       No Data
                     </TableCell>
                   </TableRow>
                 ) : (
                   paginatedData.map((item, index) => (
                     <TableRow key={item.id}>
-                      <TableCell align="center">{index + 1}</TableCell>
+                      <TableCell align="center">{(page - 1) * rowsPerPage + index + 1}</TableCell>
                       <TableCell align="left">{item.name_of_leave}</TableCell>
                       <TableCell align="left">{item.code}</TableCell>
                       <TableCell align="left">{item.leave_type}</TableCell>
@@ -196,7 +192,9 @@ function LeaveManagement({ handleBack, handleNext }) {
               shape="rounded"
               color="primary"
             />
-            <Typography></Typography>
+            <Button size="small" variant="contained" onClick={() => navigate('/app/payroll')}>
+              Next
+            </Button>
           </Stack>
         )}
       </Stack>
@@ -209,7 +207,7 @@ function LeaveManagement({ handleBack, handleNext }) {
         setType={setPostType}
         fetchLeaveManagementData={fetchData}
       />
-    </MainCard>
+    </Box>
   );
 }
 

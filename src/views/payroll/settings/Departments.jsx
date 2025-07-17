@@ -15,8 +15,6 @@ import {
   Grid2,
   CircularProgress
 } from '@mui/material';
-import SearchBar from 'ui-component/extended/SearchBar';
-import MainCard from 'ui-component/cards/MainCard';
 import ActionCell from 'ui-component/extended/ActionCell';
 import DepartmentDialog from './DepartmentDialog';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -30,9 +28,17 @@ import DeleteDialog from '../../../ui-component/extended/DeleteDialog'; // adjus
 import { IconButton, Tooltip } from '@mui/material'; // Add these if not already
 import { Edit, Delete } from '@mui/icons-material';
 import BulkUploadDialog from 'ui-component/extended/BulkUploadDialog';
-function Departments({ handleBack, handleNext }) {
+
+function Departments({
+  handleBack,
+  handleNext,
+  searchQuery = '',
+  openDialog = false,
+  setOpenDialog,
+  openBulkDialog = false,
+  setOpenBulkDialog
+}) {
   const [departments, setDepartments] = useState([]);
-  const [openDialog, setOpenDialog] = useState(false);
   const [postType, setPostType] = useState('');
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -42,8 +48,7 @@ function Departments({ handleBack, handleNext }) {
   const dispatch = useDispatch();
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
-  const [openBulkDialog, setOpenBulkDialog] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+
   const handleOpenDeleteDialog = (row) => {
     setSelectedRow(row);
     setOpenDeleteDialog(true);
@@ -52,7 +57,7 @@ function Departments({ handleBack, handleNext }) {
     handleDelete(selectedRow);
     setOpenDeleteDialog(false);
   };
-  // Filter departments based on searchQuery
+  // Filter departments based on searchQuery from props
   const filteredDepartments = departments.filter((department) => {
     const query = searchQuery.toLowerCase();
     return (
@@ -73,7 +78,6 @@ function Departments({ handleBack, handleNext }) {
 
   const handlePageChange = (event, value) => setCurrentPage(value);
 
-  const handleOpenDialog = () => setOpenDialog(true);
   const handleCloseDialog = () => setOpenDialog(false);
 
   const fetchDepartments = async () => {
@@ -101,7 +105,7 @@ function Departments({ handleBack, handleNext }) {
   const handleEdit = (department) => {
     setPostType('edit');
     setSelectedRecord(department);
-    handleOpenDialog();
+    setOpenDialog(true);
   };
 
   const handleDelete = async (department) => {
@@ -141,35 +145,7 @@ function Departments({ handleBack, handleNext }) {
     );
   }
   return (
-    <MainCard
-      title="Departments Details"
-      subtitle="Manage your departments for seamless operations"
-      secondary={
-        <Stack direction="row" spacing={2} alignItems="center">
-          <SearchBar
-            placeholder="Search department..."
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setCurrentPage(1);
-            }}
-          />
-          <Button variant="outlined" color="secondary" onClick={() => setOpenBulkDialog(true)}>
-            Bulk Upload
-          </Button>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => {
-              setPostType('post');
-              handleOpenDialog();
-            }}
-          >
-            Add Department
-          </Button>
-        </Stack>
-      }
-    >
+    <Box>
       <BulkUploadDialog
         open={openBulkDialog}
         handleClose={closeBulkDialog}
@@ -185,7 +161,7 @@ function Departments({ handleBack, handleNext }) {
           <DepartmentDialog
             open={openDialog}
             handleClose={handleCloseDialog}
-            handleOpenDialog={handleOpenDialog}
+            handleOpenDialog={() => setOpenDialog(true)}
             selectedRecord={selectedRecord}
             type={postType}
             setType={setPostType}
@@ -283,7 +259,7 @@ function Departments({ handleBack, handleNext }) {
           </Box>
         </Grid2>
       </Grid2>
-    </MainCard>
+    </Box>
   );
 }
 

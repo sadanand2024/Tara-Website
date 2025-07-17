@@ -93,11 +93,20 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
           no_of_months: '',
           start_month: ''
         };
-      case 'Bonus & Incentives':
+      case 'Variable Bonus':
         return {
           employee: '',
           bonus_type: '',
           amount: '',
+          month: '',
+          financial_year: ''
+        };
+      case 'Adhoc Bonus & Incentives':
+        return {
+          employee: '',
+          adhoc_type: '',
+          amount: '',
+          reason: '',
           month: '',
           financial_year: ''
         };
@@ -179,7 +188,7 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
             .required('No of Months is required'),
           start_month: Yup.string().required('Start Month is required')
         });
-      case 'Bonus & Incentives':
+      case 'Variable Bonus':
         return Yup.object({
           employee: Yup.string().required('Employee is required'),
           bonus_type: Yup.string().required('Bonus Type is required'),
@@ -189,6 +198,13 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
             .required('Amount is required'),
           financial_year: Yup.string().required('Financial Year is required'),
           month: Yup.string().required('Month is required')
+        });
+
+      case 'Adhoc Bonus & Incentives':
+        return Yup.object({
+          employee: Yup.string().required('Employee is required'),
+          type: Yup.string().required('Type is required'),
+          amount: Yup.number().typeError('Amount must be a number').positive('Amount must be positive').required('Amount is required')
         });
 
       case 'Salary Revisions':
@@ -342,12 +358,47 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
           );
         }
       }
-      if (from === 'Bonus & Incentives') {
+      if (from === 'Variable Bonus') {
         setLoading(true);
         let url = selectedRecord?.id ? `/payroll/bonus-incentives/${selectedRecord?.id}` : `/payroll/bonus-incentives`;
         let method = selectedRecord?.id ? 'put' : 'Post';
         let postData = {
           bonus_type: values.bonus_type,
+          amount: Number(values.amount)
+        };
+        const { res, error } = await Factory(method, url, postData);
+        setLoading(false);
+        if (res.status_cd === 0) {
+          dispatch(
+            openSnackbar({
+              open: true,
+              message: 'Data Saved Successfully',
+              variant: 'alert',
+              alert: { color: 'success' },
+              close: false
+            })
+          );
+          getData();
+          setOpenDialog(false);
+        } else {
+          dispatch(
+            openSnackbar({
+              open: true,
+              message: JSON.stringify(res.data.data),
+              variant: 'alert',
+              alert: { color: 'error' },
+              close: false
+            })
+          );
+        }
+      }
+
+      if (from === 'Adhoc Bonus & Incentives') {
+        setLoading(true);
+        let url = selectedRecord?.id ? `/payroll/adhoc-bonus/${selectedRecord?.id}` : `/payroll/adhoc-bonus`;
+        let method = selectedRecord?.id ? 'put' : 'Post';
+        let postData = {
+          type: values.type,
           amount: Number(values.amount)
         };
         const { res, error } = await Factory(method, url, postData);
@@ -440,7 +491,7 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
             size="small"
             disabled={(from === 'Attendance' && field.name === 'employee') || (from === 'Tds' && field.name === 'employee')}
           />
-        ) : field.name === 'loan_type' || field.name === 'bonus_type' || field.name === 'month' ? (
+        ) : field.name === 'loan_type' || field.name === 'bonus_type' || field.name === 'adhoc_type' || field.name === 'month' ? (
           <CustomAutocomplete
             value={field.name === 'month' ? months[values[field.name] - 1] || null : values[field.name] || null}
             onChange={(e, newValue) => {
@@ -479,12 +530,25 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
                         'Holiday Bonus',
                         'Project Completion Bonus'
                       ]
-                    : months
+                    : field.name === 'type'
+                      ? [
+                          'Special Recognition Bonus',
+                          'Project Completion Bonus',
+                          'Performance Incentive',
+                          'Retention Bonus',
+                          'Referral Bonus',
+                          'Spot Bonus',
+                          'Festival Bonus',
+                          'Year-End Bonus',
+                          'Sales Incentive',
+                          'Other Adhoc Bonus'
+                        ]
+                      : months
             }
             sx={{ width: '100%' }}
             error={touched[field.name] && Boolean(errors[field.name])}
             helperText={touched[field.name] && errors[field.name]}
-            disabled={(from === 'Attendance' || from === 'Bonus & Incentives') && field.name === 'month'}
+            disabled={(from === 'Attendance' || from === 'Variable Bonus') && field.name === 'month'}
           />
         ) : field.name === 'doe' || field.name === 'start_month' ? (
           <CustomDatePicker
@@ -521,7 +585,7 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
                 helperText={touched[field.name] && errors[field.name]}
               />
             )}
-            disabled={from === 'Bonus & Incentives'}
+            disabled={from === 'Variable Bonus'}
           />
         ) : field.name === 'reset_leave_balance_type' ? (
           <CustomAutocomplete
@@ -589,13 +653,15 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
             ? 'Employee Attendance'
             : from === 'Loans & Advances'
               ? 'Advance Loans'
-              : from === 'Bonus & Incentives'
-                ? 'Bonus & Incentives'
-                : from === 'Salary Revisions'
-                  ? 'Salary Revisions'
-                  : from === 'Tds'
-                    ? 'TDS'
-                    : ''
+              : from === 'Variable Bonus'
+                ? 'Variable Bonus'
+                : from === 'Adhoc Bonus & Incentives'
+                  ? 'Adhoc Bonus & Incentives'
+                  : from === 'Salary Revisions'
+                    ? 'Salary Revisions'
+                    : from === 'Tds'
+                      ? 'TDS'
+                      : ''
       }
       showClose={true}
       handleClose={() => {
