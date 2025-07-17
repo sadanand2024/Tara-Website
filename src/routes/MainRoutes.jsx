@@ -219,7 +219,7 @@ const MainRoutes = {
       element: <DocumentDrafting />
     },
     {
-      path: '/app/selected-event/:eventInstanceId',
+      path: '/app/drafting/selected-event/:eventInstanceId',
       element: <SelectedEvent />
     },
 
