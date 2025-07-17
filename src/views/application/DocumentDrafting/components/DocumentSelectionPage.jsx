@@ -262,8 +262,8 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
           displayValue = `${dd}-${mm}-${yyyy}`;
         }
       }
-      // Wrap in highlight span
-      const highlighted = `<span style="background:rgba(54, 80, 174, 0.24); border-radius: 4px; padding: 0 4px;">${displayValue}</span>`;
+      // Wrap in highlight span with id for scroll sync
+      const highlighted = `<span id="preview-field-${key}" style="background:rgba(54, 80, 174, 0.24); border-radius: 4px; padding: 0 4px;">${displayValue}</span>`;
       html = html.replaceAll(new RegExp(`\{\{\s*${key}\s*\}\}`, 'g'), value ? highlighted : '');
     });
     // Extract and scope <style> tags from the HTML
@@ -333,10 +333,16 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
         fields.forEach(field => {
           let validator = Yup.string();
           if (field.metadata && field.metadata.validations && field.metadata.validations.regex) {
-            validator = validator.matches(
-              new RegExp(field.metadata.validations.regex),
-              field.metadata.validations.error_message || 'Invalid value'
-            );
+            validator = validator
+              .notRequired()
+              .test(
+                'matches-regex-if-not-empty',
+                field.metadata.validations.error_message || 'Invalid value',
+                value => {
+                  if (!value) return true; // allow empty
+                  return new RegExp(field.metadata.validations.regex).test(value);
+                }
+              );
           }
           draftValidationShape[field.field_name] = validator;
         });
@@ -641,20 +647,21 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
 
     // Reset All handler
     const handleResetAll = () => {
-        // Reset all form fields to empty
+        // Reset all form fields to empty using formik
         const resetValues = (fields || []).reduce((acc, field) => {
             acc[field.field_name] = '';
             return acc;
-        }, {});
+        }, { file_name: '' });
+        formik.resetForm({ values: resetValues });
         setFormValues(resetValues);
-    dispatch(openSnackbar({
-      open: true,
-      message: 'All fields reset',
-      variant: 'alert',
-      alert: { color: 'success' },
-      close: false
-    }));
-  };
+        dispatch(openSnackbar({
+          open: true,
+          message: 'All fields reset',
+          variant: 'alert',
+          alert: { color: 'success' },
+          close: false
+        }));
+    };
 
   const handleDeleteDocument = async (row) => {
     if (!row?.id) return;
@@ -725,6 +732,11 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
         setFormValues(values);
       },
     });
+
+    // Add a ref for the preview container at the top of the component
+    const previewContainerRef = React.useRef(null);
+    // At the top of the component
+    const previewContentRef = React.useRef(null);
 
     if (splitView) {
         // Only render the split view, no header/tabs, with a full white background
@@ -814,7 +826,19 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
                                   fullWidth
                                   options={field.metadata.options}
                                   value={formik.values[field.field_name] || ''}
-                                  onChange={(_, value) => formik.setFieldValue(field.field_name, value)}
+                                  onChange={(_, value) => {
+                                    formik.setFieldValue(field.field_name, value);
+                                    setTimeout(() => {
+                                      const el = document.getElementById(`preview-field-${field.field_name}`);
+                                      const container = previewContentRef.current;
+                                      if (el && container) {
+                                        const elRect = el.getBoundingClientRect();
+                                        const containerRect = container.getBoundingClientRect();
+                                        const scrollTop = container.scrollTop + (elRect.top - containerRect.top) - container.clientHeight / 2 + el.offsetHeight / 2;
+                                        container.scrollTo({ top: scrollTop, behavior: 'smooth' });
+                                      }
+                                    }, 0);
+                                  }}
                                   onBlur={formik.handleBlur}
                                   renderInput={(params) => (
                                     <TextField
@@ -834,7 +858,19 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
                                   label={field.label || field.field_name}
                                   name={field.field_name}
                                   value={formik.values[field.field_name] || ''}
-                                  onChange={formik.handleChange}
+                                  onChange={e => {
+                                    formik.handleChange(e);
+                                    setTimeout(() => {
+                                      const el = document.getElementById(`preview-field-${field.field_name}`);
+                                      const container = previewContentRef.current;
+                                      if (el && container) {
+                                        const elRect = el.getBoundingClientRect();
+                                        const containerRect = container.getBoundingClientRect();
+                                        const scrollTop = container.scrollTop + (elRect.top - containerRect.top) - container.clientHeight / 2 + el.offsetHeight / 2;
+                                        container.scrollTo({ top: scrollTop, behavior: 'smooth' });
+                                      }
+                                    }, 0);
+                                  }}
                                   onBlur={formik.handleBlur}
                                   error={formik.touched[field.field_name] && Boolean(formik.errors[field.field_name])}
                                   helperText={formik.touched[field.field_name] && formik.errors[field.field_name]}
@@ -892,7 +928,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
                   <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
                     <Typography variant="h5" fontWeight={700} mb={2} sx={{ pl: 3, pt: 2 }}>Document Preview</Typography>
                     <Box
-                      ref={templateBoxRef}
+                      ref={previewContentRef}
                         sx={{
                         flex: 1,
                         p: 1,
@@ -965,11 +1001,11 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
                 fontSize: 16,
                 px: 3,
                 py: 0,
-                background: '#00329E',
+                background: fileUrl ? '#00329E' : '#b0b8c4',
                 color: '#fff',
-                '&:hover': { background: '#002266' },
+                '&:hover': { background: fileUrl ? '#002266' : '#b0b8c4' },
                 '&.Mui-disabled': {
-                  backgroundColor: '#00329E',
+                  backgroundColor: '#b0b8c4',
                   color: '#fff',
                   opacity: 1,
                 },
@@ -992,6 +1028,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
       if (!search) return true;
       const s = search.toLowerCase();
       return (
+        (template.document_name && template.document_name.toLowerCase().includes(s)) ||
         (template.title && template.title.toLowerCase().includes(s)) ||
         (template.file_name && template.file_name.toLowerCase().includes(s)) ||
         (template.description && template.description.toLowerCase().includes(s))
@@ -1022,7 +1059,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
       ) : error ? (
         <Box sx={{ textAlign: 'center', color: 'red', my: 4 }}>{error}</Box>
       ) : (
-        <Grid2 container spacing={{ xs: 2, sm: 6, md: 6 }} sx={{ mb: 4, width:'100%', mx: 'auto' }} alignItems="flex-start" justifyContent="flex-start">
+        <Grid2 container spacing={{ xs: 2, sm: 6, md: 7 }} sx={{ mb: 4, width:'100%', mx: 'auto' }} alignItems="flex-start" justifyContent="flex-start">
         {filteredTemplates.map((template) => (
   <Grid2 size={{xs:12, sm:6, md:3}} key={template.id}>
 <Paper
@@ -1033,12 +1070,13 @@ pl: 2,
 pr: 2,
 pt: 2.5,
 pb: 2.5,
-ml:-1.5,
+ml:-2.5,
 
 
 
 
-width:"110%",
+
+width:"115%",
 minHeight: 180,
 maxHeight: 180,
 height: 180,

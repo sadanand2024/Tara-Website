@@ -68,20 +68,44 @@ export default function Drafting({ id, tab = 'document', contextId }) {
   const [showDocumentSelection, setShowDocumentSelection] = useState(false);
   const user = useSelector((state) => state.accountReducer.user);
   const navigate = useNavigate();
-  const [selectedCard, setSelectedCard] = useState('all'); // 'all', 'draft', 'completed', 'yet_to_start'
+  const [selectedCard, setSelectedCard] = useState(''); // No card selected by default
+  // Add state for each filter
+  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [selectedEvent, setSelectedEvent] = useState('All');
+  const [selectedDocument, setSelectedDocument] = useState('All');
+  const [selectedStatus, setSelectedStatus] = useState('All');
+  const [selectedCreator, setSelectedCreator] = useState('All');
   const [selectedDate, setSelectedDate] = useState(null);
+ 
+  // Add state for dynamic filter options
+  const [filterOptions, setFilterOptions] = useState({
+    category_names: [],
+    event_names: [],
+    document_names: [],
+    statuses: [],
+    created_by: []
+  });
+  const [filterOptionsLoading, setFilterOptionsLoading] = useState(true);
+ 
+  // Helper to build query string from selected filters
+  const buildQueryString = () => {
+    const params = [];
+    if (selectedStatus && selectedStatus !== 'All') params.push(`status=${selectedStatus}`);
+    if (selectedCategory && selectedCategory !== 'All') params.push(`category_name=${encodeURIComponent(selectedCategory)}`);
+    if (selectedEvent && selectedEvent !== 'All') params.push(`event_name=${encodeURIComponent(selectedEvent)}`);
+    if (selectedDocument && selectedDocument !== 'All') params.push(`document_name=${encodeURIComponent(selectedDocument)}`);
+    if (selectedCreator && selectedCreator !== 'All') params.push(`created_by=${encodeURIComponent(selectedCreator)}`);
+    if (selectedDate) params.push(`date=${encodeURIComponent(selectedDate.format ? selectedDate.format('YYYY-MM-DD') : selectedDate)}`);
+    return params.length > 0 ? `?${params.join('&')}` : '';
+  };
  
   useEffect(() => {
     if (!id) return;
     setLoading(true);
-    let url = `/documentdrafting/document-list/${id}/`;
-    if (selectedCard === 'draft') {
-      url += '?status=draft';
-    } else if (selectedCard === 'completed') {
-      url += '?status=completed';
-    } else if (selectedCard === 'yet_to_start') {
-      url += '?status=yet_to_start';
-    }
+    let url = `/documentdrafting/filtered-documents/${id}/` + buildQueryString();
+    console.log('Fetching with filters:', {
+      selectedCategory, selectedEvent, selectedDocument, selectedStatus, selectedCreator, selectedDate, url
+    });
     Factory('get', url, {}, {})
       .then(response => {
         const resData = response?.res?.data || response?.res || response;
@@ -100,7 +124,7 @@ export default function Drafting({ id, tab = 'document', contextId }) {
       })
       .catch(() => setTableRows([]))
       .finally(() => setLoading(false));
-  }, [id, selectedCard]);
+  }, [id, selectedCategory, selectedEvent, selectedDocument, selectedStatus, selectedCreator, selectedDate]);
  
   useEffect(() => {
     if (!id) return;
@@ -153,6 +177,29 @@ export default function Drafting({ id, tab = 'document', contextId }) {
       .catch(() => setRecentEvents([]))
       .finally(() => setRecentEventsLoading(false));
   }, [id]);
+ 
+  useEffect(() => {
+    setFilterOptionsLoading(true);
+    Factory('get', '/documentdrafting/filter-dropdown-data/', {}, {})
+      .then(response => {
+        const data = response?.res?.data || response?.res || response;
+        setFilterOptions({
+          category_names: data.category_names || [],
+          event_names: data.event_names || [],
+          document_names: data.document_names || [],
+          statuses: data.statuses || [],
+          created_by: data.created_by || []
+        });
+      })
+      .catch(() => setFilterOptions({
+        category_names: [],
+        event_names: [],
+        document_names: [],
+        statuses: [],
+        created_by: []
+      }))
+      .finally(() => setFilterOptionsLoading(false));
+  }, []);
  
   useEffect(() => {
     if (location.state?.showEvent) {
@@ -284,7 +331,16 @@ export default function Drafting({ id, tab = 'document', contextId }) {
  
   // Card click handler
   const handleCardClick = (card) => {
-    setSelectedCard(prev => (prev === card ? 'all' : card));
+    setSelectedCard(card);
+    if (card === 'all') {
+      setSelectedStatus('All');
+    } else if (card === 'draft') {
+      setSelectedStatus('draft');
+    } else if (card === 'completed') {
+      setSelectedStatus('completed');
+    } else if (card === 'yet_to_start') {
+      setSelectedStatus('yet_to_start');
+    }
   };
  
   return (
@@ -325,65 +381,136 @@ export default function Drafting({ id, tab = 'document', contextId }) {
  
       {/* Filters */}
       <Grid2 container spacing={2} mb={3}>
-        
-        {filters.map((filter) => (
-          filter.label === 'Date' ? (
-            <Grid2 size={{xs:12, sm:4,md:2}} key={filter.label}>
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DatePicker
-                  label={filter.label}
-                  value={selectedDate}
-                  onChange={newValue => setSelectedDate(newValue)}
-                  slotProps={{
-                    textField: {
-                      fullWidth: true,
-                      size: 'small',
-                      sx: { bgcolor: '#F5F7FA' },
-                      InputLabelProps: { shrink: true },
-                    }
-                  }}
-                />
-              </LocalizationProvider>
-            </Grid2>
-          ) : (
-            <Grid2 size={{xs:12, sm:4,md:2}} key={filter.label}>
-              <TextField
-                fullWidth
-                select
-                label={filter.label}
-                size="small"
-                sx={{ bgcolor: '#F5F7FA' }}
-                defaultValue={filter.options[0]}
-              >
-                {filter.options.map((option) => (
-                  <MenuItem key={option} value={option}>{option}</MenuItem>
-                ))}
-              </TextField>
-            </Grid2>
-          )
-        ))}
+        {/* Category Filter */}
+        <Grid2 size={{xs:12, sm:4,md:2}}>
+          <TextField
+            fullWidth
+            select
+            label="Category"
+            size="small"
+            sx={{ bgcolor: '#F5F7FA' }}
+            value={selectedCategory}
+            onChange={e => setSelectedCategory(e.target.value)}
+            disabled={filterOptionsLoading}
+          >
+            <MenuItem value="All">All</MenuItem>
+            {filterOptions.category_names.map(option => (
+              <MenuItem key={option} value={option}>{option}</MenuItem>
+            ))}
+          </TextField>
+        </Grid2>
+        {/* Events Filter */}
+        <Grid2 size={{xs:12, sm:4,md:2}}>
+          <TextField
+            fullWidth
+            select
+            label="Events"
+            size="small"
+            sx={{ bgcolor: '#F5F7FA' }}
+            value={selectedEvent}
+            onChange={e => setSelectedEvent(e.target.value)}
+            disabled={filterOptionsLoading}
+          >
+            <MenuItem value="All">All</MenuItem>
+            {filterOptions.event_names.map(option => (
+              <MenuItem key={option} value={option}>{option}</MenuItem>
+            ))}
+          </TextField>
+        </Grid2>
+        {/* Documents Filter */}
+        <Grid2 size={{xs:12, sm:4,md:2}}>
+        <TextField
+            fullWidth
+            select
+            label="Documents"
+          size="small"
+            sx={{ bgcolor: '#F5F7FA' }}
+            value={selectedDocument}
+            onChange={e => setSelectedDocument(e.target.value)}
+            disabled={filterOptionsLoading}
+          >
+            <MenuItem value="All">All</MenuItem>
+            {filterOptions.document_names.map(option => (
+              <MenuItem key={option} value={option}>{option}</MenuItem>
+            ))}
+          </TextField>
+        </Grid2>
+        {/* Status Filter */}
+        <Grid2 size={{xs:12, sm:4,md:2}}>
+          <TextField
+            fullWidth
+            select
+            label="Status"
+            size="small"
+            sx={{ bgcolor: '#F5F7FA' }}
+            value={selectedStatus}
+            onChange={e => setSelectedStatus(e.target.value)}
+            disabled={filterOptionsLoading}
+          >
+            <MenuItem value="All">All</MenuItem>
+            {filterOptions.statuses.map(option => (
+              <MenuItem key={option} value={option}>{option}</MenuItem>
+            ))}
+          </TextField>
+        </Grid2>
+        {/* Creator Filter */}
+        <Grid2 size={{xs:12, sm:4,md:2}}>
+          <TextField
+            fullWidth
+            select
+            label="Creator"
+            size="small"
+            sx={{ bgcolor: '#F5F7FA' }}
+            value={selectedCreator}
+            onChange={e => setSelectedCreator(e.target.value)}
+            disabled={filterOptionsLoading}
+          >
+            <MenuItem value="All">All</MenuItem>
+            {filterOptions.created_by.map(option => (
+              <MenuItem key={option} value={option}>{option}</MenuItem>
+            ))}
+          </TextField>
+        </Grid2>
+        {/* Date Filter (keep as DatePicker) */}
+        <Grid2 size={{xs:12, sm:4,md:2}}>
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DatePicker
+              label="Date"
+              value={selectedDate}
+              onChange={newValue => setSelectedDate(newValue)}
+              slotProps={{
+                textField: {
+                  fullWidth: true,
+                  size: 'small',
+                  sx: { bgcolor: '#F5F7FA' },
+                  InputLabelProps: { shrink: true },
+                }
+              }}
+            />
+          </LocalizationProvider>
+        </Grid2>
       </Grid2>
  
       {/* Stats Cards */}
       {statsLoading ? (
         <CircularProgressComponent isLoading displayContent={'Loading Stats...'} />
       ) : (
-        <Grid2 container spacing={3} mb={4}>
+      <Grid2 container spacing={3} mb={4}>
           {stats.length === 0 ? (
             <Grid2 size={{ xs: 12 }}><Typography align="center">No stats found</Typography></Grid2>
-          ) : (
-            stats.map((stat) => {
+        ) : (
+          stats.map((stat) => {
               let cardKey = 'all';
               if (stat.label.toLowerCase().includes('draft')) cardKey = 'draft';
               else if (stat.label.toLowerCase().includes('finalized')) cardKey = 'completed';
               else if (stat.label.toLowerCase().includes('action pending')) cardKey = 'yet_to_start';
               const isSelected = selectedCard === cardKey;
-              const style = statStyles[stat.label] || {};
+            const style = statStyles[stat.label] || {};
               const cardBgGradient = `linear-gradient(135deg, ${style.iconBg || '#E3EAFE'} 0%, #fff 100%)`;
               const borderColor = isSelected ? style.iconColor : '#E5EAF2';
-              return (
+            return (
                 <Grid2 size={{ xs: 12, md: 3, sm: 3 }} key={stat.label}>
-                  <Paper
+                <Paper
                     elevation={isSelected ? 3 : 0}
                     sx={{
                       borderRadius: 3,
@@ -408,13 +535,13 @@ export default function Drafting({ id, tab = 'document', contextId }) {
                     {/* Row 1: Icon and Heading */}
                     <Box display="flex" alignItems="center" gap={2} mb={1}>
                       <Avatar variant="circular" sx={{ width: 44, height: 44, bgcolor: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        {React.cloneElement(statIcons[stat.label] || <DescriptionOutlinedIcon />, {
-                          style: { color: style.iconColor, fontSize: 28 }
-                        })}
+                    {React.cloneElement(statIcons[stat.label] || <DescriptionOutlinedIcon />, {
+                      style: { color: style.iconColor, fontSize: 28 }
+                    })}
                       </Avatar>
                       <Typography variant="h6" fontWeight={800} fontSize={15} sx={{ color: '#0A1F44', mb: 0 }}>
-                        {stat.label === "Total Document" ? "Total Documents" : stat.label}
-                      </Typography>
+                    {stat.label === "Total Document" ? "Total Documents" : stat.label}
+                  </Typography>
                     </Box>
                     {/* Row 2: Description/Paragraph */}
                     <Box sx={{ width: '105%' }}>
@@ -428,19 +555,19 @@ export default function Drafting({ id, tab = 'document', contextId }) {
                     {/* Row 3: Count and View Button */}
                     <Box display="flex" alignItems="center" justifyContent="space-between" mt={0}>
                       <Typography variant="h4" fontWeight={700} sx={{ color: '#0A1F44', mb: 0 }}>
-                        {String(stat.value).padStart(2, '0')}
-                      </Typography>
-                      <Button
-                        className="stat-view-btn"
-                        variant="contained"
-                        disableElevation
-                        sx={{
+                    {String(stat.value).padStart(2, '0')}
+                  </Typography>
+                  <Button
+                    className="stat-view-btn"
+                    variant="contained"
+                    disableElevation
+                    sx={{
                           background: isSelected ? style.iconColor : '#F0F0F0',
                           color: isSelected ? '#fff' : '#595959',
-                          fontWeight: 500,
-                          borderRadius: 2,
-                          textTransform: 'none',
-                          boxShadow: 'none',
+                      fontWeight: 500,
+                      borderRadius: 2,
+                      textTransform: 'none',
+                      boxShadow: 'none',
                           minWidth: 48,
                           height: 32,
                           fontSize: 14,
@@ -453,54 +580,54 @@ export default function Drafting({ id, tab = 'document', contextId }) {
                           }
                         }}
                         onClick={e => { e.stopPropagation(); handleCardClick(cardKey); }}
-                      >
-                        View
-                      </Button>
+                  >
+                    View
+                  </Button>
                     </Box>
-                  </Paper>
-                </Grid2>
-              );
-            })
-          )}
-        </Grid2>
+                </Paper>
+              </Grid2>
+            );
+          })
+        )}
+      </Grid2>
       )}
  
       {/* Table */}
       {loading ? (
         <CircularProgressComponent isLoading={loading} displayContent={'Loading Documents...'} />
       ) : (
-        <Paper elevation={1} sx={{ borderRadius: 3, overflow: 'hidden' }}>
-          <Table>
-            <TableHead>
-              <TableRow sx={{ background: '#F5F6F8' }}>
-                <TableCell>Name</TableCell>
-                <TableCell>Category</TableCell>
-                <TableCell>Event</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell>Last Edited</TableCell>
-                <TableCell>Creator</TableCell>
-                <TableCell>Action</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
+      <Paper elevation={1} sx={{ borderRadius: 3, overflow: 'hidden' }}>
+        <Table>
+          <TableHead>
+            <TableRow sx={{ background: '#F5F6F8' }}>
+              <TableCell>Name</TableCell>
+              <TableCell>Category</TableCell>
+              <TableCell>Event</TableCell>
+              <TableCell>Status</TableCell>
+              <TableCell>Last Edited</TableCell>
+              <TableCell>Creator</TableCell>
+              <TableCell>Action</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
               {tableRows.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={7} align="center">No data found</TableCell>
-                </TableRow>
-              ) : (
-                paginatedRows.map((row, idx) => (
-                  <TableRow key={row.id || idx}>
-                    <TableCell>{row.name}</TableCell>
-                    <TableCell>{row.category}</TableCell>
-                    <TableCell>{row.event}</TableCell>
-                    <TableCell>{statusChip(row.status)}</TableCell>
-                    <TableCell>{row.lastEdited}</TableCell>
-                    <TableCell>{row.creator}</TableCell>
-                    <TableCell>
+              <TableRow>
+                <TableCell colSpan={7} align="center">No data found</TableCell>
+              </TableRow>
+            ) : (
+              paginatedRows.map((row, idx) => (
+                <TableRow key={row.id || idx}>
+                  <TableCell>{row.name}</TableCell>
+                  <TableCell>{row.category}</TableCell>
+                  <TableCell>{row.event}</TableCell>
+                  <TableCell>{statusChip(row.status)}</TableCell>
+                  <TableCell>{row.lastEdited}</TableCell>
+                  <TableCell>{row.creator}</TableCell>
+                  <TableCell>
                       <DraftingActionCell
                         row={row}
                         status={row.status}
-                        onEdit={() => window.location.href = `/app/drafting/fill/${row.id}`}
+                        onEdit={() => navigate(`/app/drafting/fill/${row.id}`)}
                         onDownload={async () => {
                           try {
                             // 1. Fetch draft details to get file_url
@@ -553,13 +680,13 @@ export default function Drafting({ id, tab = 'document', contextId }) {
                           description: 'This action will permanently remove this file from the list.'
                         }}
                       />
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </Paper>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </Paper>
       )}
       {/* Pagination Controls */}
       {!loading && pageCount > 1 && (
@@ -577,34 +704,34 @@ export default function Drafting({ id, tab = 'document', contextId }) {
       {(favouritesLoading || recentDocumentsLoading || recentEventsLoading) ? (
         <CircularProgressComponent isLoading displayContent={'Loading Quick Access Panel...'} />
       ) : (
-        <Box
-          mt={5}
-          mb={5}
-          sx={{
+      <Box
+        mt={5}
+        mb={5}
+        sx={{
             borderBottom: '2px solid rgb(196, 191, 191)', // thick, prominent grey border
             borderLeft: '0.1px solid #b0b8c4', // thick, prominent grey border
             borderTop: '0.1px solid #b0b8c4', // thick, prominent grey border
             borderRight: '0.1px solid #b0b8c4', // thick, prominent grey border
-            borderRadius: 3,
-            p: 4,
-            background: '#fff',
+          borderRadius: 3,
+          p: 4,
+          background: '#fff',
             // boxShadow: '0 5px 10px 0 rgba(24, 39, 75, 0.06)', // thinner, more subtle shadow at the bottom
-          }}
-        >
+        }}
+      >
           <Typography variant="h3" fontWeight={700} mb={3} sx={{ color: '#0A1F44' }}>
-            Quick Access Panel
-          </Typography>
-          <Grid2 container spacing={4}>
-            {/* Favourites */}
-            <Grid2 size ={{xs:12, md:4}}>
+          Quick Access Panel
+        </Typography>
+        <Grid2 container spacing={4}>
+          {/* Favourites */}
+          <Grid2 size ={{xs:12, md:4}}>
               <Typography fontWeight={500} sx={{ color: '#0A1F44', mb: 1,fontSize: 17 }}>Favourites</Typography>
               <Stack spacing={0}>
-                {favouritesLoading ? (
-                  <Typography>Loading favourites...</Typography>
-                ) : favourites.length === 0 ? (
-                  <Typography>No favourites found</Typography>
-                ) : (
-                  favourites.map((favourite) => (
+              {favouritesLoading ? (
+                <Typography>Loading favourites...</Typography>
+              ) : favourites.length === 0 ? (
+                <Typography>No favourites found</Typography>
+              ) : (
+                favourites.map((favourite) => (
                     <Box
                       key={favourite.id}
                       display="flex"
@@ -622,79 +749,79 @@ export default function Drafting({ id, tab = 'document', contextId }) {
                       }}
                       onClick={() => handleFavouriteProceed(favourite)}
                     >
-                      <Box sx={{ position: 'relative', display: 'inline-flex' }}>
-                        <DescriptionOutlinedIcon sx={{ color: '#A3AED0', fontSize: 28, bgcolor: '#F5F7FA', borderRadius: 2, p: 0.5 }} />
+                    <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+                      <DescriptionOutlinedIcon sx={{ color: '#A3AED0', fontSize: 28, bgcolor: '#F5F7FA', borderRadius: 2, p: 0.5 }} />
                         <FavoriteBorderIcon
-                          sx={{
-                            color: '#3B82F6',
-                            fontSize: 14,
-                            position: 'absolute',
-                            top: 2,
-                            right: 2,
-                            bgcolor: '#fff',
-                            borderRadius: '50%',
-                          }}
-                        />
-                      </Box>
+                        sx={{
+                          color: '#3B82F6',
+                          fontSize: 14,
+                          position: 'absolute',
+                          top: 2,
+                          right: 2,
+                          bgcolor: '#fff',
+                          borderRadius: '50%',
+                        }}
+                      />
+                    </Box>
                       <Typography sx={{ color: '#222', wordBreak: 'break-word' }}>{favourite.document?.name || favourite.name || favourite.title || favourite.document_name || 'Unnamed Document'}</Typography>
-                    </Box>
-                  ))
-                )}
-              </Stack>
-            </Grid2>
-            {/* Recently Used */}
-            <Grid2 size ={{xs:12, md:4}}>
-              <Typography fontWeight={500} sx={{ color: '#0A1F44', mb: 2,fontSize:17 }}>Recently Used</Typography>
-              <Stack spacing={2}>
-                {recentDocumentsLoading ? (
-                  <Typography>Loading recent documents...</Typography>
-                ) : recentDocuments.length === 0 ? (
-                  <Typography>No recent documents found</Typography>
-                ) : (
-                  recentDocuments.map((document) => (
-                    <Box key={document.id} display="flex" alignItems="center" gap={1}>
-                      <Box sx={{ position: 'relative', display: 'inline-flex' }}>
-                        <DescriptionOutlinedIcon sx={{ color: '#A3AED0', fontSize: 28, bgcolor: '#F5F7FA', borderRadius: 2, p: 0.5 }} />
-                        <HistoryOutlinedIcon
-                          sx={{
-                            color: '#F59E42',
-                            fontSize: 14,
-                            position: 'absolute',
-                            top: 2,
-                            right: 2,
-                            bgcolor: '#fff',
-                            borderRadius: '50%',
-                          }}
-                        />
-                      </Box>
-                      <Typography sx={{ color: '#222' }}>{document.document?.name || document.name || document.title || document.document_name || 'Unnamed Document'}</Typography>
-                    </Box>
-                  ))
-                )}
-              </Stack>
-            </Grid2>
-            {/* Recent Events */}
-            <Grid2 size ={{xs:12, md:4}}>
-              <Typography fontWeight={500} sx={{ color: '#0A1F44', mb: 2,fontSize:17 }}>Recent Events</Typography>
-              <Stack spacing={2}>
-                {recentEventsLoading ? (
-                  <Typography>Loading recent events...</Typography>
-                ) : recentEvents.length === 0 ? (
-                  <Typography>No recent events found</Typography>
-                ) : (
-                  recentEvents.map((event) => (
-                    <Box key={event.id} display="flex" alignItems="center" gap={1}>
-                      <Box sx={{ position: 'relative', display: 'inline-flex' }}>
-                        <DescriptionOutlinedIcon sx={{ color: '#A3AED0', fontSize: 28, bgcolor: '#F5F7FA', borderRadius: 2, p: 0.5 }} />
-                      </Box>
-                      <Typography sx={{ color: '#222' }}>{event.event?.name || event.name || event.title || event.event_name || 'Unnamed Event'}</Typography>
-                    </Box>
-                  ))
-                )}
-              </Stack>
-            </Grid2>
+                  </Box>
+                ))
+              )}
+            </Stack>
           </Grid2>
-        </Box>
+          {/* Recently Used */}
+          <Grid2 size ={{xs:12, md:4}}>
+              <Typography fontWeight={500} sx={{ color: '#0A1F44', mb: 2,fontSize:17 }}>Recently Used</Typography>
+            <Stack spacing={2}>
+              {recentDocumentsLoading ? (
+                <Typography>Loading recent documents...</Typography>
+              ) : recentDocuments.length === 0 ? (
+                <Typography>No recent documents found</Typography>
+              ) : (
+                recentDocuments.map((document) => (
+                  <Box key={document.id} display="flex" alignItems="center" gap={1}>
+                    <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+                      <DescriptionOutlinedIcon sx={{ color: '#A3AED0', fontSize: 28, bgcolor: '#F5F7FA', borderRadius: 2, p: 0.5 }} />
+                      <HistoryOutlinedIcon
+                        sx={{
+                          color: '#F59E42',
+                          fontSize: 14,
+                          position: 'absolute',
+                          top: 2,
+                          right: 2,
+                          bgcolor: '#fff',
+                          borderRadius: '50%',
+                        }}
+                      />
+                    </Box>
+                    <Typography sx={{ color: '#222' }}>{document.document?.name || document.name || document.title || document.document_name || 'Unnamed Document'}</Typography>
+                  </Box>
+                ))
+              )}
+            </Stack>
+          </Grid2>
+          {/* Recent Events */}
+          <Grid2 size ={{xs:12, md:4}}>
+              <Typography fontWeight={500} sx={{ color: '#0A1F44', mb: 2,fontSize:17 }}>Recent Events</Typography>
+            <Stack spacing={2}>
+              {recentEventsLoading ? (
+                <Typography>Loading recent events...</Typography>
+              ) : recentEvents.length === 0 ? (
+                <Typography>No recent events found</Typography>
+              ) : (
+                recentEvents.map((event) => (
+                  <Box key={event.id} display="flex" alignItems="center" gap={1}>
+                    <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+                      <DescriptionOutlinedIcon sx={{ color: '#A3AED0', fontSize: 28, bgcolor: '#F5F7FA', borderRadius: 2, p: 0.5 }} />
+                    </Box>
+                    <Typography sx={{ color: '#222' }}>{event.event?.name || event.name || event.title || event.event_name || 'Unnamed Event'}</Typography>
+                  </Box>
+                ))
+              )}
+            </Stack>
+          </Grid2>
+        </Grid2>
+      </Box>
       )}
       {/* MyEvents section at the bottom of the page */}
       <Box mt={6} ref={myEventsRef}>
