@@ -259,8 +259,8 @@ const SelectedEvent = ({ onBack }) => {
                         <CircularProgress
                           variant="determinate"
                           value={100}
-                          size={40}
-                          thickness={6}
+                          size={35}
+                          thickness={5}
                           sx={{ color: '#E0E0E0' }}
                         />
                         <Box
@@ -287,8 +287,8 @@ const SelectedEvent = ({ onBack }) => {
                         <CircularProgress
                           variant="determinate"
                           value={progressPercent}
-                          size={40}
-                          thickness={6}
+                          size={35}
+                          thickness={5}
                           sx={{ color: getProgressColor(Math.round(progressPercent)) }}
                         />
                         <Box
@@ -343,11 +343,10 @@ const SelectedEvent = ({ onBack }) => {
                           bgcolor: '#0039A6',
                           color: '#fff',
                           fontWeight: 500,
-                          fontSize: 16,
+                          fontSize: 12,
                           borderRadius: '999px',
                           px: 3,
                           height: 32,
-                          
                           boxShadow: 'none',
                           letterSpacing: 0.5,
                           cursor: 'pointer',
@@ -376,7 +375,7 @@ const SelectedEvent = ({ onBack }) => {
                             borderRadius: 2,
                             textTransform: 'none',
                             fontWeight: 600,
-                            fontSize: 15,
+                            fontSize: 13,
                             boxShadow: 0,
                             px: 2,
                             minWidth: 140,

@@ -71,7 +71,7 @@ function DocumentCard({ title, description, isFavorite, isSelected, onFavorite, 
         pt: 2.5,
         minWidth: 260,
         maxWidth: 400,
-        minHeight: 130,
+        minHeight: 160,
         maxHeight: 180,
         
         boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
@@ -317,7 +317,7 @@ if (category) {
         </Typography>
         <Button
           variant="outlined"
-          onClick={() => { navigate('/app/drafting'); }}
+          onClick={() => { window.location.href = '/app/drafting'; }}
           sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600, px: 2 }}
           startIcon={<ArrowBackIcon />}
         >
@@ -349,7 +349,7 @@ if (category) {
     <Tab label="Create an Event" />
   </Tabs>
   {activeTab === 0 && (
-    <Box sx={{ width: { xs: '100%', sm: 350, md: '24%' }, transform: 'translateX(-3%)', ml: { md: 2 }, mt: { xs: 2, md: 0 } }}>
+    <Box sx={{ width: { xs: '100%', sm: 350, md: '23.5%' }, transform: 'translateX(-5%)', ml: { md: 2 }, mt: { xs: 2, md: 0 } }}>
       <TextField
         fullWidth
         size="small"
@@ -480,9 +480,11 @@ if (category) {
                   Proceed
                 </Button>
               </Box>
-              <Typography variant="body2" sx={{ color: '#1976d2', mt: 2, fontStyle: 'none' }}>
-                Note: By default, all templates are selected. If you do not want a template, please uncheck it.
-              </Typography>
+              {category && event && (
+                <Typography variant="body2" sx={{ color: '#1976d2', mt: 2, fontStyle: 'none' }}>
+                  Note: By default, all templates are selected. If you do not want a template, please uncheck it.
+                </Typography>
+              )}
             </>
           )}
         </TabPanel>
