@@ -110,7 +110,7 @@ export default function Drafting({ id, tab = 'document', contextId }) {
       .then(response => {
         const resData = response?.res?.data || response?.res || response;
         const rows = (resData?.results || resData || []).map(item => ({
-          name: item.document?.name || item.name || '-',
+          name: item?.file_name || item.name || '-',
          
           category: item.category?.name || '-',
           event: item.event?.name || '-',
