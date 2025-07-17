@@ -120,21 +120,7 @@ function StepperComponent() {
       {loading ? (
         <Loader />
       ) : (
-        <MainCard
-          title="Employee Master Data"
-          subtitle="Manage your Employee Master Data by Adding Or Editing the Form"
-
-          // secondary={
-          //   <Stack direction="row" spacing={2}>
-          //     <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigate('/app/payroll')}>
-          //       Back to Employee Dashboard
-          //     </Button>
-          //     <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigate('/app/payroll')}>
-          //       Back to Payroll Dashboard
-          //     </Button>
-          //   </Stack>
-          // }
-        >
+        <>
           <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 3 }}>
             {steps.map((label, idx) => (
               <Step key={idx}>
@@ -179,7 +165,7 @@ function StepperComponent() {
               </Stack>
             </>
           )}
-        </MainCard>
+        </>
       )}
     </>
   );

@@ -71,8 +71,8 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
       case 'Attendance':
         return {
           employee: '',
-          financial_year: '',
-          month: '',
+          financial_year: financial_year || '',
+          month: month || '',
           total_days_of_month: '',
           holidays: '',
           week_offs: '',
@@ -98,17 +98,16 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
           employee: '',
           bonus_type: '',
           amount: '',
-          month: '',
-          financial_year: ''
+          month: month || '',
+          financial_year: financial_year || ''
         };
       case 'Adhoc Bonus & Incentives':
         return {
           employee: '',
-          adhoc_type: '',
+          bonus_type: '',
           amount: '',
-          reason: '',
-          month: '',
-          financial_year: ''
+          month: month || '',
+          financial_year: financial_year || ''
         };
       case 'Salary Revisions':
         return {
@@ -203,8 +202,10 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
       case 'Adhoc Bonus & Incentives':
         return Yup.object({
           employee: Yup.string().required('Employee is required'),
-          type: Yup.string().required('Type is required'),
-          amount: Yup.number().typeError('Amount must be a number').positive('Amount must be positive').required('Amount is required')
+          bonus_type: Yup.string().required('Bonus Type is required'),
+          amount: Yup.number().typeError('Amount must be a number').positive('Amount must be positive').required('Amount is required'),
+          month: Yup.string().required('Month is required'),
+          financial_year: Yup.string().required('Financial Year is required')
         });
 
       case 'Salary Revisions':
@@ -363,12 +364,16 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
         let url = selectedRecord?.id ? `/payroll/bonus-incentives/${selectedRecord?.id}` : `/payroll/bonus-incentives`;
         let method = selectedRecord?.id ? 'put' : 'Post';
         let postData = {
+          employee: values.employee,
           bonus_type: values.bonus_type,
-          amount: Number(values.amount)
+          amount: Number(values.amount),
+          month: values.month,
+          financial_year: values.financial_year
         };
+        postData.payroll = payrollid;
         const { res, error } = await Factory(method, url, postData);
         setLoading(false);
-        if (res.status_cd === 0) {
+        if (res && res.status_cd === 0) {
           dispatch(
             openSnackbar({
               open: true,
@@ -379,12 +384,14 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
             })
           );
           getData();
+          resetForm();
           setOpenDialog(false);
         } else {
+          const errorMessage = res?.data?.data ? JSON.stringify(res.data.data) : 'Failed to save data';
           dispatch(
             openSnackbar({
               open: true,
-              message: JSON.stringify(res.data.data),
+              message: errorMessage,
               variant: 'alert',
               alert: { color: 'error' },
               close: false
@@ -395,12 +402,16 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
 
       if (from === 'Adhoc Bonus & Incentives') {
         setLoading(true);
-        let url = selectedRecord?.id ? `/payroll/adhoc-bonus/${selectedRecord?.id}` : `/payroll/adhoc-bonus`;
+        let url = selectedRecord?.id ? `/payroll/bonus-incentives/${selectedRecord?.id}` : `/payroll/bonus-incentives`;
         let method = selectedRecord?.id ? 'put' : 'Post';
         let postData = {
-          type: values.type,
-          amount: Number(values.amount)
+          employee: values.employee,
+          bonus_type: values.bonus_type,
+          amount: Number(values.amount),
+          month: values.month,
+          financial_year: values.financial_year
         };
+        postData.payroll = payrollid;
         const { res, error } = await Factory(method, url, postData);
         setLoading(false);
         if (res.status_cd === 0) {
@@ -414,6 +425,7 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
             })
           );
           getData();
+          resetForm();
           setOpenDialog(false);
         } else {
           dispatch(
@@ -479,19 +491,33 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
               if (from === 'Salary Revisions' && newValue?.employee_salary?.annual_ctc) {
                 setFieldValue('current_ctc', newValue.employee_salary.annual_ctc);
               }
+              // Ensure all form values are defined
+              if (!newValue) {
+                setFieldValue('department', '');
+                setFieldValue('designation', '');
+                if (from === 'Salary Revisions') {
+                  setFieldValue('current_ctc', '');
+                }
+              }
             }}
             options={employeeMasterData || []}
             getOptionLabel={(option) => `${option.first_name || ''} ${option.middle_name || ''} ${option.last_name || ''}`.trim()}
             getOptionKey={(option) => option.id}
             isOptionEqualToValue={(option, value) => option.id === value.id}
             sx={{ width: '100%' }}
-            onBlur={handleBlur}
+            onBlur={(e) => {
+              handleBlur(e);
+              // Ensure employee field always has a defined value
+              if (values[field.name] === undefined) {
+                setFieldValue(field.name, '');
+              }
+            }}
             error={touched[field.name] && Boolean(errors[field.name])}
             helperText={touched[field.name] && errors[field.name]}
             size="small"
             disabled={(from === 'Attendance' && field.name === 'employee') || (from === 'Tds' && field.name === 'employee')}
           />
-        ) : field.name === 'loan_type' || field.name === 'bonus_type' || field.name === 'adhoc_type' || field.name === 'month' ? (
+        ) : field.name === 'loan_type' || field.name === 'type' || field.name === 'bonus_type' || field.name === 'month' ? (
           <CustomAutocomplete
             value={field.name === 'month' ? months[values[field.name] - 1] || null : values[field.name] || null}
             onChange={(e, newValue) => {
@@ -517,20 +543,9 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
                   ]
                 : field.name === 'financial_year'
                   ? ['2021-22', '2022-23', '2023-24', '2024-25', '2025-26']
-                  : field.name === 'bonus_type'
-                    ? [
-                        'Performance Bonus',
-                        'Annual Bonus',
-                        'Festival Bonus',
-                        'Referral Bonus',
-                        'Joining Bonus',
-                        'Retention Bonus',
-                        'Spot Bonus',
-                        'Incentive Bonus',
-                        'Holiday Bonus',
-                        'Project Completion Bonus'
-                      ]
-                    : field.name === 'type'
+                  : field.name === 'bonus_type' && from === 'Variable Bonus'
+                    ? ['  Variable Bonus']
+                    : field.name === 'bonus_type' && from === 'Adhoc Bonus & Incentives'
                       ? [
                           'Special Recognition Bonus',
                           'Project Completion Bonus',
@@ -548,7 +563,7 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
             sx={{ width: '100%' }}
             error={touched[field.name] && Boolean(errors[field.name])}
             helperText={touched[field.name] && errors[field.name]}
-            disabled={(from === 'Attendance' || from === 'Variable Bonus') && field.name === 'month'}
+            disabled={(from === 'Attendance' || from === 'Variable Bonus' || from === 'Adhoc Bonus & Incentives') && field.name === 'month'}
           />
         ) : field.name === 'doe' || field.name === 'start_month' ? (
           <CustomDatePicker
@@ -585,7 +600,7 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
                 helperText={touched[field.name] && errors[field.name]}
               />
             )}
-            disabled={from === 'Variable Bonus'}
+            disabled={from === 'Variable Bonus' || from === 'Adhoc Bonus & Incentives'}
           />
         ) : field.name === 'reset_leave_balance_type' ? (
           <CustomAutocomplete
@@ -603,7 +618,7 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
           <CustomInput
             fullWidth
             name={field.name}
-            value={values[field.name]}
+            value={values[field.name] || ''}
             multiline={field.name === 'notes'}
             minRows={field.name === 'notes' ? 4 : undefined}
             onChange={handleChange}
@@ -630,6 +645,7 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
   };
 
   const { values, setValues, handleChange, errors, touched, handleSubmit, handleBlur, resetForm, setFieldValue } = formik;
+  // Set form values when selectedRecord changes or when URL params are available
   useEffect(() => {
     if (selectedRecord !== null) {
       // Convert month name to numeric value if it exists
@@ -640,8 +656,26 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
       setValues(() => ({
         ...updatedRecord
       }));
+    } else {
+      // When no selectedRecord (new entry), auto-set month and financial_year from URL params
+      const updatedValues = { ...values };
+      let hasChanges = false;
+
+      if (month && (from === 'Attendance' || from === 'Variable Bonus' || from === 'Adhoc Bonus & Incentives')) {
+        updatedValues.month = month;
+        hasChanges = true;
+      }
+
+      if (financial_year && (from === 'Attendance' || from === 'Variable Bonus' || from === 'Adhoc Bonus & Incentives')) {
+        updatedValues.financial_year = financial_year;
+        hasChanges = true;
+      }
+
+      if (hasChanges) {
+        setValues(updatedValues);
+      }
     }
-  }, [selectedRecord]);
+  }, [selectedRecord, month, financial_year, from]);
   return (
     <Modal
       open={openDialog}

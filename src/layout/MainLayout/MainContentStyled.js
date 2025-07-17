@@ -15,7 +15,7 @@ const MainContentStyled = styled('main', {
   width: '100%',
   minHeight: 'calc(100vh - 88px)',
   flexGrow: 1,
-  padding: 20,
+  padding: 10,
   marginTop: 88,
   marginRight: 20,
   borderRadius: `${borderRadius}px`,

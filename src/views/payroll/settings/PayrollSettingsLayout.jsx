@@ -76,7 +76,7 @@ const PAYROLL_STEPS = [
     component: OrganizationDetails,
     icon: IconBuilding,
     title: 'Business Profile',
-    subtitle: 'Manage your business profile for invoice generation and business operations',
+    // subtitle: 'Manage your business profile for invoice generation and business operations',
     secondaryAction: null
   },
   {
@@ -85,8 +85,8 @@ const PAYROLL_STEPS = [
     dataKey: 'work_locations',
     component: WorkLocation,
     icon: IconMapPin,
-    title: 'Work Location',
-    subtitle: 'Manage your work locations for seamless operations',
+    title: 'Work Locations',
+    // subtitle: 'Manage your work locations for seamless operations',
     secondaryAction: 'workLocation' // Special identifier for work location actions
   },
   {
@@ -96,7 +96,7 @@ const PAYROLL_STEPS = [
     component: Departments,
     icon: IconGitBranch,
     title: 'Departments',
-    subtitle: 'Manage your departments for seamless operations',
+    // subtitle: 'Manage your departments for seamless operations',
     secondaryAction: 'departments' // Special identifier for departments actions
   },
   {
@@ -106,7 +106,7 @@ const PAYROLL_STEPS = [
     component: Designations,
     icon: IconIdBadge,
     title: 'Designations',
-    subtitle: 'Manage your designations',
+    // subtitle: 'Manage your designations',
     secondaryAction: 'designations' // Special identifier for designations actions
   },
   {
@@ -116,7 +116,7 @@ const PAYROLL_STEPS = [
     component: StatuitoryComponents,
     icon: IconGavel,
     title: 'Statutory Components',
-    subtitle: 'Manage statutory components',
+    // subtitle: 'Manage statutory components',
     secondaryAction: null
   },
   {
@@ -126,7 +126,7 @@ const PAYROLL_STEPS = [
     component: SalaryComponents,
     icon: IconCurrencyDollar,
     title: 'Salary Components',
-    subtitle: 'Manage your Salary Components for seamless operations',
+    // subtitle: 'Manage your Salary Components for seamless operations',
     secondaryAction: 'salaryComponents' // Special identifier for salary components actions
   },
   {
@@ -136,7 +136,7 @@ const PAYROLL_STEPS = [
     component: SalaryTemplateList,
     icon: IconFileDescription,
     title: 'Salary Templates',
-    subtitle: 'Manage your Salary Templates for seamless operations',
+    // subtitle: 'Manage your Salary Templates for seamless operations',
     secondaryAction: 'salaryTemplates' // Special identifier for salary templates actions
   },
   {
@@ -146,7 +146,7 @@ const PAYROLL_STEPS = [
     component: EmployeeMaster,
     icon: IconUsers,
     title: 'Employee Master Data',
-    subtitle: 'Manage your Employee Master Data for seamless operations',
+    // subtitle: 'Manage your Employee Master Data for seamless operations',
     secondaryAction: 'employeeMaster' // Special identifier for employee master actions
   },
   {
@@ -156,7 +156,7 @@ const PAYROLL_STEPS = [
     component: PaySchedule,
     icon: IconCalendarTime,
     title: 'Pay Schedule',
-    subtitle: 'Manage Pay Schedule seamless operations',
+    // subtitle: 'Manage Pay Schedule seamless operations',
     secondaryAction: null
   },
   {
@@ -166,7 +166,7 @@ const PAYROLL_STEPS = [
     component: LeaveAttendance,
     icon: IconCalendarEvent,
     title: 'Leave & Attendance',
-    subtitle: 'Manage Leave & Attendance for seamless operations',
+    // subtitle: 'Manage Leave & Attendance for seamless operations',
     secondaryAction: 'leaveAttendance' // Special identifier for leave attendance actions
   }
 ];
@@ -892,9 +892,9 @@ const PayrollSettingsLayout = () => {
                 <Typography variant="h4" fontWeight={600} color="text.primary">
                   {currentStep?.title || 'Payroll Settings'}
                 </Typography>
-                <Typography variant="body1" color="text.secondary" sx={{ mt: 0.5 }}>
-                  {currentStep?.subtitle || 'Manage your payroll settings'}
-                </Typography>
+                {/* <Typography variant="body1" color="text.secondary" sx={{ mt: 0.5 }}>
+                  {currentStep?.subtitle}
+                </Typography> */}
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 {renderSecondaryAction()}
