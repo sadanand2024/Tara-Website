@@ -20,6 +20,13 @@ const SalaryComponentTabs = ({ type, handleBack, handleNext, openDialog = false,
   const [activeTab, setActiveTab] = useState(0);
   const [postType, setPostType] = useState('');
 
+  // Set postType to 'post' when dialog opens for adding new component
+  React.useEffect(() => {
+    if (openDialog && !postType) {
+      setPostType('post');
+    }
+  }, [openDialog, postType]);
+
   const handleTabChange = (_event, newValue) => setActiveTab(newValue);
 
   const handleTabNext = () => {

@@ -23,7 +23,7 @@ export default function BonusAndIncentives({
     'Employee Name',
     'Department',
     'Designation',
-    'Type',
+    'Bonus Type',
     'Amount',
     'Committed Bonus',
     'Ytd Bonus',

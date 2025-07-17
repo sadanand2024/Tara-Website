@@ -164,7 +164,8 @@ const PayrollWorkflows = ({ type }) => {
 
   const fetchBonusData = async () => {
     setLoading(true);
-    const url = `/payroll/bonus-incentives/by-payroll-month?payroll_id=${payrollId}&month=${month}&financial_year=${financialYear}`;
+    const url = `/payroll/bonus-incentives/by-payroll-month?payroll_id=${payrollId}&month=${month}&financial_year=${financialYear}&type=variable`;
+
     const { res } = await Factory('get', url, {});
     setLoading(false);
     if (res?.status_cd === 0) {
@@ -176,7 +177,7 @@ const PayrollWorkflows = ({ type }) => {
 
   const fetchAdhocBonusData = async () => {
     setLoading(true);
-    const url = `/payroll/adhoc-bonus/by-payroll-month?payroll_id=${payrollId}&month=${month}&financial_year=${financialYear}`;
+    const url = `/payroll/bonus-incentives/by-payroll-month?payroll_id=${payrollId}&month=${month}&financial_year=${financialYear}&type=adhoc`;
     const { res } = await Factory('get', url, {});
     setLoading(false);
     if (res?.status_cd === 0) {
@@ -292,8 +293,10 @@ const PayrollWorkflows = ({ type }) => {
           { name: 'employee', label: 'Employee Name' },
           { name: 'department', label: 'Department' },
           { name: 'designation', label: 'Designation' },
-          { name: 'type', label: 'Type' },
-          { name: 'amount', label: 'Amount' }
+          { name: 'bonus_type', label: 'Bonus Type' },
+          { name: 'amount', label: 'Amount' },
+          { name: 'month', label: 'Month' },
+          { name: 'financial_year', label: 'Financial Year' }
         ]
       },
       {
@@ -504,7 +507,13 @@ const PayrollWorkflows = ({ type }) => {
               filteredData={getFilteredData()}
               employeeMasterData={employeeMasterData}
               fetchData={
-                tab.label === 'Exits' ? fetchExitsData : tab.label === 'Adhoc Bonus & Incentives' ? fetchAdhocBonusData : undefined
+                tab.label === 'Exits'
+                  ? fetchExitsData
+                  : tab.label === 'Adhoc Bonus & Incentives'
+                    ? fetchAdhocBonusData
+                    : tab.label === 'Variable Bonus'
+                      ? fetchBonusData
+                      : undefined
               }
               fetchAttendance={tab.label === 'Attendance' ? getAttandanceData : undefined}
               attendanceData={tab.label === 'Attendance' ? getFilteredData() : undefined}

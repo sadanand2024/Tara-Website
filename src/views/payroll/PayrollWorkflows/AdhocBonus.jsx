@@ -18,9 +18,9 @@ export default function AdhocBonus({
   filteredData,
   fetchData
 }) {
-  const headerData = ['Employee ID', 'Employee Name', 'Department', 'Designation', 'Type', 'Amount'];
+  const headerData = ['Employee ID', 'Employee Name', 'Department', 'Designation', 'Bonus Type', 'Amount'];
 
-  const body_keys = ['associate_id', 'employee_name', 'department', 'designation', 'type', 'amount'];
+  const body_keys = ['associate_id', 'employee_name', 'department', 'designation', 'bonus_type', 'amount'];
 
   const [loading, setLoading] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState(null);
@@ -44,7 +44,7 @@ export default function AdhocBonus({
   }, [searchParams]);
 
   const handleEdit = async (item) => {
-    let url = `/payroll/adhoc-bonus/${item.id}`;
+    let url = `/payroll/bonus-incentives/${item.id}`;
     const { res } = await Factory('get', url, {});
     if (res.status_cd === 1) {
       dispatch(
