@@ -22,6 +22,7 @@ import { useDispatch } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 import { openSnackbar } from 'store/slices/snackbar';
 import Factory from 'utils/Factory';
+import EmptyDataPlaceholder from 'ui-component/extended/EmptyDataPlaceholder';
 
 
 const statusColor = (status) => {
@@ -110,7 +111,11 @@ const SelectedEvent = ({ onBack }) => {
 
   if (loading) return <Box p={4}><Typography>Loading...</Typography></Box>;
   if (error) return <Box p={4}><Typography color="error">{error}</Typography></Box>;
-  if (!eventData) return <Box p={4}><Typography>No data found</Typography></Box>;
+  if (!eventData) return (
+    <Box p={4}>
+      <EmptyDataPlaceholder title="No Data Found" subtitle="There is no content to display." />
+    </Box>
+  );
 
   // Extract and map data as needed
   const eventInstance = eventData.event_instance || {};
@@ -222,6 +227,11 @@ const SelectedEvent = ({ onBack }) => {
           position: 'relative',
           background: '#fff',
           overflowX: 'auto',
+          ml:{xs:0,md:0},
+          
+
+          
+          
         }}
       >
         {/* Summary Section - Flex Row */}
@@ -235,11 +245,13 @@ const SelectedEvent = ({ onBack }) => {
             px: { xs: 0.5, sm: 2 },
             pb: 2,
             borderBottom: '1.5px solid #E3EAFE',
-            mb: 2,
+            mt: {xs:0,md:-2},
+            ml:{xs:0,md:-3},
+            width:'110%'
           }}
         >
           <Box sx={{ flex: 1, minWidth: 120, mb: { xs: 1, sm: 0 } }}>
-            <Typography sx={{ color: '#1138e7', fontWeight: 700, fontSize: { xs: 16, sm: 18 }, mb: 0.5 }}>Event Name</Typography>
+            <Typography sx={{ color: '#1138e7', fontWeight: 700, fontSize: { xs: 16, sm: 18 }, mb: 0.5}}>Event Name</Typography>
             <Typography sx={{ fontWeight: 500, fontSize: { xs: 14, sm: 16 } }}>{eventName}</Typography>
           </Box>
           <Box sx={{ flex: 1, minWidth: 120, mb: { xs: 1, sm: 0 } }}>
@@ -247,7 +259,7 @@ const SelectedEvent = ({ onBack }) => {
             <Typography sx={{ fontWeight: 500, fontSize: { xs: 14, sm: 16 } }}>{createdOn}</Typography>
           </Box>
           <Box sx={{ flex: 1, minWidth: 120, mb: { xs: 1, sm: 0 } }}>
-            <Typography sx={{ color: '#1138e7', fontWeight: 700, fontSize: { xs: 15, sm: 16 }, mb: 0.5 }}>Status</Typography>
+            <Typography sx={{ color: '#1138e7', fontWeight: 700, fontSize: { xs: 15, sm: 16 }, mb: 0.5 ,ml:2}}>Status</Typography>
             {statusChip(status)}
           </Box>
           <Box sx={{ flex: 1, minWidth: 120, display: 'flex', alignItems: 'center', gap: 1, mb: { xs: 1, sm: 0 } }}>
@@ -321,23 +333,23 @@ const SelectedEvent = ({ onBack }) => {
         {/* Document Table Section (unchanged) */}
         <Box sx={{ mt: 3, borderRadius: 2, overflow: 'auto', bgcolor: '#fff', width: '100%' }}>
           <TableContainer sx={{ borderRadius: 2, border: '1px solid #E3EAFE', overflow: 'auto', width: '100%' }}>
-            <Table sx={{ width: '100%', minWidth: 600 }}>
+            <Table sx={{ width: '100%', minWidth: 900 }}>
               <TableHead>
                 <TableRow sx={{ bgcolor: '#f5f6fa' }}>
-                  <TableCell sx={{ fontWeight: 700, color: '#1138e7', fontSize: 15, borderTopLeftRadius: 12 }}>Document Name</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: '#1138e7', fontSize: 15 }}>Template</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: '#1138e7', fontSize: 15 }}>Status</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: '#1138e7', fontSize: 15 }}>Last Edited</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: '#1138e7', fontSize: 15, borderTopRightRadius: 12 }}>Action</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: '#1138e7', fontSize: 15, borderTopLeftRadius: 12, px: 9, minWidth: 160 }}>Document Name</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: '#1138e7', fontSize: 15, px: 6, minWidth: 140 }}>Template</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: '#1138e7', fontSize: 15, px: 6, minWidth: 120 }}>Status</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: '#1138e7', fontSize: 15, px: 6, minWidth: 140 }}>Last Edited</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: '#1138e7', fontSize: 15, borderTopRightRadius: 12, px: 6, minWidth: 160 }}>Action</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {documents.map((doc) => (
                   <TableRow key={doc.id}>
-                    <TableCell sx={{ fontWeight: 500 }}>
+                    <TableCell sx={{ fontWeight: 500, px: 9, minWidth: 160 }}>
                       {doc.document?.name || '-'}
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ px: 8, minWidth: 140 }}>
                       <Chip
                         label={'Template'}
                         sx={{
@@ -347,6 +359,7 @@ const SelectedEvent = ({ onBack }) => {
                           fontSize: 12,
                           borderRadius: '999px',
                           px: 3,
+                          ml: -2,
                           height: 32,
                           boxShadow: 'none',
                           letterSpacing: 0.5,
@@ -358,13 +371,15 @@ const SelectedEvent = ({ onBack }) => {
                         onClick={() => navigate(`/app/drafting/fill/${doc.id}`)}
                       />
                     </TableCell>
-                    <TableCell>
-                      {statusChip(doc.status)}
+                    <TableCell align="left" sx={{ px: 8, minWidth: 120 }}>
+                      <Box display="flex" alignItems="center" sx={{ ml: -2 }}>
+                        {statusChip(doc.status)}
+                      </Box>
                     </TableCell>
-                    <TableCell sx={{ fontWeight: 500 }}>
+                    <TableCell sx={{ fontWeight: 500, px: 8, minWidth: 140 }}>
                       {doc.updated_at ? formatDate(doc.updated_at) : ''}
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ px: 8, minWidth: 160 }}>
                       {doc.status === 'yet_to_start' && (
                         <Button
                           variant="contained"
@@ -378,6 +393,7 @@ const SelectedEvent = ({ onBack }) => {
                             fontWeight: 600,
                             fontSize: 13,
                             boxShadow: 0,
+                            ml: -2,
                             px: 2,
                             minWidth: 140,
                             '&:hover': {

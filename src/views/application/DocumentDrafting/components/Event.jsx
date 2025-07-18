@@ -16,6 +16,9 @@ import { Translate } from '@mui/icons-material';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import CircularProgressComponent from 'utils/CircularProgressComponent';
+import EventIcon from '@mui/icons-material/Event';
+import IconButton from '@mui/material/IconButton';
+import CloseIcon from '@mui/icons-material/Close';
  
 
 // const documents = [
@@ -60,7 +63,7 @@ TabPanel.propTypes = {
 };
 
 // Reusable DocumentCard component
-function DocumentCard({ title, description, isFavorite, isSelected, onFavorite, onClick }) {
+function DocumentCard({ title, description, isFavorite, isSelected, onFavorite, onClick, showNote, setShowFirstCardNote }) {
   return (
     <Paper
       sx={{
@@ -132,6 +135,57 @@ function DocumentCard({ title, description, isFavorite, isSelected, onFavorite, 
           }}
         >
           <CheckCircleIcon sx={{ color: '#fff', fontSize: 22 }} />
+        </Box>
+      )}
+      {/* Tooltip note above the checked circle for first card only */}
+      {showNote && isSelected && (
+        <Box
+          sx={{
+            position: 'absolute',
+            right: 0,
+            top: -55, // place above the checked circle
+            left:215,
+            zIndex: 10,
+            bgcolor: '#5B4FE9',
+            color: '#fff',
+            borderRadius: 2,
+            px: 2,
+            py: 1,
+            minWidth: 260,
+            maxWidth: 220,
+            height: 55,
+            fontSize: 14,
+            display: 'flex',
+            alignItems: 'center',
+            boxShadow: 3,
+          }}
+        >
+          {/* Arrow */}
+          <Box
+            sx={{
+              position: 'absolute',
+              left: 10,
+              top: '100%',
+              width: 0,
+              height: 0,
+              borderLeft: '8px solid transparent',
+              borderRight: '8px solid transparent',
+              borderTop: '10px solid #5B4FE9',
+            }}
+          />
+          <Typography sx={{ flex: 1, fontSize: 12, pr: 0,pt:2,pb:2 }}>
+          All templates are selected by default. Uncheck any you don't need.
+          </Typography>
+          <IconButton
+            size="small"
+            sx={{ color: '#fff', ml: 1, p: 0.5 }}
+            onClick={e => {
+              e.stopPropagation();
+              setShowFirstCardNote(false);
+            }}
+          >
+            <CloseIcon fontSize="small" />
+          </IconButton>
         </Box>
       )}
     </Paper>
@@ -309,6 +363,9 @@ if (category) {
     navigate(`/app/drafting/${tabRoute}/${contextId || ''}`);
   };
 
+  // In Event component, add state for note visibility
+  const [showFirstCardNote, setShowFirstCardNote] = useState(true);
+
   return (
     <Box sx={{ p: { xs: 2, md: 4 }, background: 'white',borderRadius:2, minHeight: '100vh' }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0 }}>
@@ -439,6 +496,26 @@ if (category) {
           </Box>
         </TabPanel>
         <TabPanel value={activeTab} index={1}>
+          {(category === '' || event === '') && (
+            <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" sx={{ width: '100%', my: 2 }}>
+              <EventIcon
+                sx={{
+                  color: 'rgb(175, 206, 239)',
+                  // fontSize: { xs: 60, sm: 80, md: 120, lg: 160 },
+                  width: { xs: 95, sm: 80, md: 120, lg: 90 },
+                  height: { xs: 60, sm: 80, md: 120, lg: 160 },
+                }}
+              />
+              <Box sx={{mb:6}}>
+             <Typography variant="body1" color="text.secondary" sx={{mt:{xs:0,md:-3}, maxWidth: 480, mx: 'auto' }}>
+             Please select category and event to start drafting
+                   </Typography>
+                   </Box>
+            
+             
+            </Box>
+            
+          )}
           {filtersLoading ? (
             <Box
                   sx={{
@@ -473,7 +550,7 @@ if (category) {
                     justifyContent="flex-start"
                   >
                     {documents.map((doc, idx) => (
-                      <Grid2 size={{ xs: 12, sm: 6, md: 3 }} key={doc.id || idx}>
+                      <Grid2 size={{ xs: 12, sm: 6, md: 3 }} key={doc.id || idx} sx={{ position: 'relative' }}>
                         <DocumentCard
                           title={doc.title || doc.document_name}
                           description={doc.description}
@@ -481,6 +558,8 @@ if (category) {
                           isSelected={selected.includes(doc.id)}
                           onFavorite={() => handleToggleFavorite(doc.id)}
                           onClick={() => handleCardClick(doc.id)}
+                          showNote={idx === 0 && selected.includes(doc.id) && showFirstCardNote}
+                          setShowFirstCardNote={setShowFirstCardNote}
                         />
               </Grid2>
             ))}
@@ -505,9 +584,9 @@ if (category) {
               Proceed
             </Button>
           </Box>
-                  <Typography variant="body2" sx={{ color: '#1976d2', mt: 2, fontStyle: 'none' }}>
+                  {/* <Typography variant="body2" sx={{ color: '#1976d2', mt: 2, fontStyle: 'none' }}>
             Note: By default, all templates are selected. If you do not want a template, please uncheck it.
-          </Typography>
+          </Typography> */}
                 </>
               ) : null}
         </>

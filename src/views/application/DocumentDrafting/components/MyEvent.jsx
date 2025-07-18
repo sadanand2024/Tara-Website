@@ -21,6 +21,7 @@ import React, { useEffect, useState } from 'react';
 import Factory from 'utils/Factory';
 import SelectedEvent from './SelectedEvent';
 import { useNavigate } from 'react-router-dom';
+import EmptyDataPlaceholder from 'ui-component/extended/EmptyDataPlaceholder';
 
 const statusColor = (status) => {
   switch (status?.toLowerCase()) {
@@ -180,7 +181,9 @@ const MyEvents = ({ id }) => {
                 <TableBody>
                   {events.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={5} align="center">No events found</TableCell>
+                      <TableCell colSpan={5} align="center" sx={{ py: 6 }}>
+                        <EmptyDataPlaceholder title="No Events Found" subtitle="There are no events to display." />
+                      </TableCell>
                     </TableRow>
                   ) : (
                     paginatedRows.map((event) => (
