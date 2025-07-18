@@ -1,17 +1,17 @@
-import React, { useEffect, useState } from 'react';
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
-import { Typography, TextField, Grid2, Button, FormControlLabel, Checkbox, Card, Stack } from '@mui/material';
-import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
-import Factory from 'utils/Factory';
-import { useDispatch } from 'react-redux';
-import { openSnackbar } from 'store/slices/snackbar';
-import { useSearchParams } from 'react-router-dom';
+import { Button, Card, Checkbox, FormControlLabel, Grid2, Stack, TextField, Typography } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
 import Box from '@mui/material/Box';
-import RaiseRequest from '../../RaiseRequest';
-import GetActionButtons from '../../FormHelpers';
+import { useFormik } from 'formik';
+import React, { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { useSearchParams } from 'react-router-dom';
+import { openSnackbar } from 'store/slices/snackbar';
+import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
 import CircularProgressComponent from 'utils/CircularProgressComponent';
+import Factory from 'utils/Factory';
+import * as Yup from 'yup';
+import GetActionButtons from '../../FormHelpers';
+import RaiseRequest from '../../RaiseRequest';
 
 const DESIGNATION_CHOICES = [
   { value: 'partner', label: 'Partner' },
@@ -265,13 +265,13 @@ const ApplicantDetails = ({ applicantTaskId }) => {
     getApplicantDetails();
   }, []);
    if (isLoading) {
-        console.log('Loading promoter data...', isLoading);
+        // console.log('Loading promoter data...', isLoading);
         return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading promoter Data'} />;
       }
       const getLabelWithAsterisk = (label, isRequired = true) => (
   <span>
     {label}
-    {isRequired && <span style={{ color: 'red', fontSize: '1.3em' }}> *</span>}
+    {isRequired && <span style={{ color: 'red' }}> *</span>}
   </span>
 );
   const { values, handleChange, handleBlur, setFieldValue, touched, errors, handleSubmit, setValues } = formik;

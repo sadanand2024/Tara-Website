@@ -11,9 +11,18 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import { useSelector, useDispatch } from 'react-redux';
 import { openSnackbar } from 'store/slices/snackbar';
 import DraftingActionCell from './DraftingActionCell';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import SearchIcon from '@mui/icons-material/Search';
+import InputAdornment from '@mui/material/InputAdornment';
+import CircularProgressComponent from 'utils/CircularProgressComponent';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
+import Autocomplete from '@mui/material/Autocomplete';
 
 
-export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, contextId }) {
+export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, search = '' }) {
+    const { contextId } = useParams();
+
   const dispatch = useDispatch();
     const user = useSelector((state) => state.accountReducer.user);
     const { contextEventId } = useParams();
@@ -32,11 +41,48 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
     const [finalizing, setFinalizing] = useState(false);
     const [fileUrl, setFileUrl] = useState(null); // Store file URL for download
   const [favoriteStates, setFavoriteStates] = useState({});
+  const [favouriteIdMap, setFavouriteIdMap] = useState({}); // Map documentId -> favouriteId
   // Add: API call to add to favourites
   const handleToggleFavorite = async (id) => {
-    // If already favorite, just toggle local state (no API for unfavorite as per user request)
+    // If already favorite, delete via API
     if (favoriteStates[id]) {
-      setFavoriteStates((prev) => ({ ...prev, [id]: false }));
+      const favId = favouriteIdMap[id];
+      if (favId) {
+        try {
+          const result = await Factory('delete', `/documentdrafting/favourites/${favId}/`);
+          if (result.res && result.res.status_cd === 0) {
+            setFavoriteStates((prev) => ({ ...prev, [id]: false }));
+            setFavouriteIdMap((prev) => {
+              const newMap = { ...prev };
+              delete newMap[id];
+              return newMap;
+            });
+            dispatch(openSnackbar({
+              open: true,
+              message: 'Removed from favourites',
+              variant: 'alert',
+              alert: { color: 'success' },
+              close: false
+            }));
+          } else {
+            dispatch(openSnackbar({
+              open: true,
+              message: result.message || 'Failed to remove from favourites',
+              variant: 'alert',
+              alert: { color: 'error' },
+              close: false
+            }));
+          }
+        } catch (err) {
+          dispatch(openSnackbar({
+            open: true,
+            message: 'Failed to remove from favourites',
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          }));
+        }
+      }
       return;
     }
     // POST to /documentdrafting/favourites/
@@ -45,6 +91,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
       const result = await Factory('post', '/documentdrafting/favourites/', payload);
       if (result.res && result.res.status_cd === 0) {
         setFavoriteStates((prev) => ({ ...prev, [id]: true }));
+        setFavouriteIdMap((prev) => ({ ...prev, [id]: result.res.id }));
         dispatch(openSnackbar({
           open: true,
           message: 'Added to favourites',
@@ -78,15 +125,21 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
     Factory('get', `/documentdrafting/favourites/by-draft/${contextId}/`, {}, {})
       .then(response => {
         const data = response?.res?.data || response?.res || response;
-        // Build a map of { [documentId]: true }
+        // Build a map of { [documentId]: true } and { [documentId]: favouriteId }
         const favMap = {};
+        const favIdMap = {};
         (data || []).forEach(fav => {
           const docId = typeof fav.document === 'object' ? fav.document.id : fav.document;
           favMap[docId] = true;
+          favIdMap[docId] = fav.id;
         });
         setFavoriteStates(favMap);
+        setFavouriteIdMap(favIdMap);
       })
-      .catch(() => setFavoriteStates({}));
+      .catch(() => {
+        setFavoriteStates({});
+        setFavouriteIdMap({});
+      });
   }, [contextId]);
 
     useEffect(() => {
@@ -127,7 +180,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
             // No contextEventId, show document selection step
             setLoading(true);
             setError(null);
-            Factory('get', '/documentdrafting/documents/')
+            Factory('get', `/documentdrafting/documents/?draft_id=${contextId}`)
                 .then(result => {
                     if (result.res && result.res.status_cd === 0) {
                         const docs = result.res.data?.results || result.res.data || [];
@@ -191,10 +244,14 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
         setFormValues((prev) => ({ ...prev, [name]: value }));
     };
 
-    // Replace placeholders in templateHtml with formValues
+    // Replace placeholders in templateHtml with formValues or formik.values
     const renderTemplateWithValues = () => {
         let html = templateHtml;
-        Object.entries(formValues).forEach(([key, value]) => {
+        // Remove all {% ... %} blocks
+        html = html.replace(/\{\%[\s\S]*?\%\}/g, '');
+        // Use formik.values in splitView, otherwise formValues
+        const valuesToUse = splitView && formik ? formik.values : formValues;
+        Object.entries(valuesToUse).forEach(([key, value]) => {
       let displayValue = value;
       // If this key is a date field, format it
       const field = fields.find(f => f.field_name === key);
@@ -205,9 +262,9 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
           displayValue = `${dd}-${mm}-${yyyy}`;
         }
       }
-      // Wrap in highlight span
-      const highlighted = `<span style="background:rgba(54, 80, 174, 0.24); border-radius: 4px; padding: 0 4px;">${displayValue}</span>`;
-      html = html.replaceAll(new RegExp(`{{\s*${key}\s*}}`, 'g'), value ? highlighted : '');
+      // Wrap in highlight span with id for scroll sync
+      const highlighted = `<span id="preview-field-${key}" style="background:rgba(54, 80, 174, 0.24); border-radius: 4px; padding: 0 4px;">${displayValue}</span>`;
+      html = html.replaceAll(new RegExp(`\{\{\s*${key}\s*\}\}`, 'g'), value ? highlighted : '');
     });
     // Extract and scope <style> tags from the HTML
         let scopedStyles = '';
@@ -271,6 +328,46 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
 
     // Save Draft handler
     const handleSaveDraft = async () => {
+        // Build a validation schema that ignores is_required, only checks metadata validations
+        const draftValidationShape = {};
+        fields.forEach(field => {
+          let validator = Yup.string();
+          if (field.metadata && field.metadata.validations && field.metadata.validations.regex) {
+            validator = validator
+              .notRequired()
+              .test(
+                'matches-regex-if-not-empty',
+                field.metadata.validations.error_message || 'Invalid value',
+                value => {
+                  if (!value) return true; // allow empty
+                  return new RegExp(field.metadata.validations.regex).test(value);
+                }
+              );
+          }
+          draftValidationShape[field.field_name] = validator;
+        });
+        const draftValidationSchema = Yup.object().shape(draftValidationShape);
+        try {
+          await draftValidationSchema.validate(formik.values, { abortEarly: false });
+        } catch (validationError) {
+          // Only mark fields with metadata validations as touched and set errors
+          const errors = {};
+          const touched = {};
+          validationError.inner.forEach(err => {
+            errors[err.path] = err.message;
+            touched[err.path] = true;
+          });
+          formik.setTouched(touched);
+          formik.setErrors(errors);
+          dispatch(openSnackbar({
+            open: true,
+            message: 'Please fix the highlighted fields with format errors before saving draft.',
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          }));
+          return; // Do not save if not valid
+        }
         if (!contextEventId) {
       dispatch(openSnackbar({
         open: true,
@@ -279,31 +376,20 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
         alert: { color: 'error' },
         close: false
       }));
-      return;
-    }
-    // Check if all fields are filled
-    const emptyField = (fields || []).find(f => !formValues[f.field_name] || String(formValues[f.field_name]).trim() === '');
-    if (emptyField) {
-      dispatch(openSnackbar({
-        open: true,
-        message: `Please fill all fields before saving. Missing: ${emptyField.label || emptyField.field_name}`,
-        variant: 'alert',
-        alert: { color: 'error' },
-        close: false
-      }));
             return;
         }
         setSavingDraft(true);
-    // Format all date fields before sending
-    const formattedFormValues = { ...formValues };
-    fields.forEach(field => {
-      if (field.field_type === 'date' && formattedFormValues[field.field_name]) {
-        formattedFormValues[field.field_name] = formatDateToDDMMYYYY(formattedFormValues[field.field_name]);
-      }
-    });
+  // Format all date fields before sending
+  const formattedFormValues = { ...formik.values };
+  fields.forEach(field => {
+    if (field.field_type === 'date' && formattedFormValues[field.field_name]) {
+      formattedFormValues[field.field_name] = formatDateToDDMMYYYY(formattedFormValues[field.field_name]);
+    }
+  });
         const payload = {
             draft: contextEventId,
-      draft_data: formattedFormValues,
+    draft_data: formattedFormValues,
+            file_name: formik.values.file_name,
             status: 'draft'
         };
         try {
@@ -317,21 +403,21 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
                     } else {
                         fetchAndSetFileUrl(result.res.id);
                     }
-          dispatch(openSnackbar({
-            open: true,
-            message: 'Draft saved successfully',
-            variant: 'alert',
-            alert: { color: 'success' },
-            close: false
-          }));
+        dispatch(openSnackbar({
+          open: true,
+          message: 'Draft saved successfully',
+          variant: 'alert',
+          alert: { color: 'success' },
+          close: false
+        }));
                 } else {
-          dispatch(openSnackbar({
-            open: true,
-            message: result.message || 'Failed to save draft',
-            variant: 'alert',
-            alert: { color: 'error' },
-            close: false
-          }));
+        dispatch(openSnackbar({
+          open: true,
+          message: result.message || 'Failed to save draft',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        }));
                 }
             } else {
                 // Subsequent: PUT
@@ -342,37 +428,75 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
                     } else {
                         fetchAndSetFileUrl(draftDetailId);
                     }
-          dispatch(openSnackbar({
-            open: true,
-            message: 'Draft updated successfully',
-            variant: 'alert',
-            alert: { color: 'success' },
-            close: false
-          }));
+        dispatch(openSnackbar({
+          open: true,
+          message: 'Draft updated successfully',
+          variant: 'alert',
+          alert: { color: 'success' },
+          close: false
+        }));
                 } else {
-          dispatch(openSnackbar({
-            open: true,
-            message: result.message || 'Failed to update draft',
-            variant: 'alert',
-            alert: { color: 'error' },
-            close: false
-          }));
+        dispatch(openSnackbar({
+          open: true,
+          message: result.message || 'Failed to update draft',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        }));
                 }
             }
         } catch (err) {
-      dispatch(openSnackbar({
-        open: true,
-        message: 'Failed to save draft',
-        variant: 'alert',
-        alert: { color: 'error' },
-        close: false
-      }));
+    dispatch(openSnackbar({
+      open: true,
+      message: 'Failed to save draft',
+      variant: 'alert',
+      alert: { color: 'error' },
+      close: false
+    }));
         }
         setSavingDraft(false);
     };
 
     // Finalize handler
     const handleFinalize = async () => {
+        // Build a validation schema that checks both is_required and metadata validations
+        const finalizeValidationShape = {};
+        fields.forEach(field => {
+          let validator = Yup.string();
+          if (field.is_required) {
+            validator = validator.required(`${field.label || field.field_name} is required`);
+          }
+          if (field.metadata && field.metadata.validations && field.metadata.validations.regex) {
+            validator = validator.matches(
+              new RegExp(field.metadata.validations.regex),
+              field.metadata.validations.error_message || 'Invalid value'
+            );
+          }
+          finalizeValidationShape[field.field_name] = validator;
+        });
+        const finalizeValidationSchema = Yup.object().shape(finalizeValidationShape);
+        try {
+          await finalizeValidationSchema.validate(formik.values, { abortEarly: false });
+        } catch (validationError) {
+          // Mark only relevant fields as touched and set errors
+          const errors = {};
+          const touched = {};
+          validationError.inner.forEach(err => {
+            errors[err.path] = err.message;
+            touched[err.path] = true;
+          });
+          formik.setTouched(touched);
+          formik.setErrors(errors);
+          dispatch(openSnackbar({
+            open: true,
+            message: 'Please fill all required fields and fix format errors before finalizing.',
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          }));
+          setFinalizing(false);
+          return; // Do not finalize if not valid
+        }
         if (!contextEventId) {
       dispatch(openSnackbar({
         open: true,
@@ -383,12 +507,12 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
       }));
       return;
     }
-    // Check if all fields are filled
-    const emptyFieldFinalize = (fields || []).find(f => !formValues[f.field_name] || String(formValues[f.field_name]).trim() === '');
+    // Only check required fields
+    const emptyFieldFinalize = (fields || []).find(f => f.is_required && (!formik.values[f.field_name] || String(formik.values[f.field_name]).trim() === ''));
     if (emptyFieldFinalize) {
       dispatch(openSnackbar({
         open: true,
-        message: `Please fill all fields before finalizing. Missing: ${emptyFieldFinalize.label || emptyFieldFinalize.field_name}`,
+        message: `Please fill all required fields before finalizing. Missing: ${emptyFieldFinalize.label || emptyFieldFinalize.field_name}`,
         variant: 'alert',
         alert: { color: 'error' },
         close: false
@@ -397,7 +521,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
         }
         setFinalizing(true);
     // Format all date fields before sending
-    const formattedFormValues = { ...formValues };
+    const formattedFormValues = { ...formik.values };
     fields.forEach(field => {
       if (field.field_type === 'date' && formattedFormValues[field.field_name]) {
         formattedFormValues[field.field_name] = formatDateToDDMMYYYY(formattedFormValues[field.field_name]);
@@ -406,7 +530,8 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
         const payload = {
             draft: contextEventId,
       draft_data: formattedFormValues,
-            status: 'completed'
+            file_name: formik.values.file_name,
+            status: 'completed',
         };
         try {
             if (!draftDetailId) {
@@ -522,20 +647,21 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
 
     // Reset All handler
     const handleResetAll = () => {
-        // Reset all form fields to empty
+        // Reset all form fields to empty using formik
         const resetValues = (fields || []).reduce((acc, field) => {
             acc[field.field_name] = '';
             return acc;
-        }, {});
+        }, { file_name: '' });
+        formik.resetForm({ values: resetValues });
         setFormValues(resetValues);
-    dispatch(openSnackbar({
-      open: true,
-      message: 'All fields reset',
-      variant: 'alert',
-      alert: { color: 'success' },
-      close: false
-    }));
-  };
+        dispatch(openSnackbar({
+          open: true,
+          message: 'All fields reset',
+          variant: 'alert',
+          alert: { color: 'success' },
+          close: false
+        }));
+    };
 
   const handleDeleteDocument = async (row) => {
     if (!row?.id) return;
@@ -575,12 +701,58 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
     }
     };
 
+    // Always build formik, but use empty fields/validation if not splitView
+    const dynamicFields = splitView ? (fields || []) : [];
+    const initialValues = { file_name: '' };
+    const validationShape = {};
+    if (splitView) {
+      initialValues.file_name = formValues.file_name || '';
+    }
+    dynamicFields.forEach(field => {
+      let value = formValues[field.field_name] || '';
+      if (field.field_type === 'date' && value) {
+        // Convert DD-MM-YYYY to YYYY-MM-DD if needed
+        if (/^\d{2}-\d{2}-\d{4}$/.test(value)) {
+          const [dd, mm, yyyy] = value.split('-');
+          value = `${yyyy}-${mm}-${dd}`;
+        }
+        // If already YYYY-MM-DD, keep as is
+      }
+      initialValues[field.field_name] = value;
+      let validator = Yup.string();
+      if (field.is_required) {
+        validator = validator.required(`${field.label || field.field_name} is required`);
+      }
+      if (field.metadata && field.metadata.validations && field.metadata.validations.regex) {
+        validator = validator.matches(
+          new RegExp(field.metadata.validations.regex),
+          field.metadata.validations.error_message || 'Invalid value'
+        );
+      }
+      validationShape[field.field_name] = validator;
+    });
+    // Do NOT add file_name to validationShape
+    const validationSchema = Yup.object().shape(validationShape);
+    const formik = useFormik({
+      initialValues,
+      enableReinitialize: true,
+      validationSchema,
+      onSubmit: (values) => {
+        setFormValues(values);
+      },
+    });
+
+    // Add a ref for the preview container at the top of the component
+    const previewContainerRef = React.useRef(null);
+    // At the top of the component
+    const previewContentRef = React.useRef(null);
+
     if (splitView) {
         // Only render the split view, no header/tabs, with a full white background
         return (
             <Box
                 sx={{
-        p: { xs: 1.5, sm: 2, md: 4 },
+        p: { xs: 2, sm: 2, md: 4 },
         minHeight: '100vh',
         width: '100%',
         boxSizing: 'border-box',
@@ -604,13 +776,13 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
             }}
             > 
           {/* Left: Dynamic Form */}
-          <Paper elevation={2} sx={{flex: 1, minWidth: { xs: '100%', sm: 320, md: 400 }, maxWidth: 700, height: 585, maxHeight: 1000, display: 'flex', flexDirection: 'column', pb: 2, mr: 2, overflow: 'hidden' }}>
+          <Paper elevation={2} sx={{flex: 1, minWidth: { xs: '100%', sm: 320, md: 400 }, maxWidth: 400, height: 585, maxHeight: 1000, display: 'flex', flexDirection: 'column', pb: 2, mr: 0, overflow: 'hidden' }}>
             {/* Progress Bar */}
             {fields.length > 0 && (
               <Box sx={{ width: '100%', mb: 2, position: 'relative' }}>
                 {(() => {
                   const totalFields = fields.length;
-                  const filledFields = fields.filter(f => formValues[f.field_name] && String(formValues[f.field_name]).trim() !== '').length;
+                  const filledFields = fields.filter(f => formik.values[f.field_name] && String(formik.values[f.field_name]).trim() !== '').length;
                   const progress = totalFields > 0 ? (filledFields / totalFields) * 100 : 0;
                   return <>
                     <LinearProgress
@@ -637,50 +809,100 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
             <Box sx={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
               <ScrollableCard showArrows>
                 <Box sx={{ p: 2.5, pb: 2 }}>
-                        {(fields || []).length > 0 ? (
+                  <form onSubmit={formik.handleSubmit} autoComplete="off">
                     <Grid2 container spacing={2}>
-                      {fields.map((field, idx) => (
-                        <Grid2 size={{xs:12,md:6}} key={field.field_name}>
+                      <Grid2 size={{xs:12}}>
+                        <TextField
+                          fullWidth
+                          label="Enter document name"
+                          name="file_name"
+                          value={formik.values.file_name || ''}
+                          onChange={formik.handleChange}
+                          onBlur={formik.handleBlur}
+                          error={formik.touched.file_name && Boolean(formik.errors.file_name)}
+                          helperText={formik.touched.file_name && formik.errors.file_name}
+                          variant="outlined"
+                          slotProps={{ inputLabel: { shrink: true } }}
+                        />
+                      </Grid2>
+                      {(fields || []).length > 0 ? (
+                        <Grid2 container spacing={2}>
+                          {fields.map((field, idx) => (
+                            <Grid2 size={{xs:12}} key={field.field_name}>
+                              {/* Render Autocomplete if field_type is select and metadata.options exists */}
+                              {field.field_type === 'select' && field.metadata && Array.isArray(field.metadata.options) ? (
+                                <Autocomplete
+                                  fullWidth
+                                  options={field.metadata.options}
+                                  value={formik.values[field.field_name] || ''}
+                                  onChange={(_, value) => {
+                                    formik.setFieldValue(field.field_name, value);
+                                    setTimeout(() => {
+                                      const el = document.getElementById(`preview-field-${field.field_name}`);
+                                      const container = previewContentRef.current;
+                                      if (el && container) {
+                                        const elRect = el.getBoundingClientRect();
+                                        const containerRect = container.getBoundingClientRect();
+                                        const scrollTop = container.scrollTop + (elRect.top - containerRect.top) - container.clientHeight / 2 + el.offsetHeight / 2;
+                                        container.scrollTo({ top: scrollTop, behavior: 'smooth' });
+                                      }
+                                    }, 0);
+                                  }}
+                                  onBlur={formik.handleBlur}
+                                  renderInput={(params) => (
                                     <TextField
-                                        fullWidth
-                                        label={field.label || field.field_name}
-                                        value={formValues[field.field_name] || ''}
-                                        onChange={e => handleFormChange(field.field_name, e.target.value)}
-                                        type={field.field_type || 'text'}
-                                        variant="outlined"
-                            slotProps={{ inputLabel: { shrink: true } }}
-                            placeholder={field.placeholder || (field.field_type === 'date' ? 'DD-MM-YYYY' : '')}
-                            sx={
-                              field.field_type === 'date'
-                                ? {
-                                    backgroundColor: '#f7f9fb',
-                                    '& .MuiOutlinedInput-root': {
-                                      backgroundColor: '#f7f9fb',
-                                      borderRadius: '24px',
-                                      '& input::placeholder': {
-                                        color: '#b0b8c4',
-                                        opacity: 1,
-                                        fontWeight: 600,
-                                        fontSize: 32,
-                                        textAlign: 'center',
-                                      },
-                                    },
-                                  }
-                                : {}
-                            }
-                          />
+                                      {...params}
+                                      label={field.label || field.field_name}
+                                      name={field.field_name}
+                                      error={formik.touched[field.field_name] && Boolean(formik.errors[field.field_name])}
+                                      helperText={formik.touched[field.field_name] && formik.errors[field.field_name]}
+                                      variant="outlined"
+                                      slotProps={{ inputLabel: { shrink: true } }}
+                                    />
+                                  )}
+                                />
+                              ) : (
+                                <TextField
+                                  fullWidth
+                                  label={field.label || field.field_name}
+                                  name={field.field_name}
+                                  value={formik.values[field.field_name] || ''}
+                                  onChange={e => {
+                                    formik.handleChange(e);
+                                    setTimeout(() => {
+                                      const el = document.getElementById(`preview-field-${field.field_name}`);
+                                      const container = previewContentRef.current;
+                                      if (el && container) {
+                                        const elRect = el.getBoundingClientRect();
+                                        const containerRect = container.getBoundingClientRect();
+                                        const scrollTop = container.scrollTop + (elRect.top - containerRect.top) - container.clientHeight / 2 + el.offsetHeight / 2;
+                                        container.scrollTo({ top: scrollTop, behavior: 'smooth' });
+                                      }
+                                    }, 0);
+                                  }}
+                                  onBlur={formik.handleBlur}
+                                  error={formik.touched[field.field_name] && Boolean(formik.errors[field.field_name])}
+                                  helperText={formik.touched[field.field_name] && formik.errors[field.field_name]}
+                                  type={field.field_type || 'text'}
+                                  variant="outlined"
+                                  slotProps={{ inputLabel: { shrink: true } }}
+                                  placeholder={field.placeholder || (field.field_type === 'date' ? 'DD-MM-YYYY' : '')}
+                                />
+                              )}
+                            </Grid2>
+                          ))}
                         </Grid2>
-                      ))}
+                      ) : (
+                        <Typography>No fields to fill.</Typography>
+                      )}
                     </Grid2>
-                        ) : (
-                            <Typography>No fields to fill.</Typography>
-                        )}
+                  </form>
                 </Box>
-                    </ScrollableCard>
+              </ScrollableCard>
             </Box>
-                </Paper>
+          </Paper>
           {/* Right: Live Template Preview */}
-          <Paper elevation={2} sx={{ position: 'relative', flex: 1, minWidth: { xs: '100%', sm: 320, md: 400 }, maxWidth: 700, height: 585, maxHeight: 1000, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          <Paper elevation={2} sx={{ position: 'relative', flex: 1, minWidth: { xs: '100%', sm: 320, md: 400 }, maxWidth: 900, height: 585, maxHeight: 1000, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
             {/* Progress Bar (same as left) */}
             {fields.length > 0 && (
               <Box sx={{ width: '100%', mb: 2, position: 'relative' }}>
@@ -713,12 +935,12 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
               return (
                 <ScrollableCard showArrows containerRef={templateBoxRef}>
                   <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-                    <Typography variant="h5" fontWeight={700} mb={2} sx={{ p: 2, pb: 0 }}>Document Preview</Typography>
+                    <Typography variant="h5" fontWeight={700} mb={2} sx={{ pl: 3, pt: 2 }}>Document Preview</Typography>
                     <Box
-                      ref={templateBoxRef}
+                      ref={previewContentRef}
                         sx={{
                         flex: 1,
-                        p: 0,
+                        p: 1,
                         height: '100%',
                         maxHeight: 500,
                         overflow: 'auto',
@@ -770,13 +992,74 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
             </Box>
 
         {/* Action Buttons: Back at left, others at right */}
-        <Box sx={{ display: 'flex', gap: 2, mt: 6, justifyContent: 'space-between', alignItems: 'center' }}>
-          <Button variant="outlined" sx={{ height: 40, minWidth: 120, fontSize: 16, px: 3, py: 0, borderColor: '#00329E', color: '#00329E', '&:hover': { borderColor: '#00329E', background: 'rgba(0,50,158,0.04)' } }} onClick={() => navigate('/app/drafting', { state: { showEvent: true, eventInitialTab: 'document' } })}>{'< Back'}</Button>
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <Button variant="contained" color="primary" sx={{ height: 40, minWidth: 120, fontSize: 16, px: 3, py: 0, background: '#00329E', color: '#fff', '&:hover': { background: '#002266' } }} onClick={handleSaveDraft} disabled={savingDraft}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: { xs: 'column', sm: 'row' },
+            gap: 2,
+            mt: 6,
+            justifyContent: { xs: 'center', sm: 'space-between' },
+            alignItems: { xs: 'stretch', sm: 'center' },
+          }}
+        >
+          <Button
+            variant="outlined"
+            sx={{
+              height: 40,
+              minWidth: 120,
+              fontSize: 16,
+              px: 3,
+              py: 0,
+              borderColor: '#00329E',
+              color: '#00329E',
+              width: { xs: '100%', sm: 'auto' },
+              mb: { xs: 1, sm: 0 },
+              '&:hover': { borderColor: '#00329E', background: 'rgba(0,50,158,0.04)' },
+            }}
+            startIcon={<ArrowBackIcon />}
+            onClick={() => navigate(`/app/drafting`)}
+          >
+            {'Back to Dashboard'}
+          </Button>
+          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, width: { xs: '100%', sm: 'auto' } }}>
+            <Button
+              variant="contained"
+              color="primary"
+              sx={{
+                height: 40,
+                minWidth: 120,
+                fontSize: 16,
+                px: 3,
+                py: 0,
+                background: '#00329E',
+                color: '#fff',
+                width: { xs: '100%', sm: 'auto' },
+                mb: { xs: 1, sm: 0 },
+                '&:hover': { background: '#002266' },
+              }}
+              onClick={handleSaveDraft}
+              disabled={savingDraft}
+            >
               {savingDraft ? 'Saving...' : 'Save Draft'}
             </Button>
-            <Button variant="contained" color="primary" sx={{ height: 40, minWidth: 120, fontSize: 16, px: 3, py: 0, background: '#00329E', color: '#fff', '&:hover': { background: '#002266' } }} onClick={handleFinalize} disabled={finalizing}>
+            <Button
+              variant="contained"
+              color="primary"
+              sx={{
+                height: 40,
+                minWidth: 120,
+                fontSize: 16,
+                px: 3,
+                py: 0,
+                background: '#00329E',
+                color: '#fff',
+                width: { xs: '100%', sm: 'auto' },
+                mb: { xs: 1, sm: 0 },
+                '&:hover': { background: '#002266' },
+              }}
+              onClick={handleFinalize}
+              disabled={finalizing}
+            >
               {finalizing ? 'Finalizing...' : 'Finalize'}
             </Button>
             <Button
@@ -788,11 +1071,13 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
                 fontSize: 16,
                 px: 3,
                 py: 0,
-                background: '#00329E',
+                background: fileUrl ? '#00329E' : '#b0b8c4',
                 color: '#fff',
-                '&:hover': { background: '#002266' },
+                width: { xs: '100%', sm: 'auto' },
+                mb: { xs: 1, sm: 0 },
+                '&:hover': { background: fileUrl ? '#002266' : '#b0b8c4' },
                 '&.Mui-disabled': {
-                  backgroundColor: '#00329E',
+                  backgroundColor: '#b0b8c4',
                   color: '#fff',
                   opacity: 1,
                 },
@@ -802,7 +1087,25 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
             >
               Download
             </Button>
-            <Button variant="outlined" color="primary" sx={{ height: 40, minWidth: 120, fontSize: 16, px: 3, py: 0, borderColor: '#00329E', color: '#00329E', '&:hover': { borderColor: '#00329E', background: 'rgba(0,50,158,0.04)' } }} onClick={handleResetAll}>Reset All</Button>
+            <Button
+              variant="outlined"
+              color="primary"
+              sx={{
+                height: 40,
+                minWidth: 120,
+                fontSize: 16,
+                px: 3,
+                py: 0,
+                borderColor: '#00329E',
+                color: '#00329E',
+                width: { xs: '100%', sm: 'auto' },
+                mb: { xs: 1, sm: 0 },
+                '&:hover': { borderColor: '#00329E', background: 'rgba(0,50,158,0.04)' },
+              }}
+              onClick={handleResetAll}
+            >
+              Reset All
+            </Button>
           </Box>
         </Box>
       
@@ -810,67 +1113,82 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
         );
     }
 
+    // Filter templates by search string (case-insensitive, title or description)
+    const filteredTemplates = (templates || []).filter(template => {
+      if (!search) return true;
+      const s = search.toLowerCase();
+      return (
+        (template.document_name && template.document_name.toLowerCase().includes(s)) ||
+        (template.title && template.title.toLowerCase().includes(s)) ||
+        (template.file_name && template.file_name.toLowerCase().includes(s)) ||
+        (template.description && template.description.toLowerCase().includes(s))
+      );
+    });
+
+    // Debug log
+    console.log('DocumentSelectionPage search:', search, 'filteredTemplates:', filteredTemplates.length);
+
     return (
     <Box sx={{ p: { xs: 2, md: 4 } }}>
+      {/* Top Row: Heading and Search - removed, now handled by parent */}
       {/* Document Cards Grid */}
       {loading ? (
-                <Box sx={{ textAlign: 'center', my: 4 }}>Loading templates...</Box>
-            ) : error ? (
-                <Box sx={{ textAlign: 'center', color: 'red', my: 4 }}>{error}</Box>
-            ) : (
-        <Grid2 container spacing={3} sx={{ mb: 4, maxWidth: 1200, mx: 'auto' }} justifyContent="flex-start">
-                    {(templates || []).map((template) => (
-              <Grid2 size={{xs:12,sm:6,md:4}} key={template.id}>
-                            <Paper
-                //   sx={{
-                //     background: '#fff',
-                //     border: '1.5px solid #e3eafe',
-                //     borderRadius: 3,
-                //     p: 3,
-                //     minWidth: 350,
-                //     maxWidth: 350,
-                //     minHeight: 180,
-                //     maxHeight: 180,
-                //     boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
-                //     position: 'relative',
-                //     transition: 'border 0.2s, box-shadow 0.2s',
-                //     cursor: 'pointer',
-                //     display: 'flex',
-                //     flexDirection: 'column',
-                //     alignItems: 'center',
-                //     justifyContent: 'center',
-                //     textAlign: 'center',
-                //     '&:hover': {
-                //       border: '2px solid #2563eb',
-                //       boxShadow: '0 4px 16px rgba(37,99,235,0.08)',
-                //       background: '#f5faff',
-                //     },
-                //   }}
-                                sx={{
-                                    border: '1.5px solid #b0b8c4',
-                                    borderRadius: 3,
-                                    p: 3,
-                                    minWidth: 350,
-                                    maxWidth: 350,
-                    minHeight: 180,
-                    maxHeight: 180,
-                                    boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
-                                    position: 'relative',
+        <Box
+          sx={{
+            borderRadius: 3,
+            p: 4,
+            background: '#fff',
+            minHeight: 300,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <CircularProgressComponent isLoading displayContent={'Loading Templates...'} />
+        </Box>
+      ) : error ? (
+        <Box sx={{ textAlign: 'center', color: 'red', my: 4 }}>{error}</Box>
+      ) : (
+        <>
+          {/* Responsive Card Grid */}
+          <Grid2 container spacing={{ xs: 2, sm: 4, md: 6 }} sx={{ mb: 4, width: '100%', mx: 'auto', }} alignItems="flex-start" justifyContent="flex-start">
+            {filteredTemplates.map((template) => (
+              <Grid2 size={{ xs: 12, sm: 6, md: 3 }} key={template.id} sx={{ mb: { xs: 2, md: 0 } }}>
+                <Paper
+                  sx={{
+                    border: '1.5px solid #b0b8c4',
+                    borderRadius: 3,
+                    pl: { xs: 2, sm: 2.5 },
+                    pr: { xs: 2, sm: 2.5 },
+                    pt: { xs: 2, sm: 2.5 },
+                    pb: { xs: 2, sm: 2.5 },
+                
+                    ml: {xs:0,md:-2},
+                
+                    width: { xs: '110%', sm: '100%',md:'110%' },
+                    
+                    minWidth: { xs: '100%', sm: 220, md: '110%' },
+                    maxWidth: { xs: '100%', sm: 400,md:'110%' },
+                    minHeight: { xs: 120, sm: 180 },
+                    maxHeight: { xs: 180, sm: 180 },
+                    height: { xs: 140, sm: 180 },
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
+                    position: 'relative',
                     transition: 'border 0.2s, box-shadow 0.2s, transform 0.2s',
                     cursor: 'pointer',
-                                    display: 'flex',
-                                    flexDirection: 'column',
+                    display: 'flex',
+                    flexDirection: 'column',
                     justifyContent: 'space-between',
+                    alignItems: 'stretch',
                     '&:hover': {
                       border: '1.5px solid #00329E',
                       boxShadow: '0 6px 24px rgba(2, 78, 153, 0.15)',
                       transform: 'scale(1.03)',
                       zIndex: 2,
                     },
+                    mr: { xs: 0, sm: 2, md: 3 },
                   }}
-
-
-              >
+                >
                   {/* Love (heart) icon at top right */}
                   <Box
                     sx={{
@@ -888,46 +1206,67 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, co
                     }}
                   >
                     {favoriteStates[template.id] ? (
-                      <FavoriteIcon sx={{ fontSize: 25 }} />
+                      <FavoriteIcon sx={{ fontSize: 23 }} />
                     ) : (
-                      <FavoriteBorderIcon sx={{ fontSize: 25 }} />
+                      <FavoriteBorderIcon sx={{ fontSize: 23 }} />
                     )}
                   </Box>
-                                <Typography fontWeight={700} fontSize={18} mb={1}>
-                                    {template.title || template.document_name}
-                                </Typography>
-                  <Typography fontSize={15} color="text.secondary" sx={{ flex: 1 }}>
-                                    {template.description}
-                                </Typography>
-                                <Button
-                    variant="outlined"
-                                    endIcon={<ArrowForwardIcon />}
-                                    sx={{
-                      height: 30,
-                      minWidth: 100,
-                      fontSize: 14,
-                      fontWeight: 600,
-                                        borderRadius: 2,
-                      mt: 2,
-                      alignSelf: 'flex-end',
-                      borderColor: '#00329E',
-                      color: '#00329E',
-                      px: 2,
-                      '&:hover': {
+                  {/* Content (heading + paragraph) */}
+                  <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', minHeight: 0 }}>
+                    <Box
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: 14,
+                        width:'95%',
+                        mb: 0.5,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                        lineHeight: 1.2,
+                        minHeight: '2.6em',
+                      }}
+                      title={template.document_name || template.title || template.file_name}
+                    >
+                      {template.document_name || template.title || template.file_name}
+                    </Box>
+                    <Typography fontSize={14} color="text.secondary">
+                      {template.description}
+                    </Typography>
+                  </Box>
+                  {/* Proceed button pinned to bottom */}
+                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+                    <Button
+                      variant="outlined"
+                      endIcon={<ArrowForwardIcon />}
+                      sx={{
+                        height: 30,
+                        minWidth: 100,
+                        fontSize: 14,
+                        fontWeight: 600,
+                        borderRadius: 2,
+                        alignSelf: 'flex-end',
                         borderColor: '#00329E',
-                        background: 'rgba(0,50,158,0.04)'
-                      }
-                                    }}
-                                    onClick={() => handleCardProceed(template.id)}
-                                >
-                                    Proceed
-                                </Button>
-                            </Paper>
-            </Grid2>
-                    ))}
-        </Grid2>
+                        color: '#00329E',
+                        px: 2,
+                        '&:hover': {
+                          borderColor: '#00329E',
+                          background: 'rgba(0,50,158,0.04)'
+                        }
+                      }}
+                      onClick={() => handleCardProceed(template.id)}
+                    >
+                      Proceed
+                    </Button>
+                  </Box>
+                </Paper>
+              </Grid2>
+            ))}
+          </Grid2>
+        </>
       )}
-        </Box>
+    </Box>
     );
 }
 
@@ -1030,5 +1369,6 @@ function ScrollableCard({ children, showArrows, containerRef: externalRef }) {
                 </Box>
             )}
         </Box>
+    
     );
 } 

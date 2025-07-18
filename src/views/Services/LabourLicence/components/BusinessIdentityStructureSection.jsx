@@ -1,19 +1,17 @@
-import React, { useEffect, useState } from 'react';
-import { Box, Typography, TextField, Grid2, Autocomplete, Button, Card, Stack } from '@mui/material';
+import { Autocomplete, Box, Button, Card, Grid2, Stack, TextField, Typography } from '@mui/material';
 import { useFormik } from 'formik';
-import * as Yup from 'yup';
+import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { openSnackbar } from 'store/slices/snackbar';
-import Factory from 'utils/Factory';
 import { useSearchParams } from 'react-router-dom';
+import { openSnackbar } from 'store/slices/snackbar';
 import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
-import DeleteIcon from '@mui/icons-material/Delete';
-import DownloadIcon from '@mui/icons-material/Download';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import RaiseRequest from '../../RaiseRequest';
-import GetActionButtons from '../../FormHelpers';
 import CircularProgressComponent from 'utils/CircularProgressComponent';
 import { industries } from 'utils/industries';
+import Factory from 'utils/Factory';
+import * as Yup from 'yup';
+import GetActionButtons from '../../FormHelpers';
+import RaiseRequest from '../../RaiseRequest';
+
 
 const typeOfBusinessOptions = [
   'Proprietorship',
@@ -95,6 +93,12 @@ const BusinessIdentityStructureSection = ({ taskId }) => {
   const [businessInfo, setBusinessInfo] = useState({
     taskId: null
   });
+  const [personsEmployed, setPersonsEmployed] = useState({
+    male: '',
+    female: '',
+    others: '',
+    total: ''
+  });
 
   const formik = useFormik({
     initialValues: {
@@ -168,7 +172,9 @@ const BusinessIdentityStructureSection = ({ taskId }) => {
   const getLabelWithAsterisk = (label, isRequired = true) => (
     <span>
       {label}
-      {isRequired && <span style={{ color: 'red', fontSize: '1.3em' }}> *</span>}
+
+      {isRequired && <span style={{ color: 'red' }}> *</span>}
+
     </span>
   );
   const renderField = (field) => {
@@ -341,6 +347,70 @@ const BusinessIdentityStructureSection = ({ taskId }) => {
               {renderField(field)}
             </Grid2>
           ))}
+          <Grid2 item xs={12} sx={{ maxWidth: 'none', width: '100%' }}>
+            <Typography variant="subtitle1" mb={1}>
+              {getLabelWithAsterisk('Number of persons employed')}
+            </Typography>
+            <Box display="flex" gap={2}>
+              <TextField
+                label="Male"
+                type="number"
+                size="small"
+                value={personsEmployed.male}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/[^0-9]/g, '');
+                  setPersonsEmployed((pe) => ({
+                    ...pe,
+                    male: val,
+                    total: String(Number(val || 0) + Number(pe.female || 0) + Number(pe.others || 0))
+                  }));
+                }}
+                sx={{ flex: 1 }}
+                InputLabelProps={{ shrink: true }}
+              />
+              <TextField
+                label="Female"
+                type="number"
+                size="small"
+                value={personsEmployed.female}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/[^0-9]/g, '');
+                  setPersonsEmployed((pe) => ({
+                    ...pe,
+                    female: val,
+                    total: String(Number(pe.male || 0) + Number(val || 0) + Number(pe.others || 0))
+                  }));
+                }}
+                sx={{ flex: 1 }}
+                InputLabelProps={{ shrink: true }}
+              />
+              <TextField
+                label="Others"
+                type="number"
+                size="small"
+                value={personsEmployed.others}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/[^0-9]/g, '');
+                  setPersonsEmployed((pe) => ({
+                    ...pe,
+                    others: val,
+                    total: String(Number(pe.male || 0) + Number(pe.female || 0) + Number(val || 0))
+                  }));
+                }}
+                sx={{ flex: 1 }}
+                InputLabelProps={{ shrink: true }}
+              />
+              <TextField
+                label="Total"
+                type="number"
+                size="small"
+                value={personsEmployed.total}
+                InputProps={{ readOnly: true }}
+                sx={{ flex: 1 }}
+                InputLabelProps={{ shrink: true }}
+              />
+            </Box>
+          </Grid2>
         </Grid2>
         <Stack direction="row" spacing={1} sx={{ mt: 3, justifyContent: 'flex-end' }}>
           <Button variant="contained" color="primary" type="submit">

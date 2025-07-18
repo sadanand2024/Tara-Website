@@ -17,8 +17,8 @@ import DesignationDialog from '../DesignationDialog';
 const employeeFields = [
   { name: 'first_name', label: 'First Name', required: true },
   { name: 'middle_name', label: 'Middle Name', required: false },
-  { name: 'last_name', label: 'Last Name', required: false },
-  { name: 'associate_id', label: 'Employee ID', required: false },
+  { name: 'last_name', label: 'Last Name', required:true },
+  { name: 'associate_id', label: 'Employee ID', required:true },
   { name: 'doj', label: 'Date of Joining', required: true },
   { name: 'work_email', label: 'Work Email', required: true },
   { name: 'mobile_number', label: 'Mobile Number', required: false },
@@ -76,9 +76,9 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
     associate_id: Yup.string().required('Employee ID is required'),
     doj: Yup.date().required('Date of Joining is required'),
     work_email: Yup.string().email('Invalid email format').required('Work Email is required'),
-    mobile_number: Yup.string()
-      .required('Mobile Number is required')
-      .matches(/^[0-9]{10}$/, 'Mobile Number must be exactly 10 digits'),
+    // mobile_number: Yup.string()
+    //   .required('Mobile Number is required')
+    //   .matches(/^[0-9]{10}$/, 'Mobile Number must be exactly 10 digits'),
     gender: Yup.string().required('Gender is required'),
     work_location: Yup.string().required('Work Location is required'),
     designation: Yup.string().required('Designation is required'),

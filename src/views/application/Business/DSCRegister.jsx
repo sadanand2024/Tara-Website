@@ -64,7 +64,7 @@ const fields = [
   { name: 'location', label: 'Location', type: 'text' }
 ];
 
-const DSCRegister = ({ handleBack, handleNext }) => {
+const DSCRegister = ({ handleBack, handleNext, tabval }) => {
   const [dscList, setDscList] = useState([]);
   const [open, setOpen] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
@@ -512,11 +512,6 @@ const DSCRegister = ({ handleBack, handleNext }) => {
         <Button startIcon={<ArrowBackIcon />} variant="outlined" onClick={handleBack}>
           Back
         </Button>
-        <Stack direction="row" spacing={2}>
-          <Button variant="contained" onClick={handleNext}>
-            Next
-          </Button>
-        </Stack>
       </Box>
     </MainCard>
   );

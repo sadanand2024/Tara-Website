@@ -215,15 +215,11 @@ const MainRoutes = {
       element: <ManageTasks />
     },
     {
-      path: '/app/drafting',
+      path: '/app/drafting/:tab?/:contextId?',
       element: <DocumentDrafting />
     },
     {
-      path: '/app/event',
-      element: <Event />
-    },
-    {
-      path: '/app/selected-event/:eventInstanceId',
+      path: '/app/drafting/selected-event/:eventInstanceId',
       element: <SelectedEvent />
     },
 
@@ -316,6 +312,14 @@ const MainRoutes = {
     {
       path: '/app/invoice/editInvoice',
       element: <EditInvoice />
+    },
+    {
+      path: '/app/document-selection/:contextId',
+      element: <DocumentSelectionPage />
+    },
+    {
+      path: '/app/create-event/:contextId',
+      element: <Event />
     }
   ]
 };

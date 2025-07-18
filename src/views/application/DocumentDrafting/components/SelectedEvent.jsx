@@ -1,14 +1,14 @@
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import DownloadIcon from '@mui/icons-material/Download';
 import EditIcon from '@mui/icons-material/Edit';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import {
   Box,
   Button,
-  Card,
-  CardContent,
   Chip,
   CircularProgress,
   IconButton,
+  Paper,
   Table,
   TableBody,
   TableCell,
@@ -17,10 +17,12 @@ import {
   TableRow,
   Typography
 } from '@mui/material';
-import Grid2 from '@mui/material/Grid2';
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { useNavigate, useParams } from 'react-router-dom';
+import { openSnackbar } from 'store/slices/snackbar';
 import Factory from 'utils/Factory';
+
 
 const statusColor = (status) => {
   switch (status) {
@@ -49,12 +51,46 @@ const summaryValueStyle = {
   fontSize: 16
 };
 
+// Add statusChip function for consistent status styling
+const statusChip = (status) => {
+  if (status === 'completed')
+    return <Chip label="Completed" sx={{ bgcolor: '#C8E6C9', color: '#388E3C', fontWeight: 500 }} />;
+  if (status === 'yet_to_start')
+    return <Chip label="Yet to Start" sx={{ bgcolor: '#FFF1F0', color: '#FF4D4F', fontWeight: 500 }} />;
+  if (status === 'draft')
+    return <Chip label="Draft" sx={{ bgcolor: '#FFF7E3', color: '#FAAD14', fontWeight: 500, width: 90 }} />;
+  if (status === 'in_progress')
+    return <Chip label="In progress" sx={{ bgcolor: '#FFF9C4', color: '#FBC02D', fontWeight: 500 }} />;
+  return <Chip label={status} />;
+};
+
+// Helper to format date as dd/mm/yyyy
+const formatDate = (date) => {
+  if (!date) return '';
+  const d = new Date(date);
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = d.getFullYear();
+  return `${day}/${month}/${year}`;
+};
+
+// Helper to get progress color based on percent (match the image)
+function getProgressColor(percent) {
+  if (percent === 0) return '#E0E0E0';      // Gray
+  if (percent <= 25) return '#FFC400';      // Yellow
+  if (percent <= 50) return '#B388FF';      // Purple
+  if (percent <= 75) return '#2979FF';      // Blue
+  if (percent < 100)  return '#FF9100';     // Orange (for 76-99%)
+  return '#43A047';                         // Green for 100%
+}
+
 const SelectedEvent = ({ onBack }) => {
   const { eventInstanceId } = useParams();
   const navigate = useNavigate();
   const [eventData, setEventData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (!eventInstanceId) return;
@@ -80,25 +116,67 @@ const SelectedEvent = ({ onBack }) => {
   const eventInstance = eventData.event_instance || {};
   const eventName = eventInstance.event_name?.event_name || 'N/A';
   const createdOn = eventInstance.created_at
-    ? new Date(eventInstance.created_at).toLocaleDateString()
-    : (eventData.created_at ? new Date(eventData.created_at).toLocaleDateString() : 'N/A');
+    ? formatDate(eventInstance.created_at)
+    : (eventData.created_at ? formatDate(eventData.created_at) : 'N/A');
   const status = eventInstance.status || eventData.status || 'N/A';
-  const progress = eventInstance.progress || eventData.progress || { completed: 0, total: 0 };
   const documents = eventData.documents || [];
-  const progressPercent = (progress.completed / progress.total) * 100;
+  const progressTotal = documents.length;
+  const progressCompleted = documents.filter(doc => (doc.status === 'completed')).length;
+  const progressPercent = progressTotal > 0 ? (progressCompleted / progressTotal) * 100 : 0;
+
+  const handleDownloadFile = async (fileUrl) => {
+    try {
+      if (!fileUrl) {
+        dispatch(openSnackbar({
+          open: true,
+          message: 'No file available for download. Please finalize the document first.',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        }));
+        return;
+      }
+      const presigned = await Factory('get', `/docwallet/generate_presigned_url?url=${encodeURIComponent(fileUrl)}`);
+      const presignedUrl = presigned?.res?.data?.presigned_url || presigned?.res?.data?.url;
+      if (presigned?.res && presigned?.res?.status_cd === 0 && presignedUrl) {
+        window.open(presignedUrl, '_blank');
+        dispatch(openSnackbar({
+          open: true,
+          message: 'Download started',
+          variant: 'alert',
+          alert: { color: 'success' },
+          close: false
+        }));
+      } else {
+        dispatch(openSnackbar({
+          open: true,
+          message: presigned?.res?.message || 'Failed to get presigned URL',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        }));
+      }
+    } catch (err) {
+      dispatch(openSnackbar({
+        open: true,
+        message: 'Failed to download file',
+        variant: 'alert',
+        alert: { color: 'error' },
+        close: false
+      }));
+    }
+  };
 
   return (
     <Box
-      sx={{
-        p: { xs: 1, md: 4 },
-        bgcolor: '#f7f9fb',
-        minHeight: '50vh',
-        width: '90vw',
-      }}
+    sx={{ p: { xs: 2, md: 4 }, background: 'white', borderRadius: 2, minHeight: '100vh', width: '100%' }}
     >
       {/* Breadcrumb */}
       <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
-        <Typography variant="body2" color="#757575">
+      <Typography variant="h5" fontWeight={600} sx={{ m: 0, mb: 2, fontSize: { xs: 18, sm: 22 } }}>
+            Document Drafting
+          </Typography>
+        {/* <Typography variant="body2" color="#757575">
           <b>
             <span
               style={{ color: '#757575', textDecoration: 'none', cursor: 'pointer' }}
@@ -118,10 +196,10 @@ const SelectedEvent = ({ onBack }) => {
           </b>
           &nbsp;&gt;&nbsp;
           <b style={{ color: '#1976d2' }}>{eventName}</b>
-        </Typography>
+        </Typography> */}
         <Button
           variant="outlined"
-          onClick={() => { window.location.href = '/app/drafting'; }} // Update path if needed
+          onClick={() => navigate('/app/drafting')}
           startIcon={<ArrowBackIcon />}
           sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600, px: 2 }}
         >
@@ -130,65 +208,127 @@ const SelectedEvent = ({ onBack }) => {
       </Box>
 
       {/* Main Card with summary and table */}
-      <Card
+      <Paper
         sx={{
-          borderRadius: 4,
-          boxShadow: 1,
-          p: 0,
+          borderRadius: 3,
+          border: '1.5px solid #E3EAFE',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
+          p: { xs: 2, md: 4 },
+          maxWidth: '100%',
           width: '100%',
-          maxWidth: 'none',
-          mx: 0
+          mx: 'auto',
+          mt: 0,
+          minHeight: { xs: 400, md: 700 },
+          position: 'relative',
+          background: '#fff',
+          overflowX: 'auto',
         }}
       >
-        <CardContent sx={{ pb: 0 }}>
-          <Grid2 container spacing={23} alignItems="center" sx={{ mb: 2 }}>
-            <Grid2 xs={12} sm={3}>
-              <Typography sx={summaryLabelStyle}>Event Name</Typography>
-              <Typography sx={summaryValueStyle}>{eventName}</Typography>
-            </Grid2>
-            <Grid2 xs={12} sm={3}>
-              <Typography sx={summaryLabelStyle}>Created On</Typography>
-              <Typography sx={summaryValueStyle}>{createdOn}</Typography>
-            </Grid2>
-            <Grid2 xs={12} sm={3}>
-              <Typography sx={summaryLabelStyle}>Status</Typography>
-              <Chip
-                label={status}
-                sx={{
-                  ...statusColor(status),
-                  fontWeight: 600,
-                  px: 2,
-                  fontSize: 16,
-                  borderRadius: 2,
-                  boxShadow: 0
-                }}
-              />
-            </Grid2>
-            <Grid2 xs={12} sm={3}>
-              <Typography sx={summaryLabelStyle}>Progress</Typography>
-              <Box display="flex" alignItems="center" gap={1}>
-                <CircularProgress
-                  variant="determinate"
-                  value={progressPercent}
-                  size={32}
-                  thickness={5}
-                  sx={{ color: '#1976d2', mr: 1 }}
-                />
-                <Typography sx={summaryValueStyle}>{progress.completed}/{progress.total} Docs Completed</Typography>
-              </Box>
-            </Grid2>
-          </Grid2>
-        </CardContent>
-        <Box sx={{ px: 3, pb: 3 }}>
-          <TableContainer>
-            <Table>
+        {/* Summary Section - Flex Row */}
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: { xs: 'column', sm: 'row' },
+            justifyContent: 'space-between',
+            alignItems: { xs: 'flex-start', sm: 'center' },
+            gap: { xs: 2, sm: 0 },
+            px: { xs: 0.5, sm: 2 },
+            pb: 2,
+            borderBottom: '1.5px solid #E3EAFE',
+            mb: 2,
+          }}
+        >
+          <Box sx={{ flex: 1, minWidth: 120, mb: { xs: 1, sm: 0 } }}>
+            <Typography sx={{ color: '#1138e7', fontWeight: 700, fontSize: { xs: 16, sm: 18 }, mb: 0.5 }}>Event Name</Typography>
+            <Typography sx={{ fontWeight: 500, fontSize: { xs: 14, sm: 16 } }}>{eventName}</Typography>
+          </Box>
+          <Box sx={{ flex: 1, minWidth: 120, mb: { xs: 1, sm: 0 } }}>
+            <Typography sx={{ color: '#1138e7', fontWeight: 700, fontSize: { xs: 16, sm: 18 }, mb: 0.5 }}>Created On</Typography>
+            <Typography sx={{ fontWeight: 500, fontSize: { xs: 14, sm: 16 } }}>{createdOn}</Typography>
+          </Box>
+          <Box sx={{ flex: 1, minWidth: 120, mb: { xs: 1, sm: 0 } }}>
+            <Typography sx={{ color: '#1138e7', fontWeight: 700, fontSize: { xs: 15, sm: 16 }, mb: 0.5 }}>Status</Typography>
+            {statusChip(status)}
+          </Box>
+          <Box sx={{ flex: 1, minWidth: 120, display: 'flex', alignItems: 'center', gap: 1, mb: { xs: 1, sm: 0 } }}>
+            <Box>
+              <Typography sx={{ color: '#1138e7', fontWeight: 700, fontSize: { xs: 16, sm: 18 }, mb: 0.5 }}>Progress</Typography>
+                <Box display="flex" alignItems="center" gap={1}>
+                  <Box sx={{ position: 'relative', display: 'inline-flex', mr: 1 }}>
+                    {progressPercent === 0 ? (
+                      <>
+                        <CircularProgress
+                          variant="determinate"
+                          value={100}
+                          size={30}
+                          thickness={5}
+                          sx={{ color: '#E0E0E0' }}
+                        />
+                        <Box
+                          sx={{
+                            top: 0,
+                            left: 0,
+                            bottom: 0,
+                            right: 0,
+                            position: 'absolute',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '100%',
+                            height: '100%',
+                          }}
+                        >
+                          <Typography sx={{ fontWeight: 700, fontSize: 10, color: '#000' }}>
+                            0%
+                          </Typography>
+                        </Box>
+                      </>
+                    ) : (
+                      <>
+                        <CircularProgress
+                          variant="determinate"
+                          value={progressPercent}
+                          size={30}
+                          thickness={5}
+                          sx={{ color: getProgressColor(Math.round(progressPercent)) }}
+                        />
+                        <Box
+                          sx={{
+                            top: 0,
+                            left: 0,
+                            bottom: 0,
+                            right: 0,
+                            position: 'absolute',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '100%',
+                            height: '100%',
+                          }}
+                        >
+                          <Typography sx={{ fontWeight: 700, fontSize: 10, color: '#000' }}>
+                            {Math.round(progressPercent)}%
+                          </Typography>
+                        </Box>
+                      </>
+                    )}
+                  </Box>
+                  <Typography sx={{ fontWeight: 500, fontSize: { xs: 14, sm: 18 } }}>{progressCompleted}/{progressTotal} Docs Completed</Typography>
+                </Box>
+            </Box>
+          </Box>
+        </Box>
+        {/* Document Table Section (unchanged) */}
+        <Box sx={{ mt: 3, borderRadius: 2, overflow: 'auto', bgcolor: '#fff', width: '100%' }}>
+          <TableContainer sx={{ borderRadius: 2, border: '1px solid #E3EAFE', overflow: 'auto', width: '100%' }}>
+            <Table sx={{ width: '100%', minWidth: 600 }}>
               <TableHead>
                 <TableRow sx={{ bgcolor: '#f5f6fa' }}>
-                  <TableCell sx={{ fontWeight: 700, color: '#1976d2', fontSize: 15, borderTopLeftRadius: 12 }}>Document Name</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: '#1976d2', fontSize: 15 }}>Template</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: '#1976d2', fontSize: 15 }}>Status</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: '#1976d2', fontSize: 15 }}>Last Edited</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: '#1976d2', fontSize: 15, borderTopRightRadius: 12 }}>Action</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: '#1138e7', fontSize: 15, borderTopLeftRadius: 12 }}>Document Name</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: '#1138e7', fontSize: 15 }}>Template</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: '#1138e7', fontSize: 15 }}>Status</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: '#1138e7', fontSize: 15 }}>Last Edited</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: '#1138e7', fontSize: 15, borderTopRightRadius: 12 }}>Action</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -201,51 +341,87 @@ const SelectedEvent = ({ onBack }) => {
                       <Chip
                         label={'Template'}
                         sx={{
-                          bgcolor: '#1138e7',
+                          bgcolor: '#0039A6',
                           color: '#fff',
-                          fontWeight: 600,
-                          px: 2,
-                          borderRadius: 2,
-                          fontSize: 15,
+                          fontWeight: 500,
+                          fontSize: 12,
+                          borderRadius: '999px',
+                          px: 3,
+                          height: 32,
+                          boxShadow: 'none',
+                          letterSpacing: 0.5,
                           cursor: 'pointer',
-                          transition: 'box-shadow 0.2s',
-                          boxShadow: 0,
-                          '&:hover': {
-                            boxShadow: 2,
-                            bgcolor: '#00329E',
+                          '& .MuiChip-label': {
+                            padding: 0,
                           },
                         }}
                         onClick={() => navigate(`/app/drafting/fill/${doc.id}`)}
                       />
                     </TableCell>
                     <TableCell>
-                      <Chip
-                        label={doc.status}
-                        sx={{
-                          ...statusColor(doc.status),
-                          fontWeight: 600,
-                          px: 2,
-                          borderRadius: 2,
-                          fontSize: 15
-                        }}
-                      />
+                      {statusChip(doc.status)}
                     </TableCell>
                     <TableCell sx={{ fontWeight: 500 }}>
-                      {doc.updated_at ? new Date(doc.updated_at).toLocaleDateString() : ''}
+                      {doc.updated_at ? formatDate(doc.updated_at) : ''}
                     </TableCell>
                     <TableCell>
-                      {doc.status === 'Processed' || doc.status === 'Completed' ? (
-                        <Button variant="contained" size="small" endIcon={<EditIcon />} sx={{ bgcolor: '#1976d2', color: '#fff', borderRadius: 2, textTransform: 'none', fontWeight: 600, fontSize: 15, boxShadow: 0, px: 2 }}>
+                      {doc.status === 'yet_to_start' && (
+                        <Button
+                          variant="contained"
+                          size="small"
+                          endIcon={<EditIcon />}
+                          sx={{
+                            bgcolor: '#0062FF',
+                            color: '#fff',
+                            borderRadius: 2,
+                            textTransform: 'none',
+                            fontWeight: 600,
+                            fontSize: 13,
+                            boxShadow: 0,
+                            px: 2,
+                            minWidth: 140,
+                            '&:hover': {
+                              color: '#fff',
+                            }
+                          }}
+                          onClick={() => navigate(`/app/drafting/fill/${doc.id}`)}
+                        >
                           Start Drafting
                         </Button>
-                      ) : doc.status === 'Declined' ? (
-                        <Button variant="outlined" size="small" sx={{ color: '#FBC02D', borderColor: '#FBC02D', borderRadius: 2, textTransform: 'none', fontWeight: 600, fontSize: 15, px: 2 }}>
+                      )}
+                      {doc.status === 'draft' && (
+                        <Button
+                          variant="contained"
+                          size="small"
+                          endIcon={<EditIcon sx={{ color: '#FFC400' }} />}
+                          sx={{
+                            bgcolor: '#FFF9C4',
+                            color: '#FFC400',
+                            borderRadius: 2,
+                            textTransform: 'none',
+                            fontWeight: 600,
+                            fontSize: 15,
+                            boxShadow: 0,
+                            px: 2,
+                            minWidth: 120,
+                            '&:hover': {
+                              color: '#FFC400',
+                            }
+                          }}
+                          onClick={() => navigate(`/app/drafting/fill/${doc.id}`)}
+                        >
                           Continue
                         </Button>
-                      ) : (
-                        <IconButton sx={{ color: '#1976d2' }}>
-                          <VisibilityIcon />
-                        </IconButton>
+                      )}
+                      {doc.status === 'completed' && (
+                        <Box display="flex">
+                          <IconButton sx={{ color: '#0062FF' }} onClick={() => handleDownloadFile(doc.file)}>
+                            <VisibilityIcon />
+                          </IconButton>
+                          <IconButton sx={{ color: '#0062FF' }} onClick={() => handleDownloadFile(doc.file)}>
+                            <DownloadIcon />
+                          </IconButton>
+                        </Box>
                       )}
                     </TableCell>
                   </TableRow>
@@ -254,7 +430,7 @@ const SelectedEvent = ({ onBack }) => {
             </Table>
           </TableContainer>
         </Box>
-      </Card>
+      </Paper>
     </Box>
   );
 };

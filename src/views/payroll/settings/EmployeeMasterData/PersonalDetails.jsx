@@ -24,7 +24,7 @@ const PersonalDetails = ({ fetchEmployeeData, employeeData, createdEmployeeId, s
     { name: 'dob', label: 'Date of Birth', required: false },
     { name: 'guardian_name', label: 'Guardian Name', required: true },
     { name: 'pan', label: 'PAN', required: true },
-    { name: 'aadhar', label: 'Aadhar', required: false },
+    { name: 'aadhar', label: 'Aadhar', required:true },
     { name: 'age', label: 'Age', required: false },
     { name: 'alternate_contact_number', label: 'Alternate Contact Number', required: false },
     { name: 'marital_status', label: 'Marital Status', required: false },
@@ -69,9 +69,9 @@ const PersonalDetails = ({ fetchEmployeeData, employeeData, createdEmployeeId, s
     pan: Yup.string()
       .required()
       .matches(/^[A-Z]{5}\d{4}[A-Z]{1}$/, 'Invalid PAN'),
-    // aadhar: Yup.string()
-    //   .required()
-    //   .matches(/^\d{12}$/, 'Must be 12 digits'),
+    aadhar: Yup.string()
+      .required()
+      .matches(/^\d{12}$/, 'Must be 12 digits'),
     // age: Yup.number().required().positive().integer(), // REMOVE age validation
     // alternate_contact_number: Yup.string()
     //   .required()
