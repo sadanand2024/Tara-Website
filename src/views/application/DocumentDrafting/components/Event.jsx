@@ -142,29 +142,55 @@ function DocumentCard({ title, description, isFavorite, isSelected, onFavorite, 
         <Box
           sx={{
             position: 'absolute',
-            right: 0,
-            top: -55, // place above the checked circle
-            left:215,
             zIndex: 10,
             bgcolor: '#5B4FE9',
             color: '#fff',
             borderRadius: 2,
             px: 2,
-            py: 1,
-            minWidth: 260,
-            maxWidth: 220,
-            height: 55,
+            py: 2,
+            minWidth: { xs: 180, sm: 220, md: 260 },
+            maxWidth: { xs: 220, sm: 260, md: 320 },
+            height:60,
             fontSize: 14,
             display: 'flex',
             alignItems: 'center',
             boxShadow: 3,
+            left: {
+              xs: '100%',
+              sm: 'auto',
+              md: '81%'
+            },
+            right: {
+              xs: 'auto',
+              sm: 0,
+              md: 0
+            },
+            top: {
+              xs: -60,
+              sm: -55,
+              md: -55
+            },
+            transform: {
+              xs: 'translateX(-50%)',
+              sm: 'none',
+              md: 'none'
+            }
           }}
         >
           {/* Arrow */}
           <Box
             sx={{
               position: 'absolute',
-              left: 10,
+              left: {
+                xs: '50%',
+                sm: 18,
+                md: 22
+              },
+              transform: {
+                xs: 'translateX(-50%)',
+                sm: 'none',
+                md: 'none'
+              },
               top: '100%',
               width: 0,
               height: 0,
@@ -173,8 +199,8 @@ function DocumentCard({ title, description, isFavorite, isSelected, onFavorite, 
               borderTop: '10px solid #5B4FE9',
             }}
           />
-          <Typography sx={{ flex: 1, fontSize: 12, pr: 0,pt:2,pb:2 }}>
-          All templates are selected by default. Uncheck any you don't need.
+          <Typography sx={{ flex: 1, fontSize: { xs: 12, sm: 13, md: 14 }, pr: 0,pt:5,pb:4 }}>
+            All templates are selected by default. Uncheck any you don't need.
           </Typography>
           <IconButton
             size="small"
