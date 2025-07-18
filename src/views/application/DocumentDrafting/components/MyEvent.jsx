@@ -143,22 +143,33 @@ const MyEvents = ({ id }) => {
             borderTop: '0.1px solid #b0b8c4',
             borderRight: '0.1px solid #b0b8c4',
             borderRadius: 3,
-            p: 4,
             background: '#fff',
           }}
         >
-          <Typography variant="h3" fontWeight={700} mb={3} sx={{ color: '#0A1F44' }}>
+          <Typography variant="h3"
+          fontWeight={700}
+          sx={{
+            color: '#0A1F44',
+            background: '#F5F6F8',
+            padding: '16px 24px',       // Add internal spacing
+            borderTopLeftRadius: '12px',
+            borderTopRightRadius:'12px',       // Rounded corners
+            width: '100%',              // Or use a fixed width like '400px'
+          }}>
             My Events
           </Typography>
           <Box
-            mb={-3}
-            ml={-4}
-            mr={-4}
+            mb={1}
           >
-            <TableContainer  sx={{ background: 'transparent', border: 'none' }}>
+            <TableContainer  sx={{ background: 'transparent', border: 'none' }} >
               <Table>
-                <TableHead>
-                  <TableRow sx={{ background: '#F5F6F8' }}>
+                <TableHead sx={{
+                    backgroundColor: 'primary.main',
+                    '& .MuiTableCell-root': {
+                      color: '#ffffff !important'
+                    }
+                  }}>
+                  <TableRow>
                     <TableCell sx={{ fontWeight: 700, color: '#0A1F44', fontSize: 16 }}>Event Name</TableCell>
                     <TableCell sx={{ fontWeight: 700, color: '#0A1F44', fontSize: 16 }}>Created On</TableCell>
                     <TableCell sx={{ fontWeight: 700, color: '#0A1F44', fontSize: 16 }}>Status</TableCell>

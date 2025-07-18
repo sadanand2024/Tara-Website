@@ -169,7 +169,7 @@ const SelectedEvent = ({ onBack }) => {
 
   return (
     <Box
-    sx={{ p: { xs: 1, md: 4 }, background: 'white',borderRadius:2, minHeight: '100vh' }}
+    sx={{ p: { xs: 2, md: 4 }, background: 'white', borderRadius: 2, minHeight: '100vh', width: '100%' }}
     >
       {/* Breadcrumb */}
       <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
@@ -221,6 +221,7 @@ const SelectedEvent = ({ onBack }) => {
           minHeight: { xs: 400, md: 700 },
           position: 'relative',
           background: '#fff',
+          overflowX: 'auto',
         }}
       >
         {/* Summary Section - Flex Row */}
@@ -231,27 +232,27 @@ const SelectedEvent = ({ onBack }) => {
             justifyContent: 'space-between',
             alignItems: { xs: 'flex-start', sm: 'center' },
             gap: { xs: 2, sm: 0 },
-            px: { xs: 1, sm: 2 },
+            px: { xs: 0.5, sm: 2 },
             pb: 2,
             borderBottom: '1.5px solid #E3EAFE',
             mb: 2,
           }}
         >
-          <Box sx={{ flex: 1, minWidth: 120 }}>
-            <Typography sx={{ color: '#1138e7', fontWeight: 700, fontSize: 18, mb: 0.5 }}>Event Name</Typography>
-            <Typography sx={{ fontWeight: 500, fontSize: 16 }}>{eventName}</Typography>
+          <Box sx={{ flex: 1, minWidth: 120, mb: { xs: 1, sm: 0 } }}>
+            <Typography sx={{ color: '#1138e7', fontWeight: 700, fontSize: { xs: 16, sm: 18 }, mb: 0.5 }}>Event Name</Typography>
+            <Typography sx={{ fontWeight: 500, fontSize: { xs: 14, sm: 16 } }}>{eventName}</Typography>
           </Box>
-          <Box sx={{ flex: 1, minWidth: 120 }}>
-            <Typography sx={{ color: '#1138e7', fontWeight: 700, fontSize: 18, mb: 0.5 }}>Created On</Typography>
-            <Typography sx={{ fontWeight: 500, fontSize: 16 }}>{createdOn}</Typography>
+          <Box sx={{ flex: 1, minWidth: 120, mb: { xs: 1, sm: 0 } }}>
+            <Typography sx={{ color: '#1138e7', fontWeight: 700, fontSize: { xs: 16, sm: 18 }, mb: 0.5 }}>Created On</Typography>
+            <Typography sx={{ fontWeight: 500, fontSize: { xs: 14, sm: 16 } }}>{createdOn}</Typography>
           </Box>
-          <Box sx={{ flex: 1, minWidth: 120 }}>
-            <Typography sx={{ color: '#1138e7', fontWeight: 700, fontSize: 16, mb: 0.5 }}>Status</Typography>
+          <Box sx={{ flex: 1, minWidth: 120, mb: { xs: 1, sm: 0 } }}>
+            <Typography sx={{ color: '#1138e7', fontWeight: 700, fontSize: { xs: 15, sm: 16 }, mb: 0.5 }}>Status</Typography>
             {statusChip(status)}
           </Box>
-          <Box sx={{ flex: 1, minWidth: 120, display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box sx={{ flex: 1, minWidth: 120, display: 'flex', alignItems: 'center', gap: 1, mb: { xs: 1, sm: 0 } }}>
             <Box>
-              <Typography sx={{ color: '#1138e7', fontWeight: 700, fontSize: 18, mb: 0.5 }}>Progress</Typography>
+              <Typography sx={{ color: '#1138e7', fontWeight: 700, fontSize: { xs: 16, sm: 18 }, mb: 0.5 }}>Progress</Typography>
                 <Box display="flex" alignItems="center" gap={1}>
                   <Box sx={{ position: 'relative', display: 'inline-flex', mr: 1 }}>
                     {progressPercent === 0 ? (
@@ -259,7 +260,7 @@ const SelectedEvent = ({ onBack }) => {
                         <CircularProgress
                           variant="determinate"
                           value={100}
-                          size={35}
+                          size={30}
                           thickness={5}
                           sx={{ color: '#E0E0E0' }}
                         />
@@ -287,7 +288,7 @@ const SelectedEvent = ({ onBack }) => {
                         <CircularProgress
                           variant="determinate"
                           value={progressPercent}
-                          size={35}
+                          size={30}
                           thickness={5}
                           sx={{ color: getProgressColor(Math.round(progressPercent)) }}
                         />
@@ -312,15 +313,15 @@ const SelectedEvent = ({ onBack }) => {
                       </>
                     )}
                   </Box>
-                  <Typography sx={{ fontWeight: 500, fontSize: 18 }}>{progressCompleted}/{progressTotal} Docs Completed</Typography>
+                  <Typography sx={{ fontWeight: 500, fontSize: { xs: 14, sm: 18 } }}>{progressCompleted}/{progressTotal} Docs Completed</Typography>
                 </Box>
             </Box>
           </Box>
         </Box>
         {/* Document Table Section (unchanged) */}
-        <Box sx={{ mt: 3, borderRadius: 2, overflow: 'hidden', bgcolor: '#fff' }}>
-          <TableContainer sx={{ borderRadius: 2, border: '1px solid #E3EAFE', overflow: 'hidden', width: '110%' }}>
-            <Table sx={{ width: '100%' }}>
+        <Box sx={{ mt: 3, borderRadius: 2, overflow: 'auto', bgcolor: '#fff', width: '100%' }}>
+          <TableContainer sx={{ borderRadius: 2, border: '1px solid #E3EAFE', overflow: 'auto', width: '100%' }}>
+            <Table sx={{ width: '100%', minWidth: 600 }}>
               <TableHead>
                 <TableRow sx={{ bgcolor: '#f5f6fa' }}>
                   <TableCell sx={{ fontWeight: 700, color: '#1138e7', fontSize: 15, borderTopLeftRadius: 12 }}>Document Name</TableCell>

@@ -87,6 +87,15 @@ export default function Drafting({ id, tab = 'document', contextId }) {
   });
   const [filterOptionsLoading, setFilterOptionsLoading] = useState(true);
  
+  // Add a mapping for status labels and values at the top of the component
+  const statusOptions = [
+    { label: 'Yet to Start', value: 'yet_to_start' },
+    { label: 'Completed', value: 'completed' },
+    { label: 'In Progress', value: 'in_progress' },
+    { label: 'Draft', value: 'draft' },
+    { label: 'All', value: 'All' },
+  ];
+ 
   // Helper to build query string from selected filters
   const buildQueryString = () => {
     const params = [];
@@ -344,14 +353,14 @@ export default function Drafting({ id, tab = 'document', contextId }) {
   };
  
   return (
-    <Box sx={{ p: { xs: 1, md: 4 }, background: '#fff',borderRadius:2, minHeight: '100vh', width:'100%' }}>
+    <Box sx={{ p: { xs: 2, md: 4 }, background: '#fff', borderRadius: 2, minHeight: '100vh', width: '100%' }}>
       {/* Title and Actions */}
-      <Box display="flex" flexDirection={{ xs: 'column', md: 'row' }} alignItems={{ xs: 'flex-start', md: 'center' }} justifyContent="space-between" mb={4} gap={2}>
+      <Box display="flex" flexDirection={{ xs: 'column', md: 'row' }} alignItems={{ xs: 'flex-start', md: 'center' }} justifyContent="space-between" mb={4} gap={2} width={'100%'}>
       <Typography variant="h5" fontWeight={600} sx={{ m: 0, mb: 0, fontSize: { xs: 18, sm: 22 } }}>
             Document Drafting
           </Typography>
-        <Stack direction="row" spacing={2}>
-          <Grid2 size={{xs: 12}} width={300}>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} width={{ xs: '100%', sm: 'auto' }}>
+          <Grid2 size={{ xs: 12 }} width={{ xs: '100%', sm: 300 }}>
             <TextField
               fullWidth
               size="small"
@@ -366,12 +375,12 @@ export default function Drafting({ id, tab = 'document', contextId }) {
               sx={{ bgcolor: '#F5F7FA' }}
             />
           </Grid2>
-          <Button variant="outlined" startIcon={<AddIcon />} onClick={() => navigate(`/app/drafting/document/${id}`)} >Create New Document</Button>
-          <Button variant="contained" startIcon={<EventIcon />} onClick={() => navigate(`/app/drafting/event/${id}`)}>Create New Event</Button>
+          <Button variant="outlined" startIcon={<AddIcon />} onClick={() => navigate(`/app/drafting/document/${id}`)} sx={{ width: { xs: '100%', sm: 'auto' } }}>Create New Document</Button>
+          <Button variant="contained" startIcon={<EventIcon />} onClick={() => navigate(`/app/drafting/event/${id}`)} sx={{ width: { xs: '100%', sm: 'auto' } }}>Create New Event</Button>
           <Button
             variant="outlined"
             startIcon={<PersonIcon />}
-            sx={{ bgcolor: '#F5F7FA', color: '#222' }}
+            sx={{ bgcolor: '#F5F7FA', color: '#222', width: { xs: '100%', sm: 'auto' } }}
             onClick={scrollToMyEvents}
           >
             My Events
@@ -447,9 +456,8 @@ export default function Drafting({ id, tab = 'document', contextId }) {
             onChange={e => setSelectedStatus(e.target.value)}
             disabled={filterOptionsLoading}
           >
-            <MenuItem value="All">All</MenuItem>
-            {filterOptions.statuses.map(option => (
-              <MenuItem key={option} value={option}>{option}</MenuItem>
+            {statusOptions.map(option => (
+              <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
             ))}
           </TextField>
         </Grid2>
@@ -596,10 +604,16 @@ export default function Drafting({ id, tab = 'document', contextId }) {
       {loading ? (
         <CircularProgressComponent isLoading={loading} displayContent={'Loading Documents...'} />
       ) : (
-      <Paper elevation={1} sx={{ borderRadius: 3, overflow: 'hidden' }}>
-        <Table>
-          <TableHead>
-            <TableRow sx={{ background: '#F5F6F8' }}>
+      <Paper elevation={1} sx={{ borderRadius: 3, overflowX: 'auto', width: '100%' }}>
+        <Table sx={{ minWidth: 600 }}>
+          
+          <TableHead sx={{
+                    backgroundColor: 'primary.main',
+                    '& .MuiTableCell-root': {
+                      color: '#ffffff !important'
+                    }
+                  }}>
+            <TableRow >
               <TableCell>Name</TableCell>
               <TableCell>Category</TableCell>
               <TableCell>Event</TableCell>
@@ -713,120 +727,144 @@ export default function Drafting({ id, tab = 'document', contextId }) {
             borderTop: '0.1px solid #b0b8c4', // thick, prominent grey border
             borderRight: '0.1px solid #b0b8c4', // thick, prominent grey border
           borderRadius: 3,
-          p: 4,
+          pb:4,
           background: '#fff',
             // boxShadow: '0 5px 10px 0 rgba(24, 39, 75, 0.06)', // thinner, more subtle shadow at the bottom
+          width: '100%',
+          overflowX: 'auto',
         }}
       >
-          <Typography variant="h3" fontWeight={700} mb={3} sx={{ color: '#0A1F44' }}>
+        
+        <Typography
+          variant="h3"
+          fontWeight={700}
+          mb={3}
+          sx={{
+            color: '#0A1F44',
+            background: '#F5F6F8',
+            padding: '16px 24px',       // Add internal spacing
+            borderTopLeftRadius: '12px',
+            borderTopRightRadius:'12px',       // Rounded corners
+            width: '100%',              // Or use a fixed width like '400px'
+            fontSize: { xs: 18, sm: 18},
+          }}
+        >
           Quick Access Panel
         </Typography>
-        <Grid2 container spacing={4}>
-          {/* Favourites */}
-          <Grid2 size ={{xs:12, md:4}}>
-              <Typography fontWeight={500} sx={{ color: '#0A1F44', mb: 1,fontSize: 17 }}>Favourites</Typography>
-              <Stack spacing={0}>
-              {favouritesLoading ? (
-                <Typography>Loading favourites...</Typography>
-              ) : favourites.length === 0 ? (
-                <Typography>No favourites found</Typography>
-              ) : (
-                favourites.map((favourite) => (
-                    <Box
-                      key={favourite.id}
-                      display="flex"
-                      alignItems="center"
-                      gap={1}
-                      sx={{
-                        cursor: 'pointer',
-                        minWidth: 0,
-                        px: 0,
-                        height: 45,
-                        py: 0.5,
-                        borderRadius: 2,
-                        '&:hover': { background: '#f5f5f5', width: 300,
-                          height: 45, }
-                      }}
-                      onClick={() => handleFavouriteProceed(favourite)}
-                    >
-                    <Box sx={{ position: 'relative', display: 'inline-flex' }}>
-                      <DescriptionOutlinedIcon sx={{ color: '#A3AED0', fontSize: 28, bgcolor: '#F5F7FA', borderRadius: 2, p: 0.5 }} />
-                        <FavoriteBorderIcon
+      
+ 
+ 
+        <Box px={{ xs: 2, sm: 0,md:0 }} py={2}>
+          <Grid2 container spacing={4} marginLeft={{ xs: 0, md: 4 }}>
+            {/* Favourites */}
+            <Grid2 size ={{xs:12, md:4}}>
+                <Typography fontWeight={500} sx={{ color: '#0A1F44', mb: 1,fontSize: 17 }}>Favourites</Typography>
+                <Stack spacing={0}>
+                {favouritesLoading ? (
+                  <Typography>Loading favourites...</Typography>
+                ) : favourites.length === 0 ? (
+                  <Typography>No favourites found</Typography>
+                ) : (
+                  favourites.map((favourite) => (
+                      <Box
+                        key={favourite.id}
+                        display="flex"
+                        alignItems="center"
+                        gap={1}
                         sx={{
-                          color: '#3B82F6',
-                          fontSize: 14,
-                          position: 'absolute',
-                          top: 2,
-                          right: 2,
-                          bgcolor: '#fff',
-                          borderRadius: '50%',
+                          cursor: 'pointer',
+                          minWidth: 0,
+                          px: 0,
+                          height: 45,
+                          py: 0.5,
+                          borderRadius: 2,
+                          '&:hover': { background: '#f5f5f5', width: 300,
+                            height: 45, }
                         }}
-                      />
+                        onClick={() => handleFavouriteProceed(favourite)}
+                      >
+                      <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+                        <DescriptionOutlinedIcon sx={{ color: '#A3AED0', fontSize: 28, bgcolor: '#F5F7FA', borderRadius: 2, p: 0.5 }} />
+                          <FavoriteBorderIcon
+                          sx={{
+                            color: '#3B82F6',
+                            fontSize: 14,
+                            position: 'absolute',
+                            top: 2,
+                            right: 2,
+                            bgcolor: '#fff',
+                            borderRadius: '50%',
+                          }}
+                        />
+                      </Box>
+                        <Typography sx={{ color: '#222', wordBreak: 'break-word' }}>{favourite.document?.name || favourite.name || favourite.title || favourite.document_name || 'Unnamed Document'}</Typography>
                     </Box>
-                      <Typography sx={{ color: '#222', wordBreak: 'break-word' }}>{favourite.document?.name || favourite.name || favourite.title || favourite.document_name || 'Unnamed Document'}</Typography>
-                  </Box>
-                ))
-              )}
-            </Stack>
-          </Grid2>
-          {/* Recently Used */}
-          <Grid2 size ={{xs:12, md:4}}>
-              <Typography fontWeight={500} sx={{ color: '#0A1F44', mb: 2,fontSize:17 }}>Recently Used</Typography>
-            <Stack spacing={2}>
-              {recentDocumentsLoading ? (
-                <Typography>Loading recent documents...</Typography>
-              ) : recentDocuments.length === 0 ? (
-                <Typography>No recent documents found</Typography>
-              ) : (
-                recentDocuments.map((document) => (
-                  <Box key={document.id} display="flex" alignItems="center" gap={1}>
-                    <Box sx={{ position: 'relative', display: 'inline-flex' }}>
-                      <DescriptionOutlinedIcon sx={{ color: '#A3AED0', fontSize: 28, bgcolor: '#F5F7FA', borderRadius: 2, p: 0.5 }} />
-                      <HistoryOutlinedIcon
-                        sx={{
-                          color: '#F59E42',
-                          fontSize: 14,
-                          position: 'absolute',
-                          top: 2,
-                          right: 2,
-                          bgcolor: '#fff',
-                          borderRadius: '50%',
-                        }}
-                      />
+                  ))
+                )}
+              </Stack>
+            </Grid2>
+            {/* Recently Used */}
+            <Grid2 size ={{xs:12, md:4}}>
+                <Typography fontWeight={500} sx={{ color: '#0A1F44', mb: 2,fontSize:17 }}>Recently Used</Typography>
+              <Stack spacing={2}>
+                {recentDocumentsLoading ? (
+                  <Typography>Loading recent documents...</Typography>
+                ) : recentDocuments.length === 0 ? (
+                  <Typography>No recent documents found</Typography>
+                ) : (
+                  recentDocuments.map((document) => (
+                    <Box key={document.id} display="flex" alignItems="center" gap={1}>
+                      <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+                        <DescriptionOutlinedIcon sx={{ color: '#A3AED0', fontSize: 28, bgcolor: '#F5F7FA', borderRadius: 2, p: 0.5 }} />
+                        <HistoryOutlinedIcon
+                          sx={{
+                            color: '#F59E42',
+                            fontSize: 14,
+                            position: 'absolute',
+                            top: 2,
+                            right: 2,
+                            bgcolor: '#fff',
+                            borderRadius: '50%',
+                          }}
+                        />
+                      </Box>
+                      <Typography sx={{ color: '#222' }}>{document.document?.name || document.name || document.title || document.document_name || 'Unnamed Document'}</Typography>
                     </Box>
-                    <Typography sx={{ color: '#222' }}>{document.document?.name || document.name || document.title || document.document_name || 'Unnamed Document'}</Typography>
-                  </Box>
-                ))
-              )}
-            </Stack>
-          </Grid2>
-          {/* Recent Events */}
-          <Grid2 size ={{xs:12, md:4}}>
-              <Typography fontWeight={500} sx={{ color: '#0A1F44', mb: 2,fontSize:17 }}>Recent Events</Typography>
-            <Stack spacing={2}>
-              {recentEventsLoading ? (
-                <Typography>Loading recent events...</Typography>
-              ) : recentEvents.length === 0 ? (
-                <Typography>No recent events found</Typography>
-              ) : (
-                recentEvents.map((event) => (
-                  <Box key={event.id} display="flex" alignItems="center" gap={1}>
-                    <Box sx={{ position: 'relative', display: 'inline-flex' }}>
-                      <DescriptionOutlinedIcon sx={{ color: '#A3AED0', fontSize: 28, bgcolor: '#F5F7FA', borderRadius: 2, p: 0.5 }} />
+                  ))
+                )}
+              </Stack>
+            </Grid2>
+            {/* Recent Events */}
+            <Grid2 size ={{xs:12, md:4}}>
+                <Typography fontWeight={500} sx={{ color: '#0A1F44', mb: 2,fontSize:17 }}>Recent Events</Typography>
+              <Stack spacing={2}>
+                {recentEventsLoading ? (
+                  <Typography>Loading recent events...</Typography>
+                ) : recentEvents.length === 0 ? (
+                  <Typography>No recent events found</Typography>
+                ) : (
+                  recentEvents.map((event) => (
+                    <Box key={event.id} display="flex" alignItems="center" gap={1}>
+                      <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+                        <DescriptionOutlinedIcon sx={{ color: '#A3AED0', fontSize: 28, bgcolor: '#F5F7FA', borderRadius: 2, p: 0.5 }} />
+                      </Box>
+                      <Typography sx={{ color: '#222' }}>{event.event?.name || event.name || event.title || event.event_name || 'Unnamed Event'}</Typography>
                     </Box>
-                    <Typography sx={{ color: '#222' }}>{event.event?.name || event.name || event.title || event.event_name || 'Unnamed Event'}</Typography>
-                  </Box>
-                ))
-              )}
-            </Stack>
+                  ))
+                )}
+              </Stack>
+            </Grid2>
           </Grid2>
-        </Grid2>
-      </Box>
+        </Box>
+        </Box>
       )}
       {/* MyEvents section at the bottom of the page */}
       <Box mt={6} ref={myEventsRef}>
         <MyEvents id={id} />
       </Box>
+      
     </Box>
+   
   );
+  
 }
