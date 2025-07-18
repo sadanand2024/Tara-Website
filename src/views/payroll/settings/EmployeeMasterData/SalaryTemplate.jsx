@@ -472,17 +472,35 @@ export default function RenderSalaryTemplateTable({
         width: '100%',
         borderRadius: 2,
         boxShadow: 1,
-        overflowX: 'auto'
+        overflowX: 'auto',
+        maxWidth: '100%'
       }}
     >
-      <Table>
-        <TableHead>
-          <TableRow sx={{ bgcolor: 'grey.100' }}>
-            <TableCell>Component</TableCell>
-            <TableCell>Calculation</TableCell>
-            <TableCell>Monthly</TableCell>
-            <TableCell>Annually</TableCell>
-            <TableCell>Action</TableCell>
+      <Table size="small" sx={{ tableLayout: 'fixed', width: '100%' }}>
+        <TableHead
+          sx={{
+            backgroundColor: 'primary.main',
+            '& .MuiTableCell-root': {
+              color: '#ffffff !important'
+            }
+          }}
+        >
+          <TableRow>
+            <TableCell sx={{ width: '25%' }} align="left">
+              Component
+            </TableCell>
+            <TableCell sx={{ width: '35%' }} align="left">
+              Calculation
+            </TableCell>
+            <TableCell sx={{ width: '10%' }} align="left">
+              Monthly
+            </TableCell>
+            <TableCell sx={{ width: '10%' }} align="left">
+              Annually
+            </TableCell>
+            <TableCell sx={{ width: '10%' }} align="left">
+              Action
+            </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -529,7 +547,7 @@ export default function RenderSalaryTemplateTable({
                         }
                       }}
                       type="text"
-                      sx={{ width: 250 }}
+                      sx={{ width: '100%', maxWidth: 200 }}
                     />
                     <Typography
                       variant="body2"
@@ -566,9 +584,12 @@ export default function RenderSalaryTemplateTable({
           </TableRow>
           <TableRow>
             <TableCell>
-              <Typography variant="h5" sx={{ whiteSpace: 'nowrap' }}>
-                Fixed Allowance (Monthly CTC - Sum of all other components - Benefits)
-              </Typography>
+              <Stack direction="row" alignItems="center" spacing={1}>
+                <Typography variant="h5">Fixed Allowance</Typography>
+                <Tooltip title="Monthly CTC - Sum of all other components - Benefits" placement="top" arrow>
+                  <InfoOutlinedIcon sx={{ fontSize: 18, color: 'gray', cursor: 'pointer' }} />
+                </Tooltip>
+              </Stack>
             </TableCell>
             <TableCell>Remaining Balance</TableCell>
             <TableCell>
