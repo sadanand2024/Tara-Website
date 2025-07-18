@@ -21,7 +21,7 @@ const PersonalDetails = ({ fetchEmployeeData, employeeData, createdEmployeeId, s
 
   const [loading, setLoading] = useState(false);
   const employeeFields = [
-    { name: 'dob', label: 'Date of Birth', required: false },
+    { name: 'dob', label: 'Date of Birth', required:true },
     { name: 'guardian_name', label: 'Guardian Name', required: true },
     { name: 'pan', label: 'PAN', required: true },
     { name: 'aadhar', label: 'Aadhar', required:true },
@@ -59,18 +59,18 @@ const PersonalDetails = ({ fetchEmployeeData, employeeData, createdEmployeeId, s
   const getLabelWithAsterisk = (label, isRequired) => (
     <span>
       {label}
-      {isRequired && <span style={{ color: 'red', fontSize: '1.2em', marginLeft: 2 }}>*</span>}
+      {isRequired && <span style={{ color: 'red', marginLeft: 2 }}>*</span>}
     </span>
   );
 
   const validationSchema = Yup.object({
-    // dob: Yup.date().required('Required'),
+    dob: Yup.date().required('Date of Birth Required'),
     guardian_name: Yup.string().required('Required'),
     pan: Yup.string()
       .required()
       .matches(/^[A-Z]{5}\d{4}[A-Z]{1}$/, 'Invalid PAN'),
     aadhar: Yup.string()
-      .required()
+      .required('Aadhar Required')
       .matches(/^\d{12}$/, 'Must be 12 digits'),
     // age: Yup.number().required().positive().integer(), // REMOVE age validation
     // alternate_contact_number: Yup.string()

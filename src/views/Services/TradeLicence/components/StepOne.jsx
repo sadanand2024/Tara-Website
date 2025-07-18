@@ -67,7 +67,8 @@ const StepOne = ({step, setStep}) => {
 <BusinessIdentityStructureSection 
   taskId={taskIds.businessIdentityTaskId} 
   applicantTaskId={taskIds.applicantDetailsTaskId} 
-/>      {/* <ApplicantDetails taskId={taskIds.applicantDetailsTaskId} /> */}
+/>     
+ <ApplicantDetails applicantTaskId={taskIds.applicantDetailsTaskId} />
       {/* <BusinessIdentityStructureSection taskId={taskIds.businessIdentityTaskId} /> */}
       <PromoterSignatorySection taskId={taskIds.promoterSignatoryTaskId} />
       <BusinessPremisesSection taskId={taskIds.businessPremisesTaskId} />

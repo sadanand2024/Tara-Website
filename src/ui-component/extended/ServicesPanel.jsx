@@ -1,8 +1,8 @@
-import React, { useContext, useMemo } from 'react';
-import { Box, Typography, Grid2, Paper, ClickAwayListener, Container } from '@mui/material';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Link as RouterLink } from 'react-router-dom';
+import { ClickAwayListener, Container, Grid2, Paper, Typography } from '@mui/material';
 import ServicesContext from 'contexts/ServicesContext';
+import { AnimatePresence, motion } from 'framer-motion';
+import React, { useContext, useMemo } from 'react';
+import { Link as RouterLink } from 'react-router-dom';
 
 const services = [
   {
@@ -162,7 +162,11 @@ const ServicesPanel = ({ onClose }) => {
             left: 0,
             width: '100vw',
             zIndex: 1100,
-            backgroundColor: 'background.paper',
+            // backgroundColor: 'background.paper',
+            backgroundImage: 'linear-gradient(to left, #9DB0FF 0%, #F0F3FF 50%, #FFFFFF 100%)',
+            backgroundRepeat: 'no-repeat',
+            backgroundSize: 'cover',
+        
             px: { xs: 2, sm: 4, md: 10 },
             py: { xs: 3, sm: 5 },
             borderTop: (theme) => `1px solid ${theme.palette.divider}`,

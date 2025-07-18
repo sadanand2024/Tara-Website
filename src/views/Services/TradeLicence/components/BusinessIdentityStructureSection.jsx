@@ -327,7 +327,7 @@ const BusinessIdentityStructureSection = ({ taskId, applicantTaskId }) => {
           </Stack>
         </form>
       </Card>
-      <ApplicantDetails applicantTaskId={applicantTaskId} />
+      {/* <ApplicantDetails applicantTaskId={applicantTaskId} /> */}
     </Box>
   );
 };
