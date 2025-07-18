@@ -310,21 +310,40 @@ if (category) {
   };
 
   return (
-    <Box sx={{ p: { xs: 1, md: 4 }, background: 'white',borderRadius:2, minHeight: '100vh' }}>
+    <Box sx={{ p: { xs: 2, md: 4 }, background: 'white',borderRadius:2, minHeight: '100vh' }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0 }}>
-        <Typography variant="h5" fontWeight={600} sx={{ m: 0, fontSize: { xs: 18, sm: 22 } }}>
-          Document Drafting
-        </Typography>
-        <Button
-          variant="outlined"
-          onClick={() => { window.location.href = '/app/drafting'; }}
-          sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600, px: 2 }}
+  <Typography variant="h5" fontWeight={600} sx={{ m: 0, fontSize: { xs: 18, sm: 22 } }}>
+    Document Drafting
+  </Typography>
+  <Button
+    variant="outlined"
+    onClick={() => { window.location.href = '/app/drafting'; }}
+    sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600, px: 2 }}
           startIcon={<ArrowBackIcon />}
-        >
-          Back to Dashboard
-        </Button>
-      </Box>
-      <Paper elevation={2} sx={{ p: { xs: 2, md: 4 }, borderRadius: 3, maxWidth: 1400, mx: 'auto', mt: 2, minHeight: { xs: 400, md: 700 }, position: 'relative' }}>
+  >
+    Back to Dashboard
+  </Button>
+</Box>
+      {/* <Paper elevation={2} sx={{
+  p: { xs: 2, md: 4 },
+  borderRadius: 3,
+  width: '100%',
+  maxWidth: 1400,
+  mx: 'auto',
+  mt: 2,
+  minHeight: { xs: 800, md: 700 },
+  position: 'relative',
+}}> */}
+<Paper elevation={2} sx={{
+  p: { xs: 2, md: 4 },
+  borderRadius: 3,
+  width: '100%',
+  maxWidth: 1400,
+  mx: 'auto',
+  mt: 2,
+  minHeight: { xs: 800, md: 700 },
+  position: 'relative',
+}}>
         {/* Tabs always centered, search bar right, responsive */}
         <Box
           sx={{
@@ -334,6 +353,7 @@ if (category) {
             alignItems: 'center',
             flexDirection: { xs: 'column', md: 'row' },
             gap: 2,
+            ml: {xs:0,md:-4}
           }}
         >
   <Tabs
@@ -349,11 +369,11 @@ if (category) {
     <Tab label="Create an Event" />
   </Tabs>
   {activeTab === 0 && (
-    <Box sx={{ width: { xs: '100%', sm: 350, md: '23.5%' }, transform: 'translateX(-5%)', ml: { md: 2 }, mt: { xs: 2, md: 0 } }}>
+    <Box sx={{ width: { xs: '93%', sm: 350, md: '23.5%' }, ml: { md: 2 }, mt: { xs: 2, md: 0 }, mb: { xs: 2, md: 0 } }}>
       <TextField
         fullWidth
         size="small"
-        placeholder="Search"
+        placeholder="Search "
         value={search}
         onChange={e => setSearch(e.target.value)}
         InputProps={{
@@ -363,34 +383,36 @@ if (category) {
             </InputAdornment>
           ),
         }}
-        sx={{
+          sx={{
           bgcolor: '#fff',
           borderRadius: 2,
           boxShadow: { xs: 1, md: 0 },
+          width: '100%',
+          minWidth: 0,
         }}
       />
-    </Box>
+        </Box>
   )}
   {activeTab === 1 && (
-    <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, width: { xs: '100%', sm: '35%' }, ml: { md: 2 }}}>
+    <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, width: { xs: '93%', sm: '35%' }, ml: { xs:2,md: 2 }, mt: { xs: 2, md: 0 }, mb: { xs: 2, md: 0 } }}>
       <TextField
         fullWidth
         select
         label="Category"
         size="small"
         sx={{ bgcolor: '#F5F7FA', transform: 'translateY(2px) translateX(-8px)' }}
-        value={category}
-        onChange={e => handleCategoryChange(e.target.value)}
-        disabled={filtersLoading}
-      >
-        <MenuItem value="">Select Category</MenuItem>
-        {filtersLoading ? (
-          <MenuItem value="">Loading...</MenuItem>
-        ) : (
-          categoryOptions.map((cat) => (
-            <MenuItem key={cat.id} value={cat.id}>{cat.category_name}</MenuItem>
-          ))
-        )}
+              value={category}
+              onChange={e => handleCategoryChange(e.target.value)}
+              disabled={filtersLoading}
+            >
+              <MenuItem value="">Select Category</MenuItem>
+              {filtersLoading ? (
+                <MenuItem value="">Loading...</MenuItem>
+              ) : (
+                categoryOptions.map((cat) => (
+                  <MenuItem key={cat.id} value={cat.id}>{cat.category_name}</MenuItem>
+                ))
+              )}
       </TextField>
       <TextField
         fullWidth
@@ -398,14 +420,14 @@ if (category) {
         label="Event"
         size="small"
         sx={{ bgcolor: '#F5F7FA', transform: 'translateY(2px) translateX(-8px)' }}
-        value={event}
-        onChange={e => handleEventChange(e.target.value)}
-        disabled={filtersLoading}
-      >
-        <MenuItem value="">Select Event</MenuItem>
-        {eventOptions.map((ev) => (
-          <MenuItem key={ev.id} value={ev.id}>{ev.event_name}</MenuItem>
-        ))}
+              value={event}
+              onChange={e => handleEventChange(e.target.value)}
+              disabled={filtersLoading}
+            >
+              <MenuItem value="">Select Event</MenuItem>
+              {eventOptions.map((ev) => (
+                <MenuItem key={ev.id} value={ev.id}>{ev.event_name}</MenuItem>
+              ))}
       </TextField>
     </Box>
   )}
@@ -419,74 +441,77 @@ if (category) {
         <TabPanel value={activeTab} index={1}>
           {filtersLoading ? (
             <Box
-              sx={{
-                borderRadius: 3,
+                  sx={{
+                    borderRadius: 3,
                 p: 4,
                 background: '#fff',
                 minHeight: 300,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
               <CircularProgressComponent isLoading displayContent={'Loading Events...'} />
-            </Box>
+                    </Box>
           ) : (
             <>
-              {/* Note about default selection */}
-              {/* <Typography variant="body2" sx={{ color: '#1976d2', mb: 2, fontStyle: 'italic' }}>
-                Note: By default, all templates are selected. If you do not want a template, please uncheck it.
-              </Typography> */}
-              <Grid2
-                container
-                spacing={{xs:2, sm:6, md: 6}}
-                sx={{ mb: 4, width:'100%', mx: 'auto',mt:4}}
-                alignItems="flex-start"
-                justifyContent="flex-start"
-              >
-                {(documents.length > 0 ? documents : documents).map((doc, idx) => (
-                  <Grid2 size={{ xs: 12, sm: 6, md: 3 }} key={doc.id || idx}>
+              {/* Only show card grid, Proceed button, and note if bot category and event are selected and documents are available */}
+              {(category && event && documents.length > 0) ? (
+                <>
+                  <Grid2
+                    container
+                    spacing={{ xs: 2, sm: 6, md: 6 }}
+                    sx={{ mb: 4, mx: 'auto', mt: 4
+                      ,
+                      ml: {xs:2},
+                      width: { xs: '93%', sm: '100%',md:'100%' },
                     
-                    <DocumentCard
-                      title={doc.title || doc.document_name}
-                      description={doc.description}
-                      isFavorite={doc.isFavorite}
-                      isSelected={selected.includes(doc.id)}
-                      onFavorite={() => handleToggleFavorite(doc.id)}
-                      onClick={() => handleCardClick(doc.id)}
-                    />
-                  </Grid2>
-                ))}
+                    minWidth: { xs: '93%', sm: 220, md: '100%' },
+                    maxWidth: { xs: '100%', sm: 400,md:'110%' },
+                    }}
+                    alignItems="flex-start"
+                    justifyContent="flex-start"
+                  >
+                    {documents.map((doc, idx) => (
+                      <Grid2 size={{ xs: 12, sm: 6, md: 3 }} key={doc.id || idx}>
+                        <DocumentCard
+                          title={doc.title || doc.document_name}
+                          description={doc.description}
+                          isFavorite={doc.isFavorite}
+                          isSelected={selected.includes(doc.id)}
+                          onFavorite={() => handleToggleFavorite(doc.id)}
+                          onClick={() => handleCardClick(doc.id)}
+                        />
               </Grid2>
-              {/* Footer */}
-              <Box display="flex" alignItems="center" justifyContent="center" mt={4}>
-                <Button
-                  variant="contained"
-                  sx={{
-                    height: 30,
-                    minWidth: 100,
-                    fontSize: 14,
-                    fontWeight: 400,
-                    borderRadius: 1,
-                    bgcolor:'#00329E',
-                    color: 'white',
-                    pt: 1,
-                    
-                  }}
-                  disabled={selected.length === 0}
-
-                  onClick={() => handleProceed(category,event, selected, user.user.id, contextId)}
-                >
-                  Proceed
-                </Button>
-              </Box>
-              {category && event && (
-                <Typography variant="body2" sx={{ color: '#1976d2', mt: 2, fontStyle: 'none' }}>
-                  Note: By default, all templates are selected. If you do not want a template, please uncheck it.
-                </Typography>
-              )}
-            </>
-          )}
+            ))}
+          </Grid2>
+          {/* Footer */}
+          <Box display="flex" alignItems="center" justifyContent="center" mt={4}>
+            <Button
+              variant="contained"
+                      sx={{
+                        height: 30,
+                        minWidth: 100,
+                        fontSize: 14,
+                        fontWeight: 400,
+                        borderRadius: 1,
+                        bgcolor: '#00329E',
+                        color: 'white',
+                        pt: 1,
+                      }}
+              disabled={selected.length === 0}
+                      onClick={() => handleProceed(category, event, selected, user.user.id, contextId)}
+            >
+              Proceed
+            </Button>
+          </Box>
+                  <Typography variant="body2" sx={{ color: '#1976d2', mt: 2, fontStyle: 'none' }}>
+            Note: By default, all templates are selected. If you do not want a template, please uncheck it.
+          </Typography>
+                </>
+              ) : null}
+        </>
+      )}
         </TabPanel>
       </Paper>
     </Box>

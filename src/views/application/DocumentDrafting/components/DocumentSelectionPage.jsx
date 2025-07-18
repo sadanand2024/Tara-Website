@@ -709,7 +709,16 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
       initialValues.file_name = formValues.file_name || '';
     }
     dynamicFields.forEach(field => {
-      initialValues[field.field_name] = formValues[field.field_name] || '';
+      let value = formValues[field.field_name] || '';
+      if (field.field_type === 'date' && value) {
+        // Convert DD-MM-YYYY to YYYY-MM-DD if needed
+        if (/^\d{2}-\d{2}-\d{4}$/.test(value)) {
+          const [dd, mm, yyyy] = value.split('-');
+          value = `${yyyy}-${mm}-${dd}`;
+        }
+        // If already YYYY-MM-DD, keep as is
+      }
+      initialValues[field.field_name] = value;
       let validator = Yup.string();
       if (field.is_required) {
         validator = validator.required(`${field.label || field.field_name} is required`);
@@ -743,7 +752,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
         return (
             <Box
                 sx={{
-        p: { xs: 1.5, sm: 2, md: 4 },
+        p: { xs: 2, sm: 2, md: 4 },
         minHeight: '100vh',
         width: '100%',
         boxSizing: 'border-box',
@@ -767,7 +776,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
             }}
             > 
           {/* Left: Dynamic Form */}
-          <Paper elevation={2} sx={{flex: 1, minWidth: { xs: '100%', sm: 320, md: 400 }, maxWidth: 400, height: 585, maxHeight: 1000, display: 'flex', flexDirection: 'column', pb: 2, mr: 2, overflow: 'hidden' }}>
+          <Paper elevation={2} sx={{flex: 1, minWidth: { xs: '100%', sm: 320, md: 400 }, maxWidth: 400, height: 585, maxHeight: 1000, display: 'flex', flexDirection: 'column', pb: 2, mr: 0, overflow: 'hidden' }}>
             {/* Progress Bar */}
             {fields.length > 0 && (
               <Box sx={{ width: '100%', mb: 2, position: 'relative' }}>
@@ -983,13 +992,74 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
             </Box>
 
         {/* Action Buttons: Back at left, others at right */}
-        <Box sx={{ display: 'flex', gap: 2, mt: 6, justifyContent: 'space-between', alignItems: 'center' }}>
-          <Button variant="outlined" sx={{ height: 40, minWidth: 120, fontSize: 16, px: 3, py: 0, borderColor: '#00329E', color: '#00329E', '&:hover': { borderColor: '#00329E', background: 'rgba(0,50,158,0.04)' } }} startIcon={<ArrowBackIcon />} onClick={() => navigate(`/app/drafting`)}>{'Back to Dashboard'}</Button>
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <Button variant="contained" color="primary" sx={{ height: 40, minWidth: 120, fontSize: 16, px: 3, py: 0, background: '#00329E', color: '#fff', '&:hover': { background: '#002266' } }} onClick={handleSaveDraft} disabled={savingDraft}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: { xs: 'column', sm: 'row' },
+            gap: 2,
+            mt: 6,
+            justifyContent: { xs: 'center', sm: 'space-between' },
+            alignItems: { xs: 'stretch', sm: 'center' },
+          }}
+        >
+          <Button
+            variant="outlined"
+            sx={{
+              height: 40,
+              minWidth: 120,
+              fontSize: 16,
+              px: 3,
+              py: 0,
+              borderColor: '#00329E',
+              color: '#00329E',
+              width: { xs: '100%', sm: 'auto' },
+              mb: { xs: 1, sm: 0 },
+              '&:hover': { borderColor: '#00329E', background: 'rgba(0,50,158,0.04)' },
+            }}
+            startIcon={<ArrowBackIcon />}
+            onClick={() => navigate(`/app/drafting`)}
+          >
+            {'Back to Dashboard'}
+          </Button>
+          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, width: { xs: '100%', sm: 'auto' } }}>
+            <Button
+              variant="contained"
+              color="primary"
+              sx={{
+                height: 40,
+                minWidth: 120,
+                fontSize: 16,
+                px: 3,
+                py: 0,
+                background: '#00329E',
+                color: '#fff',
+                width: { xs: '100%', sm: 'auto' },
+                mb: { xs: 1, sm: 0 },
+                '&:hover': { background: '#002266' },
+              }}
+              onClick={handleSaveDraft}
+              disabled={savingDraft}
+            >
               {savingDraft ? 'Saving...' : 'Save Draft'}
             </Button>
-            <Button variant="contained" color="primary" sx={{ height: 40, minWidth: 120, fontSize: 16, px: 3, py: 0, background: '#00329E', color: '#fff', '&:hover': { background: '#002266' } }} onClick={handleFinalize} disabled={finalizing}>
+            <Button
+              variant="contained"
+              color="primary"
+              sx={{
+                height: 40,
+                minWidth: 120,
+                fontSize: 16,
+                px: 3,
+                py: 0,
+                background: '#00329E',
+                color: '#fff',
+                width: { xs: '100%', sm: 'auto' },
+                mb: { xs: 1, sm: 0 },
+                '&:hover': { background: '#002266' },
+              }}
+              onClick={handleFinalize}
+              disabled={finalizing}
+            >
               {finalizing ? 'Finalizing...' : 'Finalize'}
             </Button>
             <Button
@@ -1003,6 +1073,8 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
                 py: 0,
                 background: fileUrl ? '#00329E' : '#b0b8c4',
                 color: '#fff',
+                width: { xs: '100%', sm: 'auto' },
+                mb: { xs: 1, sm: 0 },
                 '&:hover': { background: fileUrl ? '#002266' : '#b0b8c4' },
                 '&.Mui-disabled': {
                   backgroundColor: '#b0b8c4',
@@ -1015,7 +1087,25 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
             >
               Download
             </Button>
-            <Button variant="outlined" color="primary" sx={{ height: 40, minWidth: 120, fontSize: 16, px: 3, py: 0, borderColor: '#00329E', color: '#00329E', '&:hover': { borderColor: '#00329E', background: 'rgba(0,50,158,0.04)' } }} onClick={handleResetAll}>Reset All</Button>
+            <Button
+              variant="outlined"
+              color="primary"
+              sx={{
+                height: 40,
+                minWidth: 120,
+                fontSize: 16,
+                px: 3,
+                py: 0,
+                borderColor: '#00329E',
+                color: '#00329E',
+                width: { xs: '100%', sm: 'auto' },
+                mb: { xs: 1, sm: 0 },
+                '&:hover': { borderColor: '#00329E', background: 'rgba(0,50,158,0.04)' },
+              }}
+              onClick={handleResetAll}
+            >
+              Reset All
+            </Button>
           </Box>
         </Box>
       
@@ -1059,121 +1149,124 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
       ) : error ? (
         <Box sx={{ textAlign: 'center', color: 'red', my: 4 }}>{error}</Box>
       ) : (
-        <Grid2 container spacing={{ xs: 2, sm: 6, md: 7 }} sx={{ mb: 4, width:'100%', mx: 'auto' }} alignItems="flex-start" justifyContent="flex-start">
-        {filteredTemplates.map((template) => (
-  <Grid2 size={{xs:12, sm:6, md:3}} key={template.id}>
-<Paper
-sx={{
-border: '1.5px solid #b0b8c4',
-borderRadius: 3,
-pl: 2,
-pr: 2,
-pt: 2.5,
-pb: 2.5,
-ml:-2.5,
-
-
-
-
-
-width:"115%",
-minHeight: 180,
-maxHeight: 180,
-height: 180,
-
-      boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
-      position: 'relative',
-      transition: 'border 0.2s, box-shadow 0.2s, transform 0.2s',
-      cursor: 'pointer',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'space-between',
-      alignItems: 'stretch',
-      '&:hover': {
-        border: '1.5px solid #00329E',
-        boxShadow: '0 6px 24px rgba(2, 78, 153, 0.15)',
-        transform: 'scale(1.03)',
-        zIndex: 2,
-      },
-    }}
-  >
-    {/* Love (heart) icon at top right */}
-    <Box
-      sx={{
-        position: 'absolute',
-        top: 12,
-        right: 12,
-        zIndex: 3,
-        cursor: 'pointer',
-        transition: 'color 0.2s',
-        color: favoriteStates[template.id] ? '#00329E' : '#b0b8c4',
-      }}
-      onClick={e => {
-        e.stopPropagation();
-        handleToggleFavorite(template.id);
-      }}
-    >
-      {favoriteStates[template.id] ? (
-        <FavoriteIcon sx={{ fontSize: 23 }} />
-      ) : (
-        <FavoriteBorderIcon sx={{ fontSize: 23 }} />
+        <>
+          {/* Responsive Card Grid */}
+          <Grid2 container spacing={{ xs: 2, sm: 4, md: 6 }} sx={{ mb: 4, width: '100%', mx: 'auto', }} alignItems="flex-start" justifyContent="flex-start">
+            {filteredTemplates.map((template) => (
+              <Grid2 size={{ xs: 12, sm: 6, md: 3 }} key={template.id} sx={{ mb: { xs: 2, md: 0 } }}>
+                <Paper
+                  sx={{
+                    border: '1.5px solid #b0b8c4',
+                    borderRadius: 3,
+                    pl: { xs: 2, sm: 2.5 },
+                    pr: { xs: 2, sm: 2.5 },
+                    pt: { xs: 2, sm: 2.5 },
+                    pb: { xs: 2, sm: 2.5 },
+                
+                    ml: {xs:0,md:-2},
+                
+                    width: { xs: '110%', sm: '100%',md:'110%' },
+                    
+                    minWidth: { xs: '100%', sm: 220, md: '110%' },
+                    maxWidth: { xs: '100%', sm: 400,md:'110%' },
+                    minHeight: { xs: 120, sm: 180 },
+                    maxHeight: { xs: 180, sm: 180 },
+                    height: { xs: 140, sm: 180 },
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
+                    position: 'relative',
+                    transition: 'border 0.2s, box-shadow 0.2s, transform 0.2s',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    alignItems: 'stretch',
+                    '&:hover': {
+                      border: '1.5px solid #00329E',
+                      boxShadow: '0 6px 24px rgba(2, 78, 153, 0.15)',
+                      transform: 'scale(1.03)',
+                      zIndex: 2,
+                    },
+                    mr: { xs: 0, sm: 2, md: 3 },
+                  }}
+                >
+                  {/* Love (heart) icon at top right */}
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      top: 12,
+                      right: 12,
+                      zIndex: 3,
+                      cursor: 'pointer',
+                      transition: 'color 0.2s',
+                      color: favoriteStates[template.id] ? '#00329E' : '#b0b8c4',
+                    }}
+                    onClick={e => {
+                      e.stopPropagation();
+                      handleToggleFavorite(template.id);
+                    }}
+                  >
+                    {favoriteStates[template.id] ? (
+                      <FavoriteIcon sx={{ fontSize: 23 }} />
+                    ) : (
+                      <FavoriteBorderIcon sx={{ fontSize: 23 }} />
+                    )}
+                  </Box>
+                  {/* Content (heading + paragraph) */}
+                  <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', minHeight: 0 }}>
+                    <Box
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: 14,
+                        width:'95%',
+                        mb: 0.5,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                        lineHeight: 1.2,
+                        minHeight: '2.6em',
+                      }}
+                      title={template.document_name || template.title || template.file_name}
+                    >
+                      {template.document_name || template.title || template.file_name}
+                    </Box>
+                    <Typography fontSize={14} color="text.secondary">
+                      {template.description}
+                    </Typography>
+                  </Box>
+                  {/* Proceed button pinned to bottom */}
+                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+                    <Button
+                      variant="outlined"
+                      endIcon={<ArrowForwardIcon />}
+                      sx={{
+                        height: 30,
+                        minWidth: 100,
+                        fontSize: 14,
+                        fontWeight: 600,
+                        borderRadius: 2,
+                        alignSelf: 'flex-end',
+                        borderColor: '#00329E',
+                        color: '#00329E',
+                        px: 2,
+                        '&:hover': {
+                          borderColor: '#00329E',
+                          background: 'rgba(0,50,158,0.04)'
+                        }
+                      }}
+                      onClick={() => handleCardProceed(template.id)}
+                    >
+                      Proceed
+                    </Button>
+                  </Box>
+                </Paper>
+              </Grid2>
+            ))}
+          </Grid2>
+        </>
       )}
     </Box>
-    {/* Content (heading + paragraph) */}
-    <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', minHeight: 0 }}>
-      <Box
-        sx={{
-          fontWeight: 700,
-          fontSize: 14,
-          width:'95%',
-          mb: 0.5,
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          display: '-webkit-box',
-          WebkitLineClamp: 2,
-          WebkitBoxOrient: 'vertical',
-          lineHeight: 1.2,
-          minHeight: '2.6em',
-        }}
-        title={template.document_name || template.title || template.file_name}
-      >
-        {template.document_name || template.title || template.file_name}
-      </Box>
-      <Typography fontSize={14} color="text.secondary">
-        {template.description}
-      </Typography>
-    </Box>
-    {/* Proceed button pinned to bottom */}
-    <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
-      <Button
-        variant="outlined"
-        endIcon={<ArrowForwardIcon />}
-        sx={{
-          height: 30,
-          minWidth: 100,
-          fontSize: 14,
-          fontWeight: 600,
-          borderRadius: 2,
-          alignSelf: 'flex-end',
-          borderColor: '#00329E',
-          color: '#00329E',
-          px: 2,
-          '&:hover': {
-            borderColor: '#00329E',
-            background: 'rgba(0,50,158,0.04)'
-          }
-        }}
-        onClick={() => handleCardProceed(template.id)}
-      >
-        Proceed
-      </Button>
-    </Box>
-  </Paper>
-</Grid2>
-                    ))}
-        </Grid2>
-      )}
-        </Box>
     );
 }
 
@@ -1276,5 +1369,6 @@ function ScrollableCard({ children, showArrows, containerRef: externalRef }) {
                 </Box>
             )}
         </Box>
+    
     );
 } 
