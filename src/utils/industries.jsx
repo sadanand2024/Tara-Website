@@ -30,5 +30,6 @@ export const industries = [
   'Travel/Hospitality',
   'Web Designing',
   'Web Development',
-  'Writers'
+  'Writers',
+  'Software Services'
 ];

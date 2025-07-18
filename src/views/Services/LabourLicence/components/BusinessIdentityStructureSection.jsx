@@ -6,10 +6,12 @@ import { useSearchParams } from 'react-router-dom';
 import { openSnackbar } from 'store/slices/snackbar';
 import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
 import CircularProgressComponent from 'utils/CircularProgressComponent';
+import { industries } from 'utils/industries';
 import Factory from 'utils/Factory';
 import * as Yup from 'yup';
 import GetActionButtons from '../../FormHelpers';
 import RaiseRequest from '../../RaiseRequest';
+
 
 const typeOfBusinessOptions = [
   'Proprietorship',
@@ -39,28 +41,6 @@ const categoryOfEstablishmentOptions = [
   'Media & Entertainment',
   'Others'
 ];
-const natureOfBusinessOptions = [
-  'Manufacturing / Production',
-  'Construction and Civil Works',
-  'Trading / Retail / Wholesale',
-  'IT / Software / BPO Services',
-  'Hospitality and Food Services',
-  'Security Services',
-  'Housekeeping / Facility Management',
-  'Logistics and Transportation',
-  'Educational Institutions',
-  'Healthcare and Medical Services',
-  'Administrative / Clerical Services',
-  'Electrical / Mechanical Maintenance',
-  'Marketing and Sales Activities',
-  'Mining and Quarrying',
-  'Event Management Services',
-  'Agriculture and Farming Operations',
-  'Real Estate and Property Management',
-  'Financial and Insurance Services',
-  'Printing and Publishing Services',
-  'Media and Entertainment Services'
-];
 
 const fields = [
   {
@@ -87,7 +67,7 @@ const fields = [
     label: 'Nature of Business',
     name: 'nature_of_business',
     type: 'autocomplete',
-    options: natureOfBusinessOptions,
+    options: industries,
     required: true
   },
   {
@@ -192,7 +172,9 @@ const BusinessIdentityStructureSection = ({ taskId }) => {
   const getLabelWithAsterisk = (label, isRequired = true) => (
     <span>
       {label}
+
       {isRequired && <span style={{ color: 'red' }}> *</span>}
+
     </span>
   );
   const renderField = (field) => {

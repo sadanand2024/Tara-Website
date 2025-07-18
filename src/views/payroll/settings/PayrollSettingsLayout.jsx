@@ -599,81 +599,101 @@ const PayrollSettingsLayout = () => {
     }
 
     if (currentStep?.secondaryAction === 'salaryTemplates') {
-      return (
-        <Stack direction="row" spacing={2} alignItems="center">
-          <SearchBar
-            placeholder="Search template..."
-            value={salaryTemplatesSearchQuery}
-            onChange={(e) => {
-              setSalaryTemplatesSearchQuery(e.target.value);
-            }}
-          />
-          <Button
-            variant="contained"
-            size="small"
-            startIcon={<AddIcon />}
-            onClick={() => {
-              const params = new URLSearchParams(location.search);
-              params.set('action', 'new');
-              navigate({ search: params.toString() });
-            }}
-            sx={{
-              textTransform: 'none',
-              fontWeight: 600,
-              fontSize: '0.9rem',
-              whiteSpace: 'nowrap'
-            }}
-          >
-            Create New Template
-          </Button>
-        </Stack>
-      );
+      // Check if user is editing or creating a new template
+      const params = new URLSearchParams(location.search);
+      const action = params.get('action');
+      const templateId = params.get('template_id');
+
+      // Only show search and create button if not editing or creating
+      if (!action && !templateId) {
+        return (
+          <Stack direction="row" spacing={2} alignItems="center">
+            <SearchBar
+              placeholder="Search template..."
+              value={salaryTemplatesSearchQuery}
+              onChange={(e) => {
+                setSalaryTemplatesSearchQuery(e.target.value);
+              }}
+            />
+            <Button
+              variant="contained"
+              size="small"
+              startIcon={<AddIcon />}
+              onClick={() => {
+                const params = new URLSearchParams(location.search);
+                params.set('action', 'new');
+                navigate({ search: params.toString() });
+              }}
+              sx={{
+                textTransform: 'none',
+                fontWeight: 600,
+                fontSize: '0.9rem',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              Create New Template
+            </Button>
+          </Stack>
+        );
+      }
+
+      return null;
     }
 
     if (currentStep?.secondaryAction === 'employeeMaster') {
-      return (
-        <Stack direction="row" spacing={2} alignItems="center">
-          <SearchBar
-            placeholder="Search employee..."
-            value={employeeMasterSearchQuery}
-            onChange={(e) => {
-              setEmployeeMasterSearchQuery(e.target.value);
-            }}
-          />
-          <Button
-            variant="outlined"
-            color="secondary"
-            size="small"
-            onClick={() => setEmployeeMasterBulkDialog(true)}
-            sx={{
-              textTransform: 'none',
-              fontWeight: 600,
-              fontSize: '0.9rem',
-              whiteSpace: 'nowrap'
-            }}
-          >
-            Bulk Upload
-          </Button>
-          <Button
-            variant="contained"
-            size="small"
-            startIcon={<AddIcon />}
-            onClick={() => {
-              const params = new URLSearchParams(location.search);
-              params.set('action', 'add');
-              navigate({ search: params.toString() });
-            }}
-            sx={{
-              textTransform: 'none',
-              fontWeight: 600,
-              fontSize: '0.9rem',
-              whiteSpace: 'nowrap'
-            }}
-          >
-            Add Employee
-          </Button>
-        </Stack>
-      );
+      // Check if user is editing or adding a new employee
+      const params = new URLSearchParams(location.search);
+      const action = params.get('action');
+      const employeeId = params.get('employee_id');
+
+      // Only show search and buttons if not editing or adding
+      if (!action && !employeeId) {
+        return (
+          <Stack direction="row" spacing={2} alignItems="center">
+            <SearchBar
+              placeholder="Search employee..."
+              value={employeeMasterSearchQuery}
+              onChange={(e) => {
+                setEmployeeMasterSearchQuery(e.target.value);
+              }}
+            />
+            <Button
+              variant="outlined"
+              color="secondary"
+              size="small"
+              onClick={() => setEmployeeMasterBulkDialog(true)}
+              sx={{
+                textTransform: 'none',
+                fontWeight: 600,
+                fontSize: '0.9rem',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              Bulk Upload
+            </Button>
+            <Button
+              variant="contained"
+              size="small"
+              startIcon={<AddIcon />}
+              onClick={() => {
+                const params = new URLSearchParams(location.search);
+                params.set('action', 'add');
+                navigate({ search: params.toString() });
+              }}
+              sx={{
+                textTransform: 'none',
+                fontWeight: 600,
+                fontSize: '0.9rem',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              Add Employee
+            </Button>
+          </Stack>
+        );
+      }
+
+      return null;
     }
 
     if (currentStep?.secondaryAction === 'leaveAttendance') {
@@ -690,28 +710,6 @@ const PayrollSettingsLayout = () => {
               renderInput={(params) => <TextField {...params} label="Leave Type" />}
             />
           )}
-          {/* <Button
-            variant="outlined"
-            color="secondary"
-            size="small"
-            onClick={() => {
-              // Trigger bulk upload for the current tab
-              if (leaveAttendanceActiveTab === 0) {
-                // Holiday bulk upload
-                console.log('Holiday bulk upload');
-              } else {
-                // Leave bulk upload
-                console.log('Leave bulk upload');
-              }
-            }}
-            sx={{
-              textTransform: 'none',
-              fontWeight: 600,
-              fontSize: '0.9rem'
-            }}
-          >
-            Bulk Upload
-          </Button> */}
           <Button
             variant="contained"
             size="small"

@@ -104,7 +104,30 @@ function LeaveManagement({ handleBack, handleNext, leaveType = 'All', setLeaveTy
 
   const handleDelete = async (item) => {
     const { res } = await Factory('delete', `/payroll/leave-management/${item.id}`, {});
-    if (res?.status_cd === 0) fetchData();
+    if (res?.status_cd === 0) {
+      if (res?.status_cd === 0) {
+        fetchData();
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'Leave Record deleted successfully',
+            variant: 'alert',
+            alert: { color: 'success' },
+            close: false
+          })
+        );
+      } else {
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'Failed to delete leave record',
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
+      }
+    }
   };
 
   const openDialog = (type = '', record = null) => {
