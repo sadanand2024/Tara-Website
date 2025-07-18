@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { Button, Box, Stack, Grid2, Typography, TextField } from '@mui/material';
+import { Button, Box, Stack, Grid2, Typography, TextField, Autocomplete } from '@mui/material';
 import { indian_States_And_UTs } from 'utils/indian_States_And_UT';
 import CustomInput from 'utils/CustomInput';
 import CustomAutocomplete from 'utils/CustomAutocomplete';
@@ -101,13 +101,19 @@ export default function WorkLocationDialog({ open, handleClose, fetchWorkLocatio
       if (field.name === 'address_state') {
         return (
           <Grid2 key={field.name} size={{ xs: 12, sm: 6 }}>
-            <CustomAutocomplete
+            <Typography variant="subtitle1" sx={{ mb: 0.5 }}>
+              {getLabelWithAsterisk(field.label, field.required)}
+            </Typography>
+            <Autocomplete
               value={values[field.name]}
               name={field.name}
-              onChange={(e, newValue) => setFieldValue(field.name, newValue)}
+              onChange={(e, newValue) => {
+                setFieldValue(field.name, newValue);
+              }}
               options={indian_States_And_UTs}
               error={touched[field.name] && Boolean(errors[field.name])}
               helperText={touched[field.name] && errors[field.name]}
+              renderInput={(params) => <TextField {...params} size="small" />}
               required={field.required}
               label={field.label}
               sx={{
@@ -122,9 +128,6 @@ export default function WorkLocationDialog({ open, handleClose, fetchWorkLocatio
 
       return (
         <Grid2 key={field.name} size={{ xs: 12, sm: 6 }}>
-          {/* <Typography variant="subtitle1" sx={{ mb: 0.5 }}>
-            {field.label}
-          </Typography> */}
           <Typography variant="subtitle1" sx={{ mb: 0.5 }}>
             {getLabelWithAsterisk(field.label, field.required)}
           </Typography>

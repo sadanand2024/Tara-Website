@@ -155,7 +155,7 @@ export default function BulkUploadDialog({ open, handleClose, getData, payrollid
         dispatch(
           openSnackbar({
             open: true,
-            message: 'Work locations uploaded successfully',
+            message: `${type}s uploaded successfully`,
             variant: 'alert',
             alert: { color: 'success' },
             close: false

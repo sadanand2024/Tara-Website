@@ -117,7 +117,7 @@ function Organizationdetails({ handleNext }) {
       setLoading(true);
       const postBusinessDetails = {
         business_details: {
-          nameOfBusiness: values.nameOfBusiness,
+          nameOfBusiness: values.business_name,
           pan: values.pan,
           dob_or_incorp_date: values.dob_or_incorp_date,
           entityType: values.entityType,
@@ -158,8 +158,6 @@ function Organizationdetails({ handleNext }) {
             close: false
           })
         );
-
-        navigate(-1);
       } else {
         dispatch(
           openSnackbar({

@@ -13,7 +13,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import RaiseRequest from '../../RaiseRequest';
 import GetActionButtons from '../../FormHelpers';
 import CircularProgressComponent from 'utils/CircularProgressComponent';
-
+import { industries } from 'utils/industries';
 
 const typeOfBusinessOptions = [
   'Proprietorship',
@@ -43,28 +43,6 @@ const categoryOfEstablishmentOptions = [
   'Media & Entertainment',
   'Others'
 ];
-const natureOfBusinessOptions = [
-  'Manufacturing / Production',
-  'Construction and Civil Works',
-  'Trading / Retail / Wholesale',
-  'IT / Software / BPO Services',
-  'Hospitality and Food Services',
-  'Security Services',
-  'Housekeeping / Facility Management',
-  'Logistics and Transportation',
-  'Educational Institutions',
-  'Healthcare and Medical Services',
-  'Administrative / Clerical Services',
-  'Electrical / Mechanical Maintenance',
-  'Marketing and Sales Activities',
-  'Mining and Quarrying',
-  'Event Management Services',
-  'Agriculture and Farming Operations',
-  'Real Estate and Property Management',
-  'Financial and Insurance Services',
-  'Printing and Publishing Services',
-  'Media and Entertainment Services'
-];
 
 const fields = [
   {
@@ -91,7 +69,7 @@ const fields = [
     label: 'Nature of Business',
     name: 'nature_of_business',
     type: 'autocomplete',
-    options: natureOfBusinessOptions,
+    options: industries,
     required: true
   },
   {
@@ -111,7 +89,7 @@ const BusinessIdentityStructureSection = ({ taskId }) => {
   const [searchParams] = useSearchParams();
   const service_id = searchParams.get('service_id');
   const dispatch = useDispatch();
-    const [isLoading, setIsLoading] = useState(false); 
+  const [isLoading, setIsLoading] = useState(false);
 
   const [businessIdentityposttype, setBusinessIdentityposttype] = useState('post');
   const [businessInfo, setBusinessInfo] = useState({
@@ -141,7 +119,7 @@ const BusinessIdentityStructureSection = ({ taskId }) => {
       nature_of_business: Yup.string().required('Nature of Business is required')
     }),
     onSubmit: async (values) => {
-        setIsLoading(true); 
+      setIsLoading(true);
 
       const url =
         businessIdentityposttype === 'put' ? `/labourlicense/business-identity/${values.id}/` : `/labourlicense/business-identity/`;
@@ -187,12 +165,12 @@ const BusinessIdentityStructureSection = ({ taskId }) => {
       setIsLoading(false);
     }
   });
-    const getLabelWithAsterisk = (label, isRequired = true) => (
-  <span>
-    {label}
-    {isRequired && <span style={{ color: 'red', fontSize: '1.3em' }}> *</span>}
-  </span>
-);
+  const getLabelWithAsterisk = (label, isRequired = true) => (
+    <span>
+      {label}
+      {isRequired && <span style={{ color: 'red', fontSize: '1.3em' }}> *</span>}
+    </span>
+  );
   const renderField = (field) => {
     switch (field.type) {
       case 'autocomplete':
@@ -282,7 +260,6 @@ const BusinessIdentityStructureSection = ({ taskId }) => {
   };
   const { values, setValues, handleChange, errors, touched, handleSubmit, handleBlur, resetForm, setFieldValue } = formik;
   const getBusinessIdentity = async () => {
-   
     const url = `/labourlicense/business-identity/by-request-or-task?service_request_id=${service_id}`;
     const { res } = await Factory('get', url);
     if (res.status_cd === 0) {
@@ -319,12 +296,11 @@ const BusinessIdentityStructureSection = ({ taskId }) => {
       );
       setBusinessIdentityposttype('post');
     }
-    
   };
   useEffect(() => {
     getBusinessIdentity();
   }, []);
-   if (isLoading) {
+  if (isLoading) {
     return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading business identity...'} />;
   }
 
@@ -360,8 +336,8 @@ const BusinessIdentityStructureSection = ({ taskId }) => {
                 {field.label}
               </Typography> */}
               <Typography variant="subtitle1" mb={1}>
-    {getLabelWithAsterisk(field.label, field.required)}
-  </Typography>
+                {getLabelWithAsterisk(field.label, field.required)}
+              </Typography>
               {renderField(field)}
             </Grid2>
           ))}

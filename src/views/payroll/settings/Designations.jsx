@@ -27,7 +27,8 @@ import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
 import { IconButton } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
 import BulkUploadDialog from 'ui-component/extended/BulkUploadDialog';
-
+import { useDispatch } from 'store';
+import { openSnackbar } from 'store/slices/snackbar';
 function Designations({
   handleBack,
   handleNext,
@@ -44,7 +45,7 @@ function Designations({
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
   const [loading, setLoading] = useState(false);
-
+  const dispatch = useDispatch();
   const handleOpenDeleteDialog = (designation) => {
     setSelectedRow(designation);
     setOpenDeleteDialog(true);
@@ -99,7 +100,26 @@ function Designations({
     const url = `/payroll/designations/${designation.id}/`;
     const { res } = await Factory('delete', url, {});
     if (res?.status_cd === 0) {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Record Deleted Successfully',
+          variant: 'alert',
+          alert: { color: 'success' },
+          close: false
+        })
+      );
       fetchDesignations();
+    } else {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res?.data?.data?.error || 'Unknown error'),
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     }
   };
 

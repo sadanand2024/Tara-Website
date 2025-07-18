@@ -14,7 +14,7 @@ export default function DesignationDialog({ open, handleClose, fetchDesignations
   const [searchParams] = useSearchParams();
   const [payrollid, setPayrollId] = useState(null);
 
-  const designationFields = [{ name: 'designation_name', label: 'Designation Name',required: true }];
+  const designationFields = [{ name: 'designation_name', label: 'Designation Name', required: true }];
 
   useEffect(() => {
     const id = searchParams.get('payrollid');
@@ -47,7 +47,7 @@ export default function DesignationDialog({ open, handleClose, fetchDesignations
         fetchDesignations();
         resetForm();
       } else {
-        dispatchSnackbar(
+        dispatch(
           openSnackbar({
             open: true,
             message: JSON.stringify(res?.data?.error || 'Something went wrong'),
@@ -60,23 +60,24 @@ export default function DesignationDialog({ open, handleClose, fetchDesignations
     }
   });
   const getLabelWithAsterisk = (label, isRequired) => (
-  <>
-    {label}
-    {isRequired && <span style={{ color: 'red' }}> *</span>}
-  </>
-);
-
-  
+    <>
+      {label}
+      {isRequired && <span style={{ color: 'red' }}> *</span>}
+    </>
+  );
 
   const { values, handleChange, handleBlur, touched, errors, handleSubmit, setValues, resetForm } = formik;
 
-  useEffect(() => { 
+  useEffect(() => {
     if (type === 'edit' && selectedRecord) {
       setValues({
         designation_name: selectedRecord.designation_name || ''
       });
+    } else if (type === 'add' || !type) {
+      // Reset form when opening for adding new designation
+      resetForm();
     }
-  }, [type, selectedRecord, setValues]);
+  }, [type, selectedRecord, setValues, resetForm]);
 
   return (
     <Modal
@@ -115,9 +116,9 @@ export default function DesignationDialog({ open, handleClose, fetchDesignations
             {/* <Typography variant="subtitle1" gutterBottom>
               {field.label}
             </Typography> */}
-              <Typography variant="subtitle1" gutterBottom>
+            <Typography variant="subtitle1" gutterBottom>
               {getLabelWithAsterisk(field.label, field.required)}
-              </Typography>
+            </Typography>
             <TextField
               size="small"
               fullWidth

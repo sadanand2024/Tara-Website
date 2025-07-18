@@ -172,7 +172,7 @@ function HolidayManagement({ handleBack, handleNext, onAddClick }) {
       dispatch(
         openSnackbar({
           open: true,
-          message: 'Holiday deleted successfully',
+          message: 'Holiday Record deleted successfully',
           variant: 'alert',
           alert: { color: 'success' },
           close: false
@@ -182,7 +182,7 @@ function HolidayManagement({ handleBack, handleNext, onAddClick }) {
       dispatch(
         openSnackbar({
           open: true,
-          message: 'Failed to delete holiday',
+          message: 'Failed to delete holiday record',
           variant: 'alert',
           alert: { color: 'error' },
           close: false

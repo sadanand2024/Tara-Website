@@ -25,6 +25,21 @@ function SalaryTemplate() {
   const [payrollid, setPayrollId] = useState(null);
   const [templateId, setTemplateId] = useState(null);
   const [enablePreviewButton, setEnablePreviewButton] = useState(false);
+  const [annualCtcInput, setAnnualCtcInput] = useState('');
+
+  // Utility function to format numbers for input display (with commas)
+  const formatNumberForInput = (value) => {
+    if (value === '' || value === null || value === undefined || isNaN(value)) return '';
+    return Number(value).toLocaleString('en-IN');
+  };
+
+  // Utility function to parse comma-separated numbers for calculations
+  const parseCommaNumber = (value) => {
+    if (value === '' || value === null || value === undefined) return '';
+    // Remove all commas and convert to number
+    const cleanValue = String(value).replace(/,/g, '');
+    return isNaN(cleanValue) ? '' : cleanValue;
+  };
 
   useEffect(() => {
     const pid = searchParams.get('payrollid');
@@ -59,7 +74,7 @@ function SalaryTemplate() {
       const fixedAllowance = annualCtc - totalEarnings;
 
       // Validate Fixed Allowance
-      if (fixedAllowance <= 0) {
+      if (fixedAllowance < 0) {
         setValues((prev) => ({
           ...prev,
           errorMessage: 'The system calculated Fixed Allowance cannot be less than zero. Check and enter valid salary details.'
@@ -106,118 +121,138 @@ function SalaryTemplate() {
   });
 
   const { values, setValues, handleChange, handleSubmit, setFieldValue, errors, touched, handleBlur } = formik;
+  // Initialize annual CTC input value
+  useEffect(() => {
+    if (values.annual_ctc !== undefined && values.annual_ctc !== null) {
+      setAnnualCtcInput(formatNumberForInput(values.annual_ctc));
+    }
+  }, [values.annual_ctc]);
 
   return (
-    <MainCard title="Create Salary Template">
-      <Box component="form" onSubmit={handleSubmit} sx={{ p: 2 }}>
-        <Grid2 container spacing={3}>
-          <Grid2 size={{ xs: 12, sm: 4 }}>
-            <Typography variant="subtitle1" sx={{ mb: 0.5 }}>
-              Template Name <span style={{ color: 'red' }}>*</span>
-            </Typography>
-            <TextField
-              fullWidth
-              name="template_name"
-              size="small"
-              value={values.template_name}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              error={touched.template_name && Boolean(errors.template_name)}
-              helperText={touched.template_name && errors.template_name}
-              sx={{
-                '& .MuiInputBase-input': {
-                  color: 'grey.600'
-                }
-              }}
-            />
-          </Grid2>
-
-          <Grid2 size={{ xs: 12, sm: 4 }}>
-            <Typography variant="subtitle1" sx={{ mb: 0.5 }}>
-              Description <span style={{ color: 'red' }}>*</span>
-            </Typography>
-            <TextField
-              fullWidth
-              size="small"
-              name="description"
-              value={values.description}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              error={touched.description && Boolean(errors.description)}
-              helperText={touched.description && errors.description}
-              sx={{
-                '& .MuiInputBase-input': {
-                  color: 'grey.600'
-                }
-              }}
-            />
-          </Grid2>
-
-          <Grid2 size={{ xs: 12, sm: 4 }}>
-            <Typography variant="subtitle1" sx={{ mb: 0.5 }}>
-              Annual CTC <span style={{ color: 'red' }}>*</span>
-            </Typography>
-            <Stack direction="row" spacing={2} alignItems="center">
-              <TextField
-                fullWidth
-                size="small"
-                name="annual_ctc"
-                value={values.annual_ctc}
-                onChange={(e) => {
-                  setFieldValue('annual_ctc', e.target.value);
-                  setEnablePreviewButton(true);
-                }}
-                onBlur={handleBlur}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                  }
-                }}
-                error={touched.annual_ctc && Boolean(errors.annual_ctc)}
-                helperText={touched.annual_ctc && errors.annual_ctc}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      ₹<Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
-                    </InputAdornment>
-                  ),
-                  sx: {
-                    '& .MuiInputBase-input': {
-                      color: 'grey.600'
-                    }
-                  }
-                }}
-              />
-              <Typography variant="subtitle1" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
-                Per year
-              </Typography>
-            </Stack>
-          </Grid2>
+    <Box component="form" onSubmit={handleSubmit} sx={{ p: 2 }}>
+      <Grid2 container spacing={3}>
+        <Grid2 size={{ xs: 12, sm: 4 }}>
+          <Typography variant="subtitle1" sx={{ mb: 0.5 }}>
+            Template Name <span style={{ color: 'red' }}>*</span>
+          </Typography>
+          <TextField
+            fullWidth
+            name="template_name"
+            size="small"
+            value={values.template_name}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            error={touched.template_name && Boolean(errors.template_name)}
+            helperText={touched.template_name && errors.template_name}
+            sx={{
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
+          />
         </Grid2>
 
-        <Box mt={4}>
-          <RenderSalaryTemplateTable
-            source="template"
-            values={values}
-            setValues={setValues}
-            setFieldValue={setFieldValue}
-            enablePreviewButton={enablePreviewButton}
-            setEnablePreviewButton={setEnablePreviewButton}
+        <Grid2 size={{ xs: 12, sm: 4 }}>
+          <Typography variant="subtitle1" sx={{ mb: 0.5 }}>
+            Description <span style={{ color: 'red' }}>*</span>
+          </Typography>
+          <TextField
+            fullWidth
+            size="small"
+            name="description"
+            value={values.description}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            error={touched.description && Boolean(errors.description)}
+            helperText={touched.description && errors.description}
+            sx={{
+              '& .MuiInputBase-input': {
+                color: 'grey.600'
+              }
+            }}
           />
-        </Box>
+        </Grid2>
 
-        <Stack direction="row" spacing={2} sx={{ mt: 4, justifyContent: 'space-between' }}>
-          <Button startIcon={<ArrowBackIcon />} variant="outlined" onClick={() => navigate(-1)}>
-            Back
-          </Button>
-          {enablePreviewButton === false && (
-            <Button type="submit" variant="contained" color="primary">
-              Save Template
-            </Button>
-          )}
-        </Stack>
+        <Grid2 size={{ xs: 12, sm: 4 }}>
+          <Typography variant="subtitle1" sx={{ mb: 0.5 }}>
+            Annual CTC <span style={{ color: 'red' }}>*</span>
+          </Typography>
+          <Stack direction="row" spacing={2} alignItems="center">
+            <TextField
+              fullWidth
+              size="small"
+              name="annual_ctc"
+              value={annualCtcInput}
+              onChange={(e) => {
+                const val = e.target.value;
+                // Allow only numbers, commas, and decimal points
+                const cleanVal = val.replace(/[^\d,.]/g, '');
+                setAnnualCtcInput(cleanVal);
+
+                // Also update Formik field value to trigger validation
+                const parsedValue = parseCommaNumber(cleanVal);
+                setFieldValue('annual_ctc', parsedValue);
+              }}
+              onBlur={(e) => {
+                const parsedValue = parseCommaNumber(annualCtcInput);
+                setFieldValue('annual_ctc', parsedValue);
+                setAnnualCtcInput(formatNumberForInput(parsedValue));
+                setEnablePreviewButton(true);
+                handleBlur(e);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  const parsedValue = parseCommaNumber(annualCtcInput);
+                  setFieldValue('annual_ctc', parsedValue);
+                  setAnnualCtcInput(formatNumberForInput(parsedValue));
+                  setEnablePreviewButton(true);
+                }
+              }}
+              error={touched.annual_ctc && Boolean(errors.annual_ctc)}
+              helperText={touched.annual_ctc && errors.annual_ctc}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    ₹<Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
+                  </InputAdornment>
+                ),
+                sx: {
+                  '& .MuiInputBase-input': {
+                    color: 'grey.600'
+                  }
+                }
+              }}
+            />
+            <Typography variant="subtitle1" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
+              Per year
+            </Typography>
+          </Stack>
+        </Grid2>
+      </Grid2>
+
+      <Box mt={4}>
+        <RenderSalaryTemplateTable
+          source="template"
+          values={values}
+          setValues={setValues}
+          setFieldValue={setFieldValue}
+          enablePreviewButton={enablePreviewButton}
+          setEnablePreviewButton={setEnablePreviewButton}
+        />
       </Box>
-    </MainCard>
+
+      <Stack direction="row" spacing={2} sx={{ mt: 4, justifyContent: 'space-between' }}>
+        <Button startIcon={<ArrowBackIcon />} variant="outlined" onClick={() => navigate(-1)}>
+          Back
+        </Button>
+        {enablePreviewButton === false && (
+          <Button type="submit" variant="contained" color="primary">
+            Save Template
+          </Button>
+        )}
+      </Stack>
+    </Box>
   );
 }
 

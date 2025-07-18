@@ -84,7 +84,13 @@ function Worklocation({ handleBack, handleNext, searchQuery = '', openDialog = f
     const { res, error } = await Factory('get', url, {});
     setLoading(false);
     if (res?.status_cd === 0 && Array.isArray(res?.data)) {
-      setWorkLocations(res.data);
+      // Move the last record (head office) to the first position
+      const data = [...res.data];
+      if (data.length > 0) {
+        const lastRecord = data.pop(); // Remove the last record
+        data.unshift(lastRecord); // Add it to the beginning
+      }
+      setWorkLocations(data);
     } else {
       setWorkLocations([]);
       dispatch(

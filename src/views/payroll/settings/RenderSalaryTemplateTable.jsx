@@ -31,6 +31,7 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
   const [fixedAllowance, setFixedAllowance] = useState({ monthly: 0, annually: 0 });
   const [loading, setLoading] = useState(false);
   const [viewPreview, setViewPreview] = useState(false);
+  const [inputValues, setInputValues] = useState({});
   const dispatch = useDispatch();
 
   const get_individual_componnet_data = async (id) => {
@@ -255,6 +256,11 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
     const cleaned = updated.filter((e, i) => e.component_name || i === index);
 
     setFieldValue('earnings', cleaned);
+    // Update input value for the selected component
+    setInputValues((prev) => ({
+      ...prev,
+      [index]: formatNumberForInput(selectedItem.calculation_type?.value || 0)
+    }));
     setEnablePreviewButton(true);
   };
 
@@ -321,6 +327,10 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
     const updated = [...values.earnings, newComponent];
     setFieldValue('earnings', updated);
 
+    // Initialize input value for the new component
+    const newIndex = updated.length - 1;
+    setInputValues((prev) => ({ ...prev, [newIndex]: '' }));
+
     setFieldValue('errorMessage', ''); // ✅ clear previous error
     setEnablePreviewButton(true);
   };
@@ -328,6 +338,20 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
   const handleDeleteEarning = (index) => {
     const updated = values.earnings.filter((_, i) => i !== index);
     setFieldValue('earnings', updated);
+
+    // Clean up input values for deleted component
+    setInputValues((prev) => {
+      const newInputValues = {};
+      Object.keys(prev).forEach((key) => {
+        const keyIndex = parseInt(key);
+        if (keyIndex < index) {
+          newInputValues[keyIndex] = prev[keyIndex];
+        } else if (keyIndex > index) {
+          newInputValues[keyIndex - 1] = prev[keyIndex];
+        }
+      });
+      return newInputValues;
+    });
 
     setFieldValue('errorMessage', ''); // ✅ clear previous error
     setEnablePreviewButton(true);
@@ -532,9 +556,34 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
       setViewPreview(true);
     }
   }, [values.benefits, values.deductions]);
+
+  // Initialize input values when earnings change
+  useEffect(() => {
+    const newInputValues = {};
+    values.earnings.forEach((earning, index) => {
+      if (earning.calculation !== undefined && earning.calculation !== null) {
+        newInputValues[index] = formatNumberForInput(earning.calculation);
+      }
+    });
+    setInputValues(newInputValues);
+  }, [values.earnings]);
   const formatNumberIN = (value) => {
     if (value === '' || value === null || value === undefined || isNaN(value)) return '';
     return Number(value).toLocaleString('en-IN', { maximumFractionDigits: 2, minimumFractionDigits: 2 });
+  };
+
+  // Utility function to format numbers for input display (with commas)
+  const formatNumberForInput = (value) => {
+    if (value === '' || value === null || value === undefined || isNaN(value)) return '';
+    return Number(value).toLocaleString('en-IN');
+  };
+
+  // Utility function to parse comma-separated numbers for calculations
+  const parseCommaNumber = (value) => {
+    if (value === '' || value === null || value === undefined) return '';
+    // Remove all commas and convert to number
+    const cleanValue = String(value).replace(/,/g, '');
+    return isNaN(cleanValue) ? '' : cleanValue;
   };
   return (
     <TableContainer
@@ -543,17 +592,35 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
         width: '100%',
         borderRadius: 2,
         boxShadow: 1,
-        overflowX: 'auto'
+        overflowX: 'auto',
+        maxWidth: '100%'
       }}
     >
-      <Table>
-        <TableHead>
-          <TableRow sx={{ bgcolor: 'grey.100' }}>
-            <TableCell>Component</TableCell>
-            <TableCell>Calculation</TableCell>
-            <TableCell>Monthly</TableCell>
-            <TableCell>Annually</TableCell>
-            <TableCell>Action</TableCell>
+      <Table size="small" sx={{ tableLayout: 'fixed', width: '100%' }}>
+        <TableHead
+          sx={{
+            backgroundColor: 'primary.main',
+            '& .MuiTableCell-root': {
+              color: '#ffffff !important'
+            }
+          }}
+        >
+          <TableRow>
+            <TableCell sx={{ width: '25%' }} align="left">
+              Component
+            </TableCell>
+            <TableCell sx={{ width: '35%' }} align="left">
+              Calculation
+            </TableCell>
+            <TableCell sx={{ width: '10%' }} align="left">
+              Monthly
+            </TableCell>
+            <TableCell sx={{ width: '10%' }} align="left">
+              Annually
+            </TableCell>
+            <TableCell sx={{ width: '10%' }} align="left">
+              Action
+            </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -569,7 +636,13 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
             .filter((e) => e.component_name !== 'Fixed Allowance')
             .map((earning, index) => (
               <TableRow key={index}>
-                <TableCell>
+                <TableCell
+                  sx={{
+                    width: { xs: '25%', md: '20%' },
+                    minWidth: 120,
+                    wordBreak: 'break-word'
+                  }}
+                >
                   <CustomAutocomplete
                     options={earningsData
                       .map((item) => item.component_name)
@@ -586,28 +659,42 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
                     }}
                   />
                 </TableCell>
-                <TableCell>
-                  <Stack direction="row" alignItems="center" spacing={2}>
+                <TableCell
+                  sx={{
+                    width: { xs: '35%', md: '40%' },
+                    minWidth: 200,
+                    wordBreak: 'break-word'
+                  }}
+                >
+                  <Stack direction="row" alignItems="center" spacing={{ xs: 1, md: 2 }} sx={{ flexWrap: 'wrap' }}>
                     <CustomInput
-                      value={earning.calculation}
+                      value={inputValues[index] !== undefined ? inputValues[index] : formatNumberForInput(earning.calculation)}
                       onChange={(e) => {
                         const val = e.target.value;
-                        const updated = [...values.earnings];
-                        updated[index].calculation = val;
-                        setFieldValue('earnings', updated);
-                        setEnablePreviewButton(true);
+                        // Allow only numbers, commas, and decimal points
+                        const cleanVal = val.replace(/[^\d,.]/g, '');
+                        setInputValues((prev) => ({ ...prev, [index]: cleanVal }));
                       }}
                       onBlur={() => {
-                        handleCalculationChange(earning.calculation, index);
+                        const parsedValue = parseCommaNumber(inputValues[index] || earning.calculation);
+                        const updated = [...values.earnings];
+                        updated[index].calculation = parsedValue;
+                        setFieldValue('earnings', updated);
+                        setInputValues((prev) => ({ ...prev, [index]: formatNumberForInput(parsedValue) }));
+                        handleCalculationChange(parsedValue, index);
                       }}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
                           e.preventDefault();
-                          handleCalculationChange(earning.calculation, index);
+                          const parsedValue = parseCommaNumber(inputValues[index] || earning.calculation);
+                          handleCalculationChange(parsedValue, index);
                         }
                       }}
                       type="text"
-                      sx={{ width: 250 }}
+                      sx={{
+                        width: { xs: 120, sm: 150, md: 200 },
+                        minWidth: 100
+                      }}
                     />
                     <Typography
                       variant="body2"
@@ -615,7 +702,8 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
                         whiteSpace: 'nowrap',
                         fontWeight: 500,
                         color: 'grey.700',
-                        minWidth: '130px' // Keeps consistent spacing
+                        minWidth: { xs: '80px', md: '130px' },
+                        fontSize: { xs: '0.75rem', md: '0.875rem' }
                       }}
                     >
                       {earning.component_name === 'Basic' && earning.calculation_type === 'Flat Amount'
@@ -627,9 +715,31 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
                   </Stack>
                 </TableCell>
 
-                <TableCell>{formatNumberIN(earning.monthly.toFixed(2))}</TableCell>
-                <TableCell>{formatNumberIN(earning.annually.toFixed(2))}</TableCell>
-                <TableCell>
+                <TableCell
+                  sx={{
+                    width: { xs: '15%', md: '15%' },
+                    minWidth: 100,
+                    wordBreak: 'break-word'
+                  }}
+                >
+                  {formatNumberIN(earning.monthly.toFixed(2))}
+                </TableCell>
+                <TableCell
+                  sx={{
+                    width: { xs: '15%', md: '15%' },
+                    minWidth: 100,
+                    wordBreak: 'break-word'
+                  }}
+                >
+                  {formatNumberIN(earning.annually.toFixed(2))}
+                </TableCell>
+                <TableCell
+                  sx={{
+                    width: { xs: '10%', md: '10%' },
+                    minWidth: 60,
+                    textAlign: 'center'
+                  }}
+                >
                   {index !== 0 && (
                     <Button color="error" onClick={() => handleDeleteEarning(index)}>
                       <IconTrash size={16} />
@@ -646,7 +756,12 @@ export default function RenderSalaryTemplateTable({ values, setFieldValue, setVa
           <TableRow>
             <TableCell>
               <Typography variant="h5" sx={{ whiteSpace: 'nowrap' }}>
-                Fixed Allowance (Monthly CTC - Sum of all other components - Benefits)
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <Typography variant="h5">Fixed Allowance</Typography>
+                  <Tooltip title="Monthly CTC - Sum of all other components - Benefits" placement="top" arrow>
+                    <InfoOutlinedIcon sx={{ fontSize: 18, color: 'gray', cursor: 'pointer' }} />
+                  </Tooltip>
+                </Stack>
               </Typography>
             </TableCell>
             <TableCell>Remaining Balance</TableCell>
