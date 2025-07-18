@@ -177,11 +177,22 @@ export default function HolidayManagementDialog({ open, handleClose, selectedRec
     });
   };
   const { values, setValues, errors, touched, handleSubmit, handleBlur, setFieldValue, resetForm } = formik;
-  useEffect(() => {
-    if (type === 'edit' && selectedRecord) {
-      setValues(selectedRecord); // Ensure values are set for editing
-    }
-  }, [type, selectedRecord]);
+  // useEffect(() => {
+  //   if (type === 'edit' && selectedRecord) {
+  //     setValues(selectedRecord); // Ensure values are set for editing
+  //   }
+  // }, [type, selectedRecord]);
+ useEffect(() => {
+  if (open && type === 'edit' && selectedRecord) {
+    setValues({
+      ...selectedRecord,
+      start_date: selectedRecord.start_date || '',
+      end_date: selectedRecord.end_date || ''
+    });
+  } else if (open && type === 'add') {
+    resetForm(); // Empty fields when adding
+  }
+}, [open, type, selectedRecord]);
   return (
     <Modal
       open={open}

@@ -1,38 +1,35 @@
-import CustomAutocomplete from 'utils/CustomAutocomplete';
-import React, { useEffect, useState } from 'react';
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import {
-  Button,
   Box,
-  TextField,
+  Button,
   Checkbox,
+  Divider,
   FormControlLabel,
   FormGroup,
-  Typography,
   Grid2,
+  InputAdornment,
+  Pagination,
+  Paper,
   Stack,
-  TableContainer,
   Table,
   TableBody,
   TableCell,
+  TableContainer,
   TableHead,
-  Paper,
   TableRow,
-  InputAdornment,
-  Divider,
-  Pagination
+  TextField,
+  Typography
 } from '@mui/material';
-import Modal from 'ui-component/extended/Modal';
+import { useFormik } from 'formik';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import Factory from 'utils/Factory';
-import ActionCell from 'ui-component/extended/ActionCell';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
+import Modal from 'ui-component/extended/Modal';
+import CustomAutocomplete from 'utils/CustomAutocomplete';
+import Factory from 'utils/Factory';
+import * as Yup from 'yup';
 
-import { IconButton } from '@mui/material';
-import { Edit, Delete } from '@mui/icons-material';
 import DeleteDialog from 'ui-component/extended/DeleteDialog';
 import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
 const validationSchema = Yup.object({
@@ -348,6 +345,7 @@ function Deductions({ handleNext, handleBack, open, setOpen, postType, setPostTy
 
           <Modal
             open={open}
+            title="Edit Deduction"
             maxWidth={'sm'}
             header={{ title: values.component_name || 'New Component', subheader: '' }}
             showClose={true}
@@ -407,6 +405,7 @@ function Deductions({ handleNext, handleBack, open, setOpen, postType, setPostTy
                                     value: 0
                                   });
                                 }}
+                                
                               />
                             }
                             label="Flat Amount"

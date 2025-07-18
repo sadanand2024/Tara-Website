@@ -441,7 +441,7 @@ export default function Index() {
                           >
                             Work on it
                           </Button>
-                          <Button
+                          {/* <Button
                             variant="outlined"
                             sx={{
                               color: (theme) => theme.palette.success.darker,
@@ -455,6 +455,30 @@ export default function Index() {
                               handleMarkAsDoneClick(index);
                             }}
                             disabled={doneStatus[index]}
+                          >
+                            Mark as Done
+                          </Button> */}
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleMarkAsDoneClick(index);
+                            }}
+                            disabled={doneStatus[index]}
+                            sx={{
+                              color: (theme) => theme.palette.success.darker,
+                              borderColor: (theme) => theme.palette.success.darker,
+                              '&:hover': {
+                                backgroundColor: 'transparent',
+                                borderColor: (theme) => theme.palette.success.main,
+                                color: (theme) => theme.palette.success.main
+                              },
+                              '&.Mui-disabled': {
+                                color: (theme) => theme.palette.success.light,
+                                borderColor: (theme) => theme.palette.success.light
+                              }
+                            }}
                           >
                             Mark as Done
                           </Button>

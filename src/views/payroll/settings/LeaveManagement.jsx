@@ -76,11 +76,23 @@ function LeaveManagement({ handleBack, handleNext, leaveType = 'All', setLeaveTy
     if (payrollId) fetchData();
   }, [payrollId]);
 
+  // useEffect(() => {
+  //   const filtered = leaveType === 'All' ? data : data.filter((d) => d?.leave_type.toLowerCase() === leaveType.toLowerCase());
+  //   setFilteredData(filtered);
+  //   setPage(1);
+  // }, [leaveType, data]);
   useEffect(() => {
-    const filtered = leaveType === 'All' ? data : data.filter((d) => d.leave_type.toLowerCase() === leaveType.toLowerCase());
-    setFilteredData(filtered);
-    setPage(1);
-  }, [leaveType, data]);
+      const safeLeaveType = (leaveType || '').toLowerCase();
+  const filtered =
+    leaveType === 'All'
+      ? data
+      : data.filter((d) =>
+          (d?.leave_type || '').toLowerCase() === safeLeaveType
+        );
+  setFilteredData(filtered);
+  setPage(1);
+}, [leaveType, data]);
+
 
   const fetchData = async () => {
     setLoading(true);

@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import RenderTable from './RenderTable';
-import {} from '@mui/material';
-import Factory from 'utils/Factory';
+import { } from '@mui/material';
+import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import RenderDialog from './RenderDialog';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
+import Factory from 'utils/Factory';
+import RenderDialog from './RenderDialog';
+import RenderTable from './RenderTable';
 
 export default function BonusAndIncentives({
   employeeMasterData,
@@ -26,7 +26,7 @@ export default function BonusAndIncentives({
     'Bonus Type',
     'Amount',
     'Committed Bonus',
-    'Ytd Bonus',
+    'YTD Bonus',
     'Remaining Balance'
     // 'Month',
     // 'Financial Year'

@@ -128,7 +128,7 @@ const RenderTable = ({
                           <IconButton size="small" color="primary" onClick={() => handleEdit(row)}>
                             <Edit />
                           </IconButton>
-                          {from !== 'Tds' ? (
+                          {from !== 'Tds' && from !== 'Adhoc Bonus & Incentives' ? (
                             <IconButton size="small" color="error" onClick={() => handleOpenDeleteDialog(row)}>
                               <Delete />
                             </IconButton>

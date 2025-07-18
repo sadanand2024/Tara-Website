@@ -65,7 +65,7 @@ const PersonalDetails = ({ fetchEmployeeData, employeeData, createdEmployeeId, s
 
   const validationSchema = Yup.object({
     dob: Yup.date().required('Date of Birth Required'),
-    guardian_name: Yup.string().required('Required'),
+    guardian_name: Yup.string().required('Guardian Required'),
     pan: Yup.string()
       .required()
       .matches(/^[A-Z]{5}\d{4}[A-Z]{1}$/, 'Invalid PAN'),
@@ -97,7 +97,10 @@ const PersonalDetails = ({ fetchEmployeeData, employeeData, createdEmployeeId, s
         ...values,
         payroll: Number(payrollId),
         employee: employeeData?.id || createdEmployeeId,
-        marital_status: values.marital_status.toLowerCase()
+        // marital_status: values.marital_status.toLowerCase() : null,
+        marital_status: values.marital_status ? values.marital_status.toLowerCase() : null,
+        blood_group: values.blood_group || null
+
       };
 
       const method = employeeData?.employee_personal_details?.id ? 'put' : 'post';
@@ -204,7 +207,8 @@ const PersonalDetails = ({ fetchEmployeeData, employeeData, createdEmployeeId, s
         ) : field.name === 'address_state' || field.name === 'marital_status' || field.name === 'blood_group' ? (
           <CustomAutocomplete
             name={fieldName}
-            value={value || ''}
+            value={value || null}
+            
             options={
               field.name === 'marital_status'
                 ? ['Single', 'Married']
@@ -212,7 +216,7 @@ const PersonalDetails = ({ fetchEmployeeData, employeeData, createdEmployeeId, s
                   ? ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-', 'Unknown']
                   : indian_States_And_UTs
             }
-            onChange={(e, newValue) => setFieldValue(fieldName, newValue)}
+            onChange={(e, newValue) => setFieldValue(fieldName, newValue??null)}
             error={Boolean(isTouched && error)}
             helperText={isTouched && error}
             sx={{ width: '100%', '& .MuiInputBase-input': { color: 'grey.600' } }}
