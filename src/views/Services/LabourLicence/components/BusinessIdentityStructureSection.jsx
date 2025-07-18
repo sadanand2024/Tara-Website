@@ -126,7 +126,9 @@ const BusinessIdentityStructureSection = ({ taskId }) => {
       setIsLoading(true);
 
       const url =
-        businessIdentityposttype === 'put' ? `/labourlicense/business-identity/${values.id}/` : `/labourlicense/business-identity/`;
+        businessIdentityposttype === 'put'
+          ? `/labourlicense/business-identity/${values.id}/`
+          : `/labourlicense/business-identity/`;
 
       const formData = new FormData();
       formData.append('service_request', service_id);
@@ -137,6 +139,9 @@ const BusinessIdentityStructureSection = ({ taskId }) => {
       formData.append('category_of_establishment', values.category_of_establishment);
       formData.append('classification_of_establishment', values.classification_of_establishment);
       formData.append('status', 'in progress');
+
+      // Add this line to send number_of_employees as JSON
+      formData.append('number_of_employees', JSON.stringify(personsEmployed));
 
       if (values.business_pan && typeof values.business_pan !== 'string') {
         formData.append('business_pan', values.business_pan);
@@ -270,7 +275,6 @@ const BusinessIdentityStructureSection = ({ taskId }) => {
     const { res } = await Factory('get', url);
     if (res.status_cd === 0) {
       // Map API response to form fields
-
       const responseData = {
         id: res.data.id || '',
         service_type: res.data.service_type || '',
@@ -289,6 +293,26 @@ const BusinessIdentityStructureSection = ({ taskId }) => {
       setValues(responseData);
       setBusinessInfo(res?.data);
       setBusinessIdentityposttype('put');
+
+      // Set personsEmployed from API if available
+      if (res.data.number_of_employees) {
+        try {
+          // If it's a stringified JSON, parse it
+          const parsed = typeof res.data.number_of_employees === 'string'
+            ? JSON.parse(res.data.number_of_employees)
+            : res.data.number_of_employees;
+          setPersonsEmployed({
+            male: parsed.male || '',
+            female: parsed.female || '',
+            others: parsed.others || '',
+            total: parsed.total || ''
+          });
+        } catch (e) {
+          setPersonsEmployed({ male: '', female: '', others: '', total: '' });
+        }
+      } else {
+        setPersonsEmployed({ male: '', female: '', others: '', total: '' });
+      }
     }
     if (res.status_cd === 1) {
       dispatch(

@@ -64,12 +64,19 @@ const StepTwo = ({taskId,tradelicencedetailsTaskId, step, setStep}) => {
       formData.append('apply_new_license', values.apply_new_license?.value);
       formData.append('trade_license_number', values.trade_license_number);
       formData.append('status', 'in progress');
-      if (values.trade_license_file && typeof values.trade_license_file !== 'string') {
-        formData.append('trade_license_file', values.trade_license_file);
-      }
-      else {
-    formData.append('trade_license_number', '');
-    formData.append('trade_license_file', '');
+  //     if (values.trade_license_file && typeof values.trade_license_file !== 'string') {
+  //       formData.append('trade_license_file', values.trade_license_file);
+  //     }
+  //     else {
+  //   formData.append('trade_license_number', '');
+  //   formData.append('trade_license_file', '');
+  // }
+  if (values.trade_license_file && typeof values.trade_license_file !== 'string') {
+    // Only append file if it's a File object (new upload)
+    formData.append('trade_license_file', values.trade_license_file);
+  } else if (values.trade_license_number) {
+    // Only append number if file is not new and number is provided
+    formData.append('trade_license_number', values.trade_license_number);
   }
 
       const { res } = await Factory(values.id ? 'put' : 'post', url, formData);
