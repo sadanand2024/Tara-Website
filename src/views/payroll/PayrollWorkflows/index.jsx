@@ -1,33 +1,29 @@
-import PropTypes from 'prop-types';
-import { useState, useEffect, useMemo, useRef } from 'react';
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import CoPresentOutlined from '@mui/icons-material/CoPresentOutlined';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import LogoutIcon from '@mui/icons-material/Logout';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import { Avatar, Box, Button, Paper, Stack, Tab, Tabs, Typography } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import { Box, Tab, Tabs, Typography, Stack, Avatar, Button, Paper } from '@mui/material';
-import { IconBolt } from '@tabler/icons-react';
-import MainCard from '../../../ui-component/cards/MainCard';
-import { useNavigate } from 'react-router-dom';
-import { useSearchParams } from 'react-router-dom';
-import NewJoiners from './NewJoiners';
-import Exits from './Exits';
-import Attendance from './Attendance';
-import LoansAndAdvances from './LoansAndAdvances';
-import BonusAndIncentives from './BonusAndIncentives';
-import AdhocBonus from './AdhocBonus';
-import SalaryRevisions from './SalaryRevisions';
-import OtherDeductions from './OtherDeductions';
-import Factory from 'utils/Factory';
+import PropTypes from 'prop-types';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
-import CoPresentOutlined from '@mui/icons-material/CoPresentOutlined';
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import LogoutIcon from '@mui/icons-material/Logout';
-import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
-import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
-import React from 'react';
-import Tds from './Tds';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import SearchBar from 'ui-component/extended/SearchBar';
+import Factory from 'utils/Factory';
+import MainCard from '../../../ui-component/cards/MainCard';
+import AdhocBonus from './AdhocBonus';
+import Attendance from './Attendance';
+import BonusAndIncentives from './BonusAndIncentives';
+import Exits from './Exits';
+import LoansAndAdvances from './LoansAndAdvances';
+import NewJoiners from './NewJoiners';
+import SalaryRevisions from './SalaryRevisions';
+import Tds from './Tds';
 // TabPanel Component
 const TabPanel = ({ children, value, index }) => (
   <div role="tabpanel" hidden={value !== index} id={`tabpanel-${index}`} aria-labelledby={`tab-${index}`}>
@@ -174,6 +170,15 @@ const PayrollWorkflows = ({ type }) => {
       setBonusData([]);
     }
   };
+  const getMonthName = (monthNum) => {
+    const monthNames = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    const index = parseInt(monthNum, 10) - 1;
+    return monthNames[index] || '';
+  };
+  
 
   const fetchAdhocBonusData = async () => {
     setLoading(true);
@@ -442,7 +447,9 @@ const PayrollWorkflows = ({ type }) => {
 
   return (
     <MainCard
-      title="Employee Dashboard"
+      // title="Employee Dashboard for  "
+      // title={`Employee Dashboard for ${month || ''}`}
+      title={`Employee Dashboard for ${getMonthName(month) || ''}`}
       tagline="Payroll Workflow"
       secondary={
         <Stack direction="row" sx={{ gap: 2 }}>

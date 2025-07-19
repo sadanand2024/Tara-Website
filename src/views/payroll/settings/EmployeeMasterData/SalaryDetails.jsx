@@ -85,7 +85,7 @@ function SalaryDetails({
       is_variable_bonus: false,
       variable_bonus: {
         bonus_amount: '',
-        pay_cycle_frequency: 'quarterly'
+        pay_cycle_frequency: 'Quarterly'
       }
     },
     validationSchema,
@@ -208,14 +208,15 @@ function SalaryDetails({
           </>
         ) : (
           <>
-            <Typography variant="subtitle2" sx={{ color: 'grey.800', mb: 0.5 }}>
+            <Typography variant="subtitle2" sx={{ color: 'grey.800',mb: 0.3 }}>
               {field.label}
-              <span style={{ color: 'red', fontSize: '1rem', paddingLeft: '4px' }}>*</span>
+              <span style={{ color: 'red', paddingLeft: '4px' }}>*</span>
             </Typography>
 
             <TextField
               fullWidth
               name="annual_ctc"
+             
               size="small"
               value={annualCtcInput}
               onChange={(e) => {

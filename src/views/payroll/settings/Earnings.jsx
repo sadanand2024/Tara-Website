@@ -1,41 +1,40 @@
-import CustomAutocomplete from 'utils/CustomAutocomplete';
-import CircularProgressComponent from 'utils/CircularProgressComponent';
-import React, { useEffect, useState } from 'react';
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
+import { Delete, Edit } from '@mui/icons-material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import BlockIcon from '@mui/icons-material/Block';
 import {
-  Button,
   Box,
-  TextField,
+  Button,
   Checkbox,
+  Divider,
   FormControlLabel,
   FormGroup,
-  Typography,
   Grid2,
+  IconButton,
+  InputAdornment,
+  Pagination,
+  Paper,
   Stack,
-  TableContainer,
   Table,
   TableBody,
   TableCell,
+  TableContainer,
   TableHead,
-  Paper,
   TableRow,
-  InputAdornment,
-  Divider,
-  Pagination
+  TextField,
+  Typography
 } from '@mui/material';
-import Modal from 'ui-component/extended/Modal';
+import { useFormik } from 'formik';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import Factory from 'utils/Factory';
-import ActionCell from 'ui-component/extended/ActionCell';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
-import BlockIcon from '@mui/icons-material/Block';
-import { IconButton } from '@mui/material';
-import { Edit, Delete } from '@mui/icons-material';
 import DeleteDialog from 'ui-component/extended/DeleteDialog';
+import Modal from 'ui-component/extended/Modal';
 import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
+import CircularProgressComponent from 'utils/CircularProgressComponent';
+import CustomAutocomplete from 'utils/CustomAutocomplete';
+import Factory from 'utils/Factory';
+import * as Yup from 'yup';
 const validationSchema = Yup.object({
   component_name: Yup.string().required('Name is required'),
   component_type: Yup.string().required('Type is required'),
@@ -331,6 +330,7 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
 
       <Modal
         open={open}
+        title="Edit Earnings"
         maxWidth={'sm'}
         header={{ title: values.component_name || 'New Component', subheader: '' }}
         showClose={true}
@@ -376,12 +376,13 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
       >
         <>
           <Box component="form">
+            
             <Grid2 container spacing={3}>
               {/* Left Column */}
               <Grid2 size={{ xs: 6 }}>
                 <Grid2 container direction="column" spacing={2}>
                   <Grid2>
-                    <Typography variant="subtitle1">Name</Typography>
+                    <Typography variant="subtitle1">Name <span style={{ color: 'red' }}>*</span></Typography>
                     <TextField
                       fullWidth
                       size="small"
@@ -419,6 +420,7 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
                                   value: 0
                                 });
                               }}
+                              
                               // disabled={values.component_name === 'Basic'}
                             />
                           }
@@ -521,8 +523,8 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
               <Grid2 size={{ xs: 6 }}>
                 <Grid2 container direction="column" spacing={2}>
                   <Grid2>
-                    <Typography variant="subtitle1" sx={{ mb: 0.5 }}>
-                      Type
+                    <Typography variant="subtitle1" sx={{ mb: 0.2 }}>
+                      Type <span style={{ color: 'red' }}>*</span>
                     </Typography>
 
                     <CustomAutocomplete

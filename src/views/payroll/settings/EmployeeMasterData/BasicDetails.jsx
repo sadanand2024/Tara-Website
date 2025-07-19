@@ -93,7 +93,8 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
         return Yup.object().shape({
           pf_account_number: parent?.epf_enabled
             ? Yup.string()
-              .nullable()
+              // .nullable()
+              .required('Pf Account Number is required')
               .matches(/^[A-Z]{5}\d{10,14}$/, 'Invalid PF Account Number. Format: 5 letters followed by 10–14 digits')
             : Yup.string().nullable(),
 
@@ -107,11 +108,11 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
 
       employee_state_insurance: Yup.lazy((_, { parent }) => {
         return Yup.object().shape({
-          // esi_number: parent?.esi_enabled
-          //   ? Yup.string()
-          //     .required('ESI Number is required')
-          //     .matches(/^[0-9]{10}$/, 'ESI Number must be 10 digits')
-          //   : Yup.string().nullable()
+          esi_number: parent?.esi_enabled
+            ? Yup.string()
+              .required('ESI Number is required')
+              .matches(/^[0-9]{10}$/, 'ESI Number must be 10 digits')
+            : Yup.string().nullable()
         });
       })
     })
@@ -534,7 +535,7 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
                         (e.g. ABCD1234567)
                       </Typography>
                     </>,
-                    false // or false based on conditional logic
+                    true // or false based on conditional logic
                   )}
                 </Typography>
 
@@ -618,7 +619,7 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
                         (e.g. 1234567890)
                       </Typography>
                     </>,
-                    false // Set this to `true` if ESI Number is required based on conditions
+                    true // Set this to `true` if ESI Number is required based on conditions
                   )}
                 </Typography>
 

@@ -225,7 +225,7 @@ const GSTSettings = ({ handleBack, handleNext }) => {
           size="small"
           startIcon={<AddIcon />}
           onClick={() => {
-            if (invoiceUsage && Object.keys(invoiceUsage.gstin).length > 0) {
+            if (invoiceUsage?.gstin && Object.keys(invoiceUsage.gstin).length > 0) {
               if (Number(invoiceUsage.gstin.usage_count) >= Number(invoiceUsage.gstin.actual_count)) {
                 enqueueSnackbar('Usage limit exceeded. Please upgrade your plan!', { variant: 'warning' });
               } else handleOpen();
