@@ -28,6 +28,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import EmptyDataPlaceholder from 'ui-component/extended/EmptyDataPlaceholder';
+import ConfirmationDialog from 'ui-component/extended/ConfirmationDialog';
 
 const filters = [
   { label: 'Category', options: ['All', 'Company', 'HR', 'Finance'] },
@@ -37,7 +38,7 @@ const filters = [
   { label: 'Creator', options: ['All', 'Srinivas', 'Surya'] },
   { label: 'Date', options: ['All', '23/12/22', '12/09/22'] },
 ];
- 
+
 const statusChip = (status) => {
   if (status === 'Processed')
     return <Chip label="Processed" sx={{ bgcolor: '#FFF9C4', color: '#FBC02D', fontWeight: 500 }} />;
@@ -46,10 +47,10 @@ const statusChip = (status) => {
   if (status === 'Yet to Start')
     return <Chip label="Yet to Start" sx={{ bgcolor: '#FFF1F0', color: '#FF4D4F', fontWeight: 500 }} />;
   if (status === 'Draft')
-    return <Chip label="Draft" sx={{ bgcolor: '#FFF7E3', color: '#FAAD14', fontWeight: 500, width:90}} />;
+    return <Chip label="Draft" sx={{ bgcolor: '#FFF7E3', color: '#FAAD14', fontWeight: 500, width: 90 }} />;
   return <Chip label={status} />;
 };
- 
+
 export default function Drafting({ id, tab = 'document', contextId }) {
   const location = useLocation();
   const dispatch = useDispatch();
@@ -77,7 +78,9 @@ export default function Drafting({ id, tab = 'document', contextId }) {
   const [selectedStatus, setSelectedStatus] = useState('All');
   const [selectedCreator, setSelectedCreator] = useState('All');
   const [selectedDate, setSelectedDate] = useState(null);
- 
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [selectedFavourite, setSelectedFavourite] = useState(null);
+
   // Add state for dynamic filter options
   const [filterOptions, setFilterOptions] = useState({
     category_names: [],
@@ -87,7 +90,7 @@ export default function Drafting({ id, tab = 'document', contextId }) {
     created_by: []
   });
   const [filterOptionsLoading, setFilterOptionsLoading] = useState(true);
- 
+
   // Add a mapping for status labels and values at the top of the component
   const statusOptions = [
     { label: 'Yet to Start', value: 'yet_to_start' },
@@ -96,7 +99,7 @@ export default function Drafting({ id, tab = 'document', contextId }) {
     { label: 'Draft', value: 'draft' },
     { label: 'All', value: 'All' },
   ];
- 
+
   // Helper to build query string from selected filters
   const buildQueryString = () => {
     const params = [];
@@ -108,7 +111,7 @@ export default function Drafting({ id, tab = 'document', contextId }) {
     if (selectedDate) params.push(`created_at=${encodeURIComponent(selectedDate.format ? selectedDate.format('YYYY-MM-DD') : selectedDate)}`);
     return params.length > 0 ? `?${params.join('&')}` : '';
   };
- 
+
   useEffect(() => {
     if (!id) return;
     setLoading(true);
@@ -121,7 +124,7 @@ export default function Drafting({ id, tab = 'document', contextId }) {
         const resData = response?.res?.data || response?.res || response;
         const rows = (resData?.results || resData || []).map(item => ({
           name: item?.file_name || item?.document?.name || '-',
-         
+
           category: item.category?.name || '-',
           event: item.event?.name || '-',
           status: item.status || '-',
@@ -135,13 +138,13 @@ export default function Drafting({ id, tab = 'document', contextId }) {
       .catch(() => setTableRows([]))
       .finally(() => setLoading(false));
   }, [id, selectedCategory, selectedEvent, selectedDocument, selectedStatus, selectedCreator, selectedDate]);
- 
+
   useEffect(() => {
     if (!id) return;
     setStatsLoading(true);
     // Factory('get', /documentdrafting/documents-summary-by-context/?doc_draft_id=${id}, {}, {})
     Factory('get', `/documentdrafting/documents-summary-by-context/?doc_draft_id=${id}`, {}, {})
- 
+
       .then(response => {
         const resData = response?.res?.data || response?.res || response;
         // Convert object to array of { label, value }
@@ -151,7 +154,7 @@ export default function Drafting({ id, tab = 'document', contextId }) {
       .catch(() => setStats([]))
       .finally(() => setStatsLoading(false));
   }, [id]);
- 
+
   useEffect(() => {
     if (!id) return;
     setFavouritesLoading(true);
@@ -163,7 +166,7 @@ export default function Drafting({ id, tab = 'document', contextId }) {
       .catch(() => setFavourites([]))
       .finally(() => setFavouritesLoading(false));
   }, [id]);
- 
+
   useEffect(() => {
     if (!id) return;
     setRecentDocumentsLoading(true);
@@ -175,7 +178,7 @@ export default function Drafting({ id, tab = 'document', contextId }) {
       .catch(() => setRecentDocuments([]))
       .finally(() => setRecentDocumentsLoading(false));
   }, [id]);
- 
+
   useEffect(() => {
     if (!id) return;
     setRecentEventsLoading(true);
@@ -187,7 +190,7 @@ export default function Drafting({ id, tab = 'document', contextId }) {
       .catch(() => setRecentEvents([]))
       .finally(() => setRecentEventsLoading(false));
   }, [id]);
- 
+
   useEffect(() => {
     setFilterOptionsLoading(true);
     Factory('get', '/documentdrafting/filter-dropdown-data/', {}, {})
@@ -210,30 +213,30 @@ export default function Drafting({ id, tab = 'document', contextId }) {
       }))
       .finally(() => setFilterOptionsLoading(false));
   }, []);
- 
+
   useEffect(() => {
     if (location.state?.showEvent) {
       // setShowEvent(true); // This state is removed
       // setEventInitialTab(location.state.eventInitialTab || 'document'); // This state is removed
     }
   }, [location.state]);
- 
+
   // Always render Event component for both document and event tabs
   if ((tab === 'document' || tab === 'event') && contextId) {
     return <Event tab={tab} contextId={contextId} />;
   }
- 
+
   const scrollToMyEvents = () => {
     myEventsRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
- 
+
   const statIcons = {
     "Total Document": <DescriptionOutlinedIcon color="primary" fontSize="large" />,
     "Draft": <DraftsOutlinedIcon color="warning" fontSize="large" />,
     "Finalized": <CheckCircleOutlineIcon color="success" fontSize="large" />,
     "Action Pending": <ErrorOutlineIcon color="error" fontSize="large" />,
   };
- 
+
   const statStyles = {
     "Total Document": {
       iconBg: "#E3EAFE",
@@ -260,11 +263,11 @@ export default function Drafting({ id, tab = 'document', contextId }) {
       buttonColor: "#595959"
     }
   };
- 
+
   // Calculate paginated rows
   const paginatedRows = tableRows.slice((page - 1) * rowsPerPage, page * rowsPerPage);
   const pageCount = Math.ceil(tableRows.length / rowsPerPage);
- 
+
   const handleDeleteDocument = async (row) => {
     if (!row?.id) return;
     try {
@@ -297,7 +300,7 @@ export default function Drafting({ id, tab = 'document', contextId }) {
       }));
     }
   };
- 
+
   // Handler for clicking a favourite in Quick Access Panel
   const handleFavouriteProceed = async (favourite) => {
     if (!favourite?.document?.id && !favourite?.document) return;
@@ -338,9 +341,29 @@ export default function Drafting({ id, tab = 'document', contextId }) {
       }));
     }
   };
+
+  const handleOpenConfirmDialog = (favourite) => {
+    setSelectedFavourite(favourite);
+    setConfirmDialogOpen(true);
+  };
  
+  const handleConfirmProceed = () => {
+    if (selectedFavourite) {
+      handleFavouriteProceed(selectedFavourite);
+    }
+    setConfirmDialogOpen(false);
+    setSelectedFavourite(null);
+  };
+ 
+
   // Card click handler
   const handleCardClick = (card) => {
+    setSelectedCard(card);
+    // Do NOT setSelectedStatus here anymore
+  };
+
+  // View button click handler for stats card
+  const handleCardView = (card) => {
     setSelectedCard(card);
     if (card === 'all') {
       setSelectedStatus('All');
@@ -352,7 +375,7 @@ export default function Drafting({ id, tab = 'document', contextId }) {
       setSelectedStatus('yet_to_start');
     }
   };
- 
+
   return (
     <Box sx={{ p: { xs: 2, md: 4 }, background: '#fff', borderRadius: 2, minHeight: '100vh', width: '100%' }}>
       {/* Title and Actions */}
@@ -379,7 +402,7 @@ export default function Drafting({ id, tab = 'document', contextId }) {
           alignItems={{ xs: 'stretch', md: 'center' }}
           sx={{ ml: { xs: 0, md: 'auto' } }}
         >
-          <TextField
+          {/* <TextField
             fullWidth
             size="small"
             placeholder="Search"
@@ -395,7 +418,7 @@ export default function Drafting({ id, tab = 'document', contextId }) {
               minWidth: { xs: 0, sm: 220, md: 200, lg: 250 },
               maxWidth: { xs: '100%', sm: 400, md: 200, lg: 250 },
             }}
-          />
+          /> */}
           <Button
             variant="outlined"
             startIcon={<AddIcon />}
@@ -422,11 +445,11 @@ export default function Drafting({ id, tab = 'document', contextId }) {
           </Button>
         </Stack>
       </Box>
- 
+
       {/* Filters */}
       <Grid2 container spacing={2} mb={3}>
         {/* Category Filter */}
-        <Grid2 size={{xs:12, sm:4,md:2}}>
+        <Grid2 size={{ xs: 12, sm: 4, md: 2 }}>
           <TextField
             fullWidth
             select
@@ -444,7 +467,7 @@ export default function Drafting({ id, tab = 'document', contextId }) {
           </TextField>
         </Grid2>
         {/* Events Filter */}
-        <Grid2 size={{xs:12, sm:4,md:2}}>
+        <Grid2 size={{ xs: 12, sm: 4, md: 2 }}>
           <TextField
             fullWidth
             select
@@ -462,12 +485,12 @@ export default function Drafting({ id, tab = 'document', contextId }) {
           </TextField>
         </Grid2>
         {/* Documents Filter */}
-        <Grid2 size={{xs:12, sm:4,md:2}}>
-        <TextField
+        <Grid2 size={{ xs: 12, sm: 4, md: 2 }}>
+          <TextField
             fullWidth
             select
             label="Documents"
-          size="small"
+            size="small"
             sx={{ bgcolor: '#F5F7FA' }}
             value={selectedDocument}
             onChange={e => setSelectedDocument(e.target.value)}
@@ -480,7 +503,7 @@ export default function Drafting({ id, tab = 'document', contextId }) {
           </TextField>
         </Grid2>
         {/* Status Filter */}
-        <Grid2 size={{xs:12, sm:4,md:2}}>
+        <Grid2 size={{ xs: 12, sm: 4, md: 2 }}>
           <TextField
             fullWidth
             select
@@ -497,7 +520,7 @@ export default function Drafting({ id, tab = 'document', contextId }) {
           </TextField>
         </Grid2>
         {/* Creator Filter */}
-        <Grid2 size={{xs:12, sm:4,md:2}}>
+        <Grid2 size={{ xs: 12, sm: 4, md: 2 }}>
           <TextField
             fullWidth
             select
@@ -515,7 +538,7 @@ export default function Drafting({ id, tab = 'document', contextId }) {
           </TextField>
         </Grid2>
         {/* Date Filter (keep as DatePicker) */}
-        <Grid2 size={{xs:12, sm:4,md:2}}>
+        <Grid2 size={{ xs: 12, sm: 4, md: 2 }}>
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DatePicker
               label="Date"
@@ -533,27 +556,27 @@ export default function Drafting({ id, tab = 'document', contextId }) {
           </LocalizationProvider>
         </Grid2>
       </Grid2>
- 
+
       {/* Stats Cards */}
       {statsLoading ? (
         <CircularProgressComponent isLoading displayContent={'Loading Stats...'} />
       ) : (
-      <Grid2 container spacing={3} mb={4}>
+        <Grid2 container spacing={3} mb={4}>
           {stats.length === 0 ? (
             <Grid2 size={{ xs: 12 }}><Typography align="center">No stats found</Typography></Grid2>
-        ) : (
-          stats.map((stat) => {
+          ) : (
+            stats.map((stat) => {
               let cardKey = 'all';
               if (stat.label.toLowerCase().includes('draft')) cardKey = 'draft';
               else if (stat.label.toLowerCase().includes('finalized')) cardKey = 'completed';
               else if (stat.label.toLowerCase().includes('action pending')) cardKey = 'yet_to_start';
               const isSelected = selectedCard === cardKey;
-            const style = statStyles[stat.label] || {};
+              const style = statStyles[stat.label] || {};
               const cardBgGradient = `linear-gradient(135deg, ${style.iconBg || '#E3EAFE'} 0%, #fff 100%)`;
               const borderColor = isSelected ? style.iconColor : '#E5EAF2';
-            return (
+              return (
                 <Grid2 size={{ xs: 12, md: 3, sm: 3 }} key={stat.label}>
-                <Paper
+                  <Paper
                     elevation={isSelected ? 3 : 0}
                     sx={{
                       borderRadius: 3,
@@ -578,13 +601,13 @@ export default function Drafting({ id, tab = 'document', contextId }) {
                     {/* Row 1: Icon and Heading */}
                     <Box display="flex" alignItems="center" gap={2} mb={1}>
                       <Avatar variant="circular" sx={{ width: 44, height: 44, bgcolor: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    {React.cloneElement(statIcons[stat.label] || <DescriptionOutlinedIcon />, {
-                      style: { color: style.iconColor, fontSize: 28 }
-                    })}
+                        {React.cloneElement(statIcons[stat.label] || <DescriptionOutlinedIcon />, {
+                          style: { color: style.iconColor, fontSize: 28 }
+                        })}
                       </Avatar>
                       <Typography variant="h6" fontWeight={800} fontSize={15} sx={{ color: '#0A1F44', mb: 0 }}>
-                    {stat.label === "Total Document" ? "Total Documents" : stat.label}
-                  </Typography>
+                        {stat.label === "Total Document" ? "Total Documents" : stat.label}
+                      </Typography>
                     </Box>
                     {/* Row 2: Description/Paragraph */}
                     <Box sx={{ width: '105%' }}>
@@ -598,19 +621,19 @@ export default function Drafting({ id, tab = 'document', contextId }) {
                     {/* Row 3: Count and View Button */}
                     <Box display="flex" alignItems="center" justifyContent="space-between" mt={0}>
                       <Typography variant="h4" fontWeight={700} sx={{ color: '#0A1F44', mb: 0 }}>
-                    {String(stat.value).padStart(2, '0')}
-                  </Typography>
-                  <Button
-                    className="stat-view-btn"
-                    variant="contained"
-                    disableElevation
-                    sx={{
-                          background: isSelected ? style.iconColor : '#F0F0F0',
-                          color: isSelected ? '#fff' : '#595959',
-                      fontWeight: 500,
-                      borderRadius: 2,
-                      textTransform: 'none',
-                      boxShadow: 'none',
+                        {String(stat.value).padStart(2, '0')}
+                      </Typography>
+                      <Button
+                        className="stat-view-btn"
+                        variant="contained"
+                        disableElevation
+                        sx={{
+                          background: (selectedStatus === cardKey) ? style.iconColor : '#F0F0F0',
+                          color: (selectedStatus === cardKey) ? '#fff' : '#595959',
+                          fontWeight: 500,
+                          borderRadius: 2,
+                          textTransform: 'none',
+                          boxShadow: 'none',
                           minWidth: 48,
                           height: 32,
                           fontSize: 14,
@@ -622,63 +645,69 @@ export default function Drafting({ id, tab = 'document', contextId }) {
                             color: '#fff',
                           }
                         }}
-                        onClick={e => { e.stopPropagation(); handleCardClick(cardKey); }}
-                  >
-                    View
-                  </Button>
+                        onClick={e => { e.stopPropagation(); handleCardView(cardKey); }}
+                      >
+                        View
+                      </Button>
                     </Box>
-                </Paper>
-              </Grid2>
-            );
-          })
-        )}
-      </Grid2>
+                  </Paper>
+                </Grid2>
+              );
+            })
+          )}
+          <Table sx={{ minWidth: 600, borderBottom: '2px solid rgb(196, 191, 191)',
+            borderLeft: '0.1px solid #b0b8c4',
+            borderTop: '0.1px solid #b0b8c4',
+            borderRight: '0.1px solid #b0b8c4',}}>
+
+          </Table>
+        </Grid2>
       )}
- 
+
       {/* Table */}
       {loading ? (
         <CircularProgressComponent isLoading={loading} displayContent={'Loading Documents...'} />
       ) : (
-      <Paper elevation={1} sx={{ borderRadius: 3, overflowX: 'auto', width: '100%' }}>
-        <Table sx={{ minWidth: 600 }}>
-          
-          <TableHead sx={{
-                    backgroundColor: 'primary.main',
-                    '& .MuiTableCell-root': {
-                      color: '#ffffff !important'
-                    }
-                  }}>
-            <TableRow >
-              <TableCell>Name</TableCell>
-              <TableCell>Category</TableCell>
-              <TableCell>Event</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell>Last Edited</TableCell>
-              <TableCell>Creator</TableCell>
-              <TableCell>Action</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-              {tableRows.length === 0 ? (
-              <TableRow>
-                {/* <TableCell colSpan={7} align="center">No data found</TableCell> */}
-                <TableCell colSpan={7} align="center" sx={{ py: 6 }}>
-                  <EmptyDataPlaceholder
-                    title="No Data Found"
-                    subtitle="There is no content to display."
-                  />
-                </TableCell>
+        <Paper elevation={1} sx={{ borderRadius: 3, overflowX: 'auto', width: '100%' }}>
+          <Table sx={{ minWidth: 600 }}>
+
+            <TableHead sx={{
+              backgroundColor: 'primary.main',
+              '& .MuiTableCell-root': {
+                color: '#ffffff !important'
+              }
+            }}>
+              <TableRow >
+                <TableCell>Name</TableCell>
+                <TableCell>Category</TableCell>
+                <TableCell>Event</TableCell>
+                <TableCell>Status</TableCell>
+                <TableCell>Last Edited</TableCell>
+                <TableCell>Creator</TableCell>
+                <TableCell>Action</TableCell>
               </TableRow>
-            ) : (
-              paginatedRows.map((row, idx) => (
-                <TableRow key={row.id || idx}>
-                  <TableCell>{row.name}</TableCell>
-                  <TableCell>{row.category}</TableCell>
-                  <TableCell>{row.event}</TableCell>
-                  <TableCell>{statusChip(row.status)}</TableCell>
-                  <TableCell>{row.lastEdited}</TableCell>
-                  <TableCell>{row.creator}</TableCell>
-                  <TableCell>
+            </TableHead>
+            <TableBody>
+              {tableRows.length === 0 ? (
+                <TableRow>
+                  {/* <TableCell colSpan={7} align="center">No data found</TableCell> */}
+                  <TableCell colSpan={7} align="center" sx={{ py: 6 }}>
+                    <EmptyDataPlaceholder
+                      title="No Data Found"
+                      subtitle="There is no content to display."
+                    />
+                  </TableCell>
+                </TableRow>
+              ) : (
+                paginatedRows.map((row, idx) => (
+                  <TableRow key={row.id || idx}>
+                    <TableCell>{row.name}</TableCell>
+                    <TableCell>{row.category}</TableCell>
+                    <TableCell>{row.event}</TableCell>
+                    <TableCell>{statusChip(row.status)}</TableCell>
+                    <TableCell>{row.lastEdited}</TableCell>
+                    <TableCell>{row.creator}</TableCell>
+                    <TableCell>
                       <DraftingActionCell
                         row={row}
                         status={row.status}
@@ -735,17 +764,15 @@ export default function Drafting({ id, tab = 'document', contextId }) {
                           description: 'This action will permanently remove this file from the list.'
                         }}
                       />
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </Paper>
-      )}
-      {/* Pagination Controls */}
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+          {/* Pagination Controls */}
       {!loading && pageCount > 1 && (
-        <Box display="flex" justifyContent="center" alignItems="center" mt={2}>
+        <Box display="flex" justifyContent="center" alignItems="center" mt={3} mb={2}>
           <Pagination
             count={pageCount}
             page={page}
@@ -755,21 +782,12 @@ export default function Drafting({ id, tab = 'document', contextId }) {
           />
         </Box>
       )}
+        </Paper>
+      )}
+      
       {/* Quick Access Panel */}
-      <Box
-        mt={5}
-        mb={5}
-        sx={{
-          borderBottom: '2px solid rgb(196, 191, 191)',
-          borderLeft: '0.1px solid #b0b8c4',
-          borderTop: '0.1px solid #b0b8c4',
-          borderRight: '0.1px solid #b0b8c4',
-          borderRadius: 3,
-          pb: 4,
-          background: '#fff',
-          width: '100%',
-          overflowX: 'auto',
-        }}
+      <Paper
+        elevation={1} sx={{ borderRadius: 3, overflowX: 'auto', width: '100%', mt: 4}} 
       >
         <Typography
           variant="h3"
@@ -822,7 +840,7 @@ export default function Drafting({ id, tab = 'document', contextId }) {
                             borderRadius: 2,
                             '&:hover': { background: '#f5f5f5', width: 300, height: 45, }
                           }}
-                          onClick={() => handleFavouriteProceed(favourite)}
+                          onClick={() => handleOpenConfirmDialog(favourite)}
                         >
                           <Box sx={{ position: 'relative', display: 'inline-flex' }}>
                             <DescriptionOutlinedIcon sx={{ color: '#A3AED0', fontSize: 28, bgcolor: '#F5F7FA', borderRadius: 2, p: 0.5 }} />
@@ -899,14 +917,25 @@ export default function Drafting({ id, tab = 'document', contextId }) {
             </Box>
           )
         )}
-      </Box>
+      </Paper>
       {/* MyEvents section at the bottom of the page */}
-      <Box mt={6} ref={myEventsRef}>
+      <Box mt={4} ref={myEventsRef}>
         <MyEvents id={id} />
       </Box>
-      
+      <ConfirmationDialog
+        open={confirmDialogOpen}
+        onClose={() => setConfirmDialogOpen(false)}
+        onConfirm={handleConfirmProceed}
+        title="Confirm Document Creation"
+        message="Are you sure you want to create this document?"
+        confirmText="OK"
+        color="primary"
+        icon={CheckCircleOutlineIcon}
+      />
+
     </Box>
-   
+    
+
   );
-  
+
 }

@@ -21,25 +21,25 @@ import Autocomplete from '@mui/material/Autocomplete';
 
 
 export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, search = '' }) {
-    const { contextId } = useParams();
+  const { contextId } = useParams();
 
   const dispatch = useDispatch();
-    const user = useSelector((state) => state.accountReducer.user);
-    const { contextEventId } = useParams();
-    const navigate = useNavigate();
-    const [templates, setTemplates] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
-    const [splitView, setSplitView] = useState(false);
-    const [fields, setFields] = useState([]);
-    const [templateHtml, setTemplateHtml] = useState('');
-    const [formValues, setFormValues] = useState({});
-    const [templateLoading, setTemplateLoading] = useState(false);
-    const [templateError, setTemplateError] = useState(null);
-    const [draftDetailId, setDraftDetailId] = useState(null); // Store draft detail id after first save
-    const [savingDraft, setSavingDraft] = useState(false);
-    const [finalizing, setFinalizing] = useState(false);
-    const [fileUrl, setFileUrl] = useState(null); // Store file URL for download
+  const user = useSelector((state) => state.accountReducer.user);
+  const { contextEventId } = useParams();
+  const navigate = useNavigate();
+  const [templates, setTemplates] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [splitView, setSplitView] = useState(false);
+  const [fields, setFields] = useState([]);
+  const [templateHtml, setTemplateHtml] = useState('');
+  const [formValues, setFormValues] = useState({});
+  const [templateLoading, setTemplateLoading] = useState(false);
+  const [templateError, setTemplateError] = useState(null);
+  const [draftDetailId, setDraftDetailId] = useState(null); // Store draft detail id after first save
+  const [savingDraft, setSavingDraft] = useState(false);
+  const [finalizing, setFinalizing] = useState(false);
+  const [fileUrl, setFileUrl] = useState(null); // Store file URL for download
   const [favoriteStates, setFavoriteStates] = useState({});
   const [favouriteIdMap, setFavouriteIdMap] = useState({}); // Map documentId -> favouriteId
   // Add: API call to add to favourites
@@ -142,77 +142,77 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
       });
   }, [contextId]);
 
-    useEffect(() => {
-        if (contextEventId) {
-            // If contextEventId is present, fetch fields and template directly (split view mode)
-            setSplitView(true);
-            setTemplateLoading(true);
-            setTemplateError(null);
-            Factory('get', `/documentdrafting/document-fields-and-template/${contextEventId}/`)
-                .then(async (getResult) => {
-                    if (getResult.res && getResult.res.status_cd === 0) {
-                        const { fields, template, draft_info } = getResult.res.data;
-                        const draft_data = draft_info && draft_info.length > 0 ? draft_info[0].draft_data : undefined;
-                        const draftDetailIdFromApi = draft_info && draft_info.length > 0 ? draft_info[0].id : null;
-                        setDraftDetailId(draftDetailIdFromApi);
-                        setFields(fields || []);
-                        setFormValues(draft_data || (fields ? Object.fromEntries(fields.filter(f => f.field_name).map(f => [f.field_name, ''])) : {}));
-                        try {
-                            const resp = await fetch(template);
-                            if (!resp.ok) throw new Error('Failed to fetch template HTML');
-                            const html = await resp.text();
-                            setTemplateHtml(html);
-                        } catch (err) {
-                            setTemplateHtml('');
-                            setTemplateError('Failed to load template HTML');
-                        }
-                        setTemplateLoading(false);
-                    } else {
-                        setTemplateError(getResult.message || 'Failed to load document fields/template');
-                        setTemplateLoading(false);
-                    }
-                })
-                .catch(() => {
-                    setTemplateError('Failed to load document fields/template');
-                    setTemplateLoading(false);
-                });
-        } else {
-            // No contextEventId, show document selection step
-            setLoading(true);
-            setError(null);
-            Factory('get', `/documentdrafting/documents/?draft_id=${contextId}`)
-                .then(result => {
-                    if (result.res && result.res.status_cd === 0) {
-                        const docs = result.res.data?.results || result.res.data || [];
-                        setTemplates(docs);
-                    } else {
-                        setError(result.message || 'Failed to load templates');
-                    }
-                    setLoading(false);
-                })
-                .catch(() => {
-                    setError('Failed to load templates');
-                    setLoading(false);
-                });
-        }
-    }, [contextEventId]);
+  useEffect(() => {
+    if (contextEventId) {
+      // If contextEventId is present, fetch fields and template directly (split view mode)
+      setSplitView(true);
+      setTemplateLoading(true);
+      setTemplateError(null);
+      Factory('get', `/documentdrafting/document-fields-and-template/${contextEventId}/`)
+        .then(async (getResult) => {
+          if (getResult.res && getResult.res.status_cd === 0) {
+            const { fields, template, draft_info } = getResult.res.data;
+            const draft_data = draft_info && draft_info.length > 0 ? draft_info[0].draft_data : undefined;
+            const draftDetailIdFromApi = draft_info && draft_info.length > 0 ? draft_info[0].id : null;
+            setDraftDetailId(draftDetailIdFromApi);
+            setFields(fields || []);
+            setFormValues(draft_data || (fields ? Object.fromEntries(fields.filter(f => f.field_name).map(f => [f.field_name, ''])) : {}));
+            try {
+              const resp = await fetch(template);
+              if (!resp.ok) throw new Error('Failed to fetch template HTML');
+              const html = await resp.text();
+              setTemplateHtml(html);
+            } catch (err) {
+              setTemplateHtml('');
+              setTemplateError('Failed to load template HTML');
+            }
+            setTemplateLoading(false);
+          } else {
+            setTemplateError(getResult.message || 'Failed to load document fields/template');
+            setTemplateLoading(false);
+          }
+        })
+        .catch(() => {
+          setTemplateError('Failed to load document fields/template');
+          setTemplateLoading(false);
+        });
+    } else {
+      // No contextEventId, show document selection step
+      setLoading(true);
+      setError(null);
+      Factory('get', `/documentdrafting/documents/?draft_id=${contextId}`)
+        .then(result => {
+          if (result.res && result.res.status_cd === 0) {
+            const docs = result.res.data?.results || result.res.data || [];
+            setTemplates(docs);
+          } else {
+            setError(result.message || 'Failed to load templates');
+          }
+          setLoading(false);
+        })
+        .catch(() => {
+          setError('Failed to load templates');
+          setLoading(false);
+        });
+    }
+  }, [contextEventId]);
 
-    const handleCardProceed = async (templateId) => {
-        console.log('User:', user);
-        console.log('Context ID:', user.active_context.id);
-        // POST API call to create context-wise event document
-        const payload = {
-            context: contextId, // use contextId prop passed from parent
-            document: templateId,
-            status: 'yet_to_start',
-            created_by: user.user.id // TODO: replace with dynamic user id
-        };
-        try {
-            const result = await Factory('post', '/documentdrafting/context-wise-event-document-create/', payload);
-            if (result.res && result.res.status_cd === 0 && result.res.id) {
-                const contextEventId = result.res.id;
-                // Navigate to split view route
-                navigate(`/app/drafting/fill/${contextEventId}`);
+  const handleCardProceed = async (templateId) => {
+    console.log('User:', user);
+    console.log('Context ID:', user.active_context.id);
+    // POST API call to create context-wise event document
+    const payload = {
+      context: contextId, // use contextId prop passed from parent
+      document: templateId,
+      status: 'yet_to_start',
+      created_by: user.user.id // TODO: replace with dynamic user id
+    };
+    try {
+      const result = await Factory('post', '/documentdrafting/context-wise-event-document-create/', payload);
+      if (result.res && result.res.status_cd === 0 && result.res.id) {
+        const contextEventId = result.res.id;
+        // Navigate to split view route
+        navigate(`/app/drafting/fill/${contextEventId}`);
         dispatch(openSnackbar({
           open: true,
           message: 'Drafting context created',
@@ -220,7 +220,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
           alert: { color: 'success' },
           close: false
         }));
-            } else {
+      } else {
         dispatch(openSnackbar({
           open: true,
           message: result.message || 'Failed to create document drafting context',
@@ -228,8 +228,8 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
           alert: { color: 'error' },
           close: false
         }));
-            }
-        } catch (err) {
+      }
+    } catch (err) {
       dispatch(openSnackbar({
         open: true,
         message: 'Failed to create document drafting context',
@@ -237,21 +237,21 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
         alert: { color: 'error' },
         close: false
       }));
-        }
-    };
+    }
+  };
 
-    const handleFormChange = (name, value) => {
-        setFormValues((prev) => ({ ...prev, [name]: value }));
-    };
+  const handleFormChange = (name, value) => {
+    setFormValues((prev) => ({ ...prev, [name]: value }));
+  };
 
-    // Replace placeholders in templateHtml with formValues or formik.values
-    const renderTemplateWithValues = () => {
-        let html = templateHtml;
-        // Remove all {% ... %} blocks
-        html = html.replace(/\{\%[\s\S]*?\%\}/g, '');
-        // Use formik.values in splitView, otherwise formValues
-        const valuesToUse = splitView && formik ? formik.values : formValues;
-        Object.entries(valuesToUse).forEach(([key, value]) => {
+  // Replace placeholders in templateHtml with formValues or formik.values
+  const renderTemplateWithValues = () => {
+    let html = templateHtml;
+    // Remove all {% ... %} blocks
+    html = html.replace(/\{\%[\s\S]*?\%\}/g, '');
+    // Use formik.values in splitView, otherwise formValues
+    const valuesToUse = splitView && formik ? formik.values : formValues;
+    Object.entries(valuesToUse).forEach(([key, value]) => {
       let displayValue = value;
       // If this key is a date field, format it
       const field = fields.find(f => f.field_name === key);
@@ -267,29 +267,29 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
       html = html.replaceAll(new RegExp(`\{\{\s*${key}\s*\}\}`, 'g'), value ? highlighted : '');
     });
     // Extract and scope <style> tags from the HTML
-        let scopedStyles = '';
-        let offerLetterHtmlNoStyles = html;
-        const styleTagRegex = /<style[\s\S]*?<\/style>/gi;
-        const styleContentRegex = /<style[^>]*>([\s\S]*?)<\/style>/gi;
-        let match;
-        while ((match = styleContentRegex.exec(html)) !== null) {
-            // Prefix all selectors with .offer-letter-preview
-            let css = match[1];
-            css = css.replace(/(^|\})\s*([^@\{\}][^\{\}]*)\{/g, (m, p1, selector) => {
-                const prefixed = selector
-                    .split(',')
-                    .map((s) => `.offer-letter-preview ${s.trim()}`)
-                    .join(', ');
-                return `${p1} ${prefixed} {`;
-            });
-            scopedStyles += css;
-        }
-        // Remove all <style> tags from the HTML
-        offerLetterHtmlNoStyles = html.replace(styleTagRegex, '');
-        // Remove fixed widths
-        const offerLetterHtmlNoWidths = offerLetterHtmlNoStyles.replace(/width\s*:\s*\d+[^;]+;/g, '');
-        // Inject the scoped original styles and our own scoped CSS
-        const styledHtml = `
+    let scopedStyles = '';
+    let offerLetterHtmlNoStyles = html;
+    const styleTagRegex = /<style[\s\S]*?<\/style>/gi;
+    const styleContentRegex = /<style[^>]*>([\s\S]*?)<\/style>/gi;
+    let match;
+    while ((match = styleContentRegex.exec(html)) !== null) {
+      // Prefix all selectors with .offer-letter-preview
+      let css = match[1];
+      css = css.replace(/(^|\})\s*([^@\{\}][^\{\}]*)\{/g, (m, p1, selector) => {
+        const prefixed = selector
+          .split(',')
+          .map((s) => `.offer-letter-preview ${s.trim()}`)
+          .join(', ');
+        return `${p1} ${prefixed} {`;
+      });
+      scopedStyles += css;
+    }
+    // Remove all <style> tags from the HTML
+    offerLetterHtmlNoStyles = html.replace(styleTagRegex, '');
+    // Remove fixed widths
+    const offerLetterHtmlNoWidths = offerLetterHtmlNoStyles.replace(/width\s*:\s*\d+[^;]+;/g, '');
+    // Inject the scoped original styles and our own scoped CSS
+    const styledHtml = `
       <style>
         ${scopedStyles}
         .offer-letter-preview { font-family: 'Roboto', Arial, sans-serif !important; background: #fff !important; color: #222 !important; }
@@ -304,20 +304,20 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
         ${offerLetterHtmlNoWidths}
       </div>
     `;
-        return styledHtml;
-    };
+    return styledHtml;
+  };
 
-    // Helper to fetch latest draft details and update fileUrl
-    const fetchAndSetFileUrl = async (id) => {
-        try {
-            const result = await Factory('get', `/documentdrafting/document-drafts-details/${id}/`);
-            if (result.res && result.res.status_cd === 0 && result.res.data && (result.res.data.file_url || result.res.data.file)) {
-                setFileUrl(result.res.data.file_url || result.res.data.file);
-            }
-        } catch (err) {
-            // Optionally handle error
-        }
-    };
+  // Helper to fetch latest draft details and update fileUrl
+  const fetchAndSetFileUrl = async (id) => {
+    try {
+      const result = await Factory('get', `/documentdrafting/document-drafts-details/${id}/`);
+      if (result.res && result.res.status_cd === 0 && result.res.data && (result.res.data.file_url || result.res.data.file)) {
+        setFileUrl(result.res.data.file_url || result.res.data.file);
+      }
+    } catch (err) {
+      // Optionally handle error
+    }
+  };
 
   // Utility to format date from YYYY-MM-DD to DD-MM-YYYY
   function formatDateToDDMMYYYY(dateStr) {
@@ -326,49 +326,49 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
     return `${dd}-${mm}-${yyyy}`;
   }
 
-    // Save Draft handler
-    const handleSaveDraft = async () => {
-        // Build a validation schema that ignores is_required, only checks metadata validations
-        const draftValidationShape = {};
-        fields.forEach(field => {
-          let validator = Yup.string();
-          if (field.metadata && field.metadata.validations && field.metadata.validations.regex) {
-            validator = validator
-              .notRequired()
-              .test(
-                'matches-regex-if-not-empty',
-                field.metadata.validations.error_message || 'Invalid value',
-                value => {
-                  if (!value) return true; // allow empty
-                  return new RegExp(field.metadata.validations.regex).test(value);
-                }
-              );
-          }
-          draftValidationShape[field.field_name] = validator;
-        });
-        const draftValidationSchema = Yup.object().shape(draftValidationShape);
-        try {
-          await draftValidationSchema.validate(formik.values, { abortEarly: false });
-        } catch (validationError) {
-          // Only mark fields with metadata validations as touched and set errors
-          const errors = {};
-          const touched = {};
-          validationError.inner.forEach(err => {
-            errors[err.path] = err.message;
-            touched[err.path] = true;
-          });
-          formik.setTouched(touched);
-          formik.setErrors(errors);
-          dispatch(openSnackbar({
-            open: true,
-            message: 'Please fix the highlighted fields with format errors before saving draft.',
-            variant: 'alert',
-            alert: { color: 'error' },
-            close: false
-          }));
-          return; // Do not save if not valid
-        }
-        if (!contextEventId) {
+  // Save Draft handler
+  const handleSaveDraft = async () => {
+    // Build a validation schema that ignores is_required, only checks metadata validations
+    const draftValidationShape = {};
+    fields.forEach(field => {
+      let validator = Yup.string();
+      if (field.metadata && field.metadata.validations && field.metadata.validations.regex) {
+        validator = validator
+          .notRequired()
+          .test(
+            'matches-regex-if-not-empty',
+            field.metadata.validations.error_message || 'Invalid value',
+            value => {
+              if (!value) return true; // allow empty
+              return new RegExp(field.metadata.validations.regex).test(value);
+            }
+          );
+      }
+      draftValidationShape[field.field_name] = validator;
+    });
+    const draftValidationSchema = Yup.object().shape(draftValidationShape);
+    try {
+      await draftValidationSchema.validate(formik.values, { abortEarly: false });
+    } catch (validationError) {
+      // Only mark fields with metadata validations as touched and set errors
+      const errors = {};
+      const touched = {};
+      validationError.inner.forEach(err => {
+        errors[err.path] = err.message;
+        touched[err.path] = true;
+      });
+      formik.setTouched(touched);
+      formik.setErrors(errors);
+      dispatch(openSnackbar({
+        open: true,
+        message: 'Please fix the highlighted fields with format errors before saving draft.',
+        variant: 'alert',
+        alert: { color: 'error' },
+        close: false
+      }));
+      return; // Do not save if not valid
+    }
+    if (!contextEventId) {
       dispatch(openSnackbar({
         open: true,
         message: 'Context event ID missing. Please try again.',
@@ -376,128 +376,128 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
         alert: { color: 'error' },
         close: false
       }));
-            return;
-        }
-        setSavingDraft(true);
-  // Format all date fields before sending
-  const formattedFormValues = { ...formik.values };
-  fields.forEach(field => {
-    if (field.field_type === 'date' && formattedFormValues[field.field_name]) {
-      formattedFormValues[field.field_name] = formatDateToDDMMYYYY(formattedFormValues[field.field_name]);
+      return;
     }
-  });
-        const payload = {
-            draft: contextEventId,
-    draft_data: formattedFormValues,
-            file_name: formik.values.file_name,
-            status: 'draft'
-        };
-        try {
-            if (!draftDetailId) {
-                // First time: POST
-                const result = await Factory('post', '/documentdrafting/document-drafts-details/', payload);
-                if (result.res && result.res.status_cd === 0 && result.res.id) {
-                    setDraftDetailId(result.res.id);
-                    if (result.res.file_url || result.res.file) {
-                        setFileUrl(result.res.file_url || result.res.file);
-                    } else {
-                        fetchAndSetFileUrl(result.res.id);
-                    }
-        dispatch(openSnackbar({
-          open: true,
-          message: 'Draft saved successfully',
-          variant: 'alert',
-          alert: { color: 'success' },
-          close: false
-        }));
-                } else {
-        dispatch(openSnackbar({
-          open: true,
-          message: result.message || 'Failed to save draft',
-          variant: 'alert',
-          alert: { color: 'error' },
-          close: false
-        }));
-                }
-            } else {
-                // Subsequent: PUT
-                const result = await Factory('put', `/documentdrafting/document-drafts-details/${draftDetailId}/`, payload);
-                if (result.res && result.res.status_cd === 0) {
-                    if (result.res.file_url || result.res.file) {
-                        setFileUrl(result.res.file_url || result.res.file);
-                    } else {
-                        fetchAndSetFileUrl(draftDetailId);
-                    }
-        dispatch(openSnackbar({
-          open: true,
-          message: 'Draft updated successfully',
-          variant: 'alert',
-          alert: { color: 'success' },
-          close: false
-        }));
-                } else {
-        dispatch(openSnackbar({
-          open: true,
-          message: result.message || 'Failed to update draft',
-          variant: 'alert',
-          alert: { color: 'error' },
-          close: false
-        }));
-                }
-            }
-        } catch (err) {
-    dispatch(openSnackbar({
-      open: true,
-      message: 'Failed to save draft',
-      variant: 'alert',
-      alert: { color: 'error' },
-      close: false
-    }));
-        }
-        setSavingDraft(false);
+    setSavingDraft(true);
+    // Format all date fields before sending
+    const formattedFormValues = { ...formik.values };
+    fields.forEach(field => {
+      if (field.field_type === 'date' && formattedFormValues[field.field_name]) {
+        formattedFormValues[field.field_name] = formatDateToDDMMYYYY(formattedFormValues[field.field_name]);
+      }
+    });
+    const payload = {
+      draft: contextEventId,
+      draft_data: formattedFormValues,
+      file_name: formik.values.file_name,
+      status: 'draft'
     };
-
-    // Finalize handler
-    const handleFinalize = async () => {
-        // Build a validation schema that checks both is_required and metadata validations
-        const finalizeValidationShape = {};
-        fields.forEach(field => {
-          let validator = Yup.string();
-          if (field.is_required) {
-            validator = validator.required(`${field.label || field.field_name} is required`);
+    try {
+      if (!draftDetailId) {
+        // First time: POST
+        const result = await Factory('post', '/documentdrafting/document-drafts-details/', payload);
+        if (result.res && result.res.status_cd === 0 && result.res.id) {
+          setDraftDetailId(result.res.id);
+          if (result.res.file_url || result.res.file) {
+            setFileUrl(result.res.file_url || result.res.file);
+          } else {
+            fetchAndSetFileUrl(result.res.id);
           }
-          if (field.metadata && field.metadata.validations && field.metadata.validations.regex) {
-            validator = validator.matches(
-              new RegExp(field.metadata.validations.regex),
-              field.metadata.validations.error_message || 'Invalid value'
-            );
-          }
-          finalizeValidationShape[field.field_name] = validator;
-        });
-        const finalizeValidationSchema = Yup.object().shape(finalizeValidationShape);
-        try {
-          await finalizeValidationSchema.validate(formik.values, { abortEarly: false });
-        } catch (validationError) {
-          // Mark only relevant fields as touched and set errors
-          const errors = {};
-          const touched = {};
-          validationError.inner.forEach(err => {
-            errors[err.path] = err.message;
-            touched[err.path] = true;
-          });
-          formik.setTouched(touched);
-          formik.setErrors(errors);
           dispatch(openSnackbar({
             open: true,
-            message: 'Please fill all required fields and fix format errors before finalizing.',
+            message: 'Draft saved successfully',
+            variant: 'alert',
+            alert: { color: 'success' },
+            close: false
+          }));
+        } else {
+          dispatch(openSnackbar({
+            open: true,
+            message: result.message || 'Failed to save draft',
             variant: 'alert',
             alert: { color: 'error' },
             close: false
           }));
-          setFinalizing(false);
-          return; // Do not finalize if not valid
         }
-        if (!contextEventId) {
+      } else {
+        // Subsequent: PUT
+        const result = await Factory('put', `/documentdrafting/document-drafts-details/${draftDetailId}/`, payload);
+        if (result.res && result.res.status_cd === 0) {
+          if (result.res.file_url || result.res.file) {
+            setFileUrl(result.res.file_url || result.res.file);
+          } else {
+            fetchAndSetFileUrl(draftDetailId);
+          }
+          dispatch(openSnackbar({
+            open: true,
+            message: 'Draft updated successfully',
+            variant: 'alert',
+            alert: { color: 'success' },
+            close: false
+          }));
+        } else {
+          dispatch(openSnackbar({
+            open: true,
+            message: result.message || 'Failed to update draft',
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          }));
+        }
+      }
+    } catch (err) {
+      dispatch(openSnackbar({
+        open: true,
+        message: 'Failed to save draft',
+        variant: 'alert',
+        alert: { color: 'error' },
+        close: false
+      }));
+    }
+    setSavingDraft(false);
+  };
+
+  // Finalize handler
+  const handleFinalize = async () => {
+    // Build a validation schema that checks both is_required and metadata validations
+    const finalizeValidationShape = {};
+    fields.forEach(field => {
+      let validator = Yup.string();
+      if (field.is_required) {
+        validator = validator.required(`${field.label || field.field_name} is required`);
+      }
+      if (field.metadata && field.metadata.validations && field.metadata.validations.regex) {
+        validator = validator.matches(
+          new RegExp(field.metadata.validations.regex),
+          field.metadata.validations.error_message || 'Invalid value'
+        );
+      }
+      finalizeValidationShape[field.field_name] = validator;
+    });
+    const finalizeValidationSchema = Yup.object().shape(finalizeValidationShape);
+    try {
+      await finalizeValidationSchema.validate(formik.values, { abortEarly: false });
+    } catch (validationError) {
+      // Mark only relevant fields as touched and set errors
+      const errors = {};
+      const touched = {};
+      validationError.inner.forEach(err => {
+        errors[err.path] = err.message;
+        touched[err.path] = true;
+      });
+      formik.setTouched(touched);
+      formik.setErrors(errors);
+      dispatch(openSnackbar({
+        open: true,
+        message: 'Please fill all required fields and fix format errors before finalizing.',
+        variant: 'alert',
+        alert: { color: 'error' },
+        close: false
+      }));
+      setFinalizing(false);
+      return; // Do not finalize if not valid
+    }
+    if (!contextEventId) {
       dispatch(openSnackbar({
         open: true,
         message: 'Context event ID missing. Please try again.',
@@ -517,9 +517,9 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
         alert: { color: 'error' },
         close: false
       }));
-            return;
-        }
-        setFinalizing(true);
+      return;
+    }
+    setFinalizing(true);
     // Format all date fields before sending
     const formattedFormValues = { ...formik.values };
     fields.forEach(field => {
@@ -527,23 +527,23 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
         formattedFormValues[field.field_name] = formatDateToDDMMYYYY(formattedFormValues[field.field_name]);
       }
     });
-        const payload = {
-            draft: contextEventId,
+    const payload = {
+      draft: contextEventId,
       draft_data: formattedFormValues,
-            file_name: formik.values.file_name,
-            status: 'completed',
-        };
-        try {
-            if (!draftDetailId) {
-                // First time: POST
-                const result = await Factory('post', '/documentdrafting/document-drafts-details/', payload);
-                if (result.res && result.res.status_cd === 0 && result.res.id) {
-                    setDraftDetailId(result.res.id);
-                    if (result.res.file_url || result.res.file) {
-                        setFileUrl(result.res.file_url || result.res.file);
-                    } else {
-                        fetchAndSetFileUrl(result.res.id);
-                    }
+      file_name: formik.values.file_name,
+      status: 'completed',
+    };
+    try {
+      if (!draftDetailId) {
+        // First time: POST
+        const result = await Factory('post', '/documentdrafting/document-drafts-details/', payload);
+        if (result.res && result.res.status_cd === 0 && result.res.id) {
+          setDraftDetailId(result.res.id);
+          if (result.res.file_url || result.res.file) {
+            setFileUrl(result.res.file_url || result.res.file);
+          } else {
+            fetchAndSetFileUrl(result.res.id);
+          }
           dispatch(openSnackbar({
             open: true,
             message: 'Document finalized successfully',
@@ -551,7 +551,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
             alert: { color: 'success' },
             close: false
           }));
-                } else {
+        } else {
           dispatch(openSnackbar({
             open: true,
             message: result.message || 'Failed to finalize',
@@ -559,16 +559,16 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
             alert: { color: 'error' },
             close: false
           }));
-                }
-            } else {
-                // Subsequent: PUT
-                const result = await Factory('put', `/documentdrafting/document-drafts-details/${draftDetailId}/`, payload);
-                if (result.res && result.res.status_cd === 0) {
-                    if (result.res.file_url || result.res.file) {
-                        setFileUrl(result.res.file_url || result.res.file);
-                    } else {
-                        fetchAndSetFileUrl(draftDetailId);
-                    }
+        }
+      } else {
+        // Subsequent: PUT
+        const result = await Factory('put', `/documentdrafting/document-drafts-details/${draftDetailId}/`, payload);
+        if (result.res && result.res.status_cd === 0) {
+          if (result.res.file_url || result.res.file) {
+            setFileUrl(result.res.file_url || result.res.file);
+          } else {
+            fetchAndSetFileUrl(draftDetailId);
+          }
           dispatch(openSnackbar({
             open: true,
             message: 'Document finalized successfully',
@@ -576,7 +576,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
             alert: { color: 'success' },
             close: false
           }));
-                } else {
+        } else {
           dispatch(openSnackbar({
             open: true,
             message: result.message || 'Failed to finalize',
@@ -584,9 +584,9 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
             alert: { color: 'error' },
             close: false
           }));
-                }
-            }
-        } catch (err) {
+        }
+      }
+    } catch (err) {
       dispatch(openSnackbar({
         open: true,
         message: 'Failed to finalize',
@@ -594,13 +594,13 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
         alert: { color: 'error' },
         close: false
       }));
-        }
-        setFinalizing(false);
-    };
+    }
+    setFinalizing(false);
+  };
 
-    // Download handler (presigned URL logic)
-    const handleDownload = async () => {
-        if (!fileUrl) {
+  // Download handler (presigned URL logic)
+  const handleDownload = async () => {
+    if (!fileUrl) {
       dispatch(openSnackbar({
         open: true,
         message: 'No file available for download. Please finalize the document first.',
@@ -608,15 +608,15 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
         alert: { color: 'error' },
         close: false
       }));
-            return;
-        }
-        try {
-            const result = await Factory('get', `/docwallet/generate_presigned_url?url=${encodeURIComponent(fileUrl)}`, {}, {});
-            console.log('Presigned URL response:', result);
-            const presignedUrl = result.res.data.presigned_url || result.res.data.url;
-            if (result.res && result.res.status_cd === 0 && result.res.data && presignedUrl) {
-                // Open the presigned URL in a new tab (temporary workaround for CORS)
-                window.open(presignedUrl, '_blank');
+      return;
+    }
+    try {
+      const result = await Factory('get', `/docwallet/generate_presigned_url?url=${encodeURIComponent(fileUrl)}`, {}, {});
+      console.log('Presigned URL response:', result);
+      const presignedUrl = result.res.data.presigned_url || result.res.data.url;
+      if (result.res && result.res.status_cd === 0 && result.res.data && presignedUrl) {
+        // Open the presigned URL in a new tab (temporary workaround for CORS)
+        window.open(presignedUrl, '_blank');
         dispatch(openSnackbar({
           open: true,
           message: 'Download started',
@@ -624,7 +624,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
           alert: { color: 'success' },
           close: false
         }));
-            } else {
+      } else {
         dispatch(openSnackbar({
           open: true,
           message: result.message || 'Failed to get presigned URL',
@@ -632,8 +632,8 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
           alert: { color: 'error' },
           close: false
         }));
-            }
-        } catch (err) {
+      }
+    } catch (err) {
       dispatch(openSnackbar({
         open: true,
         message: 'Failed to download file',
@@ -641,27 +641,27 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
         alert: { color: 'error' },
         close: false
       }));
-            console.error('Download error:', err);
-        }
-    };
+      console.error('Download error:', err);
+    }
+  };
 
-    // Reset All handler
-    const handleResetAll = () => {
-        // Reset all form fields to empty using formik
-        const resetValues = (fields || []).reduce((acc, field) => {
-            acc[field.field_name] = '';
-            return acc;
-        }, { file_name: '' });
-        formik.resetForm({ values: resetValues });
-        setFormValues(resetValues);
-        dispatch(openSnackbar({
-          open: true,
-          message: 'All fields reset',
-          variant: 'alert',
-          alert: { color: 'success' },
-          close: false
-        }));
-    };
+  // Reset All handler
+  const handleResetAll = () => {
+    // Reset all form fields to empty using formik
+    const resetValues = (fields || []).reduce((acc, field) => {
+      acc[field.field_name] = '';
+      return acc;
+    }, { file_name: '' });
+    formik.resetForm({ values: resetValues });
+    setFormValues(resetValues);
+    dispatch(openSnackbar({
+      open: true,
+      message: 'All fields reset',
+      variant: 'alert',
+      alert: { color: 'success' },
+      close: false
+    }));
+  };
 
   const handleDeleteDocument = async (row) => {
     if (!row?.id) return;
@@ -699,84 +699,82 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
         close: false
       }));
     }
-    };
+  };
 
-    // Always build formik, but use empty fields/validation if not splitView
-    const dynamicFields = splitView ? (fields || []) : [];
-    const initialValues = { file_name: '' };
-    const validationShape = {};
-    if (splitView) {
-      initialValues.file_name = formValues.file_name || '';
+  // Always build formik, but use empty fields/validation if not splitView
+  const dynamicFields = splitView ? (fields || []) : [];
+  const initialValues = { file_name: '' };
+  const validationShape = {};
+  if (splitView) {
+    initialValues.file_name = formValues.file_name || '';
+  }
+  dynamicFields.forEach(field => {
+    let value = formValues[field.field_name] || '';
+    if (field.field_type === 'date' && value) {
+      // Convert DD-MM-YYYY to YYYY-MM-DD if needed
+      if (/^\d{2}-\d{2}-\d{4}$/.test(value)) {
+        const [dd, mm, yyyy] = value.split('-');
+        value = `${yyyy}-${mm}-${dd}`;
+      }
+      // If already YYYY-MM-DD, keep as is
     }
-    dynamicFields.forEach(field => {
-      let value = formValues[field.field_name] || '';
-      if (field.field_type === 'date' && value) {
-        // Convert DD-MM-YYYY to YYYY-MM-DD if needed
-        if (/^\d{2}-\d{2}-\d{4}$/.test(value)) {
-          const [dd, mm, yyyy] = value.split('-');
-          value = `${yyyy}-${mm}-${dd}`;
-        }
-        // If already YYYY-MM-DD, keep as is
-      }
-      initialValues[field.field_name] = value;
-      let validator = Yup.string();
-      if (field.is_required) {
-        validator = validator.required(`${field.label || field.field_name} is required`);
-      }
-      if (field.metadata && field.metadata.validations && field.metadata.validations.regex) {
-        validator = validator.matches(
-          new RegExp(field.metadata.validations.regex),
-          field.metadata.validations.error_message || 'Invalid value'
-        );
-      }
-      validationShape[field.field_name] = validator;
-    });
-    // Do NOT add file_name to validationShape
-    const validationSchema = Yup.object().shape(validationShape);
-    const formik = useFormik({
-      initialValues,
-      enableReinitialize: true,
-      validationSchema,
-      onSubmit: (values) => {
-        setFormValues(values);
-      },
-    });
+    initialValues[field.field_name] = value;
+    let validator = Yup.string();
+    if (field.is_required) {
+      validator = validator.required(`${field.label || field.field_name} is required`);
+    }
+    if (field.metadata && field.metadata.validations && field.metadata.validations.regex) {
+      validator = validator.matches(
+        new RegExp(field.metadata.validations.regex),
+        field.metadata.validations.error_message || 'Invalid value'
+      );
+    }
+    validationShape[field.field_name] = validator;
+  });
+  // Do NOT add file_name to validationShape
+  const validationSchema = Yup.object().shape(validationShape);
+  const formik = useFormik({
+    initialValues,
+    enableReinitialize: true,
+    validationSchema,
+    onSubmit: (values) => {
+      setFormValues(values);
+    },
+  });
 
-    // Add a ref for the preview container at the top of the component
-    const previewContainerRef = React.useRef(null);
-    // At the top of the component
-    const previewContentRef = React.useRef(null);
+  // Add the previewContainerRef hook at the top level
+  const previewContainerRef = React.useRef(null);
 
-    if (splitView) {
-        // Only render the split view, no header/tabs, with a full white background
-        return (
-            <Box
-                sx={{
-        p: { xs: 2, sm: 2, md: 4 },
-        minHeight: '100vh',
-        width: '100%',
-        boxSizing: 'border-box',
-        backgroundColor: 'white', // set app background
-        borderRadius: '8px',
-      }}
-    >
-      
-      <Typography variant="h5" fontWeight={600} sx={{ m: 0, mb: 2, fontSize: { xs: 18, sm: 22 } }}>
-            Document Drafting
-          </Typography>
-      
-          {/* Your inner content */}
-            <Box
-                    sx={{
-                        display: 'flex',
-                flexWrap: { xs: 'wrap', md: 'nowrap' }, // Wrap on small screens, side-by-side on md+
-                gap: 3, // space between the papers
-                justifyContent: 'center', // center the row
-                width: '100%',
-            }}
-            > 
+  if (splitView) {
+    // Only render the split view, no header/tabs, with a full white background
+    return (
+      <Box
+        sx={{
+          p: { xs: 2, sm: 2, md: 4 },
+          minHeight: '100vh',
+          width: '100%',
+          boxSizing: 'border-box',
+          backgroundColor: 'white', // set app background
+          borderRadius: '8px',
+        }}
+      >
+
+        <Typography variant="h5" fontWeight={600} sx={{ ml: { md: 2, xs: 0 }, mb: 2, fontSize: { xs: 18, sm: 22 } }}>
+          Document Drafting
+        </Typography>
+
+        {/* Your inner content */}
+        <Box
+          sx={{
+            display: 'flex',
+            flexWrap: { xs: 'wrap', md: 'nowrap' }, // Wrap on small screens, side-by-side on md+
+            gap: 3, // space between the papers
+            justifyContent: 'center', // center the row
+            width: '100%',
+          }}
+        >
           {/* Left: Dynamic Form */}
-          <Paper elevation={2} sx={{flex: 1, minWidth: { xs: '100%', sm: 320, md: 400 }, maxWidth: 400, height: 585, maxHeight: 1000, display: 'flex', flexDirection: 'column', pb: 2, mr: 0, overflow: 'hidden' }}>
+          <Paper elevation={2} sx={{ flex: 1, minWidth: { xs: '100%', sm: 320, md: 400 }, maxWidth: 400, height: 620, maxHeight: 1000, display: 'flex', flexDirection: 'column', pb: 2, mr: 0, overflow: 'hidden' }}>
             {/* Progress Bar */}
             {fields.length > 0 && (
               <Box sx={{ width: '100%', mb: 2, position: 'relative' }}>
@@ -811,7 +809,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
                 <Box sx={{ p: 2.5, pb: 2 }}>
                   <form onSubmit={formik.handleSubmit} autoComplete="off">
                     <Grid2 container spacing={2}>
-                      <Grid2 size={{xs:12}}>
+                      <Grid2 size={{ xs: 12 }}>
                         <TextField
                           fullWidth
                           label="Enter document name"
@@ -828,7 +826,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
                       {(fields || []).length > 0 ? (
                         <Grid2 container spacing={2}>
                           {fields.map((field, idx) => (
-                            <Grid2 size={{xs:12}} key={field.field_name}>
+                            <Grid2 size={{ xs: 12 }} key={field.field_name}>
                               {/* Render Autocomplete if field_type is select and metadata.options exists */}
                               {field.field_type === 'select' && field.metadata && Array.isArray(field.metadata.options) ? (
                                 <Autocomplete
@@ -839,7 +837,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
                                     formik.setFieldValue(field.field_name, value);
                                     setTimeout(() => {
                                       const el = document.getElementById(`preview-field-${field.field_name}`);
-                                      const container = previewContentRef.current;
+                                      const container = previewContainerRef.current;
                                       if (el && container) {
                                         const elRect = el.getBoundingClientRect();
                                         const containerRect = container.getBoundingClientRect();
@@ -871,7 +869,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
                                     formik.handleChange(e);
                                     setTimeout(() => {
                                       const el = document.getElementById(`preview-field-${field.field_name}`);
-                                      const container = previewContentRef.current;
+                                      const container = previewContainerRef.current;
                                       if (el && container) {
                                         const elRect = el.getBoundingClientRect();
                                         const containerRect = container.getBoundingClientRect();
@@ -902,7 +900,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
             </Box>
           </Paper>
           {/* Right: Live Template Preview */}
-          <Paper elevation={2} sx={{ position: 'relative', flex: 1, minWidth: { xs: '100%', sm: 320, md: 400 }, maxWidth: 900, height: 585, maxHeight: 1000, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          <Paper elevation={2} sx={{ position: 'relative', flex: 1, minWidth: { xs: '100%', sm: 320, md: 400 }, maxWidth: 900, height: 620, maxHeight: 1000, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
             {/* Progress Bar (same as left) */}
             {fields.length > 0 && (
               <Box sx={{ width: '100%', mb: 2, position: 'relative' }}>
@@ -914,7 +912,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
                     <LinearProgress
                       variant="determinate"
                       value={progress}
-                    sx={{
+                      sx={{
                         height: 8,
                         borderRadius: 4,
                         backgroundColor: '#E3EAFE',
@@ -931,65 +929,62 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
               </Box>
             )}
             {(() => {
-              const templateBoxRef = React.createRef();
               return (
-                <ScrollableCard showArrows containerRef={templateBoxRef}>
-                  <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-                    <Typography variant="h5" fontWeight={700} mb={2} sx={{ pl: 3, pt: 2 }}>Document Preview</Typography>
-                    <Box
-                      ref={previewContentRef}
-                        sx={{
-                        flex: 1,
-                        p: 1,
-                        height: '100%',
-                        maxHeight: 500,
-                        overflow: 'auto',
+                <ScrollableCard showArrows={true} containerRef={previewContainerRef}>
+                  <Typography variant="h5" fontWeight={700} mb={2} sx={{ pl: 3, pt: 2 }}>Document Preview</Typography>
+                  <Box
+                    ref={previewContainerRef}
+                    sx={{
+                      flex: 1,
+                      p: 1,
+                      height: '100%',
+                      maxHeight: 530,
+                      overflow: 'auto',
+                      width: '100%',
+                      maxWidth: '100%',
+                      background: 'transparent',
+                      borderRadius: 0,
+                      boxSizing: 'border-box',
+                      // Custom scrollbar styles
+                      '&::-webkit-scrollbar': {
+                        width: 8,
+                        backgroundColor: '#E3EAFE',
+                        borderRadius: 4,
+                      },
+                      '&::-webkit-scrollbar-thumb': {
+                        backgroundColor: '#3650AE',
+                        borderRadius: 4,
+                      },
+                      '&::-webkit-scrollbar-thumb:hover': {
+                        backgroundColor: '#00329E',
+                      },
+                      scrollbarWidth: 'thin',
+                      scrollbarColor: '#3650AE #E3EAFE',
+                      '& .offer-letter-preview': {
                         width: '100%',
+                        marginTop: 2,
+                        marginBottom: 2,
+                        padding: 2,
+                      },
+                      '& *': {
                         maxWidth: '100%',
-                        background: 'transparent',
-                        borderRadius: 0,
-                        boxSizing: 'border-box',
-                        // Custom scrollbar styles
-                        '&::-webkit-scrollbar': {
-                          width: 8,
-                          backgroundColor: '#E3EAFE',
-                          borderRadius: 4,
-                        },
-                        '&::-webkit-scrollbar-thumb': {
-                          backgroundColor: '#3650AE',
-                          borderRadius: 4,
-                        },
-                        '&::-webkit-scrollbar-thumb:hover': {
-                          backgroundColor: '#00329E',
-                        },
-                        scrollbarWidth: 'thin',
-                        scrollbarColor: '#3650AE #E3EAFE',
-                        '& .offer-letter-preview': {
-                          width: '100%',
-                          marginTop: 2,
-                          marginBottom: 2,
-                          padding: 2,
-                        },
-                        '& *': {
-                          maxWidth: '100%',
-                          wordBreak: 'break-word',
-                        },
-                      }}
-                    >
-                      {templateLoading ? (
-                        <Typography>Loading template...</Typography>
-                      ) : templateError ? (
-                        <Typography color="error">{templateError}</Typography>
-                      ) : (
-                        <div dangerouslySetInnerHTML={{ __html: renderTemplateWithValues() }} />
-                      )}
-                    </Box>
+                        wordBreak: 'break-word',
+                      },
+                    }}
+                  >
+                    {templateLoading ? (
+                      <Typography>Loading template...</Typography>
+                    ) : templateError ? (
+                      <Typography color="error">{templateError}</Typography>
+                    ) : (
+                      <div dangerouslySetInnerHTML={{ __html: renderTemplateWithValues() }} />
+                    )}
                   </Box>
                 </ScrollableCard>
               );
             })()}
-                </Paper>
-            </Box>
+          </Paper>
+        </Box>
 
         {/* Action Buttons: Back at left, others at right */}
         <Box
@@ -1014,6 +1009,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
               color: '#00329E',
               width: { xs: '100%', sm: 'auto' },
               mb: { xs: 1, sm: 0 },
+              ml: { md: 2 },
               '&:hover': { borderColor: '#00329E', background: 'rgba(0,50,158,0.04)' },
             }}
             startIcon={<ArrowBackIcon />}
@@ -1021,7 +1017,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
           >
             {'Back to Dashboard'}
           </Button>
-          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, width: { xs: '100%', sm: 'auto' } }}>
+          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, width: { xs: '100%', sm: 'auto' }, mr: { md: 2 } }}>
             <Button
               variant="contained"
               color="primary"
@@ -1108,27 +1104,27 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
             </Button>
           </Box>
         </Box>
-      
-    </Box>
-        );
-    }
 
-    // Filter templates by search string (case-insensitive, title or description)
-    const filteredTemplates = (templates || []).filter(template => {
-      if (!search) return true;
-      const s = search.toLowerCase();
-      return (
-        (template.document_name && template.document_name.toLowerCase().includes(s)) ||
-        (template.title && template.title.toLowerCase().includes(s)) ||
-        (template.file_name && template.file_name.toLowerCase().includes(s)) ||
-        (template.description && template.description.toLowerCase().includes(s))
-      );
-    });
+      </Box>
+    );
+  }
 
-    // Debug log
-    console.log('DocumentSelectionPage search:', search, 'filteredTemplates:', filteredTemplates.length);
-
+  // Filter templates by search string (case-insensitive, title or description)
+  const filteredTemplates = (templates || []).filter(template => {
+    if (!search) return true;
+    const s = search.toLowerCase();
     return (
+      (template.document_name && template.document_name.toLowerCase().includes(s)) ||
+      (template.title && template.title.toLowerCase().includes(s)) ||
+      (template.file_name && template.file_name.toLowerCase().includes(s)) ||
+      (template.description && template.description.toLowerCase().includes(s))
+    );
+  });
+
+  // Debug log
+  console.log('DocumentSelectionPage search:', search, 'filteredTemplates:', filteredTemplates.length);
+
+  return (
     <Box sx={{ p: { xs: 2, md: 4 } }}>
       {/* Top Row: Heading and Search - removed, now handled by parent */}
       {/* Document Cards Grid */}
@@ -1162,13 +1158,13 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
                     pr: { xs: 2, sm: 2.5 },
                     pt: { xs: 2, sm: 2.5 },
                     pb: { xs: 2, sm: 2.5 },
-                
-                    ml: {xs:0,md:-2},
-                
-                    width: { xs: '110%', sm: '100%',md:'110%' },
-                    
+
+                    ml: { xs: 0, md: -2 },
+
+                    width: { xs: '110%', sm: '100%', md: '110%' },
+
                     minWidth: { xs: '100%', sm: 220, md: '110%' },
-                    maxWidth: { xs: '100%', sm: 400,md:'110%' },
+                    maxWidth: { xs: '100%', sm: 400, md: '110%' },
                     minHeight: { xs: 120, sm: 180 },
                     maxHeight: { xs: 180, sm: 180 },
                     height: { xs: 140, sm: 180 },
@@ -1217,7 +1213,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
                       sx={{
                         fontWeight: 700,
                         fontSize: 14,
-                        width:'95%',
+                        width: '95%',
                         mb: 0.5,
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
@@ -1267,64 +1263,64 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
         </>
       )}
     </Box>
-    );
+  );
 }
 
 function ScrollableCard({ children, showArrows, containerRef: externalRef }) {
   const internalRef = React.useRef(null);
   const containerRef = externalRef || internalRef;
-    const [showUp, setShowUp] = React.useState(false);
-    const [showDown, setShowDown] = React.useState(false);
+  const [showUp, setShowUp] = React.useState(false);
+  const [showDown, setShowDown] = React.useState(false);
 
-    const checkScroll = () => {
-        const el = containerRef.current;
-        if (!el) return;
-        setShowUp(el.scrollTop > 0);
+  const checkScroll = () => {
+    const el = containerRef.current;
+    if (!el) return;
+    setShowUp(el.scrollTop > 0);
     setShowDown(el.scrollTop + el.clientHeight < el.scrollHeight - 1); // -1 for rounding
-    };
+  };
 
-    React.useEffect(() => {
-        checkScroll();
-        const el = containerRef.current;
-        if (!el) return;
-        el.addEventListener('scroll', checkScroll);
-        return () => el.removeEventListener('scroll', checkScroll);
+  React.useEffect(() => {
+    checkScroll();
+    const el = containerRef.current;
+    if (!el) return;
+    el.addEventListener('scroll', checkScroll);
+    return () => el.removeEventListener('scroll', checkScroll);
   }, [children]); // re-check when children change
 
-    const handleScroll = (direction) => {
-        const el = containerRef.current;
-        if (!el) return;
-        const amount = 100;
-        if (direction === 'up') {
-            el.scrollBy({ top: -amount, behavior: 'smooth' });
-        } else if (direction === 'down') {
-            el.scrollBy({ top: amount, behavior: 'smooth' });
-        }
-    };
+  const handleScroll = (direction) => {
+    const el = containerRef.current;
+    if (!el) return;
+    const amount = 100;
+    if (direction === 'up') {
+      el.scrollBy({ top: -amount, behavior: 'smooth' });
+    } else if (direction === 'down') {
+      el.scrollBy({ top: amount, behavior: 'smooth' });
+    }
+  };
 
-    return (
-        <Box sx={{ position: 'relative', height: '100%', width: '100%' }}>
+  return (
+    <Box sx={{ position: 'relative', height: '100%', width: '100%' }}>
       {showArrows && showUp && (
-                <Box sx={{ position: 'absolute', top: 8, left: 0, right: 0, display: 'flex', justifyContent: 'center', zIndex: 2 }}>
-                    <Box
-                        component="button"
-                        onClick={() => handleScroll('up')}
-                        sx={{
-                            border: 'none',
-                            background: 'none',
-                            cursor: 'pointer',
-                            p: 0,
-                            m: 0,
-                            outline: 'none',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                        }}
-                    >
-                        <ArrowUpwardIcon fontSize="small" sx={{ bgcolor: '#fff', borderRadius: '50%', boxShadow: 1, p: 0.2 }} />
-                    </Box>
-                </Box>
-            )}
+        <Box sx={{ position: 'absolute', top: 8, left: 0, right: 0, display: 'flex', justifyContent: 'center', zIndex: 2 }}>
+          <Box
+            component="button"
+            onClick={() => handleScroll('up')}
+            sx={{
+              border: 'none',
+              background: 'none',
+              cursor: 'pointer',
+              p: 0,
+              m: 0,
+              outline: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <ArrowUpwardIcon fontSize="small" sx={{ bgcolor: '#fff', borderRadius: '50%', boxShadow: 1, p: 0.2 }} />
+          </Box>
+        </Box>
+      )}
       {/* Only attach ref to direct child if not provided externally */}
       {externalRef ? children : <Box ref={containerRef} sx={{
         height: '100%',
@@ -1348,27 +1344,27 @@ function ScrollableCard({ children, showArrows, containerRef: externalRef }) {
         scrollbarColor: '#3650AE #E3EAFE',
       }}>{children}</Box>}
       {showArrows && showDown && (
-                <Box sx={{ position: 'absolute', bottom: 8, left: 0, right: 0, display: 'flex', justifyContent: 'center', zIndex: 2 }}>
-                    <Box
-                        component="button"
-                        onClick={() => handleScroll('down')}
-                        sx={{
-                            border: 'none',
-                            background: 'none',
-                            cursor: 'pointer',
-                            p: 0,
-                            m: 0,
-                            outline: 'none',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                        }}
-                    >
-                        <ArrowDownwardIcon fontSize="small" sx={{ bgcolor: '#fff', borderRadius: '50%', boxShadow: 1, p: 0.2 }} />
-                    </Box>
-                </Box>
-            )}
+        <Box sx={{ position: 'absolute', bottom: 8, left: 0, right: 0, display: 'flex', justifyContent: 'center', zIndex: 2 }}>
+          <Box
+            component="button"
+            onClick={() => handleScroll('down')}
+            sx={{
+              border: 'none',
+              background: 'none',
+              cursor: 'pointer',
+              p: 0,
+              m: 0,
+              outline: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <ArrowDownwardIcon fontSize="small" sx={{ bgcolor: '#fff', borderRadius: '50%', boxShadow: 1, p: 0.2 }} />
+          </Box>
         </Box>
-    
-    );
+      )}
+    </Box>
+
+  );
 } 
