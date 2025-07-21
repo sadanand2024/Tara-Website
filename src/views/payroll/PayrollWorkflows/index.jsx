@@ -172,13 +172,22 @@ const PayrollWorkflows = ({ type }) => {
   };
   const getMonthName = (monthNum) => {
     const monthNames = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December'
     ];
     const index = parseInt(monthNum, 10) - 1;
     return monthNames[index] || '';
   };
-  
 
   const fetchAdhocBonusData = async () => {
     setLoading(true);
@@ -340,7 +349,8 @@ const PayrollWorkflows = ({ type }) => {
     if (tabs[activeTab].label === 'Attendance') {
       generateAttandance();
     } else if (tabs[activeTab].label === 'New Joiners') {
-      navigate(`/app/payroll/settings/add-employee?payrollid=${payrollId}`);
+      // navigate(`/app/payroll/settings/add-employee?payrollid=${payrollId}`);
+      navigate(`/app/payroll/settings/employee-master?payrollid=${payrollId}&action=add&tabValue=0`);
     } else {
       setOpenDialog(true);
     }
@@ -459,7 +469,12 @@ const PayrollWorkflows = ({ type }) => {
             onChange={(e) => setSearchQuery(e.target.value)}
             sx={{ minWidth: 250 }}
           />
-          <Button startIcon={<ArrowBackIcon />} variant="outlined" color="primary" onClick={() => navigate(-1)}>
+          <Button
+            startIcon={<ArrowBackIcon />}
+            variant="outlined"
+            color="primary"
+            onClick={() => navigate('/app/payroll?month=' + month + '&financial_year=' + financialYear)}
+          >
             Back to dashboard
           </Button>
           <Button variant="contained" color="primary" onClick={handleButtonClick}>

@@ -16,7 +16,15 @@ TabPanel.propTypes = {
   index: PropTypes.number.isRequired
 };
 
-const SalaryComponentTabs = ({ type, handleBack, handleNext, openDialog = false, setOpenDialog }) => {
+const SalaryComponentTabs = ({
+  type,
+  handleBack,
+  handleNext,
+  openDialog = false,
+  setOpenDialog,
+  activeTab: parentActiveTab,
+  setActiveTab: setParentActiveTab
+}) => {
   const [activeTab, setActiveTab] = useState(0);
   const [postType, setPostType] = useState('');
 
@@ -27,7 +35,20 @@ const SalaryComponentTabs = ({ type, handleBack, handleNext, openDialog = false,
     }
   }, [openDialog, postType]);
 
-  const handleTabChange = (_event, newValue) => setActiveTab(newValue);
+  // Sync local activeTab with parent's activeTab
+  React.useEffect(() => {
+    if (parentActiveTab !== undefined && parentActiveTab !== activeTab) {
+      setActiveTab(parentActiveTab);
+    }
+  }, [parentActiveTab, activeTab]);
+
+  const handleTabChange = (_event, newValue) => {
+    setActiveTab(newValue);
+    // Update parent component's active tab state
+    if (setParentActiveTab) {
+      setParentActiveTab(newValue);
+    }
+  };
 
   const handleTabNext = () => {
     if (activeTab < tabLabels.length - 1) setActiveTab((prev) => prev + 1);
@@ -74,7 +95,9 @@ SalaryComponentTabs.propTypes = {
   handleBack: PropTypes.func,
   handleNext: PropTypes.func,
   openDialog: PropTypes.bool,
-  setOpenDialog: PropTypes.func
+  setOpenDialog: PropTypes.func,
+  activeTab: PropTypes.number,
+  setActiveTab: PropTypes.func
 };
 
 export default SalaryComponentTabs;

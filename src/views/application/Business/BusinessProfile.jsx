@@ -82,7 +82,7 @@ const validationSchema = Yup.object({
   pan: Yup.string()
     .matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN Number')
     .required('Business PAN is required'),
-  registrationNumber: Yup.string().required('Registration No. is required'),
+  // registrationNumber: Yup.string().required('Registration No. is required'),
   entityType: Yup.string().required('Entity type is required'),
   dob_or_incorp_date: Yup.date().required('Date of Incorporation is required'),
   email: Yup.string().email('Invalid email format').required('Email is required'),
@@ -125,7 +125,13 @@ const validationSchema = Yup.object({
 const businessProfileFields = [
   {
     name: 'nameOfBusiness',
-    label: 'Business Name',
+    label: 'Business or Trade Name',
+    type: 'text',
+    required: true
+  },
+  {
+    name: 'legal_name',
+    label: 'Legal Name',
     type: 'text',
     required: true
   },
@@ -145,7 +151,7 @@ const businessProfileFields = [
     name: 'registrationNumber',
     label: 'Registration Number',
     type: 'text',
-    required: true
+    required: false
   },
   {
     name: 'entityType',
@@ -310,33 +316,31 @@ const BusinessProfile = ({ tabChange, tabval }) => {
   // Fetch initial data
   useEffect(() => {
     const fetchAllData = async () => {
-      try {
-        setIsLoading(true);
-        const profileResponse = await Factory('get', `/user_management/businesses/${user.active_context.business_id}/`, {}, {});
-        if (profileResponse.res.status_cd === 0) {
-          const profileData = profileResponse.res.data;
-          setInitialValues({
-            nameOfBusiness: profileData.nameOfBusiness || '',
-            business_nature: profileData.business_nature || '',
-            pan: profileData.pan || '',
-            registrationNumber: profileData.registrationNumber || '',
-            entityType: profileData.entityType || '',
-            dob_or_incorp_date: profileData.dob_or_incorp_date || '',
-            email: profileData.email || '',
-            mobile_number: profileData.mobile_number || '',
-            headOffice: {
-              address_line1: profileData.headOffice?.address_line1 || '',
-              address_line2: profileData.headOffice?.address_line2 || '',
-              city: profileData.headOffice?.city || '',
-              state: profileData.headOffice?.state || '',
-              pincode: profileData.headOffice?.pincode || ''
-            },
-            is_msme_registered: profileData.is_msme_registered || 'no',
-            msme_registration_type: profileData.msme_registration_type || '',
-            msme_registration_number: profileData.msme_registration_number || '',
-            trade_name: profileData.trade_name || ''
-          });
-        }
+      setIsLoading(true);
+      const profileResponse = await Factory('get', `/user_management/businesses/${user.active_context.business_id}/`, {}, {});
+      if (profileResponse.res.status_cd === 0) {
+        const profileData = profileResponse.res.data;
+        setInitialValues({
+          nameOfBusiness: profileData.nameOfBusiness || '',
+          business_nature: profileData.business_nature || '',
+          pan: profileData.pan || '',
+          registrationNumber: profileData.registrationNumber || '',
+          entityType: profileData.entityType || '',
+          dob_or_incorp_date: profileData.dob_or_incorp_date || '',
+          email: profileData.email || '',
+          mobile_number: profileData.mobile_number || '',
+          headOffice: {
+            address_line1: profileData.headOffice?.address_line1 || '',
+            address_line2: profileData.headOffice?.address_line2 || '',
+            city: profileData.headOffice?.city || '',
+            state: profileData.headOffice?.state || '',
+            pincode: profileData.headOffice?.pincode || ''
+          },
+          is_msme_registered: profileData.is_msme_registered || 'no',
+          msme_registration_type: profileData.msme_registration_type || '',
+          msme_registration_number: profileData.msme_registration_number || '',
+          trade_name: profileData.trade_name || ''
+        });
 
         const branchesResponse = await Factory('get', `/user_management/branches/${user.active_context.business_id}/`, {}, {});
         if (branchesResponse.res.status_cd === 0) {
@@ -356,21 +360,28 @@ const BusinessProfile = ({ tabChange, tabval }) => {
         } else {
           setLogoUrlDetails(null);
           setLogoposttype('post');
+          dispatch(
+            openSnackbar({
+              open: true,
+              message: 'Logo not found',
+              variant: 'alert',
+              alert: { color: 'error' },
+              close: false
+            })
+          );
         }
-      } catch (error) {
-        console.error('Error fetching data:', error);
+      } else {
         dispatch(
           openSnackbar({
             open: true,
-            message: 'Failed to load data',
+            message: JSON.stringify(profileResponse.message) || 'Failed to load data',
             variant: 'alert',
             alert: { color: 'error' },
             close: false
           })
         );
-      } finally {
-        setIsLoading(false);
       }
+      setIsLoading(false);
     };
 
     fetchAllData();
@@ -487,7 +498,7 @@ const BusinessProfile = ({ tabChange, tabval }) => {
     return (
       <span>
         {label}
-        {isRequired && <span style={{ color: 'red', fontSize: '1.3em' }}> *</span>}
+        {isRequired && <span style={{ color: 'red', fontSize: '1em' }}> *</span>}
       </span>
     );
   };

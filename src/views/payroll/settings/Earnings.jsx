@@ -42,7 +42,7 @@ const validationSchema = Yup.object({
     is: (val) => val !== 'Commission' && val !== 'Bonus',
     then: (schema) =>
       schema.shape({
-        type: Yup.string().required('Calculation type is required'),
+        type: Yup.string().required('Select Calculation Type'),
         value: Yup.number()
           .required('Value is required')
           .min(0, 'Value must be greater than or equal to 0')
@@ -62,6 +62,7 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
   const [hovered, setHovered] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
+  const [submitAttempted, setSubmitAttempted] = useState(false);
   const handleOpenDeleteDialog = (designation) => {
     setSelectedRow(designation);
     setOpenDeleteDialog(true);
@@ -213,7 +214,6 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
     }
   }, [payrollid]);
   const { values, setValues, handleChange, errors, touched, handleSubmit, handleBlur, resetForm, setFieldValue } = formik;
-
   if (loading) {
     return <CircularProgressComponent isLoading={loading} displayContent={'Loading Earnings Data'} />;
   }
@@ -353,6 +353,7 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
               variant="contained"
               color="primary"
               onClick={(e) => {
+                setSubmitAttempted(true);
                 console.log(Object.keys(errors));
                 if (Object.keys(errors).length > 0) {
                   dispatch(
@@ -376,13 +377,14 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
       >
         <>
           <Box component="form">
-            
             <Grid2 container spacing={3}>
               {/* Left Column */}
               <Grid2 size={{ xs: 6 }}>
                 <Grid2 container direction="column" spacing={2}>
                   <Grid2>
-                    <Typography variant="subtitle1">Name <span style={{ color: 'red' }}>*</span></Typography>
+                    <Typography variant="subtitle1">
+                      Name <span style={{ color: 'red' }}>*</span>
+                    </Typography>
                     <TextField
                       fullWidth
                       size="small"
@@ -420,7 +422,7 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
                                   value: 0
                                 });
                               }}
-                              
+
                               // disabled={values.component_name === 'Basic'}
                             />
                           }
@@ -471,6 +473,12 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
                           />
                         )}
                       </FormGroup>
+                      {/* Show error for Calculation Type selection */}
+                      {(touched.calculation_type?.type || submitAttempted) && errors.calculation_type?.type && (
+                        <Typography variant="caption" color="error" sx={{ ml: 1 }}>
+                          {errors.calculation_type.type}
+                        </Typography>
+                      )}
                       <Grid2>
                         <Typography variant="subtitle1" sx={{ mb: 0.5 }}>
                           {values.calculation_type.type === 'Flat Amount' ? 'Enter Amount ' : 'Enter Percentage'}
@@ -487,8 +495,8 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
                             setFieldValue('calculation_type.value', numericValue);
                           }}
                           onBlur={handleBlur}
-                          error={touched.calculation_type?.value && Boolean(errors.calculation_type?.value)}
-                          helperText={touched.calculation_type?.value && errors.calculation_type?.value}
+                          error={(touched.calculation_type?.value || submitAttempted) && Boolean(errors.calculation_type?.value)}
+                          helperText={(touched.calculation_type?.value || submitAttempted) && errors.calculation_type?.value}
                           InputProps={{
                             startAdornment: (
                               <InputAdornment position="start" sx={{ display: 'flex', alignItems: 'center' }}>

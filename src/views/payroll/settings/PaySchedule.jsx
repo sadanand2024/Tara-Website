@@ -71,7 +71,6 @@ function PaySchedule({ handleBack, handleNext }) {
         setOpenConfirmDialog(true);
         return;
       }
-
       await submitForm(values);
     }
   });
@@ -262,9 +261,14 @@ function PaySchedule({ handleBack, handleNext }) {
             <Button startIcon={<ArrowBackIcon />} variant="outlined" onClick={handleBack}>
               Back
             </Button>
-            <Button type="submit" variant="contained" onClick={handleNext}>
-              Next
-            </Button>
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <Button variant="contained" onClick={() => handleSubmit(values)}>
+                Save
+              </Button>
+              <Button type="button" variant="contained" onClick={() => handleNext()}>
+                Next
+              </Button>
+            </Box>
           </Stack>
         </form>
 

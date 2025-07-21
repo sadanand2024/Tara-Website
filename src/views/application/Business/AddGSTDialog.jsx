@@ -88,15 +88,16 @@ const fields = [
     type: 'text',
     required: true
   },
+
   {
-    name: 'legal_name',
-    label: 'Legal Name',
+    name: 'trade_name',
+    label: 'Business or Trade Name',
     type: 'text',
     required: true
   },
   {
-    name: 'trade_name',
-    label: 'Trade Name',
+    name: 'legal_name',
+    label: 'Legal Name',
     type: 'text',
     required: true
   },
@@ -143,15 +144,14 @@ const fields = [
     name: 'gst_document',
     label: 'GST Document',
     type: 'file',
-    required: true
+    required: false
   }
 ];
 const fields_lut = [
   {
     name: 'lut_reg_no',
     label: 'LUT Reg. No (ex: LUT123456789012345)',
-    type: 'text',
-  
+    type: 'text'
   },
   {
     name: 'dob',
@@ -178,11 +178,11 @@ const AddGSTDialog = ({ open, selectedGST, handleClose, fetchGSTList }) => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.accountReducer.user);
   const getLabelWithAsterisk = (label, isRequired) => (
-  <Typography variant="subtitle1" gutterBottom color="text.secondary">
-    {label}
-    {isRequired && <span style={{ color: 'red' }}> *</span>}
-  </Typography>
-);
+    <Typography variant="subtitle1" gutterBottom color="text.secondary">
+      {label}
+      {isRequired && <span style={{ color: 'red' }}> *</span>}
+    </Typography>
+  );
 
   const renderFields = (fields) => {
     return fields.map((field) => (
@@ -190,7 +190,7 @@ const AddGSTDialog = ({ open, selectedGST, handleClose, fetchGSTList }) => {
         {/* <Typography variant="subtitle1" gutterBottom color="text.secondary">
           {field.label}
         </Typography> */}
-      {getLabelWithAsterisk(field.label, field.required)}
+        {getLabelWithAsterisk(field.label, field.required)}
 
         {field.type === 'text' ? (
           <TextField
@@ -220,6 +220,7 @@ const AddGSTDialog = ({ open, selectedGST, handleClose, fetchGSTList }) => {
             error={touched[field.name] && Boolean(errors[field.name])}
             helperText={touched[field.name] && errors[field.name]}
             InputLabelProps={{ shrink: true }}
+            disabled={field.name === 'trade_name' || field.name === 'legal_name'}
           />
         ) : field.type === 'file' ? (
           <RenderFileUpload
@@ -358,15 +359,22 @@ const AddGSTDialog = ({ open, selectedGST, handleClose, fetchGSTList }) => {
       setValues(selectedGST);
     }
   }, [selectedGST]);
+  useEffect(() => {
+    if (user.active_context.business_id) {
+      setFieldValue('trade_name', user.active_context.name || '');
+      setFieldValue('legal_name', user.active_context.legal_name || '');
+    }
+  }, [user.active_context.business_id]);
   return (
     <Modal
       open={open}
+      maxWidth="md"
       title={selectedGST !== null ? 'Edit GST Details' : 'Add GST Details'}
       handleClose={() => {
         resetForm();
         handleClose();
       }}
-      showClose={false}
+      showClose={true}
       footer={
         <Stack direction="row" sx={{ width: 1, justifyContent: 'space-between', gap: 2 }}>
           <Button
@@ -385,7 +393,7 @@ const AddGSTDialog = ({ open, selectedGST, handleClose, fetchGSTList }) => {
         </Stack>
       }
     >
-      <Box component="form" onSubmit={handleSubmit} sx={{ padding: 2 }}>
+      <Box component="form" onSubmit={handleSubmit} sx={{ pt: 1 }}>
         {/* GST Details Group */}
         <Box mb={2}>
           <Grid2 container spacing={2}>
@@ -395,28 +403,23 @@ const AddGSTDialog = ({ open, selectedGST, handleClose, fetchGSTList }) => {
 
         {/* Schemes & Exports Group */}
         <Box mb={2}>
-          {/* <Typography variant="subtitle1" fontWeight={600} gutterBottom color="text.primary">
-          Schemes & Exports
-        </Typography> */}
           <Grid2 container spacing={2}>
             <Grid2 size={{ xs: 12 }}>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={values.is_composition_scheme === true}
-                    onChange={(e) => {
-                      if (e.target.checked === false) {
-                        setFieldValue('composition_scheme_percent', '');
-                      }
-                      setFieldValue('is_composition_scheme', e.target.checked ? true : false);
-                    }}
-                    name="is_composition_scheme"
-                  />
-                }
-                label="Are you Reg. under Composition Scheme?"
-                labelPlacement="start" // This puts the label on the left, switch on the right
-                sx={{ width: '100%', justifyContent: 'space-between', m: 0 }}
-              />
+              <Box display="flex" alignItems="center" justifyContent="space-between" width="100%">
+                <Typography variant="subtitle1" color="text.secondary">
+                  Are you Reg. under Composition Scheme?
+                </Typography>
+                <Switch
+                  checked={values.is_composition_scheme === true}
+                  onChange={(e) => {
+                    if (e.target.checked === false) {
+                      setFieldValue('composition_scheme_percent', '');
+                    }
+                    setFieldValue('is_composition_scheme', e.target.checked ? true : false);
+                  }}
+                  name="is_composition_scheme"
+                />
+              </Box>
             </Grid2>
 
             <Grid2 size={{ xs: 12 }}>
@@ -441,25 +444,23 @@ const AddGSTDialog = ({ open, selectedGST, handleClose, fetchGSTList }) => {
               )}
             </Grid2>
             <Grid2 size={{ xs: 12 }}>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={values.is_export_sez === true}
-                    onChange={(e) => {
-                      if (e.target.checked === false) {
-                        setFieldValue('lut_reg_no', '');
-                        setFieldValue('dob', '');
-                        setFieldValue('financial_year', '');
-                      }
-                      setFieldValue('is_export_sez', e.target.checked ? true : false);
-                    }}
-                    name="is_export_sez"
-                  />
-                }
-                label="Is your business involved in export/supply to sez/deemed exports?"
-                labelPlacement="start" // This puts the label on the left, switch on the right
-                sx={{ width: '100%', justifyContent: 'space-between', m: 0 }}
-              />
+              <Box display="flex" alignItems="center" justifyContent="space-between" width="100%">
+                <Typography variant="subtitle1" color="text.secondary">
+                  Is your business involved in export/supply to SEZ/deemed exports?
+                </Typography>
+                <Switch
+                  checked={values.is_export_sez === true}
+                  onChange={(e) => {
+                    if (e.target.checked === false) {
+                      setFieldValue('lut_reg_no', '');
+                      setFieldValue('dob', '');
+                      setFieldValue('financial_year', '');
+                    }
+                    setFieldValue('is_export_sez', e.target.checked ? true : false);
+                  }}
+                  name="is_export_sez"
+                />
+              </Box>
             </Grid2>
           </Grid2>
         </Box>

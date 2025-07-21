@@ -110,32 +110,31 @@ export default function DesignationDialog({ open, handleClose, fetchDesignations
         </Stack>
       }
     >
-      <Box component="form" onSubmit={handleSubmit} sx={{ p: 2 }}>
-        {designationFields.map((field) => (
-          <Grid2 key={field.name} size={{ xs: 12 }}>
-            {/* <Typography variant="subtitle1" gutterBottom>
-              {field.label}
-            </Typography> */}
-            <Typography variant="subtitle1" gutterBottom>
-              {getLabelWithAsterisk(field.label, field.required)}
-            </Typography>
-            <TextField
-              size="small"
-              fullWidth
-              name={field.name}
-              value={values[field.name]}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              error={touched[field.name] && Boolean(errors[field.name])}
-              helperText={touched[field.name] && errors[field.name]}
-              sx={{
-                '& .MuiInputBase-input': {
-                  color: 'grey.600'
-                }
-              }}
-            />
-          </Grid2>
-        ))}
+      <Box component="form" onSubmit={handleSubmit} sx={{ pt: 1 }}>
+        <Grid2 container spacing={2}>
+          {designationFields.map((field) => (
+            <Grid2 key={field.name} size={{ xs: 12 }}>
+              <Typography variant="subtitle1" gutterBottom>
+                {getLabelWithAsterisk(field.label, field.required)}
+              </Typography>
+              <TextField
+                size="small"
+                fullWidth
+                name={field.name}
+                value={values[field.name]}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                error={touched[field.name] && Boolean(errors[field.name])}
+                helperText={touched[field.name] && errors[field.name]}
+                sx={{
+                  '& .MuiInputBase-input': {
+                    color: 'grey.600'
+                  }
+                }}
+              />
+            </Grid2>
+          ))}
+        </Grid2>
       </Box>
     </Modal>
   );
