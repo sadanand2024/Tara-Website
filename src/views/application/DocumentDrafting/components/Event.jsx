@@ -20,7 +20,7 @@ import EventIcon from '@mui/icons-material/Event';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
  
-
+ 
 // const documents = [
 //   {
 //     title: 'Address proof of employee',
@@ -35,7 +35,7 @@ import CloseIcon from '@mui/icons-material/Close';
 //     description: 'An Address Proof of Employee document, often a letter from your employer, verifies your current residential address',
 //   },
 // ];
-
+ 
 const tabButtonStyle = (active) => ({
   minWidth: 180,
   fontWeight: 600,
@@ -48,20 +48,20 @@ const tabButtonStyle = (active) => ({
     color: active ? '#fff' : '#1976d2',
   },
 });
-
+ 
 // TabPanel component (copied from LeaveAttendance.jsx)
 const TabPanel = ({ children, value, index }) => (
   <div role="tabpanel" hidden={value !== index}>
     {value === index && <Box sx={{ pt: 3 }}>{children}</Box>}
   </div>
 );
-
+ 
 TabPanel.propTypes = {
   children: PropTypes.node,
   value: PropTypes.number.isRequired,
   index: PropTypes.number.isRequired
 };
-
+ 
 // Reusable DocumentCard component
 function DocumentCard({ title, description, isFavorite, isSelected, onFavorite, onClick, showNote, setShowFirstCardNote }) {
   return (
@@ -76,7 +76,7 @@ function DocumentCard({ title, description, isFavorite, isSelected, onFavorite, 
         maxWidth: 400,
         minHeight: 160,
         maxHeight: 180,
-        
+ 
         boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
         position: 'relative',
         transition: 'border 0.2s, box-shadow 0.2s, transform 0.2s',
@@ -124,7 +124,7 @@ function DocumentCard({ title, description, isFavorite, isSelected, onFavorite, 
             position: 'absolute',
             top: 12,
             right: 12,
-            bgcolor:'#00329E',
+            bgcolor: '#00329E',
             borderRadius: '50%',
             width: 28,
             height: 28,
@@ -150,74 +150,72 @@ function DocumentCard({ title, description, isFavorite, isSelected, onFavorite, 
             py: 2,
             minWidth: { xs: 180, sm: 220, md: 260 },
             maxWidth: { xs: 220, sm: 260, md: 320 },
-            height:60,
+            height: 'auto',
             fontSize: 14,
             display: 'flex',
-            alignItems: 'center',
+            flexDirection: 'column',
+            alignItems: 'flex-start',
             boxShadow: 3,
-            left: {
-              xs: '100%',
-              sm: 'auto',
-              md: '81%'
-            },
-            right: {
-              xs: 'auto',
-              sm: 0,
-              md: 0
-            },
-            top: {
-              xs: -60,
-              sm: -55,
-              md: -55
-            },
-            transform: {
-              xs: 'translateX(-50%)',
-              sm: 'none',
-              md: 'none'
-            }
+            left: { xs: 0, sm: 'auto', md: '81%' },
+            right: { xs: 'auto', sm: 0, md: 0 },
+            top: { xs: '100%', sm: -55, md: -110 },
+            transform: { xs: 'none', sm: 'none', md: 'none' },
+            mt: { xs: 1, sm: 0 },
           }}
         >
           {/* Arrow */}
           <Box
             sx={{
               position: 'absolute',
-              left: {
-                xs: '50%',
-                sm: 18,
-                md: 22
-              },
-              transform: {
-                xs: 'translateX(-50%)',
-                sm: 'none',
-                md: 'none'
-              },
-              top: '100%',
+              left: { xs: 32, sm: 18, md: 22 },
+              right: { xs: 'auto', sm: 'auto', md: 'auto' },
+              transform: { xs: 'none', sm: 'none', md: 'none' },
+              top: { xs: -10, sm: '100%' },
               width: 0,
               height: 0,
               borderLeft: '8px solid transparent',
               borderRight: '8px solid transparent',
-              borderTop: '10px solid #5B4FE9',
+              borderTop: { xs: 'none', sm: '10px solid #5B4FE9' },
+              borderBottom: { xs: '10px solid #5B4FE9', sm: 'none' },
             }}
           />
-          <Typography sx={{ flex: 1, fontSize: { xs: 12, sm: 13, md: 14 }, pr: 0,pt:5,pb:4 }}>
+          <Typography sx={{ flex: 1, fontSize: { xs: 12, sm: 13, md: 14 }, pr: 0, pb: 1 }}>
             All templates are selected by default. Uncheck any you don't need.
           </Typography>
-          <IconButton
+          <Button
             size="small"
-            sx={{ color: '#fff', ml: 1, p: 0.5 }}
+            variant="contained"
+            sx={{
+              mt: 1,
+              alignSelf: 'flex-end',
+              bgcolor: '#fff',
+              color: '#5B4FE9',
+              fontWeight: 700,
+              fontSize: 13,
+              px: 2.5,
+              py: 0.5,
+              borderRadius: 2,
+              boxShadow: 'none',
+              textTransform: 'none',
+              minWidth: 64,
+              '&:hover': {
+                bgcolor: '#ecebfa',
+                color: '#5B4FE9',
+              },
+            }}
             onClick={e => {
               e.stopPropagation();
               setShowFirstCardNote(false);
             }}
           >
-            <CloseIcon fontSize="small" />
-          </IconButton>
+            Got it
+          </Button>
         </Box>
       )}
     </Paper>
   );
 }
-
+ 
 const Event = ({ tab = 'document', contextId }) => {
   const navigate = useNavigate();
   const user = useSelector((state) => state.accountReducer.user);
@@ -234,52 +232,52 @@ const Event = ({ tab = 'document', contextId }) => {
   const [search, setSearch] = useState('');
   const tabNameToIndex = { document: 0, event: 1 };
   const indexToTabName = ['document', 'event'];
-
+ 
   const [activeTab, setActiveTab] = useState(tabNameToIndex[tab] || 0);
-
+ 
   // Sync tab state with route prop
   useEffect(() => {
     setActiveTab(tabNameToIndex[tab] || 0);
   }, [tab]);
-
+ 
   // useEffect(() => {
   //   setActiveTab(initialTab);
   // }, [initialTab]);
-
+ 
   useEffect(() => {
     setFiltersLoading(true);
     Promise.all([
       Factory('get', '/documentdrafting/categories/', {}, {}),
       Factory('get', '/documentdrafting/events/', {}, {})
-
+ 
     ])
       .then(([catRes, eventRes]) => {
         console.log(eventRes?.res?.data)
         const catData = catRes?.res?.data || catRes?.res || catRes;
         const eventData = eventRes?.res?.data || eventRes?.res || eventRes;
         setCategoryOptions(catData || []);
-        setEventOptions(eventData ||[]); // No events until category is selected
+        setEventOptions(eventData || []); // No events until category is selected
         setCategory('');     // Always show "Select Category" by default
         setEvent('');        // Always show "Select Event" by default
       })
-      
+ 
       .finally(() => setFiltersLoading(false));
   }, []);
-
+ 
   // When documents are loaded, select all by default
   useEffect(() => {
     if (documents && documents.length > 0) {
       setSelected(documents.map(doc => doc.id));
     }
   }, [documents]);
-
+ 
   const handleCategoryChange = (catId) => {
     setCategory(catId);
     const selectedCat = categoryOptions.find(cat => cat.id === catId);
     setEventOptions(selectedCat?.events || []);
     setEvent(''); // Reset event selection when category changes
   };
-
+ 
   // const handleEventChange = (eventId) => {
   //   setEvent(eventId);
   //   if (!category || !eventId) {
@@ -299,36 +297,36 @@ const Event = ({ tab = 'document', contextId }) => {
   // };
   const handleEventChange = (eventId) => {
     setEvent(eventId);
-
+ 
     if (!eventId) {
       setDocuments([]);
       return;
     }
-
+ 
     // Build query string dynamically
     // let queryString = ?event_id=${eventId};
     // if (category) {
     //   queryString += &category_id=${category};
     // }
-//     let queryString = ?event_id=${eventId};
-// if (category) {
-//   queryString += &category_id=${category};
-// }
-let queryString = `?event_id=${eventId}`;
-if (category) {
-  queryString += `&category_id=${category}`;
-}
-
-
+    //     let queryString = ?event_id=${eventId};
+    // if (category) {
+    //   queryString += &category_id=${category};
+    // }
+    let queryString = `?event_id=${eventId}`;
+    if (category) {
+      queryString += `&category_id=${category}`;
+    }
+ 
+ 
     // Build payload dynamically
     const payload = { event_id: eventId };
     if (category) {
       payload.category_id = category;
     }
-
+ 
     Factory(
       'get', `/documentdrafting/category-or-events-wise-document-list/${queryString}`,
-
+ 
       payload,
       {}
     ).then(response => {
@@ -336,16 +334,16 @@ if (category) {
       setDocuments(docs || []);
       setSelected([]); // Reset selection after new documents are loaded
     });
-    console.log("wertyui",user.user.id)
+    console.log("wertyui", user.user.id)
   };
-  
-
+ 
+ 
   const handleCardClick = (docId) => {
     setSelected((prev) =>
       prev.includes(docId) ? prev.filter(id => id !== docId) : [...prev, docId]
     );
   };
-
+ 
   const handleToggleFavorite = (docId) => {
     setDocuments(prevDocuments =>
       prevDocuments.map(doc =>
@@ -353,15 +351,15 @@ if (category) {
       )
     );
   };
-
-  const handleProceed = async (catId,eventId, documentIds, userId, contextId) => {
+ 
+  const handleProceed = async (catId, eventId, documentIds, userId, contextId) => {
     const payload = {
       event: eventId,
       context: contextId,
       documents: documentIds, // send all selected document IDs
       status: 'yet_to_start',
       created_by: userId,
-      category:catId
+      category: catId
     };
     const response = await Factory(
       'post',
@@ -374,39 +372,47 @@ if (category) {
       // handle error
     }
   };
-
+ 
   const handleBackToDashboard = () => {
     setSelectedEventInstanceId(null);
   };
-
+ 
   if (selectedEventInstanceId) {
     navigate(`/app/drafting/selected-event/${selectedEventInstanceId}`);
   }
-
+ 
   // Tab click handlers
   const handleTabChange = (_e, newValue) => {
     const tabRoute = indexToTabName[newValue];
     navigate(`/app/drafting/${tabRoute}/${contextId || ''}`);
   };
-
+ 
   // In Event component, add state for note visibility
   const [showFirstCardNote, setShowFirstCardNote] = useState(true);
-
+ 
   return (
-    <Box sx={{ p: { xs: 2, md: 4 }, background: 'white',borderRadius:2, minHeight: '100vh' }}>
+    <Box sx={{ p: { xs: 2, md: 4 }, background: 'white', borderRadius: 2, minHeight: '100vh' }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0 }}>
-  <Typography variant="h5" fontWeight={600} sx={{ m: 0, fontSize: { xs: 18, sm: 22 } }}>
-    Document Drafting
-  </Typography>
-  <Button
-    variant="outlined"
-    onClick={() => { window.location.href = '/app/drafting'; }}
-    sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600, px: 2 }}
+        <Typography variant="h5" fontWeight={600} sx={{ m: 0, fontSize: { xs: 15, sm: 22 } }}>
+          Document Drafting
+        </Typography>
+        <Button
+          variant="outlined"
+          onClick={() => { window.location.href = '/app/drafting'; }}
           startIcon={<ArrowBackIcon />}
-  >
-    Back to Dashboard
-  </Button>
-</Box>
+          sx={{
+            borderRadius: 2,
+            textTransform: 'none',
+            fontWeight: 600,
+            fontSize: { xs: '0.75rem', sm: '0.875rem', md: 'none' }, // smaller font on xs
+            px: { xs: 1, sm: 2 },  // smaller horizontal padding on xs
+            py: { xs: 0.5, sm: 1 } // optional: smaller vertical padding
+          }}
+        >
+          Back to Dashboard
+        </Button>
+ 
+      </Box>
       {/* <Paper elevation={2} sx={{
   p: { xs: 2, md: 4 },
   borderRadius: 3,
@@ -417,104 +423,104 @@ if (category) {
   minHeight: { xs: 800, md: 700 },
   position: 'relative',
 }}> */}
-<Paper elevation={2} sx={{
-  p: { xs: 2, md: 4 },
-  borderRadius: 3,
-  width: '100%',
-  maxWidth: 1400,
-  mx: 'auto',
-  mt: 2,
-  minHeight: { xs: 800, md: 700 },
-  position: 'relative',
-}}>
+      <Paper elevation={2} sx={{
+        p: { xs: 2, md: 4 },
+        borderRadius: 3,
+        width: '100%',
+        maxWidth: 1400,
+        mx: 'auto',
+        mt: 2,
+        minHeight: { xs: 800, md: 700 },
+        position: 'relative',
+      }}>
         {/* Tabs always centered, search bar right, responsive */}
         <Box
           sx={{
             width: '100%',
-            mt: -2,
+            mt: { xs: -2, md: -4 },
             display: 'flex',
             alignItems: 'center',
             flexDirection: { xs: 'column', md: 'row' },
             gap: 2,
-            ml: {xs:0,md:-4}
+            ml: { xs: 0, md: -4 }
           }}
         >
-  <Tabs
-    value={activeTab}
-    onChange={handleTabChange}
-    variant="scrollable"
-    scrollButtons="auto"
-    textColor="primary"
-    indicatorColor="primary"
-    sx={{ flex: 1, '& .MuiTab-root': { textTransform: 'none', fontWeight: 600 } }}
-  >
-    <Tab label="Document Selection" />
-    <Tab label="Create an Event" />
-  </Tabs>
-  {activeTab === 0 && (
-    <Box sx={{ width: { xs: '93%', sm: 350, md: '23.5%' }, ml: { md: 2 }, mt: { xs: 2, md: 0 }, mb: { xs: 2, md: 0 } }}>
-      <TextField
-        fullWidth
-        size="small"
-        placeholder="Search "
-        value={search}
-        onChange={e => setSearch(e.target.value)}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <SearchIcon color="action" />
-            </InputAdornment>
-          ),
-        }}
-          sx={{
-          bgcolor: '#fff',
-          borderRadius: 2,
-          boxShadow: { xs: 1, md: 0 },
-          width: '100%',
-          minWidth: 0,
-        }}
-      />
+          <Tabs
+            value={activeTab}
+            onChange={handleTabChange}
+            variant="scrollable"
+            scrollButtons="auto"
+            textColor="primary"
+            indicatorColor="primary"
+            sx={{ flex: 1, '& .MuiTab-root': { textTransform: 'none', fontWeight: 600 } }}
+          >
+            <Tab label="Document Selection" />
+            <Tab label="Create an Event" />
+          </Tabs>
+          {activeTab === 0 && (
+            <Box sx={{ width: { xs: '93%', sm: 350, md: '23.5%' }, ml: { md: 2 }, mt: { xs: 2, md: 0 }, mb: { xs: 2, md: 0 } }}>
+              <TextField
+                fullWidth
+                size="small"
+                placeholder="Search "
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon color="action" />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{
+                  bgcolor: '#fff',
+                  borderRadius: 2,
+                  boxShadow: { xs: 1, md: 0 },
+                  width: '100%',
+                  minWidth: 0,
+                }}
+              />
+            </Box>
+          )}
+          {activeTab === 1 && (
+            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, width: { xs: '93%', sm: '35%' }, ml: { xs: 2, md: 2 }, mt: { xs: 2, md: 0 }, mb: { xs: 2, md: 0 } }}>
+              <TextField
+                fullWidth
+                select
+                label="Category"
+                size="small"
+                sx={{ bgcolor: '#F5F7FA', transform: 'translateY(2px) translateX(-8px)' }}
+                value={category}
+                onChange={e => handleCategoryChange(e.target.value)}
+                disabled={filtersLoading}
+              >
+                <MenuItem value="">Select Category</MenuItem>
+                {filtersLoading ? (
+                  <MenuItem value="">Loading...</MenuItem>
+                ) : (
+                  categoryOptions.map((cat) => (
+                    <MenuItem key={cat.id} value={cat.id}>{cat.category_name}</MenuItem>
+                  ))
+                )}
+              </TextField>
+              <TextField
+                fullWidth
+                select
+                label="Event"
+                size="small"
+                sx={{ bgcolor: '#F5F7FA', transform: 'translateY(2px) translateX(-8px)' }}
+                value={event}
+                onChange={e => handleEventChange(e.target.value)}
+                disabled={filtersLoading}
+              >
+                <MenuItem value="">Select Event</MenuItem>
+                {eventOptions.map((ev) => (
+                  <MenuItem key={ev.id} value={ev.id}>{ev.event_name}</MenuItem>
+                ))}
+              </TextField>
+            </Box>
+          )}
         </Box>
-  )}
-  {activeTab === 1 && (
-    <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, width: { xs: '93%', sm: '35%' }, ml: { xs:2,md: 2 }, mt: { xs: 2, md: 0 }, mb: { xs: 2, md: 0 } }}>
-      <TextField
-        fullWidth
-        select
-        label="Category"
-        size="small"
-        sx={{ bgcolor: '#F5F7FA', transform: 'translateY(2px) translateX(-8px)' }}
-              value={category}
-              onChange={e => handleCategoryChange(e.target.value)}
-              disabled={filtersLoading}
-            >
-              <MenuItem value="">Select Category</MenuItem>
-              {filtersLoading ? (
-                <MenuItem value="">Loading...</MenuItem>
-              ) : (
-                categoryOptions.map((cat) => (
-                  <MenuItem key={cat.id} value={cat.id}>{cat.category_name}</MenuItem>
-                ))
-              )}
-      </TextField>
-      <TextField
-        fullWidth
-        select
-        label="Event"
-        size="small"
-        sx={{ bgcolor: '#F5F7FA', transform: 'translateY(2px) translateX(-8px)' }}
-              value={event}
-              onChange={e => handleEventChange(e.target.value)}
-              disabled={filtersLoading}
-            >
-              <MenuItem value="">Select Event</MenuItem>
-              {eventOptions.map((ev) => (
-                <MenuItem key={ev.id} value={ev.id}>{ev.event_name}</MenuItem>
-              ))}
-      </TextField>
-    </Box>
-  )}
-</Box>
         {/* Tab Content */}
         <TabPanel value={activeTab} index={0}>
           <Box>
@@ -522,7 +528,7 @@ if (category) {
           </Box>
         </TabPanel>
         <TabPanel value={activeTab} index={1}>
-          {(category === '' || event === '') && (
+          {(category === '' && event === '') && (
             <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" sx={{ width: '100%', my: 2 }}>
               <EventIcon
                 sx={{
@@ -532,45 +538,46 @@ if (category) {
                   height: { xs: 60, sm: 80, md: 120, lg: 160 },
                 }}
               />
-              <Box sx={{mb:6}}>
-             <Typography variant="body1" color="text.secondary" sx={{mt:{xs:0,md:-3}, maxWidth: 480, mx: 'auto' }}>
-             Please select category and event to start drafting
-                   </Typography>
-                   </Box>
-            
-             
+              <Box sx={{ mb: 6 }}>
+                <Typography variant="body1" color="text.secondary" sx={{ mt: { xs: 0, md: -3 }, maxWidth: 480, mx: 'auto' }}>
+                  Please select category and event to start drafting
+                </Typography>
+              </Box>
+ 
+ 
             </Box>
-            
+ 
           )}
           {filtersLoading ? (
             <Box
-                  sx={{
-                    borderRadius: 3,
+              sx={{
+                borderRadius: 3,
                 p: 4,
                 background: '#fff',
                 minHeight: 300,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
-                    >
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
               <CircularProgressComponent isLoading displayContent={'Loading Events...'} />
-                    </Box>
+            </Box>
           ) : (
             <>
               {/* Only show card grid, Proceed button, and note if bot category and event are selected and documents are available */}
-              {(category && event && documents.length > 0) ? (
+              {(event && documents.length > 0) ? (
                 <>
                   <Grid2
                     container
                     spacing={{ xs: 2, sm: 6, md: 6 }}
-                    sx={{ mb: 4, mx: 'auto', mt: 4
+                    sx={{
+                      mb: 4, mx: 'auto', mt: 4
                       ,
-                      ml: {xs:2},
-                      width: { xs: '93%', sm: '100%',md:'100%' },
-                    
-                    minWidth: { xs: '93%', sm: 220, md: '100%' },
-                    maxWidth: { xs: '100%', sm: 400,md:'110%' },
+                      ml: { xs: 2 },
+                      width: { xs: '93%', sm: '100%', md: '100%' },
+ 
+                      minWidth: { xs: '93%', sm: 220, md: '100%' },
+                      maxWidth: { xs: '100%', sm: 400, md: '110%' },
                     }}
                     alignItems="flex-start"
                     justifyContent="flex-start"
@@ -587,13 +594,13 @@ if (category) {
                           showNote={idx === 0 && selected.includes(doc.id) && showFirstCardNote}
                           setShowFirstCardNote={setShowFirstCardNote}
                         />
-              </Grid2>
-            ))}
-          </Grid2>
-          {/* Footer */}
-          <Box display="flex" alignItems="center" justifyContent="center" mt={4}>
-            <Button
-              variant="contained"
+                      </Grid2>
+                    ))}
+                  </Grid2>
+                  {/* Footer */}
+                  <Box display="flex" alignItems="center" justifyContent="center" mt={4}>
+                    <Button
+                      variant="contained"
                       sx={{
                         height: 30,
                         minWidth: 100,
@@ -604,23 +611,24 @@ if (category) {
                         color: 'white',
                         pt: 1,
                       }}
-              disabled={selected.length === 0}
+                      disabled={selected.length === 0}
                       onClick={() => handleProceed(category, event, selected, user.user.id, contextId)}
-            >
-              Proceed
-            </Button>
-          </Box>
+                    >
+                      Proceed
+                    </Button>
+                  </Box>
                   {/* <Typography variant="body2" sx={{ color: '#1976d2', mt: 2, fontStyle: 'none' }}>
             Note: By default, all templates are selected. If you do not want a template, please uncheck it.
           </Typography> */}
                 </>
               ) : null}
-        </>
-      )}
+            </>
+          )}
         </TabPanel>
       </Paper>
     </Box>
   );
 };
-
+ 
 export default Event;
+ 
