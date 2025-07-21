@@ -88,8 +88,8 @@ const validationSchema = Yup.object().shape({
   //   .required('PAN Number is required')
   //   .matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN Number format'),
   pan_number: Yup.string()
-  .required('PAN is required')
-  .matches(/^[A-Z]{3}P[A-Z][0-9]{4}[A-Z]$/, 'Invalid PAN Number format'),
+    .required('PAN is required')
+    .matches(/^[A-Z]{3}P[A-Z][0-9]{4}[A-Z]$/, 'Invalid PAN Number format'),
 
   role: Yup.string().required('Role is required'),
   status: Yup.string().required('Status is required')
@@ -351,12 +351,12 @@ const KeyManagerialPersonnel = ({ user, handleNext, handleBack, tabChange, tabva
             }}
           >
             <TableRow>
-              <TableCell sx={{ fontWeight: 600 }}>Name</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Designation</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>PAN Number</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Role</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
-              <TableCell align="center" sx={{ fontWeight: 600 }}>
+              <TableCell sx={{ fontWeight: 600, whiteSpace: 'nowrap' }}>Name</TableCell>
+              <TableCell sx={{ fontWeight: 600, whiteSpace: 'nowrap' }}>Designation</TableCell>
+              <TableCell sx={{ fontWeight: 600, whiteSpace: 'nowrap' }}>PAN Number</TableCell>
+              <TableCell sx={{ fontWeight: 600, whiteSpace: 'nowrap' }}>Role</TableCell>
+              <TableCell sx={{ fontWeight: 600, whiteSpace: 'nowrap' }}>Status</TableCell>
+              <TableCell align="center" sx={{ fontWeight: 600, whiteSpace: 'nowrap' }}>
                 Actions
               </TableCell>
             </TableRow>
@@ -366,28 +366,26 @@ const KeyManagerialPersonnel = ({ user, handleNext, handleBack, tabChange, tabva
               personnel.map((person, index) => (
                 <TableRow key={index} hover>
                   <TableCell>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Typography variant="body2" fontWeight={500}>
-                        {person.name}
-                      </Typography>
-                    </Box>
+                    <Typography variant="body2" fontWeight={500} sx={{ whiteSpace: 'nowrap' }}>
+                      {person.name}
+                    </Typography>
                   </TableCell>
                   <TableCell>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <WorkIcon color="action" fontSize="small" />
-                      <Typography variant="body2">{person.designation}</Typography>
-                    </Box>
+                    <Typography variant="body2" sx={{ whiteSpace: 'nowrap' }}>
+                      {person.designation}
+                    </Typography>
                   </TableCell>
                   <TableCell>
-                    <Typography variant="body2">{person.pan_number}</Typography>
+                    <Typography variant="body2" sx={{ whiteSpace: 'nowrap' }}>
+                      {person.pan_number}
+                    </Typography>
                   </TableCell>
                   <TableCell>
                     <Chip
                       label={
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                          <span>{getRoleIcon(person.role)}</span>
-                          <span>{person.role}</span>
-                        </Box>
+                        <Typography variant="body2" sx={{ whiteSpace: 'nowrap' }}>
+                          {person.role}
+                        </Typography>
                       }
                       color={getRoleColor(person.role)}
                       size="small"
@@ -466,6 +464,7 @@ const KeyManagerialPersonnel = ({ user, handleNext, handleBack, tabChange, tabva
       </TableContainer>
       <Modal
         open={open}
+        maxWidth="sm"
         showClose={true}
         title={values.id ? 'Edit Personnel' : 'Add Personnel'}
         handleClose={() => {
@@ -490,7 +489,7 @@ const KeyManagerialPersonnel = ({ user, handleNext, handleBack, tabChange, tabva
           </Stack>
         }
       >
-        <Box component="form" onSubmit={handleSubmit} sx={{ padding: 2 }}>
+        <Box component="form" onSubmit={handleSubmit} sx={{ pt: 1 }}>
           <Grid2 container spacing={2}>
             {renderFields()}
           </Grid2>

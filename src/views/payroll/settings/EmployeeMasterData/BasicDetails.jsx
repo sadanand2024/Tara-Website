@@ -17,8 +17,8 @@ import DesignationDialog from '../DesignationDialog';
 const employeeFields = [
   { name: 'first_name', label: 'First Name', required: true },
   { name: 'middle_name', label: 'Middle Name', required: false },
-  { name: 'last_name', label: 'Last Name', required:true },
-  { name: 'associate_id', label: 'Employee ID', required:true },
+  { name: 'last_name', label: 'Last Name', required: true },
+  { name: 'associate_id', label: 'Employee ID', required: true },
   { name: 'doj', label: 'Date of Joining', required: true },
   { name: 'work_email', label: 'Work Email', required: true },
   { name: 'mobile_number', label: 'Mobile Number', required: false },
@@ -26,7 +26,6 @@ const employeeFields = [
   { name: 'work_location', label: 'Work Location', required: true },
   { name: 'designation', label: 'Designation', required: true },
   { name: 'department', label: 'Department', required: true }
-
 ];
 function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, onNext, setSubmitRef }) {
   const [loading, setLoading] = useState(false); // State for loader
@@ -93,15 +92,15 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
         return Yup.object().shape({
           pf_account_number: parent?.epf_enabled
             ? Yup.string()
-              // .nullable()
-              .required('Pf Account Number is required')
-              .matches(/^[A-Z]{5}\d{10,14}$/, 'Invalid PF Account Number. Format: 5 letters followed by 10–14 digits')
+                // .nullable()
+                .required('Pf Account Number is required')
+                .matches(/^[A-Z]{5}\d{10,14}$/, 'Invalid PF Account Number. Format: 5 letters followed by 10–14 digits')
             : Yup.string().nullable(),
 
           uan: parent?.epf_enabled
             ? Yup.string()
-              .required('UAN is required')
-              .matches(/^[0-9]{12}$/, 'UAN must be a 12-digit number')
+                .required('UAN is required')
+                .matches(/^[0-9]{12}$/, 'UAN must be a 12-digit number')
             : Yup.string().nullable()
         });
       }),
@@ -110,14 +109,13 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
         return Yup.object().shape({
           esi_number: parent?.esi_enabled
             ? Yup.string()
-              .required('ESI Number is required')
-              .matches(/^[0-9]{10}$/, 'ESI Number must be 10 digits')
+                .required('ESI Number is required')
+                .matches(/^[0-9]{10}$/, 'ESI Number must be 10 digits')
             : Yup.string().nullable()
         });
       })
     })
   });
-
 
   const formik = useFormik({
     initialValues: {
@@ -196,9 +194,7 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
     return fields.map((field) => (
       <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
         {/* <Typography variant="subtitle1">{field.label}</Typography> */}
-        <Typography variant="subtitle1">
-          {getLabelWithAsterisk(field.label, field.required)}
-        </Typography>
+        <Typography variant="subtitle1">{getLabelWithAsterisk(field.label, field.required)}</Typography>
         {field.name === 'gender' || field.name === 'work_location' || field.name === 'designation' || field.name === 'department' ? (
           <CustomAutocomplete
             value={
@@ -250,38 +246,6 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
             ListboxProps={
               field.name === 'designation'
                 ? {
-                  style: { maxHeight: 250 },
-                  component: React.forwardRef(function CustomListboxComponent(props, ref) {
-                    const { children, ...rest } = props;
-                    return (
-                      <ul ref={ref} {...rest}>
-                        {children}
-                        <li style={{ padding: '8px 16px' }}>
-                          <Button
-                            startIcon={<IconPlus />}
-                            variant="contained"
-                            fullWidth
-                            size="small"
-                            sx={{
-                              bgcolor: 'primary.main',
-                              '&:hover': {
-                                bgcolor: 'primary.dark'
-                              }
-                            }}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleOpenDesignationDialog();
-                            }}
-                          >
-                            Add Designation
-                          </Button>
-                        </li>
-                      </ul>
-                    );
-                  })
-                }
-                : field.name === 'department'
-                  ? {
                     style: { maxHeight: 250 },
                     component: React.forwardRef(function CustomListboxComponent(props, ref) {
                       const { children, ...rest } = props;
@@ -302,16 +266,48 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
                               }}
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleOpenDepartmentDialog();
+                                handleOpenDesignationDialog();
                               }}
                             >
-                              Add Department
+                              Add Designation
                             </Button>
                           </li>
                         </ul>
                       );
                     })
                   }
+                : field.name === 'department'
+                  ? {
+                      style: { maxHeight: 250 },
+                      component: React.forwardRef(function CustomListboxComponent(props, ref) {
+                        const { children, ...rest } = props;
+                        return (
+                          <ul ref={ref} {...rest}>
+                            {children}
+                            <li style={{ padding: '8px 16px' }}>
+                              <Button
+                                startIcon={<IconPlus />}
+                                variant="contained"
+                                fullWidth
+                                size="small"
+                                sx={{
+                                  bgcolor: 'primary.main',
+                                  '&:hover': {
+                                    bgcolor: 'primary.dark'
+                                  }
+                                }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleOpenDepartmentDialog();
+                                }}
+                              >
+                                Add Department
+                              </Button>
+                            </li>
+                          </ul>
+                        );
+                      })
+                    }
                   : undefined
             }
           />
@@ -523,6 +519,12 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
               />
             }
             label="Employees Provident Fund"
+            sx={{
+              width: 'fit-content',
+              '& .MuiFormControlLabel-label': {
+                cursor: 'pointer'
+              }
+            }}
           />
           {values.statutory_components.epf_enabled && (
             <Grid2 container spacing={2} sx={{ mt: 1, ml: 3 }}>
@@ -607,6 +609,12 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
               />
             }
             label="Employee State Insurance"
+            sx={{
+              width: 'fit-content',
+              '& .MuiFormControlLabel-label': {
+                cursor: 'pointer'
+              }
+            }}
           />
           {values.statutory_components.esi_enabled && (
             <Grid2 container spacing={2} sx={{ mt: 1, ml: 3 }}>
@@ -655,6 +663,12 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
               />
             }
             label="Professional tax"
+            sx={{
+              width: 'fit-content',
+              '& .MuiFormControlLabel-label': {
+                cursor: 'pointer'
+              }
+            }}
           />
         </FormGroup>
       </form>

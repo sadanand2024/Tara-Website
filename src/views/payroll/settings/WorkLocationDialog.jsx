@@ -111,9 +111,14 @@ export default function WorkLocationDialog({ open, handleClose, fetchWorkLocatio
                 setFieldValue(field.name, newValue);
               }}
               options={indian_States_And_UTs}
-              error={touched[field.name] && Boolean(errors[field.name])}
-              helperText={touched[field.name] && errors[field.name]}
-              renderInput={(params) => <TextField {...params} size="small" />}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  size="small"
+                  error={touched[field.name] && Boolean(errors[field.name])}
+                  helperText={touched[field.name] && errors[field.name]}
+                />
+              )}
               required={field.required}
               label={field.label}
               sx={{
@@ -165,6 +170,7 @@ export default function WorkLocationDialog({ open, handleClose, fetchWorkLocatio
       open={open}
       showClose={true}
       title={type === 'edit' ? 'Edit Work Location' : 'Add Work Location'}
+      maxWidth="sm"
       handleClose={() => {
         setType('');
         resetForm(); // Optional
@@ -189,8 +195,8 @@ export default function WorkLocationDialog({ open, handleClose, fetchWorkLocatio
         </Stack>
       }
     >
-      <Box component="form" onSubmit={handleSubmit} sx={{ padding: 2 }}>
-        <Grid2 container spacing={3}>
+      <Box component="form" onSubmit={handleSubmit} sx={{ pt: 1 }}>
+        <Grid2 container spacing={2}>
           {renderFields(filingAddress)}
         </Grid2>
       </Box>

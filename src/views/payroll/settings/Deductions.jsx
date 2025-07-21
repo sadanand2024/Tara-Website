@@ -218,19 +218,6 @@ function Deductions({ handleNext, handleBack, open, setOpen, postType, setPostTy
       ) : (
         <Box>
           <Grid2 size={{ xs: 12 }}>
-            <Box sx={{ mb: 2, display: 'flex', justifyContent: 'flex-end' }}>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => {
-                  setPostType('post');
-                  resetForm();
-                  handleOpen();
-                }}
-              >
-                Add Deduction
-              </Button>
-            </Box>
             <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 1 }}>
               <Table size="small">
                 <TableHead sx={{ backgroundColor: 'primary.main' }}>
@@ -405,7 +392,6 @@ function Deductions({ handleNext, handleBack, open, setOpen, postType, setPostTy
                                     value: 0
                                   });
                                 }}
-                                
                               />
                             }
                             label="Flat Amount"

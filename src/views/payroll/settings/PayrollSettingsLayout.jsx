@@ -223,6 +223,7 @@ const PayrollSettingsLayout = () => {
 
   // State for salary components specific actions
   const [salaryComponentsOpenDialog, setSalaryComponentsOpenDialog] = useState(false);
+  const [salaryComponentsActiveTab, setSalaryComponentsActiveTab] = useState(0);
 
   // State for salary templates specific actions
   const [salaryTemplatesSearchQuery, setSalaryTemplatesSearchQuery] = useState('');
@@ -578,24 +579,28 @@ const PayrollSettingsLayout = () => {
     }
 
     if (currentStep?.secondaryAction === 'salaryComponents') {
-      return (
-        <Stack direction="row" spacing={2} alignItems="center">
-          <Button
-            variant="contained"
-            size="small"
-            startIcon={<AddIcon />}
-            onClick={() => setSalaryComponentsOpenDialog(true)}
-            sx={{
-              textTransform: 'none',
-              fontWeight: 600,
-              fontSize: '0.9rem',
-              whiteSpace: 'nowrap'
-            }}
-          >
-            Add Component
-          </Button>
-        </Stack>
-      );
+      // Only show Add Component button for Earnings tab (index 0)
+      if (salaryComponentsActiveTab === 0) {
+        return (
+          <Stack direction="row" spacing={2} alignItems="center">
+            <Button
+              variant="contained"
+              size="small"
+              startIcon={<AddIcon />}
+              onClick={() => setSalaryComponentsOpenDialog(true)}
+              sx={{
+                textTransform: 'none',
+                fontWeight: 600,
+                fontSize: '0.9rem',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              Add Component
+            </Button>
+          </Stack>
+        );
+      }
+      return null;
     }
 
     if (currentStep?.secondaryAction === 'salaryTemplates') {
@@ -965,6 +970,8 @@ const PayrollSettingsLayout = () => {
                   handleNext={handleNext}
                   openDialog={salaryComponentsOpenDialog}
                   setOpenDialog={setSalaryComponentsOpenDialog}
+                  activeTab={salaryComponentsActiveTab}
+                  setActiveTab={setSalaryComponentsActiveTab}
                 />
               </TabPanel>
               <TabPanel value={value} index={6}>

@@ -253,7 +253,13 @@ export default function Index() {
       tagline="Explore your monthly payroll details"
       // sx={{ background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)', p: { xs: 2, md: 4 }, borderRadius: 4 }}
       secondary={
-        <Button startIcon={<ArrowBackIcon />} variant="outlined" color="primary" size="small" onClick={() => navigate('/app/payroll')}>
+        <Button
+          startIcon={<ArrowBackIcon />}
+          variant="outlined"
+          color="primary"
+          size="small"
+          onClick={() => navigate('/app/payroll?month=' + month + '&financial_year=' + financialYear)}
+        >
           Go to Payroll Dashboard
         </Button>
       }

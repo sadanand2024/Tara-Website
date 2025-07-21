@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { months } from 'utils/MonthsList';
 
 import { useDispatch } from 'store';
@@ -28,6 +28,7 @@ import { size } from 'lodash-es';
 const PayrollDashboard = () => {
   // const { userData } = useCurrentUser();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const user = useSelector((state) => state.accountReducer.user);
   const businessId = user.active_context.business_id;
   const dispatch = useDispatch();
@@ -81,9 +82,18 @@ const PayrollDashboard = () => {
     }
 
     const monthIndex = months.indexOf(newValue); // 0-based index
-    setSelectedMonth(monthIndex + 1); // Store 1-based month number
+    const newMonth = monthIndex + 1; // Store 1-based month number
+    setSelectedMonth(newMonth);
 
-    get_payrollMonthData(monthIndex + 1); // API expects 1-based month number
+    // Update URL parameters
+    const params = new URLSearchParams(searchParams);
+    params.set('month', newMonth);
+    if (financialYear) {
+      params.set('financial_year', financialYear);
+    }
+    navigate({ search: params.toString() }, { replace: true });
+
+    get_payrollMonthData(newMonth); // API expects 1-based month number
   };
 
   const calculate_employee_monthly_salary_status = async (payrollId) => {
@@ -202,20 +212,33 @@ const PayrollDashboard = () => {
     getData(businessId);
   }, [user.active_context]);
 
+  // Read month and financial year from URL parameters
   useEffect(() => {
-    const getCurrentFinancialYear = () => {
-      const today = new Date();
-      const month = today.getMonth() + 1; // 1-based month
-      const year = today.getFullYear();
+    const monthParam = searchParams.get('month');
+    const yearParam = searchParams.get('financial_year');
 
-      const fyStart = month >= 4 ? year : year - 1; // April is the cutoff
-      const fyEnd = fyStart + 1; // last 2 digits of next year
+    if (monthParam) {
+      setSelectedMonth(Number(monthParam));
+    }
 
-      // % 100
-      return `${fyStart}-${String(fyEnd).padStart(2, '0')}`;
-    };
-    setFinancialYear(getCurrentFinancialYear());
-  }, []);
+    if (yearParam) {
+      setFinancialYear(yearParam);
+    } else {
+      // Set default financial year if not in URL
+      const getCurrentFinancialYear = () => {
+        const today = new Date();
+        const month = today.getMonth() + 1; // 1-based month
+        const year = today.getFullYear();
+
+        const fyStart = month >= 4 ? year : year - 1; // April is the cutoff
+        const fyEnd = fyStart + 1; // last 2 digits of next year
+
+        // % 100
+        return `${fyStart}-${String(fyEnd).padStart(2, '0')}`;
+      };
+      setFinancialYear(getCurrentFinancialYear());
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (financialYear && businessDetails?.payroll_id && !initialLoading) {
@@ -260,6 +283,17 @@ const PayrollDashboard = () => {
             value={financialYear}
             onChange={(e, val) => {
               setFinancialYear(val);
+              // Update URL parameters
+              const params = new URLSearchParams(searchParams);
+              if (val) {
+                params.set('financial_year', val);
+              } else {
+                params.delete('financial_year');
+              }
+              if (selectedMonth) {
+                params.set('month', selectedMonth);
+              }
+              navigate({ search: params.toString() }, { replace: true });
             }}
             sx={{
               minWidth: 200,

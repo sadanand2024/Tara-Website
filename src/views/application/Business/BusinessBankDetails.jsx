@@ -288,12 +288,12 @@ const BusinessBankDetails = ({ user, handleNext, handleBack, tabChange, tabval }
             }}
           >
             <TableRow>
-              <TableCell sx={{ fontWeight: 600 }}>Bank Name</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Account Number</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Branch</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>IFSC Code</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Swift Code</TableCell>
-              <TableCell align="center" sx={{ fontWeight: 600 }}>
+              <TableCell sx={{ fontWeight: 600, whiteSpace: 'nowrap' }}>Bank Name</TableCell>
+              <TableCell sx={{ fontWeight: 600, whiteSpace: 'nowrap' }}>Account Number</TableCell>
+              <TableCell sx={{ fontWeight: 600, whiteSpace: 'nowrap' }}>Branch</TableCell>
+              <TableCell sx={{ fontWeight: 600, whiteSpace: 'nowrap' }}>IFSC Code</TableCell>
+              <TableCell sx={{ fontWeight: 600, whiteSpace: 'nowrap' }}>Swift Code</TableCell>
+              <TableCell align="center" sx={{ fontWeight: 600, whiteSpace: 'nowrap' }}>
                 Actions
               </TableCell>
             </TableRow>
@@ -303,23 +303,29 @@ const BusinessBankDetails = ({ user, handleNext, handleBack, tabChange, tabval }
               bankAccounts.filter(Boolean).map((account, index) => (
                 <TableRow key={index} hover>
                   <TableCell>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Typography variant="body2" fontWeight={500}>
-                        {account.bank_name}
-                      </Typography>
-                    </Box>
+                    <Typography variant="body2" fontWeight={500} sx={{ whiteSpace: 'nowrap' }}>
+                      {account.bank_name}
+                    </Typography>
                   </TableCell>
                   <TableCell>
-                    <Typography variant="body2">{account.account_number}</Typography>
+                    <Typography variant="body2" sx={{ whiteSpace: 'nowrap' }}>
+                      {account.account_number}
+                    </Typography>
                   </TableCell>
                   <TableCell>
-                    <Typography variant="body2">{account.branch_name}</Typography>
+                    <Typography variant="body2" sx={{ whiteSpace: 'nowrap' }}>
+                      {account.branch_name}
+                    </Typography>
                   </TableCell>
                   <TableCell>
-                    <Typography variant="body2">{account.ifsc_code}</Typography>
+                    <Typography variant="body2" sx={{ whiteSpace: 'nowrap' }}>
+                      {account.ifsc_code}
+                    </Typography>
                   </TableCell>
                   <TableCell>
-                    <Typography variant="body2">{account.swift_code || 'NA'}</Typography>
+                    <Typography variant="body2" sx={{ whiteSpace: 'nowrap' }}>
+                      {account.swift_code || 'NA'}
+                    </Typography>
                   </TableCell>
                   <TableCell align="center">
                     <Stack direction="row" spacing={1} justifyContent="center">
@@ -391,6 +397,7 @@ const BusinessBankDetails = ({ user, handleNext, handleBack, tabChange, tabval }
       </Box>
       <Modal
         open={open}
+        maxWidth="sm"
         showClose={true}
         title={values.id ? 'Edit Bank Account' : 'Add Bank Account'}
         handleClose={() => {
@@ -415,7 +422,7 @@ const BusinessBankDetails = ({ user, handleNext, handleBack, tabChange, tabval }
           </Stack>
         }
       >
-        <Box component="form" onSubmit={handleSubmit} sx={{ padding: 2 }}>
+        <Box component="form" onSubmit={handleSubmit} sx={{ pt: 1 }}>
           <Grid2 container spacing={2}>
             {renderFields()}
           </Grid2>

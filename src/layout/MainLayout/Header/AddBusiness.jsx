@@ -40,12 +40,12 @@ const AddBusiness = ({ open, onClose, userData, setUserData, getContext }) => {
   const dispatch = useDispatch();
   const [submitAttempted, setSubmitAttempted] = React.useState(false);
   const Fields = [
-    { name: 'business_name', label: 'Business Name', required: true },
+    { name: 'business_name', label: 'Business or Trade Name ', required: true },
+    { name: 'legal_name', label: 'Legal Name ', required: true },
     { name: 'registration_number', label: 'Registration Number', required: false },
     { name: 'entity_type', label: 'Entity Type', type: 'select', options: entityTypes, required: true },
     { name: 'pan', label: 'PAN', required: true },
     { name: 'business_nature', type: 'select', label: 'Business Nature', options: industries, required: true },
-    { name: 'trade_name', label: 'Trade Name', required: true },
     { name: 'mobile_number', label: 'Mobile Number', required: true },
     { name: 'email', label: 'Email', required: true },
     { name: 'dob_or_incorp_date', label: 'Date of Incorporation' },
