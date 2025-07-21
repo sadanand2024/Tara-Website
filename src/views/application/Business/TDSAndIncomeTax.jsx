@@ -166,9 +166,13 @@ const validationSchema = Yup.object().shape({
   tan_number: Yup.string()
     .required('TAN is required')
     .matches(/^[A-Z]{4}[0-9]{5}[A-Z]{1}$/, 'Invalid TAN format'),
+  // pan: Yup.string()
+  //   .required('PAN is required')
+  //   .matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN format'),
   pan: Yup.string()
-    .required('PAN is required')
-    .matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN format'),
+  .required('PAN is required')
+  .matches(/^[A-Z]{3}C[A-Z][0-9]{4}[A-Z]$/, 'Invalid PAN format'),
+
   legal_name: Yup.string().required('Legal Name is required'),
   trade_name: Yup.string().required('Trade Name is required'),
   location: Yup.string().required('Location/Vertical is required'),

@@ -345,7 +345,7 @@ function Deductions({ handleNext, handleBack, open, setOpen, postType, setPostTy
 
           <Modal
             open={open}
-            title="Edit Deduction"
+            title="Add Deduction"
             maxWidth={'sm'}
             header={{ title: values.component_name || 'New Component', subheader: '' }}
             showClose={true}

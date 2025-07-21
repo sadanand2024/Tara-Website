@@ -84,9 +84,13 @@ const getRoleIcon = (role) => {
 const validationSchema = Yup.object().shape({
   name: Yup.string().required('Name is required'),
   designation: Yup.string().required('Designation is required'),
+  // pan_number: Yup.string()
+  //   .required('PAN Number is required')
+  //   .matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN Number format'),
   pan_number: Yup.string()
-    .required('PAN Number is required')
-    .matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN Number format'),
+  .required('PAN is required')
+  .matches(/^[A-Z]{3}P[A-Z][0-9]{4}[A-Z]$/, 'Invalid PAN Number format'),
+
   role: Yup.string().required('Role is required'),
   status: Yup.string().required('Status is required')
 });
