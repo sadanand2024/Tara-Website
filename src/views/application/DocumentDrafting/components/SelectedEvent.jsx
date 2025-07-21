@@ -23,8 +23,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { openSnackbar } from 'store/slices/snackbar';
 import Factory from 'utils/Factory';
 import EmptyDataPlaceholder from 'ui-component/extended/EmptyDataPlaceholder';
-
-
+ 
+ 
 const statusColor = (status) => {
   switch (status) {
     case 'Processed':
@@ -39,19 +39,19 @@ const statusColor = (status) => {
       return { bgcolor: '#E0E0E0', color: '#757575' };
   }
 };
-
+ 
 const summaryLabelStyle = {
   color: '#1976d2',
   fontWeight: 700,
   fontSize: 16,
   mb: 0.5
 };
-
+ 
 const summaryValueStyle = {
   fontWeight: 600,
   fontSize: 16
 };
-
+ 
 // Add statusChip function for consistent status styling
 const statusChip = (status) => {
   if (status === 'completed')
@@ -64,7 +64,7 @@ const statusChip = (status) => {
     return <Chip label="In progress" sx={{ bgcolor: '#FFF9C4', color: '#FBC02D', fontWeight: 500 }} />;
   return <Chip label={status} />;
 };
-
+ 
 // Helper to format date as dd/mm/yyyy
 const formatDate = (date) => {
   if (!date) return '';
@@ -74,17 +74,17 @@ const formatDate = (date) => {
   const year = d.getFullYear();
   return `${day}/${month}/${year}`;
 };
-
+ 
 // Helper to get progress color based on percent (match the image)
 function getProgressColor(percent) {
   if (percent === 0) return '#E0E0E0';      // Gray
   if (percent <= 25) return '#FFC400';      // Yellow
   if (percent <= 50) return '#B388FF';      // Purple
   if (percent <= 75) return '#2979FF';      // Blue
-  if (percent < 100)  return '#FF9100';     // Orange (for 76-99%)
+  if (percent < 100) return '#FF9100';     // Orange (for 76-99%)
   return '#43A047';                         // Green for 100%
 }
-
+ 
 const SelectedEvent = ({ onBack }) => {
   const { eventInstanceId } = useParams();
   const navigate = useNavigate();
@@ -92,7 +92,7 @@ const SelectedEvent = ({ onBack }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const dispatch = useDispatch();
-
+ 
   useEffect(() => {
     if (!eventInstanceId) return;
     setLoading(true);
@@ -107,8 +107,8 @@ const SelectedEvent = ({ onBack }) => {
       })
       .finally(() => setLoading(false));
   }, [eventInstanceId]);
-  
-
+ 
+ 
   if (loading) return <Box p={4}><Typography>Loading...</Typography></Box>;
   if (error) return <Box p={4}><Typography color="error">{error}</Typography></Box>;
   if (!eventData) return (
@@ -116,7 +116,7 @@ const SelectedEvent = ({ onBack }) => {
       <EmptyDataPlaceholder title="No Data Found" subtitle="There is no content to display." />
     </Box>
   );
-
+ 
   // Extract and map data as needed
   const eventInstance = eventData.event_instance || {};
   const eventName = eventInstance.event_name?.event_name || 'N/A';
@@ -128,7 +128,7 @@ const SelectedEvent = ({ onBack }) => {
   const progressTotal = documents.length;
   const progressCompleted = documents.filter(doc => (doc.status === 'completed')).length;
   const progressPercent = progressTotal > 0 ? (progressCompleted / progressTotal) * 100 : 0;
-
+ 
   const handleDownloadFile = async (fileUrl) => {
     try {
       if (!fileUrl) {
@@ -171,16 +171,17 @@ const SelectedEvent = ({ onBack }) => {
       }));
     }
   };
-
+ 
   return (
     <Box
-    sx={{ p: { xs: 2, md: 4 }, background: 'white', borderRadius: 2, minHeight: '100vh', width: '100%' }}
+      sx={{ p: { xs: 2, md: 4 }, background: 'white', borderRadius: 2, minHeight: '100vh', width: '100%' }}
+ 
     >
       {/* Breadcrumb */}
       <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
-      <Typography variant="h5" fontWeight={600} sx={{ m: 0, mb: 2, fontSize: { xs: 18, sm: 22 } }}>
-            Document Drafting
-          </Typography>
+        <Typography variant="h5" fontWeight={600} sx={{ m: 0, fontSize: { xs: 15, sm: 22 } }}>
+          Document Drafting
+        </Typography>
         {/* <Typography variant="body2" color="#757575">
           <b>
             <span
@@ -196,7 +197,7 @@ const SelectedEvent = ({ onBack }) => {
               style={{ color: '#757575', textDecoration: 'none', cursor: 'pointer' }}
               // onClick={() => { window.location.href = '/app/event'; }}
             >
-              Event Creation 
+              Event Creation
             </span>
           </b>
           &nbsp;&gt;&nbsp;
@@ -204,182 +205,295 @@ const SelectedEvent = ({ onBack }) => {
         </Typography> */}
         <Button
           variant="outlined"
-          onClick={() => navigate('/app/drafting')}
+          onClick={() => { window.location.href = '/app/drafting'; }}
           startIcon={<ArrowBackIcon />}
-          sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600, px: 2 }}
+          sx={{
+            borderRadius: 2,
+            textTransform: 'none',
+            fontWeight: 600,
+            fontSize: { xs: '0.75rem', sm: '0.875rem', md: 'none' }, // smaller font on xs
+            px: { xs: 1, sm: 2 },  // smaller horizontal padding on xs
+            py: { xs: 0.5, sm: 1 } // optional: smaller vertical padding
+          }}
         >
           Back to Dashboard
         </Button>
       </Box>
-
+ 
       {/* Main Card with summary and table */}
       <Paper
-        sx={{
-          borderRadius: 3,
-          border: '1.5px solid #E3EAFE',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
+        elevation={2} sx={{
           p: { xs: 2, md: 4 },
-          maxWidth: '100%',
+          borderRadius: 3,
           width: '100%',
+          maxWidth: 1400,
           mx: 'auto',
-          mt: 0,
-          minHeight: { xs: 400, md: 700 },
+          mt: 2,
+          minHeight: { xs: 800, md: 700 },
           position: 'relative',
-          background: '#fff',
-          overflowX: 'auto',
-          ml:{xs:0,md:0},
-          
-
-          
-          
         }}
       >
+ 
+        {/*elevation={3}
+          sx={{
+            borderRadius: 3,
+            border: '1.5px solid #E3EAFE',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
+            p: { xs: 2, md: 4 },
+            maxWidth: '100%',
+            width: '100%',
+            mx: 'auto',
+            mt: 0,
+            minHeight: { xs: 400, md: 700 },
+            position: 'relative',
+            background: '#fff',
+            overflowX: 'auto',
+            ml: { xs: 0, md: 0 },
+            // borderBottom: '2px solid rgb(196, 191, 191)',
+            // borderLeft: '0.1px solid #b0b8c4',
+            // borderTop: '0.1px solid #b0b8c4',
+            // borderRight: '0.1px solid #b0b8c4',
+          }} */}
+ 
+ 
         {/* Summary Section - Flex Row */}
         <Box
           sx={{
             display: 'flex',
             flexDirection: { xs: 'column', sm: 'row' },
-            justifyContent: 'space-between',
-            alignItems: { xs: 'flex-start', sm: 'center' },
+            justifyContent: 'center',
+            alignItems: 'center',
             gap: { xs: 2, sm: 0 },
             px: { xs: 0.5, sm: 2 },
+            maxWidth: '180%',
+            mx: 'auto',
             pb: 2,
             borderBottom: '1.5px solid #E3EAFE',
-            mt: {xs:0,md:-2},
-            ml:{xs:0,md:-3},
-            width:'110%'
+            mt: { xs: 0, md: -2 },
+            ml: { xs: 0, md: -3 },
+            width: '104%',
           }}
         >
-          <Box sx={{ flex: 1, minWidth: 120, mb: { xs: 1, sm: 0 } }}>
-            <Typography sx={{ color: '#1138e7', fontWeight: 700, fontSize: { xs: 16, sm: 18 }, mb: 0.5}}>Event Name</Typography>
-            <Typography sx={{ fontWeight: 500, fontSize: { xs: 14, sm: 16 } }}>{eventName}</Typography>
+          {/* Responsive summary: 2 rows on mobile, 1 row on desktop */}
+          {/** xs: 2 rows, sm+: 1 row **/}
+          <Box sx={{ display: { xs: 'flex', sm: 'none' }, flexDirection: 'row', width: '100%', gap: 2 }}>
+            <Box sx={{ flex: 1, minWidth: 120, textAlign: 'center', mx: 'auto' }}>
+              <Typography sx={{ color: '#1138e7', fontWeight: 500, fontSize: { xs: 16, sm: 18 }, mb: 0.5, textAlign: 'center' }}>Event Name</Typography>
+              <Typography sx={{ fontWeight: 500, fontSize: { xs: 14, sm: 16 }, textAlign: 'center', ml: 2 }}>{eventName}</Typography>
+            </Box>
+            <Box sx={{ flex: 1, minWidth: 120, textAlign: 'center', mx: 'auto' }}>
+              <Typography sx={{ color: '#1138e7', fontWeight: 500, fontSize: { xs: 16, sm: 18 }, mb: 0.5, textAlign: 'center' }}>Created On</Typography>
+              <Typography sx={{ fontWeight: 500, fontSize: { xs: 14, sm: 16 }, textAlign: 'center' }}>{createdOn}</Typography>
+            </Box>
           </Box>
-          <Box sx={{ flex: 1, minWidth: 120, mb: { xs: 1, sm: 0 } }}>
-            <Typography sx={{ color: '#1138e7', fontWeight: 700, fontSize: { xs: 16, sm: 18 }, mb: 0.5 }}>Created On</Typography>
-            <Typography sx={{ fontWeight: 500, fontSize: { xs: 14, sm: 16 } }}>{createdOn}</Typography>
-          </Box>
-          <Box sx={{ flex: 1, minWidth: 120, mb: { xs: 1, sm: 0 } }}>
-            <Typography sx={{ color: '#1138e7', fontWeight: 700, fontSize: { xs: 15, sm: 16 }, mb: 0.5 ,ml:2}}>Status</Typography>
-            {statusChip(status)}
-          </Box>
-          <Box sx={{ flex: 1, minWidth: 120, display: 'flex', alignItems: 'center', gap: 1, mb: { xs: 1, sm: 0 } }}>
-            <Box>
-              <Typography sx={{ color: '#1138e7', fontWeight: 700, fontSize: { xs: 16, sm: 18 }, mb: 0.5 }}>Progress</Typography>
-                <Box display="flex" alignItems="center" gap={1}>
-                  <Box sx={{ position: 'relative', display: 'inline-flex', mr: 1 }}>
-                    {progressPercent === 0 ? (
-                      <>
-                        <CircularProgress
-                          variant="determinate"
-                          value={100}
-                          size={30}
-                          thickness={5}
-                          sx={{ color: '#E0E0E0' }}
-                        />
-                        <Box
-                          sx={{
-                            top: 0,
-                            left: 0,
-                            bottom: 0,
-                            right: 0,
-                            position: 'absolute',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            width: '100%',
-                            height: '100%',
-                          }}
-                        >
-                          <Typography sx={{ fontWeight: 700, fontSize: 10, color: '#000' }}>
-                            0%
-                          </Typography>
-                        </Box>
-                      </>
-                    ) : (
-                      <>
-                        <CircularProgress
-                          variant="determinate"
-                          value={progressPercent}
-                          size={30}
-                          thickness={5}
-                          sx={{ color: getProgressColor(Math.round(progressPercent)) }}
-                        />
-                        <Box
-                          sx={{
-                            top: 0,
-                            left: 0,
-                            bottom: 0,
-                            right: 0,
-                            position: 'absolute',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            width: '100%',
-                            height: '100%',
-                          }}
-                        >
-                          <Typography sx={{ fontWeight: 700, fontSize: 10, color: '#000' }}>
-                            {Math.round(progressPercent)}%
-                          </Typography>
-                        </Box>
-                      </>
-                    )}
-                  </Box>
-                  <Typography sx={{ fontWeight: 500, fontSize: { xs: 14, sm: 18 } }}>{progressCompleted}/{progressTotal} Docs Completed</Typography>
+          {/* Mobile Progress: stack circle and text vertically */}
+          <Box sx={{ display: { xs: 'flex', sm: 'none' }, flexDirection: 'row', width: '100%', gap: 2, mt: 1 }}>
+            <Box sx={{ flex: 1, minWidth: 120, textAlign: 'center', mx: 'auto' }}>
+              <Typography sx={{ color: '#1138e7', fontWeight: 500, fontSize: { xs: 15, sm: 16 }, mb: 0.5, textAlign: 'center' }}>Status</Typography>
+              <Box sx={{ display: 'flex', justifyContent: 'center', ml: 1 }}>{statusChip(status)}</Box>
+            </Box>
+            <Box sx={{ flex: 1, minWidth: 120, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, textAlign: 'center', mx: 'auto' }}>
+              <Typography sx={{ color: '#1138e7', fontWeight: 500, fontSize: { xs: 16, sm: 18 }, mb: 0.5, textAlign: 'center' }}>Progress</Typography>
+              <Box display="flex" flexDirection="row" alignItems="center" gap={1} justifyContent="row">
+                <Box sx={{ position: 'relative', display: 'inline-flex', mb: 1 }}>
+                  {progressPercent === 0 ? (
+                    <>
+                      <CircularProgress
+                        variant="determinate"
+                        value={100}
+                        size={30}
+                        thickness={5}
+                        sx={{ color: '#E0E0E0' }}
+                      />
+                      <Box
+                        sx={{
+                          top: 0,
+                          left: 0,
+                          bottom: 0,
+                          right: 0,
+                          position: 'absolute',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: '100%',
+                          height: '100%',
+                        }}
+                      >
+                        <Typography sx={{ fontWeight: 500, fontSize: 10, color: '#000' }}>
+                          0%
+                        </Typography>
+                      </Box>
+                    </>
+                  ) : (
+                    <>
+                      <CircularProgress
+                        variant="determinate"
+                        value={progressPercent}
+                        size={30}
+                        thickness={5}
+                        sx={{ color: getProgressColor(Math.round(progressPercent)) }}
+                      />
+                      <Box
+                        sx={{
+                          top: 0,
+                          left: 0,
+                          bottom: 0,
+                          right: 0,
+                          position: 'absolute',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: '100%',
+                          height: '100%',
+                        }}
+                      >
+                        <Typography sx={{ fontWeight: 500, fontSize: 8, color: '#000' }}>
+                          {Math.round(progressPercent)}%
+                        </Typography>
+                      </Box>
+                    </>
+                  )}
                 </Box>
+                <Typography sx={{ fontWeight: 500, fontSize: { xs: 12, sm: 10, md: 10 }, textAlign: 'center', mt: 0 }}>{progressCompleted}/{progressTotal} Docs Completed</Typography>
+              </Box>
+            </Box>
+          </Box>
+          {/* Desktop/tablet: all in one row */}
+          <Box sx={{ display: { xs: 'none', sm: 'flex' }, flexDirection: 'row', width: '100%' }}>
+            <Box sx={{ flex: 1, minWidth: 120, mb: { xs: 1, sm: 0 }, textAlign: 'center', mx: 'auto' }}>
+              <Typography sx={{ color: '#1138e7', fontWeight: 500, fontSize: { xs: 16, sm: 18 }, mb: 2, textAlign: 'center' }}>Event Name</Typography>
+              <Typography sx={{ fontWeight: 500, fontSize: { xs: 14, sm: 16 }, textAlign: 'center', ml: 3 }}>{eventName}</Typography>
+            </Box>
+            <Box sx={{ flex: 1, minWidth: 120, mb: { xs: 1, sm: 0 }, textAlign: 'center', mx: 'auto' }}>
+              <Typography sx={{ color: '#1138e7', fontWeight: 500, fontSize: { xs: 16, sm: 18 }, mb: 2, textAlign: 'center' }}>Created On</Typography>
+              <Typography sx={{ fontWeight: 500, fontSize: { xs: 14, sm: 16 }, textAlign: 'center' }}>{createdOn}</Typography>
+            </Box>
+            <Box sx={{ flex: 1, minWidth: 120, mb: { xs: 1, sm: 0 }, textAlign: 'center', mx: 'auto' }}>
+              <Typography sx={{ color: '#1138e7', fontWeight: 500, fontSize: { xs: 15, sm: 16 }, mb: 2, textAlign: 'center' }}>Status</Typography>
+              <Box sx={{ display: 'flex', justifyContent: 'center', ml: 1 }}>{statusChip(status)}</Box>
+            </Box>
+            <Box sx={{ flex: 1, minWidth: 120, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, mb: { xs: 1, sm: 0 }, textAlign: 'center', mx: 'auto' }}>
+              <Typography sx={{ color: '#1138e7', fontWeight: 500, fontSize: { xs: 16, sm: 18 }, mb: 0.5, textAlign: 'center' }}>Progress</Typography>
+              <Box display="flex" alignItems="center" gap={1} justifyContent="center">
+                <Box sx={{ position: 'relative', display: 'inline-flex', mr: 1, ml: 0 }}>
+                  {progressPercent === 0 ? (
+                    <>
+                      <CircularProgress
+                        variant="determinate"
+                        value={100}
+                        size={35}
+                        thickness={5}
+                        sx={{ color: '#E0E0E0' }}
+                      />
+                      <Box
+                        sx={{
+                          top: 0,
+                          left: 0,
+                          bottom: 0,
+                          right: 0,
+                          position: 'absolute',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: '100%',
+                          height: '100%',
+                        }}
+                      >
+                        <Typography sx={{ fontWeight: 500, fontSize: 10, color: '#000' }}>
+                          0%
+                        </Typography>
+                      </Box>
+                    </>
+                  ) : (
+                    <>
+                      <CircularProgress
+                        variant="determinate"
+                        value={progressPercent}
+                        size={35}
+                        thickness={5}
+                        sx={{ color: getProgressColor(Math.round(progressPercent)) }}
+                      />
+                      <Box
+                        sx={{
+                          top: 0,
+                          left: 0,
+                          bottom: 0,
+                          right: 0,
+                          position: 'absolute',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: '100%',
+                          height: '100%',
+                        }}
+                      >
+                        <Typography sx={{ fontWeight: 500, fontSize: 9, color: '#000' }}>
+                          {Math.round(progressPercent)}%
+                        </Typography>
+                      </Box>
+                    </>
+                  )}
+                </Box>
+                <Typography sx={{ fontWeight: 500, fontSize: { xs: 10, sm: 14 }, textAlign: 'center' }}>{progressCompleted}/{progressTotal} Docs Completed</Typography>
+              </Box>
             </Box>
           </Box>
         </Box>
         {/* Document Table Section (unchanged) */}
-        <Box sx={{ mt: 3, borderRadius: 2, overflow: 'auto', bgcolor: '#fff', width: '100%' }}>
-          <TableContainer sx={{ borderRadius: 2, border: '1px solid #E3EAFE', overflow: 'auto', width: '100%' }}>
-            <Table sx={{ width: '100%', minWidth: 900 }}>
-              <TableHead>
-                <TableRow sx={{ bgcolor: '#f5f6fa' }}>
-                  <TableCell sx={{ fontWeight: 700, color: '#1138e7', fontSize: 15, borderTopLeftRadius: 12, px: 9, minWidth: 160 }}>Document Name</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: '#1138e7', fontSize: 15, px: 6, minWidth: 140 }}>Template</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: '#1138e7', fontSize: 15, px: 6, minWidth: 120 }}>Status</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: '#1138e7', fontSize: 15, px: 6, minWidth: 140 }}>Last Edited</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: '#1138e7', fontSize: 15, borderTopRightRadius: 12, px: 6, minWidth: 160 }}>Action</TableCell>
+        <Box >
+          <TableContainer component={Paper} sx={{ mt: 3, boxShadow: 3, borderRadius: 2, overflowX: 'auto' }}>
+            <Table sx={{ width: '100%', minWidth: 900, textAlign: 'center' }}>
+              <TableHead sx={{
+                backgroundColor: 'primary.main',
+                '& .MuiTableCell-root': {
+                  color: '#ffffff !important'
+                }
+              }}>
+                <TableRow >
+                  <TableCell align="left" sx={{ fontWeight: 700, color: '#1138e7', fontSize: 18, borderTopLeftRadius: 12, px: 6, minWidth: 160, whiteSpace: 'nowrap' }}>Document Name</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 700, color: '#1138e7', fontSize: 18, px: 4, minWidth: 140, whiteSpace: 'nowrap' }}>Template</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 700, color: '#1138e7', fontSize: 18, px: 4, minWidth: 120, whiteSpace: 'nowrap' }}>Status</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 700, color: '#1138e7', fontSize: 18, px: 4, minWidth: 140, whiteSpace: 'nowrap' }}>Last Edited</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 700, color: '#1138e7', fontSize: 18, borderTopRightRadius: 12, px: 4, minWidth: 160, whiteSpace: 'nowrap' }}>Action</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {documents.map((doc) => (
                   <TableRow key={doc.id}>
-                    <TableCell sx={{ fontWeight: 500, px: 9, minWidth: 160 }}>
+                    <TableCell align="left" sx={{ fontWeight: 500, textAlign: 'left', pl: 6, minWidth: 160, verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
                       {doc.document?.name || '-'}
                     </TableCell>
-                    <TableCell sx={{ px: 8, minWidth: 140 }}>
+                    <TableCell align="center" sx={{ px: 8, pl: 8, minWidth: 140, verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
                       <Chip
                         label={'Template'}
                         sx={{
                           bgcolor: '#0039A6',
                           color: '#fff',
                           fontWeight: 500,
-                          fontSize: 12,
+                          fontSize: 13,
                           borderRadius: '999px',
                           px: 3,
-                          ml: -2,
+                          pl: 0,
                           height: 32,
                           boxShadow: 'none',
                           letterSpacing: 0.5,
                           cursor: 'pointer',
                           '& .MuiChip-label': {
-                            padding: 0,
+                            paddingLeft: 4,
                           },
                         }}
                         onClick={() => navigate(`/app/drafting/fill/${doc.id}`)}
                       />
                     </TableCell>
-                    <TableCell align="left" sx={{ px: 8, minWidth: 120 }}>
-                      <Box display="flex" alignItems="center" sx={{ ml: -2 }}>
+                    <TableCell align="center" sx={{ px: 5, minWidth: 120, verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
+                      <Box display="flex" alignItems="center" justifyContent="center" sx={{ ml: 2 }}>
                         {statusChip(doc.status)}
                       </Box>
                     </TableCell>
-                    <TableCell sx={{ fontWeight: 500, px: 8, minWidth: 140 }}>
+                    <TableCell align="center" sx={{ fontWeight: 500, px: 5, minWidth: 140, verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
                       {doc.updated_at ? formatDate(doc.updated_at) : ''}
                     </TableCell>
-                    <TableCell sx={{ px: 8, minWidth: 160 }}>
+                    <TableCell align="center" sx={{ px: 5, minWidth: 160, verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
                       {doc.status === 'yet_to_start' && (
                         <Button
                           variant="contained"
@@ -430,8 +544,8 @@ const SelectedEvent = ({ onBack }) => {
                         </Button>
                       )}
                       {doc.status === 'completed' && (
-                        <Box display="flex">
-                          <IconButton sx={{ color: '#0062FF' }} onClick={() => handleDownloadFile(doc.file)}>
+                        <Box display="flex" justifyContent="center">
+                          <IconButton sx={{ color: '#0062FF', ml: 1 }} onClick={() => handleDownloadFile(doc.file)}>
                             <VisibilityIcon />
                           </IconButton>
                           <IconButton sx={{ color: '#0062FF' }} onClick={() => handleDownloadFile(doc.file)}>
@@ -450,5 +564,5 @@ const SelectedEvent = ({ onBack }) => {
     </Box>
   );
 };
-
+ 
 export default SelectedEvent;
