@@ -1,5 +1,6 @@
 'use client';
 import { Box, Grid2, Typography } from '@mui/material';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs from 'dayjs';
 import { FormikProvider, useFormik } from 'formik';
 import React, { useEffect, useState } from 'react';
@@ -7,7 +8,6 @@ import { useSearchParams } from 'react-router-dom';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
 import CustomAutocomplete from 'utils/CustomAutocomplete';
-import CustomDatePicker from 'utils/CustomDateInput';
 import CustomInput from 'utils/CustomInput';
 import Factory from 'utils/Factory';
 import { indian_States_And_UTs } from 'utils/indian_States_And_UT';
@@ -21,16 +21,16 @@ const PersonalDetails = ({ fetchEmployeeData, employeeData, createdEmployeeId, s
 
   const [loading, setLoading] = useState(false);
   const employeeFields = [
-    { name: 'dob', label: 'Date of Birth', required:true },
+    { name: 'dob', label: 'Date of Birth', required: true },
     { name: 'guardian_name', label: 'Guardian Name', required: true },
     { name: 'pan', label: 'PAN', required: true },
-    { name: 'aadhar', label: 'Aadhar', required:true },
+    { name: 'aadhar', label: 'Aadhar', required: true },
     { name: 'age', label: 'Age', required: false },
     { name: 'alternate_contact_number', label: 'Alternate Contact Number', required: false },
     { name: 'marital_status', label: 'Marital Status', required: false },
     { name: 'blood_group', label: 'Blood Group', required: false }
   ];
-  
+
   const addressFields = [
     { name: 'address_line1', label: 'Address Line 1', required: true },
     { name: 'address_line2', label: 'Address Line 2', required: false },
@@ -38,7 +38,7 @@ const PersonalDetails = ({ fetchEmployeeData, employeeData, createdEmployeeId, s
     { name: 'address_state', label: 'State', required: false },
     { name: 'address_pinCode', label: 'Pincode', required: false }
   ];
-  
+
   const initialValues = {
     dob: '',
     guardian_name: '',
@@ -79,7 +79,7 @@ const PersonalDetails = ({ fetchEmployeeData, employeeData, createdEmployeeId, s
     // marital_status: Yup.string().required('Required'),
     // blood_group: Yup.string().required('Required'),
     address: Yup.object().shape({
-      address_line1: Yup.string().required('Required'),
+      address_line1: Yup.string().required('Required')
       // address_city: Yup.string().required('Required'),
       // address_state: Yup.string().required('Required'),
       // address_pinCode: Yup.string()
@@ -100,7 +100,6 @@ const PersonalDetails = ({ fetchEmployeeData, employeeData, createdEmployeeId, s
         // marital_status: values.marital_status.toLowerCase() : null,
         marital_status: values.marital_status ? values.marital_status.toLowerCase() : null,
         blood_group: values.blood_group || null
-
       };
 
       const method = employeeData?.employee_personal_details?.id ? 'put' : 'post';
@@ -173,14 +172,11 @@ const PersonalDetails = ({ fetchEmployeeData, employeeData, createdEmployeeId, s
     if (field.name === 'age') {
       return (
         <>
-          {/* <Typography variant="subtitle1">{field.label}</Typography> */}
-          <Typography variant="subtitle1">
-            {getLabelWithAsterisk(field.label, field.required)}
-          </Typography>
+          <Typography variant="subtitle1">{getLabelWithAsterisk(field.label, field.required)}</Typography>
           <CustomInput
             fullWidth
             name={fieldName}
-            value={value || ''}
+            value={calculatedAge}
             disabled
             sx={{ width: '100%', '& .MuiInputBase-input': { color: 'grey.600' } }}
           />
@@ -191,24 +187,28 @@ const PersonalDetails = ({ fetchEmployeeData, employeeData, createdEmployeeId, s
     return (
       <>
         {/* <Typography variant="subtitle1">{field.label}</Typography> */}
-        <Typography variant="subtitle1">
-  {getLabelWithAsterisk(field.label, field.required)}
-</Typography>
+        <Typography variant="subtitle1">{getLabelWithAsterisk(field.label, field.required)}</Typography>
 
         {field.name === 'dob' ? (
-          <CustomDatePicker
+          <DatePicker
             name={fieldName}
             value={value ? dayjs(value) : null}
             onChange={(date) => setFieldValue(fieldName, date ? date.format('YYYY-MM-DD') : '')}
             onBlur={handleBlur}
             error={Boolean(isTouched && error)}
             helperText={isTouched && error}
+            sx={{ width: '100%', '& .MuiInputBase-input': { color: 'grey.600' } }}
+            slotProps={{
+              textField: {
+                size: 'small',
+                sx: { width: '100%', '& .MuiInputBase-input': { color: 'grey.600' } }
+              }
+            }}
           />
         ) : field.name === 'address_state' || field.name === 'marital_status' || field.name === 'blood_group' ? (
           <CustomAutocomplete
             name={fieldName}
             value={value || null}
-            
             options={
               field.name === 'marital_status'
                 ? ['Single', 'Married']
@@ -216,7 +216,7 @@ const PersonalDetails = ({ fetchEmployeeData, employeeData, createdEmployeeId, s
                   ? ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-', 'Unknown']
                   : indian_States_And_UTs
             }
-            onChange={(e, newValue) => setFieldValue(fieldName, newValue??null)}
+            onChange={(e, newValue) => setFieldValue(fieldName, newValue ?? null)}
             error={Boolean(isTouched && error)}
             helperText={isTouched && error}
             sx={{ width: '100%', '& .MuiInputBase-input': { color: 'grey.600' } }}
@@ -276,6 +276,9 @@ const PersonalDetails = ({ fetchEmployeeData, employeeData, createdEmployeeId, s
       setSubmitRef(formik.submitForm);
     }
   }, [setSubmitRef, formik.submitForm]);
+  console.log('values', values);
+  const calculatedAge = values.dob ? dayjs().diff(dayjs(values.dob), 'year') : '';
+
   return (
     <Box sx={{ mt: 2 }}>
       <FormikProvider value={formik}>

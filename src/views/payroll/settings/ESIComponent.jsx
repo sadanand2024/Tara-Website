@@ -15,7 +15,8 @@ import {
   CardHeader,
   Divider,
   Paper,
-  CircularProgress
+  CircularProgress,
+  Alert
 } from '@mui/material';
 import { IconPlus, IconEdit } from '@tabler/icons-react';
 import Modal from 'ui-component/extended/Modal';
@@ -33,6 +34,7 @@ const esiFields = [
 
 function ESIComponent({ handleNext, handleBack }) {
   const [open, setOpen] = useState(false);
+  const [esidisableDialog, setEsidisableDialog] = useState(false);
   const [esiData, setEsiData] = useState(null);
   const [postType, setPostType] = useState('');
   const [loading, setLoading] = useState(false);
@@ -72,7 +74,8 @@ function ESIComponent({ handleNext, handleBack }) {
       esi_number: '',
       employee_contribution: 0.75,
       employer_contribution: 3.25,
-      include_employer_contribution_in_ctc: false
+      include_employer_contribution_in_ctc: false,
+      is_disabled: false
     },
     validationSchema,
     onSubmit: async (values) => {
@@ -127,6 +130,39 @@ function ESIComponent({ handleNext, handleBack }) {
       getESI_Details(payrollid);
     }
   }, [payrollid]);
+
+  const disable_save_func = async () => {
+    setLoading(true);
+    const postData = { ...values };
+    postData.is_disabled = true;
+    postData.payroll = Number(payrollid);
+    const url = postType === 'post' ? `/payroll/esi` : `/payroll/esi/${esiData.id}`;
+    const { res, error } = await Factory(postType, url, postData);
+    setLoading(false);
+    if (res.status_cd === 0) {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: postType === 'post' ? 'Data Saved Successfully' : 'Data Updated Successfully',
+          variant: 'alert',
+          alert: { color: 'success' },
+          close: false
+        })
+      );
+      setEsidisableDialog(false);
+      getESI_Details(payrollid);
+    } else {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res.data.data),
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
+    }
+  };
 
   const { values, setValues, handleChange, errors, touched, handleSubmit, handleBlur, setFieldValue, resetForm } = formik;
 
@@ -229,9 +265,14 @@ function ESIComponent({ handleNext, handleBack }) {
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                     Enable ESI to start managing insurance settings for your organization.
                   </Typography>
-                  <Button variant="contained" startIcon={<IconPlus size={18} />} onClick={handleOpen} sx={{ mt: 1 }}>
-                    Enable ESI
-                  </Button>
+                  <Stack direction="row" spacing={2} justifyContent="center" sx={{ mt: 2 }}>
+                    <Button variant="contained" startIcon={<IconPlus size={18} />} onClick={handleOpen} sx={{ mt: 1 }}>
+                      Enable ESI
+                    </Button>
+                    <Button variant="outlined" color="error" onClick={() => setEsidisableDialog(true)} sx={{ mt: 1 }}>
+                      Disable ESI
+                    </Button>
+                  </Stack>
                 </Paper>
               </Grid2>
             )}
@@ -304,6 +345,51 @@ function ESIComponent({ handleNext, handleBack }) {
               }
             />
           </Grid2>
+        </Box>
+      </Modal>
+
+      {/* Modal for Disable ESI */}
+      <Modal
+        open={esidisableDialog}
+        showClose={true}
+        maxWidth={'sm'}
+        handleClose={() => {
+          resetForm();
+          setEsidisableDialog(false);
+        }}
+        header={{ title: 'Employees State Insurance', subheader: '' }}
+        footer={
+          <Stack direction="row" sx={{ width: 1, justifyContent: 'space-between', gap: 2 }}>
+            <Button
+              type="submit"
+              variant="outlined"
+              onClick={() => {
+                resetForm();
+                setEsidisableDialog(false);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              onClick={() => {
+                disable_save_func();
+              }}
+            >
+              Proceed
+            </Button>
+          </Stack>
+        }
+      >
+        <Box p={2}>
+          <Box display="flex" justifyContent="center" mb={1}>
+            <ErrorOutlineIcon color="primary" fontSize="large" />
+          </Box>
+          <Alert severity="error" sx={{ mb: 2 }}>
+            If your organisation has 10 or more employees, it is necessary to register for the ESI scheme. Are you sure you want to disable
+            ESI for this organisation?
+          </Alert>
         </Box>
       </Modal>
       {loading && (
