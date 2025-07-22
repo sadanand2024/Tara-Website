@@ -23,8 +23,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { openSnackbar } from 'store/slices/snackbar';
 import Factory from 'utils/Factory';
 import EmptyDataPlaceholder from 'ui-component/extended/EmptyDataPlaceholder';
- 
- 
+
+
 const statusColor = (status) => {
   switch (status) {
     case 'Processed':
@@ -39,19 +39,19 @@ const statusColor = (status) => {
       return { bgcolor: '#E0E0E0', color: '#757575' };
   }
 };
- 
+
 const summaryLabelStyle = {
   color: '#1976d2',
   fontWeight: 700,
   fontSize: 16,
   mb: 0.5
 };
- 
+
 const summaryValueStyle = {
   fontWeight: 600,
   fontSize: 16
 };
- 
+
 // Add statusChip function for consistent status styling
 const statusChip = (status) => {
   if (status === 'completed')
@@ -64,7 +64,7 @@ const statusChip = (status) => {
     return <Chip label="In progress" sx={{ bgcolor: '#FFF9C4', color: '#FBC02D', fontWeight: 500 }} />;
   return <Chip label={status} />;
 };
- 
+
 // Helper to format date as dd/mm/yyyy
 const formatDate = (date) => {
   if (!date) return '';
@@ -74,7 +74,7 @@ const formatDate = (date) => {
   const year = d.getFullYear();
   return `${day}/${month}/${year}`;
 };
- 
+
 // Helper to get progress color based on percent (match the image)
 function getProgressColor(percent) {
   if (percent === 0) return '#E0E0E0';      // Gray
@@ -84,7 +84,7 @@ function getProgressColor(percent) {
   if (percent < 100) return '#FF9100';     // Orange (for 76-99%)
   return '#43A047';                         // Green for 100%
 }
- 
+
 const SelectedEvent = ({ onBack }) => {
   const { eventInstanceId } = useParams();
   const navigate = useNavigate();
@@ -92,7 +92,7 @@ const SelectedEvent = ({ onBack }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const dispatch = useDispatch();
- 
+
   useEffect(() => {
     if (!eventInstanceId) return;
     setLoading(true);
@@ -107,8 +107,8 @@ const SelectedEvent = ({ onBack }) => {
       })
       .finally(() => setLoading(false));
   }, [eventInstanceId]);
- 
- 
+
+
   if (loading) return <Box p={4}><Typography>Loading...</Typography></Box>;
   if (error) return <Box p={4}><Typography color="error">{error}</Typography></Box>;
   if (!eventData) return (
@@ -116,7 +116,7 @@ const SelectedEvent = ({ onBack }) => {
       <EmptyDataPlaceholder title="No Data Found" subtitle="There is no content to display." />
     </Box>
   );
- 
+
   // Extract and map data as needed
   const eventInstance = eventData.event_instance || {};
   const eventName = eventInstance.event_name?.event_name || 'N/A';
@@ -128,7 +128,7 @@ const SelectedEvent = ({ onBack }) => {
   const progressTotal = documents.length;
   const progressCompleted = documents.filter(doc => (doc.status === 'completed')).length;
   const progressPercent = progressTotal > 0 ? (progressCompleted / progressTotal) * 100 : 0;
- 
+
   const handleDownloadFile = async (fileUrl) => {
     try {
       if (!fileUrl) {
@@ -171,11 +171,11 @@ const SelectedEvent = ({ onBack }) => {
       }));
     }
   };
- 
+
   return (
     <Box
       sx={{ p: { xs: 2, md: 4 }, background: 'white', borderRadius: 2, minHeight: '100vh', width: '100%' }}
- 
+
     >
       {/* Breadcrumb */}
       <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
@@ -219,7 +219,7 @@ const SelectedEvent = ({ onBack }) => {
           Back to Dashboard
         </Button>
       </Box>
- 
+
       {/* Main Card with summary and table */}
       <Paper
         elevation={2} sx={{
@@ -233,7 +233,7 @@ const SelectedEvent = ({ onBack }) => {
           position: 'relative',
         }}
       >
- 
+
         {/*elevation={3}
           sx={{
             borderRadius: 3,
@@ -254,8 +254,8 @@ const SelectedEvent = ({ onBack }) => {
             // borderTop: '0.1px solid #b0b8c4',
             // borderRight: '0.1px solid #b0b8c4',
           }} */}
- 
- 
+
+
         {/* Summary Section - Flex Row */}
         <Box
           sx={{
@@ -279,7 +279,7 @@ const SelectedEvent = ({ onBack }) => {
           <Box sx={{ display: { xs: 'flex', sm: 'none' }, flexDirection: 'row', width: '100%', gap: 2 }}>
             <Box sx={{ flex: 1, minWidth: 120, textAlign: 'center', mx: 'auto' }}>
               <Typography sx={{ color: '#1138e7', fontWeight: 500, fontSize: { xs: 16, sm: 18 }, mb: 0.5, textAlign: 'center' }}>Event Name</Typography>
-              <Typography sx={{ fontWeight: 500, fontSize: { xs: 14, sm: 16 }, textAlign: 'center', ml: 2 }}>{eventName}</Typography>
+              <Typography sx={{ fontWeight: 500, fontSize: { xs: 14, sm: 16 }, textAlign: 'center', ml: 0 }}>{eventName}</Typography>
             </Box>
             <Box sx={{ flex: 1, minWidth: 120, textAlign: 'center', mx: 'auto' }}>
               <Typography sx={{ color: '#1138e7', fontWeight: 500, fontSize: { xs: 16, sm: 18 }, mb: 0.5, textAlign: 'center' }}>Created On</Typography>
@@ -361,8 +361,8 @@ const SelectedEvent = ({ onBack }) => {
           {/* Desktop/tablet: all in one row */}
           <Box sx={{ display: { xs: 'none', sm: 'flex' }, flexDirection: 'row', width: '100%' }}>
             <Box sx={{ flex: 1, minWidth: 120, mb: { xs: 1, sm: 0 }, textAlign: 'center', mx: 'auto' }}>
-              <Typography sx={{ color: '#1138e7', fontWeight: 500, fontSize: { xs: 16, sm: 18 }, mb: 2, textAlign: 'center' }}>Event Name</Typography>
-              <Typography sx={{ fontWeight: 500, fontSize: { xs: 14, sm: 16 }, textAlign: 'center', ml: 3 }}>{eventName}</Typography>
+              <Typography sx={{ color: '#1138e7', fontWeight: 500, fontSize: { xs: 16, sm: 18 }, mb: 2, ml: -6, textAlign: 'center' }}>Event Name</Typography>
+              <Typography sx={{ fontWeight: 500, fontSize: { xs: 14, sm: 16 }, textAlign: 'center', ml: -3 }}>{eventName}</Typography>
             </Box>
             <Box sx={{ flex: 1, minWidth: 120, mb: { xs: 1, sm: 0 }, textAlign: 'center', mx: 'auto' }}>
               <Typography sx={{ color: '#1138e7', fontWeight: 500, fontSize: { xs: 16, sm: 18 }, mb: 2, textAlign: 'center' }}>Created On</Typography>
@@ -564,5 +564,5 @@ const SelectedEvent = ({ onBack }) => {
     </Box>
   );
 };
- 
+
 export default SelectedEvent;
