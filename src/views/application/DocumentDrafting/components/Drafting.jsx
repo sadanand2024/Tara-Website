@@ -221,6 +221,21 @@ export default function Drafting({ id, tab = 'document', contextId }) {
     }
   }, [location.state]);
 
+  // Persist selectedStatus and selectedCard to localStorage
+  useEffect(() => {
+    if (selectedStatus) {
+      localStorage.setItem('drafting_selectedStatus', selectedStatus);
+    }
+  }, [selectedStatus]);
+
+  useEffect(() => {
+    const savedStatus = localStorage.getItem('drafting_selectedStatus');
+    if (savedStatus) {
+      setSelectedStatus(savedStatus);
+      setSelectedCard(savedStatus.toLowerCase());
+    }
+  }, []);
+
   // Always render Event component for both document and event tabs
   if ((tab === 'document' || tab === 'event') && contextId) {
     return <Event tab={tab} contextId={contextId} />;
@@ -346,7 +361,7 @@ export default function Drafting({ id, tab = 'document', contextId }) {
     setSelectedFavourite(favourite);
     setConfirmDialogOpen(true);
   };
- 
+
   const handleConfirmProceed = () => {
     if (selectedFavourite) {
       handleFavouriteProceed(selectedFavourite);
@@ -354,7 +369,7 @@ export default function Drafting({ id, tab = 'document', contextId }) {
     setConfirmDialogOpen(false);
     setSelectedFavourite(null);
   };
- 
+
 
   // Card click handler
   const handleCardClick = (card) => {
@@ -628,8 +643,8 @@ export default function Drafting({ id, tab = 'document', contextId }) {
                         variant="contained"
                         disableElevation
                         sx={{
-                          background: (selectedStatus === cardKey) ? style.iconColor : '#F0F0F0',
-                          color: (selectedStatus === cardKey) ? '#fff' : '#595959',
+                          background: (selectedStatus && selectedStatus.toLowerCase() === cardKey) ? style.iconColor : '#F0F0F0',
+                          color: (selectedStatus && selectedStatus.toLowerCase() === cardKey) ? '#fff' : '#595959',
                           fontWeight: 500,
                           borderRadius: 2,
                           textTransform: 'none',
@@ -655,10 +670,12 @@ export default function Drafting({ id, tab = 'document', contextId }) {
               );
             })
           )}
-          <Table sx={{ minWidth: 600, borderBottom: '2px solid rgb(196, 191, 191)',
+          <Table sx={{
+            minWidth: 600, borderBottom: '2px solid rgb(196, 191, 191)',
             borderLeft: '0.1px solid #b0b8c4',
             borderTop: '0.1px solid #b0b8c4',
-            borderRight: '0.1px solid #b0b8c4',}}>
+            borderRight: '0.1px solid #b0b8c4',
+          }}>
 
           </Table>
         </Grid2>
@@ -681,7 +698,7 @@ export default function Drafting({ id, tab = 'document', contextId }) {
                 <TableCell>Name</TableCell>
                 <TableCell>Category</TableCell>
                 <TableCell>Event</TableCell>
-                <TableCell>Status</TableCell>
+                <TableCell sx={{ px: 4 }}>Status</TableCell>
                 <TableCell>Last Edited</TableCell>
                 <TableCell>Creator</TableCell>
                 <TableCell>Action</TableCell>
@@ -771,23 +788,23 @@ export default function Drafting({ id, tab = 'document', contextId }) {
             </TableBody>
           </Table>
           {/* Pagination Controls */}
-      {!loading && pageCount > 1 && (
-        <Box display="flex" justifyContent="center" alignItems="center" mt={3} mb={2}>
-          <Pagination
-            count={pageCount}
-            page={page}
-            onChange={(e, value) => setPage(value)}
-            color="primary"
-            shape="rounded"
-          />
-        </Box>
-      )}
+          {!loading && pageCount > 1 && (
+            <Box display="flex" justifyContent="center" alignItems="center" mt={3} mb={3}>
+              <Pagination
+                count={pageCount}
+                page={page}
+                onChange={(e, value) => setPage(value)}
+                color="primary"
+                shape="rounded"
+              />
+            </Box>
+          )}
         </Paper>
       )}
-      
+
       {/* Quick Access Panel */}
       <Paper
-        elevation={1} sx={{ borderRadius: 3, overflowX: 'auto', width: '100%', mt: 4}} 
+        elevation={1} sx={{ borderRadius: 3, overflowX: 'auto', width: '100%', mt: 4 }}
       >
         <Typography
           variant="h3"
@@ -864,7 +881,7 @@ export default function Drafting({ id, tab = 'document', contextId }) {
                 </Grid2>
                 {/* Recently Used */}
                 <Grid2 size={{ xs: 12, md: 4 }}>
-                  <Typography fontWeight={500} sx={{ color: '#0A1F44', mb: 2, fontSize: 17 }}>Recently Used</Typography>
+                  <Typography fontWeight={500} sx={{ color: '#0A1F44', mb: 2, fontSize: 17 }}>Recently Used Documents</Typography>
                   <Stack spacing={2}>
                     {recentDocumentsLoading ? (
                       <Typography>Loading recent documents...</Typography>
@@ -928,13 +945,13 @@ export default function Drafting({ id, tab = 'document', contextId }) {
         onConfirm={handleConfirmProceed}
         title="Confirm Document Creation"
         message="Are you sure you want to create this document?"
-        confirmText="OK"
+        confirmText="Yes"
         color="primary"
         icon={CheckCircleOutlineIcon}
       />
 
     </Box>
-    
+
 
   );
 

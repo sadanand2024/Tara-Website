@@ -759,7 +759,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
         }}
       >
 
-        <Typography variant="h5" fontWeight={600} sx={{ ml: { md: 2, xs: 0 }, mb: 2, fontSize: { xs: 18, sm: 22 } }}>
+        <Typography variant="h5" fontWeight={600} sx={{ mb: 2, fontSize: { xs: 18, sm: 22 } }}>
           Document Drafting
         </Typography>
 
@@ -774,7 +774,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
           }}
         >
           {/* Left: Dynamic Form */}
-          <Paper elevation={2} sx={{ flex: 1, minWidth: { xs: '100%', sm: 320, md: 400 }, maxWidth: 400, height: 620, maxHeight: 1000, display: 'flex', flexDirection: 'column', pb: 2, mr: 0, overflow: 'hidden' }}>
+          <Paper elevation={2} sx={{ flex: 1, minWidth: { xs: '100%', sm: 320, md: 400 }, maxWidth: 400, height: 620, maxHeight: 1000, display: 'flex', flexDirection: 'column', pb: 2, mr: { xs: 0, md: 3 }, overflow: 'hidden' }}>
             {/* Progress Bar */}
             {fields.length > 0 && (
               <Box sx={{ width: '100%', mb: 2, position: 'relative' }}>
@@ -792,7 +792,9 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
                         backgroundColor: '#E3EAFE',
                         '& .MuiLinearProgress-bar': {
                           backgroundColor: '#3650AE',
+                          transition: 'none', // Remove animation
                         },
+                        transition: 'none', // Remove animation
                       }}
                     />
                     <Typography variant="caption" sx={{ position: 'absolute', right: 16, top: 4, color: '#3650AE', fontWeight: 600 }}>
@@ -906,7 +908,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
               <Box sx={{ width: '100%', mb: 2, position: 'relative' }}>
                 {(() => {
                   const totalFields = fields.length;
-                  const filledFields = fields.filter(f => formValues[f.field_name] && String(formValues[f.field_name]).trim() !== '').length;
+                  const filledFields = fields.filter(f => formik.values[f.field_name] && String(formik.values[f.field_name]).trim() !== '').length;
                   const progress = totalFields > 0 ? (filledFields / totalFields) * 100 : 0;
                   return <>
                     <LinearProgress
@@ -1009,7 +1011,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
               color: '#00329E',
               width: { xs: '100%', sm: 'auto' },
               mb: { xs: 1, sm: 0 },
-              ml: { md: 2 },
+
               '&:hover': { borderColor: '#00329E', background: 'rgba(0,50,158,0.04)' },
             }}
             startIcon={<ArrowBackIcon />}
@@ -1017,7 +1019,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
           >
             {'Back to Dashboard'}
           </Button>
-          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, width: { xs: '100%', sm: 'auto' }, mr: { md: 2 } }}>
+          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, width: { xs: '100%', sm: 'auto' } }}>
             <Button
               variant="contained"
               color="primary"
@@ -1125,7 +1127,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
   console.log('DocumentSelectionPage search:', search, 'filteredTemplates:', filteredTemplates.length);
 
   return (
-    <Box sx={{ p: { xs: 2, md: 4 } }}>
+    <Box sx={{ p: { xs: 2, md: 2 } }}>
       {/* Top Row: Heading and Search - removed, now handled by parent */}
       {/* Document Cards Grid */}
       {loading ? (
@@ -1134,7 +1136,8 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
             borderRadius: 3,
             p: 4,
             background: '#fff',
-            minHeight: 300,
+            height: '250px',
+            // minHeight: '70%',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -1147,7 +1150,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
       ) : (
         <>
           {/* Responsive Card Grid */}
-          <Grid2 container spacing={{ xs: 2, sm: 4, md: 6 }} sx={{ mb: 4, width: '100%', mx: 'auto', }} alignItems="flex-start" justifyContent="flex-start">
+          <Grid2 container spacing={{ xs: 2, sm: 4, md: 6 }} sx={{ width: '100%', mx: 'auto', }} alignItems="flex-start" justifyContent="flex-start">
             {filteredTemplates.map((template) => (
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }} key={template.id} sx={{ mb: { xs: 2, md: 0 } }}>
                 <Paper
@@ -1156,7 +1159,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
                     borderRadius: 3,
                     pl: { xs: 2, sm: 2.5 },
                     pr: { xs: 2, sm: 2.5 },
-                    pt: { xs: 2, sm: 2.5 },
+                    pt: { xs: 1, sm: 2.5 },
                     pb: { xs: 2, sm: 2.5 },
 
                     ml: { xs: 0, md: -2 },

@@ -22,7 +22,7 @@ import Factory from 'utils/Factory';
 import SelectedEvent from './SelectedEvent';
 import { useNavigate } from 'react-router-dom';
 import EmptyDataPlaceholder from 'ui-component/extended/EmptyDataPlaceholder';
- 
+
 const statusColor = (status) => {
   switch (status?.toLowerCase()) {
     case 'processed':
@@ -35,7 +35,7 @@ const statusColor = (status) => {
       return { bgcolor: '#E0E0E0', color: '#757575' };
   }
 };
- 
+
 const statusChip = (status) => {
   if (!status) return null;
   const s = status.toLowerCase();
@@ -47,7 +47,7 @@ const statusChip = (status) => {
     return <Chip label="Yet to Start" sx={{ bgcolor: '#FFEAEA', color: '#D1293D', fontWeight: 500 }} />;
   return <Chip label={status} />;
 };
- 
+
 // ColoredCircularProgress component for colored progress circles
 const getProgressColor = (value) => {
   if (value <= 25) return '#FBC02D';      // Yellow for 0-25%
@@ -55,7 +55,7 @@ const getProgressColor = (value) => {
   if (value <= 75) return '#1976d2';      // Blue for 51-75%
   return '#388E3C';                       // Green for 76-100%
 };
- 
+
 function ColoredCircularProgress({ value = 0, size = 28, thickness = 5 }) {
   return (
     <Box position="relative" display="inline-flex" alignItems="center" justifyContent="center">
@@ -93,18 +93,18 @@ function ColoredCircularProgress({ value = 0, size = 28, thickness = 5 }) {
     </Box>
   );
 }
- 
+
 const MyEvents = ({ id }) => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const rowsPerPage = 5;
   const navigate = useNavigate();
- 
+
   useEffect(() => {
     if (!id) return;
     setLoading(true);
-    Factory('get',`/documentdrafting/my-events-list/?doc_drafts_id=${id}`, {}, {})
+    Factory('get', `/documentdrafting/my-events-list/?doc_drafts_id=${id}`, {}, {})
       .then(response => {
         const data = response?.res?.data || response?.res || response;
         setEvents(data || []);
@@ -112,12 +112,12 @@ const MyEvents = ({ id }) => {
       .catch(() => setEvents([]))
       .finally(() => setLoading(false));
   }, [id]);
- 
- 
- 
+
+
+
   const paginatedRows = events.slice((page - 1) * rowsPerPage, page * rowsPerPage);
   const pageCount = Math.ceil(events.length / rowsPerPage);
- 
+
   return (
     <>
       {loading ? (
@@ -130,34 +130,34 @@ const MyEvents = ({ id }) => {
           sx={{ borderRadius: 3, overflowX: 'auto', width: '100%' }}
         >
           <Typography variant="h3"
-          fontWeight={700}
-          sx={{
-            color: '#0A1F44',
-            background: '#F5F6F8',
-            padding: '16px 24px',       // Add internal spacing
-            borderTopLeftRadius: '12px',
-            borderTopRightRadius:'12px',       // Rounded corners
-            width: '100%',              // Or use a fixed width like '400px'
-          }}>
+            fontWeight={700}
+            sx={{
+              color: '#0A1F44',
+              background: '#F5F6F8',
+              padding: '16px 24px',       // Add internal spacing
+              borderTopLeftRadius: '12px',
+              borderTopRightRadius: '12px',       // Rounded corners
+              width: '100%',              // Or use a fixed width like '400px'
+            }}>
             My Events
           </Typography>
           <Box
             mb={1}
           >
-            <TableContainer  sx={{ background: 'transparent', border: 'none' }} >
+            <TableContainer sx={{ background: 'transparent', border: 'none' }} >
               <Table>
                 <TableHead sx={{
-                    backgroundColor: 'primary.main',
-                    '& .MuiTableCell-root': {
-                      color: '#ffffff !important'
-                    }
-                  }}>
+                  backgroundColor: 'primary.main',
+                  '& .MuiTableCell-root': {
+                    color: '#ffffff !important'
+                  }
+                }}>
                   <TableRow>
-                    <TableCell sx={{ fontWeight: 700, color: '#0A1F44', fontSize: 16,px:3 }}>Event Name</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: '#0A1F44', fontSize: 16,px:3 }}>Created On</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: '#0A1F44', fontSize: 16,px:4 }}>Status</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: '#0A1F44', fontSize: 16,px:3 }}>Progress</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: '#0A1F44', fontSize: 16,px:3 }}>Action</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: '#0A1F44', fontSize: 16, px: 3 }}>Event Name</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: '#0A1F44', fontSize: 16, px: 3 }}>Created On</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: '#0A1F44', fontSize: 16, px: 4 }}>Status</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: '#0A1F44', fontSize: 16, px: 3 }}>Progress</TableCell>
+                    <TableCell sx={{ fontWeight: 700, color: '#0A1F44', fontSize: 16, px: 3 }}>Action</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -176,14 +176,14 @@ const MyEvents = ({ id }) => {
                           transition: 'background 0.2s',
                         }}
                       >
-                        <TableCell sx={{ color: '#0A1F44',px:3, fontWeight: 500 }}>{event.event_name?.event_name || event.event_name || '-'}</TableCell>
-                        <TableCell sx={{ fontWeight: 500,px:3 }}>
-                        {event.created_at ? new Date(event.created_at).toLocaleDateString('en-GB') : '-'}
-                    </TableCell>
+                        <TableCell sx={{ color: '#0A1F44', px: 3, fontWeight: 500 }}>{event.event_name?.event_name || event.event_name || '-'}</TableCell>
+                        <TableCell sx={{ fontWeight: 500, px: 3 }}>
+                          {event.created_at ? new Date(event.created_at).toLocaleDateString('en-GB') : '-'}
+                        </TableCell>
                         <TableCell>
                           {statusChip(event.status)}
                         </TableCell>
-                        <TableCell sx={{px:3}}>
+                        <TableCell sx={{ px: 3 }}>
                           <Box display="flex" alignItems="center" gap={1}>
                             <Box sx={{ position: 'relative', display: 'inline-flex' }}>
                               {event.progress === 0 ? (
@@ -209,7 +209,7 @@ const MyEvents = ({ id }) => {
                             </Typography>
                           </Box>
                         </TableCell>
-                        <TableCell sx={{px:3}}>
+                        <TableCell sx={{ px: 3 }}>
                           <IconButton
                             sx={{
                               color: '#2F54EB',
@@ -229,23 +229,23 @@ const MyEvents = ({ id }) => {
               </Table>
             </TableContainer>
             {/* Pagination Controls */}
-      {!loading && pageCount > 1 && (
-        <Box display="flex" justifyContent="center" alignItems="center" mt={3} mb={3}>
-          <Pagination
-            count={pageCount}
-            page={page}
-            onChange={(e, value) => setPage(value)}
-            color="primary"
-            shape="rounded"
-          />
-        </Box>
-      )}
+            {!loading && pageCount > 1 && (
+              <Box display="flex" justifyContent="center" alignItems="center" mt={3} mb={3}>
+                <Pagination
+                  count={pageCount}
+                  page={page}
+                  onChange={(e, value) => setPage(value)}
+                  color="primary"
+                  shape="rounded"
+                />
+              </Box>
+            )}
           </Box>
         </Paper>
       )}
-     
+
     </>
   );
 };
- 
+
 export default MyEvents;

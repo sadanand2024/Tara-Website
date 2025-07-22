@@ -19,8 +19,8 @@ import CircularProgressComponent from 'utils/CircularProgressComponent';
 import EventIcon from '@mui/icons-material/Event';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
- 
- 
+
+
 // const documents = [
 //   {
 //     title: 'Address proof of employee',
@@ -35,7 +35,7 @@ import CloseIcon from '@mui/icons-material/Close';
 //     description: 'An Address Proof of Employee document, often a letter from your employer, verifies your current residential address',
 //   },
 // ];
- 
+
 const tabButtonStyle = (active) => ({
   minWidth: 180,
   fontWeight: 600,
@@ -48,20 +48,20 @@ const tabButtonStyle = (active) => ({
     color: active ? '#fff' : '#1976d2',
   },
 });
- 
+
 // TabPanel component (copied from LeaveAttendance.jsx)
 const TabPanel = ({ children, value, index }) => (
   <div role="tabpanel" hidden={value !== index}>
     {value === index && <Box sx={{ pt: 3 }}>{children}</Box>}
   </div>
 );
- 
+
 TabPanel.propTypes = {
   children: PropTypes.node,
   value: PropTypes.number.isRequired,
   index: PropTypes.number.isRequired
 };
- 
+
 // Reusable DocumentCard component
 function DocumentCard({ title, description, isFavorite, isSelected, onFavorite, onClick, showNote, setShowFirstCardNote }) {
   return (
@@ -76,7 +76,7 @@ function DocumentCard({ title, description, isFavorite, isSelected, onFavorite, 
         maxWidth: 400,
         minHeight: 160,
         maxHeight: 180,
- 
+
         boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
         position: 'relative',
         transition: 'border 0.2s, box-shadow 0.2s, transform 0.2s',
@@ -215,7 +215,7 @@ function DocumentCard({ title, description, isFavorite, isSelected, onFavorite, 
     </Paper>
   );
 }
- 
+
 const Event = ({ tab = 'document', contextId }) => {
   const navigate = useNavigate();
   const user = useSelector((state) => state.accountReducer.user);
@@ -232,24 +232,24 @@ const Event = ({ tab = 'document', contextId }) => {
   const [search, setSearch] = useState('');
   const tabNameToIndex = { document: 0, event: 1 };
   const indexToTabName = ['document', 'event'];
- 
+
   const [activeTab, setActiveTab] = useState(tabNameToIndex[tab] || 0);
- 
+
   // Sync tab state with route prop
   useEffect(() => {
     setActiveTab(tabNameToIndex[tab] || 0);
   }, [tab]);
- 
+
   // useEffect(() => {
   //   setActiveTab(initialTab);
   // }, [initialTab]);
- 
+
   useEffect(() => {
     setFiltersLoading(true);
     Promise.all([
       Factory('get', '/documentdrafting/categories/', {}, {}),
       Factory('get', '/documentdrafting/events/', {}, {})
- 
+
     ])
       .then(([catRes, eventRes]) => {
         console.log(eventRes?.res?.data)
@@ -260,24 +260,24 @@ const Event = ({ tab = 'document', contextId }) => {
         setCategory('');     // Always show "Select Category" by default
         setEvent('');        // Always show "Select Event" by default
       })
- 
+
       .finally(() => setFiltersLoading(false));
   }, []);
- 
+
   // When documents are loaded, select all by default
   useEffect(() => {
     if (documents && documents.length > 0) {
       setSelected(documents.map(doc => doc.id));
     }
   }, [documents]);
- 
+
   const handleCategoryChange = (catId) => {
     setCategory(catId);
     const selectedCat = categoryOptions.find(cat => cat.id === catId);
     setEventOptions(selectedCat?.events || []);
     setEvent(''); // Reset event selection when category changes
   };
- 
+
   // const handleEventChange = (eventId) => {
   //   setEvent(eventId);
   //   if (!category || !eventId) {
@@ -297,12 +297,12 @@ const Event = ({ tab = 'document', contextId }) => {
   // };
   const handleEventChange = (eventId) => {
     setEvent(eventId);
- 
+
     if (!eventId) {
       setDocuments([]);
       return;
     }
- 
+
     // Build query string dynamically
     // let queryString = ?event_id=${eventId};
     // if (category) {
@@ -316,17 +316,17 @@ const Event = ({ tab = 'document', contextId }) => {
     if (category) {
       queryString += `&category_id=${category}`;
     }
- 
- 
+
+
     // Build payload dynamically
     const payload = { event_id: eventId };
     if (category) {
       payload.category_id = category;
     }
- 
+
     Factory(
       'get', `/documentdrafting/category-or-events-wise-document-list/${queryString}`,
- 
+
       payload,
       {}
     ).then(response => {
@@ -336,14 +336,14 @@ const Event = ({ tab = 'document', contextId }) => {
     });
     console.log("wertyui", user.user.id)
   };
- 
- 
+
+
   const handleCardClick = (docId) => {
     setSelected((prev) =>
       prev.includes(docId) ? prev.filter(id => id !== docId) : [...prev, docId]
     );
   };
- 
+
   const handleToggleFavorite = (docId) => {
     setDocuments(prevDocuments =>
       prevDocuments.map(doc =>
@@ -351,7 +351,7 @@ const Event = ({ tab = 'document', contextId }) => {
       )
     );
   };
- 
+
   const handleProceed = async (catId, eventId, documentIds, userId, contextId) => {
     const payload = {
       event: eventId,
@@ -372,26 +372,35 @@ const Event = ({ tab = 'document', contextId }) => {
       // handle error
     }
   };
- 
+
   const handleBackToDashboard = () => {
     setSelectedEventInstanceId(null);
   };
- 
+
   if (selectedEventInstanceId) {
     navigate(`/app/drafting/selected-event/${selectedEventInstanceId}`);
   }
- 
+
   // Tab click handlers
   const handleTabChange = (_e, newValue) => {
     const tabRoute = indexToTabName[newValue];
     navigate(`/app/drafting/${tabRoute}/${contextId || ''}`);
   };
- 
+
   // In Event component, add state for note visibility
   const [showFirstCardNote, setShowFirstCardNote] = useState(true);
- 
+
   return (
-    <Box sx={{ p: { xs: 2, md: 4 }, background: 'white', borderRadius: 2, minHeight: '100vh' }}>
+    <Box sx={{
+      p: { xs: 2, md: 4 },
+      background: 'white',
+      borderRadius: 2,
+      height: {
+        xs: '100vh',
+        md: '100%'
+      }, // force it to 80% viewport height
+      overflowY: 'auto',
+    }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0 }}>
         <Typography variant="h5" fontWeight={600} sx={{ m: 0, fontSize: { xs: 15, sm: 22 } }}>
           Document Drafting
@@ -411,7 +420,7 @@ const Event = ({ tab = 'document', contextId }) => {
         >
           Back to Dashboard
         </Button>
- 
+
       </Box>
       {/* <Paper elevation={2} sx={{
   p: { xs: 2, md: 4 },
@@ -430,7 +439,7 @@ const Event = ({ tab = 'document', contextId }) => {
         maxWidth: 1400,
         mx: 'auto',
         mt: 2,
-        minHeight: { xs: 800, md: 700 },
+        minHeight: { xs: 800, md: 550 },
         position: 'relative',
       }}>
         {/* Tabs always centered, search bar right, responsive */}
@@ -458,10 +467,11 @@ const Event = ({ tab = 'document', contextId }) => {
             <Tab label="Create an Event" />
           </Tabs>
           {activeTab === 0 && (
-            <Box sx={{ width: { xs: '93%', sm: 350, md: '23.5%' }, ml: { md: 2 }, mt: { xs: 2, md: 0 }, mb: { xs: 2, md: 0 } }}>
+            <Box sx={{ width: { xs: '93%', sm: 350, md: '23.5%' }, ml: { md: 'auto' }, mt: { xs: 2 }, mb: { xs: 2, md: 0 } }}>
               <TextField
                 fullWidth
                 size="small"
+
                 placeholder="Search "
                 value={search}
                 onChange={e => setSearch(e.target.value)}
@@ -478,18 +488,28 @@ const Event = ({ tab = 'document', contextId }) => {
                   boxShadow: { xs: 1, md: 0 },
                   width: '100%',
                   minWidth: 0,
+                  transform: {
+                    xs: 'translateY(2px) translateX(-1px)',
+                    md: 'translateY(2px) translateX(50px)'
+                  }
                 }}
               />
             </Box>
           )}
           {activeTab === 1 && (
-            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, width: { xs: '93%', sm: '35%' }, ml: { xs: 2, md: 2 }, mt: { xs: 2, md: 0 }, mb: { xs: 2, md: 0 } }}>
+            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, width: { xs: '93%', sm: '35%' }, ml: { xs: 2, md: 4 }, mt: { xs: 2 }, mb: { xs: 2, md: 0 } }}>
               <TextField
                 fullWidth
                 select
                 label="Category"
                 size="small"
-                sx={{ bgcolor: '#F5F7FA', transform: 'translateY(2px) translateX(-8px)' }}
+                sx={{
+                  bgcolor: '#F5F7FA',
+                  transform: {
+                    xs: 'translateY(2px) translateX(-8px)',
+                    md: 'translateY(2px) translateX(50px)'
+                  }
+                }}
                 value={category}
                 onChange={e => handleCategoryChange(e.target.value)}
                 disabled={filtersLoading}
@@ -508,7 +528,13 @@ const Event = ({ tab = 'document', contextId }) => {
                 select
                 label="Event"
                 size="small"
-                sx={{ bgcolor: '#F5F7FA', transform: 'translateY(2px) translateX(-8px)' }}
+                sx={{
+                  bgcolor: '#F5F7FA',
+                  transform: {
+                    xs: 'translateY(2px) translateX(-8px)',
+                    md: 'translateY(2px) translateX(50px)'
+                  }
+                }}
                 value={event}
                 onChange={e => handleEventChange(e.target.value)}
                 disabled={filtersLoading}
@@ -529,7 +555,7 @@ const Event = ({ tab = 'document', contextId }) => {
         </TabPanel>
         <TabPanel value={activeTab} index={1}>
           {(category === '' && event === '') && (
-            <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" sx={{ width: '100%', my: 2 }}>
+            <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" sx={{ width: '100%', my: 12 }}>
               <EventIcon
                 sx={{
                   color: 'rgb(175, 206, 239)',
@@ -543,10 +569,10 @@ const Event = ({ tab = 'document', contextId }) => {
                   Please select category and event to start drafting
                 </Typography>
               </Box>
- 
- 
+
+
             </Box>
- 
+
           )}
           {filtersLoading ? (
             <Box
@@ -575,9 +601,9 @@ const Event = ({ tab = 'document', contextId }) => {
                       ,
                       ml: { xs: 2 },
                       width: { xs: '93%', sm: '100%', md: '100%' },
- 
+
                       minWidth: { xs: '93%', sm: 220, md: '100%' },
-                      maxWidth: { xs: '100%', sm: 400, md: '110%' },
+                      maxWidth: { xs: '100%', sm: 400, md: '105%' },
                     }}
                     alignItems="flex-start"
                     justifyContent="flex-start"
@@ -629,6 +655,5 @@ const Event = ({ tab = 'document', contextId }) => {
     </Box>
   );
 };
- 
+
 export default Event;
- 
