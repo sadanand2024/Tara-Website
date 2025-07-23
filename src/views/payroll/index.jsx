@@ -203,6 +203,34 @@ const PayrollDashboard = () => {
     setRefreshLoading(false);
   };
 
+  // const payrollLock = async (payrollId) => {
+  //   if (!payrollId || !selectedMonth || !financialYear) return;
+  //   let url = `/payroll/payroll-workflows/detail-or-create/?payroll=${payrollId}&month=${selectedMonth}&financial_year=${financialYear}`;
+  //   const { res } = await Factory('put', url, {});
+  //   console.log(res);
+  //   if (res?.status_cd === 0) {
+  //     dispatch(
+  //       openSnackbar({
+  //         open: true,
+  //         message: 'Payroll locked successfully',
+  //         variant: 'alert',
+  //         alert: { color: 'success' },
+  //         close: false
+  //       })
+  //     );
+  //   } else {
+  //     dispatch(
+  //       openSnackbar({
+  //         open: true,
+  //         message: JSON.stringify(res?.data?.error) || 'An error occurred',
+  //         variant: 'alert',
+  //         alert: { color: 'error' },
+  //         close: false
+  //       })
+  //     );
+  //   }
+  // };
+
   useEffect(() => {
     // if (user?.user?.registration_completed === 'False') {
     //   // navigate('/payrollsetup/payroll_business_profileSetup');
@@ -416,6 +444,21 @@ const PayrollDashboard = () => {
                         }}
                       >
                         Resume Payroll
+                      </Button>
+                      <Button
+                        variant="contained"
+                        size="small"
+                        onClick={() => {
+                          if (businessDetails?.payroll_id) {
+                            payrollLock(businessDetails?.payroll_id);
+                          }
+                        }}
+                        sx={{
+                          color: '#fff',
+                          fontWeight: 700
+                        }}
+                      >
+                        Lock Payroll
                       </Button>
                       <Tooltip title="Refresh Employees on Your Payroll" arrow placement="top">
                         <Button

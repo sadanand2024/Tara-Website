@@ -62,6 +62,7 @@ export default function Index() {
   const [error, setError] = useState(null);
   const [selectedMonth, setSelectedMonth] = useState(null);
   const [doneStatus, setDoneStatus] = useState(Array(PRODUCTS_DATA.length).fill(false));
+  const [lockPayroll, setLockPayroll] = useState(false);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [dialogIndex, setDialogIndex] = useState(null);
   const [skipConfirm, setSkipConfirm] = useState(false);
@@ -120,13 +121,15 @@ export default function Index() {
 
   const getworkFlowStatusData = async () => {
     if (!payrollId || !selectedMonth || !financialYear) return;
-    let url = `/app/payroll/payroll-workflows/detail-or-create/?payroll=${payrollId}&month=${selectedMonth}&financial_year=${financialYear}`;
+    let url = `/payroll/payroll-workflows/detail-or-create/?payroll=${payrollId}&month=${selectedMonth}&financial_year=${financialYear}`;
     const { res } = await Factory('get', url, {});
+    console.log(res);
     if (res?.status_cd === 0) {
       const data = res.data;
       // console.log(data);
       const newDoneStatus = workflowFieldMap.map((field) => data[field] === 'completed');
       setDoneStatus([...newDoneStatus, { id: data.id }]);
+      setLockPayroll(data.lock_payroll || false);
     }
   };
   // Fetch month summary data when month or financialYear changes
@@ -162,7 +165,9 @@ export default function Index() {
   };
 
   const handleCardClick = (href, index) => {
-    navigate(`/app/payroll${href}?payrollid=${payrollId}&tabValue=${index}&month=${month}&financial_year=${financialYear}`);
+    navigate(
+      `/app/payroll${href}?payrollid=${payrollId}&tabValue=${index}&month=${month}&financial_year=${financialYear}&lock_payroll=${lockPayroll}`
+    );
   };
 
   const putStatusApicall = async (index, status) => {

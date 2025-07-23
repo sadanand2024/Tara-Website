@@ -35,7 +35,7 @@ const EmployeePortal = {
       id: 'dashboard',
       title: 'dashboard',
       type: 'item',
-      url: '/dashboard/employee-portal',
+      url: '/app/employee-portal/dashboard',
       icon: icons.IconBriefcase,
       breadcrumbs: false
     },

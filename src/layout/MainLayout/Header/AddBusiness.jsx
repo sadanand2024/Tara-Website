@@ -60,7 +60,7 @@ const AddBusiness = ({ open, onClose, userData, setUserData, getContext }) => {
 
   const formik = useFormik({
     initialValues: {
-      user_id: userData.user.id,
+      user_id: userData?.user?.id || '',
       business_name: '',
       legal_name: '',
       registration_number: '',

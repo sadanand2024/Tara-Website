@@ -43,6 +43,7 @@ const RenderTable = ({
   const [selectedRow, setSelectedRow] = useState(null);
   const [month, setMonth] = useState(null);
   const [financial_year, setFinancialYear] = useState(null);
+  const [lock_payroll, setLockPayroll] = useState(false);
   const handleOpenDeleteDialog = (row) => {
     setSelectedRow(row);
     setOpenDeleteDialog(true);
@@ -57,9 +58,11 @@ const RenderTable = ({
     const id = searchParams.get('payrollid');
     const month = searchParams.get('month');
     const financial_year = searchParams.get('financial_year');
+    const lock_payroll = searchParams.get('lock_payroll');
     if (id) setPayrollId(id);
     if (month) setMonth(month);
     if (financial_year) setFinancialYear(financial_year);
+    if (lock_payroll === 'true') setLockPayroll(true);
   }, [searchParams]);
 
   const handlePageChange = (_, value) => {
@@ -125,11 +128,16 @@ const RenderTable = ({
                         </Button>
                       ) : (
                         <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
-                          <IconButton size="small" color="primary" onClick={() => handleEdit(row)}>
+                          <IconButton size="small" color="primary" onClick={() => handleEdit(row)} disabled={lock_payroll === 'true'}>
                             <Edit />
                           </IconButton>
                           {from !== 'Tds' && from !== 'Adhoc Bonus & Incentives' ? (
-                            <IconButton size="small" color="error" onClick={() => handleOpenDeleteDialog(row)}>
+                            <IconButton
+                              size="small"
+                              color="error"
+                              onClick={() => handleOpenDeleteDialog(row)}
+                              disabled={lock_payroll === 'true'}
+                            >
                               <Delete />
                             </IconButton>
                           ) : null}
