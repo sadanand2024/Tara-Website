@@ -73,9 +73,9 @@ function EpfComponent({ handleNext }) {
 
   const formik = useFormik({
     initialValues: {
-      epf_number: '',
-      employee_contribution_rate: '',
-      employer_contribution_rate: '',
+      epf_number: null,
+      employee_contribution_rate: null,
+      employer_contribution_rate: null,
       include_employer_contribution_in_ctc: false,
       employer_edil_contribution_in_ctc: false,
       admin_charge_in_ctc: false,

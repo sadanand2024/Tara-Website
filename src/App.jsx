@@ -1,4 +1,6 @@
 import { RouterProvider } from 'react-router-dom';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
 // routing
 import router from 'routes';
@@ -25,20 +27,22 @@ export default function App() {
   return (
     <ThemeCustomization>
       {/* <RTLLayout> */}
-      <Locales>
-        <NavigationScroll>
-          <AuthProvider>
-            <>
-              <Notistack>
-                <ServicesProvider>
-                  <RouterProvider router={router} />
-                  <Snackbar />
-                </ServicesProvider>
-              </Notistack>
-            </>
-          </AuthProvider>
-        </NavigationScroll>
-      </Locales>
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <Locales>
+          <NavigationScroll>
+            <AuthProvider>
+              <>
+                <Notistack>
+                  <ServicesProvider>
+                    <RouterProvider router={router} />
+                    <Snackbar />
+                  </ServicesProvider>
+                </Notistack>
+              </>
+            </AuthProvider>
+          </NavigationScroll>
+        </Locales>
+      </LocalizationProvider>
       {/* </RTLLayout> */}
     </ThemeCustomization>
   );
