@@ -150,7 +150,7 @@ const PayrollWorkflows = ({ type }) => {
       );
       // Refresh attendance data after generation
       getAttandanceData();
-      refreshEmployees_on_payroll();
+      // refreshEmployees_on_payroll();
     } else {
       dispatch(
         openSnackbar({

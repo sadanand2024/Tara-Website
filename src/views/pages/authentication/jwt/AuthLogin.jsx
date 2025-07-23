@@ -36,7 +36,7 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff';
 export default function JWTLogin({ ...others }) {
   const theme = useTheme();
   const dispatch = useDispatch();
-
+  const urlPath = window.location.pathname;
   const { login, isLoggedIn } = useAuth();
   const scriptedRef = useScriptRef();
 
@@ -64,7 +64,10 @@ export default function JWTLogin({ ...others }) {
         submit: null
       }}
       validationSchema={Yup.object().shape({
-        email: Yup.string().email('Must be a valid email').max(255).required('Email is required'),
+        email:
+          urlPath === '/employee-login'
+            ? Yup.string().required('Username is required')
+            : Yup.string().email('Must be a valid email').max(255).required('Email is required'),
         password: Yup.string()
           .required('Password is required')
           .test('no-leading-trailing-whitespace', 'Password can not start or end with spaces', (value) => value === value.trim())
@@ -109,10 +112,10 @@ export default function JWTLogin({ ...others }) {
       {({ errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values }) => (
         <form noValidate onSubmit={handleSubmit} {...others}>
           <FormControl fullWidth error={Boolean(touched.email && errors.email)} sx={{ ...theme.typography.customInput }}>
-            <InputLabel htmlFor="outlined-adornment-email-login">Email Address</InputLabel>
+            <InputLabel htmlFor="outlined-adornment-email-login">{urlPath === '/employee-login' ? 'Username' : 'Email Address'}</InputLabel>
             <OutlinedInput
               id="outlined-adornment-email-login"
-              type="email"
+              type={urlPath === '/employee-login' ? 'text' : 'email'}
               value={values.email}
               name="email"
               onBlur={handleBlur}

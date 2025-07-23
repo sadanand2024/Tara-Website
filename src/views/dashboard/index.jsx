@@ -91,7 +91,7 @@ export default function Dashboard() {
       else if (user.active_context?.context_type === 'personal') navigate('/dashboard/personal');
     }, 1000);
   }, [user]);
-
+  console.log('vhj');
   return (
     <>
       <ChooseAccountDialog open={accDialog} onContinue={onContinue} />
