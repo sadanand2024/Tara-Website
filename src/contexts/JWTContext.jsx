@@ -55,7 +55,7 @@ const JWTContext = createContext(null);
 export function JWTProvider({ children }) {
   const reduxDispatch = useReduxDispatch(); // ✅ Redux dispatcher
   const [state, dispatch] = useReducer(accountReducer, initialState); // ✅ Local reducer
-
+  const urlPath = window.location.pathname;
   useEffect(() => {
     const init = async () => {
       try {
@@ -85,7 +85,15 @@ export function JWTProvider({ children }) {
   }, [reduxDispatch, dispatch]);
 
   const login = async (email, password) => {
-    const response = await axios.post('/user_management/auth/login', { email, password });
+    let url = '/user_management/auth/login';
+    if (urlPath === '/employee-login') {
+      url = '/payroll/auth/employee-login/';
+    }
+    let loginPostData = { email, password };
+    if (urlPath === '/employee-login') {
+      loginPostData = { username: email, password };
+    }
+    const response = await axios.post(url, loginPostData);
     const serviceToken = response.data.access_token;
     const user = response.data;
 

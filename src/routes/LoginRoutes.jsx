@@ -36,6 +36,10 @@ const LoginRoutes = {
       element: <AuthLogin />
     },
     {
+      path: '/employee-login',
+      element: <AuthLogin />
+    },
+    {
       path: '/register',
       element: <AuthRegister />
     },
