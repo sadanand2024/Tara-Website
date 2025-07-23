@@ -11,6 +11,7 @@ import CreditCardIcon from '@mui/icons-material/CreditCard';
 import FolderIcon from '@mui/icons-material/Folder';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
+import useScrollTrigger from '@mui/material/useScrollTrigger';
 
 const products = [
   {
@@ -100,9 +101,9 @@ const ProductCard = ({ product, onClose }) => (
       
       minHeight: 180,
       boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
-      opacity: product.is_active ? 1 : 0.5,
-      pointerEvents: product.is_active ? 'auto' : 'none',
-      cursor: product.is_active ? 'pointer' : 'not-allowed',
+      // opacity: product.is_active ? 1 : 0.5,
+      // pointerEvents: product.is_active ? 'auto' : 'none',
+      // cursor: product.is_active ? 'pointer' : 'not-allowed',
       '&:hover': product.is_active
         ? {
             transform: 'scale(1.035)',
@@ -120,6 +121,7 @@ const ProductCard = ({ product, onClose }) => (
     <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 1, flex: 1, fontSize: 13, textAlign: 'center', width: '100%' }}>
       {product.description}
     </Typography>
+    {product.is_active ? (
     <Button
       component={RouterLink}
       to={`${product.path}?id=${product.id}&context=${product.context_type}&type=product`}
@@ -149,12 +151,35 @@ const ProductCard = ({ product, onClose }) => (
     >
       Try Now
     </Button>
+    ) : (
+  <Typography
+    variant="body2"
+    sx={{
+      color: 'text.disabled',
+      fontWeight: 500,
+      fontSize: 13,
+      textAlign: 'center',
+      mt: 1
+    }}
+  >
+    Coming Soon
+  </Typography>
+)}
   </Paper>
 );
 
 const ProductsPanel = ({ onClose }) => {
   const location = useLocation();
-  const isLandingPage = location.pathname === '/'; 
+    const pathname = location.pathname;
+  // const isLandingPage = location.pathname === '/';
+    const trigger = useScrollTrigger({
+    disableHysteresis: true,
+    threshold: 0,
+  });
+    const getBackgroundColor = () => {
+    if (trigger) return '#FFFFFF';
+    return pathname === '/' ? 'linear-gradient(to left, #9DB0FF 0%, #F0F3FF 50%, #FFFFFF 100%)' : '#FFFFFF';
+  };
   return (
     <AnimatePresence>
       <ClickAwayListener onClickAway={onClose}>
@@ -174,8 +199,10 @@ const ProductsPanel = ({ onClose }) => {
             zIndex: 1100,
             // backgroundColor: 'background.paper',
             // backgroundImage: 'linear-gradient(to left, #9DB0FF 0%, #F0F3FF 50%, #FFFFFF 100%)',
-            backgroundImage: isLandingPage ? 'linear-gradient(to left, #9DB0FF 0%, #F0F3FF 50%, #FFFFFF 100%)' : 'none',
-            backgroundColor: isLandingPage ? 'transparent' : 'white',
+            // backgroundImage: isLandingPage ? 'linear-gradient(to left, #9DB0FF 0%, #F0F3FF 50%, #FFFFFF 100%)' : 'none',
+            // backgroundColor: isLandingPage ? 'transparent' : 'white',
+            backgroundImage: trigger ? 'none' : getBackgroundColor(),
+            backgroundColor: trigger ? '#FFFFFF' : (pathname === '/' ? 'transparent' : '#FFFFFF'),
             backgroundRepeat: 'no-repeat',
             backgroundSize: 'cover',
 
