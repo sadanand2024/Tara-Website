@@ -1,4 +1,4 @@
-import { ClickAwayListener, Container, Grid2, Paper, Typography } from '@mui/material';
+import { ClickAwayListener, Container, Grid2, Paper, Typography ,useScrollTrigger} from '@mui/material';
 import ServicesContext from 'contexts/ServicesContext';
 import { AnimatePresence, motion } from 'framer-motion';
 import React, { useContext, useMemo } from 'react';
@@ -124,6 +124,29 @@ const ServicesPanel = ({ onClose }) => {
   const { services: apiServices } = useContext(ServicesContext);
   const location = useLocation();
 const isLandingPage = location.pathname === '/'; 
+  const trigger = useScrollTrigger({
+    disableHysteresis: true,
+    threshold: 0
+  });
+   const getBackgroundStyles = () => {
+    if (trigger) {
+      return {
+        backgroundColor: '#FFFFFF',
+        backgroundImage: 'none',
+        transform: 'translateY(-8px)'
+      };
+    } else {
+      return {
+        backgroundColor: isLandingPage ? 'transparent' : '#FFFFFF',
+        backgroundImage: isLandingPage
+          ? 'linear-gradient(to left, #9DB0FF 0%, #F0F3FF 50%, #FFFFFF 100%)'
+          : 'none',
+        transform: 'translateY(0)'
+      };
+    }
+  };
+
+  const backgroundStyles = getBackgroundStyles();
 
   // Create a lookup for fast matching
   const apiLookup = useMemo(() => {
@@ -170,8 +193,11 @@ const isLandingPage = location.pathname === '/';
             // backgroundImage: 'linear-gradient(to left, #9DB0FF 0%, #F0F3FF 50%, #FFFFFF 100%)',
             // backgroundRepeat: 'no-repeat',
             // backgroundSize: 'cover',
-            backgroundImage: isLandingPage ? 'linear-gradient(to left, #9DB0FF 0%, #F0F3FF 50%, #FFFFFF 100%)' : 'none',
-            backgroundColor: isLandingPage ? 'transparent' : 'white',
+            // backgroundImage: isLandingPage ? 'linear-gradient(to left, #9DB0FF 0%, #F0F3FF 50%, #FFFFFF 100%)' : 'none',
+            // backgroundColor: isLandingPage ? 'transparent' : 'white',
+            backgroundColor: backgroundStyles.backgroundColor,
+            backgroundImage: backgroundStyles.backgroundImage,
+            transform: backgroundStyles.transform,
             backgroundRepeat: 'no-repeat',
             backgroundSize: 'cover',
 
