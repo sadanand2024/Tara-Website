@@ -2,7 +2,7 @@ import { ClickAwayListener, Container, Grid2, Paper, Typography } from '@mui/mat
 import ServicesContext from 'contexts/ServicesContext';
 import { AnimatePresence, motion } from 'framer-motion';
 import React, { useContext, useMemo } from 'react';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useLocation } from 'react-router-dom';
 
 const services = [
   {
@@ -110,6 +110,8 @@ const services = [
     ]
   }
 ];
+
+
 const MotionPaper = motion.create(Paper);
 
 const panelVariants = {
@@ -120,6 +122,8 @@ const panelVariants = {
 
 const ServicesPanel = ({ onClose }) => {
   const { services: apiServices } = useContext(ServicesContext);
+  const location = useLocation();
+const isLandingPage = location.pathname === '/'; 
 
   // Create a lookup for fast matching
   const apiLookup = useMemo(() => {
@@ -163,10 +167,14 @@ const ServicesPanel = ({ onClose }) => {
             width: '100vw',
             zIndex: 1100,
             // backgroundColor: 'background.paper',
-            backgroundImage: 'linear-gradient(to left, #9DB0FF 0%, #F0F3FF 50%, #FFFFFF 100%)',
+            // backgroundImage: 'linear-gradient(to left, #9DB0FF 0%, #F0F3FF 50%, #FFFFFF 100%)',
+            // backgroundRepeat: 'no-repeat',
+            // backgroundSize: 'cover',
+            backgroundImage: isLandingPage ? 'linear-gradient(to left, #9DB0FF 0%, #F0F3FF 50%, #FFFFFF 100%)' : 'none',
+            backgroundColor: isLandingPage ? 'transparent' : 'white',
             backgroundRepeat: 'no-repeat',
             backgroundSize: 'cover',
-        
+
             px: { xs: 2, sm: 4, md: 10 },
             py: { xs: 3, sm: 5 },
             borderTop: (theme) => `1px solid ${theme.palette.divider}`,
