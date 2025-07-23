@@ -55,7 +55,7 @@ const servicesData = {
   'Rental income from one or more house properties',
   'Agricultural income',
   'Other minor sources of income'
-], price: '₹₹999/year' },
+], price: '₹999/year' },
             { name: 'Small Business & Freelancers',
               bestFor: [
   'Designed For:',

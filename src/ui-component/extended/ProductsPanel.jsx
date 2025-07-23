@@ -1,6 +1,6 @@
 import { Box, Button, ClickAwayListener, Container, Grid2, Paper, Typography } from '@mui/material';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink,useLocation } from 'react-router-dom';
 import React from 'react';
 
 // Import icons
@@ -53,6 +53,7 @@ const products = [
     context_type: 'business',
     is_active: false
   },
+  
   {
     title: 'Compliance Tracker',
     description: 'Auto reminders and status for ITR, GST, and ROC filings.',
@@ -96,6 +97,7 @@ const ProductCard = ({ product, onClose }) => (
       transition: 'all 0.25s cubic-bezier(.4,2,.6,1)',
       border: '1px solid',
       borderColor: 'divider',
+      
       minHeight: 180,
       boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
       opacity: product.is_active ? 1 : 0.5,
@@ -151,6 +153,8 @@ const ProductCard = ({ product, onClose }) => (
 );
 
 const ProductsPanel = ({ onClose }) => {
+  const location = useLocation();
+  const isLandingPage = location.pathname === '/'; 
   return (
     <AnimatePresence>
       <ClickAwayListener onClickAway={onClose}>
@@ -168,7 +172,13 @@ const ProductsPanel = ({ onClose }) => {
             left: 0,
             width: '100vw',
             zIndex: 1100,
-            backgroundColor: 'background.paper',
+            // backgroundColor: 'background.paper',
+            // backgroundImage: 'linear-gradient(to left, #9DB0FF 0%, #F0F3FF 50%, #FFFFFF 100%)',
+            backgroundImage: isLandingPage ? 'linear-gradient(to left, #9DB0FF 0%, #F0F3FF 50%, #FFFFFF 100%)' : 'none',
+            backgroundColor: isLandingPage ? 'transparent' : 'white',
+            backgroundRepeat: 'no-repeat',
+            backgroundSize: 'cover',
+
             px: { xs: 2, sm: 4, md: 10 },
             py: { xs: 3, sm: 5 },
             borderTop: (theme) => `1px solid ${theme.palette.divider}`,
