@@ -78,6 +78,7 @@ const entityTypeMapping = {
 
 const validationSchema = Yup.object({
   nameOfBusiness: Yup.string().required('Business name is required'),
+  legal_name: Yup.string().required('Legal name is required'),
   business_nature: Yup.string().required('Industry is required'),
   pan: Yup.string()
     .matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN Number')
@@ -293,6 +294,7 @@ const BusinessProfile = ({ tabChange, tabval }) => {
 
   const [initialValues, setInitialValues] = useState({
     nameOfBusiness: '',
+    legal_name: '',
     business_nature: '',
     pan: '',
     registrationNumber: '',
@@ -309,8 +311,8 @@ const BusinessProfile = ({ tabChange, tabval }) => {
     },
     is_msme_registered: 'no',
     msme_registration_type: '',
-    msme_registration_number: '',
-    trade_name: ''
+    msme_registration_number: ''
+    // trade_name: ''
   });
 
   // Fetch initial data
@@ -322,6 +324,7 @@ const BusinessProfile = ({ tabChange, tabval }) => {
         const profileData = profileResponse.res.data;
         setInitialValues({
           nameOfBusiness: profileData.nameOfBusiness || '',
+          legal_name: profileData.legal_name || '',
           business_nature: profileData.business_nature || '',
           pan: profileData.pan || '',
           registrationNumber: profileData.registrationNumber || '',
@@ -338,8 +341,8 @@ const BusinessProfile = ({ tabChange, tabval }) => {
           },
           is_msme_registered: profileData.is_msme_registered || 'no',
           msme_registration_type: profileData.msme_registration_type || '',
-          msme_registration_number: profileData.msme_registration_number || '',
-          trade_name: profileData.trade_name || ''
+          msme_registration_number: profileData.msme_registration_number || ''
+          // trade_name: profileData.trade_name || ''
         });
 
         const branchesResponse = await Factory('get', `/user_management/branches/${user.active_context.business_id}/`, {}, {});

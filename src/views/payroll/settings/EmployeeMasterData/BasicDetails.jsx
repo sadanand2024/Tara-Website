@@ -531,17 +531,13 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
               <Grid2 size={{ xs: 12, sm: 6 }}>
                 <Typography variant="subtitle2" sx={{ color: 'grey.800', mb: 0.5 }}>
                   {getLabelWithAsterisk(
-                    <>
-                      PF Account Number{' '}
-                      <Typography component="span" sx={{ fontSize: '0.75rem', color: 'grey.600' }}>
-                        (e.g. ABCD1234567)
-                      </Typography>
-                    </>,
+                    <>PF Account Number</>,
                     true // or false based on conditional logic
                   )}
                 </Typography>
 
                 <TextField
+                  size="small"
                   fullWidth
                   value={values.statutory_components?.employee_provident_fund?.pf_account_number || ''}
                   onChange={(e) => setFieldValue('statutory_components.employee_provident_fund.pf_account_number', e.target.value)}
@@ -558,25 +554,15 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
                 />
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6 }}>
-                {/* <Typography variant="subtitle2" sx={{ color: 'grey.800', mb: 0.5 }}>
-                  UAN Number{' '}
-                  <Typography component="span" sx={{ fontSize: '0.75rem', color: 'grey.600' }}>
-                    (e.g. 123456789012)
-                  </Typography>
-                </Typography> */}
                 <Typography variant="subtitle2" sx={{ color: 'grey.800', mb: 0.5 }}>
                   {getLabelWithAsterisk(
-                    <>
-                      UAN Number{' '}
-                      <Typography component="span" sx={{ fontSize: '0.75rem', color: 'grey.600', display: 'inline' }}>
-                        (e.g. 123456789012)
-                      </Typography>
-                    </>,
+                    <>UAN Number </>,
                     true // Set to `true` if UAN is required
                   )}
                 </Typography>
 
                 <TextField
+                  size="small"
                   fullWidth
                   value={values.statutory_components?.employee_provident_fund?.uan || ''}
                   onChange={(e) => setFieldValue('statutory_components.employee_provident_fund.uan', e.target.value)}

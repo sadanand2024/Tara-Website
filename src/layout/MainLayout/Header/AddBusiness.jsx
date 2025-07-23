@@ -15,6 +15,7 @@ import { industries } from 'utils/industries';
 
 const validationSchema = Yup.object({
   business_name: Yup.string().required('Business name is required'),
+  legal_name: Yup.string().required('Legal name is required'),
   // registration_number: Yup.string().required('Registration number is required'),
   entity_type: Yup.string().required('Entity type is required'),
   address_line1: Yup.string().required('Address Line 1 is required'),
@@ -27,7 +28,7 @@ const validationSchema = Yup.object({
   pan: Yup.string()
     .required('PAN Number is required')
     .matches(/^[A-Z]{5}[0-9]{4}[A-Z]$/, 'Invalid PAN Number format'),
-  trade_name: Yup.string().required('Trade Name is required'),
+  // trade_name: Yup.string().required('Trade Name is required'),
   mobile_number: Yup.string()
     .matches(/^\d{10}$/, 'Mobile Number must be exactly 10 digits')
     .required('Mobile Number is required'),
@@ -61,6 +62,7 @@ const AddBusiness = ({ open, onClose, userData, setUserData, getContext }) => {
     initialValues: {
       user_id: userData.user.id,
       business_name: '',
+      legal_name: '',
       registration_number: '',
       dob_or_incorp_date: new Date().toISOString().slice(0, 10),
       entity_type: '',
@@ -72,7 +74,7 @@ const AddBusiness = ({ open, onClose, userData, setUserData, getContext }) => {
       pincode: '',
       pan: '',
       business_nature: '',
-      trade_name: '',
+      // trade_name: '',
       mobile_number: '',
       email: ''
     },
@@ -83,6 +85,7 @@ const AddBusiness = ({ open, onClose, userData, setUserData, getContext }) => {
       const payload = {
         user_id: values.user_id,
         business_name: values.business_name,
+        legal_name: values.legal_name,
         registration_number: values.registration_number,
         dob_or_incorp_date: values.dob_or_incorp_date,
         entity_type: values.entity_type,
@@ -96,7 +99,7 @@ const AddBusiness = ({ open, onClose, userData, setUserData, getContext }) => {
         },
         pan: values.pan,
         business_nature: values.business_nature,
-        trade_name: values.trade_name,
+        // trade_name: values.trade_name,
         mobile_number: values.mobile_number,
         email: values.email
       };
@@ -230,7 +233,6 @@ const AddBusiness = ({ open, onClose, userData, setUserData, getContext }) => {
       ))}
     </Grid2>
   );
-
   return (
     <Modal
       open={open}
