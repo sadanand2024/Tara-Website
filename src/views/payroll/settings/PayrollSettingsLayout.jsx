@@ -579,8 +579,8 @@ const PayrollSettingsLayout = () => {
     }
 
     if (currentStep?.secondaryAction === 'salaryComponents') {
-      // Only show Add Component button for Earnings tab (index 0)
-      if (salaryComponentsActiveTab === 0) {
+      // Show Add Component button for both Earnings tab (index 0) and Deductions tab (index 1)
+      if (salaryComponentsActiveTab === 0 || salaryComponentsActiveTab === 1) {
         return (
           <Stack direction="row" spacing={2} alignItems="center">
             <Button

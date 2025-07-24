@@ -113,33 +113,41 @@ const RenderTable = ({
                     ))}
                     <TableCell align="center">
                       {from === 'Salary Revisions' ? (
-                        <Button
-                          variant="outlined"
-                          size="small"
-                          onClick={() => {
-                            if (row.employee_id !== '' && row.employee_id !== null) {
-                              navigate(
-                                `/app/payroll/settings/add-employee?employee_id=${row.employee_id}&payrollid=${payrollId}&from=${'Salary Revisions'}&tabValue=${Number(1)}&month=${month}&financial_year=${financial_year}`
-                              );
-                            }
-                          }}
-                        >
-                          Edit Pay Structure
-                        </Button>
+                        <Tooltip title={lock_payroll ? 'Cannot edit - Payroll is locked' : 'Edit record'}>
+                          <span>
+                            <Button
+                              variant="outlined"
+                              size="small"
+                              onClick={() => {
+                                if (row.employee_id !== '' && row.employee_id !== null) {
+                                  navigate(
+                                    `/app/payroll/settings/add-employee?employee_id=${row.employee_id}&payrollid=${payrollId}&from=${'Salary Revisions'}&tabValue=${Number(1)}&month=${month}&financial_year=${financial_year}`
+                                  );
+                                }
+                              }}
+                              disabled={lock_payroll}
+                            >
+                              Edit Pay Structure
+                            </Button>
+                          </span>
+                        </Tooltip>
                       ) : (
                         <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
-                          <IconButton size="small" color="primary" onClick={() => handleEdit(row)} disabled={lock_payroll === 'true'}>
-                            <Edit />
-                          </IconButton>
+                          <Tooltip title={lock_payroll ? 'Cannot edit - Payroll is locked' : 'Edit record'}>
+                            <span>
+                              <IconButton size="small" color="primary" onClick={() => handleEdit(row)} disabled={lock_payroll}>
+                                <Edit />
+                              </IconButton>
+                            </span>
+                          </Tooltip>
                           {from !== 'Tds' && from !== 'Adhoc Bonus & Incentives' ? (
-                            <IconButton
-                              size="small"
-                              color="error"
-                              onClick={() => handleOpenDeleteDialog(row)}
-                              disabled={lock_payroll === 'true'}
-                            >
-                              <Delete />
-                            </IconButton>
+                            <Tooltip title={lock_payroll ? 'Cannot delete - Payroll is locked' : 'Delete record'}>
+                              <span>
+                                <IconButton size="small" color="error" onClick={() => handleOpenDeleteDialog(row)} disabled={lock_payroll}>
+                                  <Delete />
+                                </IconButton>
+                              </span>
+                            </Tooltip>
                           ) : null}
                         </Box>
                       )}
@@ -181,8 +189,14 @@ const RenderTable = ({
         )}
         <Box>
           {from === 'Tds' ? (
-            <Button variant="contained" color="primary" onClick={() => navigate('/app/payroll')}>
-              Proceed to Dashboard
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() =>
+                navigate(`/app/payroll/employee-dashboard?payrollid=${payrollId}&month=${month}&financial_year=${financial_year}`)
+              }
+            >
+              Proceed to Monthly Payroll Dashboard
             </Button>
           ) : (
             <Button variant="contained" color="primary" onClick={() => handleNext()}>

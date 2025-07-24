@@ -56,6 +56,7 @@ const PayrollWorkflows = ({ type }) => {
   const payrollId = searchParams.get('payrollid');
   const month = searchParams.get('month');
   const financialYear = searchParams.get('financial_year');
+  const lockPayroll = searchParams.get('lock_payroll');
   const [searchQuery, setSearchQuery] = useState('');
 
   // Fetch functions for each tab
@@ -71,35 +72,6 @@ const PayrollWorkflows = ({ type }) => {
     }
   };
 
-  const refreshEmployees_on_payroll = async () => {
-    if (!payrollId || !financialYear || !month) return;
-    const url = `/payroll/detail_employee_payroll_salary?payroll_id=${payrollId}&month=${month}&financial_year=${financialYear}`;
-    const { res } = await Factory('get', url, {});
-    if (res.status_cd === 0) {
-      if (res.data.message === 'Salary processing will be initiated between the 26th and 30th of the month.') {
-        dispatch(
-          openSnackbar({
-            open: true,
-            message: res.data.message,
-            variant: 'alert',
-            alert: { color: 'success' },
-            close: false
-          })
-        );
-        return;
-      }
-    } else {
-      dispatch(
-        openSnackbar({
-          open: true,
-          message: JSON.stringify(res?.data?.error) || 'An error occurred',
-          variant: 'alert',
-          alert: { color: 'error' },
-          close: false
-        })
-      );
-    }
-  };
   const getAttandanceData = async () => {
     if (!payrollId || !financialYear || !month) return;
     setLoading(true);
@@ -150,7 +122,6 @@ const PayrollWorkflows = ({ type }) => {
       );
       // Refresh attendance data after generation
       getAttandanceData();
-      // refreshEmployees_on_payroll();
     } else {
       dispatch(
         openSnackbar({
@@ -166,7 +137,8 @@ const PayrollWorkflows = ({ type }) => {
 
   const fetchExitsData = async () => {
     setLoading(true);
-    const url = `/payroll/payroll-exit-settlement?payroll_id=${payrollId}`;
+    const year = financialYear ? financialYear.split('-')[0] : '';
+    const url = `/payroll/payroll-exit-settlement?payroll_id=${payrollId}&month=${month}&year=${year}`;
     const { res } = await Factory('get', url, {});
     setLoading(false);
     if (res?.status_cd === 0) {
@@ -487,8 +459,6 @@ const PayrollWorkflows = ({ type }) => {
 
   return (
     <MainCard
-      // title="Employee Dashboard for  "
-      // title={`Employee Dashboard for ${month || ''}`}
       title={`Employee Dashboard for ${getMonthName(month) || ''}`}
       tagline="Payroll Workflow"
       secondary={
@@ -507,7 +477,7 @@ const PayrollWorkflows = ({ type }) => {
           >
             Back to dashboard
           </Button>
-          <Button variant="contained" color="primary" onClick={handleButtonClick}>
+          <Button variant="contained" color="primary" onClick={handleButtonClick} disabled={lockPayroll === 'true'}>
             {renderButtonLabel()}
           </Button>
         </Stack>
