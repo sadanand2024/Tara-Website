@@ -6,7 +6,6 @@ import CustomInput from 'utils/CustomInput';
 import Factory from 'utils/Factory';
 import CustomAutocomplete from 'utils/CustomAutocomplete';
 import { useSearchParams } from 'react-router-dom';
-import RenderSalaryTemplateTable from '../RenderSalaryTemplateTable';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
 import { TextField } from '@mui/material';
@@ -208,7 +207,7 @@ function SalaryDetails({
           </>
         ) : (
           <>
-            <Typography variant="subtitle2" sx={{ color: 'grey.800',mb: 0.3 }}>
+            <Typography variant="subtitle2" sx={{ color: 'grey.800', mb: 0.3 }}>
               {field.label}
               <span style={{ color: 'red', paddingLeft: '4px' }}>*</span>
             </Typography>
@@ -216,7 +215,6 @@ function SalaryDetails({
             <TextField
               fullWidth
               name="annual_ctc"
-             
               size="small"
               value={annualCtcInput}
               onChange={(e) => {
@@ -312,16 +310,6 @@ function SalaryDetails({
         <Grid2 container spacing={3}>
           {renderFields(fields)}
         </Grid2>
-
-        {/* <RenderSalaryTemplateTable
-          source="salarydetails"
-          values={values}
-          setValues={setValues}
-          setFieldValue={setFieldValue}
-          enablePreviewButton={enablePreviewButton}
-          setEnablePreviewButton={setEnablePreviewButton}
-          createdEmployeeId={employeeData?.id || createdEmployeeId}
-        /> */}
         <SalaryTemplate
           source="salarydetails"
           values={values}

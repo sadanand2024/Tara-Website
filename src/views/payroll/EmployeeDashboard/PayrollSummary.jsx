@@ -191,23 +191,23 @@ const PayrollSummary = ({ payrollId, month, financialYear }) => {
             ) : paginatedData.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={TABLE_HEADERS.length + 1} align="center" sx={{ height: 300 }}>
-                  <EmptyDataPlaceholder title="No Data Found" subtitle="Start by adding a new record." />
+                  <EmptyDataPlaceholder title="No Data Found" subtitle="Generate payroll to view data." />
                 </TableCell>
               </TableRow>
             ) : (
               paginatedData.map((item, index) => (
                 <TableRow key={item.id || index}>
-                  <TableCell>{item.associate_id || 'NA'}</TableCell>
-                  <TableCell>{item.employee_name || 'NA'}</TableCell>
-                  <TableCell>{item.department || 'NA'}</TableCell>
-                  <TableCell>{item.designation || 'NA'}</TableCell>
-                  <TableCell>{formatNumberIN(item.paid_days)}</TableCell>
-                  <TableCell>{formatNumberIN(item.ctc)}</TableCell>
-                  <TableCell>{formatNumberIN(item.actual_gross)}</TableCell>
-                  <TableCell>{formatNumberIN(item.gross_salary)}</TableCell>
-                  <TableCell>{formatNumberIN(item.earned_salary)}</TableCell>
-                  <TableCell>{formatNumberIN(item.deductions?.['Total'])}</TableCell>
-                  <TableCell>{formatNumberIN(item.net_salary)}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{item.associate_id || 'NA'}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{item.employee_name || 'NA'}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{item.department || 'NA'}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{item.designation || 'NA'}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatNumberIN(item.paid_days)}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatNumberIN(item.ctc)}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatNumberIN(item.actual_gross)}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatNumberIN(item.gross_salary)}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatNumberIN(item.earned_salary)}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatNumberIN(item.deductions?.['Total'])}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatNumberIN(item.net_pay)}</TableCell>
                   <TableCell>
                     <Typography
                       align="center"
@@ -215,7 +215,8 @@ const PayrollSummary = ({ payrollId, month, financialYear }) => {
                       sx={{
                         cursor: 'pointer',
                         textDecoration: 'underline',
-                        color: 'primary.main'
+                        color: 'primary.main',
+                        whiteSpace: 'nowrap'
                       }}
                       onClick={() => viewPayslip(item.employee_id, item.month, item.financial_year)}
                     >

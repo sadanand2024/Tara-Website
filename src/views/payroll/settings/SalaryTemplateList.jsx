@@ -25,6 +25,7 @@ import { Edit, Delete } from '@mui/icons-material';
 import DeleteDialog from 'ui-component/extended/DeleteDialog';
 import IconButton from '@mui/material/IconButton';
 import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
+import CircularProgressComponent from 'utils/CircularProgressComponent';
 
 function SalaryTemplateList({ handleBack, handleNext, searchQuery = '' }) {
   const [salaryTemplates, setSalaryTemplates] = useState([]);
@@ -35,7 +36,7 @@ function SalaryTemplateList({ handleBack, handleNext, searchQuery = '' }) {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-
+  const [isLoading, setIsLoading] = useState(false);
   // Filter salaryTemplates based on searchQuery from props
   const filteredTemplates = salaryTemplates.filter((template) => {
     const query = searchQuery.toLowerCase();
@@ -57,6 +58,7 @@ function SalaryTemplateList({ handleBack, handleNext, searchQuery = '' }) {
   }, [searchParams]);
 
   const fetchSalaryTemplates = async () => {
+    setIsLoading(true);
     const url = `/payroll/salary-templates?payroll_id=${payrollid}`;
     const { res } = await Factory('get', url, {});
     if (res?.status_cd === 0) {
@@ -64,6 +66,7 @@ function SalaryTemplateList({ handleBack, handleNext, searchQuery = '' }) {
     } else {
       setSalaryTemplates([]);
     }
+    setIsLoading(false);
   };
 
   const handleEdit = (template) => {
@@ -92,7 +95,9 @@ function SalaryTemplateList({ handleBack, handleNext, searchQuery = '' }) {
   useEffect(() => {
     if (payrollid) fetchSalaryTemplates();
   }, [payrollid]);
-
+  if (isLoading) {
+    return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading Salary Template Data'} />;
+  }
   return (
     <Box>
       <Grid2 container>

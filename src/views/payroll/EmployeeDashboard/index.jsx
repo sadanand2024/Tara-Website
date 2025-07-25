@@ -14,6 +14,8 @@ import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import UpdateIcon from '@mui/icons-material/Update';
 import ReceiptIcon from '@mui/icons-material/Receipt';
+import LockIcon from '@mui/icons-material/Lock';
+import LockOpenIcon from '@mui/icons-material/LockOpen';
 import { months } from 'utils/MonthsList';
 import ComplianceSummary from './ComplianceSummary';
 import PayrollSummaryGrid from '../PayrollSummaryGrid';
@@ -26,6 +28,10 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogActions from '@mui/material/DialogActions';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
+import Tooltip from '@mui/material/Tooltip';
+import { openSnackbar } from 'store/slices/snackbar';
+import { useDispatch } from 'store';
+import { useSelector } from 'react-redux';
 
 const PRODUCTS_DATA = [
   { title: 'New Joiners', href: '/payroll-workflows', icon: <PersonAddIcon />, color: '#4CAF50' },
@@ -53,6 +59,9 @@ TabPanel.propTypes = {
 export default function Index() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.accountReducer.user);
+  const businessId = user.active_context.business_id;
   const [payrollId, setPayrollId] = useState(null);
   const [month, setMonth] = useState(null);
   const [financialYear, setFinancialYear] = useState(null);
@@ -66,6 +75,7 @@ export default function Index() {
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [dialogIndex, setDialogIndex] = useState(null);
   const [skipConfirm, setSkipConfirm] = useState(false);
+  const [lockPayrollDialogOpen, setLockPayrollDialogOpen] = useState(false);
 
   const handleTabChange = (_event, newTabIndex) => setActiveTab(newTabIndex);
 
@@ -114,7 +124,7 @@ export default function Index() {
     'attendance',
     'loans_and_advances', // If/when available in API, else will be undefined
     'bonuses',
-    'adhoc_bonus', // New field for Adhoc Bonus & Incentives
+    'adhoc_bonuses',
     'salary_revision',
     'tds'
   ];
@@ -123,14 +133,20 @@ export default function Index() {
     if (!payrollId || !selectedMonth || !financialYear) return;
     let url = `/payroll/payroll-workflows/detail-or-create/?payroll=${payrollId}&month=${selectedMonth}&financial_year=${financialYear}`;
     const { res } = await Factory('get', url, {});
-    console.log(res);
     if (res?.status_cd === 0) {
       const data = res.data;
-      // console.log(data);
       const newDoneStatus = workflowFieldMap.map((field) => data[field] === 'completed');
       setDoneStatus([...newDoneStatus, { id: data.id }]);
       setLockPayroll(data.lock_payroll || false);
     }
+  };
+
+  // Check if all workflows are completed
+  const areAllWorkflowsCompleted = () => {
+    if (!doneStatus || doneStatus.length === 0) return false;
+    // Filter out the object with id and check if all boolean values are true
+    const workflowStatuses = doneStatus.filter((status) => typeof status === 'boolean');
+    return workflowStatuses.length > 0 && workflowStatuses.every((status) => status === true);
   };
   // Fetch month summary data when month or financialYear changes
   useEffect(() => {
@@ -174,7 +190,7 @@ export default function Index() {
     const field = workflowFieldMap[index];
     if (!field || !payrollId) return;
     const objWithId = doneStatus.find((item) => typeof item === 'object' && item !== null && 'id' in item);
-    const url = `/app/payroll/payroll-workflows/${objWithId?.id}/update/`;
+    const url = `/payroll/payroll-workflows/${objWithId?.id}/update/`;
     const payload = {
       payroll: payrollId,
       month: selectedMonth,
@@ -183,7 +199,12 @@ export default function Index() {
     };
     const { res } = await Factory('put', url, payload);
     if (res?.status_cd === 0) {
-      getworkFlowStatusData();
+      // Update doneStatus based on the response data
+      const data = res.data;
+      const newDoneStatus = workflowFieldMap.map((field) => data[field] === 'completed');
+      setDoneStatus([...newDoneStatus, { id: data.id }]);
+      setLockPayroll(data.lock_payroll || false);
+      setConfirmDialogOpen(false);
     }
   };
 
@@ -201,20 +222,103 @@ export default function Index() {
     }
   };
 
-  const handleConfirmYes = async (index, status) => {
-    setConfirmDialogOpen(false);
-    await putStatusApicall(index, status);
-    setDoneStatus((prev) => {
-      const updated = [...prev];
-      updated[index] = true;
-      return updated;
-    });
+  const handleConfirmYes = (index, status) => {
+    putStatusApicall(index, status);
   };
 
   const handleConfirmNo = () => {
     setConfirmDialogOpen(false);
   };
+  const payrollLock = async () => {
+    if (!payrollId || !selectedMonth || !financialYear) return;
+    const objWithId = doneStatus.find((item) => typeof item === 'object' && item !== null && 'id' in item);
+    let url = `/payroll/payroll-workflows/${objWithId?.id}/update/`;
+    let payload = {
+      payroll: payrollId,
+      id: objWithId?.id,
+      month: selectedMonth,
+      financial_year: financialYear,
+      lock_payroll: true
+    };
+    const { res } = await Factory('put', url, payload);
+    if (res?.status_cd === 0) {
+      // Immediately update the local state to show locked button
+      setLockPayroll(true);
+      setLockPayrollDialogOpen(false);
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Payroll locked successfully',
+          variant: 'alert',
+          alert: { color: 'success' },
+          close: false
+        })
+      );
+    } else {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res?.data?.error) || 'An error occurred',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
+    }
+  };
 
+  const handleLockPayrollClick = () => {
+    if (businessId && !lockPayroll) {
+      setLockPayrollDialogOpen(true);
+    }
+  };
+
+  const handleLockPayrollConfirm = () => {
+    payrollLock();
+  };
+
+  const handleLockPayrollCancel = () => {
+    setLockPayrollDialogOpen(false);
+  };
+  const generatePayroll = async () => {
+    if (!payrollId || !financialYear || !month) return;
+    const url = `/payroll/detail_employee_payroll_salary?payroll_id=${payrollId}&month=${month}&financial_year=${financialYear}`;
+    const { res } = await Factory('get', url, {});
+    if (res.status_cd === 0) {
+      if (res.data.message === 'Salary processing will be initiated between the 26th and 30th of the month.') {
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: res.data.message,
+            variant: 'alert',
+            alert: { color: 'success' },
+            close: false
+          })
+        );
+        return;
+      } else {
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'Payroll generated successfully.',
+            variant: 'alert',
+            alert: { color: 'success' },
+            close: false
+          })
+        );
+      }
+    } else {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res?.data?.error) || 'An error occurred',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
+    }
+  };
   if (loading) {
     return (
       <Box
@@ -253,6 +357,23 @@ export default function Index() {
             size="small"
             sx={{ minWidth: 180 }}
           />
+          <Tooltip
+            title={lockPayroll && 'Payroll for this month is locked. Editing or modifying payroll workflows is disabled'}
+            placement="top"
+            arrow
+          >
+            <span>
+              <Button
+                variant={lockPayroll ? 'outlined' : 'contained'}
+                size="small"
+                onClick={handleLockPayrollClick}
+                startIcon={lockPayroll ? <LockIcon /> : <LockOpenIcon />}
+                disabled={lockPayroll}
+              >
+                {lockPayroll ? 'Payroll Locked' : 'Lock Payroll'}
+              </Button>
+            </span>
+          </Tooltip>
         </Box>
       }
       tagline="Explore your monthly payroll details"
@@ -294,7 +415,7 @@ export default function Index() {
             </Typography>
             <Grid2 container spacing={2}>
               {PRODUCTS_DATA.map((item, index) => (
-                <Grid2 key={index} size={{ xs: 12, sm: 6, md: 3 }}>
+                <Grid2 key={index} size={{ xs: 12, sm: 6, md: 4, lg: 2.4 }}>
                   <Paper
                     elevation={4}
                     sx={{
@@ -321,7 +442,7 @@ export default function Index() {
                         display: 'flex',
                         flexDirection: 'column',
                         height: '100%',
-                        p: 2.5,
+                        p: 1.5,
                         position: 'relative',
                         overflow: 'hidden'
                       }}
@@ -345,45 +466,35 @@ export default function Index() {
                       </Box>
 
                       {/* Content Section with flexGrow */}
-                      <Box sx={{ flexGrow: 1 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
-                          <Box
-                            sx={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              width: 44,
-                              height: 44,
-                              borderRadius: '50%',
-                              bgcolor: alpha(item.color, 0.13),
-                              color: item.color,
-                              mr: 1.5,
-                              fontSize: 28
-                            }}
-                          >
-                            {item.icon}
-                          </Box>
-                          <Typography
-                            variant="subtitle1"
-                            fontWeight="700"
-                            sx={{
-                              color: 'text.primary',
-                              fontSize: '1.05rem',
-                              letterSpacing: 0.2
-                            }}
-                          >
-                            {item.title}
-                          </Typography>
-                        </Box>
-                        <Typography
-                          variant="body2"
-                          color="text.secondary"
+                      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 1.5 }}>
+                        <Box
                           sx={{
-                            fontSize: '0.85rem',
-                            lineHeight: 1.5
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: 44,
+                            height: 44,
+                            borderRadius: '50%',
+                            bgcolor: alpha(item.color, 0.13),
+                            color: item.color,
+                            mb: 1,
+                            fontSize: 28
                           }}
                         >
-                          Manage {item.title.toLowerCase()} related payroll processes and workflows
+                          {item.icon}
+                        </Box>
+                        <Typography
+                          variant="subtitle1"
+                          fontWeight="700"
+                          sx={{
+                            color: 'text.primary',
+                            fontSize: '1.05rem',
+                            letterSpacing: 0.2,
+                            textAlign: 'center',
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          {item.title}
                         </Typography>
                       </Box>
 
@@ -449,26 +560,13 @@ export default function Index() {
                               e.stopPropagation();
                               handleWorkClick(item.href, index);
                             }}
+                            sx={{
+                              whiteSpace: 'nowrap',
+                              px: 2
+                            }}
                           >
                             Work on it
                           </Button>
-                          {/* <Button
-                            variant="outlined"
-                            sx={{
-                              color: (theme) => theme.palette.success.darker,
-                              '&.Mui-checked': {
-                                color: (theme) => theme.palette.success.darker
-                              }
-                            }}
-                            size="small"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleMarkAsDoneClick(index);
-                            }}
-                            disabled={doneStatus[index]}
-                          >
-                            Mark as Done
-                          </Button> */}
                           <Button
                             variant="outlined"
                             size="small"
@@ -488,7 +586,9 @@ export default function Index() {
                               '&.Mui-disabled': {
                                 color: (theme) => theme.palette.success.light,
                                 borderColor: (theme) => theme.palette.success.light
-                              }
+                              },
+                              whiteSpace: 'nowrap',
+                              px: 2
                             }}
                           >
                             Mark as Done
@@ -500,15 +600,33 @@ export default function Index() {
                 </Grid2>
               ))}
             </Grid2>
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+              <Button
+                variant="contained"
+                onClick={generatePayroll}
+                disabled={!areAllWorkflowsCompleted() || lockPayroll}
+                sx={{
+                  borderRadius: 2,
+                  px: 10,
+                  py: 1,
+                  fontSize: '0.9rem',
+                  fontWeight: 500,
+                  whiteSpace: 'nowrap',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                {!areAllWorkflowsCompleted()
+                  ? 'Complete All Workflows to generate payroll'
+                  : lockPayroll
+                    ? 'Generate Payroll is locked'
+                    : 'Generate Payroll'}
+              </Button>
+            </Box>
           </Grid2>
-          <Grid2 size={12} sx={{ mt: 3, mb: 1 }}>
+          <Grid2 size={12} sx={{ mt: 1, mb: 1 }}>
             <Divider />
           </Grid2>
-          <Stack direction="row" sx={{ gap: 2, mb: 2 }}>
-            <Button startIcon={<ArrowBackIcon />} variant="outlined" color="primary" size="large" onClick={() => navigate(-1)}>
-              Back to Payroll Dashboard
-            </Button>
-          </Stack>
+
           <Grid2 size={12}>
             <Box sx={{ width: '100%', display: 'flex', justifyContent: 'space-between', mb: 0 }}>
               <Tabs
@@ -555,6 +673,57 @@ export default function Index() {
           </Button>
           <Button variant="outlined" color="secondary" onClick={handleConfirmNo}>
             No
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Lock Payroll Confirmation Dialog */}
+      <Dialog
+        open={lockPayrollDialogOpen}
+        onClose={handleLockPayrollCancel}
+        aria-labelledby="lock-payroll-dialog-title"
+        sx={{
+          '& .MuiDialog-paper': {
+            textAlign: 'center',
+            minWidth: 400
+          }
+        }}
+      >
+        <DialogTitle id="lock-payroll-dialog-title" sx={{ textAlign: 'center', pb: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+            <LockIcon color="primary" />
+            <Typography variant="h6">Lock Payroll</Typography>
+          </Box>
+        </DialogTitle>
+        <Box sx={{ px: 3, pb: 2 }}>
+          <Typography variant="h5" color="text.secondary" sx={{ mb: 2, textAlign: 'center' }}>
+            Are you sure you want to lock the payroll for{' '}
+            <strong>
+              {selectedMonth ? months[selectedMonth - 1] : ''} {financialYear}
+            </strong>
+            ?
+          </Typography>
+          <Typography
+            variant="body2"
+            color="error.main"
+            sx={{
+              p: 2,
+              // bgcolor: 'error.light',
+              borderRadius: 1,
+              border: '1px solid',
+              borderColor: 'error.main',
+              textAlign: 'center'
+            }}
+          >
+            <strong>Warning:</strong> Once locked, you will not be able to edit or modify any payroll workflows for this month.
+          </Typography>
+        </Box>
+        <DialogActions sx={{ justifyContent: 'center', px: 3, pb: 3 }}>
+          <Button variant="outlined" onClick={handleLockPayrollCancel}>
+            Cancel
+          </Button>
+          <Button variant="contained" color="error" onClick={handleLockPayrollConfirm}>
+            Lock Payroll
           </Button>
         </DialogActions>
       </Dialog>

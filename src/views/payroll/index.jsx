@@ -19,6 +19,7 @@ import PayrollMonthwise from './PayrollMonthwise';
 import { Button, Stack, Typography, Grid2, TextField, Chip, CircularProgress, Tooltip } from '@mui/material';
 import { IconSparkles, IconSettings2 } from '@tabler/icons-react';
 import { IconPlus } from '@tabler/icons-react';
+import LockIcon from '@mui/icons-material/Lock';
 
 import { generateFinancialYears } from 'utils/FinancialYearsList';
 import MainCard from '../../ui-component/cards/MainCard';
@@ -34,6 +35,7 @@ const PayrollDashboard = () => {
   const dispatch = useDispatch();
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [monthWiseData, setMonthWiseData] = useState(null);
+  const [lockPayroll, setLockPayroll] = useState(false);
 
   // Separate loading states to prevent blinking
   const [initialLoading, setInitialLoading] = useState(true);
@@ -163,7 +165,6 @@ const PayrollDashboard = () => {
     setRefreshLoading(true);
     const url = `/payroll/detail_employee_payroll_salary?payroll_id=${businessDetails?.payroll_id}&month=${selectedMonth}&financial_year=${financialYear}`;
     const { res } = await Factory('get', url, {});
-    console.log('res', res);
     if (res.status_cd === 0) {
       if (res.data.message === 'Salary processing will be initiated between the 26th and 30th of the month.') {
         setRefreshLoading(false);
@@ -203,33 +204,15 @@ const PayrollDashboard = () => {
     setRefreshLoading(false);
   };
 
-  // const payrollLock = async (payrollId) => {
-  //   if (!payrollId || !selectedMonth || !financialYear) return;
-  //   let url = `/payroll/payroll-workflows/detail-or-create/?payroll=${payrollId}&month=${selectedMonth}&financial_year=${financialYear}`;
-  //   const { res } = await Factory('put', url, {});
-  //   console.log(res);
-  //   if (res?.status_cd === 0) {
-  //     dispatch(
-  //       openSnackbar({
-  //         open: true,
-  //         message: 'Payroll locked successfully',
-  //         variant: 'alert',
-  //         alert: { color: 'success' },
-  //         close: false
-  //       })
-  //     );
-  //   } else {
-  //     dispatch(
-  //       openSnackbar({
-  //         open: true,
-  //         message: JSON.stringify(res?.data?.error) || 'An error occurred',
-  //         variant: 'alert',
-  //         alert: { color: 'error' },
-  //         close: false
-  //       })
-  //     );
-  //   }
-  // };
+  const getworkFlowStatusData = async () => {
+    if (!businessDetails?.payroll_id || !selectedMonth || !financialYear) return;
+    let url = `/payroll/payroll-workflows/detail-or-create/?payroll=${businessDetails?.payroll_id}&month=${selectedMonth}&financial_year=${financialYear}`;
+    const { res } = await Factory('get', url, {});
+    if (res?.status_cd === 0) {
+      const data = res.data;
+      setLockPayroll(data.lock_payroll || false);
+    }
+  };
 
   useEffect(() => {
     // if (user?.user?.registration_completed === 'False') {
@@ -272,8 +255,9 @@ const PayrollDashboard = () => {
   useEffect(() => {
     if (financialYear && businessDetails?.payroll_id && !initialLoading) {
       calculate_employee_monthly_salary_status(businessDetails.payroll_id);
+      getworkFlowStatusData();
     }
-  }, [financialYear, businessDetails?.payroll_id, initialLoading]);
+  }, [financialYear, businessDetails?.payroll_id, initialLoading, selectedMonth]);
 
   // Show loading only during initial load
   if (initialLoading) {
@@ -283,14 +267,13 @@ const PayrollDashboard = () => {
       </Stack>
     );
   }
-
   return (
     <MainCard
       sx={{
         // background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
         // boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.15)',
         borderRadius: 4,
-        p: { xs: 1, md: 1 },
+        // p: { xs: 1, md: 1 },
         animation: 'fadeIn 0.7s',
         '@keyframes fadeIn': {
           from: { opacity: 0, transform: 'translateY(24px)' },
@@ -414,20 +397,6 @@ const PayrollDashboard = () => {
                         }}
                       />
 
-                      {/* <Chip
-                        variant="filled"
-                        label="In Progress"
-                        color="warning"
-                        size="small"
-                        sx={{
-                          fontWeight: 700,
-                          fontSize: 16,
-                          px: 2,
-                          textTransform: 'uppercase',
-                          letterSpacing: 1
-                        }}
-                      /> */}
-
                       <Button
                         variant="contained"
                         size="small"
@@ -443,24 +412,37 @@ const PayrollDashboard = () => {
                           fontWeight: 700
                         }}
                       >
-                        Resume Payroll
+                        {lockPayroll ? 'View Payroll' : 'Resume Payroll'}
                       </Button>
-                      <Button
-                        variant="contained"
-                        size="small"
-                        onClick={() => {
-                          if (businessDetails?.payroll_id) {
-                            payrollLock(businessDetails?.payroll_id);
-                          }
-                        }}
-                        sx={{
-                          color: '#fff',
-                          fontWeight: 700
-                        }}
-                      >
-                        Lock Payroll
-                      </Button>
-                      <Tooltip title="Refresh Employees on Your Payroll" arrow placement="top">
+                      {lockPayroll && (
+                        <Tooltip
+                          title={'Payroll for this month is locked. Editing or modifying payroll workflows is disabled. its view only.'}
+                          arrow
+                          placement="top"
+                        >
+                          <span>
+                            <Button
+                              variant="contained"
+                              size="small"
+                              onClick={() => {
+                                if (businessDetails?.payroll_id) {
+                                  getworkFlowStatusData();
+                                }
+                              }}
+                              disabled={lockPayroll}
+                              sx={{
+                                color: '#fff',
+                                fontWeight: 700
+                              }}
+                              startIcon={<LockIcon />}
+                            >
+                              Payroll Locked
+                            </Button>
+                          </span>
+                        </Tooltip>
+                      )}
+
+                      {/* <Tooltip title="Refresh Employees on Your Payroll" arrow placement="top">
                         <Button
                           variant="outlined"
                           size="small"
@@ -475,7 +457,7 @@ const PayrollDashboard = () => {
                         >
                           {refreshLoading ? 'Refreshing...' : 'Refresh'}
                         </Button>
-                      </Tooltip>
+                      </Tooltip> */}
                     </Stack>
                   </Stack>
                 </Stack>

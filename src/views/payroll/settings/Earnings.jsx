@@ -221,33 +221,50 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
   return (
     <Box>
       <Grid2 size={{ xs: 12 }}>
-        <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 1 }}>
+        <TableContainer
+          component={Paper}
+          sx={{
+            borderRadius: 2,
+            boxShadow: 1,
+            overflowX: 'auto',
+            '& .MuiTable-root': {
+              width: '100%'
+            }
+          }}
+        >
           <Table size="small">
             <TableHead sx={{ backgroundColor: 'primary.main' }}>
               <TableRow>
-                {['Sr. No.', 'Component Name', 'Calculation', 'Consider for EPF', 'Consider for ESI', 'Status', 'Actions'].map(
-                  (head, idx) => (
-                    <TableCell
-                      key={idx}
-                      sx={{
-                        fontWeight: 'bold',
-                        whiteSpace: 'nowrap',
-                        fontSize: '0.9rem',
-                        color: '#fff !important',
-                        textAlign: idx === 6 ? 'center' : 'left'
-                      }}
-                    >
-                      {head}
-                    </TableCell>
-                  )
-                )}
+                {[
+                  { label: 'Sr. No.', width: 'auto' },
+                  { label: 'Component Name', width: 'auto' },
+                  { label: 'Calculation', width: 'auto' },
+                  { label: 'Consider for EPF', width: 'auto' },
+                  { label: 'Consider for ESI', width: 'auto' },
+                  { label: 'Status', width: 'auto' },
+                  { label: 'Actions', width: 'auto' }
+                ].map((head, idx) => (
+                  <TableCell
+                    key={idx}
+                    sx={{
+                      fontWeight: 'bold',
+                      fontSize: '0.9rem',
+                      color: '#fff !important',
+                      textAlign: idx === 6 ? 'center' : 'left',
+                      whiteSpace: 'nowrap',
+                      padding: '8px 4px'
+                    }}
+                  >
+                    {head.label}
+                  </TableCell>
+                ))}
               </TableRow>
             </TableHead>
 
             <TableBody>
               {paginatedData.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} align="center" sx={{ height: 300 }}>
+                  <TableCell colSpan={7} align="center" sx={{ height: 300 }}>
                     <Typography variant="subtitle1" color="text.secondary">
                       No Data Available
                     </Typography>
@@ -264,10 +281,18 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
                       }
                     }}
                   >
-                    <TableCell align="left">{index + 1 + (currentPage - 1) * rowsPerPage}</TableCell>
+                    <TableCell align="left" sx={{ whiteSpace: 'nowrap', padding: '8px 4px' }}>
+                      {index + 1 + (currentPage - 1) * rowsPerPage}
+                    </TableCell>
                     <TableCell
                       align="left"
-                      sx={{ cursor: 'pointer', color: 'primary.main', textDecoration: 'underline' }}
+                      sx={{
+                        cursor: 'pointer',
+                        color: 'primary.main',
+                        textDecoration: 'underline',
+                        whiteSpace: 'nowrap',
+                        padding: '8px 4px'
+                      }}
                       onClick={() => {
                         setPostType('put');
                         handleEdit(item);
@@ -276,12 +301,49 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
                       {item.component_name}
                     </TableCell>
 
-                    <TableCell align="left">{item.calculation}</TableCell>
-                    <TableCell align="left">{item.consider_for_epf ? 'Yes' : 'No'}</TableCell>
-                    <TableCell align="left">{item.consider_for_esi ? 'Yes' : 'No'}</TableCell>
-                    <TableCell align="left">{item.is_active ? 'Active' : 'Inactive'}</TableCell>
+                    <TableCell
+                      align="left"
+                      sx={{
+                        whiteSpace: 'nowrap',
+                        padding: '8px 4px'
+                      }}
+                    >
+                      {item.calculation}
+                    </TableCell>
+                    <TableCell
+                      align="left"
+                      sx={{
+                        whiteSpace: 'nowrap',
+                        padding: '8px 4px'
+                      }}
+                    >
+                      {item.consider_for_epf ? 'Yes' : 'No'}
+                    </TableCell>
+                    <TableCell
+                      align="left"
+                      sx={{
+                        whiteSpace: 'nowrap',
+                        padding: '8px 4px'
+                      }}
+                    >
+                      {item.consider_for_esi ? 'Yes' : 'No'}
+                    </TableCell>
+                    <TableCell
+                      align="left"
+                      sx={{
+                        whiteSpace: 'nowrap',
+                        padding: '8px 4px'
+                      }}
+                    >
+                      {item.is_active ? 'Active' : 'Inactive'}
+                    </TableCell>
 
-                    <TableCell align="left">
+                    <TableCell
+                      align="center"
+                      sx={{
+                        padding: '8px 4px'
+                      }}
+                    >
                       <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
                         <IconButton size="small" color="primary" onClick={() => handleEdit(item)}>
                           <Edit />
@@ -296,17 +358,18 @@ function EarningsComponent({ handleNext, handleBack, open, setOpen, postType, se
               )}
             </TableBody>
           </Table>
-          <DeleteDialog
-            open={openDeleteDialog}
-            onClose={() => setOpenDeleteDialog(false)}
-            onConfirm={handleConfirmDelete}
-            dialogData={{
-              title: 'Delete Record',
-              heading: 'Are you sure you want to delete this Record?',
-              description: 'This action will permanently delete the record.'
-            }}
-          />
         </TableContainer>
+
+        <DeleteDialog
+          open={openDeleteDialog}
+          onClose={() => setOpenDeleteDialog(false)}
+          onConfirm={handleConfirmDelete}
+          dialogData={{
+            title: 'Delete Record',
+            heading: 'Are you sure you want to delete this Record?',
+            description: 'This action will permanently delete the record.'
+          }}
+        />
 
         <Grid2 size={12} sx={{ mt: 2 }}>
           <Stack direction="row" justifyContent="space-between">
