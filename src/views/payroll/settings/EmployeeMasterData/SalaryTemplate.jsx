@@ -612,17 +612,6 @@ export default function RenderSalaryTemplateTable({
     setDeductionInputValues(newDeductionInputValues);
   }, [values.deductions]);
 
-  // Expose preview function globally
-  useEffect(() => {
-    window.triggerPreview = () => {
-      fetch_preview();
-    };
-
-    return () => {
-      delete window.triggerPreview;
-    };
-  }, []);
-
   // Utility function to format numbers with Indian comma separators
   const formatNumberIN = (value) => {
     if (value === '' || value === null || value === undefined || isNaN(value)) return '';
@@ -795,9 +784,22 @@ export default function RenderSalaryTemplateTable({
           <TableRow sx={{ backgroundColor: '#ede7f6', borderRadius: 2 }}>
             <TableCell sx={{ padding: 2 }}>
               <Stack direction="row" alignItems="center" spacing={1}>
-                <Tooltip title="System Calculated Components' Total" placement="right" arrow>
-                  <InfoOutlinedIcon sx={{ fontSize: 18, color: 'gray', cursor: 'pointer' }} />
-                </Tooltip>
+                {enablePreviewButton && (
+                  <>
+                    <Button
+                      onClick={fetch_preview}
+                      variant="contained"
+                      color="primary"
+                      sx={{ borderRadius: 2, textTransform: 'none' }}
+                      disabled={!!values.errorMessage}
+                    >
+                      Preview
+                    </Button>
+                    <Tooltip title="System Calculated Components' Total" placement="right" arrow>
+                      <InfoOutlinedIcon sx={{ fontSize: 18, color: 'gray', cursor: 'pointer' }} />
+                    </Tooltip>
+                  </>
+                )}
                 <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: 'primary.dark' }}>
                   Gross Salary
                 </Typography>

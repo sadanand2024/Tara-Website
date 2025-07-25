@@ -246,6 +246,7 @@ function SalaryTemplate() {
         <Button startIcon={<ArrowBackIcon />} variant="outlined" onClick={() => navigate(-1)}>
           Back
         </Button>
+
         {enablePreviewButton === false && (
           <Button type="submit" variant="contained" color="primary">
             Save Template
