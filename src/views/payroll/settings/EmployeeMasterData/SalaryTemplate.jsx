@@ -230,17 +230,29 @@ export default function RenderSalaryTemplateTable({
 
     console.log('Selected deduction:', selected);
     const updated = [...(values.deductions || [])];
+    const monthlyValue = Number(selected.calculation_type?.value || 0);
+    const annualValue = monthlyValue * 12;
+
     updated[index] = {
       ...updated[index],
       component_name: selected.deduction_name,
       calculation_type: selected.calculation_type?.type || '',
-      calculation: selected.calculation_type?.value || 0,
-      monthly: Number(selected.calculation_type?.value || 0),
-      annually: Number(selected.calculation_type?.value || 0) * 12
+      calculation: monthlyValue,
+      monthly: monthlyValue,
+      annually: annualValue
     };
 
     console.log('Updated deduction at index', index, ':', updated[index]);
     setFieldValue('deductions', updated);
+
+    // Set input value to show monthly amount for editable deductions
+    if (index >= 4) {
+      setDeductionInputValues((prev) => ({
+        ...prev,
+        [index]: formatNumberForInput(monthlyValue)
+      }));
+    }
+
     setEnablePreviewButton(true);
   };
 
@@ -285,6 +297,24 @@ export default function RenderSalaryTemplateTable({
 
     setFieldValue('earnings', finalEarnings);
     setFieldValue('errorMessage', ''); // ✅ clear previous error
+    setEnablePreviewButton(true);
+  };
+
+  const handleDeductionCalculationChange = (value, index) => {
+    if (index < 4) return; // Only allow changes for index 4 and beyond
+
+    const monthlyValue = parseFloat(value || 0);
+    const annualValue = monthlyValue * 12;
+
+    const updated = [...(values.deductions || [])];
+    updated[index] = {
+      ...updated[index],
+      calculation: monthlyValue,
+      monthly: monthlyValue,
+      annually: annualValue
+    };
+
+    setFieldValue('deductions', updated);
     setEnablePreviewButton(true);
   };
 
@@ -573,11 +603,25 @@ export default function RenderSalaryTemplateTable({
     const newDeductionInputValues = {};
     (values.deductions || []).forEach((deduction, index) => {
       if (deduction.calculation !== undefined && deduction.calculation !== null) {
-        newDeductionInputValues[index] = formatNumberForInput(deduction.calculation);
+        // For editable deductions (index >= 4), show monthly amount
+        // For non-editable deductions (index < 4), show calculation value
+        const displayValue = index >= 4 ? deduction.monthly : deduction.calculation;
+        newDeductionInputValues[index] = formatNumberForInput(displayValue);
       }
     });
     setDeductionInputValues(newDeductionInputValues);
   }, [values.deductions]);
+
+  // Expose preview function globally
+  useEffect(() => {
+    window.triggerPreview = () => {
+      fetch_preview();
+    };
+
+    return () => {
+      delete window.triggerPreview;
+    };
+  }, []);
 
   // Utility function to format numbers with Indian comma separators
   const formatNumberIN = (value) => {
@@ -751,22 +795,9 @@ export default function RenderSalaryTemplateTable({
           <TableRow sx={{ backgroundColor: '#ede7f6', borderRadius: 2 }}>
             <TableCell sx={{ padding: 2 }}>
               <Stack direction="row" alignItems="center" spacing={1}>
-                {enablePreviewButton && (
-                  <>
-                    <Button
-                      onClick={fetch_preview}
-                      variant="contained"
-                      color="primary"
-                      sx={{ borderRadius: 2, textTransform: 'none' }}
-                      disabled={!!values.errorMessage}
-                    >
-                      Preview
-                    </Button>
-                    <Tooltip title="System Calculated Components' Total" placement="right" arrow>
-                      <InfoOutlinedIcon sx={{ fontSize: 18, color: 'gray', cursor: 'pointer' }} />
-                    </Tooltip>
-                  </>
-                )}
+                <Tooltip title="System Calculated Components' Total" placement="right" arrow>
+                  <InfoOutlinedIcon sx={{ fontSize: 18, color: 'gray', cursor: 'pointer' }} />
+                </Tooltip>
                 <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: 'primary.dark' }}>
                   Gross Salary
                 </Typography>
@@ -838,34 +869,6 @@ export default function RenderSalaryTemplateTable({
                   </TableCell>
                   <TableCell>
                     <Stack direction="row" alignItems="center" spacing={2}>
-                      <CustomInput
-                        value={
-                          deductionInputValues[index] !== undefined ? deductionInputValues[index] : formatNumberForInput(item.calculation)
-                        }
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          // Allow only numbers, commas, and decimal points
-                          const cleanVal = val.replace(/[^\d,.]/g, '');
-                          setDeductionInputValues((prev) => ({ ...prev, [index]: cleanVal }));
-                        }}
-                        onBlur={() => {
-                          const parsedValue = parseCommaNumber(deductionInputValues[index] || item.calculation);
-                          const updated = [...(values.deductions || [])];
-                          updated[index].calculation = parsedValue;
-                          setFieldValue('deductions', updated);
-                          setDeductionInputValues((prev) => ({ ...prev, [index]: formatNumberForInput(parsedValue) }));
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault();
-                            const parsedValue = parseCommaNumber(deductionInputValues[index] || item.calculation);
-                            // No calculation change for deductions, just update value
-                            setDeductionInputValues((prev) => ({ ...prev, [index]: formatNumberForInput(parsedValue) }));
-                          }
-                        }}
-                        type="text"
-                        sx={{ width: '100%', maxWidth: 200 }}
-                      />
                       <Typography
                         variant="body2"
                         sx={{
@@ -875,16 +878,47 @@ export default function RenderSalaryTemplateTable({
                           minWidth: '130px'
                         }}
                       >
-                        {item.calculation_type || '—'}
+                        {item.calculation_type}
                       </Typography>
                     </Stack>
                   </TableCell>
-                  <TableCell> {formatNumberIN(Number(item.monthly || 0).toFixed(2))}</TableCell>
+                  <TableCell>
+                    {index >= 4 ? (
+                      <CustomInput
+                        value={deductionInputValues[index] !== undefined ? deductionInputValues[index] : formatNumberForInput(item.monthly)}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          // Allow only numbers, commas, and decimal points
+                          const cleanVal = val.replace(/[^\d,.]/g, '');
+                          setDeductionInputValues((prev) => ({ ...prev, [index]: cleanVal }));
+                        }}
+                        onBlur={() => {
+                          const parsedValue = parseCommaNumber(deductionInputValues[index] || item.monthly);
+                          handleDeductionCalculationChange(parsedValue, index);
+                          setDeductionInputValues((prev) => ({ ...prev, [index]: formatNumberForInput(parsedValue) }));
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            const parsedValue = parseCommaNumber(deductionInputValues[index] || item.monthly);
+                            handleDeductionCalculationChange(parsedValue, index);
+                            setDeductionInputValues((prev) => ({ ...prev, [index]: formatNumberForInput(parsedValue) }));
+                          }
+                        }}
+                        type="text"
+                        sx={{ width: '100%', maxWidth: 200 }}
+                      />
+                    ) : (
+                      formatNumberIN(Number(item.monthly || 0).toFixed(2))
+                    )}
+                  </TableCell>
                   <TableCell>{formatNumberIN(Number(item.annually || 0).toFixed(2))}</TableCell>
                   <TableCell>
-                    <Button color="error" onClick={() => handleDeleteDeduction(index)}>
-                      <IconTrash size={16} />
-                    </Button>
+                    {index >= 4 && (
+                      <Button color="error" onClick={() => handleDeleteDeduction(index)}>
+                        <IconTrash size={16} />
+                      </Button>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}
