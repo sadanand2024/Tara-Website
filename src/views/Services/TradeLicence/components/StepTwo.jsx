@@ -62,7 +62,7 @@ const StepTwo = ({taskId,tradelicencedetailsTaskId, step, setStep}) => {
       formData.append('service_request', service_id);
       formData.append('service_task', tradelicencedetailsTaskId);
       formData.append('apply_new_license', values.apply_new_license?.value);
-      formData.append('trade_license_number', values.trade_license_number);
+      // formData.append('trade_license_number', values.trade_license_number);
       formData.append('status', 'in progress');
   //     if (values.trade_license_file && typeof values.trade_license_file !== 'string') {
   //       formData.append('trade_license_file', values.trade_license_file);
@@ -71,13 +71,12 @@ const StepTwo = ({taskId,tradelicencedetailsTaskId, step, setStep}) => {
   //   formData.append('trade_license_number', '');
   //   formData.append('trade_license_file', '');
   // }
-  if (values.trade_license_file && typeof values.trade_license_file !== 'string') {
-    // Only append file if it's a File object (new upload)
-    formData.append('trade_license_file', values.trade_license_file);
-  } else if (values.trade_license_number) {
-    // Only append number if file is not new and number is provided
-    formData.append('trade_license_number', values.trade_license_number);
-  }
+
+  if (values.apply_new_license?.value === false && values.trade_license_number) {
+  formData.append('trade_license_number', values.trade_license_number);
+} else {
+  formData.append('trade_license_number', ''); // explicitly send empty if switched to 'Yes'
+}
 
       const { res } = await Factory(values.id ? 'put' : 'post', url, formData);
       if (res.status_cd === 0) {
