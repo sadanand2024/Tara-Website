@@ -193,7 +193,7 @@ const RenderTable = ({
               variant="contained"
               color="primary"
               onClick={() =>
-                navigate(`/app/payroll/employee-dashboard?payrollid=${payrollId}&month=${month}&financial_year=${financial_year}`)
+                navigate(`/app/payroll/employee-dashboard?payrollid=${payrollId}&month=${month}&financialYear=${financial_year}`)
               }
             >
               Proceed to Monthly Payroll Dashboard

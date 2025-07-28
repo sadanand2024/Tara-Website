@@ -75,6 +75,17 @@ const ServiceSummary = Loadable(lazy(() => import('views/SuperAdmin/ServiceManag
 
 //employee Portal
 const EmployeePortal = Loadable(lazy(() => import('views/application/EmployeePortal')));
+const LeaveManagement = Loadable(lazy(() => import('views/application/EmployeePortal/LeaveManagement')));
+const LeaveBalance = Loadable(lazy(() => import('views/application/EmployeePortal/LeaveBalance')));
+const LeaveCalendar = Loadable(lazy(() => import('views/application/EmployeePortal/LeaveCalendar')));
+const TeamOnLeave = Loadable(lazy(() => import('views/application/EmployeePortal/TeamOnLeave')));
+const HolidayCalendar = Loadable(lazy(() => import('views/application/EmployeePortal/HolidayCalendar')));
+const Attendance = Loadable(lazy(() => import('views/application/EmployeePortal/Attendance')));
+const PaySlips = Loadable(lazy(() => import('views/application/EmployeePortal/PaySlips')));
+const YTDReports = Loadable(lazy(() => import('views/application/EmployeePortal/YTDReports')));
+const ITStatements = Loadable(lazy(() => import('views/application/EmployeePortal/ITStatements')));
+const ITDeclaration = Loadable(lazy(() => import('views/application/EmployeePortal/ITDeclaration')));
+const LoanStatement = Loadable(lazy(() => import('views/application/EmployeePortal/LoanStatement')));
 
 const FaceRecognition = Loadable(lazy(() => import('views/application/AttendanceTest')));
 // ==============================|| MAIN ROUTING ||============================== //
@@ -223,11 +234,55 @@ const MainRoutes = {
       element: <SelectedEvent />
     },
 
-    //Employee Portl
+    //Employee Portal
 
     {
       path: '/app/employee-portal/dashboard',
       element: <EmployeePortal />
+    },
+    {
+      path: '/app/employee-portal/leave-management',
+      element: <LeaveManagement />
+    },
+    {
+      path: '/app/employee-portal/leave-balance',
+      element: <LeaveBalance />
+    },
+    {
+      path: '/app/employee-portal/leave-calendar',
+      element: <LeaveCalendar />
+    },
+    {
+      path: '/app/employee-portal/team-on-leave',
+      element: <TeamOnLeave />
+    },
+    {
+      path: '/app/employee-portal/holiday-calendar',
+      element: <HolidayCalendar />
+    },
+    {
+      path: '/app/employee-portal/attendance-management',
+      element: <Attendance />
+    },
+    {
+      path: '/app/employee-portal/pay-slips',
+      element: <PaySlips />
+    },
+    {
+      path: '/app/employee-portal/ytd-reports',
+      element: <YTDReports />
+    },
+    {
+      path: '/app/employee-portal/it-statements',
+      element: <ITStatements />
+    },
+    {
+      path: '/app/employee-portal/it-declaration',
+      element: <ITDeclaration />
+    },
+    {
+      path: '/app/employee-portal/loan-statement',
+      element: <LoanStatement />
     },
     {
       path: '/app/subscriptions',
