@@ -112,9 +112,6 @@ const LeaveCalendar = () => {
         <Typography variant="h4" sx={{ fontWeight: 600, mb: 1 }}>
           Leave Calendar
         </Typography>
-        <Typography variant="body1" color="text.secondary">
-          (Same for Team on leave)
-        </Typography>
       </Box>
 
       {/* Calendar Navigation */}

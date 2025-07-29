@@ -124,7 +124,7 @@ const dashboard = {
       icon: icons.IconFileText,
       breadcrumbs: false,
       caption: ''
-    },
+    }
     // {
     //   id: 'income-tax',
     //   title: 'income-tax',

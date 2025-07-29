@@ -6,6 +6,7 @@ import { useLocation } from 'react-router-dom';
 // material-ui
 import { alpha, styled, useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
+import ButtonBase from '@mui/material/ButtonBase';
 import ClickAwayListener from '@mui/material/ClickAwayListener';
 import Collapse from '@mui/material/Collapse';
 import List from '@mui/material/List';
@@ -195,11 +196,12 @@ export default function NavCollapse({ menu, level, parentId }) {
               ...(drawerOpen &&
                 level === 1 &&
                 mode !== ThemeMode.DARK && {
+                  px: 1,
                   '&:hover': { bgcolor: 'secondary.light' },
                   '&.Mui-selected': {
                     bgcolor: 'secondary.light',
                     color: iconSelectedColor,
-                    '&:hover': { color: iconSelectedColor, bgcolor: '.secondary.light' }
+                    '&:hover': { color: iconSelectedColor, bgcolor: 'secondary.light' }
                   }
                 }),
               ...((!drawerOpen || level !== 1) && {
@@ -214,31 +216,33 @@ export default function NavCollapse({ menu, level, parentId }) {
             onClick={handleClickMini}
           >
             {menuIcon && (
-              <ListItemIcon
-                sx={{
-                  minWidth: level === 1 ? 36 : 18,
-                  color: isSelected ? iconSelectedColor : 'text.primary',
-                  ...(!drawerOpen &&
-                    level === 1 && {
-                      borderRadius: `${borderRadius}px`,
-                      width: 46,
-                      height: 46,
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      '&:hover': {
-                        bgcolor: mode === ThemeMode.DARK ? alpha(theme.palette.secondary.main, 0.25) : 'secondary.light'
-                      },
-                      ...((isSelected || anchorEl) && {
-                        bgcolor: mode === ThemeMode.DARK ? alpha(theme.palette.secondary.main, 0.25) : 'secondary.light',
+              <ButtonBase aria-label="theme-icon" sx={{ borderRadius: `${borderRadius}px` }} disableRipple={drawerOpen}>
+                <ListItemIcon
+                  sx={{
+                    minWidth: level === 1 ? 36 : 18,
+                    color: isSelected ? iconSelectedColor : 'text.primary',
+                    ...(!drawerOpen &&
+                      level === 1 && {
+                        borderRadius: `${borderRadius}px`,
+                        width: 46,
+                        height: 46,
+                        alignItems: 'center',
+                        justifyContent: 'center',
                         '&:hover': {
-                          bgcolor: mode === ThemeMode.DARK ? alpha(theme.palette.secondary.main, 0.3) : 'secondary.light'
-                        }
+                          bgcolor: mode === ThemeMode.DARK ? alpha(theme.palette.secondary.main, 0.25) : 'secondary.light'
+                        },
+                        ...((isSelected || anchorEl) && {
+                          bgcolor: mode === ThemeMode.DARK ? alpha(theme.palette.secondary.main, 0.25) : 'secondary.light',
+                          '&:hover': {
+                            bgcolor: mode === ThemeMode.DARK ? alpha(theme.palette.secondary.main, 0.3) : 'secondary.light'
+                          }
+                        })
                       })
-                    })
-                }}
-              >
-                {menuIcon}
-              </ListItemIcon>
+                  }}
+                >
+                  {menuIcon}
+                </ListItemIcon>
+              </ButtonBase>
             )}
             {(drawerOpen || (!drawerOpen && level !== 1)) && (
               <Tooltip title={<FormattedMessage id={menu.title} />} disableHoverListener={!hoverStatus}>
