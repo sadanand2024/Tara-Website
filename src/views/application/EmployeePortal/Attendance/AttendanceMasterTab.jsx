@@ -132,13 +132,6 @@ const AttendanceMasterTab = () => {
 
   return (
     <Box>
-      {/* Header */}
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" sx={{ fontWeight: 600, mb: 1, textDecoration: 'underline' }}>
-          Attendance Master
-        </Typography>
-      </Box>
-
       {/* Search and Filter Section */}
       <Box sx={{ mb: 3, display: 'flex', gap: 2, alignItems: 'center' }}>
         <TextField

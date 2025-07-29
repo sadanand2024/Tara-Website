@@ -97,7 +97,6 @@ export default function ProfileSection() {
   const userData = useSelector((state) => state.accountReducer.user);
   const isPersonalContext = userData?.active_context?.context_type === 'personal';
   const isBusinessContext = userData?.active_context?.context_type !== 'personal';
-
   return (
     <>
       <Chip
