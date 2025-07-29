@@ -249,7 +249,14 @@ function HolidayManagement({ handleBack, handleNext, onAddClick }) {
                       <TableCell align="left">
                         {item.description?.length > 30 ? `${item.description.slice(0, 30)}...` : item.description || 'N/A'}
                       </TableCell>
-                      <TableCell align="left">{item.applicable_for}</TableCell>
+                      {/* <TableCell align="left">{item.applicable_for}</TableCell> */}
+                      <TableCell align="left">
+                        {Array.isArray(item.applicable_for)
+                        ? item.applicable_for.join(', ')
+                        : item.applicable_for || 'N/A'}
+                        </TableCell>
+                    
+
                       <TableCell align="center">
                         <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
                           <IconButton size="small" color="primary" onClick={() => handleEdit(item)}>

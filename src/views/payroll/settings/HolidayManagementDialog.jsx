@@ -34,13 +34,13 @@ export default function HolidayManagementDialog({ open, handleClose, selectedRec
     { name: 'description', label: 'Description', required: true }
   ];
 
-
   // Formik validation schema
   const validationSchema = Yup.object({
     holiday_name: Yup.string().required('Holiday Name is required'),
     start_date: Yup.string().required('Start Date is required'),
     end_date: Yup.string().required('End Date is required'),
-    applicable_for: Yup.string().required('This field is required'),
+    // applicable_for: Yup.string().required('This field is required'),
+    applicable_for: Yup.array().min(1, 'At least one location is required'),
     description: Yup.string().required('Description is required')
   });
   const getLabelWithAsterisk = (label, isRequired) => (
@@ -49,7 +49,6 @@ export default function HolidayManagementDialog({ open, handleClose, selectedRec
       {isRequired && <span style={{ color: 'red', fontSize: '1.2em', marginLeft: 2 }}>*</span>}
     </span>
   );
-
 
   const formik = useFormik({
     initialValues: {
@@ -106,6 +105,7 @@ export default function HolidayManagementDialog({ open, handleClose, selectedRec
       }
     }
   });
+  const combinedWorkLocations = [{ id: 'all', location_name: 'All Locations' }, ...(workLocations || [])];
 
   const renderFields = (fields) => {
     return fields.map((field) => {
@@ -134,9 +134,10 @@ export default function HolidayManagementDialog({ open, handleClose, selectedRec
               {getLabelWithAsterisk(field.label, field.required)}
             </Typography>
 
-            <CustomAutocomplete
+            {/* <CustomAutocomplete
               value={workLocations.find((loc) => loc.location_name === values[field.name]) || null} // Find the full object based on location_name
               onChange={(e, newValue) => {
+                const index = workLocations.findIndex(loc => loc.location_name === newValue?.location_name);
                 // Set the full object, not just the location_name
                 setFieldValue(field.name, newValue ? newValue.location_name : '');
               }}
@@ -146,6 +147,35 @@ export default function HolidayManagementDialog({ open, handleClose, selectedRec
               onBlur={handleBlur} // Handle Formik's blur event
               error={touched[field.name] && Boolean(errors[field.name])} // Display error based on validation
               helperText={touched[field.name] && errors[field.name]} // Show error message
+              size="small"
+            /> */}
+
+            <CustomAutocomplete
+              multiple
+              value={(() => {
+                if (!Array.isArray(values[field.name])) return [];
+                if (values[field.name].includes('all')) {
+                  return [combinedWorkLocations[0]]; // show "All Locations" only
+                }
+                return combinedWorkLocations.filter((loc) => values[field.name]?.includes(loc.id));
+              })()}
+              onChange={(e, newValues) => {
+                if (newValues.some((val) => val.id === 'all')) {
+                  // If "All Locations" is selected, override with all real IDs
+                  const allRealIds = workLocations.map((loc) => loc.id);
+                  setFieldValue(field.name, allRealIds);
+                } else {
+                  const ids = newValues.map((val) => val.id);
+                  setFieldValue(field.name, ids);
+                }
+              }}
+              options={combinedWorkLocations}
+              getOptionLabel={(option) => option?.location_name || ''}
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+              sx={{ width: '100%' }}
+              onBlur={handleBlur}
+              error={touched[field.name] && Boolean(errors[field.name])}
+              helperText={touched[field.name] && errors[field.name]}
               size="small"
             />
           </Grid2>
@@ -182,17 +212,36 @@ export default function HolidayManagementDialog({ open, handleClose, selectedRec
   //     setValues(selectedRecord); // Ensure values are set for editing
   //   }
   // }, [type, selectedRecord]);
- useEffect(() => {
-  if (open && type === 'edit' && selectedRecord) {
-    setValues({
-      ...selectedRecord,
-      start_date: selectedRecord.start_date || '',
-      end_date: selectedRecord.end_date || ''
-    });
-  } else if (open && type === 'add') {
-    resetForm(); // Empty fields when adding
-  }
-}, [open, type, selectedRecord]);
+
+  useEffect(() => {
+    if (open && type === 'edit' && selectedRecord) {
+      let applicableIds = [];
+
+      if (Array.isArray(selectedRecord.applicable_for)) {
+        applicableIds = selectedRecord.applicable_for
+          .map((name) => {
+            const match = workLocations.find((loc) => loc.location_name === name);
+            return match?.id;
+          })
+          .filter(Boolean);
+      } else if (typeof selectedRecord.applicable_for === 'string') {
+        const match = workLocations.find((loc) => loc.location_name === selectedRecord.applicable_for);
+        if (match) applicableIds = [match.id];
+      } else if (Array.isArray(selectedRecord.applicable_for_ids)) {
+        applicableIds = selectedRecord.applicable_for_ids;
+      }
+
+      setValues({
+        ...selectedRecord,
+        applicable_for: applicableIds,
+        start_date: selectedRecord.start_date || '',
+        end_date: selectedRecord.end_date || ''
+      });
+    } else if (open && type === 'add') {
+      resetForm();
+    }
+  }, [open, type, selectedRecord]);
+
   return (
     <Modal
       open={open}
