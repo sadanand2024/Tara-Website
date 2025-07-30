@@ -1,28 +1,19 @@
 import React, { useEffect } from 'react';
-import {
-  Autocomplete,
-  Box,
-  Button,
-  Card,
-  Grid2,
-  Stack,
-  TextField,
-  Typography
-} from '@mui/material';
+import { Autocomplete, Box, Button, Card, Grid2, Stack, TextField, Typography } from '@mui/material';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
 import { useSelector } from 'store';
-
+import MainCard from 'ui-component/cards/MainCard';
 const additionalFields = [
   { label: 'Address Line 1', name: 'address_line1', type: 'text', required: true },
   { label: 'Address Line 2', name: 'address_line2', type: 'text', required: true },
   { label: 'City', name: 'address_city', type: 'text', required: true },
-//   { label: 'District', name: 'district', type: 'text', required: true },
+  //   { label: 'District', name: 'district', type: 'text', required: true },
   { label: 'State', name: 'address_state', type: 'text', required: true },
   { label: 'Country', name: 'country', type: 'text', required: true },
-  { label: 'PinCode', name: 'address_pinCode', type: 'text', required: true },
-//   { label: 'Address proof (Additional)', name: 'address_proof_additional', type: 'file', required: true }
+  { label: 'PinCode', name: 'address_pinCode', type: 'text', required: true }
+  //   { label: 'Address proof (Additional)', name: 'address_proof_additional', type: 'file', required: true }
 ];
 
 const AddressInfo = () => {
@@ -34,7 +25,7 @@ const AddressInfo = () => {
       address_line1: '',
       address_line2: '',
       address_city: '',
-    //   district: '',
+      //   district: '',
       address_state: '',
       address_pinCode: '',
       country: '',
@@ -45,7 +36,7 @@ const AddressInfo = () => {
       address_line1: Yup.string().required('Address Line 1 is required'),
       address_line2: Yup.string().required('Address Line 2 is required'),
       address_city: Yup.string().required('address_city is required'),
-    //   district: Yup.string().required('District is required'),
+      //   district: Yup.string().required('District is required'),
       address_state: Yup.string().required('address_state is required'),
       address_pinCode: Yup.string()
         .matches(/^[1-9][0-9]{5}$/, 'address_pinCode must be exactly 6 digits')
@@ -58,15 +49,7 @@ const AddressInfo = () => {
     }
   });
 
-  const {
-    values,
-    setFieldValue,
-    handleChange,
-    errors,
-    touched,
-    handleSubmit,
-    handleBlur
-  } = formik;
+  const { values, setFieldValue, handleChange, errors, touched, handleSubmit, handleBlur } = formik;
 
   // Set initial form values from Redux
   useEffect(() => {
@@ -74,7 +57,7 @@ const AddressInfo = () => {
       setFieldValue('address_line1', personalDetails.address.address_line1 || '');
       setFieldValue('address_line2', personalDetails.address.address_line2 || '');
       setFieldValue('address_city', personalDetails.address.address_city || '');
-    //   setFieldValue('district', personalDetails.address.address_address_city || ''); // You may have a separate field for district
+      //   setFieldValue('district', personalDetails.address.address_address_city || ''); // You may have a separate field for district
       setFieldValue('address_state', personalDetails.address.address_state || '');
       setFieldValue('country', 'India'); // Default if not in Redux
       setFieldValue('address_pinCode', personalDetails.address.address_pinCode || '');
@@ -133,30 +116,22 @@ const AddressInfo = () => {
   };
 
   return (
-    <Box>
-      <Card sx={{ p: 1}}>
-        <form onSubmit={handleSubmit}>
-          <Grid2 container spacing={2}>
-            <Grid2 size={{xs:12}}>
-              <Typography variant="h4" fontWeight={700}>
-                Address Information
-              </Typography>
+    <MainCard>
+      <form onSubmit={handleSubmit}>
+        <Grid2 container spacing={2}>
+          {additionalFields.map((field) => (
+            <Grid2 size={{ xs: 12, sm: 6, md: 4 }} key={field.name}>
+              {renderField(field)}
             </Grid2>
-
-            {additionalFields.map((field) => (
-              <Grid2 size={{xs:12,sm:6,md:4}} key={field.name}>
-                {renderField(field)}
-              </Grid2>
-            ))}
-          </Grid2>
-          <Stack direction="row" spacing={2} sx={{ mt: 3, justifyContent: 'flex-end' }}>
-            <Button variant="contained" color="primary" type="submit">
-              Save
-            </Button>
-          </Stack>
-        </form>
-      </Card>
-    </Box>
+          ))}
+        </Grid2>
+        <Stack direction="row" spacing={2} sx={{ mt: 3, justifyContent: 'flex-end' }}>
+          <Button variant="contained" color="primary" type="submit">
+            Save
+          </Button>
+        </Stack>
+      </form>
+    </MainCard>
   );
 };
 
