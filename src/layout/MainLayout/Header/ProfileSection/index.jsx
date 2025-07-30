@@ -97,6 +97,10 @@ export default function ProfileSection() {
   const userData = useSelector((state) => state.accountReducer.user);
   const isPersonalContext = userData?.active_context?.context_type === 'personal';
   const isBusinessContext = userData?.active_context?.context_type !== 'personal';
+  const isEmployeePortal = !!user?.employee;
+  console.log('useAuth().user:', user);
+  console.log('Role from userData:', !!user?.employee);
+
   return (
     <>
       <Chip
@@ -159,11 +163,24 @@ export default function ProfileSection() {
                       <Stack direction="row" alignItems="center" spacing={2}>
                         <Avatar src={User1} alt="user-images" sx={{ width: 40, height: 40 }} />
                         <Stack direction="column" spacing={0}>
-                          <Typography variant="h5" color="text.primary" sx={{ lineHeight: 1 }} fontWeight={600}>
+                          {/* <Typography variant="h5" color="text.primary" sx={{ lineHeight: 1 }} fontWeight={600}>
                             {userData?.user?.email || 'User Name'}
                           </Typography>
                           <Typography variant="caption" color="text.secondary" sx={{ p: 0, m: 0 }} fontWeight={600}>
                             {userData?.user_role?.name || 'User Role'}
+                          </Typography> */}
+                          <Typography variant="h5" color="text.primary" sx={{ lineHeight: 1 }} fontWeight={600}>
+                            {isEmployeePortal
+                              ? `${user?.employee?.profile?.first_name || ''} ${user?.employee?.profile?.last_name || ''}`.trim()
+                              : userData?.user?.email || 'User Name'}
+                          </Typography>
+
+                          <Typography variant="caption" color="text.secondary" sx={{ p: 0, m: 0 }} fontWeight={600}>
+                            {isEmployeePortal
+                              ? 'Employee'
+                              : typeof userData?.user_role?.name === 'string'
+                                ? userData.user_role.name
+                                : userData?.user_role?.name?.en || 'User Role'}
                           </Typography>
                         </Stack>
                       </Stack>
@@ -219,7 +236,7 @@ export default function ProfileSection() {
                         </CardContent>
                       </Card> */}
                       {/* <Divider /> */}
-                      <List
+                      {/* <List
                         component="nav"
                         sx={{
                           width: '100%',
@@ -230,6 +247,25 @@ export default function ProfileSection() {
                           '& .MuiListItemButton-root': { mt: 0.5 }
                         }}
                       >
+                        {isEmployeePortal && (
+                          <ListItemButton
+                            sx={{ borderRadius: `${borderRadius}px` }}
+                            selected={selectedIndex === 0}
+                            onClick={(event) => handleListItemClick(event, 0, '/apps/user/profile')}
+                          >
+                            <ListItemIcon>
+                              <IconUser stroke={1.5} size="20px" />
+                            </ListItemIcon>
+                            <ListItemText
+                              primary={
+                                <Typography variant="body2">
+                                  <FormattedMessage id="my-profile" defaultMessage="My Profile" />
+                                </Typography>
+                              }
+                            />
+                          </ListItemButton>
+                        )}
+                        
                         {isPersonalContext && (
                           <ListItemButton
                             sx={{ borderRadius: `${borderRadius}px` }}
@@ -282,6 +318,111 @@ export default function ProfileSection() {
                             }
                           />
                         </ListItemButton>
+                        <ListItemButton sx={{ borderRadius: `${borderRadius}px` }} selected={selectedIndex === 3} onClick={handleLogout}>
+                          <ListItemIcon>
+                            <IconLogout stroke={1.5} size="20px" />
+                          </ListItemIcon>
+                          <ListItemText
+                            primary={
+                              <Typography variant="body2">
+                                <FormattedMessage id="logout" />
+                              </Typography>
+                            }
+                          />
+                        </ListItemButton>
+                      </List> */}
+                      <List
+                        component="nav"
+                        sx={{
+                          width: '100%',
+                          maxWidth: 350,
+                          minWidth: 300,
+                          p: 0,
+                          borderRadius: `${borderRadius}px`,
+                          '& .MuiListItemButton-root': { mt: 0.5 }
+                        }}
+                      >
+                        {/* Employee Portal: Only My Profile & Logout */}
+                        {isEmployeePortal ? (
+                          <>
+                            <ListItemButton
+                              sx={{ borderRadius: `${borderRadius}px` }}
+                              selected={selectedIndex === 0}
+                              onClick={(event) => handleListItemClick(event, 3, '/apps/user/MyProfile')}
+                            >
+                              <ListItemIcon>
+                                <IconUser stroke={1.5} size="20px" />
+                              </ListItemIcon>
+                              <ListItemText
+                                primary={
+                                  <Typography variant="body2">
+                                    {/* <FormattedMessage id="my-profile" /> */}
+                                     <FormattedMessage id="my-profile" defaultMessage="My Profile" />
+                                  </Typography>
+                                }
+                              />
+                            </ListItemButton>
+                          </>
+                        ) : (
+                          <>
+                            {isPersonalContext && (
+                              <ListItemButton
+                                sx={{ borderRadius: `${borderRadius}px` }}
+                                selected={selectedIndex === 0}
+                                onClick={(event) => handleListItemClick(event, 0, '/apps/user/profile')}
+                              >
+                                <ListItemIcon>
+                                  <IconUser stroke={1.5} size="20px" />
+                                </ListItemIcon>
+                                <ListItemText
+                                  primary={
+                                    <Typography variant="body2">
+                                      <FormattedMessage id="personal-settings" />
+                                    </Typography>
+                                  }
+                                />
+                              </ListItemButton>
+                            )}
+
+                            {isBusinessContext && (
+                              <ListItemButton
+                                sx={{ borderRadius: `${borderRadius}px` }}
+                                selected={selectedIndex === 1}
+                                onClick={(event) => handleListItemClick(event, 1, '/apps/business-settings')}
+                              >
+                                <ListItemIcon>
+                                  <IconSettings stroke={1.5} size="20px" />
+                                </ListItemIcon>
+                                <ListItemText
+                                  primary={
+                                    <Typography variant="body2">
+                                      <FormattedMessage id="business-settings" />
+                                    </Typography>
+                                  }
+                                />
+                              </ListItemButton>
+                            )}
+
+                            <ListItemButton
+                              sx={{ borderRadius: `${borderRadius}px` }}
+                              selected={selectedIndex === 2}
+                              onClick={(event) => handleListItemClick(event, 2, '/apps/account-settings')}
+                            >
+                              <ListItemIcon>
+                                <IconSettings stroke={1.5} size="20px" />
+                              </ListItemIcon>
+                              <ListItemText
+                                primary={
+                                  <Typography variant="body2">
+                                    <FormattedMessage id="account-settings" />
+                                  </Typography>
+                                }
+                              />
+                            </ListItemButton>
+                          </>
+                        )}
+
+                        {/* Always visible Logout */}
                         <ListItemButton sx={{ borderRadius: `${borderRadius}px` }} selected={selectedIndex === 3} onClick={handleLogout}>
                           <ListItemIcon>
                             <IconLogout stroke={1.5} size="20px" />

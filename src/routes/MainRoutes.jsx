@@ -48,6 +48,7 @@ const ManageModulesAndServices = Loadable(lazy(() => import('views/ManageSubscri
 const AppUserAccountProfile2 = Loadable(lazy(() => import('views/application/users/Profile')));
 const AppBusinessSettings = Loadable(lazy(() => import('views/application/Business/settings')));
 const AppAccountSettings = Loadable(lazy(() => import('views/application/users/Account')));
+const AppMyProfileSettings = Loadable(lazy(() => import('views/application/users/MyProfile')));
 const ManagePlans = Loadable(lazy(() => import('views/ManageSubscriptions/ManagePlans')));
 const ManageTasks = Loadable(lazy(() => import('views/application/ManageTasks')));
 const DocumentDrafting = Loadable(lazy(() => import('views/application/DocumentDrafting')));
@@ -131,6 +132,10 @@ const MainRoutes = {
     {
       path: '/apps/user/profile',
       element: <AppUserAccountProfile2 />
+    },
+     {
+      path: '/apps/user/MyProfile',
+      element: <AppMyProfileSettings/>
     },
     {
       path: '/apps/business-settings',
