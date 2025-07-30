@@ -24,16 +24,36 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
-  TextareaAutosize
+  Autocomplete
 } from '@mui/material';
 import { IconClock, IconCalendar, IconCheck, IconX, IconAlertTriangle, IconMapPin, IconEdit } from '@tabler/icons-react';
+import Factory from 'utils/Factory';
+import { useDispatch, useSelector } from 'react-redux';
+import { openSnackbar } from 'store/slices/snackbar';
+import { generateYears } from 'utils/YearsList';
 import PunchInOutCard from './PunchInOutCard';
-
+const monthOptions = [
+  { label: 'January', value: 1 },
+  { label: 'February', value: 2 },
+  { label: 'March', value: 3 },
+  { label: 'April', value: 4 },
+  { label: 'May', value: 5 },
+  { label: 'June', value: 6 },
+  { label: 'July', value: 7 },
+  { label: 'August', value: 8 },
+  { label: 'September', value: 9 },
+  { label: 'October', value: 10 },
+  { label: 'November', value: 11 },
+  { label: 'December', value: 12 }
+];
 const AttendanceInfoTab = () => {
+  const dispatch = useDispatch();
+  const yearOptions = generateYears();
   // State for attendance data
   const [attendanceData, setAttendanceData] = useState([]);
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [sessionsDialogOpen, setSessionsDialogOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState(null);
+  const [selectedSessions, setSelectedSessions] = useState([]);
   const [editForm, setEditForm] = useState({
     status: '',
     checkIn: '',
@@ -41,23 +61,107 @@ const AttendanceInfoTab = () => {
     remarks: ''
   });
 
+  // State for month and year selection
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+
   // Generate attendance data for the current month
   useEffect(() => {
-    generateMonthlyAttendanceData();
-  }, []);
+    getAttendanceReport();
+  }, [selectedMonth, selectedYear]);
 
-  const generateMonthlyAttendanceData = () => {
-    const currentDate = new Date();
-    const currentMonth = currentDate.getMonth();
-    const currentYear = currentDate.getFullYear();
-    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+  const getAttendanceReport = async () => {
+    try {
+      let url = `/payroll/monthly-report/?month=${selectedMonth}&year=${selectedYear}`;
+      const { res } = await Factory('get', url, {});
+      console.log('Monthly Report API Response:', res);
+
+      if (res.status_cd === 0 && res.data && res.data.report) {
+        // Transform API response to match our attendance data structure
+        const transformedData = transformMonthlyReportToAttendanceData(res.data.report);
+        setAttendanceData(transformedData);
+      } else {
+        // If API fails, fall back to generated data
+        generateFallbackData();
+        console.error('Failed to fetch attendance data:', res);
+      }
+    } catch (error) {
+      console.error('Error fetching attendance data:', error);
+      // Fall back to generated data on error
+      generateFallbackData();
+    }
+  };
+
+  const transformMonthlyReportToAttendanceData = (reportData) => {
+    return reportData.map((dayReport, index) => {
+      const dateParts = dayReport.date.split('-');
+      const day = parseInt(dateParts[0]);
+      const month = parseInt(dateParts[1]);
+      const year = parseInt(dateParts[2]);
+
+      const date = new Date(year, month - 1, day);
+      const dayOfWeek = date.toLocaleDateString('en-US', { weekday: 'short' });
+      const formattedDate = `${day.toString().padStart(2, '0')}/${month.toString().padStart(2, '0')}/${year}`;
+
+      let status = dayReport.status;
+      let checkIn = '-';
+      let checkOut = '-';
+      let duration = '-';
+      let checkInLocation = null;
+      let checkOutLocation = null;
+
+      // Process sessions if available
+      if (dayReport.sessions && dayReport.sessions.length > 0) {
+        const firstSession = dayReport.sessions[0];
+        const lastSession = dayReport.sessions[dayReport.sessions.length - 1];
+
+        if (firstSession.check_in && firstSession.check_in !== '-') {
+          checkIn = firstSession.check_in.substring(0, 5); // Extract HH:MM from HH:MM:SS
+        }
+
+        if (lastSession.check_out && lastSession.check_out !== '-') {
+          checkOut = lastSession.check_out.substring(0, 5); // Extract HH:MM from HH:MM:SS
+        }
+
+        // Calculate duration if both check-in and check-out exist
+        if (checkIn !== '-' && checkOut !== '-') {
+          duration = calculateDuration(checkIn, checkOut);
+        } else if (dayReport.total_hours && dayReport.total_hours !== '0:00:00') {
+          // Use total_hours from API if available
+          const timeParts = dayReport.total_hours.split(':');
+          if (timeParts.length >= 2) {
+            duration = `${timeParts[0]}:${timeParts[1]}`;
+          }
+        }
+      }
+
+      return {
+        id: index + 1,
+        date: formattedDate,
+        dayName: dayOfWeek,
+        status: status,
+        checkIn: checkIn,
+        checkOut: checkOut,
+        duration: duration,
+        remarks: '-',
+        checkInLocation: checkInLocation,
+        checkOutLocation: checkOutLocation,
+        sessions: dayReport.sessions || [],
+        totalHours: dayReport.total_hours || '0:00:00',
+        sessionCount: dayReport.session_count || 0
+      };
+    });
+  };
+
+  const generateFallbackData = () => {
+    const daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate();
 
     const monthlyData = [];
 
     for (let day = 1; day <= daysInMonth; day++) {
-      const date = new Date(currentYear, currentMonth, day);
+      const date = new Date(selectedYear, selectedMonth - 1, day);
       const dayOfWeek = date.toLocaleDateString('en-US', { weekday: 'short' });
-      const formattedDate = `${day.toString().padStart(2, '0')}/${(currentMonth + 1).toString().padStart(2, '0')}/${currentYear}`;
+      const formattedDate = `${day.toString().padStart(2, '0')}/${selectedMonth.toString().padStart(2, '0')}/${selectedYear}`;
 
       // Skip weekends (Saturday = 6, Sunday = 0)
       if (date.getDay() !== 0 && date.getDay() !== 6) {
@@ -80,33 +184,35 @@ const AttendanceInfoTab = () => {
   };
 
   // Handle punch in/out updates
-  const handleAttendanceUpdate = (type, time, location = null) => {
-    const today = new Date();
-    const todayFormatted = `${today.getDate().toString().padStart(2, '0')}/${(today.getMonth() + 1).toString().padStart(2, '0')}/${today.getFullYear()}`;
+  const handleAttendanceUpdate = async (type, time, location = null) => {
+    try {
+      // Refresh the attendance data to get the latest information
+      await getAttendanceReport();
 
-    setAttendanceData((prevData) =>
-      prevData.map((record) => {
-        if (record.date === todayFormatted) {
-          if (type === 'checkIn') {
-            return {
-              ...record,
-              status: 'Present',
-              checkIn: time,
-              checkInLocation: location,
-              duration: record.checkOut !== '-' ? calculateDuration(time, record.checkOut) : '-'
-            };
-          } else if (type === 'checkOut') {
-            return {
-              ...record,
-              checkOut: time,
-              checkOutLocation: location,
-              duration: record.checkIn !== '-' ? calculateDuration(record.checkIn, time) : '-'
-            };
-          }
-        }
-        return record;
-      })
-    );
+      // Show success message
+      const message = type === 'checkIn' ? 'Successfully checked in!' : 'Successfully checked out!';
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(message),
+          variant: 'alert',
+          alert: { color: 'success' },
+          close: false
+        })
+      );
+    } catch (error) {
+      console.error('Error updating attendance:', error);
+      const message = type === 'checkIn' ? 'Failed to check in' : 'Failed to check out';
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(message),
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
+    }
   };
 
   const calculateDuration = (checkIn, checkOut) => {
@@ -128,43 +234,14 @@ const AttendanceInfoTab = () => {
   // Edit functionality
   const handleEditClick = (record) => {
     setEditingRecord(record);
-    setEditForm({
-      status: record.status === '-' ? 'Present' : record.status,
-      checkIn: record.checkIn === '-' ? '' : record.checkIn,
-      checkOut: record.checkOut === '-' ? '' : record.checkOut,
-      remarks: record.remarks === '-' ? '' : record.remarks
-    });
-    setEditDialogOpen(true);
+    setSelectedSessions(record.sessions || []);
+    setSessionsDialogOpen(true);
   };
 
-  const handleEditSave = () => {
-    setAttendanceData((prevData) =>
-      prevData.map((record) => {
-        if (record.id === editingRecord.id) {
-          const duration = editForm.checkIn && editForm.checkOut ? calculateDuration(editForm.checkIn, editForm.checkOut) : '-';
-
-          return {
-            ...record,
-            status: editForm.status,
-            checkIn: editForm.checkIn || '-',
-            checkOut: editForm.checkOut || '-',
-            duration: duration,
-            remarks: editForm.remarks || '-'
-          };
-        }
-        return record;
-      })
-    );
-
-    setEditDialogOpen(false);
+  const handleSessionsClose = () => {
+    setSessionsDialogOpen(false);
     setEditingRecord(null);
-    setEditForm({ status: '', checkIn: '', checkOut: '', remarks: '' });
-  };
-
-  const handleEditCancel = () => {
-    setEditDialogOpen(false);
-    setEditingRecord(null);
-    setEditForm({ status: '', checkIn: '', checkOut: '', remarks: '' });
+    setSelectedSessions([]);
   };
 
   const getStatusColor = (status) => {
@@ -198,12 +275,29 @@ const AttendanceInfoTab = () => {
   };
 
   const calculateAverageWorkHours = () => {
-    const presentRecords = attendanceData.filter((record) => record.status === 'Present' && record.duration !== '-');
+    const presentRecords = attendanceData.filter(
+      (record) => record.status === 'Present' && record.totalHours && record.totalHours !== '0:00:00'
+    );
     if (presentRecords.length === 0) return '0hr 0mins';
 
     const totalMinutes = presentRecords.reduce((sum, record) => {
-      const [hours, minutes] = record.duration.split(':').map(Number);
-      return sum + (hours * 60 + minutes);
+      // Parse total_hours from API (format: "1:26:27" or "5 days, 0:53:14")
+      const timeStr = record.totalHours;
+      if (timeStr.includes('days')) {
+        // Handle format like "5 days, 0:53:14"
+        const parts = timeStr.split(', ');
+        const days = parseInt(parts[0].split(' ')[0]) || 0;
+        const timeParts = parts[1] ? parts[1].split(':') : ['0', '0', '0'];
+        const hours = parseInt(timeParts[0]) || 0;
+        const minutes = parseInt(timeParts[1]) || 0;
+        return days * 24 * 60 + hours * 60 + minutes;
+      } else {
+        // Handle format like "1:26:27"
+        const timeParts = timeStr.split(':');
+        const hours = parseInt(timeParts[0]) || 0;
+        const minutes = parseInt(timeParts[1]) || 0;
+        return hours * 60 + minutes;
+      }
     }, 0);
 
     const avgMinutes = totalMinutes / presentRecords.length;
@@ -213,12 +307,29 @@ const AttendanceInfoTab = () => {
   };
 
   const calculateAverageActualHours = () => {
-    const presentRecords = attendanceData.filter((record) => record.status === 'Present' && record.duration !== '-');
+    const presentRecords = attendanceData.filter(
+      (record) => record.status === 'Present' && record.totalHours && record.totalHours !== '0:00:00'
+    );
     if (presentRecords.length === 0) return '0hrs 0m';
 
     const totalMinutes = presentRecords.reduce((sum, record) => {
-      const [hours, minutes] = record.duration.split(':').map(Number);
-      return sum + (hours * 60 + minutes);
+      // Parse total_hours from API (format: "1:26:27" or "5 days, 0:53:14")
+      const timeStr = record.totalHours;
+      if (timeStr.includes('days')) {
+        // Handle format like "5 days, 0:53:14"
+        const parts = timeStr.split(', ');
+        const days = parseInt(parts[0].split(' ')[0]) || 0;
+        const timeParts = parts[1] ? parts[1].split(':') : ['0', '0', '0'];
+        const hours = parseInt(timeParts[0]) || 0;
+        const minutes = parseInt(timeParts[1]) || 0;
+        return days * 24 * 60 + hours * 60 + minutes;
+      } else {
+        // Handle format like "1:26:27"
+        const timeParts = timeStr.split(':');
+        const hours = parseInt(timeParts[0]) || 0;
+        const minutes = parseInt(timeParts[1]) || 0;
+        return hours * 60 + minutes;
+      }
     }, 0);
 
     const avgMinutes = totalMinutes / presentRecords.length;
@@ -231,126 +342,162 @@ const AttendanceInfoTab = () => {
     return attendanceData.filter((record) => record.status === 'Late' || record.status === 'Absent').length;
   };
 
+  const getTotalPresentDays = () => {
+    return attendanceData.filter((record) => record.status === 'Present').length;
+  };
+
   return (
     <Box>
       {/* Punch In/Out Card */}
-      <Box sx={{ mb: 4 }}>
+      <Box sx={{ mb: 2 }}>
         <PunchInOutCard onAttendanceUpdate={handleAttendanceUpdate} />
       </Box>
-
       {/* Attendance Header */}
-      <Box sx={{ mb: 3 }}>
-        <Typography variant="h4" sx={{ fontWeight: 700, color: 'text.primary', mb: 1 }}>
-          Attendance
-        </Typography>
-        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-          To update your attendance data, please click on the edit button next to each date.
-        </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+          <Typography variant="h4" sx={{ fontWeight: 700, color: 'text.primary', mb: 1 }}>
+            Attendance
+          </Typography>
+          <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
+            To update your attendance data, please click on the edit button next to each date.
+          </Typography>
+        </Box>
+
+        {/* Month and Year Selection */}
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 2 }}>
+          <Autocomplete
+            sx={{ minWidth: 200 }}
+            size="small"
+            value={monthOptions.find((option) => option.value === selectedMonth)}
+            onChange={(event, newValue) => setSelectedMonth(newValue.value)}
+            options={monthOptions}
+            renderInput={(params) => <TextField {...params} label="Month" />}
+          />
+
+          <Autocomplete
+            sx={{ minWidth: 200 }}
+            size="small"
+            value={selectedYear.toString()}
+            onChange={(event, newValue) => setSelectedYear(parseInt(newValue))}
+            options={yearOptions.map((year) => year.toString())}
+            renderInput={(params) => <TextField {...params} label="Financial Year" />}
+            disableClearable
+          />
+        </Box>
       </Box>
-
       {/* Attendance Table */}
-      <Card sx={{ mb: 4 }}>
-        <CardContent>
-          <TableContainer component={Paper} sx={{ boxShadow: 'none' }}>
-            <Table>
-              <TableHead>
-                <TableRow sx={{ bgcolor: 'grey.50' }}>
-                  <TableCell sx={{ fontWeight: 600, textDecoration: 'underline' }}>Date</TableCell>
-                  <TableCell sx={{ fontWeight: 600, textDecoration: 'underline' }}>Status</TableCell>
-                  <TableCell sx={{ fontWeight: 600, textDecoration: 'underline' }}>Check In</TableCell>
-                  <TableCell sx={{ fontWeight: 600, textDecoration: 'underline' }}>Check Out</TableCell>
-                  <TableCell sx={{ fontWeight: 600, textDecoration: 'underline' }}>Duration</TableCell>
-                  <TableCell sx={{ fontWeight: 600, textDecoration: 'underline' }}>Remarks</TableCell>
-                  <TableCell sx={{ fontWeight: 600, textDecoration: 'underline' }}>Edit</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {attendanceData.map((record) => {
-                  const StatusIcon = getStatusIcon(record.status);
-                  const isToday = record.date === new Date().toLocaleDateString('en-GB').split('/').reverse().join('/');
+      <TableContainer
+        component={Paper}
+        sx={{
+          width: '100%',
+          borderRadius: 2,
+          boxShadow: 1,
+          overflowX: 'auto'
+        }}
+      >
+        <Table size="small">
+          <TableHead
+            sx={{
+              backgroundColor: 'primary.main',
+              '& .MuiTableCell-root': {
+                color: '#ffffff !important'
+              }
+            }}
+          >
+            <TableRow>
+              <TableCell sx={{ fontWeight: 600 }}>Date</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>Check In</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>Check Out</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>Duration</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>Remarks</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>Action</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {attendanceData.map((record) => {
+              const StatusIcon = getStatusIcon(record.status);
+              const isToday = record.date === new Date().toLocaleDateString('en-GB').split('/').reverse().join('/');
 
-                  return (
-                    <TableRow
-                      key={record.id}
-                      hover
+              return (
+                <TableRow
+                  key={record.id}
+                  hover
+                  sx={{
+                    bgcolor: isToday ? 'primary.50' : 'inherit',
+                    '&:hover': { bgcolor: 'grey.50' }
+                  }}
+                >
+                  <TableCell>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      {record.date}
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                      {record.dayName}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    {record.status === '-' ? (
+                      <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                        -
+                      </Typography>
+                    ) : (
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <StatusIcon size={16} style={{ color: '#666' }} />
+                        <Chip label={record.status} color={getStatusColor(record.status)} size="small" variant="outlined" />
+                      </Box>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {record.checkIn === '-' ? (
+                      <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                        -
+                      </Typography>
+                    ) : (
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        {record.checkInLocation && <IconMapPin size={14} style={{ color: '#1976d2' }} />}
+                        <Typography variant="body2">{record.checkIn}</Typography>
+                      </Box>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body2" sx={{ color: record.checkOut === '-' ? 'text.secondary' : 'text.primary' }}>
+                      {record.checkOut}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography
+                      variant="body2"
+                      sx={{ fontWeight: 600, color: record.duration === '-' ? 'text.secondary' : 'text.primary' }}
+                    >
+                      {record.duration}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                      {record.remarks}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <IconButton
+                      size="small"
+                      onClick={() => handleEditClick(record)}
                       sx={{
-                        bgcolor: isToday ? 'primary.50' : 'inherit',
-                        '&:hover': { bgcolor: 'grey.50' }
+                        color: 'primary.main',
+                        '&:hover': { bgcolor: 'primary.50' }
                       }}
                     >
-                      <TableCell>
-                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                          {record.date}
-                        </Typography>
-                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                          {record.dayName}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        {record.status === '-' ? (
-                          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                            -
-                          </Typography>
-                        ) : (
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <StatusIcon size={16} style={{ color: '#666' }} />
-                            <Chip label={record.status} color={getStatusColor(record.status)} size="small" variant="outlined" />
-                          </Box>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {record.checkIn === '-' ? (
-                          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                            -
-                          </Typography>
-                        ) : (
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            {record.checkInLocation && <IconMapPin size={14} style={{ color: '#1976d2' }} />}
-                            <Typography variant="body2">{record.checkIn}</Typography>
-                          </Box>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2" sx={{ color: record.checkOut === '-' ? 'text.secondary' : 'text.primary' }}>
-                          {record.checkOut}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography
-                          variant="body2"
-                          sx={{ fontWeight: 600, color: record.duration === '-' ? 'text.secondary' : 'text.primary' }}
-                        >
-                          {record.duration}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                          {record.remarks}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <IconButton
-                          size="small"
-                          onClick={() => handleEditClick(record)}
-                          sx={{
-                            color: 'primary.main',
-                            '&:hover': { bgcolor: 'primary.50' }
-                          }}
-                        >
-                          <IconEdit size={16} />
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </CardContent>
-      </Card>
-
+                      <IconEdit size={16} />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </TableContainer>
       {/* Summary Boxes */}
-      <Grid2 container spacing={3}>
+      <Grid2 container spacing={3} sx={{ mt: 3 }}>
         <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
           <Card sx={{ bgcolor: 'primary.50', height: '100%' }}>
             <CardContent sx={{ textAlign: 'center', p: 3 }}>
@@ -391,65 +538,172 @@ const AttendanceInfoTab = () => {
           </Card>
         </Grid2>
       </Grid2>
-
-      {/* Edit Attendance Dialog */}
-      <Dialog open={editDialogOpen} onClose={handleEditCancel} maxWidth="sm" fullWidth>
-        <DialogTitle>
-          <Typography variant="h6" sx={{ fontWeight: 600 }}>
-            Edit Attendance
+      {/* Sessions Dialog */}
+      <Dialog
+        open={sessionsDialogOpen}
+        onClose={handleSessionsClose}
+        maxWidth="md"
+        fullWidth
+        sx={{
+          '& .MuiDialog-paper': {
+            boxShadow: '0px 10px 30px rgba(0, 0, 0, 0.1)' // Soft shadow for depth
+          }
+        }}
+      >
+        <DialogTitle sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+          <Typography variant="h5" sx={{ fontWeight: 600 }}>
+            Attendance Sessions
           </Typography>
           <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }}>
-            for {editingRecord?.date}
+            for {editingRecord?.date} ({editingRecord?.dayName})
           </Typography>
         </DialogTitle>
+
         <DialogContent sx={{ pt: 2 }}>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-            <FormControl fullWidth>
-              <InputLabel>Status</InputLabel>
-              <Select value={editForm.status} onChange={(e) => setEditForm({ ...editForm, status: e.target.value })} label="Status">
-                <MenuItem value="Present">Present</MenuItem>
-                <MenuItem value="Late">Late</MenuItem>
-                <MenuItem value="Absent">Absent</MenuItem>
-                <MenuItem value="Half Day">Half Day</MenuItem>
-              </Select>
-            </FormControl>
+            {/* Summary Information */}
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                p: 2,
+                bgcolor: 'grey.50',
+                boxShadow: '0 2px 6px rgba(0, 0, 0, 0.1)'
+              }}
+            >
+              <Box>
+                <Typography variant="body2" color="text.secondary">
+                  Status
+                </Typography>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontWeight: 600,
+                    color: getStatusColor(editingRecord?.status) === 'success' ? 'success.darker' : 'text.primary'
+                  }}
+                >
+                  {editingRecord?.status || 'N/A'}
+                </Typography>
+              </Box>
+              <Box>
+                <Typography variant="body2" color="text.secondary">
+                  Total Sessions
+                </Typography>
+                <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                  {editingRecord?.sessionCount || 0}
+                </Typography>
+              </Box>
+              <Box>
+                <Typography variant="body2" color="text.secondary">
+                  Total Hours
+                </Typography>
+                <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                  {editingRecord?.totalHours || '0:00:00'}
+                </Typography>
+              </Box>
+            </Box>
 
-            <TextField
-              label="Check In"
-              placeholder="hh:mm"
-              value={editForm.checkIn}
-              onChange={(e) => setEditForm({ ...editForm, checkIn: e.target.value })}
-              fullWidth
-            />
+            {/* Sessions Table */}
+            {selectedSessions.length > 0 ? (
+              <TableContainer
+                component={Paper}
+                sx={{
+                  boxShadow: 'none',
+                  border: '1px solid',
+                  borderColor: 'grey.200',
+                  borderRadius: 2
+                }}
+              >
+                <Table size="small">
+                  <TableHead>
+                    <TableRow sx={{ bgcolor: 'grey.100' }}>
+                      <TableCell sx={{ fontWeight: 600, color: 'text.primary' }}>Session</TableCell>
+                      <TableCell sx={{ fontWeight: 600, color: 'text.primary' }}>Check In</TableCell>
+                      <TableCell sx={{ fontWeight: 600, color: 'text.primary' }}>Check Out</TableCell>
+                      <TableCell sx={{ fontWeight: 600, color: 'text.primary' }}>Duration</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {selectedSessions.map((session, index) => {
+                      const checkIn = session.check_in ? session.check_in.substring(0, 5) : '-';
+                      const checkOut = session.check_out ? session.check_out.substring(0, 5) : '-';
+                      const duration = checkIn !== '-' && checkOut !== '-' ? calculateDuration(checkIn, checkOut) : '-';
 
-            <TextField
-              label="Check Out"
-              placeholder="hh:mm"
-              value={editForm.checkOut}
-              onChange={(e) => setEditForm({ ...editForm, checkOut: e.target.value })}
-              fullWidth
-            />
-
-            <TextField
-              label="Remarks"
-              placeholder="(optional)"
-              value={editForm.remarks}
-              onChange={(e) => setEditForm({ ...editForm, remarks: e.target.value })}
-              multiline
-              rows={3}
-              fullWidth
-            />
+                      return (
+                        <TableRow key={index} hover>
+                          <TableCell>
+                            <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                              {index + 1}
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                color: checkIn === '-' ? 'text.secondary' : 'text.primary',
+                                transition: 'color 0.3s ease',
+                                '&:hover': { color: 'primary.main' }
+                              }}
+                            >
+                              {checkIn}
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                color: checkOut === '-' ? 'text.secondary' : 'text.primary',
+                                transition: 'color 0.3s ease',
+                                '&:hover': { color: 'primary.main' }
+                              }}
+                            >
+                              {checkOut}
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                fontWeight: 600,
+                                color: duration === '-' ? 'text.secondary' : 'text.primary',
+                                transition: 'color 0.3s ease',
+                                '&:hover': { color: 'primary.main' }
+                              }}
+                            >
+                              {duration}
+                            </Typography>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            ) : (
+              <Box sx={{ textAlign: 'center', py: 4 }}>
+                <Typography variant="body1" color="text.secondary">
+                  No sessions found for this date
+                </Typography>
+              </Box>
+            )}
           </Box>
         </DialogContent>
+
         <DialogActions sx={{ p: 3, pt: 1 }}>
-          <Button onClick={handleEditCancel} variant="outlined">
-            Cancel
-          </Button>
-          <Button onClick={handleEditSave} variant="contained">
-            Update
+          <Button
+            onClick={handleSessionsClose}
+            variant="outlined"
+            color="secondary"
+            sx={{
+              fontWeight: 600,
+              '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.08)' }
+            }}
+          >
+            Close
           </Button>
         </DialogActions>
       </Dialog>
+      ;
     </Box>
   );
 };

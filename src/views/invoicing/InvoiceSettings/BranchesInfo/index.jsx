@@ -29,7 +29,7 @@ import DeleteConfirmationDialog from 'utils/DeleteConfirmationDialog';
 
 import AddBranchDialog from './AddBranchDialog';
 
-export default function BranchesInfo({ handleBack, handleNext, fetchBusinessDetails }) {
+export default function BranchesInfo({ handleBack, handleNext, fetchBusinessDetails, addDialogOpen, setAddDialogOpen }) {
   const [branches, setBranches] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -44,6 +44,9 @@ export default function BranchesInfo({ handleBack, handleNext, fetchBusinessDeta
     setOpen(false);
     setType('');
     setSelectedRecord(null);
+    if (setAddDialogOpen) {
+      setAddDialogOpen(false);
+    }
   };
 
   const getBranches = async () => {
@@ -117,6 +120,13 @@ export default function BranchesInfo({ handleBack, handleNext, fetchBusinessDeta
     getBranches();
   }, []);
 
+  // Watch for addDialogOpen prop changes
+  useEffect(() => {
+    if (addDialogOpen) {
+      handleOpenDialog();
+    }
+  }, [addDialogOpen]);
+
   if (isLoading) {
     return (
       <Box
@@ -138,25 +148,7 @@ export default function BranchesInfo({ handleBack, handleNext, fetchBusinessDeta
   }
 
   return (
-    <MainCard
-      title="Branches Info"
-      subtitle="Manage your business branches for invoice generation and business operations"
-      action={
-        <Button
-          variant="contained"
-          size="small"
-          startIcon={<AddIcon />}
-          onClick={handleOpenDialog}
-          sx={{
-            textTransform: 'none',
-            fontWeight: 600,
-            fontSize: '0.9rem'
-          }}
-        >
-          Add Branch
-        </Button>
-      }
-    >
+    <MainCard>
       <TableContainer
         component={Paper}
         sx={{

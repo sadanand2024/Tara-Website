@@ -12,7 +12,8 @@ import {
   TableRow,
   Paper,
   Pagination,
-  CircularProgress
+  CircularProgress,
+  Tooltip
 } from '@mui/material';
 import { IconPlus, IconReload, IconFilter } from '@tabler/icons-react';
 import { useSearchParams } from 'react-router-dom';
@@ -243,19 +244,33 @@ function HolidayManagement({ handleBack, handleNext, onAddClick }) {
                 ) : (
                   paginatedData.map((item, index) => (
                     <TableRow key={item.id} hover>
-                      <TableCell align="center">{(currentPage - 1) * rowsPerPage + index + 1}</TableCell>
-                      <TableCell align="left">{item.holiday_name}</TableCell>
-                      <TableCell align="left">{`${item.start_date} - ${item.end_date}`}</TableCell>
-                      <TableCell align="left">
-                        {item.description?.length > 30 ? `${item.description.slice(0, 30)}...` : item.description || 'N/A'}
+                      <TableCell sx={{ whiteSpace: 'nowrap' }} align="center">
+                        {(currentPage - 1) * rowsPerPage + index + 1}
+                      </TableCell>
+                      <TableCell sx={{ whiteSpace: 'nowrap' }} align="left">
+                        {item.holiday_name}
+                      </TableCell>
+                      <TableCell sx={{ whiteSpace: 'nowrap' }} align="left">{`${item.start_date} - ${item.end_date}`}</TableCell>
+                      <TableCell sx={{ whiteSpace: 'nowrap' }} align="left">
+                        <Tooltip arrow title={item.description || 'N/A'}>
+                          <span>{item.description?.length > 30 ? `${item.description.slice(0, 30)}...` : item.description || 'N/A'}</span>
+                        </Tooltip>
                       </TableCell>
                       {/* <TableCell align="left">{item.applicable_for}</TableCell> */}
                       <TableCell align="left">
-                        {Array.isArray(item.applicable_for)
-                        ? item.applicable_for.join(', ')
-                        : item.applicable_for || 'N/A'}
-                        </TableCell>
-                    
+                        <Tooltip
+                          arrow
+                          title={
+                            Array.isArray(item.applicable_for) && item.applicable_for.length > 0 ? item.applicable_for.join(', ') : 'N/A'
+                          }
+                        >
+                          <span>
+                            {Array.isArray(item.applicable_for) && item.applicable_for.length > 0
+                              ? item.applicable_for.slice(0, 3).join(', ') + (item.applicable_for.length > 3 ? '...' : '')
+                              : 'N/A'}
+                          </span>
+                        </Tooltip>
+                      </TableCell>
 
                       <TableCell align="center">
                         <Box display="flex" justifyContent="center" alignItems="center" gap={1}>

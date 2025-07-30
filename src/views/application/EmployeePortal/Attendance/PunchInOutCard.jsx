@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Card, CardContent, Typography, Button, Chip, Alert, CircularProgress } from '@mui/material';
 import { IconClock, IconMapPin, IconAlertCircle } from '@tabler/icons-react';
-
+import Factory from 'utils/Factory';
+import { useDispatch, useSelector } from 'react-redux';
+import { openSnackbar } from 'store/slices/snackbar';
 const PunchInOutCard = ({ onAttendanceUpdate }) => {
+  const dispatch = useDispatch();
   const [isCheckedIn, setIsCheckedIn] = useState(false);
   const [checkInTime, setCheckInTime] = useState(null);
   const [currentDate, setCurrentDate] = useState('');
@@ -20,7 +23,50 @@ const PunchInOutCard = ({ onAttendanceUpdate }) => {
       year: 'numeric'
     };
     setCurrentDate(today.toLocaleDateString('en-US', options));
+
+    // Check current check-in status
+    checkCurrentStatus();
   }, []);
+
+  const checkCurrentStatus = async () => {
+    try {
+      const { res } = await Factory('get', '/payroll/today/', {});
+      if (res.status_cd === 0 && res.data && res.data.logs && res.data.logs.length > 0) {
+        // Find the latest log that doesn't have a check-out time (currently checked in)
+        const currentLog = res.data.logs.find((log) => log.check_in && !log.check_out);
+
+        if (currentLog) {
+          // User is currently checked in
+          const checkInTime = new Date(currentLog.check_in);
+          const timeString = checkInTime.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+          });
+
+          setIsCheckedIn(true);
+          setCheckInTime(timeString);
+
+          // If location data is available, set it
+          if (currentLog.location) {
+            setLocation({
+              latitude: 0,
+              longitude: 0,
+              coordinates: currentLog.location
+            });
+          }
+        } else {
+          // User is not currently checked in
+          setIsCheckedIn(false);
+          setCheckInTime(null);
+          setLocation(null);
+          setLocationAddress(null);
+        }
+      }
+    } catch (error) {
+      console.error('Error checking current status:', error);
+    }
+  };
 
   const getAddressFromCoordinates = async (latitude, longitude) => {
     try {
@@ -165,62 +211,140 @@ const PunchInOutCard = ({ onAttendanceUpdate }) => {
 
   const handlePunchIn = async () => {
     try {
+      setIsGettingLocation(true);
       // Get location first
       const locationData = await getCurrentLocation();
 
       const now = new Date();
-      setCheckInTime(
-        now.toLocaleTimeString('en-US', {
-          hour: '2-digit',
-          minute: '2-digit',
-          hour12: false
-        })
-      );
-      setIsCheckedIn(true);
+      const timeString = now.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      });
 
-      // Here you would typically make an API call to record the punch in with location
-      console.log('Punched in at:', now.toLocaleTimeString(), 'Location:', locationData);
+      // Prepare API payload
+      const payload = {
+        location: locationData?.coordinates || '',
+        device_info: navigator.userAgent,
+        check_in_type: 'manual'
+      };
 
-      // Update parent component with attendance data
-      if (onAttendanceUpdate) {
-        const time = now.toLocaleTimeString('en-US', {
-          hour: '2-digit',
-          minute: '2-digit',
-          hour12: false
-        });
-        onAttendanceUpdate('checkIn', time, locationData);
+      // Make API call to manual check-in
+      const { res } = await Factory('post', '/payroll/manual-checkin/', payload);
+
+      if (res.status_cd === 0) {
+        // Success - update local state
+        setCheckInTime(timeString);
+        setIsCheckedIn(true);
+        setLocation(locationData);
+        setLocationAddress(locationData);
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'Successfully checked in.',
+            variant: 'alert',
+            alert: { color: 'success' },
+            close: false
+          })
+        );
+        // Update parent component with attendance data
+        if (onAttendanceUpdate) {
+          onAttendanceUpdate('checkIn', timeString, locationData);
+        }
+      } else {
+        // API error
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: `Check-in failed: ${res.data?.message || 'Unknown error'}`,
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
       }
     } catch (error) {
       console.error('Error during punch in:', error);
-      // You might want to show an error message to the user here
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify('Failed to check in. Please try again.'),
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
+    } finally {
+      setIsGettingLocation(false);
     }
   };
 
   const handlePunchOut = async () => {
     try {
+      setIsGettingLocation(true);
       // Get location for punch out as well
       const locationData = await getCurrentLocation();
 
-      setIsCheckedIn(false);
-      setCheckInTime(null);
-      setLocation(null);
-      setLocationAddress(null);
+      const now = new Date();
+      const timeString = now.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      });
 
-      // Here you would typically make an API call to record the punch out with location
-      console.log('Punched out at:', new Date().toLocaleTimeString(), 'Location:', locationData);
+      // Prepare API payload
+      const payload = {
+        location: locationData?.coordinates || '',
+        device_info: navigator.userAgent
+      };
 
-      // Update parent component with attendance data
-      if (onAttendanceUpdate) {
-        const now = new Date();
-        const time = now.toLocaleTimeString('en-US', {
-          hour: '2-digit',
-          minute: '2-digit',
-          hour12: false
-        });
-        onAttendanceUpdate('checkOut', time, locationData);
+      // Make API call to manual check-out
+      const { res } = await Factory('post', '/payroll/manual-checkout/', payload);
+
+      if (res.status_cd === 0) {
+        // Success - update local state
+        setIsCheckedIn(false);
+        setCheckInTime(null);
+        setLocation(null);
+        setLocationAddress(null);
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'Successfully checked out.',
+            variant: 'alert',
+            alert: { color: 'success' },
+            close: false
+          })
+        );
+
+        // Update parent component with attendance data
+        if (onAttendanceUpdate) {
+          onAttendanceUpdate('checkOut', timeString, locationData);
+        }
+      } else {
+        // API error
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: JSON.stringify(`Check-out failed: ${res.data?.message || 'Unknown error'}`),
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
       }
     } catch (error) {
       console.error('Error during punch out:', error);
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify('Failed to check out. Please try again.'),
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
+
       // Still allow punch out even if location fails
       setIsCheckedIn(false);
       setCheckInTime(null);
@@ -237,6 +361,8 @@ const PunchInOutCard = ({ onAttendanceUpdate }) => {
         });
         onAttendanceUpdate('checkOut', time, null);
       }
+    } finally {
+      setIsGettingLocation(false);
     }
   };
 
@@ -250,7 +376,7 @@ const PunchInOutCard = ({ onAttendanceUpdate }) => {
         overflow: 'visible'
       }}
     >
-      <CardContent sx={{ p: 3 }}>
+      <CardContent>
         {/* Location Error Alert */}
         {locationError && (
           <Alert severity="warning" icon={<IconAlertCircle />} sx={{ mb: 2 }} onClose={() => setLocationError(null)}>

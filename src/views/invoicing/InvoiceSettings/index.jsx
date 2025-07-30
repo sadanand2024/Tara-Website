@@ -35,10 +35,11 @@ import { useTheme } from '@mui/material/styles';
 import { useSearchParams } from 'react-router-dom';
 import InvoiceOnboarding from '../../../ui-component/onBoarding/InvoiceOnboarding';
 import { useNavigate } from 'react-router-dom';
+import { Add as AddIcon } from '@mui/icons-material';
 function TabPanel({ children, value, index, ...other }) {
   return (
     <div role="tabpanel" hidden={value !== index} id={`simple-tabpanel-${index}`} aria-labelledby={`simple-tab-${index}`} {...other}>
-      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+      {value === index && <Box sx={{ p: 0 }}>{children}</Box>}
     </div>
   );
 }
@@ -66,6 +67,9 @@ export default function SimpleTabs() {
   const [searchParams] = useSearchParams();
   const [invoiceOnboarding, setInvoiceOnboarding] = useState(false);
   const navigate = useNavigate();
+  const [branchesAddDialogOpen, setBranchesAddDialogOpen] = useState(false);
+  const [customersAddDialogOpen, setCustomersAddDialogOpen] = useState(false);
+  const [goodsServicesAddDialogOpen, setGoodsServicesAddDialogOpen] = useState(false);
   const getInvoicingUsage = async () => {
     //   const moduleUsageRes = await Factory('post', `/user_management/usage-summary/${}`, {});
     //   if (moduleUsageRes.res.status_cd === 0) {
@@ -229,7 +233,85 @@ export default function SimpleTabs() {
         }}
       >
         {/* Header at the top */}
-        <CardHeader title="Invoicing Settings" />
+        <Box sx={{ p: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <Box>
+              <Typography variant="h4" sx={{ fontWeight: 700, color: 'text.primary' }}>
+                Invoicing Settings
+              </Typography>
+              {value === 0 && (
+                <Typography variant="h6" sx={{ fontWeight: 600, color: 'primary.main', mt: 0.5 }}>
+                  Business Profile
+                </Typography>
+              )}
+              {value === 2 && (
+                <Typography variant="h6" sx={{ fontWeight: 600, color: 'primary.main', mt: 0.5 }}>
+                  Branches Info
+                </Typography>
+              )}
+              {value === 3 && (
+                <Typography variant="h6" sx={{ fontWeight: 600, color: 'primary.main', mt: 0.5 }}>
+                  Customers
+                </Typography>
+              )}
+              {value === 4 && (
+                <Typography variant="h6" sx={{ fontWeight: 600, color: 'primary.main', mt: 0.5 }}>
+                  Goods & Services
+                </Typography>
+              )}
+              {value === 5 && (
+                <Typography variant="h6" sx={{ fontWeight: 600, color: 'primary.main', mt: 0.5 }}>
+                  Invoice Number Format
+                </Typography>
+              )}
+            </Box>
+            {value === 2 && (
+              <Button
+                variant="contained"
+                size="small"
+                startIcon={<AddIcon />}
+                onClick={() => setBranchesAddDialogOpen(true)}
+                sx={{
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  fontSize: '0.9rem'
+                }}
+              >
+                Add Branch
+              </Button>
+            )}
+            {value === 3 && (
+              <Button
+                variant="contained"
+                size="small"
+                startIcon={<AddIcon />}
+                onClick={() => setCustomersAddDialogOpen(true)}
+                sx={{
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  fontSize: '0.9rem'
+                }}
+              >
+                Add Customer
+              </Button>
+            )}
+            {value === 4 && (
+              <Button
+                variant="contained"
+                size="small"
+                startIcon={<AddIcon />}
+                onClick={() => setGoodsServicesAddDialogOpen(true)}
+                sx={{
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  fontSize: '0.9rem'
+                }}
+              >
+                Add Item
+              </Button>
+            )}
+          </Box>
+        </Box>
         <Divider />
         {/* Main content area: Tabs + TabPanels */}
         <Box
@@ -345,6 +427,8 @@ export default function SimpleTabs() {
                   postType={postType}
                   handleNext={handleNext}
                   handleBack={handleBack}
+                  addDialogOpen={branchesAddDialogOpen}
+                  setAddDialogOpen={setBranchesAddDialogOpen}
                 />
               </TabPanel>
               <TabPanel value={value} index={3}>
@@ -355,6 +439,8 @@ export default function SimpleTabs() {
                   setBusinessDetails={setBusinessDetails}
                   handleNext={handleNext}
                   handleBack={handleBack}
+                  addDialogOpen={customersAddDialogOpen}
+                  setAddDialogOpen={setCustomersAddDialogOpen}
                 />
               </TabPanel>
               <TabPanel value={value} index={4}>
@@ -363,6 +449,8 @@ export default function SimpleTabs() {
                   setBusinessDetails={setBusinessDetails}
                   handleNext={handleNext}
                   handleBack={handleBack}
+                  addDialogOpen={goodsServicesAddDialogOpen}
+                  setAddDialogOpen={setGoodsServicesAddDialogOpen}
                 />
               </TabPanel>
               <TabPanel value={value} index={5}>
