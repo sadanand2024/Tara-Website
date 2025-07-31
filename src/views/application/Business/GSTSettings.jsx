@@ -276,7 +276,7 @@ const GSTSettings = ({ handleBack, handleNext }) => {
               paginatedData.map((row, idx) => (
                 <TableRow key={idx} hover>
                   <TableCell sx={{ whiteSpace: 'nowrap' }}>{row.gstin}</TableCell>
-                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{row.business_name}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{row.trade_name}</TableCell>
                   <TableCell sx={{ whiteSpace: 'nowrap' }}>{row.branch_name}</TableCell>
                   <TableCell sx={{ whiteSpace: 'nowrap' }}>{row.state}</TableCell>
                   <TableCell sx={{ whiteSpace: 'nowrap' }}>
