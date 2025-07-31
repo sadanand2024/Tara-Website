@@ -74,7 +74,6 @@ const AttendanceInfoTab = () => {
     try {
       let url = `/payroll/monthly-report/?month=${selectedMonth}&year=${selectedYear}`;
       const { res } = await Factory('get', url, {});
-      console.log('Monthly Report API Response:', res);
 
       if (res.status_cd === 0 && res.data && res.data.report) {
         // Transform API response to match our attendance data structure
@@ -83,7 +82,6 @@ const AttendanceInfoTab = () => {
       } else {
         // If API fails, fall back to generated data
         generateFallbackData();
-        console.error('Failed to fetch attendance data:', res);
       }
     } catch (error) {
       console.error('Error fetching attendance data:', error);

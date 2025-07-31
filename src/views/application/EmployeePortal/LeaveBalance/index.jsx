@@ -1,10 +1,13 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Box, Card, CardContent, Typography, Grid2, Button, Stack, Chip, Divider } from '@mui/material';
 import { useSelector } from 'store';
 import { IconCalendar, IconClock, IconUser, IconFileText, IconArrowRight } from '@tabler/icons-react';
+import Factory from 'utils/Factory';
 
 const LeaveBalance = () => {
   const user = useSelector((state) => state.accountReducer.user);
+  const [leaveBalances, setLeaveBalances] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   // Safety check - if user is not an employee, show a message
   if (!user?.employee) {
@@ -18,59 +21,37 @@ const LeaveBalance = () => {
     );
   }
 
-  // Mock leave balance data
-  const leaveBalances = [
-    {
-      id: 'compensatory',
-      title: 'Compensatory off',
-      granted: 3,
-      balance: 3,
-      used: 0,
-      icon: IconClock,
-      color: 'primary',
-      hasDetails: true
-    },
-    {
-      id: 'privilege',
-      title: 'Privilege Leave',
-      granted: 28,
-      balance: 22,
-      used: 6,
-      icon: IconCalendar,
-      color: 'success',
-      hasDetails: true
-    },
-    {
-      id: 'casual',
-      title: 'Casual Leave',
-      granted: 12,
-      balance: 12,
-      used: 0,
-      icon: IconUser,
-      color: 'info',
-      hasDetails: false
-    },
-    {
-      id: 'sick',
-      title: 'Sick Leave',
-      granted: 15,
-      balance: 15,
-      used: 0,
-      icon: IconFileText,
-      color: 'warning',
-      hasDetails: false
-    },
-    {
-      id: 'earned',
-      title: 'Earned Leave',
-      granted: 0,
-      balance: 0,
-      used: 0,
-      icon: IconCalendar,
-      color: 'secondary',
-      hasDetails: false
+  // Icon mapping for leave types
+  const getIconForLeaveType = (leaveTypeName) => {
+    switch (leaveTypeName.toLowerCase()) {
+      case 'earned leaves':
+        return IconCalendar;
+      case 'casual leaves':
+        return IconUser;
+      case 'sick leaves':
+        return IconFileText;
+      case 'loss of pay':
+        return IconClock;
+      default:
+        return IconCalendar;
     }
-  ];
+  };
+
+  // Color mapping for leave types
+  const getColorForLeaveType = (leaveTypeName) => {
+    switch (leaveTypeName.toLowerCase()) {
+      case 'earned leaves':
+        return 'secondary';
+      case 'casual leaves':
+        return 'info';
+      case 'sick leaves':
+        return 'warning';
+      case 'loss of pay':
+        return 'error';
+      default:
+        return 'primary';
+    }
+  };
 
   const getColorByType = (color) => {
     switch (color) {
@@ -84,6 +65,8 @@ const LeaveBalance = () => {
         return '#ed6c02';
       case 'secondary':
         return '#9c27b0';
+      case 'error':
+        return '#d32f2f';
       default:
         return '#666';
     }
@@ -93,6 +76,44 @@ const LeaveBalance = () => {
     console.log(`View details for ${leaveType}`);
     // Here you would typically navigate to a detailed view or open a modal
   };
+
+  const getLeaveBalance = async () => {
+    try {
+      setLoading(true);
+      let url = '/payroll/my-leave-balances/';
+      const { res } = await Factory('get', url, {});
+
+      // Transform API data to match component structure
+      const transformedData = res.data.map((item) => ({
+        id: item.id,
+        title: item.leave_type_name,
+        granted: item.leave_entitled,
+        balance: item.leave_remaining,
+        used: item.leave_used,
+        icon: getIconForLeaveType(item.leave_type_name),
+        color: getColorForLeaveType(item.leave_type_name),
+        hasDetails: item.leave_entitled > 0 // Show details if there are leaves granted
+      }));
+
+      setLeaveBalances(transformedData);
+    } catch (error) {
+      console.error('Error fetching leave balances:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    getLeaveBalance();
+  }, []);
+
+  if (loading) {
+    return (
+      <Box sx={{ p: 3 }}>
+        <Typography variant="h6">Loading leave balances...</Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ p: 3 }}>

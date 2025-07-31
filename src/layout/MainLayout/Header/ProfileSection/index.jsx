@@ -98,8 +98,8 @@ export default function ProfileSection() {
   const isPersonalContext = userData?.active_context?.context_type === 'personal';
   const isBusinessContext = userData?.active_context?.context_type !== 'personal';
   const isEmployeePortal = !!user?.employee;
-  console.log('useAuth().user:', user);
-  console.log('Role from userData:', !!user?.employee);
+  // console.log('useAuth().user:', user);
+  // console.log('Role from userData:', !!user?.employee);
 
   return (
     <>
@@ -357,7 +357,7 @@ export default function ProfileSection() {
                                 primary={
                                   <Typography variant="body2">
                                     {/* <FormattedMessage id="my-profile" /> */}
-                                     <FormattedMessage id="my-profile" defaultMessage="My Profile" />
+                                    <FormattedMessage id="my-profile" defaultMessage="My Profile" />
                                   </Typography>
                                 }
                               />
