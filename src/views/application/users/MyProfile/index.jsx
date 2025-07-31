@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -21,12 +20,10 @@ import { gridSpacing } from 'store/constant';
 import { useSelector } from 'store';
 import { useSearchParams } from 'react-router-dom';
 
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';             // Profile Information
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'; // Profile Information
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined'; // Personal Information
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined'; // Address Information
-import SchoolOutlinedIcon from '@mui/icons-material/SchoolOutlined';         // Educational Information
-
-
+import SchoolOutlinedIcon from '@mui/icons-material/SchoolOutlined'; // Educational Information
 
 import ProfileInfo from './ProfileInfo';
 import Personal from './Personal';
@@ -39,7 +36,7 @@ import { useMediaQuery, Box, Card, CardHeader } from '@mui/material';
 function TabPanel({ children, value, index, ...other }) {
   return (
     <div role="tabpanel" hidden={value !== index} id={`simple-tabpanel-${index}`} aria-labelledby={`simple-tab-${index}`} {...other}>
-      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+      {value === index && <Box sx={{ p: 0 }}>{children}</Box>}
     </div>
   );
 }
@@ -74,7 +71,6 @@ const tabsOption = [
     caption: 'Academic background and certificates'
   }
 ];
-
 
 // ==============================|| PROFILE 2 ||============================== //
 
@@ -116,7 +112,20 @@ export default function Profile2() {
       }}
     >
       {/* Header at the top */}
-      <CardHeader title="Business Settings" />
+      <CardHeader
+        title="My Profile"
+        subheader={
+          value === 0
+            ? 'Profile Information'
+            : value === 1
+              ? 'Personal Information'
+              : value === 2
+                ? 'Address Information'
+                : value === 3
+                  ? 'Educational Information'
+                  : ''
+        }
+      />
       <Divider />
       {/* Main content area: Tabs + TabPanels */}
       <Box
@@ -219,7 +228,6 @@ export default function Profile2() {
             <TabPanel value={value} index={3}>
               <EducationInfo user={user} handleNext={handleNext} handleBack={handleBack} tabChange={handleChange} tabval={value} />
             </TabPanel>
-           
           </CardContent>
         </Box>
       </Box>

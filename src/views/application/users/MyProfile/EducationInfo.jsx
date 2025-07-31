@@ -1,19 +1,10 @@
 import React, { useEffect } from 'react';
-import {
-  Autocomplete,
-  Box,
-  Button,
-  Card,
-  Grid2,
-  Stack,
-  TextField,
-  Typography
-} from '@mui/material';
+import { Autocomplete, Box, Button, Card, Grid2, Stack, TextField, Typography } from '@mui/material';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
 import { useSelector } from 'store';
-
+import MainCard from 'ui-component/cards/MainCard';
 const additionalFields = [
   { label: 'Qualification/Degree', name: 'qualification', type: 'text', required: true },
   { label: 'Year Of Passing', name: 'year_of_passing', type: 'text', required: true },
@@ -41,15 +32,7 @@ const EducationInfo = () => {
     }
   });
 
-  const {
-    values,
-    setFieldValue,
-    handleChange,
-    errors,
-    touched,
-    handleSubmit,
-    handleBlur
-  } = formik;
+  const { values, setFieldValue, handleChange, errors, touched, handleSubmit, handleBlur } = formik;
 
   // Prefill Redux values
   useEffect(() => {
@@ -136,30 +119,22 @@ const EducationInfo = () => {
   };
 
   return (
-    <Box>
-      <Card sx={{ p: 1}}>
-        <form onSubmit={handleSubmit}>
-          <Grid2 container spacing={2}>
-            <Grid2 size={{xs:12}}>
-              <Typography variant="h4" fontWeight={700}>
-                Education Information
-              </Typography>
+    <MainCard>
+      <form onSubmit={handleSubmit}>
+        <Grid2 container spacing={2}>
+          {additionalFields.map((field) => (
+            <Grid2 size={{ xs: 12, sm: 6, md: 4 }} key={field.name}>
+              {renderField(field)}
             </Grid2>
-
-            {additionalFields.map((field) => (
-              <Grid2 size={{xs:12,sm:6,md:4}}  key={field.name}>
-                {renderField(field)}
-              </Grid2>
-            ))}
-          </Grid2>
-          <Stack direction="row" spacing={2} sx={{ mt: 3, justifyContent: 'flex-end' }}>
-            <Button variant="contained" color="primary" type="submit">
-              Save
-            </Button>
-          </Stack>
-        </form>
-      </Card>
-    </Box>
+          ))}
+        </Grid2>
+        <Stack direction="row" spacing={2} sx={{ mt: 3, justifyContent: 'flex-end' }}>
+          <Button variant="contained" color="primary" type="submit">
+            Save
+          </Button>
+        </Stack>
+      </form>
+    </MainCard>
   );
 };
 
