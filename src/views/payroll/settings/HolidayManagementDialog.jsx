@@ -1,5 +1,6 @@
 import { Box, Button, Stack, Typography } from '@mui/material';
 import Grid2 from '@mui/material/Grid2';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs from 'dayjs';
 import { useFormik } from 'formik';
 import React, { useEffect, useState } from 'react';
@@ -8,7 +9,6 @@ import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
 import Modal from 'ui-component/extended/Modal';
 import CustomAutocomplete from 'utils/CustomAutocomplete';
-import CustomDatePicker from 'utils/CustomDateInput';
 import CustomInput from 'utils/CustomInput';
 import Factory from 'utils/Factory';
 import * as Yup from 'yup';
@@ -49,6 +49,21 @@ export default function HolidayManagementDialog({ open, handleClose, selectedRec
       {isRequired && <span style={{ color: 'red', fontSize: '1.2em', marginLeft: 2 }}>*</span>}
     </span>
   );
+
+  // Helper function to convert DD-MM-YYYY to YYYY-MM-DD
+  const convertDateFormat = (dateString) => {
+    if (!dateString) return '';
+    // Check if date is already in YYYY-MM-DD format
+    if (dateString.includes('-') && dateString.split('-')[0].length === 4) {
+      return dateString;
+    }
+    // Convert from DD-MM-YYYY to YYYY-MM-DD
+    const parts = dateString.split('-');
+    if (parts.length === 3) {
+      return `${parts[2]}-${parts[1]}-${parts[0]}`;
+    }
+    return dateString;
+  };
 
   const formik = useFormik({
     initialValues: {
@@ -116,14 +131,20 @@ export default function HolidayManagementDialog({ open, handleClose, selectedRec
               {getLabelWithAsterisk(field.label, field.required)}
             </Typography>
 
-            <CustomDatePicker
-              name={field.name}
+            <DatePicker
               value={values[field.name] ? dayjs(values[field.name]) : null}
               onChange={(newDate) => {
                 setFieldValue(field.name, newDate ? newDate.format('YYYY-MM-DD') : '');
               }}
-              error={touched[field.name] && Boolean(errors[field.name])}
-              helperText={touched[field.name] && errors[field.name]}
+              format="DD/MM/YYYY"
+              slotProps={{
+                textField: {
+                  fullWidth: true,
+                  size: 'small',
+                  error: touched[field.name] && Boolean(errors[field.name]),
+                  helperText: touched[field.name] && errors[field.name]
+                }
+              }}
             />
           </Grid2>
         );
@@ -234,8 +255,8 @@ export default function HolidayManagementDialog({ open, handleClose, selectedRec
       setValues({
         ...selectedRecord,
         applicable_for: applicableIds,
-        start_date: selectedRecord.start_date || '',
-        end_date: selectedRecord.end_date || ''
+        start_date: selectedRecord.start_date ? convertDateFormat(selectedRecord.start_date) : '',
+        end_date: selectedRecord.end_date ? convertDateFormat(selectedRecord.end_date) : ''
       });
     } else if (open && type === 'add') {
       resetForm();

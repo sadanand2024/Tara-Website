@@ -13,8 +13,7 @@ import {
   IconCurrencyDollar,
   IconFileDescription,
   IconUsers,
-  IconCalendarTime,
-  IconCalendarEvent
+  IconArrowLeft
 } from '@tabler/icons-react';
 import Factory from 'utils/Factory';
 import BusinessProfile from './BusinessProfile';
@@ -233,38 +232,38 @@ export default function SimpleTabs() {
         }}
       >
         {/* Header at the top */}
-        <Box sx={{ p: 2 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <Box>
-              <Typography variant="h4" sx={{ fontWeight: 700, color: 'text.primary' }}>
-                Invoicing Settings
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', p: 2 }}>
+          <Box>
+            <Typography variant="h4" sx={{ fontWeight: 700, color: 'text.primary' }}>
+              Invoicing Settings
+            </Typography>
+            {value === 0 && (
+              <Typography variant="h6" sx={{ fontWeight: 600, color: 'primary.main', mt: 0.5 }}>
+                Business Profile
               </Typography>
-              {value === 0 && (
-                <Typography variant="h6" sx={{ fontWeight: 600, color: 'primary.main', mt: 0.5 }}>
-                  Business Profile
-                </Typography>
-              )}
-              {value === 2 && (
-                <Typography variant="h6" sx={{ fontWeight: 600, color: 'primary.main', mt: 0.5 }}>
-                  Branches Info
-                </Typography>
-              )}
-              {value === 3 && (
-                <Typography variant="h6" sx={{ fontWeight: 600, color: 'primary.main', mt: 0.5 }}>
-                  Customers
-                </Typography>
-              )}
-              {value === 4 && (
-                <Typography variant="h6" sx={{ fontWeight: 600, color: 'primary.main', mt: 0.5 }}>
-                  Goods & Services
-                </Typography>
-              )}
-              {value === 5 && (
-                <Typography variant="h6" sx={{ fontWeight: 600, color: 'primary.main', mt: 0.5 }}>
-                  Invoice Number Format
-                </Typography>
-              )}
-            </Box>
+            )}
+            {value === 2 && (
+              <Typography variant="h6" sx={{ fontWeight: 600, color: 'primary.main', mt: 0.5 }}>
+                Branches Info
+              </Typography>
+            )}
+            {value === 3 && (
+              <Typography variant="h6" sx={{ fontWeight: 600, color: 'primary.main', mt: 0.5 }}>
+                Customers
+              </Typography>
+            )}
+            {value === 4 && (
+              <Typography variant="h6" sx={{ fontWeight: 600, color: 'primary.main', mt: 0.5 }}>
+                Goods & Services
+              </Typography>
+            )}
+            {value === 5 && (
+              <Typography variant="h6" sx={{ fontWeight: 600, color: 'primary.main', mt: 0.5 }}>
+                Invoice Number Format
+              </Typography>
+            )}
+          </Box>
+          <Box sx={{ display: 'flex', gap: 2 }}>
             {value === 2 && (
               <Button
                 variant="contained"
@@ -310,6 +309,11 @@ export default function SimpleTabs() {
                 Add Item
               </Button>
             )}
+            {
+              <Button startIcon={<IconArrowLeft />} variant="outlined" size="small" onClick={() => navigate('/app/invoice')}>
+                Back to Dashboard
+              </Button>
+            }
           </Box>
         </Box>
         <Divider />

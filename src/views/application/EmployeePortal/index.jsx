@@ -15,7 +15,15 @@ import {
   Divider,
   IconButton,
   LinearProgress,
-  Paper
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Dialog,
+  DialogContent
 } from '@mui/material';
 import { useSelector } from 'store';
 import {
@@ -32,13 +40,17 @@ import {
   IconHome,
   IconCalendarEvent,
   IconCurrencyDollar,
-  IconFileDescription
+  IconFileDescription,
+  IconDownload,
+  IconEye,
+  IconPlus
 } from '@tabler/icons-react';
-// import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import TaxTDSInfo from './TaxTDSInfo';
 
 const EmployeePortalDashboard = () => {
   const user = useSelector((state) => state.accountReducer.user);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [showTaxDetails, setShowTaxDetails] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -60,271 +72,318 @@ const EmployeePortalDashboard = () => {
   }
 
   // Mock data - in real app, this would come from API
-  const userName = user?.employee?.full_name || 'Srinivas';
+  const userName = user?.employee?.full_name || 'Rahul';
   const currentDate = currentTime.toLocaleDateString('en-US', {
     day: 'numeric',
     month: 'long',
     year: 'numeric'
   });
-  const currentDay = currentTime.toLocaleDateString('en-US', { weekday: 'long' });
   const currentTimeString = currentTime.toLocaleTimeString('en-US', {
-    hour12: false,
+    hour12: true,
     hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit'
+    minute: '2-digit'
   });
 
-  // Earnings breakdown data
-  const earningsData = [
-    { name: 'Basic', value: 40000, color: '#8884d8' },
-    { name: 'Allowances', value: 15000, color: '#82ca9d' },
-    { name: 'Other Benefits', value: 5000, color: '#ffc658' }
-  ];
-
-  const upcomingHolidays = [
-    { date: '30th July, 2025', type: 'Independence Day' },
-    { date: '25th August, 2025', type: 'Raksha Bandhan' },
-    { date: '31st August, 2025', type: 'Ganesh Chaturthi' }
-  ];
-
-  const quickAccessItems = ['Payslip', 'IT Statement', 'Loan Statement', 'YTD Reports', 'Form 16'];
-
-  const earningsBreakdown = ['Basic', 'Allowances', 'Gross pay', 'Deductions', 'Other Benefits', 'My monthly CTC'];
-
   return (
-    <Box sx={{ p: 1 }}>
-      {/* Welcome Message */}
-      <Card sx={{ mb: 3, p: 3, background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>
+    <Box sx={{ p: 0.25 }}>
+      {/* Header Section */}
+      <Card sx={{ mb: 1, p: 1, background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>
         <Typography variant="h4" sx={{ fontWeight: 600, color: 'white' }}>
-          Hello, {userName}!
+          Welcome, {userName}!
         </Typography>
-        <Typography variant="body1" sx={{ fontSize: '1rem', mt: 1, fontWeight: 400 }}>
-          Your gateway to attendance, leaves, updates, and more - because every moment at work matters. Let's make today count!
+        <Typography variant="body1" sx={{ mr: 2, fontSize: '1.1rem' }}>
+          April 2024 ▼
         </Typography>
       </Card>
-
-      <Grid2 container spacing={3}>
-        {/* My To-Dos */}
-        <Grid2 size={{ xs: 12, md: 6, lg: 4 }}>
+      <Grid2 container spacing={1} sx={{ mb: 1 }}>
+        {/* Welcome and Check-in */}
+        <Grid2 size={{ xs: 12, md: 4 }}>
           <Card sx={{ height: '100%' }}>
-            <CardContent>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="h5" sx={{ fontWeight: 600 }}>
-                  My To-Dos
-                </Typography>
-                <IconArrowRight />
-              </Box>
-              <List dense>
-                <ListItem sx={{ px: 0 }}>
-                  <ListItemText primary="• update kyc info" primaryTypographyProps={{ fontSize: '0.9rem' }} />
-                  <IconArrowRight size={16} />
-                </ListItem>
-              </List>
-            </CardContent>
-          </Card>
-        </Grid2>
-
-        {/* Current Shift/Time Card */}
-        <Grid2 size={{ xs: 12, md: 6, lg: 4 }}>
-          <Card
-            sx={{ height: '100%', background: 'linear-gradient(135deg,rgb(107, 126, 211) 0%,rgb(219, 138, 149) 100%)', color: 'white' }}
-          >
-            <CardContent>
-              <Typography variant="h5" sx={{ mb: 2, fontWeight: 600 }}>
-                Current Shift/Time Card
+            <CardContent sx={{ p: 1 }}>
+              <Typography variant="body1" sx={{ mb: 0.25, fontSize: '1.05rem' }}>
+                Today: {currentDate}
               </Typography>
-              <Typography variant="h5" sx={{ mb: 1, fontWeight: 600 }}>
-                {currentDate}
+              <Typography variant="body1" sx={{ mb: 1, fontSize: '1.05rem' }}>
+                Checked in at {currentTimeString}
               </Typography>
-              <Typography variant="body1" sx={{ mb: 1 }}>
-                {currentDay} | Morning shift
-              </Typography>
-              <Typography variant="h4" sx={{ mb: 2, fontWeight: 600, fontFamily: 'monospace' }}>
-                {currentTimeString} HRS
-              </Typography>
-              <Button
-                variant="contained"
-                sx={{
-                  bgcolor: 'white',
-                  color: 'primary.main',
-                  '&:hover': { bgcolor: 'grey.100' }
-                }}
-              >
-                Sign in
+              <Button variant="contained" color="primary" size="small">
+                Check-out
               </Button>
             </CardContent>
           </Card>
         </Grid2>
 
-        {/* Track */}
-        <Grid2 size={{ xs: 12, md: 6, lg: 4 }}>
+        {/* My Earnings */}
+        <Grid2 size={{ xs: 12, md: 4 }}>
           <Card sx={{ height: '100%' }}>
-            <CardContent>
-              <Typography variant="h5" sx={{ mb: 2, fontWeight: 600 }}>
-                Track
+            <CardContent sx={{ p: 1 }}>
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 1, fontSize: '1.1rem', whiteSpace: 'nowrap' }}>
+                My Earnings (Net pay)
               </Typography>
-              <Grid2 container spacing={2}>
-                <Grid2 size={6}>
-                  <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'primary.light', color: 'white' }}>
-                    <Typography variant="h3" sx={{ fontWeight: 700 }}>
-                      5
-                    </Typography>
-                    <Typography variant="body2">Claims</Typography>
-                  </Paper>
-                </Grid2>
-                <Grid2 size={6}>
-                  <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'secondary.light', color: 'white' }}>
-                    <Typography variant="h3" sx={{ fontWeight: 700 }}>
-                      3
-                    </Typography>
-                    <Typography variant="body2">Leaves</Typography>
-                  </Paper>
-                </Grid2>
-              </Grid2>
-            </CardContent>
-          </Card>
-        </Grid2>
 
-        {/* Upcoming Holidays */}
-        <Grid2 size={{ xs: 12, md: 6, lg: 4 }}>
-          <Card sx={{ height: '100%' }}>
-            <CardContent>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="h5" sx={{ fontWeight: 600 }}>
-                  Upcoming Holidays
-                </Typography>
-                <IconArrowRight />
-              </Box>
-              <List dense>
-                {upcomingHolidays.map((holiday, index) => (
-                  <ListItem key={index} sx={{ px: 0 }}>
-                    <ListItemText primary={`${holiday.date} - ${holiday.type}`} primaryTypographyProps={{ fontSize: '0.9rem' }} />
-                  </ListItem>
-                ))}
-              </List>
-            </CardContent>
-          </Card>
-        </Grid2>
-
-        {/* Quick Access */}
-        <Grid2 size={{ xs: 12, md: 6, lg: 4 }}>
-          <Card sx={{ height: '100%' }}>
-            <CardContent>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="h5" sx={{ fontWeight: 600 }}>
-                  Quick Access
-                </Typography>
-                <IconArrowRight />
-              </Box>
-              <List dense>
-                {quickAccessItems.map((item, index) => (
-                  <ListItem key={index} sx={{ px: 0 }}>
-                    <ListItemText primary={item} primaryTypographyProps={{ fontSize: '0.9rem' }} />
-                  </ListItem>
-                ))}
-              </List>
-            </CardContent>
-          </Card>
-        </Grid2>
-
-        {/* My Earnings Breakdown */}
-        <Grid2 size={{ xs: 12, md: 6, lg: 4 }}>
-          <Card sx={{ height: '100%' }}>
-            <CardContent>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="h5" sx={{ fontWeight: 600 }}>
-                  My Earnings Breakdown
-                </Typography>
-                <IconArrowRight />
-              </Box>
-              <Grid2 container spacing={2}>
-                <Grid2 size={8}>
-                  <List dense>
-                    {earningsBreakdown.map((item, index) => (
-                      <ListItem key={index} sx={{ px: 0 }}>
-                        <ListItemText primary={item} primaryTypographyProps={{ fontSize: '0.9rem' }} />
-                      </ListItem>
-                    ))}
-                  </List>
-                </Grid2>
-                <Grid2 size={4}>
-                  <Box sx={{ width: '100%', height: 150, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Box sx={{ textAlign: 'center' }}>
-                      <Typography variant="h4" sx={{ fontWeight: 700, color: 'primary.main' }}>
-                        ₹60,000
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Total CTC
-                      </Typography>
-                    </Box>
-                  </Box>
-                </Grid2>
-              </Grid2>
-            </CardContent>
-          </Card>
-        </Grid2>
-
-        {/* IT Declarations & POI */}
-        <Grid2 size={{ xs: 12, md: 6, lg: 4 }}>
-          <Card sx={{ height: '100%', bgcolor: 'warning.light' }}>
-            <CardContent>
-              <Typography variant="h5" sx={{ mb: 2, fontWeight: 600 }}>
-                IT Declarations & POI
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 0.25, fontSize: '0.95rem' }}>
+                This month :
               </Typography>
-              <Typography variant="body2" sx={{ mb: 2 }}>
-                Declarations window is open till 31st Aug 2025. Please submit your IT declarations and proof of investments.
+              <Typography variant="h5" sx={{ fontWeight: 700, color: 'primary.main', mb: 0.25, fontSize: '1.4rem' }}>
+                ₹98,262
               </Typography>
-              <Button variant="contained" color="warning">
-                Submit
+
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1, fontSize: '0.95rem' }}>
+                YTD :
+              </Typography>
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.25, fontSize: '1.2rem' }}>
+                ₹6,20,000
+              </Typography>
+              <Button variant="outlined" size="small" startIcon={<IconEye />}>
+                View salary Breakdown
               </Button>
             </CardContent>
           </Card>
         </Grid2>
 
-        {/* My Attendance History */}
-        <Grid2 size={{ xs: 12, md: 6, lg: 4 }}>
+        {/* My Payslips */}
+        <Grid2 size={{ xs: 12, md: 4 }}>
           <Card sx={{ height: '100%' }}>
-            <CardContent>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="h5" sx={{ fontWeight: 600 }}>
-                  My Attendance History
-                </Typography>
-                <IconArrowRight />
-              </Box>
-              <Box sx={{ height: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Typography variant="body2" color="text.secondary">
-                  Click to view detailed history
-                </Typography>
+            <CardContent sx={{ p: 1 }}>
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 1, fontSize: '1.1rem' }}>
+                My Payslips
+              </Typography>
+              <List dense sx={{ py: 0 }}>
+                <ListItem sx={{ px: 0, py: 0.25 }}>
+                  <ListItemText
+                    primary="April 2024"
+                    secondary="View/Download"
+                    primaryTypographyProps={{ fontSize: '1rem', fontWeight: 500 }}
+                    secondaryTypographyProps={{ fontSize: '0.85rem' }}
+                  />
+                  <IconDownload size={16} />
+                </ListItem>
+                <ListItem sx={{ px: 0, py: 0.25 }}>
+                  <ListItemText
+                    primary="March 2024"
+                    secondary="View/Download"
+                    primaryTypographyProps={{ fontSize: '1rem', fontWeight: 500 }}
+                    secondaryTypographyProps={{ fontSize: '0.85rem' }}
+                  />
+                  <IconDownload size={16} />
+                </ListItem>
+                <ListItem sx={{ px: 0, py: 0.25 }}>
+                  <ListItemText
+                    primary="Feb 2024"
+                    secondary="View/Download"
+                    primaryTypographyProps={{ fontSize: '1rem', fontWeight: 500 }}
+                    secondaryTypographyProps={{ fontSize: '0.85rem' }}
+                  />
+                  <IconDownload size={16} />
+                </ListItem>
+              </List>
+              <Button variant="outlined" size="small">
+                View ALL
+              </Button>
+            </CardContent>
+          </Card>
+        </Grid2>
+      </Grid2>
+
+      {/* Middle Section */}
+      <Grid2 container spacing={1} sx={{ mb: 1 }}>
+        {/* Leave & LoP */}
+        <Grid2 size={{ xs: 12, md: 4 }}>
+          <Card sx={{ height: '100%' }}>
+            <CardContent sx={{ p: 1 }}>
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 1, fontSize: '1.1rem' }}>
+                Leave & LoP (Leaves taken)
+              </Typography>
+              <TableContainer>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell sx={{ fontSize: '0.9rem', fontWeight: 600, py: 0.25 }}>Type</TableCell>
+                      <TableCell sx={{ fontSize: '0.9rem', fontWeight: 600, py: 0.25 }}>Paid leaves</TableCell>
+                      <TableCell sx={{ fontSize: '0.9rem', fontWeight: 600, py: 0.25 }}>LoPs</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell sx={{ fontSize: '0.95rem', py: 0.25 }}>This month</TableCell>
+                      <TableCell sx={{ fontSize: '0.95rem', py: 0.25 }}>2</TableCell>
+                      <TableCell sx={{ fontSize: '0.95rem', py: 0.25 }}>1</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell sx={{ fontSize: '0.95rem', py: 0.25 }}>YTD</TableCell>
+                      <TableCell sx={{ fontSize: '0.95rem', py: 0.25 }}>5</TableCell>
+                      <TableCell sx={{ fontSize: '0.95rem', py: 0.25 }}>3</TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </TableContainer>
+
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', m: 2 }}>
+                <Button variant="outlined" size="small">
+                  View Leave ledger
+                </Button>
+                <Button variant="contained" color="error" size="small" startIcon={<IconPlus />}>
+                  APPLY
+                </Button>
               </Box>
             </CardContent>
           </Card>
         </Grid2>
 
-        {/* Leave Management */}
-        <Grid2 size={{ xs: 12, md: 6, lg: 4 }}>
+        {/* Tax Deducted */}
+        <Grid2 size={{ xs: 12, md: 4 }}>
           <Card sx={{ height: '100%' }}>
-            <CardContent>
-              <Typography variant="h5" sx={{ mb: 2, fontWeight: 600 }}>
-                Leave Management
+            <CardContent sx={{ p: 1 }}>
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 1, fontSize: '1.1rem' }}>
+                Tax Deducted (TDS)
               </Typography>
-              <List dense>
-                <ListItem sx={{ px: 0 }}>
-                  <ListItemText primary="Leave Balance" primaryTypographyProps={{ fontSize: '0.9rem' }} />
-                  <IconArrowRight size={16} />
+              <Typography variant="body2" sx={{ mb: 0.25, fontSize: '0.95rem' }}>
+                Regime: New
+              </Typography>
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.25, fontSize: '1.2rem' }}>
+                ₹1,800
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 0.25, fontSize: '0.9rem' }}>
+                This month
+              </Typography>
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.25, fontSize: '1.2rem' }}>
+                ₹24,600
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1, fontSize: '0.9rem' }}>
+                YTD
+              </Typography>
+              <Button variant="outlined" size="small" startIcon={<IconEye />} onClick={() => setShowTaxDetails(true)}>
+                View Details
+              </Button>
+            </CardContent>
+          </Card>
+        </Grid2>
+
+        {/* Tax Declaration */}
+        <Grid2 size={{ xs: 12, md: 4 }}>
+          <Card sx={{ height: '100%' }}>
+            <CardContent sx={{ p: 1 }}>
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 1, fontSize: '1.1rem' }}>
+                Tax Declaration
+              </Typography>
+              <Box sx={{ height: 60, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.95rem' }}>
+                  Tax declaration details will appear here
+                </Typography>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid2>
+      </Grid2>
+
+      {/* Bottom Section */}
+      <Grid2 container spacing={1}>
+        {/* My Attendance */}
+        <Grid2 size={{ xs: 12, md: 4 }}>
+          <Card sx={{ height: '100%' }}>
+            <CardContent sx={{ p: 1 }}>
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 1, fontSize: '1.1rem' }}>
+                My Attendance
+              </Typography>
+              <TableContainer>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell sx={{ fontSize: '0.9rem', fontWeight: 600, py: 0.25 }}>This month</TableCell>
+                      <TableCell sx={{ fontSize: '0.9rem', fontWeight: 600, py: 0.25 }}>YTD</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell sx={{ fontSize: '0.9rem', py: 0.25 }}>Working days</TableCell>
+                      <TableCell sx={{ fontSize: '0.9rem', py: 0.25 }}></TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell sx={{ fontSize: '0.9rem', py: 0.25 }}>Present</TableCell>
+                      <TableCell sx={{ fontSize: '0.9rem', py: 0.25 }}></TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell sx={{ fontSize: '0.9rem', py: 0.25 }}>LoP</TableCell>
+                      <TableCell sx={{ fontSize: '0.9rem', py: 0.25 }}></TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell sx={{ fontSize: '0.9rem', py: 0.25 }}>Paid leaves</TableCell>
+                      <TableCell sx={{ fontSize: '0.9rem', py: 0.25 }}></TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </TableContainer>
+              <Button variant="outlined" size="small" startIcon={<IconEye />}>
+                View Full Attendance
+              </Button>
+            </CardContent>
+          </Card>
+        </Grid2>
+
+        {/* My PF Contribution */}
+        <Grid2 size={{ xs: 12, md: 4 }}>
+          <Card sx={{ height: '100%' }}>
+            <CardContent sx={{ p: 1 }}>
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.25, fontSize: '1.1rem' }}>
+                My PF Contribution
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 0.25, fontSize: '0.9rem' }}>
+                EPF Tracker
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1, fontSize: '0.9rem' }}>
+                (Employee + Employer Contribution)
+              </Typography>
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.25, fontSize: '1.2rem' }}>
+                ₹3,600
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 0.25, fontSize: '0.9rem' }}>
+                This month
+              </Typography>
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.25, fontSize: '1.2rem' }}>
+                ₹43,200
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1, fontSize: '0.9rem' }}>
+                YTD
+              </Typography>
+              <Button variant="outlined" size="small" startIcon={<IconFileText />}>
+                View PF Passbook
+              </Button>
+            </CardContent>
+          </Card>
+        </Grid2>
+
+        {/* Reimbursements */}
+        <Grid2 size={{ xs: 12, md: 4 }}>
+          <Card sx={{ height: '100%' }}>
+            <CardContent sx={{ p: 1 }}>
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 1, fontSize: '1.1rem' }}>
+                Reimbursements
+              </Typography>
+              <List dense sx={{ py: 0 }}>
+                <ListItem sx={{ px: 0, py: 0.25 }}>
+                  <ListItemText primary="Applied:" secondary="" primaryTypographyProps={{ fontSize: '1rem', fontWeight: 500 }} />
                 </ListItem>
-                <ListItem sx={{ px: 0 }}>
-                  <ListItemText primary="Apply for leave" primaryTypographyProps={{ fontSize: '0.9rem' }} />
-                  <IconArrowRight size={16} />
+                <ListItem sx={{ px: 0, py: 0.25 }}>
+                  <ListItemText primary="Approved:" secondary="" primaryTypographyProps={{ fontSize: '1rem', fontWeight: 500 }} />
                 </ListItem>
-                <ListItem sx={{ px: 0 }}>
-                  <ListItemText primary="Leave requests" primaryTypographyProps={{ fontSize: '0.9rem' }} />
-                  <IconArrowRight size={16} />
+                <ListItem sx={{ px: 0, py: 0.25 }}>
+                  <ListItemText primary="Processed:" secondary="" primaryTypographyProps={{ fontSize: '1rem', fontWeight: 500 }} />
+                </ListItem>
+                <ListItem sx={{ px: 0, py: 0.25 }}>
+                  <ListItemText primary="Pending:" secondary="" primaryTypographyProps={{ fontSize: '1rem', fontWeight: 500 }} />
                 </ListItem>
               </List>
             </CardContent>
           </Card>
         </Grid2>
       </Grid2>
+
+      {/* Tax Details Dialog */}
+      <Dialog open={showTaxDetails} onClose={() => setShowTaxDetails(false)} maxWidth="md" fullWidth>
+        <DialogContent sx={{ p: 0 }}>
+          <TaxTDSInfo onClose={() => setShowTaxDetails(false)} />
+        </DialogContent>
+      </Dialog>
     </Box>
   );
 };

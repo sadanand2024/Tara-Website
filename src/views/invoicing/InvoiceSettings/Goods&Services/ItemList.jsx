@@ -27,6 +27,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useNavigate } from 'react-router-dom';
 import BusinessIcon from '@mui/icons-material/Business';
 import { IconPlus } from '@tabler/icons-react';
+import { formatNumberIN } from 'utils/comaseperator';
 const ItemList = ({
   type,
   setType,
@@ -197,7 +198,7 @@ const ItemList = ({
                   <TableCell>{item.sku_value}</TableCell>
                   <TableCell>{item.description}</TableCell>
                   <TableCell>{item.gst_rate}</TableCell>
-                  <TableCell>{item.selling_price}</TableCell>
+                  <TableCell>{formatNumberIN(item.selling_price)}</TableCell>
                   <TableCell align="center">
                     <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
                       <IconButton color="primary" onClick={() => handleEdit(item)}>
