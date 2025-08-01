@@ -1,258 +1,259 @@
-import React, { useState } from 'react';
-import { Box, Button, Card, CardContent, Divider, FormControl, MenuItem, Select, Stack, TextField, Typography } from '@mui/material';
-import Grid2 from '@mui/material/Grid2';
-import { IconChevronDown, IconDownload } from '@tabler/icons-react';
-import { useSelector } from 'store';
+import {
+  Autocomplete,
+  Box,
+  CircularProgress,
+  Pagination,
+  Paper,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography
+} from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import EmptyDataPlaceholder from 'ui-component/extended/EmptyDataPlaceholder';
+import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
+import { generateFinancialYears } from 'utils/FinancialYearsList';
+import MainCard from '../../../../ui-component/cards/MainCard';
+import Factory from 'utils/factory';
 
 const PaySlips = () => {
-  const user = useSelector((state) => state.accountReducer.user);
-  const [selectedMonth, setSelectedMonth] = useState('July 2025');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [paySlips, setPaySlips] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [searchParams] = useSearchParams();
+  const [selectedFinancialYear, setSelectedFinancialYear] = useState(null);
 
-  if (!user?.employee) {
-    return (
-      <Box sx={{ p: 3 }}>
-        <Typography variant="h5" color="error">
-          Access Denied
-        </Typography>
-        <Typography variant="body1">This portal is only accessible to employees.</Typography>
-      </Box>
+  const financialYearOptions = generateFinancialYears(10);
+
+  useEffect(() => {
+    const year = searchParams.get('financialYear');
+    if (year) {
+      setSelectedFinancialYear(year);
+      fetchPaySlips(year);
+    }
+  }, [searchParams]);
+
+  const totalPages = Math.ceil(paySlips.length / rowsPerPage);
+  const paginatedData = paySlips.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+
+  const handlePageChange = (_, newPage) => {
+    setCurrentPage(newPage);
+  };
+
+  const handleFinancialYearChange = (event, newValue) => {
+    setSelectedFinancialYear(newValue);
+    const params = new URLSearchParams(searchParams);
+    if (newValue) {
+      params.set('financialYear', newValue);
+    } else {
+      params.delete('financialYear');
+    }
+    window.history.replaceState(null, '', `?${params.toString()}`);
+
+    if (newValue) fetchPaySlips(newValue);
+  };
+
+  // const fetchPaySlips = async (financialYear) => {
+  //   try {
+  //     setLoading(true);
+  //     // Replace this block with real API call
+  //     setTimeout(() => {
+  //       setPaySlips([
+  //         {
+  //           id: 1,
+  //           month: 'January 2024',
+  //           gross_pay: '25555swdefgrthyjukil',
+  //           deductions: '2222',
+  //           income: '23333789456123654788888',
+  //           net_pay: '23333',
+  //           download_url: '#'
+  //         },
+  //         {
+  //           id: 2,
+  //           month: 'February 2024',
+  //           gross_pay: '27500',
+  //           deductions: '2500asdfghjklasdfghj',
+  //           income: '25000',
+  //           net_pay: '25000014785296325478888',
+  //           download_url: '#'
+  //         }
+  //       ]);
+  //       setLoading(false);
+  //     }, 1000);
+  //   } catch (error) {
+  //     console.error('Error fetching pay slips:', error);
+  //     setLoading(false);
+  //   }
+  // };
+const fetchPaySlips = async (financialYear) => {
+  try {
+    setLoading(true);
+    
+    const { res } = await Factory(
+      'get',
+      `/payroll/employee-payslips-by-financial-year/?financial_year=${financialYear}`,
+      {}
     );
+
+    if (res?.status_cd === 0 && Array.isArray(res?.data)) {
+      setPaySlips(res.data);
+    } else {
+      setPaySlips([]);
+    }
+  } catch (error) {
+    console.error('Error fetching pay slips:', error);
+    setPaySlips([]);
+  } finally {
+    setLoading(false);
   }
+};
 
-  const [paySlipData, setPaySlipData] = useState({
-  employeeDetails: {
-    employeeNo: 'EMP001',
-    name: 'John Doe',
-    bank: 'HDFC Bank',
-    accountNo: '1234567890',
-    joiningDate: '15-01-2023',
-    pfNo: 'PF123456789'
-  },
-  earnings: {
-    basic: 80000,
-    hra: 32000,
-    conveyance: 1600,
-    specialAllowance: 38400
-  },
-  deductions: {
-    esi: 0,
-    pf: 9600,
-    tds: 8000,
-    pt: 200,
-    loanRepayment: 5000
-  }
-});
-
-
-
-  const employeeFields = [
-    { name: 'employeeNo', label: 'Employee No/ID' },
-    { name: 'name', label: 'Name' },
-    { name: 'bank', label: 'Bank' },
-    { name: 'accountNo', label: 'A/C No' },
-    { name: 'joiningDate', label: 'Joining Date' },
-    { name: 'pfNo', label: 'PF No' }
-  ];
-
-  const earningsFields = [
-    { name: 'basic', label: 'Basic' },
-    { name: 'hra', label: 'HRA' },
-    { name: 'conveyance', label: 'Conveyance' },
-    { name: 'specialAllowance', label: 'Special Allowance' }
-  ];
-
-  const deductionsFields = [
-    { name: 'esi', label: 'ESI' },
-    { name: 'pf', label: 'PF' },
-    { name: 'tds', label: 'TDS' },
-    { name: 'pt', label: 'PT' },
-    { name: 'loanRepayment', label: 'Loan Repayment' }
-  ];
-
-  const months = [
-    'January 2025',
-    'February 2025',
-    'March 2025',
-    'April 2025',
-    'May 2025',
-    'June 2025',
-    'July 2025',
-    'August 2025',
-    'September 2025',
-    'October 2025',
-    'November 2025',
-    'December 2025'
-  ];
-
-  const calculateTotalEarnings = () => Object.values(paySlipData.earnings).reduce((sum, amount) => sum + amount, 0);
-
-  const calculateTotalDeductions = () => Object.values(paySlipData.deductions).reduce((sum, amount) => sum + amount, 0);
-
-  const calculateNetPay = () => calculateTotalEarnings() - calculateTotalDeductions();
-
-  const formatCurrency = (amount) =>
-    new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(amount);
-  const handleChange = (section, field, value) => {
-    setPaySlipData((prev) => ({
-      ...prev,
-      [section]: {
-        ...prev[section],
-        [field]: value
+  const viewPayslip = async (employee_id, month, financial_year) => {
+    try {
+      const tokens = JSON.parse(localStorage.getItem('user'));
+      const response = await axios.get(
+        `${baseURL}/payroll/employee-monthly-salary-template?employee_id=${employee_id}&month=${month}&financial_year=${financial_year}&year=${new Date().getFullYear()}`,
+        {
+          responseType: 'arraybuffer',
+          headers: {
+            Authorization: `Bearer ${tokens.access_token}`
+          }
+        }
+      );
+      if (response.data.byteLength > 0) {
+        const blob = new Blob([response.data], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        window.open(url, '_blank');
+        setTimeout(() => URL.revokeObjectURL(url), 10000);
+      } else {
+        console.error('Empty PDF received.');
       }
-    }));
+    } catch (error) {
+      console.error('Error fetching payslip:', error);
+    }
   };
-
-  const numberToWords = (num) => {
-    const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
-    const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
-    const teens = ['Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
-    if (num === 0) return 'Zero';
-    if (num < 10) return ones[num];
-    if (num < 20) return teens[num - 10];
-    if (num < 100) return tens[Math.floor(num / 10)] + (num % 10 !== 0 ? ' ' + ones[num % 10] : '');
-    if (num < 1000) return ones[Math.floor(num / 100)] + ' Hundred' + (num % 100 !== 0 ? ' and ' + numberToWords(num % 100) : '');
-    if (num < 100000)
-      return numberToWords(Math.floor(num / 1000)) + ' Thousand' + (num % 1000 !== 0 ? ' ' + numberToWords(num % 1000) : '');
-    if (num < 10000000)
-      return numberToWords(Math.floor(num / 100000)) + ' Lakh' + (num % 100000 !== 0 ? ' ' + numberToWords(num % 100000) : '');
-    return numberToWords(Math.floor(num / 10000000)) + ' Crore' + (num % 10000000 !== 0 ? ' ' + numberToWords(num % 10000000) : '');
-  };
-
-  const renderReadOnlyFields = (fields, data) =>
-    fields.map((field) => (
-      <Grid2 key={field.name} size={{ xs: 12, sm: 4 }}>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-          {field.label}
-        </Typography>
-        <TextField
-          value={data[field.name]}
-          fullWidth
-          size="small"
-          onChange={(e) => handleChange('employeeDetails', field.name, e.target.value)}
-          // InputProps={{ readOnly: true }}
-          sx={{ '& .MuiInputBase-input': { bgcolor: 'grey.50' } }}
-        />
-      </Grid2>
-    ));
 
   return (
-    <Box sx={{ p: 3 }}>
-      {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h2" sx={{ fontWeight: 600, textDecoration: 'underline' }}>
-          Pay Slip
-        </Typography>
-        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-          <FormControl sx={{ minWidth: 150 }}>
-            <Select
-              value={selectedMonth}
-              onChange={(e) => setSelectedMonth(e.target.value)}
-              IconComponent={IconChevronDown}
-              sx={{ '& .MuiSelect-select': { display: 'flex', alignItems:'center', gap: 1 } }}
-            >
-              {months.map((month) => (
-                <MenuItem key={month} value={month}>
-                  {month}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <Button variant="outlined" startIcon={<IconDownload size={20} />} sx={{ borderColor: 'primary.main', color: 'primary.main' }}>
-            Download
-          </Button>
-        </Box>
-      </Box>
+    <MainCard>
+      <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between">
+        <Stack direction="row" spacing={2} alignItems="center">
+          <Typography variant="h5" sx={{ fontWeight: 500, color: 'text.primary' }}>
+            Select Financial Year
+          </Typography>
+          <Autocomplete
+            options={financialYearOptions}
+            value={selectedFinancialYear}
+            onChange={handleFinancialYearChange}
+            disableClearable
+            sx={{ minWidth: 200, maxWidth: 200 }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                placeholder="Select Financial Year"
+                size="small"
+                sx={{
+                  '& .MuiInputBase-input': {
+                    fontSize: '14px',
+                    fontWeight: 500
+                  }
+                }}
+              />
+            )}
+          />
+        </Stack>
+      </Stack>
 
-      {/* Content */}
-      <Card sx={{ p: 3 }}>
-        <CardContent sx={{ p: 4 }}>
-          {/* Employee Details */}
-          <Box sx={{ mb: 4 }}>
-            <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, textDecoration: 'underline' }}>
-              Employee Details
-            </Typography>
-            <Grid2 container spacing={2}>
-              {renderReadOnlyFields(employeeFields, paySlipData.employeeDetails)}
-            </Grid2>
-          </Box>
-
-          <Divider sx={{ my: 3 }} />
-
-          {/* Earnings and Deductions */}
-          <Grid2 container spacing={4}>
-            <Grid2 size={{ xs: 12, md: 6 }}>
-              <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, textDecoration: 'underline' }}>
-                Earnings
-              </Typography>
-              <Stack spacing={2}>
-                {earningsFields.map((field) => (
-                  <Box key={field.name} sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <Typography variant="body2">{field.label}</Typography>
-                    <Typography variant="body2" fontWeight={600}>
-                      {formatCurrency(paySlipData.earnings[field.name])}
+      {/* Pay Slips Table */}
+      <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 1, mt: 4 }}>
+        <Table size="small">
+          <TableHead
+            sx={{
+              backgroundColor: 'primary.main',
+              '& .MuiTableCell-root': {
+                color: '#ffffff !important'
+              }
+            }}
+          >
+            <TableRow>
+              <TableCell>Pay Period</TableCell>
+              <TableCell>Gross Pay</TableCell>
+              <TableCell>Deductions</TableCell>
+              <TableCell>Income Tax (TDS)</TableCell>
+              <TableCell>Net Pay</TableCell>
+              <TableCell>Action</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={6} align="center" sx={{ height: 300 }}>
+                  <CircularProgress />
+                </TableCell>
+              </TableRow>
+            ) : paginatedData.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6} align="center" sx={{ height: 300 }}>
+                  <EmptyDataPlaceholder title="No Pay Slips Found" subtitle="Select a financial year to view your pay slips." />
+                </TableCell>
+              </TableRow>
+            ) : (
+              paginatedData.map((paySlip) => (
+                <TableRow key={paySlip.id}>
+                  <TableCell>{paySlip.month}</TableCell>
+                  <TableCell>{paySlip.gross_pay}</TableCell>
+                  <TableCell>{paySlip.deductions}</TableCell>
+                  <TableCell>{paySlip.income}</TableCell>
+                  <TableCell>{paySlip.net_pay}</TableCell>
+                  {/* <TableCell>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        cursor: 'pointer',
+                        color: 'primary.main',
+                        textDecoration: 'underline',
+                        whiteSpace: 'nowrap'
+                      }}
+                      onClick={() => downloadPaySlip(paySlip.download_url)}
+                    >
+                      Download
                     </Typography>
-                  </Box>
-                ))}
-                <Divider />
-                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <Typography variant="body1" fontWeight={600}>
-                    Total
-                  </Typography>
-                  <Typography variant="body1" fontWeight={700}>
-                    {formatCurrency(calculateTotalEarnings())}
-                  </Typography>
-                </Box>
-              </Stack>
-            </Grid2>
-
-            <Grid2 size={{ xs: 12, md: 6 }}>
-              <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, textDecoration: 'underline' }}>
-                Deductions
-              </Typography>
-              <Stack spacing={2}>
-                {deductionsFields.map((field) => (
-                  <Box key={field.name} sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <Typography variant="body2">{field.label}</Typography>
-                    <Typography variant="body2" fontWeight={600}>
-                      {formatCurrency(paySlipData.deductions[field.name])}
+                  </TableCell> */}
+                  <TableCell>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        cursor: 'pointer',
+                        color: 'primary.main',
+                        textDecoration: 'underline',
+                        whiteSpace: 'nowrap',
+                        textAlign: 'left'
+                      }}
+                      onClick={() => {
+                        viewPayslip(paySlip.employee, paySlip.month, selectedFinancialYear);
+                      }}
+                    >
+                      View / Download
                     </Typography>
-                  </Box>
-                ))}
-                <Divider />
-                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <Typography variant="body1" fontWeight={600}>
-                    Total
-                  </Typography>
-                  <Typography variant="body1" fontWeight={700}>
-                    {formatCurrency(calculateTotalDeductions())}
-                  </Typography>
-                </Box>
-              </Stack>
-            </Grid2>
-          </Grid2>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
 
-          <Divider sx={{ my: 3 }} />
-
-          {/* Net Pay */}
-          <Box sx={{ textAlign: 'right' }}>
-            <Typography variant="h6" fontWeight={600} mb={1}>
-              Net Pay for {selectedMonth}
-            </Typography>
-            <Typography variant="h4" fontWeight={700} color="primary.main" mb={1}>
-              {formatCurrency(calculateNetPay())}
-            </Typography>
-            <Typography variant="body2" color="text.secondary" fontStyle="italic">
-              Rupees {numberToWords(calculateNetPay())} Only
-            </Typography>
-          </Box>
-        </CardContent>
-      </Card>
-    </Box>
+      {paySlips.length > 0 && (
+        <Stack direction="row" justifyContent="center" alignItems="center" sx={{ py: 2 }}>
+          <Pagination count={totalPages} page={currentPage} onChange={handlePageChange} shape="rounded" color="primary" />
+        </Stack>
+      )}
+    </MainCard>
   );
 };
 
