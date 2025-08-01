@@ -1,48 +1,107 @@
-import React, { useEffect } from 'react';
-import { Autocomplete, Box, Button, Card, Grid2, Stack, TextField, Typography } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import {
+  Autocomplete,
+  Box,
+  Button,
+  Card,
+  Paper,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography
+} from '@mui/material';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
-import { useSelector } from 'store';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { useSelector } from 'react-redux';
 import MainCard from 'ui-component/cards/MainCard';
-const additionalFields = [
-  { label: 'Qualification/Degree', name: 'qualification', type: 'text', required: true },
-  { label: 'Year Of Passing', name: 'year_of_passing', type: 'text', required: true },
-  { label: 'Upload Certificate', name: 'certificate', type: 'file', required: true }
-];
+import Factory from 'utils/Factory';
 
-const EducationInfo = () => {
+const StepTwo = ({ step, setStep }) => {
+  // const user = useSelector((state) => state.accountReducer.user);
+  // const employeeEducation = user?.employee?.education_details?.[0] || {};
   const user = useSelector((state) => state.accountReducer.user);
-  const employeeEducation = user?.employee?.education_details?.[0] || {};
+    const profileId = user?.employee?.education_details?.id;
+  
+    const [AddressInfo, setAddressInfo] = useState({});
+    const [isLoading, setIsLoading] = useState(true);
+  
+
+  const [saveIndex, setSaveIndex] = useState(null);
 
   const formik = useFormik({
     initialValues: {
-      qualification: '',
-      year_of_passing: '',
-      certificate: '',
-      id: null
+      education: [
+        {
+          qualification: '',
+          year_of_passing: '',
+          certificate: null
+        }
+      ]
     },
     validationSchema: Yup.object({
-      qualification: Yup.string().required('Qualification is required'),
-      year_of_passing: Yup.string().required('Year of Passing is required'),
-      certificate: Yup.string().required('Certificate is required')
+      education: Yup.array().of(
+        Yup.object({
+          qualification: Yup.string().required('Qualification is required'),
+          year_of_passing: Yup.string().required('Year of Passing is required'),
+          certificate: Yup.mixed().required('Certificate is required')
+        })
+      )
     }),
-    onSubmit: (values) => {
-      console.log('Form Submitted:', values);
-    }
+    onSubmit: () => {}
   });
 
-  const { values, setFieldValue, handleChange, errors, touched, handleSubmit, handleBlur } = formik;
+  const { values, errors, touched, handleChange, handleBlur, setFieldValue } = formik;
 
-  // Prefill Redux values
-  useEffect(() => {
-    if (employeeEducation) {
-      setFieldValue('qualification', employeeEducation.qualification || '');
-      setFieldValue('year_of_passing', employeeEducation.year_of_passing?.toString() || '');
-      setFieldValue('certificate', employeeEducation.upload_certificate || '');
-      setFieldValue('id', employeeEducation.id || null);
+const getEducationInfo = async () => {
+  const url = `/payroll/employee-profile/`;
+
+  try {
+    const { res } = await Factory('get', url);
+    if (res?.status_cd === 0 && res?.data?.education_details?.length > 0) {
+      const data = res.data.education_details;
+
+      const formatted = data.map((item) => ({
+        qualification: item?.qualification || '',
+        year_of_passing: item?.year_of_passing?.toString() || '',
+        certificate: item?.upload_certificate || null
+      }));
+
+      formik.setFieldValue('education', formatted);
     }
-  }, [employeeEducation, setFieldValue]);
+  } catch (error) {
+    console.error('Error fetching education info:', error);
+  }
+};
+useEffect(() => {
+  getEducationInfo();
+}, []);
+
+  const addPromoter = () => {
+    setFieldValue('education', [
+      ...values.education,
+      { qualification: '', year_of_passing: '', certificate: null }
+    ]);
+  };
+
+  const removePromoter = () => {
+    if (values.education.length > 1) {
+      setFieldValue('education', values.education.slice(0, -1));
+    }
+  };
+
+  const handleIndividualDelete = (index) => {
+    const updated = [...values.education];
+    updated.splice(index, 1);
+    setFieldValue('education', updated);
+  };
 
   const getLabelWithAsterisk = (label, isRequired = true) => (
     <span>
@@ -51,91 +110,124 @@ const EducationInfo = () => {
     </span>
   );
 
-  const renderField = (field) => {
-    switch (field.type) {
-      case 'text':
-        if (field.name === 'qualification') {
-          return (
-            <>
-              <Typography variant="subtitle1" mb={1}>
-                {getLabelWithAsterisk(field.label, field.required)}
-              </Typography>
-              <Autocomplete
-                fullWidth
-                size="small"
-                options={['12th', 'B.Tech', 'MBA']}
-                value={values[field.name]}
-                onChange={(e, value) => setFieldValue(field.name, value)}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    name={field.name}
-                    error={touched[field.name] && Boolean(errors[field.name])}
-                    helperText={touched[field.name] && errors[field.name]}
-                  />
-                )}
-              />
-            </>
-          );
-        }
-        return (
-          <>
-            <Typography variant="subtitle1" mb={1}>
-              {getLabelWithAsterisk(field.label, field.required)}
-            </Typography>
-            <TextField
-              fullWidth
-              size="small"
-              name={field.name}
-              value={values[field.name]}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              error={touched[field.name] && Boolean(errors[field.name])}
-              helperText={touched[field.name] && errors[field.name]}
-            />
-          </>
-        );
-
-      case 'file':
-        return (
-          <>
-            <Typography variant="subtitle1" mb={1}>
-              {getLabelWithAsterisk(field.label, field.required)}
-            </Typography>
-            <RenderFileUpload
-              label={field.label}
-              fieldName={field.name}
-              file={values[field.name]}
-              setFieldValue={setFieldValue}
-              touched={touched[field.name]}
-              errors={errors[field.name]}
-            />
-          </>
-        );
-
-      default:
-        return null;
-    }
-  };
-
   return (
-    <MainCard>
-      <form onSubmit={handleSubmit}>
-        <Grid2 container spacing={2}>
-          {additionalFields.map((field) => (
-            <Grid2 size={{ xs: 12, sm: 6, md: 4 }} key={field.name}>
-              {renderField(field)}
-            </Grid2>
-          ))}
-        </Grid2>
-        <Stack direction="row" spacing={2} sx={{ mt: 3, justifyContent: 'flex-end' }}>
-          <Button variant="contained" color="primary" type="submit">
-            Save
+
+       <MainCard> 
+            <form onSubmit={formik.handleSubmit}>
+       
+
+        <Box display="flex" alignItems="center" mb={2}>
+          <Typography>No. of Entries</Typography>
+          <Button variant="outlined" size="small" sx={{ ml: 2 }} onClick={removePromoter}>
+            -
           </Button>
-        </Stack>
-      </form>
-    </MainCard>
+          <Typography variant="h5" mx={2}>{values.education.length}</Typography>
+          <Button variant="outlined" size="small" onClick={addPromoter}>
+            +
+          </Button>
+        </Box>
+
+        <TableContainer component={Paper} elevation={2} sx={{ borderRadius: 2 }}>
+          <Table size="small">
+            <TableHead>
+              <TableRow sx={{ bgcolor: 'primary.main' }}>
+                {['Qualification/Degree', 'Year Of Passing', 'Upload Certificate', 'Action'].map((head) => (
+                  <TableCell
+                    key={head}
+                    sx={{
+                      color: '#fff !important',
+                      textAlign: 'center',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    {head}
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+
+            <TableBody>
+              {values.education.map((promoter, idx) => (
+                <TableRow key={idx}>
+                  <TableCell>
+                    <Autocomplete
+                   sx={{width:'100%',mt:1}}
+                      size="small"
+                      options={['12th', 'B.Tech', 'M.Tech', 'MBA', 'Other']}
+                      value={promoter.qualification || ''}
+                      onChange={(e, value) => setFieldValue(`education[${idx}].qualification`, value)}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          label={getLabelWithAsterisk('Qualification')}
+                          name={`education[${idx}].qualification`}
+                          onBlur={handleBlur}
+                          error={touched.education?.[idx]?.qualification && Boolean(errors.education?.[idx]?.qualification)}
+                          helperText={touched.education?.[idx]?.qualification && errors.education?.[idx]?.qualification}
+                        />
+                      )}
+                    />
+                  </TableCell>
+
+                  <TableCell>
+                    <TextField
+                      
+                      sx={{width:'100%',mt:1}}
+                      size="small"
+                      label={getLabelWithAsterisk("Year Of Passing")}
+                      name={`education[${idx}].year_of_passing`}
+                      value={promoter.year_of_passing}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      error={touched.education?.[idx]?.year_of_passing && Boolean(errors.education?.[idx]?.year_of_passing)}
+                      helperText={touched.education?.[idx]?.year_of_passing && errors.education?.[idx]?.year_of_passing}
+                    />
+                  </TableCell>
+
+                  <TableCell>
+                    <RenderFileUpload
+                      label={getLabelWithAsterisk("Upload Certificate")}
+                      fieldName={`education[${idx}].certificate`}
+                      file={promoter.certificate}
+                      setFieldValue={setFieldValue}
+                      touched={touched.education?.[idx]?.certificate}
+                      errors={errors.education?.[idx]?.certificate}
+                    />
+                  </TableCell>
+
+                  <TableCell align="center">
+                    <Stack direction="row" spacing={1} justifyContent="center">
+                      <Button
+                        variant="contained"
+                        size="small"
+                        onClick={() => {
+                          setSaveIndex(idx);
+                          formik.handleSubmit();
+                        }}
+                      >
+                        Save
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        color="error"
+                        onClick={() => handleIndividualDelete(idx)}
+                      >
+                        Delete
+                      </Button>
+                    </Stack>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+         </form>
+       </MainCard>
+
+    
+   
   );
 };
 
-export default EducationInfo;
+export default StepTwo;

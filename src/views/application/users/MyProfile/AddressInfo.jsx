@@ -1,10 +1,11 @@
-import React, { useEffect } from 'react';
+import React, { useEffect,useState } from 'react';
 import { Autocomplete, Box, Button, Card, Grid2, Stack, TextField, Typography } from '@mui/material';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
 import { useSelector } from 'store';
 import MainCard from 'ui-component/cards/MainCard';
+import Factory from 'utils/Factory';
 const additionalFields = [
   { label: 'Address Line 1', name: 'address_line1', type: 'text', required: true },
   { label: 'Address Line 2', name: 'address_line2', type: 'text', required: true },
@@ -17,8 +18,11 @@ const additionalFields = [
 ];
 
 const AddressInfo = () => {
-  const user = useSelector((state) => state.accountReducer.user);
-  const personalDetails = user?.employee?.personal_details;
+const user = useSelector((state) => state.accountReducer.user);
+  const profileId = user?.employee?.personal_details?.id;
+
+  const [AddressInfo, setAddressInfo] = useState({});
+  const [isLoading, setIsLoading] = useState(true);
 
   const formik = useFormik({
     initialValues: {
@@ -51,19 +55,37 @@ const AddressInfo = () => {
 
   const { values, setFieldValue, handleChange, errors, touched, handleSubmit, handleBlur } = formik;
 
-  // Set initial form values from Redux
-  useEffect(() => {
-    if (personalDetails?.address) {
-      setFieldValue('address_line1', personalDetails.address.address_line1 || '');
-      setFieldValue('address_line2', personalDetails.address.address_line2 || '');
-      setFieldValue('address_city', personalDetails.address.address_city || '');
-      //   setFieldValue('district', personalDetails.address.address_address_city || ''); // You may have a separate field for district
-      setFieldValue('address_state', personalDetails.address.address_state || '');
-      setFieldValue('country', 'India'); // Default if not in Redux
-      setFieldValue('address_pinCode', personalDetails.address.address_pinCode || '');
-      setFieldValue('id', personalDetails.id || null);
+const getAddressInfo = async () => {
+  setIsLoading(true);
+  const url = `/payroll/employee-profile/`;
+
+  try {
+    const { res } = await Factory('get', url);
+    if (res?.status_cd === 0 && res?.data?.personal_details) {
+      // const data = res.data.personal_details;
+       const data = res.data.personal_details;
+      const address = data.address || {};
+
+      formik.setValues({
+        address_line1: address?.address_line1 || '',
+        address_line2: address?.address_line2 || '',
+        address_city: address?.address_city || '',
+        address_state: address?.address_state || '',
+        address_pinCode: address?.address_pinCode || '',
+        country: address?.country || 'Indian'
+      });
+
+      setAddressInfo(data);
     }
-  }, [personalDetails, setFieldValue]);
+  } catch (error) {
+    console.error('Failed to fetch personal info:', error);
+  } finally {
+    setIsLoading(false);
+  }
+};
+  useEffect(() => {
+    getAddressInfo();
+  }, []);
 
   const getLabelWithAsterisk = (label, isRequired = true) => (
     <span>

@@ -222,9 +222,7 @@ export default function Profile2() {
             <TabPanel value={value} index={2}>
               <AddressInfo user={user} handleNext={handleNext} handleBack={handleBack} tabChange={handleChange} tabval={value} />
             </TabPanel>
-            {/* <TabPanel value={value} index={3}>
-              <MSMESettings />
-            </TabPanel> */}
+          
             <TabPanel value={value} index={3}>
               <EducationInfo user={user} handleNext={handleNext} handleBack={handleBack} tabChange={handleChange} tabval={value} />
             </TabPanel>
