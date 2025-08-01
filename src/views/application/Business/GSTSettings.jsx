@@ -60,7 +60,6 @@ const GSTSettings = ({ handleBack, handleNext }) => {
       usage.gstin = response.find((item) => item.feature_key === 'gstin') || {};
       setInvoiceUsage(usage);
     } else if (res.res.status === 404) {
-      console.log('NOT FOUND');
     }
   };
 
@@ -225,7 +224,7 @@ const GSTSettings = ({ handleBack, handleNext }) => {
           size="small"
           startIcon={<AddIcon />}
           onClick={() => {
-            if (invoiceUsage && Object.keys(invoiceUsage.gstin).length > 0) {
+            if (invoiceUsage?.gstin && Object.keys(invoiceUsage.gstin).length > 0) {
               if (Number(invoiceUsage.gstin.usage_count) >= Number(invoiceUsage.gstin.actual_count)) {
                 enqueueSnackbar('Usage limit exceeded. Please upgrade your plan!', { variant: 'warning' });
               } else handleOpen();
@@ -260,27 +259,31 @@ const GSTSettings = ({ handleBack, handleNext }) => {
             }}
           >
             <TableRow>
-              <TableCell>GST Number</TableCell>
-              <TableCell>Trade Name</TableCell>
-              <TableCell>Branch/Vertical</TableCell>
-              <TableCell>State</TableCell>
-              <TableCell>Type</TableCell>
-              <TableCell>Export/SEZ</TableCell>
-              <TableCell>GST DOC</TableCell>
-              <TableCell align="right">Actions</TableCell>
+              <TableCell sx={{ whiteSpace: 'nowrap' }}>GST Number</TableCell>
+              <TableCell sx={{ whiteSpace: 'nowrap' }}>Business or Trade Name</TableCell>
+              <TableCell sx={{ whiteSpace: 'nowrap' }}>Branch/Vertical</TableCell>
+              <TableCell sx={{ whiteSpace: 'nowrap' }}>State</TableCell>
+              <TableCell sx={{ whiteSpace: 'nowrap' }}>Type</TableCell>
+              <TableCell sx={{ whiteSpace: 'nowrap' }}>Export/SEZ</TableCell>
+              <TableCell sx={{ whiteSpace: 'nowrap' }}>GST DOC</TableCell>
+              <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
+                Actions
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {paginatedData && paginatedData.length > 0 ? (
               paginatedData.map((row, idx) => (
                 <TableRow key={idx} hover>
-                  <TableCell>{row.gstin}</TableCell>
-                  <TableCell>{row.trade_name}</TableCell>
-                  <TableCell>{row.branch_name}</TableCell>
-                  <TableCell>{row.state}</TableCell>
-                  <TableCell>{row.type || (row.is_composition_scheme === 'yes' ? 'Composition' : 'Regular')}</TableCell>
-                  <TableCell>{row.is_export_sez === 'yes' ? 'Yes' : 'No'}</TableCell>
-                  <TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{row.gstin}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{row.trade_name}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{row.branch_name}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{row.state}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>
+                    {row.type || (row.is_composition_scheme === 'yes' ? 'Composition' : 'Regular')}
+                  </TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{row.is_export_sez === 'yes' ? 'Yes' : 'No'}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>
                     {row.gst_document && (
                       <Tooltip title="Download GST Document">
                         <IconButton size="small" color="primary" onClick={() => handleDownload(row.gst_document, `GST_${row.gstin}`)}>

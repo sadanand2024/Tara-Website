@@ -14,7 +14,6 @@ import {
   Grid2,
   Pagination
 } from '@mui/material';
-import MainCard from 'ui-component/cards/MainCard';
 import ActionCell from 'ui-component/extended/ActionCell';
 import Factory from 'utils/Factory';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -26,18 +25,24 @@ import { Edit, Delete } from '@mui/icons-material';
 import DeleteDialog from 'ui-component/extended/DeleteDialog';
 import IconButton from '@mui/material/IconButton';
 import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
+import CircularProgressComponent from 'utils/CircularProgressComponent';
 
-function SalaryTemplateList({ handleBack, handleNext }) {
+function SalaryTemplateList({ handleBack, handleNext, searchQuery = '' }) {
   const [salaryTemplates, setSalaryTemplates] = useState([]);
   const [payrollid, setPayrollId] = useState(null);
-  const [openDialog, setOpenDialog] = useState(false);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const dispatch = useDispatch();
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const paginatedData = salaryTemplates.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+  const [isLoading, setIsLoading] = useState(false);
+  // Filter salaryTemplates based on searchQuery from props
+  const filteredTemplates = salaryTemplates.filter((template) => {
+    const query = searchQuery.toLowerCase();
+    return template.template_name?.toLowerCase().includes(query) || template.description?.toLowerCase().includes(query);
+  });
+  const paginatedData = filteredTemplates.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 
   const handleOpenDeleteDialog = (template) => {
     setSelectedRow(template);
@@ -53,6 +58,7 @@ function SalaryTemplateList({ handleBack, handleNext }) {
   }, [searchParams]);
 
   const fetchSalaryTemplates = async () => {
+    setIsLoading(true);
     const url = `/payroll/salary-templates?payroll_id=${payrollid}`;
     const { res } = await Factory('get', url, {});
     if (res?.status_cd === 0) {
@@ -60,6 +66,7 @@ function SalaryTemplateList({ handleBack, handleNext }) {
     } else {
       setSalaryTemplates([]);
     }
+    setIsLoading(false);
   };
 
   const handleEdit = (template) => {
@@ -88,27 +95,11 @@ function SalaryTemplateList({ handleBack, handleNext }) {
   useEffect(() => {
     if (payrollid) fetchSalaryTemplates();
   }, [payrollid]);
-
+  if (isLoading) {
+    return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading Salary Template Data'} />;
+  }
   return (
-    <MainCard
-      title="Salary Templates"
-      subtitle="Manage your Salary Templates for seamless operations"
-      secondary={
-        <Stack direction="row" spacing={2}>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => {
-              const params = new URLSearchParams(searchParams);
-              params.set('action', 'new');
-              navigate({ search: params.toString() });
-            }}
-          >
-            Create New Template
-          </Button>
-        </Stack>
-      }
-    >
+    <Box>
       <Grid2 container>
         <Grid2 size={{ xs: 12 }}>
           <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 1 }}>
@@ -172,9 +163,9 @@ function SalaryTemplateList({ handleBack, handleNext }) {
               <Button size="small" variant="outlined" startIcon={<ArrowBackIcon />} onClick={handleBack}>
                 Back
               </Button>
-              {salaryTemplates.length > 0 && (
+              {filteredTemplates.length > 0 && (
                 <Pagination
-                  count={Math.ceil(salaryTemplates.length / rowsPerPage)}
+                  count={Math.ceil(filteredTemplates.length / rowsPerPage)}
                   page={currentPage}
                   onChange={(e, value) => setCurrentPage(value)}
                   color="primary"
@@ -187,10 +178,7 @@ function SalaryTemplateList({ handleBack, handleNext }) {
           </Grid2>
         </Grid2>
       </Grid2>
-      <Grid2 size={{ xs: 12 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}></Box>
-      </Grid2>
-    </MainCard>
+    </Box>
   );
 }
 

@@ -255,41 +255,11 @@ const Licenses = ({ handleBack, handleNext }) => {
     }
   });
 
-  const handleDocDownload = async (documentUrl) => {
-    try {
-      if (!documentUrl) {
-        dispatch(
-          openSnackbar({
-            open: true,
-            message: 'No document available for download',
-            variant: 'alert',
-            alert: { color: 'error' },
-            close: false
-          })
-        );
-        return;
-      }
-      window.open(documentUrl, '_blank');
-      dispatch(
-        openSnackbar({
-          open: true,
-          message: 'Document download started',
-          variant: 'alert',
-          alert: { color: 'success' },
-          close: false
-        })
-      );
-    } catch (error) {
-      console.error('Error downloading document:', error);
-      dispatch(
-        openSnackbar({
-          open: true,
-          message: 'Failed to download document',
-          variant: 'alert',
-          alert: { color: 'error' },
-          close: false
-        })
-      );
+  const viewFile = async (url) => {
+    const response = await Factory('get', `/docwallet/generate_presigned_url?url=${url}`, {}, {});
+    if (response.res.status_cd === 0) {
+      let url = response.res.data.url;
+      window.open(url, '_blank');
     }
   };
 
@@ -426,10 +396,10 @@ const Licenses = ({ handleBack, handleNext }) => {
                   </TableCell>
                   <TableCell>
                     {license.license_document ? (
-                      <Tooltip title="Download Document">
+                      <Tooltip title="View / Download Document">
                         <IconButton
                           size="small"
-                          onClick={() => handleDocDownload(license.license_document)}
+                          onClick={() => viewFile(license.license_document)}
                           sx={{
                             backgroundColor: 'primary.50',
                             '&:hover': { backgroundColor: 'primary.100' }
@@ -559,7 +529,7 @@ const Licenses = ({ handleBack, handleNext }) => {
                 {editIndex !== null && licenses[editIndex]?.license_document && !formik.values.license_document && (
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <Typography variant="caption">Current file:</Typography>
-                    <Button variant="text" size="small" onClick={() => handleDocDownload(licenses[editIndex].license_document)}>
+                    <Button variant="text" size="small" onClick={() => viewFile(licenses[editIndex].license_document)}>
                       Download Current Document
                     </Button>
                   </Box>

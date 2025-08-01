@@ -4,6 +4,7 @@ import { lazy } from 'react';
 import MainLayout from 'layout/MainLayout';
 import Loadable from 'ui-component/Loadable';
 import AuthGuard from 'utils/route-guard/AuthGuard';
+import DocumentSelectionPage from 'views/application/DocumentDrafting/components/DocumentSelectionPage';
 // import RoleGuard from 'utils/route-guard/roleguard';
 // payroll module
 const PayrollDashboard = Loadable(lazy(() => import('views/payroll'))); // ✅ works because index.jsx exists
@@ -47,9 +48,12 @@ const ManageModulesAndServices = Loadable(lazy(() => import('views/ManageSubscri
 const AppUserAccountProfile2 = Loadable(lazy(() => import('views/application/users/Profile')));
 const AppBusinessSettings = Loadable(lazy(() => import('views/application/Business/settings')));
 const AppAccountSettings = Loadable(lazy(() => import('views/application/users/Account')));
+const AppMyProfileSettings = Loadable(lazy(() => import('views/application/users/MyProfile')));
 const ManagePlans = Loadable(lazy(() => import('views/ManageSubscriptions/ManagePlans')));
 const ManageTasks = Loadable(lazy(() => import('views/application/ManageTasks')));
 const DocumentDrafting = Loadable(lazy(() => import('views/application/DocumentDrafting')));
+const Event = Loadable(lazy(() => import('views/application/DocumentDrafting/components/Event')));
+const SelectedEvent = Loadable(lazy(() => import('views/application/DocumentDrafting/components/SelectedEvent')));
 
 const DocumentWallet = Loadable(lazy(() => import('views/application/Document-Wallet')));
 const ContactUsInfo = Loadable(lazy(() => import('views/ContactUsInfo')));
@@ -69,6 +73,16 @@ const UserManagement = Loadable(lazy(() => import('views/SuperAdmin/UserManageme
 const NewRequests = Loadable(lazy(() => import('views/SuperAdmin/ServiceManagement/NewRequests')));
 const TaskManagement = Loadable(lazy(() => import('views/SuperAdmin/ServiceManagement/TaskManagement')));
 const ServiceSummary = Loadable(lazy(() => import('views/SuperAdmin/ServiceManagement/ServiceSummary')));
+
+//employee Portal
+const EmployeePortal = Loadable(lazy(() => import('views/application/EmployeePortal')));
+const PaySlips = Loadable(lazy(() => import('views/application/EmployeePortal/PaySlips')));
+const TaxTDS = Loadable(lazy(() => import('views/application/EmployeePortal/TaxTDS')));
+const LeaveManagement = Loadable(lazy(() => import('views/application/EmployeePortal/LeaveManagement')));
+const Attendance = Loadable(lazy(() => import('views/application/EmployeePortal/Attendance')));
+const MyEarnings = Loadable(lazy(() => import('views/application/EmployeePortal/MyEarnings')));
+const Declarations = Loadable(lazy(() => import('views/application/EmployeePortal/Declarations')));
+const Form16Compliances = Loadable(lazy(() => import('views/application/EmployeePortal/Form16Compliances')));
 
 const FaceRecognition = Loadable(lazy(() => import('views/application/AttendanceTest')));
 // ==============================|| MAIN ROUTING ||============================== //
@@ -114,6 +128,10 @@ const MainRoutes = {
     {
       path: '/apps/user/profile',
       element: <AppUserAccountProfile2 />
+    },
+    {
+      path: '/apps/user/MyProfile',
+      element: <AppMyProfileSettings />
     },
     {
       path: '/apps/business-settings',
@@ -209,10 +227,48 @@ const MainRoutes = {
       element: <ManageTasks />
     },
     {
-      path: '/app/drafting',
+      path: '/app/drafting/:tab?/:contextId?',
       element: <DocumentDrafting />
     },
+    {
+      path: '/app/drafting/selected-event/:eventInstanceId',
+      element: <SelectedEvent />
+    },
 
+    //Employee Portal
+
+    {
+      path: '/app/employee-portal/dashboard',
+      element: <EmployeePortal />
+    },
+    {
+      path: '/app/employee-portal/pay-slips',
+      element: <PaySlips />
+    },
+    {
+      path: '/app/employee-portal/tax-tds',
+      element: <TaxTDS />
+    },
+    {
+      path: '/app/employee-portal/leave-management',
+      element: <LeaveManagement />
+    },
+    {
+      path: '/app/employee-portal/attendance',
+      element: <Attendance />
+    },
+    {
+      path: '/app/employee-portal/my-earnings',
+      element: <MyEarnings />
+    },
+    {
+      path: '/app/employee-portal/declarations',
+      element: <Declarations />
+    },
+    {
+      path: '/app/employee-portal/form-16',
+      element: <Form16Compliances />
+    },
     {
       path: '/app/subscriptions',
       element: <ManageSubscriptions />
@@ -230,6 +286,10 @@ const MainRoutes = {
       element: <DocumentWallet />
     },
     {
+      path: '/app/drafting/fill/:contextEventId',
+      element: <DocumentSelectionPage />
+    },
+    {
       path: '/app/contact-us',
       element: <ContactUsInfo />
     },
@@ -242,11 +302,11 @@ const MainRoutes = {
       element: <PayrollDashboard />
     },
     {
-      path: '/payroll/employee-dashboard',
+      path: '/app/payroll/employee-dashboard',
       element: <EmployeeDashboard />
     },
     {
-      path: '/payroll/payroll-workflows',
+      path: '/app/payroll/payroll-workflows',
       element: <PayrollWorkflows />
     },
     {
@@ -292,6 +352,14 @@ const MainRoutes = {
     {
       path: '/app/invoice/editInvoice',
       element: <EditInvoice />
+    },
+    {
+      path: '/app/document-selection/:contextId',
+      element: <DocumentSelectionPage />
+    },
+    {
+      path: '/app/create-event/:contextId',
+      element: <Event />
     }
   ]
 };

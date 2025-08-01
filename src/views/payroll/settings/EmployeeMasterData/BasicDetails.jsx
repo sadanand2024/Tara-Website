@@ -1,32 +1,31 @@
-import React, { useState, useEffect } from 'react';
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
-import { FormControlLabel, Checkbox, Stack, Button, Box, Grid2, Typography, Divider, FormGroup, TextField } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-import CustomInput from 'utils/CustomInput';
-import CustomAutocomplete from 'utils/CustomAutocomplete';
+import { Box, Button, Checkbox, Divider, FormControlLabel, FormGroup, Grid2, TextField, Typography } from '@mui/material';
+import { IconPlus } from '@tabler/icons-react';
 import dayjs from 'dayjs';
-import CustomDatePicker from 'utils/CustomDateInput';
+import { useFormik } from 'formik';
+import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import Factory from 'utils/Factory';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
+import CustomAutocomplete from 'utils/CustomAutocomplete';
+import CustomDatePicker from 'utils/CustomDateInput';
+import CustomInput from 'utils/CustomInput';
+import Factory from 'utils/Factory';
+import * as Yup from 'yup';
 import DepartmentDialog from '../DepartmentDialog';
 import DesignationDialog from '../DesignationDialog';
-import { IconPlus } from '@tabler/icons-react';
 
 const employeeFields = [
-  { name: 'first_name', label: 'First Name' },
-  { name: 'middle_name', label: 'Middle Name' },
-  { name: 'last_name', label: 'Last Name' },
-  { name: 'associate_id', label: 'Employee ID' },
-  { name: 'doj', label: 'Date of Joining' },
-  { name: 'work_email', label: 'Work Email' },
-  { name: 'mobile_number', label: 'Mobile Number' },
-  { name: 'gender', label: 'Gender', options: ['Male', 'Female'] },
-  { name: 'work_location', label: 'Work Location' },
-  { name: 'designation', label: 'Designation' },
-  { name: 'department', label: 'Department' }
+  { name: 'first_name', label: 'First Name', required: true },
+  { name: 'middle_name', label: 'Middle Name', required: false },
+  { name: 'last_name', label: 'Last Name', required: true },
+  { name: 'associate_id', label: 'Employee ID', required: true },
+  { name: 'doj', label: 'Date of Joining', required: true },
+  { name: 'work_email', label: 'Work Email', required: true },
+  { name: 'mobile_number', label: 'Mobile Number', required: false },
+  { name: 'gender', label: 'Gender', required: true },
+  { name: 'work_location', label: 'Work Location', required: true },
+  { name: 'designation', label: 'Designation', required: true },
+  { name: 'department', label: 'Department', required: true }
 ];
 function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, onNext, setSubmitRef }) {
   const [loading, setLoading] = useState(false); // State for loader
@@ -76,9 +75,9 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
     associate_id: Yup.string().required('Employee ID is required'),
     doj: Yup.date().required('Date of Joining is required'),
     work_email: Yup.string().email('Invalid email format').required('Work Email is required'),
-    mobile_number: Yup.string()
-      .required('Mobile Number is required')
-      .matches(/^[0-9]{10}$/, 'Mobile Number must be exactly 10 digits'),
+    // mobile_number: Yup.string()
+    //   .required('Mobile Number is required')
+    //   .matches(/^[0-9]{10}$/, 'Mobile Number must be exactly 10 digits'),
     gender: Yup.string().required('Gender is required'),
     work_location: Yup.string().required('Work Location is required'),
     designation: Yup.string().required('Designation is required'),
@@ -93,9 +92,11 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
         return Yup.object().shape({
           pf_account_number: parent?.epf_enabled
             ? Yup.string()
-                .required('PF Account Number is required')
-                .matches(/^[A-Z0-9]+$/, 'Invalid PF Account Number')
+                // .nullable()
+                .required('Pf Account Number is required')
+                .matches(/^[A-Z]{5}\d{10,14}$/, 'Invalid PF Account Number. Format: 5 letters followed by 10–14 digits')
             : Yup.string().nullable(),
+
           uan: parent?.epf_enabled
             ? Yup.string()
                 .required('UAN is required')
@@ -183,10 +184,17 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
       }
     }
   });
+  const getLabelWithAsterisk = (label, isRequired) => (
+    <>
+      {label}
+      {isRequired && <span style={{ color: 'red' }}> *</span>}
+    </>
+  );
   const renderFields = (fields) => {
     return fields.map((field) => (
       <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-        <Typography variant="subtitle1">{field.label}</Typography>
+        {/* <Typography variant="subtitle1">{field.label}</Typography> */}
+        <Typography variant="subtitle1">{getLabelWithAsterisk(field.label, field.required)}</Typography>
         {field.name === 'gender' || field.name === 'work_location' || field.name === 'designation' || field.name === 'department' ? (
           <CustomAutocomplete
             value={
@@ -492,7 +500,7 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
 
         <Divider sx={{ my: 2 }} />
 
-        <Typography variant="h6" sx={{ mb: 1 }}>
+        <Typography variant="h4" sx={{ mb: 1 }}>
           Statutory Components
         </Typography>
         <FormGroup sx={{ mt: 1 }}>
@@ -511,17 +519,25 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
               />
             }
             label="Employees Provident Fund"
+            sx={{
+              width: 'fit-content',
+              '& .MuiFormControlLabel-label': {
+                cursor: 'pointer'
+              }
+            }}
           />
           {values.statutory_components.epf_enabled && (
             <Grid2 container spacing={2} sx={{ mt: 1, ml: 3 }}>
               <Grid2 size={{ xs: 12, sm: 6 }}>
                 <Typography variant="subtitle2" sx={{ color: 'grey.800', mb: 0.5 }}>
-                  PF Account Number{' '}
-                  <Typography component="span" sx={{ fontSize: '0.75rem', color: 'grey.600' }}>
-                    (e.g. ABCD1234567)
-                  </Typography>
+                  {getLabelWithAsterisk(
+                    <>PF Account Number</>,
+                    true // or false based on conditional logic
+                  )}
                 </Typography>
+
                 <TextField
+                  size="small"
                   fullWidth
                   value={values.statutory_components?.employee_provident_fund?.pf_account_number || ''}
                   onChange={(e) => setFieldValue('statutory_components.employee_provident_fund.pf_account_number', e.target.value)}
@@ -539,12 +555,14 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6 }}>
                 <Typography variant="subtitle2" sx={{ color: 'grey.800', mb: 0.5 }}>
-                  UAN Number{' '}
-                  <Typography component="span" sx={{ fontSize: '0.75rem', color: 'grey.600' }}>
-                    (e.g. 123456789012)
-                  </Typography>
+                  {getLabelWithAsterisk(
+                    <>UAN Number </>,
+                    true // Set to `true` if UAN is required
+                  )}
                 </Typography>
+
                 <TextField
+                  size="small"
                   fullWidth
                   value={values.statutory_components?.employee_provident_fund?.uan || ''}
                   onChange={(e) => setFieldValue('statutory_components.employee_provident_fund.uan', e.target.value)}
@@ -577,16 +595,28 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
               />
             }
             label="Employee State Insurance"
+            sx={{
+              width: 'fit-content',
+              '& .MuiFormControlLabel-label': {
+                cursor: 'pointer'
+              }
+            }}
           />
           {values.statutory_components.esi_enabled && (
             <Grid2 container spacing={2} sx={{ mt: 1, ml: 3 }}>
               <Grid2 size={{ xs: 12, sm: 6 }}>
                 <Typography variant="subtitle2" sx={{ color: 'grey.800', mb: 0.5 }}>
-                  ESI Number{' '}
-                  <Typography component="span" sx={{ fontSize: '0.75rem', color: 'grey.600' }}>
-                    (e.g. 1234567890)
-                  </Typography>
+                  {getLabelWithAsterisk(
+                    <>
+                      ESI Number{' '}
+                      <Typography component="span" sx={{ fontSize: '0.75rem', color: 'grey.600', display: 'inline' }}>
+                        (e.g. 1234567890)
+                      </Typography>
+                    </>,
+                    true // Set this to `true` if ESI Number is required based on conditions
+                  )}
                 </Typography>
+
                 <TextField
                   fullWidth
                   value={values.statutory_components?.employee_state_insurance?.esi_number || ''}
@@ -619,6 +649,12 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
               />
             }
             label="Professional tax"
+            sx={{
+              width: 'fit-content',
+              '& .MuiFormControlLabel-label': {
+                cursor: 'pointer'
+              }
+            }}
           />
         </FormGroup>
       </form>

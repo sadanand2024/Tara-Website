@@ -1,78 +1,111 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import { Autocomplete, Box, Button, Stack, TextField } from '@mui/material';
+import Grid2 from '@mui/material/Grid2';
 import { useFormik } from 'formik';
-import * as Yup from 'yup';
-import useAuth from 'hooks/useAuth';
+import PropTypes from 'prop-types';
+import React from 'react';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
-
-// material-ui
-import {
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  IconButton,
-  Typography,
-  InputLabel,
-  FormHelperText,
-  FormControl,
-  Select,
-  MenuItem,
-  Box,
-  Stack
-} from '@mui/material';
-import Grid from '@mui/material/Grid2';
-import CloseIcon from '@mui/icons-material/Close';
+import Modal from 'ui-component/extended/Modal';
+import CustomDatePicker from 'utils/CustomDateInput';
+import CustomInput from 'utils/CustomInput';
 import Factory from 'utils/Factory';
+import * as Yup from 'yup';
 import { __IndianStates } from '../../../utils/indianStates';
-import { DIALOG_TITLE_PADDING, DIALOG_CONTENT_PADDING } from 'config';
+import { industries } from 'utils/industries';
+
 const validationSchema = Yup.object({
   business_name: Yup.string().required('Business name is required'),
-
-  pan: Yup.string().matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN Number'),
-  mobile_number: Yup.string().matches(/^\+?[1-9]\d{1,14}$/, 'Invalid phone number'),
-  email: Yup.string().matches(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, 'Invalid email format'),
-  dob_or_incorp_date: Yup.date().max(new Date(), 'Date cannot be in the future')
+  legal_name: Yup.string().required('Legal name is required'),
+  // registration_number: Yup.string().required('Registration number is required'),
+  entity_type: Yup.string().required('Entity type is required'),
+  address_line1: Yup.string().required('Address Line 1 is required'),
+  city: Yup.string().required('City is required'),
+  state: Yup.string().required('State is required'),
+  country: Yup.string().required('Country is required'),
+  pincode: Yup.string()
+    .matches(/^\d{6}$/, 'Pincode must be exactly 6 digits')
+    .required('Pincode is required'),
+  pan: Yup.string()
+    .required('PAN Number is required')
+    .matches(/^[A-Z]{5}[0-9]{4}[A-Z]$/, 'Invalid PAN Number format'),
+  // trade_name: Yup.string().required('Trade Name is required'),
+  mobile_number: Yup.string()
+    .matches(/^\d{10}$/, 'Mobile Number must be exactly 10 digits')
+    .required('Mobile Number is required'),
+  email: Yup.string().email('Invalid email format').required('Email is required')
 });
 
-const entityTypes = [
-  { value: 'proprietorship', label: 'Proprietorship' },
-  { value: 'partnership', label: 'Partnership' },
-  { value: 'privateLimitedCompany', label: 'Private Limited Company' },
-  { value: 'publicLimitedCompany', label: 'Public Limited Company' },
-  { value: 'llp', label: 'Limited Liability Partnership' }
-];
+const entityTypes = ['Proprietorship', 'Partnership', 'Private Limited Company', 'Public Limited Company', 'Limited Liability Partnership'];
 
 const AddBusiness = ({ open, onClose, userData, setUserData, getContext }) => {
   const dispatch = useDispatch();
+  const [submitAttempted, setSubmitAttempted] = React.useState(false);
+  const Fields = [
+    { name: 'business_name', label: 'Business or Trade Name ', required: true },
+    { name: 'legal_name', label: 'Legal Name ', required: true },
+    { name: 'registration_number', label: 'Registration Number', required: false },
+    { name: 'entity_type', label: 'Entity Type', type: 'select', options: entityTypes, required: true },
+    { name: 'pan', label: 'PAN', required: true },
+    { name: 'business_nature', type: 'select', label: 'Business Nature', options: industries, required: true },
+    { name: 'mobile_number', label: 'Mobile Number', required: true },
+    { name: 'email', label: 'Email', required: true },
+    { name: 'dob_or_incorp_date', label: 'Date of Incorporation' },
+    { name: 'address_line1', label: 'Address Line 1', required: true },
+    { name: 'address_line2', label: 'Address Line 2', required: true },
+    { name: 'city', label: 'City', required: true },
+    { name: 'state', label: 'State', type: 'select', options: __IndianStates, required: true },
+    { name: 'country', label: 'Country', required: true },
+    { name: 'pincode', label: 'Pincode', required: true }
+  ];
+
   const formik = useFormik({
     initialValues: {
-      user_id: userData.user.id,
+      user_id: userData?.user?.id || '',
       business_name: '',
+      legal_name: '',
       registration_number: '',
+      dob_or_incorp_date: new Date().toISOString().slice(0, 10),
       entity_type: '',
-      head_office: {
-        address_line1: '',
-        address_line2: '',
-        city: '',
-        state: '',
-        country: 'India',
-        pincode: ''
-      },
+      address_line1: '',
+      address_line2: '',
+      city: '',
+      state: '',
+      country: 'India',
+      pincode: '',
       pan: '',
       business_nature: '',
-      trade_name: '',
+      // trade_name: '',
       mobile_number: '',
       email: ''
     },
-
     validationSchema,
-    onSubmit: async (values, { setSubmitting, resetForm }) => {
+    validateOnChange: false,
+    validateOnBlur: false,
+    onSubmit: async (values, { setSubmitting, resetForm, setErrors }) => {
+      const payload = {
+        user_id: values.user_id,
+        business_name: values.business_name,
+        legal_name: values.legal_name,
+        registration_number: values.registration_number,
+        dob_or_incorp_date: values.dob_or_incorp_date,
+        entity_type: values.entity_type,
+        head_office: {
+          address_line1: values.address_line1,
+          address_line2: values.address_line2,
+          city: values.city,
+          state: values.state,
+          country: values.country,
+          pincode: values.pincode
+        },
+        pan: values.pan,
+        business_nature: values.business_nature,
+        // trade_name: values.trade_name,
+        mobile_number: values.mobile_number,
+        email: values.email
+      };
+
       try {
-        const response = await Factory('post', '/user_management/business/create/', values, {});
+        const response = await Factory('post', '/user_management/business/create/', payload, {});
         if (response.res.status_cd === 0) {
           resetForm();
           dispatch(
@@ -80,7 +113,6 @@ const AddBusiness = ({ open, onClose, userData, setUserData, getContext }) => {
               open: true,
               message: 'Business Added Successfully',
               variant: 'alert',
-              anchorOrigin: { vertical: 'top', horizontal: 'right' },
               alert: { color: 'success' },
               close: false,
               severity: 'success'
@@ -88,11 +120,9 @@ const AddBusiness = ({ open, onClose, userData, setUserData, getContext }) => {
           );
           getContext();
           onClose();
-          // You might want to add a success notification here
         }
       } catch (error) {
         console.error('Error registering business:', error);
-        // You might want to add an error notification here
       } finally {
         setSubmitting(false);
       }
@@ -104,284 +134,164 @@ const AddBusiness = ({ open, onClose, userData, setUserData, getContext }) => {
     onClose();
   };
 
-  return (
-    <Dialog
-      open={open}
-      onClose={handleClose}
-      maxWidth="sm"
-      fullWidth
-      PaperProps={{
-        sx: {
-          borderRadius: 2
-        }
-      }}
-    >
-      <DialogTitle sx={DIALOG_TITLE_PADDING}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Stack direction="column" spacing={0}>
-            <Typography variant="h3">Add New Business</Typography>
-            <Typography variant="caption">Your business details will be used to create your business profile</Typography>
-          </Stack>
-          <IconButton
-            aria-label="close"
-            onClick={handleClose}
-            sx={{
-              color: (theme) => theme.palette.grey[500]
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </Box>
-      </DialogTitle>
+  const { values, handleChange, handleBlur, touched, errors, handleSubmit, setFieldValue } = formik;
 
-      <form onSubmit={formik.handleSubmit}>
-        <DialogContent sx={DIALOG_CONTENT_PADDING} dividers>
-          <Grid container spacing={2}>
-            <Grid size={{ xs: 12 }}>
-              <TextField
-                fullWidth
-                size="small"
-                id="business_name"
-                name="business_name"
-                label={
-                  <Typography>
-                    Business Name{' '}
-                    <Typography variant="caption" color="error">
-                      *
-                    </Typography>
-                  </Typography>
+  // Helper to get nested value
+  const getValue = (name) => {
+    if (name.includes('.')) {
+      const [parent, child] = name.split('.');
+      return values[parent]?.[child] || '';
+    }
+    return values[name] || '';
+  };
+
+  // Helper to get nested error/touched
+  const getError = (name) => {
+    if (name.includes('.')) {
+      const [parent, child] = name.split('.');
+      return (touched[parent]?.[child] || submitAttempted) && errors[parent]?.[child];
+    }
+    return (touched[name] || submitAttempted) && errors[name];
+  };
+
+  // Helper to render label with red asterisk if required
+  const renderLabel = (label, required) => {
+    // Check for special cases (like 'Address Line 2' and 'registration_number')
+    const isSpecialCase = label === 'Address Line 2' || label === 'registration_number';
+
+    return (
+      <span>
+        {label}
+        {required && !isSpecialCase && <span style={{ color: 'red' }}> *</span>}
+      </span>
+    );
+  };
+
+  // Render fields dynamically
+  const renderFields = () => (
+    <Grid2 container spacing={2}>
+      {Fields.map((field) => (
+        <Grid2 key={field.name} size={{ xs: 12, sm: 6 }}>
+          {field.type === 'select' ? (
+            <Autocomplete
+              options={field.options}
+              size="small"
+              value={getValue(field.name) || ''}
+              onChange={(e, newValue) => setFieldValue(field.name, newValue)}
+              getOptionLabel={(option) => (typeof option === 'string' ? option : option.label)}
+              isOptionEqualToValue={(option, value) =>
+                typeof option === 'string' ? option === value : option.value === (value?.value ?? value)
+              }
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label={renderLabel(field.label, field.required)}
+                  error={Boolean(getError(field.name))}
+                  fullWidth
+                  size="small"
+                />
+              )}
+            />
+          ) : field.name === 'dob_or_incorp_date' ? (
+            <TextField
+              fullWidth
+              size="small"
+              name={field.name}
+              type="date"
+              value={getValue(field.name) || ''}
+              onChange={(e) => setFieldValue(field.name, e.target.value)}
+              required={field.required}
+              label={renderLabel(field.label, field.required)}
+            />
+          ) : (
+            <TextField
+              name={field.name}
+              size="small"
+              value={getValue(field.name) || ''}
+              onChange={(e) => {
+                let input = e.target.value;
+
+                if (field.name === 'mobile_number' || field.name === 'pincode') {
+                  if (/[^0-9]/.test(input)) return;
                 }
-                value={formik.values.business_name}
-                onChange={formik.handleChange}
-                error={formik.touched.business_name && Boolean(formik.errors.business_name)}
-                helperText={formik.touched.business_name && formik.errors.business_name}
-              />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField
-                fullWidth
-                size="small"
-                id="registration_number"
-                name="registration_number"
-                label="Registration Number"
-                value={formik.values.registration_number}
-                onChange={formik.handleChange}
-                error={formik.touched.registration_number && Boolean(formik.errors.registration_number)}
-                helperText={formik.touched.registration_number && formik.errors.registration_number}
-              />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <FormControl fullWidth size="small" error={formik.touched.entity_type && Boolean(formik.errors.entity_type)}>
-                <InputLabel>Entity Type</InputLabel>
-                <Select
-                  id="entity_type"
-                  name="entity_type"
-                  value={formik.values.entity_type}
-                  label="Entity Type"
-                  onChange={formik.handleChange}
-                >
-                  {entityTypes.map((type) => (
-                    <MenuItem key={type.value} value={type.value}>
-                      {type.label}
-                    </MenuItem>
-                  ))}
-                </Select>
-                {formik.touched.entity_type && formik.errors.entity_type && <FormHelperText>{formik.errors.entity_type}</FormHelperText>}
-              </FormControl>
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField
-                fullWidth
-                size="small"
-                id="pan"
-                name="pan"
-                label="PAN Number"
-                value={formik.values.pan}
-                onChange={(e) => {
-                  const upperCaseValue = e.target.value.toUpperCase();
-                  if (upperCaseValue.length <= 10) {
-                    formik.setFieldValue('pan', upperCaseValue);
-                  }
-                }}
-                error={formik.touched.pan && Boolean(formik.errors.pan)}
-                helperText={formik.touched.pan && formik.errors.pan}
-              />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField
-                fullWidth
-                size="small"
-                id="business_nature"
-                name="business_nature"
-                label="Nature of Business"
-                value={formik.values.business_nature}
-                onChange={formik.handleChange}
-                error={formik.touched.business_nature && Boolean(formik.errors.business_nature)}
-                helperText={formik.touched.business_nature && formik.errors.business_nature}
-              />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField
-                fullWidth
-                size="small"
-                id="trade_name"
-                name="trade_name"
-                label="Trade Name"
-                value={formik.values.trade_name}
-                onChange={formik.handleChange}
-                error={formik.touched.trade_name && Boolean(formik.errors.trade_name)}
-                helperText={formik.touched.trade_name && formik.errors.trade_name}
-              />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField
-                fullWidth
-                size="small"
-                id="mobile_number"
-                name="mobile_number"
-                label="Mobile Number"
-                value={formik.values.mobile_number}
-                onChange={formik.handleChange}
-                error={formik.touched.mobile_number && Boolean(formik.errors.mobile_number)}
-                helperText={formik.touched.mobile_number && formik.errors.mobile_number}
-              />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField
-                fullWidth
-                size="small"
-                id="email"
-                name="email"
-                label="Business Email"
-                value={formik.values.email}
-                onChange={formik.handleChange}
-                error={formik.touched.email && Boolean(formik.errors.email)}
-                helperText={formik.touched.email && formik.errors.email}
-              />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField
-                fullWidth
-                size="small"
-                id="dob_or_incorp_date"
-                name="dob_or_incorp_date"
-                label="Date of Incorporation"
-                type="date"
-                value={formik.values.dob_or_incorp_date}
-                onChange={formik.handleChange}
-                error={formik.touched.dob_or_incorp_date && Boolean(formik.errors.dob_or_incorp_date)}
-                helperText={formik.touched.dob_or_incorp_date && formik.errors.dob_or_incorp_date}
-                InputLabelProps={{
-                  shrink: true
-                }}
-              />
-            </Grid>
 
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField
-                fullWidth
-                size="small"
-                id="head_office.address_line1"
-                name="head_office.address_line1"
-                label="Address Line 1"
-                value={formik.values.head_office.address_line1}
-                onChange={formik.handleChange}
-                error={formik.touched.head_office?.address_line1 && Boolean(formik.errors.head_office?.address_line1)}
-                helperText={formik.touched.head_office?.address_line1 && formik.errors.head_office?.address_line1}
-              />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField
-                fullWidth
-                size="small"
-                id="head_office.address_line2"
-                name="head_office.address_line2"
-                label="Address Line 2"
-                value={formik.values.head_office.address_line2}
-                onChange={formik.handleChange}
-                error={formik.touched.head_office?.address_line2 && Boolean(formik.errors.head_office?.address_line2)}
-                helperText={formik.touched.head_office?.address_line2 && formik.errors.head_office?.address_line2}
-              />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField
-                fullWidth
-                size="small"
-                id="head_office.city"
-                name="head_office.city"
-                label="City"
-                value={formik.values.head_office.city}
-                onChange={formik.handleChange}
-                error={formik.touched.head_office?.city && Boolean(formik.errors.head_office?.city)}
-                helperText={formik.touched.head_office?.city && formik.errors.head_office?.city}
-              />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <FormControl fullWidth size="small" error={formik.touched.head_office?.state && Boolean(formik.errors.head_office?.state)}>
-                <InputLabel>State</InputLabel>
-                <Select
-                  id="head_office.state"
-                  name="head_office.state"
-                  value={formik.values.head_office.state}
-                  label="State"
-                  onChange={formik.handleChange}
-                >
-                  {__IndianStates.map((state) => (
-                    <MenuItem key={state} value={state}>
-                      {state}
-                    </MenuItem>
-                  ))}
-                </Select>
-                {formik.touched.head_office?.state && formik.errors.head_office?.state && (
-                  <FormHelperText>{formik.errors.head_office.state}</FormHelperText>
-                )}
-              </FormControl>
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField
-                fullWidth
-                size="small"
-                id="head_office.country"
-                name="head_office.country"
-                label="Country"
-                disabled
-                value={formik.values.head_office.country}
-                onChange={formik.handleChange}
-                error={formik.touched.head_office?.country && Boolean(formik.errors.head_office?.country)}
-                helperText={formik.touched.head_office?.country && formik.errors.head_office?.country}
-              />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField
-                fullWidth
-                size="small"
-                id="head_office.pincode"
-                name="head_office.pincode"
-                label="Pincode"
-                value={formik.values.head_office.pincode}
-                onChange={formik.handleChange}
-                error={formik.touched.head_office?.pincode && Boolean(formik.errors.head_office?.pincode)}
-                helperText={formik.touched.head_office?.pincode && formik.errors.head_office?.pincode}
-              />
-            </Grid>
-          </Grid>
-        </DialogContent>
-        <DialogActions sx={{ p: 2.5 }}>
-          <Button onClick={handleClose} color="error" variant="outlined">
+                if (field.name === 'pan') {
+                  input = input.toUpperCase();
+                  if (!/^[A-Z0-9]*$/.test(input)) return;
+                  if (input.length > 10) return;
+                }
+
+                setFieldValue(field.name, input);
+              }}
+              onBlur={handleBlur}
+              label={renderLabel(field.label, field.required)}
+              error={Boolean(getError(field.name))}
+              fullWidth
+            />
+          )}
+        </Grid2>
+      ))}
+    </Grid2>
+  );
+  return (
+    <Modal
+      open={open}
+      title={'Add Business'}
+      maxWidth="sm"
+      showClose={true}
+      handleClose={handleClose}
+      header={{ title: 'Add Business', subheader: '' }}
+      footer={
+        <Stack direction="row" justifyContent="space-between" sx={{ width: 1, gap: 2 }}>
+          <Button variant="outlined" color="error" onClick={handleClose}>
             Cancel
           </Button>
-          <Button type="submit" variant="contained" color="primary" disabled={formik.isSubmitting}>
-            Add Business
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={async () => {
+              setSubmitAttempted(true);
+              // Validate the form and get all errors
+              const validationErrors = await formik.validateForm();
+              const missingFields = Object.entries(validationErrors).map(([fieldName, error]) => {
+                // Find the matching label from Fields array
+                const field = Fields.find((f) => f.name === fieldName || fieldName.startsWith(`${f.name}.`));
+                return field ? field.label : fieldName;
+              });
+              if (missingFields.length > 0) {
+                dispatch(
+                  openSnackbar({
+                    open: true,
+                    message: `Please fill the Mandatory fields`,
+                    variant: 'alert',
+                    alert: { color: 'error' },
+                    close: false
+                  })
+                );
+                return;
+              }
+              // No errors, submit form (save data)
+              handleSubmit();
+            }}
+          >
+            Save
           </Button>
-        </DialogActions>
-      </form>
-    </Dialog>
+        </Stack>
+      }
+    >
+      <Box component="form" onSubmit={handleSubmit} sx={{ p: 2 }}>
+        {renderFields()}
+      </Box>
+    </Modal>
   );
 };
 
 AddBusiness.propTypes = {
   open: PropTypes.bool.isRequired,
-  onClose: PropTypes.func.isRequired
+  onClose: PropTypes.func.isRequired,
+  userData: PropTypes.object.isRequired,
+  setUserData: PropTypes.func.isRequired,
+  getContext: PropTypes.func.isRequired
 };
 
 export default AddBusiness;

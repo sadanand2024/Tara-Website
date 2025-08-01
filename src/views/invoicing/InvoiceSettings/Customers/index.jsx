@@ -9,8 +9,15 @@ import CustomerList from './CustomerList';
 import { ConstructionOutlined } from '@mui/icons-material';
 import MainCard from 'ui-component/cards/MainCard';
 
-export default function CustomersComponent({ getCustomersData, customers, businessDetails, handleNext, handleBack }) {
-  const [open, setOpen] = useState(false);
+export default function CustomersComponent({
+  getCustomersData,
+  customers,
+  businessDetails,
+  handleNext,
+  handleBack,
+  addDialogOpen,
+  setAddDialogOpen
+}) {
   const [type, setType] = useState('add');
   useEffect(() => {
     if (businessDetails?.invoicing_profile_id) {
@@ -20,14 +27,12 @@ export default function CustomersComponent({ getCustomersData, customers, busine
 
   const navigate = useNavigate();
 
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const handleOpen = () => setAddDialogOpen(true);
+  const handleClose = () => setAddDialogOpen(false);
   return (
     <>
       {/* Header Section */}
       <MainCard
-        title="Customers"
-        subtitle="Manage your business customers for invoice generation and business operations"
         action={
           <Button
             variant="contained"
@@ -47,17 +52,19 @@ export default function CustomersComponent({ getCustomersData, customers, busine
         <AddCustomer
           type={type}
           setType={setType}
-          open={open}
+          open={addDialogOpen}
           handleClose={handleClose}
           getCustomersData={getCustomersData}
           businessDetailsData={businessDetails}
+          addDialogOpen={addDialogOpen}
+          setAddDialogOpen={setAddDialogOpen}
         />
 
         {/* Customer List Section */}
         <CustomerList
           type={type}
           setType={setType}
-          open={open}
+          open={addDialogOpen}
           handleOpen={handleOpen}
           handleClose={handleClose}
           businessDetailsData={businessDetails}

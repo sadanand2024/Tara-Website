@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { Button, Box, Stack, Grid2, Typography, TextField } from '@mui/material';
+import { Button, Box, Stack, Grid2, Typography, TextField, Autocomplete } from '@mui/material';
 import { indian_States_And_UTs } from 'utils/indian_States_And_UT';
 import CustomInput from 'utils/CustomInput';
 import CustomAutocomplete from 'utils/CustomAutocomplete';
@@ -11,12 +11,12 @@ import Modal from 'ui-component/extended/Modal';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
 const filingAddress = [
-  { name: 'location_name', label: 'Location Name' },
-  { name: 'address_line1', label: 'Address Line 1' },
-  { name: 'address_line2', label: 'Address Line 2' },
-  { name: 'address_state', label: 'State' },
-  { name: 'address_city', label: 'City' },
-  { name: 'address_pincode', label: 'Pincode' }
+  { name: 'location_name', label: 'Location Name', required: true },
+  { name: 'address_line1', label: 'Address Line 1', required: true },
+  { name: 'address_line2', label: 'Address Line 2', required: false },
+  { name: 'address_state', label: 'State', required: true },
+  { name: 'address_city', label: 'City', required: true },
+  { name: 'address_pincode', label: 'Pincode', required: true }
 ];
 export default function WorkLocationDialog({ open, handleClose, fetchWorkLocations, selectedRecord, type, setType }) {
   const [searchParams] = useSearchParams();
@@ -83,6 +83,12 @@ export default function WorkLocationDialog({ open, handleClose, fetchWorkLocatio
       }
     }
   });
+  const getLabelWithAsterisk = (label, isRequired) => (
+    <>
+      {label}
+      {isRequired && <span style={{ color: 'red' }}> *</span>}
+    </>
+  );
   useEffect(() => {
     if (type === 'edit' && selectedRecord) {
       setValues(selectedRecord);
@@ -95,16 +101,26 @@ export default function WorkLocationDialog({ open, handleClose, fetchWorkLocatio
       if (field.name === 'address_state') {
         return (
           <Grid2 key={field.name} size={{ xs: 12, sm: 6 }}>
-            <Typography variant="subtitle1" gutterBottom>
-              {field.label}
+            <Typography variant="subtitle1" sx={{ mb: 0.5 }}>
+              {getLabelWithAsterisk(field.label, field.required)}
             </Typography>
-            <CustomAutocomplete
+            <Autocomplete
               value={values[field.name]}
               name={field.name}
-              onChange={(e, newValue) => setFieldValue(field.name, newValue)}
+              onChange={(e, newValue) => {
+                setFieldValue(field.name, newValue);
+              }}
               options={indian_States_And_UTs}
-              error={touched[field.name] && Boolean(errors[field.name])}
-              helperText={touched[field.name] && errors[field.name]}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  size="small"
+                  error={touched[field.name] && Boolean(errors[field.name])}
+                  helperText={touched[field.name] && errors[field.name]}
+                />
+              )}
+              required={field.required}
+              label={field.label}
               sx={{
                 '& .MuiInputBase-root': {
                   color: 'grey.600'
@@ -118,7 +134,7 @@ export default function WorkLocationDialog({ open, handleClose, fetchWorkLocatio
       return (
         <Grid2 key={field.name} size={{ xs: 12, sm: 6 }}>
           <Typography variant="subtitle1" sx={{ mb: 0.5 }}>
-            {field.label}
+            {getLabelWithAsterisk(field.label, field.required)}
           </Typography>
           <TextField
             size="small"
@@ -154,6 +170,7 @@ export default function WorkLocationDialog({ open, handleClose, fetchWorkLocatio
       open={open}
       showClose={true}
       title={type === 'edit' ? 'Edit Work Location' : 'Add Work Location'}
+      maxWidth="sm"
       handleClose={() => {
         setType('');
         resetForm(); // Optional
@@ -178,8 +195,8 @@ export default function WorkLocationDialog({ open, handleClose, fetchWorkLocatio
         </Stack>
       }
     >
-      <Box component="form" onSubmit={handleSubmit} sx={{ padding: 2 }}>
-        <Grid2 container spacing={3}>
+      <Box component="form" onSubmit={handleSubmit} sx={{ pt: 1 }}>
+        <Grid2 container spacing={2}>
           {renderFields(filingAddress)}
         </Grid2>
       </Box>

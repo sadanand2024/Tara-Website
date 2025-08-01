@@ -17,7 +17,6 @@ import {
   Typography,
   CircularProgress
 } from '@mui/material';
-import MainCard from 'ui-component/cards/MainCard';
 import DeleteDialog from 'ui-component/extended/DeleteDialog';
 import DesignationDialog from './DesignationDialog';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -28,16 +27,25 @@ import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
 import { IconButton } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
 import BulkUploadDialog from 'ui-component/extended/BulkUploadDialog';
-function Designations({ handleBack, handleNext }) {
+import { useDispatch } from 'store';
+import { openSnackbar } from 'store/slices/snackbar';
+function Designations({
+  handleBack,
+  handleNext,
+  searchQuery = '',
+  openDialog = false,
+  setOpenDialog,
+  openBulkDialog = false,
+  setOpenBulkDialog
+}) {
   const [designations, setDesignations] = useState([]);
-  const [openDialog, setOpenDialog] = useState(false);
   const [postType, setPostType] = useState('');
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
-  const [openBulkDialog, setOpenBulkDialog] = useState(false);
   const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
   const handleOpenDeleteDialog = (designation) => {
     setSelectedRow(designation);
     setOpenDeleteDialog(true);
@@ -53,7 +61,12 @@ function Designations({ handleBack, handleNext }) {
   const [searchParams] = useSearchParams();
   const payrollid = searchParams.get('payrollid');
 
-  const paginatedData = designations.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+  // Filter designations based on searchQuery from props
+  const filteredDesignations = designations.filter((designation) => {
+    const query = searchQuery.toLowerCase();
+    return designation.designation_name?.toLowerCase().includes(query);
+  });
+  const paginatedData = filteredDesignations.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 
   useEffect(() => {
     if (payrollid) fetchDesignations();
@@ -61,7 +74,6 @@ function Designations({ handleBack, handleNext }) {
 
   const handlePageChange = (event, value) => setCurrentPage(value);
 
-  const handleOpenDialog = () => setOpenDialog(true);
   const handleCloseDialog = () => setOpenDialog(false);
 
   const fetchDesignations = async () => {
@@ -81,14 +93,33 @@ function Designations({ handleBack, handleNext }) {
   const handleEdit = (designation) => {
     setPostType('edit');
     setSelectedRecord(designation);
-    handleOpenDialog();
+    setOpenDialog(true);
   };
 
   const handleDelete = async (designation) => {
     const url = `/payroll/designations/${designation.id}/`;
     const { res } = await Factory('delete', url, {});
     if (res?.status_cd === 0) {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Record Deleted Successfully',
+          variant: 'alert',
+          alert: { color: 'success' },
+          close: false
+        })
+      );
       fetchDesignations();
+    } else {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res?.data?.data?.error || 'Unknown error'),
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     }
   };
 
@@ -112,35 +143,14 @@ function Designations({ handleBack, handleNext }) {
     );
   }
   return (
-    <MainCard
-      title="Designation Details"
-      subtitle="Manage your designations for seamless operations"
-      secondary={
-        <Stack direction="row" spacing={2}>
-          <Button size="small" variant="outlined" color="secondary" onClick={() => setOpenBulkDialog(true)}>
-            Bulk Upload
-          </Button>
-          <Button
-            size="small"
-            variant="contained"
-            color="primary"
-            onClick={() => {
-              setPostType('post');
-              handleOpenDialog();
-            }}
-          >
-            Add Designation
-          </Button>
-        </Stack>
-      }
-    >
+    <Box>
       <BulkUploadDialog
         open={openBulkDialog}
         handleClose={closeBulkDialog}
         getData={fetchDesignations}
         payrollid={payrollid}
         type="Designations"
-        bulkUploadUrl="/payroll/designations/"
+        bulkUploadUrl="/payroll/designations/bulk-designations-upload/"
         xlsxTemplateUrl="/payroll/download-template/xlsx?type=designation"
         csvTemplateUrl="/payroll/download-template/csv?type=designation"
       />
@@ -149,7 +159,7 @@ function Designations({ handleBack, handleNext }) {
           <DesignationDialog
             open={openDialog}
             handleClose={handleCloseDialog}
-            handleOpenDialog={handleOpenDialog}
+            handleOpenDialog={() => setOpenDialog(true)}
             selectedRecord={selectedRecord}
             type={postType}
             setType={setPostType}
@@ -214,7 +224,7 @@ function Designations({ handleBack, handleNext }) {
             dialogData={{
               title: 'Delete Record',
               heading: 'Are you sure you want to delete this Record?',
-              description: 'This action will permanently delete the record.'
+              description: 'Deleting this designation will also delete all associated employee records. Proceed only if you are sure.'
             }}
           />
         </TableContainer>
@@ -228,7 +238,7 @@ function Designations({ handleBack, handleNext }) {
             </Button>
             {designations.length > 0 && (
               <Pagination
-                count={Math.ceil(designations.length / rowsPerPage)}
+                count={Math.ceil(filteredDesignations.length / rowsPerPage)}
                 page={currentPage}
                 onChange={handlePageChange}
                 shape="rounded"
@@ -242,7 +252,7 @@ function Designations({ handleBack, handleNext }) {
           </Stack>
         </Grid2>
       </Grid2>
-    </MainCard>
+    </Box>
   );
 }
 

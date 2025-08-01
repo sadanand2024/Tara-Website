@@ -166,7 +166,7 @@ export default function LeaveManagementDialog({ open, handleClose, selectedRecor
         resetForm();
         handleClose(); // Reset form and close dialog
       }}
-      header={{ title: 'Add Leave', subheader: '' }}
+      title="Add/ Update Leave"
       footer={
         <Stack direction="row" sx={{ width: 1, justifyContent: 'space-between', gap: 2 }}>
           <Button

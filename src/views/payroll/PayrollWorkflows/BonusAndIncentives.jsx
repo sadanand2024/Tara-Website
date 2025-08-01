@@ -1,22 +1,32 @@
-import React, { useState, useEffect } from 'react';
-import RenderTable from './RenderTable';
-import {} from '@mui/material';
-import Factory from 'utils/Factory';
+import { } from '@mui/material';
+import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import RenderDialog from './RenderDialog';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
+import Factory from 'utils/Factory';
+import RenderDialog from './RenderDialog';
+import RenderTable from './RenderTable';
 
-export default function BonusAndIncentives({ employeeMasterData, from, openDialog, fields, setOpenDialog, handleBack, handleNext }) {
+export default function BonusAndIncentives({
+  employeeMasterData,
+  from,
+  openDialog,
+  fields,
+  setOpenDialog,
+  handleBack,
+  handleNext,
+  filteredData,
+  fetchData
+}) {
   const headerData = [
     'Employee ID',
     'Employee Name',
     'Department',
     'Designation',
-    'Type',
+    'Bonus Type',
     'Amount',
     'Committed Bonus',
-    'Ytd Bonus',
+    'YTD Bonus',
     'Remaining Balance'
     // 'Month',
     // 'Financial Year'
@@ -35,9 +45,7 @@ export default function BonusAndIncentives({ employeeMasterData, from, openDialo
     // 'month',
     // 'financial_year'
   ];
-  const [payrollid, setPayrollId] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [data, setData] = useState([]);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [month, setMonth] = useState(null);
   const [financialYear, setFinancialYear] = useState(null);
@@ -58,30 +66,30 @@ export default function BonusAndIncentives({ employeeMasterData, from, openDialo
   useEffect(() => {
     const id = searchParams.get('payrollid');
     if (id) {
-      setPayrollId(id);
+      // setPayrollId(id); // This line is removed as per the edit hint
     }
   }, [searchParams]);
 
-  const getData = async () => {
-    setLoading(true);
-    const year = financialYear;
-    const url = `/payroll/bonus-incentives/by-payroll-month?payroll_id=${payrollid}&month=${month}&financial_year=${year}`;
-    const { res, error } = await Factory('get', url, {});
-    setLoading(false);
-    if (res.status_cd === 0) {
-      setData(res.data || []);
-    } else {
-      dispatch(
-        openSnackbar({
-          open: true,
-          message: JSON.stringify(res.data.message),
-          variant: 'alert',
-          alert: { color: 'error' },
-          close: false
-        })
-      );
-    }
-  };
+  // const getData = async () => { // This function is removed as per the edit hint
+  //   setLoading(true);
+  //   const year = financialYear;
+  //   const url = `/payroll/bonus-incentives/by-payroll-month?payroll_id=${payrollid}&month=${month}&financial_year=${year}`;
+  //   const { res, error } = await Factory('get', url, {});
+  //   setLoading(false);
+  //   if (res.status_cd === 0) {
+  //     setData(res.data || []);
+  //   } else {
+  //     dispatch(
+  //       openSnackbar({
+  //         open: true,
+  //         message: JSON.stringify(res.data.message),
+  //         variant: 'alert',
+  //         alert: { color: 'error' },
+  //         close: false
+  //       })
+  //     );
+  //   }
+  // };
   const handleEdit = async (item) => {
     let url = `/payroll/bonus-incentives/${item.id}`;
     const { res } = await Factory('get', url, {});
@@ -124,19 +132,19 @@ export default function BonusAndIncentives({ employeeMasterData, from, openDialo
         })
       );
 
-      getData();
+      if (fetchData) fetchData();
     }
   };
-  useEffect(() => {
-    if (payrollid) {
-      getData();
-    }
-  }, [payrollid]);
+  // useEffect(() => { // This useEffect is removed as per the edit hint
+  //   if (payrollid) {
+  //     getData();
+  //   }
+  // }, [payrollid]);
   return (
     <>
       <RenderTable
         headerData={headerData}
-        tableData={data}
+        tableData={filteredData}
         handleEdit={handleEdit}
         handleDelete={handleDelete}
         body_keys={body_keys}
@@ -154,10 +162,10 @@ export default function BonusAndIncentives({ employeeMasterData, from, openDialo
         setOpenDialog={setOpenDialog}
         fields={fields}
         selectedRecord={selectedRecord}
-        setData={setData}
+        setData={() => {}}
         setLoading={setLoading}
         employeeMasterData={employeeMasterData}
-        getData={getData}
+        getData={fetchData}
       />
     </>
   );

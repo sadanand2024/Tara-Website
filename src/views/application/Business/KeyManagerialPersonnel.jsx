@@ -42,7 +42,7 @@ import GroupIcon from '@mui/icons-material/Group';
 import WorkIcon from '@mui/icons-material/Work';
 import { useSelector } from 'store';
 import Factory from 'utils/Factory';
-import DeleteConfirmationDialog from 'utils/DeleteConfirmationDialog';
+import DeleteDialog from 'ui-component/extended/DeleteDialog';
 import MainCard from 'ui-component/cards/MainCard';
 import Modal from 'ui-component/extended/Modal';
 import { useDispatch } from 'store';
@@ -84,19 +84,23 @@ const getRoleIcon = (role) => {
 const validationSchema = Yup.object().shape({
   name: Yup.string().required('Name is required'),
   designation: Yup.string().required('Designation is required'),
+  // pan_number: Yup.string()
+  //   .required('PAN Number is required')
+  //   .matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN Number format'),
   pan_number: Yup.string()
-    .required('PAN Number is required')
-    .matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN Number format'),
+    .required('PAN is required')
+    .matches(/^[A-Z]{3}P[A-Z][0-9]{4}[A-Z]$/, 'Invalid PAN Number format'),
+
   role: Yup.string().required('Role is required'),
   status: Yup.string().required('Status is required')
 });
 
 const fields = [
-  { name: 'name', label: 'Name',required: true },
-  { name: 'designation', label: 'Designation',required: true },
-  { name: 'pan_number', label: 'PAN Number',required: true },
-  { name: 'role', label: 'Role', type: 'select', options: roles,required: true },
-  { name: 'status', label: 'Status', type: 'select', options: ['active', 'inactive',],required: false }
+  { name: 'name', label: 'Name', required: true },
+  { name: 'designation', label: 'Designation', required: true },
+  { name: 'pan_number', label: 'PAN Number', required: true },
+  { name: 'role', label: 'Role', type: 'select', options: roles, required: true },
+  { name: 'status', label: 'Status', type: 'select', options: ['active', 'inactive'], required: false }
 ];
 
 const KeyManagerialPersonnel = ({ user, handleNext, handleBack, tabChange, tabval }) => {
@@ -104,6 +108,9 @@ const KeyManagerialPersonnel = ({ user, handleNext, handleBack, tabChange, tabva
   const [personnel, setPersonnel] = useState([]);
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
+  // Add state for delete dialog
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [selectedPersonnel, setSelectedPersonnel] = useState(null);
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
@@ -218,16 +225,16 @@ const KeyManagerialPersonnel = ({ user, handleNext, handleBack, tabChange, tabva
     }
   });
   const getLabelWithAsterisk = (label, isRequired) => (
-  <Typography variant="subtitle1" gutterBottom fontWeight={500}>
-    {label}
-    {isRequired && <span style={{ color: 'red', fontSize: '1.2em' }}> *</span>}
-  </Typography>
-);
+    <Typography variant="subtitle1" gutterBottom fontWeight={500}>
+      {label}
+      {isRequired && <span style={{ color: 'red' }}> *</span>}
+    </Typography>
+  );
 
   const renderFields = () => {
     return fields.map((field) => (
       <Grid2 key={field.name} size={{ xs: 12, sm: 6 }}>
-      {getLabelWithAsterisk(field.label, field.required)}
+        {getLabelWithAsterisk(field.label, field.required)}
 
         {/* <Typography variant="subtitle1" gutterBottom>
           {field.label}
@@ -344,12 +351,12 @@ const KeyManagerialPersonnel = ({ user, handleNext, handleBack, tabChange, tabva
             }}
           >
             <TableRow>
-              <TableCell sx={{ fontWeight: 600 }}>Name</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Designation</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>PAN Number</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Role</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
-              <TableCell align="center" sx={{ fontWeight: 600 }}>
+              <TableCell sx={{ fontWeight: 600, whiteSpace: 'nowrap' }}>Name</TableCell>
+              <TableCell sx={{ fontWeight: 600, whiteSpace: 'nowrap' }}>Designation</TableCell>
+              <TableCell sx={{ fontWeight: 600, whiteSpace: 'nowrap' }}>PAN Number</TableCell>
+              <TableCell sx={{ fontWeight: 600, whiteSpace: 'nowrap' }}>Role</TableCell>
+              <TableCell sx={{ fontWeight: 600, whiteSpace: 'nowrap' }}>Status</TableCell>
+              <TableCell align="center" sx={{ fontWeight: 600, whiteSpace: 'nowrap' }}>
                 Actions
               </TableCell>
             </TableRow>
@@ -359,28 +366,26 @@ const KeyManagerialPersonnel = ({ user, handleNext, handleBack, tabChange, tabva
               personnel.map((person, index) => (
                 <TableRow key={index} hover>
                   <TableCell>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Typography variant="body2" fontWeight={500}>
-                        {person.name}
-                      </Typography>
-                    </Box>
+                    <Typography variant="body2" fontWeight={500} sx={{ whiteSpace: 'nowrap' }}>
+                      {person.name}
+                    </Typography>
                   </TableCell>
                   <TableCell>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <WorkIcon color="action" fontSize="small" />
-                      <Typography variant="body2">{person.designation}</Typography>
-                    </Box>
+                    <Typography variant="body2" sx={{ whiteSpace: 'nowrap' }}>
+                      {person.designation}
+                    </Typography>
                   </TableCell>
                   <TableCell>
-                    <Typography variant="body2">{person.pan_number}</Typography>
+                    <Typography variant="body2" sx={{ whiteSpace: 'nowrap' }}>
+                      {person.pan_number}
+                    </Typography>
                   </TableCell>
                   <TableCell>
                     <Chip
                       label={
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                          <span>{getRoleIcon(person.role)}</span>
-                          <span>{person.role}</span>
-                        </Box>
+                        <Typography variant="body2" sx={{ whiteSpace: 'nowrap' }}>
+                          {person.role}
+                        </Typography>
                       }
                       color={getRoleColor(person.role)}
                       size="small"
@@ -415,7 +420,10 @@ const KeyManagerialPersonnel = ({ user, handleNext, handleBack, tabChange, tabva
                         <IconButton
                           color="error"
                           size="small"
-                          onClick={() => handleDelete(person)}
+                          onClick={() => {
+                            setSelectedPersonnel(person);
+                            setOpenDeleteDialog(true);
+                          }}
                           sx={{
                             backgroundColor: 'error.50',
                             '&:hover': { backgroundColor: 'error.100' }
@@ -456,6 +464,7 @@ const KeyManagerialPersonnel = ({ user, handleNext, handleBack, tabChange, tabva
       </TableContainer>
       <Modal
         open={open}
+        maxWidth="sm"
         showClose={true}
         title={values.id ? 'Edit Personnel' : 'Add Personnel'}
         handleClose={() => {
@@ -480,12 +489,27 @@ const KeyManagerialPersonnel = ({ user, handleNext, handleBack, tabChange, tabva
           </Stack>
         }
       >
-        <Box component="form" onSubmit={handleSubmit} sx={{ padding: 2 }}>
+        <Box component="form" onSubmit={handleSubmit} sx={{ pt: 1 }}>
           <Grid2 container spacing={2}>
             {renderFields()}
           </Grid2>
         </Box>
       </Modal>
+      {/* Delete Confirmation Dialog */}
+      <DeleteDialog
+        open={openDeleteDialog}
+        onClose={() => setOpenDeleteDialog(false)}
+        onConfirm={() => {
+          if (selectedPersonnel) handleDelete(selectedPersonnel);
+          setOpenDeleteDialog(false);
+          setSelectedPersonnel(null);
+        }}
+        dialogData={{
+          title: 'Delete Personnel',
+          heading: 'Are you sure?',
+          description: 'This action will permanently delete the selected personnel.'
+        }}
+      />
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', mt: 2 }}>
         <Button startIcon={<ArrowBackIcon />} variant="outlined" onClick={handleBack}>
           Back

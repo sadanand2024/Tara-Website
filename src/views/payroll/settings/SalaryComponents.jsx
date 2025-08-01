@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Box, Button, Stack, Tab, Tabs } from '@mui/material';
-import MainCard from '../../../ui-component/cards/MainCard';
 import EarningsComponent from './Earnings';
+import Deductions from './Deductions';
 
 const TabPanel = ({ children, value, index }) => (
   <div role="tabpanel" hidden={value !== index} id={`simple-tabpanel-${index}`} aria-labelledby={`simple-tab-${index}`}>
@@ -16,37 +16,48 @@ TabPanel.propTypes = {
   index: PropTypes.number.isRequired
 };
 
-const SalaryComponentTabs = ({ type, handleBack, handleNext }) => {
+const SalaryComponentTabs = ({
+  type,
+  handleBack,
+  handleNext,
+  openDialog = false,
+  setOpenDialog,
+  activeTab: parentActiveTab,
+  setActiveTab: setParentActiveTab
+}) => {
   const [activeTab, setActiveTab] = useState(0);
-  const [open, setOpen] = useState(false);
   const [postType, setPostType] = useState('');
 
-  const handleTabChange = (_event, newValue) => setActiveTab(newValue);
+  // Set postType to 'post' when dialog opens for adding new component
+  React.useEffect(() => {
+    if (openDialog && !postType) {
+      setPostType('post');
+    }
+  }, [openDialog, postType]);
+
+  // Sync local activeTab with parent's activeTab
+  React.useEffect(() => {
+    if (parentActiveTab !== undefined && parentActiveTab !== activeTab) {
+      setActiveTab(parentActiveTab);
+    }
+  }, [parentActiveTab, activeTab]);
+
+  const handleTabChange = (_event, newValue) => {
+    setActiveTab(newValue);
+    // Update parent component's active tab state
+    if (setParentActiveTab) {
+      setParentActiveTab(newValue);
+    }
+  };
 
   const handleTabNext = () => {
     if (activeTab < tabLabels.length - 1) setActiveTab((prev) => prev + 1);
   };
 
-  const tabLabels = ['Earnings' /*, 'Deductions'*/]; // Future tabs can be added here
+  const tabLabels = ['Earnings', 'Deductions']; // Future tabs can be added here
 
   return (
-    <MainCard
-      title="Salary Components"
-      subtitle="Manage your Salary Components for seamless operations"
-      secondary={
-        <Stack direction="row">
-          <Button
-            variant="contained"
-            onClick={() => {
-              setPostType('post');
-              setOpen(true);
-            }}
-          >
-            Add Component
-          </Button>
-        </Stack>
-      }
-    >
+    <Box>
       <Box sx={{ width: '100%', display: 'flex', justifyContent: 'space-between' }}>
         <Tabs value={activeTab} onChange={handleTabChange} aria-label="Salary Component Tabs">
           {tabLabels.map((label, index) => (
@@ -59,20 +70,34 @@ const SalaryComponentTabs = ({ type, handleBack, handleNext }) => {
         <EarningsComponent
           handleBack={handleBack}
           handleNext={handleNext}
-          open={open}
-          setOpen={setOpen}
+          open={openDialog}
+          setOpen={setOpenDialog}
           postType={postType}
           setPostType={setPostType}
         />
       </TabPanel>
-    </MainCard>
+      <TabPanel value={activeTab} index={1}>
+        <Deductions
+          handleBack={handleBack}
+          handleNext={handleNext}
+          open={openDialog}
+          setOpen={setOpenDialog}
+          postType={postType}
+          setPostType={setPostType}
+        />
+      </TabPanel>
+    </Box>
   );
 };
 
 SalaryComponentTabs.propTypes = {
   type: PropTypes.any,
   handleBack: PropTypes.func,
-  handleNext: PropTypes.func
+  handleNext: PropTypes.func,
+  openDialog: PropTypes.bool,
+  setOpenDialog: PropTypes.func,
+  activeTab: PropTypes.number,
+  setActiveTab: PropTypes.func
 };
 
 export default SalaryComponentTabs;

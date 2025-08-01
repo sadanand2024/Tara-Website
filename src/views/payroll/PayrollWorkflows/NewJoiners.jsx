@@ -40,7 +40,7 @@ function NewJoiners({ handleBack, handleNext, from }) {
   const financialYear = searchParams.get('financial_year');
 
   const handleEdit = async (item) => {
-    navigate(`/app/payroll/settings/add-employee?employee_id=${encodeURIComponent(item.id)}&payrollid=${encodeURIComponent(payrollid)}`);
+    navigate(`/app/payroll/settings/employee-master?payrollid=${payrollid}&employee_id=${item.id}&tabValue=0`);
   };
 
   const fetch_newJoiners_Data = async () => {
@@ -49,7 +49,7 @@ function NewJoiners({ handleBack, handleNext, from }) {
     const { res, error } = await Factory('get', url, {});
     setLoading(false);
     if (res.status_cd === 0) {
-      setNewJoinersData(res.data || []);
+      setNewJoinersData(Array.isArray(res.data) ? res.data : []);
     } else {
       setNewJoinersData([]);
 

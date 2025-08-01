@@ -107,7 +107,9 @@ function MenuList() {
   });
 
   return !isHorizontal ? (
-    <Box key={user.active_context?.id} {...(drawerOpen && { sx: { mt: 1.5 } })}>{navItems}</Box>
+    <Box key={user.active_context?.id} {...(drawerOpen && { sx: { mt: 1.5 } })}>
+      {navItems}
+    </Box>
   ) : (
     <Box key={user.active_context?.id}>{navItems}</Box>
   );

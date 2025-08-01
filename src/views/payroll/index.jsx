@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { months } from 'utils/MonthsList';
 
 import { useDispatch } from 'store';
@@ -16,9 +16,10 @@ import PayrollStatusSummary from './PayrollStatusSummary';
 import PayrollComplianceSummary from './PayrollComplianceSummary';
 
 import PayrollMonthwise from './PayrollMonthwise';
-import { Button, Stack, Typography, Grid2, TextField, Chip, CircularProgress } from '@mui/material';
+import { Button, Stack, Typography, Grid2, TextField, Chip, CircularProgress, Tooltip } from '@mui/material';
 import { IconSparkles, IconSettings2 } from '@tabler/icons-react';
 import { IconPlus } from '@tabler/icons-react';
+import LockIcon from '@mui/icons-material/Lock';
 
 import { generateFinancialYears } from 'utils/FinancialYearsList';
 import MainCard from '../../ui-component/cards/MainCard';
@@ -28,11 +29,13 @@ import { size } from 'lodash-es';
 const PayrollDashboard = () => {
   // const { userData } = useCurrentUser();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const user = useSelector((state) => state.accountReducer.user);
   const businessId = user.active_context.business_id;
   const dispatch = useDispatch();
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [monthWiseData, setMonthWiseData] = useState(null);
+  const [lockPayroll, setLockPayroll] = useState(false);
 
   // Separate loading states to prevent blinking
   const [initialLoading, setInitialLoading] = useState(true);
@@ -81,9 +84,18 @@ const PayrollDashboard = () => {
     }
 
     const monthIndex = months.indexOf(newValue); // 0-based index
-    setSelectedMonth(monthIndex + 1); // Store 1-based month number
+    const newMonth = monthIndex + 1; // Store 1-based month number
+    setSelectedMonth(newMonth);
 
-    get_payrollMonthData(monthIndex + 1); // API expects 1-based month number
+    // Update URL parameters
+    const params = new URLSearchParams(searchParams);
+    params.set('month', newMonth);
+    if (financialYear) {
+      params.set('financial_year', financialYear);
+    }
+    navigate({ search: params.toString() }, { replace: true });
+
+    get_payrollMonthData(newMonth); // API expects 1-based month number
   };
 
   const calculate_employee_monthly_salary_status = async (payrollId) => {
@@ -154,6 +166,19 @@ const PayrollDashboard = () => {
     const url = `/payroll/detail_employee_payroll_salary?payroll_id=${businessDetails?.payroll_id}&month=${selectedMonth}&financial_year=${financialYear}`;
     const { res } = await Factory('get', url, {});
     if (res.status_cd === 0) {
+      if (res.data.message === 'Salary processing will be initiated between the 26th and 30th of the month.') {
+        setRefreshLoading(false);
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: res.data.message,
+            variant: 'alert',
+            alert: { color: 'success' },
+            close: false
+          })
+        );
+        return;
+      }
       get_payrollMonthData(selectedMonth);
 
       dispatch(
@@ -169,7 +194,7 @@ const PayrollDashboard = () => {
       dispatch(
         openSnackbar({
           open: true,
-          message: JSON.stringify(res?.data?.error) || 'An error occurred',
+          message: JSON.stringify(res?.data?.error) || JSON.stringify(res?.data?.data?.message) || 'An error occurred',
           variant: 'alert',
           alert: { color: 'error' },
           close: false
@@ -177,6 +202,16 @@ const PayrollDashboard = () => {
       );
     }
     setRefreshLoading(false);
+  };
+
+  const getworkFlowStatusData = async () => {
+    if (!businessDetails?.payroll_id || !selectedMonth || !financialYear) return;
+    let url = `/payroll/payroll-workflows/detail-or-create/?payroll=${businessDetails?.payroll_id}&month=${selectedMonth}&financial_year=${financialYear}`;
+    const { res } = await Factory('get', url, {});
+    if (res?.status_cd === 0) {
+      const data = res.data;
+      setLockPayroll(data.lock_payroll || false);
+    }
   };
 
   useEffect(() => {
@@ -189,26 +224,40 @@ const PayrollDashboard = () => {
     getData(businessId);
   }, [user.active_context]);
 
+  // Read month and financial year from URL parameters
   useEffect(() => {
-    const getCurrentFinancialYear = () => {
-      const today = new Date();
-      const month = today.getMonth() + 1; // 1-based month
-      const year = today.getFullYear();
+    const monthParam = searchParams.get('month');
+    const yearParam = searchParams.get('financial_year');
 
-      const fyStart = month >= 4 ? year : year - 1; // April is the cutoff
-      const fyEnd = fyStart + 1; // last 2 digits of next year
+    if (monthParam) {
+      setSelectedMonth(Number(monthParam));
+    }
 
-      // % 100
-      return `${fyStart}-${String(fyEnd).padStart(2, '0')}`;
-    };
-    setFinancialYear(getCurrentFinancialYear());
-  }, []);
+    if (yearParam) {
+      setFinancialYear(yearParam);
+    } else {
+      // Set default financial year if not in URL
+      const getCurrentFinancialYear = () => {
+        const today = new Date();
+        const month = today.getMonth() + 1; // 1-based month
+        const year = today.getFullYear();
+
+        const fyStart = month >= 4 ? year : year - 1; // April is the cutoff
+        const fyEnd = fyStart + 1; // last 2 digits of next year
+
+        // % 100
+        return `${fyStart}-${String(fyEnd).padStart(2, '0')}`;
+      };
+      setFinancialYear(getCurrentFinancialYear());
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (financialYear && businessDetails?.payroll_id && !initialLoading) {
       calculate_employee_monthly_salary_status(businessDetails.payroll_id);
+      getworkFlowStatusData();
     }
-  }, [financialYear, businessDetails?.payroll_id, initialLoading]);
+  }, [financialYear, businessDetails?.payroll_id, initialLoading, selectedMonth]);
 
   // Show loading only during initial load
   if (initialLoading) {
@@ -218,14 +267,13 @@ const PayrollDashboard = () => {
       </Stack>
     );
   }
-
   return (
     <MainCard
       sx={{
         // background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
         // boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.15)',
         borderRadius: 4,
-        p: { xs: 1, md: 1 },
+        // p: { xs: 1, md: 1 },
         animation: 'fadeIn 0.7s',
         '@keyframes fadeIn': {
           from: { opacity: 0, transform: 'translateY(24px)' },
@@ -247,6 +295,17 @@ const PayrollDashboard = () => {
             value={financialYear}
             onChange={(e, val) => {
               setFinancialYear(val);
+              // Update URL parameters
+              const params = new URLSearchParams(searchParams);
+              if (val) {
+                params.set('financial_year', val);
+              } else {
+                params.delete('financial_year');
+              }
+              if (selectedMonth) {
+                params.set('month', selectedMonth);
+              }
+              navigate({ search: params.toString() }, { replace: true });
             }}
             sx={{
               minWidth: 200,
@@ -338,27 +397,13 @@ const PayrollDashboard = () => {
                         }}
                       />
 
-                      {/* <Chip
-                        variant="filled"
-                        label="In Progress"
-                        color="warning"
-                        size="small"
-                        sx={{
-                          fontWeight: 700,
-                          fontSize: 16,
-                          px: 2,
-                          textTransform: 'uppercase',
-                          letterSpacing: 1
-                        }}
-                      /> */}
-
                       <Button
                         variant="contained"
                         size="small"
                         onClick={() => {
                           if (businessDetails?.payroll_id) {
                             navigate(
-                              `/payroll/employee-dashboard?payrollid=${businessDetails?.payroll_id}&month=${selectedMonth}&financialYear=${financialYear}`
+                              `/app/payroll/employee-dashboard?payrollid=${businessDetails?.payroll_id}&month=${selectedMonth}&financialYear=${financialYear}`
                             );
                           }
                         }}
@@ -367,22 +412,52 @@ const PayrollDashboard = () => {
                           fontWeight: 700
                         }}
                       >
-                        Resume Payroll
+                        {lockPayroll ? 'View Payroll' : 'Resume Payroll'}
                       </Button>
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        onClick={() => {
-                          refreshEmployees_on_payroll();
-                        }}
-                        disabled={refreshLoading}
-                        sx={{
-                          fontWeight: 700,
-                          '&:hover': { borderColor: '#2196f3' }
-                        }}
-                      >
-                        {refreshLoading ? 'Refreshing...' : 'Refresh Employees on Your Payroll'}
-                      </Button>
+                      {lockPayroll && (
+                        <Tooltip
+                          title={'Payroll for this month is locked. Editing or modifying payroll workflows is disabled. its view only.'}
+                          arrow
+                          placement="top"
+                        >
+                          <span>
+                            <Button
+                              variant="contained"
+                              size="small"
+                              onClick={() => {
+                                if (businessDetails?.payroll_id) {
+                                  getworkFlowStatusData();
+                                }
+                              }}
+                              disabled={lockPayroll}
+                              sx={{
+                                color: '#fff',
+                                fontWeight: 700
+                              }}
+                              startIcon={<LockIcon />}
+                            >
+                              Payroll Locked
+                            </Button>
+                          </span>
+                        </Tooltip>
+                      )}
+
+                      {/* <Tooltip title="Refresh Employees on Your Payroll" arrow placement="top">
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          onClick={() => {
+                            refreshEmployees_on_payroll();
+                          }}
+                          disabled={refreshLoading}
+                          sx={{
+                            fontWeight: 700,
+                            '&:hover': { borderColor: '#2196f3' }
+                          }}
+                        >
+                          {refreshLoading ? 'Refreshing...' : 'Refresh'}
+                        </Button>
+                      </Tooltip> */}
                     </Stack>
                   </Stack>
                 </Stack>

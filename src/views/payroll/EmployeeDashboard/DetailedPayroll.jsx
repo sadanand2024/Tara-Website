@@ -50,6 +50,12 @@ const TABLE_HEADERS = [
   'Status'
 ];
 
+// Utility function to format numbers with Indian comma separators
+const formatNumberIN = (value) => {
+  if (value === null || value === undefined || value === '' || isNaN(Number(value))) return 'NA';
+  return Number(value).toLocaleString('en-IN');
+};
+
 const DetailedPayroll = ({ payrollId, month }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [detailedSummary, setDetailedSummary] = useState([]);
@@ -71,7 +77,7 @@ const DetailedPayroll = ({ payrollId, month }) => {
   const fetchDetailedSummary = async () => {
     try {
       setLoading(true);
-      const url = `/payroll/detail_employee_payroll_salary?payroll_id=${payrollId}&month=${month}&financial_year=${financialYear}`;
+      const url = `/payroll/monthly-salary-details-of-employees?payroll_id=${payrollId}&month=${month}&financial_year=${financialYear}`;
       const { res } = await Factory('get', url, {});
       if (res.status_cd === 0) {
         const responseData = res.data;
@@ -146,7 +152,7 @@ const DetailedPayroll = ({ payrollId, month }) => {
             ) : paginatedData.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={TABLE_HEADERS.length + 1} align="center" sx={{ height: 300 }}>
-                  <EmptyDataPlaceholder title="No Data Found" subtitle="Start by adding a new record." />
+                  <EmptyDataPlaceholder title="No Data Found" subtitle="Generate payroll to view data." />
                 </TableCell>
               </TableRow>
             ) : (
@@ -156,32 +162,38 @@ const DetailedPayroll = ({ payrollId, month }) => {
                   <TableCell sx={{ whiteSpace: 'nowrap' }}>{item.employee_name}</TableCell>
                   <TableCell sx={{ whiteSpace: 'nowrap' }}>{item.department}</TableCell>
                   <TableCell sx={{ whiteSpace: 'nowrap' }}>{item.designation}</TableCell>
-                  <TableCell>{item.total_days_of_month}</TableCell>
-                  <TableCell>{item.lop}</TableCell>
-                  <TableCell>{item.paid_days}</TableCell>
-                  <TableCell>{item.ctc}</TableCell>
-                  <TableCell>{item.gross_salary}</TableCell>
-                  <TableCell>{item.earned_salary}</TableCell>
-                  <TableCell>{item.basic_salary}</TableCell>
-                  <TableCell>{item.hra}</TableCell>
-                  <TableCell>{item.special_allowance}</TableCell>
-                  <TableCell>{item.bonus}</TableCell>
-                  <TableCell>{item.other_earnings}</TableCell>
-                  <TableCell>{item.benefits_total}</TableCell>
-                  <TableCell>{item.total_deductions}</TableCell>
-                  <TableCell>{item.epf}</TableCell>
-                  <TableCell>{item.esi}</TableCell>
-                  <TableCell>{item.pt}</TableCell>
-                  <TableCell>{item.tds}</TableCell>
-                  <TableCell>{item.loans_advances}</TableCell>
-                  <TableCell>{item.other_deductions}</TableCell>
-                  <TableCell>{item.total_deductions}</TableCell>
-                  <TableCell>{item.net_salary}</TableCell>
-                  <TableCell>{item.status}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatNumberIN(item.total_days_of_month)}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatNumberIN(item.lop)}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatNumberIN(item.paid_days)}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatNumberIN(item.ctc)}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatNumberIN(item.gross_salary)}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatNumberIN(item.earned_salary)}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatNumberIN(item.basic_salary)}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatNumberIN(item.hra)}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatNumberIN(item.special_allowance)}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatNumberIN(item.bonus)}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatNumberIN(item.other_earnings)}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatNumberIN(item.benefits_total)}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatNumberIN(item.total_deductions)}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatNumberIN(item.epf)}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatNumberIN(item.esi)}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatNumberIN(item.pt)}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatNumberIN(item.tds)}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatNumberIN(item.loans_advances)}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatNumberIN(item.other_deductions)}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatNumberIN(item.total_deductions)}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatNumberIN(item.net_salary)}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{item.status}</TableCell>
                   <TableCell>
                     <Typography
                       variant="body2"
-                      sx={{ cursor: 'pointer', color: 'primary.main', textDecoration: 'underline', whiteSpace: 'nowrap' }}
+                      sx={{
+                        cursor: 'pointer',
+                        color: 'primary.main',
+                        textDecoration: 'underline',
+                        whiteSpace: 'nowrap',
+                        textAlign: 'center'
+                      }}
                       onClick={() => {
                         viewPayslip(item.employee, item.month, item.financial_year);
                       }}

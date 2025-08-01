@@ -6,7 +6,6 @@ import CustomInput from 'utils/CustomInput';
 import Factory from 'utils/Factory';
 import CustomAutocomplete from 'utils/CustomAutocomplete';
 import { useSearchParams } from 'react-router-dom';
-import RenderSalaryTemplateTable from '../RenderSalaryTemplateTable';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
 import { TextField } from '@mui/material';
@@ -34,8 +33,24 @@ function SalaryDetails({
   const [salary_teamplates_data, setSalary_teamplates_data] = useState([]);
   const [searchParams] = useSearchParams();
   const [from, setFrom] = useState(null);
+  const [annualCtcInput, setAnnualCtcInput] = useState('');
+  const [bonusAmountInput, setBonusAmountInput] = useState('');
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  // Utility function to format numbers for input display (with commas)
+  const formatNumberForInput = (value) => {
+    if (value === '' || value === null || value === undefined || isNaN(value)) return '';
+    return Number(value).toLocaleString('en-IN');
+  };
+
+  // Utility function to parse comma-separated numbers for calculations
+  const parseCommaNumber = (value) => {
+    if (value === '' || value === null || value === undefined) return '';
+    // Remove all commas and convert to number
+    const cleanValue = String(value).replace(/,/g, '');
+    return isNaN(cleanValue) ? '' : cleanValue;
+  };
   const fields = [
     { name: 'salary_template', label: 'Salary Template' },
     { name: 'annual_ctc', label: 'Annual CTC' }
@@ -68,8 +83,8 @@ function SalaryDetails({
       net_salary: { monthly: 0, annually: 0 },
       is_variable_bonus: false,
       variable_bonus: {
-        bonus_amount: 0,
-        pay_cycle_frequency: 'quarterly'
+        bonus_amount: '',
+        pay_cycle_frequency: 'Quarterly'
       }
     },
     validationSchema,
@@ -192,24 +207,37 @@ function SalaryDetails({
           </>
         ) : (
           <>
-            <Typography variant="subtitle2" sx={{ color: 'grey.800', mb: 0.5 }}>
+            <Typography variant="subtitle2" sx={{ color: 'grey.800', mb: 0.3 }}>
               {field.label}
-              <Box component="span" sx={{ color: 'red', pl: 1 }}>
-                *
-              </Box>
+              <span style={{ color: 'red', paddingLeft: '4px' }}>*</span>
             </Typography>
 
             <TextField
               fullWidth
               name="annual_ctc"
               size="small"
-              value={values.annual_ctc}
+              value={annualCtcInput}
               onChange={(e) => {
-                const { name, value } = e.target;
-                const numericValue = value === '' ? '' : Number(value);
-                setFieldValue(name, numericValue);
-
-                if (name === 'annual_ctc') {
+                const val = e.target.value;
+                // Allow only numbers, commas, and decimal points
+                const cleanVal = val.replace(/[^\d,.]/g, '');
+                setAnnualCtcInput(cleanVal);
+              }}
+              onBlur={(e) => {
+                const parsedValue = parseCommaNumber(annualCtcInput);
+                const numericValue = parsedValue === '' ? '' : Number(parsedValue);
+                setFieldValue('annual_ctc', numericValue);
+                setAnnualCtcInput(formatNumberForInput(numericValue));
+                setEnablePreviewButton(true);
+                setFieldValue('errorMessage', ''); // ✅ clear previous error
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  const parsedValue = parseCommaNumber(annualCtcInput);
+                  const numericValue = parsedValue === '' ? '' : Number(parsedValue);
+                  setFieldValue('annual_ctc', numericValue);
+                  setAnnualCtcInput(formatNumberForInput(numericValue));
                   setEnablePreviewButton(true);
                   setFieldValue('errorMessage', ''); // ✅ clear previous error
                 }
@@ -239,6 +267,20 @@ function SalaryDetails({
     if (payrollid !== null) fetch_salary_templates();
   }, [payrollid]);
   const { values, setValues, handleChange, errors, touched, handleSubmit, handleBlur, resetForm, setFieldValue } = formik;
+
+  // Initialize annual CTC input value
+  useEffect(() => {
+    if (values.annual_ctc !== undefined && values.annual_ctc !== null) {
+      setAnnualCtcInput(formatNumberForInput(values.annual_ctc));
+    }
+  }, [values.annual_ctc]);
+
+  // Initialize bonus amount input value
+  useEffect(() => {
+    if (values.variable_bonus?.bonus_amount !== undefined && values.variable_bonus?.bonus_amount !== null) {
+      setBonusAmountInput(formatNumberForInput(values.variable_bonus.bonus_amount));
+    }
+  }, [values.variable_bonus?.bonus_amount]);
   // useEffect(() => {
   //   // Recalculate earnings whenever annual_ctc changes
   //   setValues((prev) => ({
@@ -261,7 +303,6 @@ function SalaryDetails({
       setSubmitRef(formik.submitForm);
     }
   }, [setSubmitRef, formik.submitForm]);
-  console.log(errors);
 
   return (
     <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
@@ -269,16 +310,6 @@ function SalaryDetails({
         <Grid2 container spacing={3}>
           {renderFields(fields)}
         </Grid2>
-
-        {/* <RenderSalaryTemplateTable
-          source="salarydetails"
-          values={values}
-          setValues={setValues}
-          setFieldValue={setFieldValue}
-          enablePreviewButton={enablePreviewButton}
-          setEnablePreviewButton={setEnablePreviewButton}
-          createdEmployeeId={employeeData?.id || createdEmployeeId}
-        /> */}
         <SalaryTemplate
           source="salarydetails"
           values={values}
@@ -325,14 +356,34 @@ function SalaryDetails({
                   label="Bonus Amount"
                   name="bonus_amount"
                   size="small"
-                  type="number"
-                  value={values.variable_bonus.bonus_amount}
-                  onChange={(e) =>
+                  value={bonusAmountInput}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    // Allow only numbers, commas, and decimal points
+                    const cleanVal = val.replace(/[^\d,.]/g, '');
+                    setBonusAmountInput(cleanVal);
+                  }}
+                  onBlur={(e) => {
+                    const parsedValue = parseCommaNumber(bonusAmountInput);
+                    const numericValue = parsedValue === '' ? '' : Number(parsedValue);
                     setFieldValue('variable_bonus', {
                       ...values.variable_bonus,
-                      bonus_amount: Number(e.target.value)
-                    })
-                  }
+                      bonus_amount: numericValue
+                    });
+                    setBonusAmountInput(formatNumberForInput(numericValue));
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      const parsedValue = parseCommaNumber(bonusAmountInput);
+                      const numericValue = parsedValue === '' ? '' : Number(parsedValue);
+                      setFieldValue('variable_bonus', {
+                        ...values.variable_bonus,
+                        bonus_amount: numericValue
+                      });
+                      setBonusAmountInput(formatNumberForInput(numericValue));
+                    }
+                  }}
                   inputProps={{ min: 0 }}
                   sx={{ minWidth: 200 }}
                 />
@@ -340,7 +391,7 @@ function SalaryDetails({
                 <Autocomplete
                   size="small"
                   fullWidth
-                  options={['Quarterly', 'Monthly', 'Yearly']}
+                  options={['Monthly', 'Quarterly', 'Yearly']}
                   value={values.variable_bonus.pay_cycle_frequency || null}
                   onChange={(e, newValue) =>
                     setFieldValue('variable_bonus', {

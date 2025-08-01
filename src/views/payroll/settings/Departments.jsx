@@ -15,7 +15,6 @@ import {
   Grid2,
   CircularProgress
 } from '@mui/material';
-import MainCard from 'ui-component/cards/MainCard';
 import ActionCell from 'ui-component/extended/ActionCell';
 import DepartmentDialog from './DepartmentDialog';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -29,9 +28,17 @@ import DeleteDialog from '../../../ui-component/extended/DeleteDialog'; // adjus
 import { IconButton, Tooltip } from '@mui/material'; // Add these if not already
 import { Edit, Delete } from '@mui/icons-material';
 import BulkUploadDialog from 'ui-component/extended/BulkUploadDialog';
-function Departments({ handleBack, handleNext }) {
+
+function Departments({
+  handleBack,
+  handleNext,
+  searchQuery = '',
+  openDialog = false,
+  setOpenDialog,
+  openBulkDialog = false,
+  setOpenBulkDialog
+}) {
   const [departments, setDepartments] = useState([]);
-  const [openDialog, setOpenDialog] = useState(false);
   const [postType, setPostType] = useState('');
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -41,7 +48,7 @@ function Departments({ handleBack, handleNext }) {
   const dispatch = useDispatch();
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
-  const [openBulkDialog, setOpenBulkDialog] = useState(false);
+
   const handleOpenDeleteDialog = (row) => {
     setSelectedRow(row);
     setOpenDeleteDialog(true);
@@ -50,7 +57,16 @@ function Departments({ handleBack, handleNext }) {
     handleDelete(selectedRow);
     setOpenDeleteDialog(false);
   };
-  const paginatedData = departments.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+  // Filter departments based on searchQuery from props
+  const filteredDepartments = departments.filter((department) => {
+    const query = searchQuery.toLowerCase();
+    return (
+      department.dept_name?.toLowerCase().includes(query) ||
+      department.dept_code?.toLowerCase().includes(query) ||
+      department.description?.toLowerCase().includes(query)
+    );
+  });
+  const paginatedData = filteredDepartments.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 
   const payrollid = searchParams.get('payrollid');
   const closeBulkDialog = () => {
@@ -62,7 +78,6 @@ function Departments({ handleBack, handleNext }) {
 
   const handlePageChange = (event, value) => setCurrentPage(value);
 
-  const handleOpenDialog = () => setOpenDialog(true);
   const handleCloseDialog = () => setOpenDialog(false);
 
   const fetchDepartments = async () => {
@@ -90,7 +105,7 @@ function Departments({ handleBack, handleNext }) {
   const handleEdit = (department) => {
     setPostType('edit');
     setSelectedRecord(department);
-    handleOpenDialog();
+    setOpenDialog(true);
   };
 
   const handleDelete = async (department) => {
@@ -130,28 +145,7 @@ function Departments({ handleBack, handleNext }) {
     );
   }
   return (
-    <MainCard
-      title="Departments Details"
-      subtitle="Manage your departments for seamless operations"
-      secondary={
-        <Stack direction="row" spacing={2}>
-          <Button size="small" variant="outlined" color="secondary" onClick={() => setOpenBulkDialog(true)}>
-            Bulk Upload
-          </Button>
-          <Button
-            size="small"
-            variant="contained"
-            color="primary"
-            onClick={() => {
-              setPostType('post');
-              handleOpenDialog();
-            }}
-          >
-            Add Department
-          </Button>
-        </Stack>
-      }
-    >
+    <Box>
       <BulkUploadDialog
         open={openBulkDialog}
         handleClose={closeBulkDialog}
@@ -167,7 +161,7 @@ function Departments({ handleBack, handleNext }) {
           <DepartmentDialog
             open={openDialog}
             handleClose={handleCloseDialog}
-            handleOpenDialog={handleOpenDialog}
+            handleOpenDialog={() => setOpenDialog(true)}
             selectedRecord={selectedRecord}
             type={postType}
             setType={setPostType}
@@ -202,7 +196,7 @@ function Departments({ handleBack, handleNext }) {
               {paginatedData.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} align="center" sx={{ height: 300 }}>
-                    <EmptyDataPlaceholder title="No Departments Found" subtitle="Start by adding a new department." />
+                    <EmptyDataPlaceholder title="No Data Found" subtitle="Start by adding new data." />
                   </TableCell>
                 </TableRow>
               ) : (
@@ -239,7 +233,7 @@ function Departments({ handleBack, handleNext }) {
             dialogData={{
               title: 'Delete Record',
               heading: 'Are you sure?',
-              description: 'This action will permanently delete the record.'
+              description: 'Deleting this department will also delete all associated employee records. Proceed only if you are sure.'
             }}
           />
         </TableContainer>
@@ -251,7 +245,7 @@ function Departments({ handleBack, handleNext }) {
             </Button>
             {departments.length > 0 && (
               <Pagination
-                count={Math.ceil(departments.length / rowsPerPage)}
+                count={Math.ceil(filteredDepartments.length / rowsPerPage)}
                 page={currentPage}
                 onChange={handlePageChange}
                 shape="rounded"
@@ -265,7 +259,7 @@ function Departments({ handleBack, handleNext }) {
           </Box>
         </Grid2>
       </Grid2>
-    </MainCard>
+    </Box>
   );
 }
 

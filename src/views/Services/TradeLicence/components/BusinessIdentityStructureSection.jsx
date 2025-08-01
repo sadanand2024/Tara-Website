@@ -11,6 +11,7 @@ import ApplicantDetails from './ApplicantDetails';
 import RaiseRequest from '../../RaiseRequest';
 import GetActionButtons from '../../FormHelpers';
 import CircularProgressComponent from 'utils/CircularProgressComponent';
+import { industries } from 'utils/industries';
 
 const typeOfBusinessOptions = [
   'Proprietorship',
@@ -28,28 +29,7 @@ const typeOfBusinessOptions = [
   'Liaison Office',
   'Foreign Company'
 ];
-const natureOfBusinessOptions = [
-  'Retail Trade',
-  'Wholesale Trade',
-  'Food and Beverage Services',
-  'Manufacturing Units',
-  'Repair and Service Centers',
-  'Beauty and Personal Care',
-  'Educational and Coaching Services',
-  'Healthcare and Medical Services',
-  'Lodging and Hospitality Services',
-  'Storage and Warehousing',
-  'Professional and Consultancy Services',
-  'Transportation and Logistics',
-  'Entertainment and Recreation',
-  'Animal and Pet Services',
-  'Household and Domestic Services',
-  'Event and Wedding Services',
-  'Printing and Publishing',
-  'Construction and Building Materials',
-  'Chemical and Hazardous Goods',
-  'Agricultural and Allied Service'
-];
+
 const fields = [
   {
     label: 'Type of Business',
@@ -68,7 +48,7 @@ const fields = [
     label: 'Nature of Business',
     name: 'nature_of_business',
     type: 'autocomplete',
-    options: natureOfBusinessOptions
+    options: industries
   },
   {
     label: 'PAN',
@@ -80,7 +60,7 @@ const BusinessIdentityStructureSection = ({ taskId, applicantTaskId }) => {
   const [searchParams] = useSearchParams();
   const service_id = searchParams.get('service_id');
   const dispatch = useDispatch();
-   const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [businessIdentityposttype, setBusinessIdentityposttype] = useState('post');
   const [businessInfo, setbusinessInfo] = useState({
@@ -102,7 +82,7 @@ const BusinessIdentityStructureSection = ({ taskId, applicantTaskId }) => {
       business_pan: Yup.mixed().required('PAN is required')
     }),
     onSubmit: async (values) => {
-       setIsLoading(true);
+      setIsLoading(true);
       const url = businessIdentityposttype === 'put' ? `/tradelicense/business-identity/${values.id}/` : `/tradelicense/business-identity/`;
 
       const formData = new FormData();
@@ -140,9 +120,8 @@ const BusinessIdentityStructureSection = ({ taskId, applicantTaskId }) => {
           })
         );
         getBusinessIdentity();
-
       }
-       setIsLoading(false);
+      setIsLoading(false);
     }
   });
   const renderField = (field) => {
@@ -260,16 +239,16 @@ const BusinessIdentityStructureSection = ({ taskId, applicantTaskId }) => {
   useEffect(() => {
     getBusinessIdentity();
   }, []);
-   if (isLoading) {
-        console.log('Loading promoter data...', isLoading);
-        return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading promoter Data'} />;
-      }
-      const getLabelWithAsterisk = (label, isRequired = true) => (
-  <span>
-    {label}
-    {isRequired && <span style={{ color: 'red', fontSize: '1.2em' }}> *</span>}
-  </span>
-);
+  if (isLoading) {
+    console.log('Loading promoter data...', isLoading);
+    return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading promoter Data'} />;
+  }
+  const getLabelWithAsterisk = (label, isRequired = true) => (
+    <span>
+      {label}
+      {isRequired && <span style={{ color: 'red', fontSize: '1.2em' }}> *</span>}
+    </span>
+  );
   return (
     <Box>
       <Card sx={{ p: 3 }}>
@@ -297,13 +276,11 @@ const BusinessIdentityStructureSection = ({ taskId, applicantTaskId }) => {
                   {field.label}
                 </Typography> */}
                 <Typography variant="subtitle1" mb={1}>
-                 {getLabelWithAsterisk(field.label, [
-                        'type_of_business',
-                   'legal_name_of_business',
-                  'nature_of_business',
-                    'business_pan'
-             ].includes(field.name))}
-              </Typography>
+                  {getLabelWithAsterisk(
+                    field.label,
+                    ['type_of_business', 'legal_name_of_business', 'nature_of_business', 'business_pan'].includes(field.name)
+                  )}
+                </Typography>
                 {renderField(field)}
               </Grid2>
             ))}
@@ -327,7 +304,7 @@ const BusinessIdentityStructureSection = ({ taskId, applicantTaskId }) => {
           </Stack>
         </form>
       </Card>
-      <ApplicantDetails applicantTaskId={applicantTaskId} />
+      {/* <ApplicantDetails applicantTaskId={applicantTaskId} /> */}
     </Box>
   );
 };

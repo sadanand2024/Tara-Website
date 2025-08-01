@@ -1057,7 +1057,7 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
                       label="Pincode"
                       value={property.property_address?.pincode || ''}
                       onChange={(e) => handleChange(idx, 'property_address.pincode', e.target.value)}
-                       sx={{
+                      sx={{
                                   width: '100%',
                                   '& .MuiInputBase-input': {
                                     color: 'grey.600'
@@ -1085,10 +1085,10 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
                    />
                     <FormControlLabel
                       control={
-                     <Radio
+                    <Radio
                     size="small"
-                       checked={property.owned_property === false}
-                       onChange={() => handleChange(idx, 'owned_property', false)}
+                      checked={property.owned_property === false}
+                      onChange={() => handleChange(idx, 'owned_property', false)}
                         />
                           }
                         label="No"
@@ -1107,7 +1107,7 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
                   placeholder="%"
                   value={property.ownership_percentage || ''}
                   onChange={(e) => handleChange(idx, 'ownership_percentage', e.target.value)}
-                   sx={{
+                  sx={{
                                   width: '100%',
                                   '& .MuiInputBase-input': {
                                     color: 'grey.600'
@@ -1180,7 +1180,7 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
                   value={property.rent_received || ''}
                   onChange={(_, v) => handleChange(idx, 'rent_received', v || '')}
                   renderInput={(params) => <TextField {...params} placeholder="Select mode" />}
-                   sx={{
+                  sx={{
                                   width: '100%',
                                   '& .MuiInputBase-input': {
                                     color: 'grey.600'
@@ -1229,7 +1229,7 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
                   placeholder="Amount"
                   value={property.municipal_tax_paid || ''}
                   onChange={(e) => handleChange(idx, 'municipal_tax_paid', e.target.value)}
-                   sx={{
+                  sx={{
                                   width: '100%',
                                   '& .MuiInputBase-input': {
                                     color: 'grey.600'
@@ -1273,27 +1273,27 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
               </Grid2>
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
               
-                 <RadioGroup row>
+                <RadioGroup row>
                 <FormControlLabel
-                 control={
-                   <Radio
-                 size="small"
-                   checked={property.home_loan_on_property === true}
-                   onChange={() => handleChange(idx, 'home_loan_on_property', true)}
+                control={
+                <Radio
+                size="small"
+                checked={property.home_loan_on_property === true}
+                onChange={() => handleChange(idx, 'home_loan_on_property', true)}
                   />
-                 }
+                }
                 label="Yes"
                   />
-                 <FormControlLabel
+                <FormControlLabel
                     control={
-                     <Radio
-                 size="small"
-                   checked={property.home_loan_on_property === false}
+                <Radio
+                size="small"
+                checked={property.home_loan_on_property === false}
                   onChange={() => handleChange(idx, 'home_loan_on_property', false)}
-                   />
+                />
                   }
                 label="No"
-                 />
+                />
               </RadioGroup>
 
               </Grid2>
@@ -1321,7 +1321,7 @@ const HousePropertyIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesDat
                   placeholder="Amount"
                   value={property.principal_during_financial_year || ''}
                   onChange={(e) => handleChange(idx, 'principal_during_financial_year', e.target.value)}
-                 sx={{
+                          sx={{
                                   width: '100%',
                                   '& .MuiInputBase-input': {
                                     color: 'grey.600'
@@ -1494,27 +1494,58 @@ const CapitalGainsIncome = ({ data, fileDialogOpen, setFileDialogOpen, filesData
     }
   }, [otherGainsRows]);
 
+  // const removeProperty = async (property) => {
+  //   const spliceRow = () => {
+  //     let __properties = [...properties];
+  //     __properties.splice(__properties.indexOf(property), 1);
+  //     setProperties(__properties);
+  //   };
+  //   if (property.id === null) {
+  //     spliceRow();
+  //   } else {
+  //     const response = await Factory('delete', `/income_tax_returns/capital-gains/delete-property/${property.id}/`);
+  //     if (response.res.status_cd === 0) {
+  //       spliceRow();
+  //       enqueueSnackbar('Property removed successfully', {
+  //         anchorOrigin: { vertical: 'top', horizontal: 'right' },
+  //         variant: 'success'
+  //       });
+  //     } else {
+  //       enqueueSnackbar('Error removing property', { anchorOrigin: { vertical: 'top', horizontal: 'right' }, variant: 'error' });
+  //     }
+  //   }
+  // };
   const removeProperty = async (property) => {
-    const spliceRow = () => {
-      let __properties = [...properties];
-      __properties.splice(__properties.indexOf(property), 1);
-      setProperties(__properties);
-    };
-    if (property.id === null) {
-      spliceRow();
-    } else {
-      const response = await Factory('delete', `/income_tax_returns/capital-gains/delete-property/${property.id}/`);
-      if (response.res.status_cd === 0) {
-        spliceRow();
-        enqueueSnackbar('Property removed successfully', {
-          anchorOrigin: { vertical: 'top', horizontal: 'right' },
-          variant: 'success'
-        });
-      } else {
-        enqueueSnackbar('Error removing property', { anchorOrigin: { vertical: 'top', horizontal: 'right' }, variant: 'error' });
-      }
-    }
+  const spliceRow = () => {
+    const updated = properties.filter((p) => p !== property);
+    setProperties(updated);
   };
+
+  if (!property.id) {
+    spliceRow();
+    return;
+  }
+
+  try {
+    const response = await Factory('delete', `/income_tax_returns/capital-gains/delete-property/${property.id}/`);
+    if (response?.res?.status_cd === 0) {
+      spliceRow();
+      enqueueSnackbar('Property removed successfully', {
+        anchorOrigin: { vertical: 'top', horizontal: 'right' },
+        variant: 'success',
+      });
+    } else {
+      throw new Error();
+    }
+  } catch (err) {
+    enqueueSnackbar('Error removing property', {
+      anchorOrigin: { vertical: 'top', horizontal: 'right' },
+      variant: 'error',
+    });
+  }
+};
+
+  
 
   // State for CAMS/Broker statements form
   const [equity_mutual_fund_type, setEquityMutualFundType] = React.useState([]);
@@ -2677,29 +2708,69 @@ const BusinessIncome = ({ data, setFileDialogOpen, fileDialogOpen, dialogFilesDa
   };
   
 
-  const removeBusinessIncome = async (row, idx) => {
-     setIsLoading(true);
-    const res = await Factory('delete', `/income_tax_returns/business-professional-income/${row.id}/delete/`, {});
+  // const removeBusinessIncome = async (row, idx) => {
+  //    setIsLoading(true);
+  //   const res = await Factory('delete', `/income_tax_returns/business-professional-income/${row.id}/delete/`, {});
 
-    if (res.res.status_cd === 0) {
-      let updated = [...businessRows];
-      updated.splice(idx, 1);
-      setBusinessRows(updated);
-      let updatedSection = [...selectedSection];
-      updatedSection.splice(idx, 1);
-      setSelectedSection(updatedSection);
+  //   if (res.res.status_cd === 0) {
+  //     let updated = [...businessRows];
+  //     updated.splice(idx, 1);
+  //     setBusinessRows(updated);
+  //     let updatedSection = [...selectedSection];
+  //     updatedSection.splice(idx, 1);
+  //     setSelectedSection(updatedSection);
+  //     enqueueSnackbar('Business/Profession Income deleted successfully!', {
+  //       variant: 'success',
+  //       anchorOrigin: { vertical: 'top', horizontal: 'right' }
+  //     });
+  //   } else {
+  //     enqueueSnackbar('Business/Profession Income delete failed', {
+  //       variant: 'error',
+  //       anchorOrigin: { vertical: 'top', horizontal: 'right' }
+  //     });
+  //   }
+  //     setIsLoading(false);
+  // };
+  const removeBusinessIncome = async (row, idx) => {
+  const removeRowLocally = () => {
+    const updatedBusiness = [...businessRows];
+    const updatedSection = [...selectedSection];
+    updatedBusiness.splice(idx, 1);
+    updatedSection.splice(idx, 1);
+    setBusinessRows(updatedBusiness);
+    setSelectedSection(updatedSection);
+  };
+
+  setIsLoading(true);
+
+  if (!row.id) {
+    removeRowLocally();
+   
+    setIsLoading(false);
+    return;
+  }
+
+  try {
+    const res = await Factory('delete', `/income_tax_returns/business-professional-income/${row.id}/delete/`, {});
+    if (res?.res?.status_cd === 0) {
+      removeRowLocally();
       enqueueSnackbar('Business/Profession Income deleted successfully!', {
         variant: 'success',
         anchorOrigin: { vertical: 'top', horizontal: 'right' }
       });
     } else {
-      enqueueSnackbar('Business/Profession Income delete failed', {
-        variant: 'error',
-        anchorOrigin: { vertical: 'top', horizontal: 'right' }
-      });
+      throw new Error();
     }
-      setIsLoading(false);
-  };
+  } catch (error) {
+    enqueueSnackbar('Business/Profession Income delete failed', {
+      variant: 'error',
+      anchorOrigin: { vertical: 'top', horizontal: 'right' }
+    });
+  } finally {
+    setIsLoading(false);
+  }
+};
+
     if (isLoading) {
     return (
       <Box sx={{ textAlign: 'center', py: 4 }}>

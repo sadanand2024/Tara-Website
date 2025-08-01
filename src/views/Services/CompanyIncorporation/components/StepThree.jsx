@@ -1,35 +1,30 @@
-import React, { useState, useEffect } from 'react';
-import {
-  Box,
-  Tabs,
-  Tab,
-  Button,
-  Typography,
-  TextField,
-  MenuItem,
-  Card,
-  Grid2,
-  FormControl,
-  FormLabel,
-  RadioGroup,
-  FormControlLabel,
-  Radio,
-  FormHelperText,
-  Checkbox
-} from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import {
+    Box,
+    Button,
+    Card,
+    Checkbox,
+    FormControlLabel,
+    Grid2,
+    MenuItem,
+    Tab,
+    Tabs,
+    TextField,
+    Typography
+} from '@mui/material';
+import React, { useEffect, useState } from 'react';
 import CircularProgressComponent from 'utils/CircularProgressComponent';
 
-import { useFormik, getIn } from 'formik';
-import RaiseRequest from '../../RaiseRequest';
-import * as Yup from 'yup';
+import { getIn, useFormik } from 'formik';
 import { useDispatch } from 'react-redux';
-import { openSnackbar } from 'store/slices/snackbar';
 import { useSearchParams } from 'react-router-dom';
-import Factory from 'utils/Factory';
+import { openSnackbar } from 'store/slices/snackbar';
 import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
+import Factory from 'utils/Factory';
+import * as Yup from 'yup';
 import GetActionButtons from '../../FormHelpers';
+import RaiseRequest from '../../RaiseRequest';
 
 const TabPanel = ({ children, value, index }) => {
   return (
@@ -99,10 +94,10 @@ const StepThree = ({ step, setStep, onShareholderDelete }) => {
 
 
   const shareholderFields = [
-    { label: 'Shareholder First Name', name: 'shareholder_first_name', type: 'text' },
-    { label: 'Middle Name', name: 'middle_name', type: 'text' },
-    { label: 'Last Name', name: 'last_name', type: 'text' },
-    { label: 'Shareholder Type', name: 'shareholder_type', type: 'autocomplete', 
+    { label: 'Shareholder First Name', name: 'shareholder_first_name', type: 'text',required: true },
+    { label: 'Middle Name', name: 'middle_name', type: 'text' ,required: true },
+    { label: 'Last Name', name: 'last_name', type: 'text',required: true },
+    { label: 'Shareholder Type', name: 'shareholder_type', type: 'autocomplete', required: true,
       options: ['Individual Indian Resident',
       'Individual Non-Resident',
       'Individual Foreign National',
@@ -110,16 +105,17 @@ const StepThree = ({ step, setStep, onShareholderDelete }) => {
       'Body Corporate Foreign Company',
       'Limited Liability Partnership'] 
     },
-    { label: 'PAN', name: 'pan_card_file', type: 'file' },
-    { label: 'Aadhar', name: 'aadhaar_card_file', type: 'file' },
-    { label: 'Bank Statement', name: 'bank_statement_file', type: 'file' },
-    { label: 'Mobile', name: 'mobile_number', type: 'text' },
-    { label: 'Email', name: 'email', type: 'text' },
-    { label: 'Percentage Holding', name: 'shareholding_percentage', type: 'text' },
+    { label: 'PAN', name: 'pan_card_file', type: 'file',required: true },
+    { label: 'Aadhar', name: 'aadhaar_card_file', type: 'file',required: true },
+    { label: 'Bank Statement', name: 'bank_statement_file', type: 'file',required: true },
+    { label: 'Mobile', name: 'mobile_number', type: 'text',required: true },
+    { label: 'Email', name: 'email', type: 'text',required: true },
+    { label: 'Percentage Holding', name: 'shareholding_percentage', type: 'text',required: true },
     {
       label: 'Residential Address Proof Type',
       name: 'residential_address_proof',
-      type: 'autocomplete',
+      type: 'autocomplete',required: true,
+
       options: ['Bank Statement',
         'Utility Bill',
         'Telephone/Mobile Bill',
@@ -128,15 +124,15 @@ const StepThree = ({ step, setStep, onShareholderDelete }) => {
         'Lease/Rent Agreement']
     },
     
-    { label: 'Residential Address Proof', name: 'residential_address_proof_file', type: 'file' }
+    { label: 'Residential Address Proof', name: 'residential_address_proof_file', type: 'file' ,required: true}
   ];
 
   const nestedAddressFields = [
-    { key: 'address_line_1', label: 'Address Line 1' },
-    { key: 'address_line_2', label: 'Address Line 2' },
-    { key: 'city', label: 'City' },
-    { key: 'state', label: 'State' },
-    { key: 'pincode', label: 'Pincode' }
+    { key: 'address_line_1', label: 'Address Line 1',required: true },
+    { key: 'address_line_2', label: 'Address Line 2',required: true },
+    { key: 'city', label: 'City' ,required: true},
+    { key: 'state', label: 'State',required: true },
+    { key: 'pincode', label: 'Pincode',required: true }
   ];
 
   const formik = useFormik({
@@ -230,6 +226,8 @@ const StepThree = ({ step, setStep, onShareholderDelete }) => {
         const formData = new FormData();
         formData.append('service_request', service_id);
         formData.append('service_task', taskIds.shareHolder?.task_id);
+        formData.append('status', 'in progress');
+        
         // Address fields
         formData.append(
           'residential_address',
@@ -247,6 +245,7 @@ const StepThree = ({ step, setStep, onShareholderDelete }) => {
           'residential_same_as_aadhaar_address',
           shareholder.residential_same_as_aadhaar_address
         );
+        
         Object.entries(shareholder).forEach(([key, value]) => {
           if ([
             'address_line_1',
@@ -276,6 +275,7 @@ const StepThree = ({ step, setStep, onShareholderDelete }) => {
             formData.append(key, JSON.stringify(value));
           }
         });
+        
         const url = shareholder.id
           ? `/companyincorporation/shareholders/${shareholder.id}/`
           : '/companyincorporation/shareholders/';
@@ -289,18 +289,6 @@ const StepThree = ({ step, setStep, onShareholderDelete }) => {
             alert: { color: 'success' },
             close: false
           }));
-          // if (shareholder.id) {
-          //   try {
-          //     const formData = new FormData();
-          //     formData.append('service_request', service_id);
-          //     formData.append('service_task', taskIds?.shareHolder?.task_id);
-          //     formData.append('status', 'in progress');
-          //     await Factory('post', '/companyincorporation/shareholders/', formData);
-          //     console.log('Shareholder status submitted successfully.');
-          //   } catch (err) {
-          //     // console.error('Shareholder status API error:', err);
-          //   }
-          // }
           await fetchShareholders();
           await fetchTaskId();
           // Normalize after save for current tab
@@ -326,7 +314,6 @@ const StepThree = ({ step, setStep, onShareholderDelete }) => {
         }));
         setErrors({ submit: error.message });
       } finally {
-        // setLoading(false);
         setSubmitting(false);
       }
       setIsLoading(false);
@@ -509,9 +496,13 @@ const StepThree = ({ step, setStep, onShareholderDelete }) => {
       case 'text':
         return (
           <Box>
-            <Typography variant="subtitle1" fontWeight={500} mb={0.5}>
+            {/* <Typography variant="subtitle1" fontWeight={500} mb={0.5}>
               {field.label}
-            </Typography>
+            </Typography> */}
+              <Typography variant='subtitle1' mb={1}>
+                                           {getLabelWithAsterisk(field.label, field.required)}
+                        
+                                        </Typography>
             <TextField
               fullWidth
               size="small"
@@ -534,9 +525,13 @@ const StepThree = ({ step, setStep, onShareholderDelete }) => {
       case 'autocomplete':
         return (
           <Box>
-            <Typography variant="subtitle1" fontWeight={500} mb={0.5}>
+            {/* <Typography variant="subtitle1" fontWeight={500} mb={0.5}>
               {field.label}
-            </Typography>
+            </Typography> */}
+              <Typography variant='subtitle1' mb={1}>
+                                           {getLabelWithAsterisk(field.label, field.required)}
+                        
+                                        </Typography>
             <TextField
               fullWidth
               select
@@ -566,9 +561,13 @@ const StepThree = ({ step, setStep, onShareholderDelete }) => {
       case 'file':
         return (
           <Box>
-            <Typography variant="subtitle1" mb={0.5}>
+            {/* <Typography variant="subtitle1" mb={0.5}>
               {field.label}
-            </Typography>
+            </Typography> */}
+              <Typography variant='subtitle1' mb={1}>
+                                           {getLabelWithAsterisk(field.label, field.required)}
+                        
+                                        </Typography>
             <RenderFileUpload
               fieldName={fieldName}
               file={values[path][idx]?.[field.name]}
@@ -585,43 +584,43 @@ const StepThree = ({ step, setStep, onShareholderDelete }) => {
           </Box>
         );
 
-      case 'radio':
-        return (
-          <>
-            <FormControl component="fieldset" error={Boolean(error)}>
-              <FormLabel component="legend">{field.label}</FormLabel>
-              <RadioGroup row name={fieldName} value={value} onChange={(e) => setFieldValue(fieldName, e.target.value)}>
-                {field.options.map((opt) => (
-                  <FormControlLabel key={opt} value={opt} control={<Radio />} label={opt} />
-                ))}
-              </RadioGroup>
-              {Boolean(error) && <FormHelperText>{error}</FormHelperText>}
-            </FormControl>
+      // case 'radio':
+      //   return (
+      //     <>
+      //       <FormControl component="fieldset" error={Boolean(error)}>
+      //         <FormLabel component="legend">{field.label}</FormLabel>
+      //         <RadioGroup row name={fieldName} value={value} onChange={(e) => setFieldValue(fieldName, e.target.value)}>
+      //           {field.options.map((opt) => (
+      //             <FormControlLabel key={opt} value={opt} control={<Radio />} label={opt} />
+      //           ))}
+      //         </RadioGroup>
+      //         {Boolean(error) && <FormHelperText>{error}</FormHelperText>}
+      //       </FormControl>
 
-            {/* Show extra field if DIN is Yes */}
-            {field.name === 'din' && value === 'Yes' && (
-              <Box mt={2}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="DIN Number"
-                  name={`${path}[${idx}].din_number`}
-                  value={values[path][idx]?.din_number || ''}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  error={Boolean(getIn(touched, `${path}[${idx}].din_number`) && getIn(errors, `${path}[${idx}].din_number`))}
-                  helperText={getIn(touched, `${path}[${idx}].din_number`) && getIn(errors, `${path}[${idx}].din_number`)}
-                   sx={{
-              width: '100%',
-              '& .MuiInputBase-input': {
-                color: 'grey.600'
-              }
-            }}
-                />
-              </Box>
-            )}
-          </>
-        );
+      //       {/* Show extra field if DIN is Yes */}
+      //       {field.name === 'din' && value === 'Yes' && (
+      //         <Box mt={2}>
+      //           <TextField
+      //             fullWidth
+      //             size="small"
+      //             label="DIN Number"
+      //             name={`${path}[${idx}].din_number`}
+      //             value={values[path][idx]?.din_number || ''}
+      //             onChange={handleChange}
+      //             onBlur={handleBlur}
+      //             error={Boolean(getIn(touched, `${path}[${idx}].din_number`) && getIn(errors, `${path}[${idx}].din_number`))}
+      //             helperText={getIn(touched, `${path}[${idx}].din_number`) && getIn(errors, `${path}[${idx}].din_number`)}
+      //              sx={{
+      //         width: '100%',
+      //         '& .MuiInputBase-input': {
+      //           color: 'grey.600'
+      //         }
+      //       }}
+      //           />
+      //         </Box>
+      //       )}
+      //     </>
+      //   );
 
       default:
         return null;
@@ -631,6 +630,13 @@ const StepThree = ({ step, setStep, onShareholderDelete }) => {
              
               return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading Shareholders Details...'} />;
             }
+
+ const getLabelWithAsterisk = (label, isRequired = true) => (
+  <span>
+    {label}
+    {isRequired && <span style={{ color: 'red', fontSize: '1.2em' }}> *</span>}
+  </span>
+);
   return (
     <form onSubmit={formik.handleSubmit}>
       <Card sx={{ p: 3, mt: 4 }}>
@@ -736,9 +742,13 @@ const StepThree = ({ step, setStep, onShareholderDelete }) => {
                   return (
                     <Grid2 size={{ xs: 2, sm: 6, md: 4 }} key={key}>
                       <Box>
-                        <Typography variant="subtitle1" fontWeight={500} mb={0.5}>
+                        {/* <Typography variant="subtitle1" fontWeight={500} mb={0.5}>
                           {label}
-                        </Typography>
+                        </Typography> */}
+                                                    <Typography variant="subtitle1" fontWeight={500} mb={0.5}>
+                                               {getLabelWithAsterisk(label, values.shareholders[idx].residential_same_as_aadhaar_address === 'No')}
+                                         </Typography>
+
                         <TextField
                           fullWidth
                           size="small"
@@ -789,20 +799,155 @@ const StepThree = ({ step, setStep, onShareholderDelete }) => {
                       )
                     });
                     
-                    // Validate only the current shareholder
-                    const errors = await formik.validateForm();
-                    const currentErrors = errors.shareholders?.[idx];
+                    // Build a Yup schema for a single shareholder
+                    const singleShareholderSchema = Yup.object({
+                      shareholder_first_name: Yup.string().required('Shareholder First Name is required'),
+                      last_name: Yup.string().required('Last Name is required'),
+                      pan_card_file: Yup.mixed().required('PAN is required'),
+                      aadhaar_card_file: Yup.mixed().required('Aadhaar is required'),
+                      bank_statement_file: Yup.mixed().required('Bank Statement is required'),
+                      shareholder_type: Yup.mixed().required('Shareholder Type is required'),
+                      mobile_number: Yup.string()
+                        .required('Mobile Number is required')
+                        .matches(/^[0-9]+$/, 'Mobile Number must be a number')
+                        .min(10, 'Mobile Number must be at least 10 digits')
+                        .max(10, 'Mobile Number must not exceed 10 digits'),
+                      email: Yup.string().email('Invalid email').required('Email is required'),
+                      shareholding_percentage: Yup.string().required('Percentage Holding is required'),
+                      residential_address_proof: Yup.string().required('Residential Address Proof Type is required'),
+                      residential_address_proof_file: Yup.string().required('Residential Address Proof is required'),
+                      address_line_1: Yup.string().when('residential_same_as_aadhaar_address', {
+                        is: 'No',
+                        then: (schema) => schema.required('Address Line 1 is required'),
+                        otherwise: (schema) => schema.notRequired()
+                      }),
+                      address_line_2: Yup.string().when('residential_same_as_aadhaar_address', {
+                        is: 'No',
+                        then: (schema) => schema.required('Address Line 2 is required'),
+                        otherwise: (schema) => schema.notRequired()
+                      }),
+                      city: Yup.string().when('residential_same_as_aadhaar_address', {
+                        is: 'No',
+                        then: (schema) => schema.required('City is required'),
+                        otherwise: (schema) => schema.notRequired()
+                      }),
+                      state: Yup.string().when('residential_same_as_aadhaar_address', {
+                        is: 'No',
+                        then: (schema) => schema.required('State is required'),
+                        otherwise: (schema) => schema.notRequired()
+                      }),
+                      pincode: Yup.string().when('residential_same_as_aadhaar_address', {
+                        is: 'No',
+                        then: (schema) => schema.required('Pincode is required'),
+                        otherwise: (schema) => schema.notRequired()
+                      }),
+                    });
                     
-                    if (!currentErrors || Object.keys(currentErrors).length === 0) {
-                      // No validation errors, proceed with submission
-                    await formik.handleSubmit();
-                    } else {
-                      // Show validation errors for current tab only
-                      formik.setErrors({
-                        shareholders: values.shareholders.map((sh, i) =>
-                          i === idx ? currentErrors : {}
-                        )
+                    try {
+                      await singleShareholderSchema.validate(currentShareholder, { abortEarly: false });
+                      // If valid, manually save just this shareholder
+                      setIsLoading(true);
+                      const formData = new FormData();
+                      formData.append('service_request', service_id);
+                      formData.append('service_task', taskIds.shareHolder?.task_id);
+                      formData.append('status', 'in progress');
+                      
+                      // Address fields
+                      formData.append(
+                        'residential_address',
+                        currentShareholder.residential_same_as_aadhaar_address === 'Yes'
+                          ? JSON.stringify({})
+                          : JSON.stringify({
+                              address_line_1: currentShareholder.address_line_1 || '',
+                              address_line_2: currentShareholder.address_line_2 || '',
+                              city: currentShareholder.city || '',
+                              state: currentShareholder.state || '',
+                              pincode: currentShareholder.pincode || ''
+                            })
+                      );
+                      formData.append(
+                        'residential_same_as_aadhaar_address',
+                        currentShareholder.residential_same_as_aadhaar_address
+                      );
+                      
+                      Object.entries(currentShareholder).forEach(([key, value]) => {
+                        if ([
+                          'address_line_1',
+                          'address_line_2',
+                          'city',
+                          'state',
+                          'pincode',
+                          'residential_address',
+                          'residential_same_as_aadhaar_address',
+                        ].includes(key)) {
+                          return;
+                        }
+                        if ([
+                          'pan_card_file',
+                          'aadhaar_card_file',
+                          'bank_statement_file',
+                          'residential_address_proof_file'
+                        ].includes(key)) {
+                          if (value instanceof File) {
+                            formData.append(key, value);
+                          }
+                        } else if (typeof value === 'string' || typeof value === 'number') {
+                          formData.append(key, value);
+                        } else if (Array.isArray(value)) {
+                          formData.append(key, JSON.stringify(value));
+                        } else if (value && typeof value === 'object') {
+                          formData.append(key, JSON.stringify(value));
+                        }
                       });
+                      
+                      const url = currentShareholder.id
+                        ? `/companyincorporation/shareholders/${currentShareholder.id}/`
+                        : '/companyincorporation/shareholders/';
+                      const { res } = await Factory(currentShareholder.id ? 'put' : 'post', url, formData);
+                      setIsLoading(false);
+                      if (res.status_cd === 0) {
+                        dispatch(openSnackbar({
+                          open: true,
+                          message: currentShareholder.id ? 'Shareholder updated successfully!' : 'Shareholder saved successfully!',
+                          variant: 'alert',
+                          alert: { color: 'success' },
+                          close: false
+                        }));
+                        await fetchShareholders();
+                        await fetchTaskId();
+                        // Normalize after save for current tab
+                        const updated = values.shareholders.map((sh, i) =>
+                          i === idx
+                            ? {
+                                ...sh,
+                                residential_same_as_aadhaar_address: (sh.residential_same_as_aadhaar_address === true || sh.residential_same_as_aadhaar_address === 'Yes') ? 'Yes' : 'No',
+                              }
+                            : sh
+                        );
+                        setFieldValue('shareholders', updated);
+                      } else {
+                        throw new Error(res.data?.message || 'Failed to save shareholder');
+                      }
+                    } catch (validationError) {
+                      if (validationError.inner) {
+                        const errorObj = {};
+                        validationError.inner.forEach(err => {
+                          errorObj[err.path] = err.message;
+                        });
+                        formik.setErrors({
+                          shareholders: values.shareholders.map((sh, i) =>
+                            i === idx ? errorObj : {}
+                          )
+                        });
+                      } else {
+                        dispatch(openSnackbar({
+                          open: true,
+                          message: validationError.message || 'Validation failed',
+                          variant: 'alert',
+                          alert: { color: 'error' },
+                          close: false
+                        }));
+                      }
                     }
                   }}
                 >

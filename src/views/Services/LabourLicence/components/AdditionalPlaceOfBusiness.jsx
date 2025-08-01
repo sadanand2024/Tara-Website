@@ -16,11 +16,11 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { openSnackbar } from 'store/slices/snackbar';
 import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
+import CircularProgressComponent from 'utils/CircularProgressComponent';
 import Factory from 'utils/Factory';
-import GetActionButtons from '../../FormHelpers';
 import { indian_States_And_UTs } from 'utils/indian_States_And_UT';
 import * as Yup from 'yup';
-import CircularProgressComponent from 'utils/CircularProgressComponent';
+import GetActionButtons from '../../FormHelpers';
 
 
 
@@ -257,7 +257,7 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
    const getLabelWithAsterisk = (label, isRequired = true) => (
   <span>
     {label}
-    {isRequired && <span style={{ color: 'red', fontSize: '1.3em' }}> *</span>}
+    {isRequired && <span style={{ color: 'red' }}> *</span>}
   </span>
 );
 
@@ -473,7 +473,7 @@ const AdditionalPlaceOfBusiness = ({ businessPremises, setBusinessPremises, task
 </FormGroup>
           </Box>
         </Grid2>
-        {console.log(additionalSpace)}
+        {/* {console.log(additionalSpace)} */}
         {additionalSpace === true && (
           
           <Grid2 item xs={12}>

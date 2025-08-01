@@ -1,17 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
-import { Button, Box, Stack, Typography } from '@mui/material';
+import { Box, Button, Stack, Typography } from '@mui/material';
 import Grid2 from '@mui/material/Grid2';
-import CustomInput from 'utils/CustomInput';
-import Factory from 'utils/Factory';
-import { useSearchParams } from 'react-router-dom';
-import Modal from 'ui-component/extended/Modal';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs from 'dayjs';
-import CustomDatePicker from 'utils/CustomDateInput';
-import CustomAutocomplete from 'utils/CustomAutocomplete';
+import { useFormik } from 'formik';
+import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
+import Modal from 'ui-component/extended/Modal';
+import CustomAutocomplete from 'utils/CustomAutocomplete';
+import CustomInput from 'utils/CustomInput';
+import Factory from 'utils/Factory';
+import * as Yup from 'yup';
 export default function HolidayManagementDialog({ open, handleClose, selectedRecord, type, fetchHolidayManagementData, workLocations }) {
   const [searchParams] = useSearchParams();
   const [payrollid, setPayrollId] = useState(null); // Payroll ID fetched from URL
@@ -27,11 +27,11 @@ export default function HolidayManagementDialog({ open, handleClose, selectedRec
   const dispatch = useDispatch();
 
   const departmentFields = [
-    { name: 'holiday_name', label: 'Holiday Name' },
-    { name: 'start_date', label: 'Start Date' },
-    { name: 'end_date', label: 'End Date' },
-    { name: 'applicable_for', label: 'This holiday applicable for?' },
-    { name: 'description', label: 'Description' }
+    { name: 'holiday_name', label: 'Holiday Name', required: true },
+    { name: 'start_date', label: 'Start Date', required: true },
+    { name: 'end_date', label: 'End Date', required: true },
+    { name: 'applicable_for', label: 'This holiday applicable for?', required: true },
+    { name: 'description', label: 'Description', required: true }
   ];
 
   // Formik validation schema
@@ -39,9 +39,31 @@ export default function HolidayManagementDialog({ open, handleClose, selectedRec
     holiday_name: Yup.string().required('Holiday Name is required'),
     start_date: Yup.string().required('Start Date is required'),
     end_date: Yup.string().required('End Date is required'),
-    applicable_for: Yup.string().required('This field is required'),
+    // applicable_for: Yup.string().required('This field is required'),
+    applicable_for: Yup.array().min(1, 'At least one location is required'),
     description: Yup.string().required('Description is required')
   });
+  const getLabelWithAsterisk = (label, isRequired) => (
+    <span>
+      {label}
+      {isRequired && <span style={{ color: 'red', fontSize: '1.2em', marginLeft: 2 }}>*</span>}
+    </span>
+  );
+
+  // Helper function to convert DD-MM-YYYY to YYYY-MM-DD
+  const convertDateFormat = (dateString) => {
+    if (!dateString) return '';
+    // Check if date is already in YYYY-MM-DD format
+    if (dateString.includes('-') && dateString.split('-')[0].length === 4) {
+      return dateString;
+    }
+    // Convert from DD-MM-YYYY to YYYY-MM-DD
+    const parts = dateString.split('-');
+    if (parts.length === 3) {
+      return `${parts[2]}-${parts[1]}-${parts[0]}`;
+    }
+    return dateString;
+  };
 
   const formik = useFormik({
     initialValues: {
@@ -98,6 +120,7 @@ export default function HolidayManagementDialog({ open, handleClose, selectedRec
       }
     }
   });
+  const combinedWorkLocations = [{ id: 'all', location_name: 'All Locations' }, ...(workLocations || [])];
 
   const renderFields = (fields) => {
     return fields.map((field) => {
@@ -105,16 +128,23 @@ export default function HolidayManagementDialog({ open, handleClose, selectedRec
         return (
           <Grid2 key={field.name} size={{ xs: 12, sm: 6 }}>
             <Typography variant="body2" sx={{ mb: 1 }}>
-              {field.label}
+              {getLabelWithAsterisk(field.label, field.required)}
             </Typography>
-            <CustomDatePicker
-              name={field.name}
+
+            <DatePicker
               value={values[field.name] ? dayjs(values[field.name]) : null}
               onChange={(newDate) => {
                 setFieldValue(field.name, newDate ? newDate.format('YYYY-MM-DD') : '');
               }}
-              error={touched[field.name] && Boolean(errors[field.name])}
-              helperText={touched[field.name] && errors[field.name]}
+              format="DD/MM/YYYY"
+              slotProps={{
+                textField: {
+                  fullWidth: true,
+                  size: 'small',
+                  error: touched[field.name] && Boolean(errors[field.name]),
+                  helperText: touched[field.name] && errors[field.name]
+                }
+              }}
             />
           </Grid2>
         );
@@ -122,11 +152,13 @@ export default function HolidayManagementDialog({ open, handleClose, selectedRec
         return (
           <Grid2 key={field.name} size={{ xs: 12, sm: 6 }}>
             <Typography variant="body2" sx={{ mb: 1 }}>
-              {field.label}
+              {getLabelWithAsterisk(field.label, field.required)}
             </Typography>
-            <CustomAutocomplete
+
+            {/* <CustomAutocomplete
               value={workLocations.find((loc) => loc.location_name === values[field.name]) || null} // Find the full object based on location_name
               onChange={(e, newValue) => {
+                const index = workLocations.findIndex(loc => loc.location_name === newValue?.location_name);
                 // Set the full object, not just the location_name
                 setFieldValue(field.name, newValue ? newValue.location_name : '');
               }}
@@ -137,15 +169,48 @@ export default function HolidayManagementDialog({ open, handleClose, selectedRec
               error={touched[field.name] && Boolean(errors[field.name])} // Display error based on validation
               helperText={touched[field.name] && errors[field.name]} // Show error message
               size="small"
+            /> */}
+
+            <CustomAutocomplete
+              multiple
+              value={(() => {
+                if (!Array.isArray(values[field.name])) return [];
+                if (values[field.name].includes('all')) {
+                  return [combinedWorkLocations[0]]; // show "All Locations" only
+                }
+                return combinedWorkLocations.filter((loc) => values[field.name]?.includes(loc.id));
+              })()}
+              onChange={(e, newValues) => {
+                if (newValues.some((val) => val.id === 'all')) {
+                  // If "All Locations" is selected, override with all real IDs
+                  const allRealIds = workLocations.map((loc) => loc.id);
+                  setFieldValue(field.name, allRealIds);
+                } else {
+                  const ids = newValues.map((val) => val.id);
+                  setFieldValue(field.name, ids);
+                }
+              }}
+              options={combinedWorkLocations}
+              getOptionLabel={(option) => option?.location_name || ''}
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+              sx={{ width: '100%' }}
+              onBlur={handleBlur}
+              error={touched[field.name] && Boolean(errors[field.name])}
+              helperText={touched[field.name] && errors[field.name]}
+              size="small"
             />
           </Grid2>
         );
       } else {
         return (
           <Grid2 key={field.name} size={{ xs: 12, sm: 6 }}>
-            <Typography variant="body2" sx={{ mb: 1 }}>
+            {/* <Typography variant="body2" sx={{ mb: 1 }}>
               {field.label}
+            </Typography> */}
+            <Typography variant="body2" sx={{ mb: 1 }}>
+              {getLabelWithAsterisk(field.label, field.required)}
             </Typography>
+
             <CustomInput
               fullWidth
               name={field.name}
@@ -163,11 +228,41 @@ export default function HolidayManagementDialog({ open, handleClose, selectedRec
     });
   };
   const { values, setValues, errors, touched, handleSubmit, handleBlur, setFieldValue, resetForm } = formik;
+  // useEffect(() => {
+  //   if (type === 'edit' && selectedRecord) {
+  //     setValues(selectedRecord); // Ensure values are set for editing
+  //   }
+  // }, [type, selectedRecord]);
+
   useEffect(() => {
-    if (type === 'edit' && selectedRecord) {
-      setValues(selectedRecord); // Ensure values are set for editing
+    if (open && type === 'edit' && selectedRecord) {
+      let applicableIds = [];
+
+      if (Array.isArray(selectedRecord.applicable_for)) {
+        applicableIds = selectedRecord.applicable_for
+          .map((name) => {
+            const match = workLocations.find((loc) => loc.location_name === name);
+            return match?.id;
+          })
+          .filter(Boolean);
+      } else if (typeof selectedRecord.applicable_for === 'string') {
+        const match = workLocations.find((loc) => loc.location_name === selectedRecord.applicable_for);
+        if (match) applicableIds = [match.id];
+      } else if (Array.isArray(selectedRecord.applicable_for_ids)) {
+        applicableIds = selectedRecord.applicable_for_ids;
+      }
+
+      setValues({
+        ...selectedRecord,
+        applicable_for: applicableIds,
+        start_date: selectedRecord.start_date ? convertDateFormat(selectedRecord.start_date) : '',
+        end_date: selectedRecord.end_date ? convertDateFormat(selectedRecord.end_date) : ''
+      });
+    } else if (open && type === 'add') {
+      resetForm();
     }
-  }, [type, selectedRecord]);
+  }, [open, type, selectedRecord]);
+
   return (
     <Modal
       open={open}
@@ -177,7 +272,7 @@ export default function HolidayManagementDialog({ open, handleClose, selectedRec
         resetForm();
         handleClose(); // Reset form and close dialog
       }}
-      header={{ title: 'Add Holiday', subheader: '' }}
+      title={'Add/ Update Holiday'}
       footer={
         <Stack direction="row" sx={{ width: 1, justifyContent: 'space-between', gap: 2 }}>
           <Button

@@ -1,8 +1,8 @@
-import React, { useContext, useMemo } from 'react';
-import { Box, Typography, Grid2, Paper, ClickAwayListener, Container } from '@mui/material';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Link as RouterLink } from 'react-router-dom';
+import { ClickAwayListener, Container, Grid2, Paper, Typography ,useScrollTrigger} from '@mui/material';
 import ServicesContext from 'contexts/ServicesContext';
+import { AnimatePresence, motion } from 'framer-motion';
+import React, { useContext, useMemo } from 'react';
+import { Link as RouterLink, useLocation } from 'react-router-dom';
 
 const services = [
   {
@@ -110,6 +110,8 @@ const services = [
     ]
   }
 ];
+
+
 const MotionPaper = motion.create(Paper);
 
 const panelVariants = {
@@ -120,6 +122,31 @@ const panelVariants = {
 
 const ServicesPanel = ({ onClose }) => {
   const { services: apiServices } = useContext(ServicesContext);
+  const location = useLocation();
+const isLandingPage = location.pathname === '/'; 
+  const trigger = useScrollTrigger({
+    disableHysteresis: true,
+    threshold: 0
+  });
+   const getBackgroundStyles = () => {
+    if (trigger) {
+      return {
+        backgroundColor: '#FFFFFF',
+        backgroundImage: 'none',
+        transform: 'translateY(-8px)'
+      };
+    } else {
+      return {
+        backgroundColor: isLandingPage ? 'transparent' : '#FFFFFF',
+        backgroundImage: isLandingPage
+          ? 'linear-gradient(to left, #9DB0FF 0%, #F0F3FF 50%, #FFFFFF 100%)'
+          : 'none',
+        transform: 'translateY(0)'
+      };
+    }
+  };
+
+  const backgroundStyles = getBackgroundStyles();
 
   // Create a lookup for fast matching
   const apiLookup = useMemo(() => {
@@ -162,7 +189,18 @@ const ServicesPanel = ({ onClose }) => {
             left: 0,
             width: '100vw',
             zIndex: 1100,
-            backgroundColor: 'background.paper',
+            // backgroundColor: 'background.paper',
+            // backgroundImage: 'linear-gradient(to left, #9DB0FF 0%, #F0F3FF 50%, #FFFFFF 100%)',
+            // backgroundRepeat: 'no-repeat',
+            // backgroundSize: 'cover',
+            // backgroundImage: isLandingPage ? 'linear-gradient(to left, #9DB0FF 0%, #F0F3FF 50%, #FFFFFF 100%)' : 'none',
+            // backgroundColor: isLandingPage ? 'transparent' : 'white',
+            backgroundColor: backgroundStyles.backgroundColor,
+            backgroundImage: backgroundStyles.backgroundImage,
+            transform: backgroundStyles.transform,
+            backgroundRepeat: 'no-repeat',
+            backgroundSize: 'cover',
+
             px: { xs: 2, sm: 4, md: 10 },
             py: { xs: 3, sm: 5 },
             borderTop: (theme) => `1px solid ${theme.palette.divider}`,

@@ -390,7 +390,10 @@ export default function OverviewCard({ invoicing_profile_data, businessId, open,
       getDashboardData();
     }
   }, [financialYear, invoicing_profile_data?.invoicing_profile_id, month]);
-
+  const formatNumberIN = (value) => {
+    if (value === null || value === undefined || value === '' || isNaN(Number(value))) return 'NA';
+    return Number(value).toLocaleString('en-IN');
+  };
   return (
     <Box>
       <YearlyStats
@@ -498,7 +501,7 @@ export default function OverviewCard({ invoicing_profile_data, businessId, open,
             <Table size="small">
               <TableHead>
                 <TableRow sx={{ bgcolor: 'primary.main', color: 'white' }}>
-                  <TableCell>Serial No.</TableCell>
+                  <TableCell>S.No</TableCell>
                   <TableCell>Invoice Date</TableCell>
                   <TableCell>Invoice Number</TableCell>
                   <TableCell>Customer</TableCell>
@@ -550,10 +553,10 @@ export default function OverviewCard({ invoicing_profile_data, businessId, open,
                         {new Date(invoice.due_date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: '2-digit' })}
                       </TableCell>
                       <TableCell>
-                        {indianCurrency}&nbsp;{invoice.total_amount}
+                        {indianCurrency}&nbsp;{formatNumberIN(invoice.total_amount)}
                       </TableCell>
                       <TableCell>
-                        {indianCurrency}&nbsp;{invoice.balance_due}
+                        {indianCurrency}&nbsp;{formatNumberIN(invoice.balance_due)}
                       </TableCell>
                       <TableCell align="center">
                         {invoice?.id && (

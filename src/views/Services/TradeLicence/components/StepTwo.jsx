@@ -1,22 +1,21 @@
-import React, { useEffect,useState } from 'react';
-import { Box, Typography, Button, Grid2,Card } from '@mui/material';
-import IconSave from '@mui/icons-material/Save';
+import { Box, Button, Card, Grid2, Typography } from '@mui/material';
 import { useFormik } from 'formik';
+import React, { useEffect, useState } from 'react';
 import CircularProgressComponent from 'utils/CircularProgressComponent';
 
 
 
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import * as Yup from 'yup';
-import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
-import { useDispatch } from 'react-redux';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { Autocomplete, TextField } from '@mui/material';
-import { openSnackbar } from 'store/slices/snackbar';
-import Factory from 'utils/Factory';
+import { useDispatch } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
-import RaiseRequest from '../../RaiseRequest';
+import { openSnackbar } from 'store/slices/snackbar';
+import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
+import Factory from 'utils/Factory';
+import * as Yup from 'yup';
 import GetActionButtons from '../../FormHelpers';
+import RaiseRequest from '../../RaiseRequest';
 import BusinessRegistrationDocumenst from './BusinessRegistrationDocumenst';
 const StepTwo = ({taskId,tradelicencedetailsTaskId, step, setStep}) => {
 
@@ -63,15 +62,21 @@ const StepTwo = ({taskId,tradelicencedetailsTaskId, step, setStep}) => {
       formData.append('service_request', service_id);
       formData.append('service_task', tradelicencedetailsTaskId);
       formData.append('apply_new_license', values.apply_new_license?.value);
-      formData.append('trade_license_number', values.trade_license_number);
+      // formData.append('trade_license_number', values.trade_license_number);
       formData.append('status', 'in progress');
-      if (values.trade_license_file && typeof values.trade_license_file !== 'string') {
-        formData.append('trade_license_file', values.trade_license_file);
-      }
-      else {
-    formData.append('trade_license_number', '');
-    formData.append('trade_license_file', '');
-  }
+  //     if (values.trade_license_file && typeof values.trade_license_file !== 'string') {
+  //       formData.append('trade_license_file', values.trade_license_file);
+  //     }
+  //     else {
+  //   formData.append('trade_license_number', '');
+  //   formData.append('trade_license_file', '');
+  // }
+
+  if (values.apply_new_license?.value === false && values.trade_license_number) {
+  formData.append('trade_license_number', values.trade_license_number);
+} else {
+  formData.append('trade_license_number', ''); // explicitly send empty if switched to 'Yes'
+}
 
       const { res } = await Factory(values.id ? 'put' : 'post', url, formData);
       if (res.status_cd === 0) {
@@ -123,13 +128,13 @@ const StepTwo = ({taskId,tradelicencedetailsTaskId, step, setStep}) => {
     getTradeLicenseDeclaration();
   }, []);
   if (isLoading) {
-      console.log('Loading promoter data...', isLoading);
-      return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading promoter Data'} />;
+      // console.log('Loading  data...', isLoading);
+      return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading  Data'} />;
     }
     const getLabelWithAsterisk = (label, isRequired = true) => (
   <span>
     {label}
-    {isRequired && <span style={{ color: 'red', fontSize: '1.3em' }}> *</span>}
+    {isRequired && <span style={{ color: 'red' }}> *</span>}
   </span>
 );
   const { values, setValues, setFieldValue, handleChange, errors, touched, handleSubmit, handleBlur } = formik;
@@ -164,8 +169,8 @@ const StepTwo = ({taskId,tradelicencedetailsTaskId, step, setStep}) => {
             <Grid2 size={{ sm: 3, md: 3, xs: 12 }}>
               {/* <Typography variant="subtitle1">Apply for a new Trade Licence</Typography> */}
               <Typography variant="subtitle1">
-  {getLabelWithAsterisk('Apply for a new Trade Licence')}
-</Typography>
+                {getLabelWithAsterisk('Apply for a new Trade Licence')}
+             </Typography>
             </Grid2>
             <Grid2 size={{ sm: 3, md: 3, xs: 12 }}>
               <Autocomplete

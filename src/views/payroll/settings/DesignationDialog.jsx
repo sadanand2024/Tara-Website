@@ -14,7 +14,7 @@ export default function DesignationDialog({ open, handleClose, fetchDesignations
   const [searchParams] = useSearchParams();
   const [payrollid, setPayrollId] = useState(null);
 
-  const designationFields = [{ name: 'designation_name', label: 'Designation Name' }];
+  const designationFields = [{ name: 'designation_name', label: 'Designation Name', required: true }];
 
   useEffect(() => {
     const id = searchParams.get('payrollid');
@@ -47,7 +47,7 @@ export default function DesignationDialog({ open, handleClose, fetchDesignations
         fetchDesignations();
         resetForm();
       } else {
-        dispatchSnackbar(
+        dispatch(
           openSnackbar({
             open: true,
             message: JSON.stringify(res?.data?.error || 'Something went wrong'),
@@ -59,6 +59,12 @@ export default function DesignationDialog({ open, handleClose, fetchDesignations
       }
     }
   });
+  const getLabelWithAsterisk = (label, isRequired) => (
+    <>
+      {label}
+      {isRequired && <span style={{ color: 'red' }}> *</span>}
+    </>
+  );
 
   const { values, handleChange, handleBlur, touched, errors, handleSubmit, setValues, resetForm } = formik;
 
@@ -67,8 +73,11 @@ export default function DesignationDialog({ open, handleClose, fetchDesignations
       setValues({
         designation_name: selectedRecord.designation_name || ''
       });
+    } else if (type === 'add' || !type) {
+      // Reset form when opening for adding new designation
+      resetForm();
     }
-  }, [type, selectedRecord, setValues]);
+  }, [type, selectedRecord, setValues, resetForm]);
 
   return (
     <Modal
@@ -101,29 +110,31 @@ export default function DesignationDialog({ open, handleClose, fetchDesignations
         </Stack>
       }
     >
-      <Box component="form" onSubmit={handleSubmit} sx={{ p: 2 }}>
-        {designationFields.map((field) => (
-          <Grid2 key={field.name} size={{ xs: 12 }}>
-            <Typography variant="subtitle1" gutterBottom>
-              {field.label}
-            </Typography>
-            <TextField
-              size="small"
-              fullWidth
-              name={field.name}
-              value={values[field.name]}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              error={touched[field.name] && Boolean(errors[field.name])}
-              helperText={touched[field.name] && errors[field.name]}
-              sx={{
-                '& .MuiInputBase-input': {
-                  color: 'grey.600'
-                }
-              }}
-            />
-          </Grid2>
-        ))}
+      <Box component="form" onSubmit={handleSubmit} sx={{ pt: 1 }}>
+        <Grid2 container spacing={2}>
+          {designationFields.map((field) => (
+            <Grid2 key={field.name} size={{ xs: 12 }}>
+              <Typography variant="subtitle1" gutterBottom>
+                {getLabelWithAsterisk(field.label, field.required)}
+              </Typography>
+              <TextField
+                size="small"
+                fullWidth
+                name={field.name}
+                value={values[field.name]}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                error={touched[field.name] && Boolean(errors[field.name])}
+                helperText={touched[field.name] && errors[field.name]}
+                sx={{
+                  '& .MuiInputBase-input': {
+                    color: 'grey.600'
+                  }
+                }}
+              />
+            </Grid2>
+          ))}
+        </Grid2>
       </Box>
     </Modal>
   );

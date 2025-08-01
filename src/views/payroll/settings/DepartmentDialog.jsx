@@ -15,8 +15,8 @@ export default function DepartmentDialog({ open, handleClose, fetchDepartments, 
   const [payrollid, setPayrollId] = useState(null);
 
   const departmentFields = [
-    { name: 'dept_name', label: 'Department Name' },
-    { name: 'dept_code', label: 'Department Code' },
+    { name: 'dept_name', label: 'Department Name', required: true },
+    { name: 'dept_code', label: 'Department Code', required: true },
     { name: 'description', label: 'Description' }
   ];
 
@@ -69,6 +69,12 @@ export default function DepartmentDialog({ open, handleClose, fetchDepartments, 
       }
     }
   });
+  const getLabelWithAsterisk = (label, isRequired) => (
+    <>
+      {label}
+      {isRequired && <span style={{ color: 'red' }}> *</span>}
+    </>
+  );
 
   const { values, setValues, handleChange, handleBlur, errors, touched, handleSubmit, resetForm } = formik;
 
@@ -113,18 +119,21 @@ export default function DepartmentDialog({ open, handleClose, fetchDepartments, 
         </Stack>
       }
     >
-      <Box component="form" onSubmit={handleSubmit} sx={{ p: 2 }}>
-        <Grid2 container spacing={3}>
+      <Box component="form" onSubmit={handleSubmit} sx={{ pt: 1 }}>
+        <Grid2 container spacing={2}>
           {departmentFields.map((field) => (
-            <Grid2 key={field.name} size={{ xs: 12, sm: 6 }}>
-              <Typography variant="subtitle1" gutterBottom>
+            <Grid2 key={field.name} size={field.name === 'description' ? 12 : { xs: 12, sm: 6 }}>
+              {/* <Typography variant="subtitle1" gutterBottom>
                 {field.label}
+              </Typography> */}
+              <Typography variant="subtitle1" gutterBottom>
+                {getLabelWithAsterisk(field.label, field.required)}
               </Typography>
               <CustomInput
                 fullWidth
                 name={field.name}
                 multiline={field.name === 'description'}
-                minRows={field.name === 'description' ? 6 : undefined}
+                minRows={field.name === 'description' ? 4 : undefined}
                 value={values[field.name]}
                 onChange={handleChange}
                 onBlur={handleBlur}

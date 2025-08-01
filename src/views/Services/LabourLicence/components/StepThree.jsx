@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Typography, Button, Stepper, Step, StepLabel, StepContent, Stack, IconButton, CircularProgress } from '@mui/material';
-import { enqueueSnackbar } from 'notistack';
-import Factory from 'utils/Factory';
 import DownloadIcon from '@mui/icons-material/Download';
-import GetActionButtons from '../../FormHelpers';
+import { Box, Button, CircularProgress, Stack, Step, StepContent, StepLabel, Stepper, Typography } from '@mui/material';
+import { enqueueSnackbar } from 'notistack';
+import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import Factory from 'utils/Factory';
+import GetActionButtons from '../../FormHelpers';
 
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
-const StepThree = ({step, setStep}) => {
+const StepThree = ({ step, setStep }) => {
   const [searchParams] = useSearchParams();
   const [reviewAndFiling, setReviewAndFiling] = useState({
     task_id: null,
@@ -18,7 +18,7 @@ const StepThree = ({step, setStep}) => {
   const [reviewStep, setReviewStep] = useState(0);
   const [loadingStep4, setLoadingStep4] = useState(false);
 
-  const reviewSteps = ['Draft TradeLicence Computation', 'Upload Filed Acknowledgement', 'Download Filed Acknowledgement'];
+  const reviewSteps = ['Draft LabourLicence', 'Upload Filed Acknowledgement', 'Download Filed Acknowledgement'];
 
   const viewFile = async (url) => {
     const response = await Factory('get', `/docwallet/generate_presigned_url?url=${url}`, {}, {});
@@ -33,10 +33,7 @@ const StepThree = ({step, setStep}) => {
     const fetchReviewAndFilingData = async () => {
       try {
         setLoadingStep4(true);
-        const res = await Factory(
-          'get',
-          `/labourlicense/service-request-section-data?service_request_id=${service_id}&section=review`,
-        );
+        const res = await Factory('get', `/labourlicense/service-request-section-data?service_request_id=${service_id}&section=review`);
 
         if (res?.res?.status_cd === 0) {
           const taskData = res?.res?.data?.task_data;
@@ -47,7 +44,6 @@ const StepThree = ({step, setStep}) => {
             task_id: reviewSection?.task_id || null,
             data: reviewSection?.data || {}
           });
-        
         } else {
           enqueueSnackbar('Failed to fetch Review & Filing Certificate data.', {
             variant: 'error',
@@ -93,7 +89,7 @@ const StepThree = ({step, setStep}) => {
                     }}
                   >
                     <Typography variant="subtitle1" mb={3} sx={{ textDecoration: 'underline' }}>
-                      Draft LabourLicence Computation
+                      Draft LabourLicence
                     </Typography>
                     <Stack direction="row" spacing={2} mb={3}>
                       <Button variant="contained" size="small" onClick={() => document.getElementById('draftGstComputationInput').click()}>
@@ -110,7 +106,7 @@ const StepThree = ({step, setStep}) => {
                                 draft_filing_certificate: e.target.files[0] || null
                               }
                             }));
-                        
+
                             const task_id = reviewAndFiling.task_id;
 
                             let type = reviewAndFiling?.data?.id ? 'put' : 'post';
@@ -128,7 +124,15 @@ const StepThree = ({step, setStep}) => {
 
                             const res = await Factory(type, urlEndpoint, formData, {});
                             if (res?.res?.status_cd === 0) {
-                              
+                              setReviewAndFiling((prev) => ({
+                                ...prev,
+                                task_id: reviewAndFiling?.task_id || null,
+                                data: {
+                                  ...res.res,
+                                  draft_filing_certificate: e.target.files[0] || null
+                                }
+                              }));
+
                               enqueueSnackbar('Draft labourLicence computation saved successfully!', {
                                 variant: 'success',
                                 anchorOrigin: { vertical: 'top', horizontal: 'right' }
@@ -143,7 +147,7 @@ const StepThree = ({step, setStep}) => {
                         />
                         Upload
                       </Button>
-                    
+
                       {reviewAndFiling?.data?.draft_filing_certificate && (
                         <Button
                           variant="outlined"
@@ -160,7 +164,7 @@ const StepThree = ({step, setStep}) => {
                         </Button>
                       )}
                     </Stack>
-                  
+
                     <Box display="flex" justifyContent="flex-start" gap={1}>
                       <GetActionButtons
                         type="put"
@@ -298,9 +302,7 @@ const StepThree = ({step, setStep}) => {
                             viewFile(reviewAndFiling?.data?.review_certificate);
                           }
                         }}
-                        startIcon={
-                            <DownloadIcon sx={{ width: { xs: 24, md: 24 }, height: { xs: 24, md: 24 } }} />
-                          }
+                        startIcon={<DownloadIcon sx={{ width: { xs: 24, md: 24 }, height: { xs: 24, md: 24 } }} />}
                       >
                         Download
                         {/* <IconButton
@@ -321,7 +323,7 @@ const StepThree = ({step, setStep}) => {
         </Stepper>
       )}
       <Box display="flex" justifyContent="flex-end" mt={2}>
-        <Button variant="outlined" size="small" onClick={() => setStep(step - 1)} startIcon={<ArrowBackIcon />}> 
+        <Button variant="outlined" size="small" onClick={() => setStep(step - 1)} startIcon={<ArrowBackIcon />}>
           Back
         </Button>
         {/* <Button variant="contained" color="primary"  onClick={() => setStep(step + 1)}>
@@ -329,7 +331,6 @@ const StepThree = ({step, setStep}) => {
         </Button> */}
       </Box>
     </Box>
-    
   );
 };
 

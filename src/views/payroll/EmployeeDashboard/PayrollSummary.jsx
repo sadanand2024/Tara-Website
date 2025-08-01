@@ -36,6 +36,12 @@ const TABLE_HEADERS = [
   'Net Pay'
 ];
 
+// Utility function to format numbers with Indian comma separators
+const formatNumberIN = (value) => {
+  if (value === null || value === undefined || value === '' || isNaN(Number(value))) return 'NA';
+  return Number(value).toLocaleString('en-IN');
+};
+
 const PayrollSummary = ({ payrollId, month, financialYear }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 5;
@@ -185,23 +191,23 @@ const PayrollSummary = ({ payrollId, month, financialYear }) => {
             ) : paginatedData.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={TABLE_HEADERS.length + 1} align="center" sx={{ height: 300 }}>
-                  <EmptyDataPlaceholder title="No Data Found" subtitle="Start by adding a new record." />
+                  <EmptyDataPlaceholder title="No Data Found" subtitle="Generate payroll to view data." />
                 </TableCell>
               </TableRow>
             ) : (
               paginatedData.map((item, index) => (
                 <TableRow key={item.id || index}>
-                  <TableCell>{item.associate_id || 'NA'}</TableCell>
-                  <TableCell>{item.employee_name || 'NA'}</TableCell>
-                  <TableCell>{item.department || 'NA'}</TableCell>
-                  <TableCell>{item.designation || 'NA'}</TableCell>
-                  <TableCell>{item.paid_days || 'NA'}</TableCell>
-                  <TableCell>{item.ctc || 'NA'}</TableCell>
-                  <TableCell>{item.actual_gross || 'NA'}</TableCell>
-                  <TableCell>{item.gross_salary || 'NA'}</TableCell>
-                  <TableCell>{item.earned_salary || 'NA'}</TableCell>
-                  <TableCell>{item.deductions?.['Total'] || 'NA'}</TableCell>
-                  <TableCell>{item.net_salary || 'NA'}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{item.associate_id || 'NA'}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{item.employee_name || 'NA'}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{item.department || 'NA'}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{item.designation || 'NA'}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatNumberIN(item.paid_days)}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatNumberIN(item.ctc)}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatNumberIN(item.actual_gross)}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatNumberIN(item.gross_salary)}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatNumberIN(item.earned_salary)}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatNumberIN(item.deductions?.['Total'])}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatNumberIN(item.net_pay)}</TableCell>
                   <TableCell>
                     <Typography
                       align="center"
@@ -209,7 +215,8 @@ const PayrollSummary = ({ payrollId, month, financialYear }) => {
                       sx={{
                         cursor: 'pointer',
                         textDecoration: 'underline',
-                        color: 'primary.main'
+                        color: 'primary.main',
+                        whiteSpace: 'nowrap'
                       }}
                       onClick={() => viewPayslip(item.employee_id, item.month, item.financial_year)}
                     >

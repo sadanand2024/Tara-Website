@@ -44,75 +44,89 @@ const deductorFields = [
   {
     label: 'TAN Number',
     name: 'tan_number',
-    type: 'text'
+    type: 'text',
+    required: true
   },
   {
     label: 'PAN',
     name: 'pan',
-    type: 'text'
+    type: 'text',
+    required: true
   },
   {
     label: 'Legal Name',
     name: 'legal_name',
-    type: 'text'
+    type: 'text',
+    required: true
   },
   {
-    label: 'Trade Name',
+    label: 'Business or Trade Name',
     name: 'trade_name',
-    type: 'text'
+    type: 'text',
+    required: true
   },
   {
     label: 'Location/Vertical',
     name: 'location',
-    type: 'text'
+    type: 'text',
+    required: true
   },
   {
     label: 'Deductor Category',
     name: 'deductor_category',
     type: 'select',
-    options: deductorCategories
+    options: deductorCategories,
+    required: true
   },
   {
     label: 'Deductor Type',
     name: 'deductor_type',
     type: 'select',
-    options: deductorTypes
+    options: deductorTypes,
+    required: true
   },
   {
     label: 'Address',
     name: 'address',
-    type: 'text'
+    type: 'text',
+    required: true
   },
   {
     label: 'State',
     name: 'state',
     type: 'select',
-    options: INDIAN_STATES
+    options: INDIAN_STATES,
+    required: true
   },
   {
     label: 'Pincode',
     name: 'pincode',
-    type: 'text'
+    type: 'text',
+    required: true
   },
   {
     label: 'Email ID',
     name: 'email',
-    type: 'text'
+    type: 'text',
+    required: true
   },
   {
     label: 'Contact Number',
     name: 'mobile_number',
-    type: 'text'
+    type: 'text',
+    required: true
   },
   {
     label: 'Username (TDS Compliance)',
     name: 'tds_username',
-    type: 'text'
+    type: 'text',
+    required: true
   },
   {
     label: 'Password (TDS Compliance)',
     name: 'tds_password',
-    type: 'text'
+    type: 'text',
+    required: true
   }
 ];
 
@@ -120,27 +134,32 @@ const authorizedPersonalDetailsFields = [
   {
     label: 'Name of Responsible Person',
     name: 'name',
-    type: 'text'
+    type: 'text',
+    required: true
   },
   {
     label: 'Designation',
     name: 'designation',
-    type: 'text'
+    type: 'text',
+    required: true
   },
   {
     label: 'PAN of RP',
     name: 'pan_of_RP',
-    type: 'text'
+    type: 'text',
+    required: true
   },
   {
     label: 'Mobile',
     name: 'mobile',
-    type: 'text'
+    type: 'text',
+    required: false
   },
   {
     label: 'Email',
     name: 'email',
-    type: 'text'
+    type: 'text',
+    required: false
   }
 ];
 
@@ -148,27 +167,41 @@ const incomeTaxDetailsFields = [
   {
     label: 'PAN',
     name: 'pan',
-    type: 'text'
+    type: 'text',
+    required: false
   },
   {
     label: 'Password',
     name: 'password',
-    type: 'text'
+    type: 'text',
+    required: false
   },
   {
     label: 'Registered Mobile Number',
     name: 'registered_mobile_number',
-    type: 'text'
+    type: 'text',
+    required: false
   }
 ];
-
+const getLabelWithAsterisk = (label, isRequired) => {
+  return (
+    <span>
+      {label}
+      {isRequired && <span style={{ color: 'red', fontSize: '1em' }}> *</span>}
+    </span>
+  );
+};
 const validationSchema = Yup.object().shape({
   tan_number: Yup.string()
     .required('TAN is required')
     .matches(/^[A-Z]{4}[0-9]{5}[A-Z]{1}$/, 'Invalid TAN format'),
+  // pan: Yup.string()
+  //   .required('PAN is required')
+  //   .matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN format'),
   pan: Yup.string()
     .required('PAN is required')
-    .matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN format'),
+    .matches(/^[A-Z]{3}C[A-Z][0-9]{4}[A-Z]$/, 'Invalid PAN format'),
+
   legal_name: Yup.string().required('Legal Name is required'),
   trade_name: Yup.string().required('Trade Name is required'),
   location: Yup.string().required('Location/Vertical is required'),
@@ -190,20 +223,20 @@ const validationSchema = Yup.object().shape({
     designation: Yup.string().required('Designation is required'),
     pan_of_RP: Yup.string()
       .required('PAN of RP is required')
-      .matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN format'),
-    mobile: Yup.string()
-      .required('Mobile is required')
-      .matches(/^[6-9]\d{9}$/, 'Invalid mobile number'),
-    email: Yup.string().email('Invalid email').required('Email is required')
+      .matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN format')
+    // mobile: Yup.string()
+    //   .required('Mobile is required')
+    //   .matches(/^[6-9]\d{9}$/, 'Invalid mobile number'),
+    // email: Yup.string().email('Invalid email').required('Email is required')
   }),
   income_tax_details: Yup.object().shape({
-    pan: Yup.string()
-      .required('PAN is required')
-      .matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN format'),
-    password: Yup.string().required('Password is required'),
-    registered_mobile_number: Yup.string()
-      .required('Registered Mobile Number is required')
-      .matches(/^[6-9]\d{9}$/, 'Invalid mobile number')
+    // pan: Yup.string()
+    //   .required('PAN is required')
+    //   .matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN format'),
+    // password: Yup.string().required('Password is required'),
+    // registered_mobile_number: Yup.string()
+    //   .required('Registered Mobile Number is required')
+    //   .matches(/^[6-9]\d{9}$/, 'Invalid mobile number')
   })
 });
 
@@ -453,7 +486,12 @@ const TDSAndIncomeTax = ({ handleBack, handleNext }) => {
   useEffect(() => {
     fetchTDSDetails();
   }, []);
-
+  useEffect(() => {
+    if (user.active_context.business_id) {
+      setFieldValue('trade_name', user.active_context.name || '');
+      setFieldValue('legal_name', user.active_context.legal_name || '');
+    }
+  }, [user.active_context.business_id]);
   const renderFields = (fields, prefix = '') => {
     return fields.map((field) => {
       const fieldName = prefix ? `${prefix}.${field.name}` : field.name;
@@ -467,7 +505,7 @@ const TDSAndIncomeTax = ({ handleBack, handleNext }) => {
             <TextField
               fullWidth
               size="small"
-              label={field.label}
+              label={getLabelWithAsterisk(field.label, field.required)}
               name={fieldName}
               value={fieldValue}
               onChange={(e) => {
@@ -494,6 +532,7 @@ const TDSAndIncomeTax = ({ handleBack, handleNext }) => {
               inputProps={
                 field.name === 'pincode' ? { maxLength: 6 } : field.name === 'pan' || field.name === 'pan_of_RP' ? { maxLength: 10 } : {}
               }
+              disabled={field.name === 'trade_name' || field.name === 'legal_name'}
             />
           )}
           {field.type === 'select' && (
@@ -580,13 +619,13 @@ const TDSAndIncomeTax = ({ handleBack, handleNext }) => {
             }}
           >
             <TableRow>
-              <TableCell sx={{ fontWeight: 600 }}>TAN</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Trade Name</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Location/Vertical</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Deductor Category</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Deductor Type</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>State</TableCell>
-              <TableCell align="center" sx={{ fontWeight: 600 }}>
+              <TableCell sx={{ fontWeight: 600, whiteSpace: 'nowrap' }}>TAN</TableCell>
+              <TableCell sx={{ fontWeight: 600, whiteSpace: 'nowrap' }}>Business or Trade Name</TableCell>
+              <TableCell sx={{ fontWeight: 600, whiteSpace: 'nowrap' }}>Location/Vertical</TableCell>
+              <TableCell sx={{ fontWeight: 600, whiteSpace: 'nowrap' }}>Deductor Category</TableCell>
+              <TableCell sx={{ fontWeight: 600, whiteSpace: 'nowrap' }}>Deductor Type</TableCell>
+              <TableCell sx={{ fontWeight: 600, whiteSpace: 'nowrap' }}>State</TableCell>
+              <TableCell align="center" sx={{ fontWeight: 600, whiteSpace: 'nowrap' }}>
                 Actions
               </TableCell>
             </TableRow>
@@ -601,19 +640,29 @@ const TDSAndIncomeTax = ({ handleBack, handleNext }) => {
                     </Typography>
                   </TableCell>
                   <TableCell>
-                    <Typography variant="body2">{row.trade_name}</Typography>
+                    <Typography variant="body2" sx={{ whiteSpace: 'nowrap' }}>
+                      {row.trade_name}
+                    </Typography>
                   </TableCell>
                   <TableCell>
-                    <Typography variant="body2">{row.location}</Typography>
+                    <Typography variant="body2" sx={{ whiteSpace: 'nowrap' }}>
+                      {row.location}
+                    </Typography>
                   </TableCell>
                   <TableCell>
-                    <Typography variant="body2">{row.deductor_category}</Typography>
+                    <Typography variant="body2" sx={{ whiteSpace: 'nowrap' }}>
+                      {row.deductor_category}
+                    </Typography>
                   </TableCell>
                   <TableCell>
-                    <Typography variant="body2">{row.deductor_type}</Typography>
+                    <Typography variant="body2" sx={{ whiteSpace: 'nowrap' }}>
+                      {row.deductor_type}
+                    </Typography>
                   </TableCell>
                   <TableCell>
-                    <Typography variant="body2">{row.state}</Typography>
+                    <Typography variant="body2" sx={{ whiteSpace: 'nowrap' }}>
+                      {row.state}
+                    </Typography>
                   </TableCell>
                   <TableCell align="center">
                     <Stack direction="row" spacing={1} justifyContent="center">
@@ -676,6 +725,7 @@ const TDSAndIncomeTax = ({ handleBack, handleNext }) => {
 
       <Modal
         open={open}
+        maxWidth="md"
         showClose={true}
         title={editIndex !== null ? 'Edit TDS Details' : 'Add TDS Details'}
         handleClose={() => {
@@ -700,7 +750,7 @@ const TDSAndIncomeTax = ({ handleBack, handleNext }) => {
           </Stack>
         }
       >
-        <Box component="form" onSubmit={handleSubmit} sx={{ padding: 2 }}>
+        <Box component="form" onSubmit={handleSubmit} sx={{ pt: 1 }}>
           {/* Deductor Details Group */}
           <Box mb={3}>
             <Typography variant="subtitle1" fontWeight={600} gutterBottom color="text.primary" sx={{ mb: 2 }}>

@@ -2,8 +2,10 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import Factory from 'utils/Factory';
 import Drafting from './components/Drafting';
+import { useParams } from 'react-router-dom';
 
 const Index = () => {
+  const { tab, contextId } = useParams();
   const user = useSelector((state) => state.accountReducer.user);
   const [exists, setExists] = useState(null);
   const [draftId, setDraftId] = useState(null);
@@ -50,11 +52,21 @@ const Index = () => {
     }
   };
 
-  return (
-    <>
-      <Drafting id={draftId} />      
-    </>
-  );
+  // Conditional rendering based on tab/contextId
+  if (!tab && !contextId) {
+    // Dashboard view
+    return <Drafting id={draftId} />;
+  }
+  if (tab === 'document' && contextId) {
+    // Document selection tab only
+    return <Drafting id={draftId} tab="document" contextId={contextId} />;
+  }
+  if (tab === 'event' && contextId) {
+    // Event creation tab only
+    return <Drafting id={draftId} tab="event" contextId={contextId} />;
+  }
+  // Fallback: dashboard
+  return <Drafting id={draftId} />;
 };
 
 export default Index;

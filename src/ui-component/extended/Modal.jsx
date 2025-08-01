@@ -10,7 +10,7 @@ const BerryDialog = ({
   subheader,
   children,
   footer,
-  maxWidth = 'md',
+  maxWidth = 'sm',
   fullWidth = true,
   scroll = 'paper',
   showClose = true

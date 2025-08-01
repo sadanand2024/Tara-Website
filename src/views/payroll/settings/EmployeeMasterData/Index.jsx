@@ -11,12 +11,8 @@ import {
   TableRow,
   Paper,
   Pagination,
-  Typography,
-  Grid2,
-  CircularProgress
+  Grid2
 } from '@mui/material';
-import MainCard from 'ui-component/cards/MainCard';
-import ActionCell from 'ui-component/extended/ActionCell';
 import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
 import Factory from 'utils/Factory';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -29,16 +25,24 @@ import { Edit, Delete } from '@mui/icons-material';
 import DeleteDialog from 'ui-component/extended/DeleteDialog';
 import EmployeeBulkUploadDialog from 'ui-component/extended/EmployeeBulkUploadDialog';
 import AddEmployee from './AddEmployee';
-function EmployeeList({ handleBack, handleNext }) {
+import CircularProgressComponent from 'utils/CircularProgressComponent';
+
+function EmployeeList({
+  handleBack,
+  handleNext,
+  searchQuery = '',
+  openDialog = false,
+  setOpenDialog,
+  openBulkDialog = false,
+  setOpenBulkDialog
+}) {
   const [employees, setEmployees] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [payrollId, setPayrollId] = useState(null);
-  const [openDialog, setOpenDialog] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const dispatch = useDispatch();
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
-  const [openBulkDialog, setOpenBulkDialog] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const closeBulkDialog = () => {
     setOpenBulkDialog(false);
   };
@@ -58,7 +62,19 @@ function EmployeeList({ handleBack, handleNext }) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const paginatedEmployees = employees.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+  // Filter employees based on searchQuery from props
+  const filteredEmployees = employees.filter((employee) => {
+    const query = searchQuery.toLowerCase();
+    return (
+      employee.associate_id?.toLowerCase().includes(query) ||
+      `${employee.first_name || ''} ${employee.last_name || ''}`.toLowerCase().includes(query) ||
+      employee.department_name?.toLowerCase().includes(query) ||
+      employee.designation_name?.toLowerCase().includes(query) ||
+      employee.work_email?.toLowerCase().includes(query)
+    );
+  });
+
+  const paginatedEmployees = filteredEmployees.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 
   useEffect(() => {
     const id = searchParams.get('payrollid');
@@ -66,10 +82,10 @@ function EmployeeList({ handleBack, handleNext }) {
   }, [searchParams]);
 
   const fetchEmployees = async () => {
-    setLoading(true);
+    setIsLoading(true);
     const url = `/payroll/employees?payroll_id=${payrollId}`;
     const { res } = await Factory('get', url, {});
-    setLoading(false);
+    setIsLoading(false);
     if (res?.status_cd === 0) {
       setEmployees(res?.data || []);
     } else {
@@ -87,10 +103,10 @@ function EmployeeList({ handleBack, handleNext }) {
   };
 
   const handleDelete = async (item) => {
-    setLoading(true);
+    setIsLoading(true);
     const url = `/payroll/employees/${item.id}`;
     const { res } = await Factory('delete', url, {});
-    setLoading(false);
+    setIsLoading(false);
     if (res?.status_cd === 0) {
       fetchEmployees();
       dispatch(
@@ -124,145 +140,114 @@ function EmployeeList({ handleBack, handleNext }) {
     params.set('employee_id', item.id);
     navigate({ search: params.toString() });
   };
+  if (isLoading) {
+    return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading Employee Data'} />;
+  }
   return (
     <>
-      {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
-          <CircularProgress />
-        </Box>
-      ) : (
-        <MainCard
-          title="Employee Master Data"
-          subtitle="Manage your Employee Master Data for seamless operations"
-          secondary={
-            <Stack direction="row" spacing={2}>
-              <Button variant="outlined" color="secondary" onClick={() => setOpenBulkDialog(true)}>
-                Bulk Upload
-              </Button>
-              <Button
-                variant="contained"
-                onClick={() => {
-                  const params = new URLSearchParams(searchParams);
-                  params.set('action', 'add');
-                  navigate({ search: params.toString() });
-                }}
-              >
-                Add Employee
-              </Button>
-            </Stack>
-          }
-        >
-          <EmployeeBulkUploadDialog
-            open={openBulkDialog}
-            handleClose={closeBulkDialog}
-            getData={fetchEmployees}
-            payrollid={payrollId}
-            type="Employees"
-            bulkUploadUrl="/payroll/employees/upload/"
-            xlsxTemplateUrl={`/payroll/download-template/${payrollId}/`}
-            // csvTemplateUrl="/payroll/download-template/csv?type=employee"
-          />
-          <Grid2 container spacing={2}>
-            <TableContainer
-              component={Paper}
-              sx={{
-                width: '100%',
-                borderRadius: 2,
-                boxShadow: 1,
-                overflowX: 'auto'
-              }}
-            >
-              <Table size="small">
-                <TableHead sx={{ backgroundColor: 'primary.main' }}>
+      <Box>
+        <EmployeeBulkUploadDialog
+          open={openBulkDialog}
+          handleClose={closeBulkDialog}
+          getData={fetchEmployees}
+          payrollid={payrollId}
+          type="Employees"
+          bulkUploadUrl="/payroll/employees/upload/"
+          xlsxTemplateUrl={`/payroll/download-template/${payrollId}/`}
+          // csvTemplateUrl="/payroll/download-template/csv?type=employee"
+        />
+        <Grid2 container spacing={2}>
+          <TableContainer
+            component={Paper}
+            sx={{
+              width: '100%',
+              borderRadius: 2,
+              boxShadow: 1,
+              overflowX: 'auto'
+            }}
+          >
+            <Table size="small">
+              <TableHead sx={{ backgroundColor: 'primary.main' }}>
+                <TableRow>
+                  {['S No', 'Employee ID', 'Name', 'Department', 'Designation', 'Email', 'Actions'].map((header, idx) => (
+                    <TableCell
+                      key={idx}
+                      align={['S No', 'Actions'].includes(header) ? 'center' : 'left'}
+                      sx={{ fontWeight: 'bold', whiteSpace: 'nowrap', color: '#fff !important' }}
+                    >
+                      {header}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {paginatedEmployees.length === 0 ? (
                   <TableRow>
-                    {['S.No', 'Employee ID', 'Employee Name', 'Department', 'Designation', 'Email', 'Status', 'Actions'].map(
-                      (header, idx) => (
-                        <TableCell
-                          key={idx}
-                          sx={{ whiteSpace: 'nowrap', fontWeight: 'bold', textAlign: 'center', color: '#fff !important' }}
-                        >
-                          {header}
-                        </TableCell>
-                      )
-                    )}
+                    <TableCell colSpan={7} align="center" sx={{ height: 300 }}>
+                      <EmptyDataPlaceholder title="No Data Found" subtitle="Start by adding new data." />
+                    </TableCell>
                   </TableRow>
-                </TableHead>
-                <TableBody>
-                  {paginatedEmployees.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={7} align="center" sx={{ height: 300 }}>
-                        <EmptyDataPlaceholder title="No Data Found" subtitle="Start Adding data." />
+                ) : (
+                  paginatedEmployees.map((employee, index) => (
+                    <TableRow key={employee.id} hover sx={{ minHeight: 56, '&:hover': { bgcolor: 'action.hover' } }}>
+                      <TableCell align="center">{(currentPage - 1) * rowsPerPage + index + 1}</TableCell>
+                      <TableCell>{employee.associate_id || 'N/A'}</TableCell>
+                      <TableCell>{`${employee.first_name || ''} ${employee.last_name || ''}`.trim() || 'N/A'}</TableCell>
+                      <TableCell>{employee.department_name || 'N/A'}</TableCell>
+                      <TableCell>{employee.designation_name || 'N/A'}</TableCell>
+                      <TableCell>{employee.work_email || 'N/A'}</TableCell>
+                      <TableCell align="center">
+                        <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
+                          <IconButton size="small" color="primary" onClick={() => handleEdit(employee)}>
+                            <Edit />
+                          </IconButton>
+                          <IconButton size="small" color="error" onClick={() => handleOpenDeleteDialog(employee)}>
+                            <Delete />
+                          </IconButton>
+                        </Box>
                       </TableCell>
                     </TableRow>
-                  ) : (
-                    paginatedEmployees.map((employee, index) => (
-                      <TableRow key={employee.id} hover sx={{ '&:nth-of-type(odd)': { backgroundColor: 'grey.50' } }}>
-                        <TableCell align="center">{(currentPage - 1) * rowsPerPage + index + 1}</TableCell>
-                        <TableCell align="center">{employee.associate_id}</TableCell>
-                        <TableCell align="center">{`${employee.first_name || ''} ${employee.last_name || ''}`}</TableCell>
-                        <TableCell align="center">{employee.department_name || '-'}</TableCell>
-                        <TableCell align="center">{employee.designation_name || '-'}</TableCell>
-                        <TableCell align="center">{employee.work_email || '-'}</TableCell>
-                        <TableCell align="center">{employee.employee_status ? 'Active' : 'Inactive'}</TableCell>
-                        <TableCell align="center">
-                          <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
-                            <IconButton size="small" color="primary" onClick={() => handleEdit(employee)}>
-                              <Edit />
-                            </IconButton>
-                            <IconButton size="small" color="error" onClick={() => handleOpenDeleteDialog(employee)}>
-                              <Delete />
-                            </IconButton>
-                          </Box>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-              <DeleteDialog
-                open={openDeleteDialog}
-                onClose={() => setOpenDeleteDialog(false)}
-                onConfirm={handleConfirmDelete}
-                dialogData={{
-                  title: 'Delete Record',
-                  heading: 'Are you sure you want to delete this Record?',
-                  description: 'This action will permanently delete the record.'
-                }}
-              />
-            </TableContainer>
-
-            <Grid2 size={{ xs: 12 }}>
-              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mt: 2, width: '100%' }}>
-                <Button size="small" variant="outlined" startIcon={<ArrowBackIcon />} onClick={handleBack}>
-                  Back
-                </Button>
-                {employees.length > 0 && (
-                  <Pagination
-                    count={Math.ceil(employees.length / rowsPerPage)}
-                    page={currentPage}
-                    onChange={(e, value) => setCurrentPage(value)}
-                    color="primary"
-                  />
+                  ))
                 )}
+              </TableBody>
+            </Table>
+            <DeleteDialog
+              open={openDeleteDialog}
+              onClose={() => setOpenDeleteDialog(false)}
+              onConfirm={handleConfirmDelete}
+              dialogData={{
+                title: 'Delete Record',
+                heading: 'Are you sure you want to delete this Record?',
+                description: 'This action will permanently delete the record.'
+              }}
+            />
+          </TableContainer>
 
-                <Button size="small" variant="contained" onClick={handleNext}>
-                  Next
-                </Button>
-              </Stack>
-            </Grid2>
+          <Grid2 size={{ xs: 12 }}>
+            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mt: 2, width: '100%' }}>
+              <Button size="small" variant="outlined" startIcon={<ArrowBackIcon />} onClick={handleBack}>
+                Back
+              </Button>
+              {filteredEmployees.length > 0 && (
+                <Pagination
+                  count={Math.ceil(filteredEmployees.length / rowsPerPage)}
+                  page={currentPage}
+                  onChange={handlePageChange}
+                  shape="rounded"
+                  color="primary"
+                />
+              )}
+              <Button size="small" variant="contained" onClick={handleNext}>
+                Next
+              </Button>
+            </Stack>
           </Grid2>
-        </MainCard>
-      )}
+        </Grid2>
+      </Box>
     </>
   );
 }
 
 export default function EmployeeMasterDataIndex(props) {
-  const [searchParams] = useSearchParams();
-  const action = searchParams.get('action');
-  const employeeId = searchParams.get('employee_id');
-  if (action === 'add' || employeeId) {
-    return <AddEmployee />;
-  }
   return <EmployeeList {...props} />;
 }

@@ -3,14 +3,15 @@ import { Button, Box, Stack, Typography } from '@mui/material';
 import Grid2 from '@mui/material/Grid2';
 import Modal from 'ui-component/extended/Modal';
 import CustomAutocomplete from 'utils/CustomAutocomplete';
+
 export default function FilterDialog({
   open,
   financialYear,
   setFinancialYear,
   workLocations,
-  selectedWorkLoacation,
+  selectedWorkLocation,
   setFilterDialog,
-  setSelectedWorkLoacation,
+  setSelectedWorkLocation,
   fetch_by_filter
 }) {
   return (
@@ -53,19 +54,21 @@ export default function FilterDialog({
             <CustomAutocomplete
               options={['2021-22', '2022-23', '2023-24', '2024-25', '2025-26']}
               value={financialYear}
-              onChange={(e, val) => setFinancialYear(val)}
+              onChange={(e, val) => {
+                setFinancialYear(val);
+              }}
               sx={{ minWidth: 200, maxWidth: 200 }}
             />
           </Box>
           <Box>
             <Typography sx={{ mb: 1 }}>Select Location</Typography>
             <CustomAutocomplete
-              value={selectedWorkLoacation} // Find the full object based on location_name
+              value={selectedWorkLocation}
               onChange={(e, newvalue) => {
-                setSelectedWorkLoacation(newvalue.location_name);
+                setSelectedWorkLocation(newvalue?.location_name || '');
               }}
               options={workLocations || []}
-              getOptionLabel={(option) => option?.location_name || ''} // Safely access location_name
+              getOptionLabel={(option) => option?.location_name || ''}
               sx={{ minWidth: 200, maxWidth: 200 }}
               size="small"
             />

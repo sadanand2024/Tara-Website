@@ -56,6 +56,10 @@ const yearlyStatsData = [
   }
 ];
 const YearlyStats = ({ theme, title, setTitle, financialYear, setFinancialYear, dashboardData, getInvoices, getStatsData, businessId }) => {
+  const formatNumberIN = (value) => {
+    if (value === null || value === undefined || value === '' || isNaN(Number(value))) return 'NA';
+    return Number(value).toLocaleString('en-IN');
+  };
   return (
     <MainCard content={false} sx={{ pb: 2.5 }}>
       <Grid2 container spacing={3}>
@@ -121,7 +125,7 @@ const YearlyStats = ({ theme, title, setTitle, financialYear, setFinancialYear, 
                     <Typography variant="h4" color="text.secondary">
                       {item.title}
                     </Typography>
-                    <Typography variant="h3">₹&nbsp;{dashboardData[item.id] || 0}</Typography>
+                    <Typography variant="h3">₹&nbsp;{formatNumberIN(dashboardData[item.id] || 0)}</Typography>
                   </Stack>
                 </SubCard>
               </Grid2>

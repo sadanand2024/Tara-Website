@@ -94,6 +94,7 @@ export default function RenderSalaryTemplateTable({
   const payrollId = searchParams.get('payrollid');
   const template_id = searchParams.get('template_id');
   const [earningsData, setEarningsData] = useState([]);
+  const [deductionsData, setDeductionsData] = useState([]);
   const [fixedAllowance, setFixedAllowance] = useState({ monthly: 0, annually: 0 });
   const [loading, setLoading] = useState(false);
   const [viewPreview, setViewPreview] = useState(false);
@@ -159,6 +160,26 @@ export default function RenderSalaryTemplateTable({
     }
   };
 
+  const getDeductions_Details = async (id) => {
+    setLoading(true);
+    const url = `/payroll/deductions/?payroll_id=${id}`;
+    const { res, error } = await Factory('get', url, {});
+    setLoading(false);
+    if (res?.status_cd === 0) {
+      setDeductionsData(res.data);
+    } else {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: JSON.stringify(res.data.data),
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
+    }
+  };
+
   const handleComponentChange = async (newValue, index) => {
     if (!newValue) return;
 
@@ -193,6 +214,45 @@ export default function RenderSalaryTemplateTable({
     const cleaned = updated.filter((e, i) => e.component_name || i === index);
 
     setFieldValue('earnings', cleaned);
+    // Update input value for the selected component
+    setInputValues((prev) => ({
+      ...prev,
+      [index]: formatNumberForInput(selectedItem.calculation_type?.value || 0)
+    }));
+    setEnablePreviewButton(true);
+  };
+
+  const handleDeductionComponentChange = async (newValue, index) => {
+    if (!newValue) return;
+
+    const selected = deductionsData.find((item) => item.deduction_name === newValue);
+    if (!selected) return;
+
+    console.log('Selected deduction:', selected);
+    const updated = [...(values.deductions || [])];
+    const monthlyValue = Number(selected.calculation_type?.value || 0);
+    const annualValue = monthlyValue * 12;
+
+    updated[index] = {
+      ...updated[index],
+      component_name: selected.deduction_name,
+      calculation_type: selected.calculation_type?.type || '',
+      calculation: monthlyValue,
+      monthly: monthlyValue,
+      annually: annualValue
+    };
+
+    console.log('Updated deduction at index', index, ':', updated[index]);
+    setFieldValue('deductions', updated);
+
+    // Set input value to show monthly amount for editable deductions
+    if (index >= 4) {
+      setDeductionInputValues((prev) => ({
+        ...prev,
+        [index]: formatNumberForInput(monthlyValue)
+      }));
+    }
+
     setEnablePreviewButton(true);
   };
 
@@ -240,6 +300,24 @@ export default function RenderSalaryTemplateTable({
     setEnablePreviewButton(true);
   };
 
+  const handleDeductionCalculationChange = (value, index) => {
+    if (index < 4) return; // Only allow changes for index 4 and beyond
+
+    const monthlyValue = parseFloat(value || 0);
+    const annualValue = monthlyValue * 12;
+
+    const updated = [...(values.deductions || [])];
+    updated[index] = {
+      ...updated[index],
+      calculation: monthlyValue,
+      monthly: monthlyValue,
+      annually: annualValue
+    };
+
+    setFieldValue('deductions', updated);
+    setEnablePreviewButton(true);
+  };
+
   const handleAddEarning = () => {
     const newComponent = {
       component_name: '',
@@ -251,7 +329,26 @@ export default function RenderSalaryTemplateTable({
     const updated = [...values.earnings, newComponent];
     setFieldValue('earnings', updated);
 
+    // Initialize input value for the new component
+    const newIndex = updated.length - 1;
+    setInputValues((prev) => ({ ...prev, [newIndex]: '' }));
+
     setFieldValue('errorMessage', ''); // ✅ clear previous error
+    setEnablePreviewButton(true);
+  };
+
+  const handleAddDeduction = () => {
+    console.log('Current deductions:', values.deductions);
+    const newComponent = {
+      component_name: '',
+      calculation_type: '',
+      calculation: 0,
+      monthly: 0,
+      annually: 0
+    };
+    const updated = [...(values.deductions || []), newComponent];
+    console.log('Updated deductions:', updated);
+    setFieldValue('deductions', updated);
     setEnablePreviewButton(true);
   };
 
@@ -259,9 +356,30 @@ export default function RenderSalaryTemplateTable({
     const updated = values.earnings.filter((_, i) => i !== index);
     setFieldValue('earnings', updated);
 
+    // Clean up input values for deleted component
+    setInputValues((prev) => {
+      const newInputValues = {};
+      Object.keys(prev).forEach((key) => {
+        const keyIndex = parseInt(key);
+        if (keyIndex < index) {
+          newInputValues[keyIndex] = prev[keyIndex];
+        } else if (keyIndex > index) {
+          newInputValues[keyIndex - 1] = prev[keyIndex];
+        }
+      });
+      return newInputValues;
+    });
+
     setFieldValue('errorMessage', ''); // ✅ clear previous error
     setEnablePreviewButton(true);
   };
+
+  const handleDeleteDeduction = (index) => {
+    const updated = (values.deductions || []).filter((_, i) => i !== index);
+    setFieldValue('deductions', updated);
+    setEnablePreviewButton(true);
+  };
+
   const fetch_preview = async () => {
     const annualCtc = parseFloat(values.annual_ctc || 0);
 
@@ -287,7 +405,7 @@ export default function RenderSalaryTemplateTable({
     });
 
     const fa = calculateFixedAllowance(annualCtc, updatedEarnings, values.benefits);
-    if (fa.annually <= 0) {
+    if (fa.annually < 0) {
       const error = 'The system calculated Fixed Allowance cannot be less than zero. Check and enter valid salary details.';
       setFieldValue('errorMessage', error);
 
@@ -316,7 +434,8 @@ export default function RenderSalaryTemplateTable({
           monthly: fa.monthly,
           annually: fa.annually
         }
-      ]
+      ],
+      deductions: values.deductions || []
     };
 
     const { res } = await Factory('post', '/payroll/calculate-payroll', finalPayload);
@@ -349,7 +468,6 @@ export default function RenderSalaryTemplateTable({
     const url = `/payroll/earnings?payroll_id=${payrollId}`;
     const { res } = await Factory('get', url, {});
     if (res?.status_cd !== 0) return;
-    console.log(res.data);
     const basicComponent = res.data.find((item) => item.component_name === 'Basic');
     if (!basicComponent) return;
 
@@ -439,6 +557,14 @@ export default function RenderSalaryTemplateTable({
     if (!payrollId) return;
     // Always fetch earnings dropdown
     getEarnings_Details(payrollId);
+    // Always fetch deductions dropdown
+    getDeductions_Details(payrollId);
+
+    // Initialize deductions array if it doesn't exist
+    if (!values.deductions) {
+      setFieldValue('deductions', []);
+    }
+
     const timeout = setTimeout(() => {
       const hasCreatedEmployeeId = !!createdEmployeeId;
       const hasValuesId = !!values?.id;
@@ -460,6 +586,55 @@ export default function RenderSalaryTemplateTable({
       setViewPreview(true);
     }
   }, [values.benefits, values.deductions]);
+
+  // Initialize input values when earnings change
+  useEffect(() => {
+    const newInputValues = {};
+    values.earnings.forEach((earning, index) => {
+      if (earning.calculation !== undefined && earning.calculation !== null) {
+        newInputValues[index] = formatNumberForInput(earning.calculation);
+      }
+    });
+    setInputValues(newInputValues);
+  }, [values.earnings]);
+
+  // Initialize input values when deductions change
+  useEffect(() => {
+    const newDeductionInputValues = {};
+    (values.deductions || []).forEach((deduction, index) => {
+      if (deduction.calculation !== undefined && deduction.calculation !== null) {
+        // For editable deductions (index >= 4), show monthly amount
+        // For non-editable deductions (index < 4), show calculation value
+        const displayValue = index >= 4 ? deduction.monthly : deduction.calculation;
+        newDeductionInputValues[index] = formatNumberForInput(displayValue);
+      }
+    });
+    setDeductionInputValues(newDeductionInputValues);
+  }, [values.deductions]);
+
+  // Utility function to format numbers with Indian comma separators
+  const formatNumberIN = (value) => {
+    if (value === '' || value === null || value === undefined || isNaN(value)) return '';
+    return Number(value).toLocaleString('en-IN', { maximumFractionDigits: 2, minimumFractionDigits: 2 });
+  };
+
+  // Utility function to format numbers for input display (with commas)
+  const formatNumberForInput = (value) => {
+    if (value === '' || value === null || value === undefined || isNaN(value)) return '';
+    return Number(value).toLocaleString('en-IN');
+  };
+
+  // Utility function to parse comma-separated numbers for calculations
+  const parseCommaNumber = (value) => {
+    if (value === '' || value === null || value === undefined) return '';
+    // Remove all commas and convert to number
+    const cleanValue = String(value).replace(/,/g, '');
+    return isNaN(cleanValue) ? '' : cleanValue;
+  };
+
+  // State to track input values separately from calculation values
+  const [inputValues, setInputValues] = useState({});
+  const [deductionInputValues, setDeductionInputValues] = useState({});
   return (
     <TableContainer
       component={Paper}
@@ -467,17 +642,35 @@ export default function RenderSalaryTemplateTable({
         width: '100%',
         borderRadius: 2,
         boxShadow: 1,
-        overflowX: 'auto'
+        overflowX: 'auto',
+        maxWidth: '100%'
       }}
     >
-      <Table>
-        <TableHead>
-          <TableRow sx={{ bgcolor: 'grey.100' }}>
-            <TableCell>Component</TableCell>
-            <TableCell>Calculation</TableCell>
-            <TableCell>Monthly</TableCell>
-            <TableCell>Annually</TableCell>
-            <TableCell>Action</TableCell>
+      <Table size="small" sx={{ tableLayout: 'fixed', width: '100%' }}>
+        <TableHead
+          sx={{
+            backgroundColor: 'primary.main',
+            '& .MuiTableCell-root': {
+              color: '#ffffff !important'
+            }
+          }}
+        >
+          <TableRow>
+            <TableCell sx={{ width: '25%' }} align="left">
+              Component
+            </TableCell>
+            <TableCell sx={{ width: '35%' }} align="left">
+              Calculation
+            </TableCell>
+            <TableCell sx={{ width: '10%' }} align="left">
+              Monthly
+            </TableCell>
+            <TableCell sx={{ width: '10%' }} align="left">
+              Annually
+            </TableCell>
+            <TableCell sx={{ width: '10%' }} align="left">
+              Action
+            </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -508,23 +701,30 @@ export default function RenderSalaryTemplateTable({
                 <TableCell>
                   <Stack direction="row" alignItems="center" spacing={2}>
                     <CustomInput
-                      value={earning.calculation}
+                      value={inputValues[index] !== undefined ? inputValues[index] : formatNumberForInput(earning.calculation)}
                       onChange={(e) => {
                         const val = e.target.value;
-                        const updated = [...values.earnings];
-                        updated[index].calculation = val;
-                        setFieldValue('earnings', updated);
-                        setEnablePreviewButton(true);
+                        // Allow only numbers, commas, and decimal points
+                        const cleanVal = val.replace(/[^\d,.]/g, '');
+                        setInputValues((prev) => ({ ...prev, [index]: cleanVal }));
                       }}
-                      onBlur={() => handleCalculationChange(earning.calculation, index)}
+                      onBlur={() => {
+                        const parsedValue = parseCommaNumber(inputValues[index] || earning.calculation);
+                        const updated = [...values.earnings];
+                        updated[index].calculation = parsedValue;
+                        setFieldValue('earnings', updated);
+                        setInputValues((prev) => ({ ...prev, [index]: formatNumberForInput(parsedValue) }));
+                        handleCalculationChange(parsedValue, index);
+                      }}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
                           e.preventDefault();
-                          handleCalculationChange(earning.calculation, index);
+                          const parsedValue = parseCommaNumber(inputValues[index] || earning.calculation);
+                          handleCalculationChange(parsedValue, index);
                         }
                       }}
                       type="text"
-                      sx={{ width: 250 }}
+                      sx={{ width: '100%', maxWidth: 200 }}
                     />
                     <Typography
                       variant="body2"
@@ -543,8 +743,8 @@ export default function RenderSalaryTemplateTable({
                     </Typography>
                   </Stack>
                 </TableCell>
-                <TableCell>{earning.monthly.toFixed(2)}</TableCell>
-                <TableCell>{earning.annually.toFixed(2)}</TableCell>
+                <TableCell> {formatNumberIN(earning.monthly.toFixed(2))}</TableCell>
+                <TableCell>{formatNumberIN(earning.annually.toFixed(2))}</TableCell>
                 <TableCell>
                   {index !== 0 && (
                     <Button color="error" onClick={() => handleDeleteEarning(index)}>
@@ -561,19 +761,22 @@ export default function RenderSalaryTemplateTable({
           </TableRow>
           <TableRow>
             <TableCell>
-              <Typography variant="h5" sx={{ whiteSpace: 'nowrap' }}>
-                Fixed Allowance (Monthly CTC - Sum of all other components - Bddddenefits)
-              </Typography>
+              <Stack direction="row" alignItems="center" spacing={1}>
+                <Typography variant="h5">Fixed Allowance</Typography>
+                <Tooltip title="Monthly CTC - Sum of all other components - Benefits" placement="top" arrow>
+                  <InfoOutlinedIcon sx={{ fontSize: 18, color: 'gray', cursor: 'pointer' }} />
+                </Tooltip>
+              </Stack>
             </TableCell>
             <TableCell>Remaining Balance</TableCell>
             <TableCell>
               <Typography sx={{ color: fixedAllowance.monthly < 0 ? 'error.main' : 'inherit' }}>
-                {fixedAllowance.monthly.toFixed(2)}
+                {formatNumberIN(fixedAllowance.monthly.toFixed(2))}
               </Typography>
             </TableCell>
             <TableCell>
               <Typography sx={{ color: fixedAllowance.annually < 0 ? 'error.main' : 'inherit' }}>
-                {fixedAllowance.annually.toFixed(2)}
+                {formatNumberIN(fixedAllowance.annually.toFixed(2))}
               </Typography>
             </TableCell>
           </TableRow>
@@ -605,12 +808,12 @@ export default function RenderSalaryTemplateTable({
             <TableCell sx={{ padding: 2 }}></TableCell>
             <TableCell>
               <Typography variant="h5">
-                {typeof values.gross_salary?.monthly === 'number' ? values.gross_salary.monthly.toFixed(2) : '-'}
+                {typeof values.gross_salary?.monthly === 'number' ? formatNumberIN(values.gross_salary.monthly.toFixed(2)) : '-'}
               </Typography>
             </TableCell>
             <TableCell>
               <Typography variant="h5">
-                {typeof values.gross_salary?.annually === 'number' ? values.gross_salary.annually.toFixed(2) : '-'}
+                {typeof values.gross_salary?.annually === 'number' ? formatNumberIN(values.gross_salary.annually.toFixed(2)) : '-'}
               </Typography>
             </TableCell>
             <TableCell></TableCell>
@@ -628,8 +831,8 @@ export default function RenderSalaryTemplateTable({
                 <TableRow key={`benefit-${index}`}>
                   <TableCell>{item.component_name}</TableCell>
                   <TableCell>{item.calculation_type}</TableCell>
-                  <TableCell>{item.monthly === 'NA' ? 'NA' : Number(item.monthly || 0).toFixed(2)}</TableCell>
-                  <TableCell>{item.annually === 'NA' ? 'NA' : Number(item.annually || 0).toFixed(2)}</TableCell>
+                  <TableCell>{item.monthly === 'NA' ? 'NA' : formatNumberIN(Number(item.monthly || 0).toFixed(2))}</TableCell>
+                  <TableCell>{item.annually === 'NA' ? 'NA' : formatNumberIN(Number(item.annually || 0).toFixed(2))}</TableCell>
                   <TableCell></TableCell>
                 </TableRow>
               ))}
@@ -640,10 +843,10 @@ export default function RenderSalaryTemplateTable({
                 </TableCell>
                 <TableCell></TableCell>
                 <TableCell>
-                  <Typography variant="h5">{Number(values.total_ctc?.monthly || 0).toFixed(2)}</Typography>
+                  <Typography variant="h5">{formatNumberIN(Number(values.total_ctc?.monthly || 0).toFixed(2))}</Typography>
                 </TableCell>
                 <TableCell>
-                  <Typography variant="h5">{Number(values.total_ctc?.annually || 0).toFixed(2)}</Typography>
+                  <Typography variant="h5">{formatNumberIN(Number(values.total_ctc?.annually || 0).toFixed(2))}</Typography>
                 </TableCell>
                 <TableCell></TableCell>
               </TableRow>
@@ -654,15 +857,79 @@ export default function RenderSalaryTemplateTable({
                   </Typography>
                 </TableCell>
               </TableRow>
-              {values?.deductions.map((item, index) => (
+              {(values?.deductions || []).map((item, index) => (
                 <TableRow key={`deduction-${index}`}>
-                  <TableCell>{item.component_name}</TableCell>
-                  <TableCell>{item.calculation_type}</TableCell>
-                  <TableCell>{item.monthly === 'NA' ? 'NA' : Number(item.monthly || 0).toFixed(2)}</TableCell>
-                  <TableCell>{item.annually === 'NA' ? 'NA' : Number(item.annually || 0).toFixed(2)}</TableCell>
-                  <TableCell></TableCell>
+                  <TableCell>
+                    <CustomAutocomplete
+                      options={deductionsData
+                        .map((item) => item.deduction_name)
+                        .filter((name) => !(values.deductions || []).some((d) => d.component_name === name && d !== item))}
+                      value={item.component_name}
+                      onChange={(e, value) => handleDeductionComponentChange(value, index)}
+                      getOptionKey={(option) => option}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Stack direction="row" alignItems="center" spacing={2}>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          whiteSpace: 'nowrap',
+                          fontWeight: 500,
+                          color: 'grey.700',
+                          minWidth: '130px'
+                        }}
+                      >
+                        {item.calculation_type}
+                      </Typography>
+                    </Stack>
+                  </TableCell>
+                  <TableCell>
+                    {index >= 4 ? (
+                      <CustomInput
+                        value={deductionInputValues[index] !== undefined ? deductionInputValues[index] : formatNumberForInput(item.monthly)}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          // Allow only numbers, commas, and decimal points
+                          const cleanVal = val.replace(/[^\d,.]/g, '');
+                          setDeductionInputValues((prev) => ({ ...prev, [index]: cleanVal }));
+                        }}
+                        onBlur={() => {
+                          const parsedValue = parseCommaNumber(deductionInputValues[index] || item.monthly);
+                          handleDeductionCalculationChange(parsedValue, index);
+                          setDeductionInputValues((prev) => ({ ...prev, [index]: formatNumberForInput(parsedValue) }));
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            const parsedValue = parseCommaNumber(deductionInputValues[index] || item.monthly);
+                            handleDeductionCalculationChange(parsedValue, index);
+                            setDeductionInputValues((prev) => ({ ...prev, [index]: formatNumberForInput(parsedValue) }));
+                          }
+                        }}
+                        type="text"
+                        sx={{ width: '100%', maxWidth: 200 }}
+                      />
+                    ) : (
+                      formatNumberIN(Number(item.monthly || 0).toFixed(2))
+                    )}
+                  </TableCell>
+                  <TableCell>{formatNumberIN(Number(item.annually || 0).toFixed(2))}</TableCell>
+                  <TableCell>
+                    {index >= 4 && (
+                      <Button color="error" onClick={() => handleDeleteDeduction(index)}>
+                        <IconTrash size={16} />
+                      </Button>
+                    )}
+                  </TableCell>
                 </TableRow>
               ))}
+
+              <TableRow>
+                <TableCell colSpan={5}>
+                  <Button onClick={handleAddDeduction}>Add Deduction Component</Button>
+                </TableCell>
+              </TableRow>
 
               <TableRow sx={{ backgroundColor: '#f6f2fc', margin: '20px' }}>
                 <TableCell>
@@ -670,10 +937,10 @@ export default function RenderSalaryTemplateTable({
                 </TableCell>
                 <TableCell></TableCell>
                 <TableCell>
-                  <Typography variant="h5">{Number(values.net_salary?.monthly || 0).toFixed(2)}</Typography>
+                  <Typography variant="h5">{formatNumberIN(Number(values.net_salary?.monthly || 0).toFixed(2))}</Typography>
                 </TableCell>
                 <TableCell>
-                  <Typography variant="h5">{Number(values.net_salary?.annually || 0).toFixed(2)}</Typography>
+                  <Typography variant="h5">{formatNumberIN(Number(values.net_salary?.annually || 0).toFixed(2))}</Typography>
                 </TableCell>
                 <TableCell></TableCell>
               </TableRow>

@@ -1,17 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Typography, TextField, Grid2, Autocomplete, Button, Stack, Radio, FormGroup, FormControlLabel, Card } from '@mui/material';
-import * as Yup from 'yup';
+import { Autocomplete, Box, Button, Card, Grid2, Stack, TextField, Typography } from '@mui/material';
 import { useFormik } from 'formik';
-import Factory from 'utils/Factory';
+import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { openSnackbar } from 'store/slices/snackbar';
-import { indian_States_And_UTs } from 'utils/indian_States_And_UT';
 import { useSearchParams } from 'react-router-dom';
+import { openSnackbar } from 'store/slices/snackbar';
 import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
-import RaiseRequest from '../../RaiseRequest';
-import GetActionButtons from '../../FormHelpers';
-import AdditionalPlaceOfBusiness from './AdditionalPlaceOfBusiness';
 import CircularProgressComponent from 'utils/CircularProgressComponent';
+import Factory from 'utils/Factory';
+import { indian_States_And_UTs } from 'utils/indian_States_And_UT';
+import * as Yup from 'yup';
+import RaiseRequest from '../../RaiseRequest';
+import AdditionalPlaceOfBusiness from './AdditionalPlaceOfBusiness';
 
 const BusinessPremisesSection = ({ taskId }) => {
   const [searchParams] = useSearchParams();
@@ -115,7 +114,7 @@ const BusinessPremisesSection = ({ taskId }) => {
       required: true
     },
     {
-      label: 'Trade Area',
+      label: 'Trade Area(In Sft)',
       name: 'trade_area',
       type: 'text',
       required: true
@@ -282,7 +281,7 @@ const BusinessPremisesSection = ({ taskId }) => {
   const getLabelWithAsterisk = (label, isRequired) => (
   <span>
     {label}
-    {isRequired && <span style={{ color: 'red', fontSize: '1.3rem' }}> *</span>}
+    {isRequired && <span style={{ color: 'red' }}> *</span>}
   </span>
 );
   const renderField = (field, formikContext) => {

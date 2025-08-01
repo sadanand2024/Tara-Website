@@ -42,25 +42,25 @@ export default function BusinessProfileComponnet({ businessDetails = {}, postTyp
   const [fileInputRef, setFileInputRef] = useState(null);
   const [busineesprofileFields] = useState({
     basic_details: [
-      { name: 'nameOfBusiness', label: 'Business Name' },
-      { name: 'registrationNumber', label: 'Business Registration Number' },
-      { name: 'logo', label: 'Logo' },
-      { name: 'gst_registered', label: 'GST Registered ?' },
-      { name: 'gstin', label: 'GSTIN' },
-      { name: 'pan', label: 'PAN' },
-      { name: 'entityType', label: 'Business Type' },
-      { name: 'address_line1', label: 'Address Line 1' },
-      { name: 'address_line2', label: 'Address Line 2' },
-      { name: 'country', label: 'Country' },
-      { name: 'state', label: 'State/Union Territory' },
-      { name: 'pincode', label: 'Pincode' },
-      { name: 'email', label: 'Email' },
-      { name: 'mobile_number', label: 'Mobile' }
+      { name: 'nameOfBusiness', label: 'Business Name', required: true },
+      { name: 'registrationNumber', label: 'Business Registration Number', required: false },
+      { name: 'logo', label: 'Logo', required: true },
+      { name: 'gst_registered', label: 'GST Registered ?', required: true },
+      { name: 'gstin', label: 'GSTIN', required: true },
+      { name: 'pan', label: 'PAN', required: true },
+      { name: 'entityType', label: 'Business Type', required: true },
+      { name: 'address_line1', label: 'Address Line 1', required: true },
+      { name: 'address_line2', label: 'Address Line 2', required: false },
+      { name: 'country', label: 'Country', required: true },
+      { name: 'state', label: 'State/Union Territory', required: true },
+      { name: 'pincode', label: 'Pincode', required: true },
+      { name: 'email', label: 'Email', required: true },
+      { name: 'mobile_number', label: 'Mobile', required: true }
     ],
     bank_details: [
-      { name: 'account_number', label: 'Bank A/C No' },
-      { name: 'bank_name', label: 'Bank Name' },
-      { name: 'ifsc_code', label: 'IFSC Code' },
+      { name: 'account_number', label: 'Bank A/C No', required: true },
+      { name: 'bank_name', label: 'Bank Name', required: true },
+      { name: 'ifsc_code', label: 'IFSC Code', required: true },
       { name: 'swift_code', label: 'Swift Code' }
     ]
   });
@@ -68,41 +68,45 @@ export default function BusinessProfileComponnet({ businessDetails = {}, postTyp
   const validationSchema = Yup.object({
     nameOfBusiness: Yup.string().required('Business Name is required'),
     entityType: Yup.string().required('Business Type is required'),
-    gst_registered: Yup.string().required('GST Registration status is required'),
+    gst_registered: Yup.boolean().required('GST Registration status is required'),
     gstin: Yup.string().when('gst_registered', {
       is: true,
-      then: () => Yup.string().required('GSTIN is required'),
-      otherwise: () => Yup.string().oneOf(['NA'], 'GSTIN must be "NA" when GST Registered is "No"') // Ensure "NA" for "No"
+      then: () =>
+        Yup.string()
+          .required('GSTIN is required when GST Registered is Yes')
+          .test('not-na', 'GSTIN cannot be "NA" when GST Registered is Yes', (value) => value !== 'NA'),
+      otherwise: () => Yup.string().oneOf(['NA'], 'GSTIN must be "NA" when GST Registered is No')
     }),
     country: Yup.string().required('Country is required'),
     state: Yup.string().required('State is required'),
     email: Yup.string().email('Invalid email format').required('Email is required'),
-    pincode: Yup.number()
-      .typeError('Pincode must be an integer')
+    pincode: Yup.string()
       .required('Pincode is required')
-      .integer('Pincode must be an integer')
-      .min(100000, 'Pincode must be at least 6 digits')
-      .max(999999, 'Pincode must be at most 6 digits'),
-    mobile_number: Yup.number()
-      .typeError('Mobile Number must be an integer')
+      .matches(/^\d{6}$/, 'Pincode must be exactly 6 digits')
+      .test('no-alphabets', 'Pincode cannot contain alphabets', (value) => {
+        return value ? /^\d+$/.test(value) : true;
+      }),
+    mobile_number: Yup.string()
       .required('Mobile Number is required')
-      .integer('Mobile Number must be an integer')
-      .min(1000000000, 'Mobile Number must be 10 digits')
-      .max(9999999999, 'Mobile Number must be 10 digits'),
+      .matches(/^\d{10}$/, 'Mobile Number must be exactly 10 digits')
+      .test('no-alphabets', 'Mobile Number cannot contain alphabets', (value) => {
+        return value ? /^\d+$/.test(value) : true;
+      }),
     address_line1: Yup.string().required('Address Line 1 is required'),
     pan: Yup.string()
       .matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN format')
       .required('PAN is required'),
-    bank_name: Yup.string().required('Bank Name is required'),
-    account_number: Yup.number()
-      .typeError('Account Number must be a number')
+    bank_name: Yup.string()
+      .required('Bank Name is required')
+      .test('no-numbers', 'Bank Name cannot contain numbers', (value) => {
+        return value ? /^[A-Za-z\s]+$/.test(value) : true;
+      }),
+    account_number: Yup.string()
       .required('Account Number is required')
-      .test(
-        'length',
-        'Account Number must be between 9 and 18 digits',
-        (value) => value && value.toString().length >= 9 && value.toString().length <= 18
-      ),
-
+      .matches(/^\d{9,18}$/, 'Account Number must be between 9 and 18 digits')
+      .test('no-alphabets', 'Account Number cannot contain alphabets', (value) => {
+        return value ? /^\d+$/.test(value) : true;
+      }),
     ifsc_code: Yup.string()
       .required('IFSC Code is required')
       .matches(/^[A-Za-z]{4}0\d{6}$/, 'IFSC Code must be 11 characters: first 4 letters, a 0, followed by 6 digits')
@@ -121,8 +125,8 @@ export default function BusinessProfileComponnet({ businessDetails = {}, postTyp
       nameOfBusiness: '',
       registrationNumber: '',
       entityType: '',
-      gst_registered: '',
-      gstin: '',
+      gst_registered: false,
+      gstin: 'NA',
       country: 'IN',
       state: '',
       email: '',
@@ -189,20 +193,14 @@ export default function BusinessProfileComponnet({ businessDetails = {}, postTyp
   const { values, setValues, errors, touched, handleSubmit, handleBlur, setFieldValue } = formik;
   useEffect(() => {
     if (businessDetails && businessDetails.id) {
+      const isGstRegistered = businessDetails.gst_registered === true;
       setValues((prev) => ({
         ...prev,
         nameOfBusiness: businessDetails.nameOfBusiness || '',
         registrationNumber: businessDetails.registrationNumber || '',
         entityType: businessDetails.entityType || '',
-        // gst_registered: Array.isArray(businessDetails?.gst_details) && businessDetails.gst_details.length > 0 ? 'Yes' : 'No',
-        gst_registered: businessDetails.gst_registered === true ? true : false,
-        // gstin:
-        //   businessDetails?.gst_details?.length !== 0 && businessDetails.gstin === 'NA'
-        //     ? ''
-        //     : businessDetails?.gst_details?.length === 0
-        //       ? 'NA'
-        //       : businessDetails.gstin,
-        gstin: businessDetails.gstin || 'NA',
+        gst_registered: isGstRegistered,
+        gstin: isGstRegistered ? businessDetails.gstin || '' : 'NA',
         state: businessDetails?.headOffice?.state || businessDetails?.state || '',
         email: businessDetails.email || '',
         pincode: businessDetails?.headOffice?.pincode || businessDetails?.pincode || '',
@@ -242,6 +240,20 @@ export default function BusinessProfileComponnet({ businessDetails = {}, postTyp
       </Box>
     );
   }
+  //   const getLabelWithAsterisk = (label, isRequired) => {
+  //   return (
+  //     <span>
+  //       {label}
+  //       {isRequired && <span style={{ color: 'red', fontSize: '1.3em' }}> *</span>}
+  //     </span>
+  //   );
+  // };
+  const getLabelWithAsterisk = (label, isRequired) => (
+    <span style={{ fontSize: '1rem', fontWeight: 500 }}>
+      {label}
+      {isRequired && <span style={{ color: 'red' }}> *</span>}
+    </span>
+  );
   const handleLogoChange = async (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -278,7 +290,7 @@ export default function BusinessProfileComponnet({ businessDetails = {}, postTyp
     }
   };
   return (
-    <MainCard title="Business Profile" subtitle="Manage your business profile for invoice generation and business operations">
+    <MainCard>
       <Grid2 container spacing={2}>
         {busineesprofileFields.basic_details.map((item, index) =>
           item.name === 'logo' ? (
@@ -324,7 +336,7 @@ export default function BusinessProfileComponnet({ businessDetails = {}, postTyp
               <FormControl fullWidth>
                 {item.name === 'gst_registered' ? (
                   <Stack spacing={1}>
-                    <FormLabel sx={{ fontWeight: 500 }}>GST Registered ?</FormLabel>
+                    <FormLabel sx={{ variant: 'subtitle1' }}>{getLabelWithAsterisk('GST Registered ?', true)}</FormLabel>
                     <RadioGroup
                       row
                       name="gst_registered"
@@ -339,6 +351,8 @@ export default function BusinessProfileComponnet({ businessDetails = {}, postTyp
                           formik.setFieldError('gstin', '');
                         } else {
                           setFieldValue('gstin', '');
+                          // Trigger validation for GSTIN when switching to Yes
+                          formik.setFieldTouched('gstin', true);
                         }
                       }}
                     >
@@ -354,15 +368,21 @@ export default function BusinessProfileComponnet({ businessDetails = {}, postTyp
                   </Stack>
                 ) : item.name === 'gstin' ? (
                   <>
-                    <Typography component="label" sx={{ mb: 1 }}>
-                      {item.label}
-                    </Typography>
+                    <Typography sx={{ mb: 1 }}>{getLabelWithAsterisk(item.label, values.gst_registered === true)}</Typography>
 
                     <Grid2 container spacing={1} alignItems="center">
                       <Grid2 size={{ xs: 8 }}>
                         <CustomAutocomplete
                           value={values[item.name] || ''}
-                          onChange={(e, newValue) => setFieldValue(item.name, newValue)}
+                          onChange={(e, newValue) => {
+                            setFieldValue(item.name, newValue);
+                            // Trigger immediate validation for GSTIN
+                            formik.setFieldTouched(item.name, true);
+                            // Clear error immediately if a value is selected
+                            if (newValue && newValue.trim() !== '') {
+                              formik.setFieldError(item.name, '');
+                            }
+                          }}
                           options={
                             Array.isArray(businessDetails.gst_details)
                               ? businessDetails.gst_details.map((gstItem) => gstItem.gstin) // Get gstin from gst_details
@@ -371,23 +391,31 @@ export default function BusinessProfileComponnet({ businessDetails = {}, postTyp
                           error={touched[item.name] && Boolean(errors[item.name])}
                           helperText={touched[item.name] && errors[item.name]}
                           name={item.name}
-                          disabled={values.gst_registered === false} // Disable gstin field if gst_registered is 'No'
+                          disabled={values.gst_registered === false} // Disable gstin field if gst_registered is false
                           disableClearable
                           customTextField={(params) => (
                             <TextField
                               {...params}
                               // label="Select GSTIN"
+                              error={touched[item.name] && Boolean(errors[item.name])}
+                              helperText={touched[item.name] && errors[item.name]}
                               inputProps={{
                                 ...params.inputProps,
                                 readOnly: true, // 🔑 Prevents typing
                                 style: { cursor: 'pointer' } // Optional: cursor looks clickable
+                              }}
+                              sx={{
+                                width: '100%',
+                                '& .MuiInputBase-input': {
+                                  color: 'grey.600'
+                                }
                               }}
                             />
                           )}
                         />
                       </Grid2>
 
-                      {values.gst_registered !== 'No' && (
+                      {values.gst_registered === true && (
                         <Grid2 size={{ xs: 4 }}>
                           <Button
                             variant="contained"
@@ -409,7 +437,8 @@ export default function BusinessProfileComponnet({ businessDetails = {}, postTyp
                   </>
                 ) : item.name === 'state' || item.name === 'entityType' ? (
                   <>
-                    <Typography sx={{ mb: 1 }}>{item.label}</Typography>
+                    {/* <Typography sx={{ mb: 1 }}>{item.label}</Typography> */}
+                    <Typography sx={{ mb: 1 }}>{getLabelWithAsterisk(item.label, item.required)}</Typography>
                     <CustomAutocomplete
                       value={values[item.name] || ''}
                       onChange={(e, newValue) => setFieldValue(item.name, newValue)}
@@ -423,12 +452,18 @@ export default function BusinessProfileComponnet({ businessDetails = {}, postTyp
                       error={touched[item.name] && Boolean(errors[item.name])}
                       helperText={touched[item.name] && errors[item.name]}
                       name={item.name}
+                      sx={{
+                        width: '100%',
+                        '& .MuiInputBase-input': {
+                          color: 'grey.600'
+                        }
+                      }}
                     />
                   </>
                 ) : (
                   <>
                     <Typography component="label" sx={{ mb: 1 }}>
-                      {item.name === 'nameOfBusiness' ? <span style={{ color: 'red' }}>*</span> : ''} {item.label}
+                      {getLabelWithAsterisk(item.label, item.required)}
                     </Typography>
 
                     <CustomInput
@@ -453,6 +488,18 @@ export default function BusinessProfileComponnet({ businessDetails = {}, postTyp
                             // Optionally handle the error or set the value to an empty string
                             setFieldValue(item.name, upperValue.substring(0, 10)); // Limit to 10 characters
                           }
+                        } else if (item.name === 'pincode') {
+                          // Only allow digits for pincode
+                          const numericValue = value.replace(/\D/g, '');
+                          if (numericValue.length <= 6) {
+                            setFieldValue(item.name, numericValue);
+                          }
+                        } else if (item.name === 'mobile_number') {
+                          // Only allow digits for mobile number
+                          const numericValue = value.replace(/\D/g, '');
+                          if (numericValue.length <= 10) {
+                            setFieldValue(item.name, numericValue);
+                          }
                         } else {
                           setFieldValue(item.name, value);
                         }
@@ -461,6 +508,12 @@ export default function BusinessProfileComponnet({ businessDetails = {}, postTyp
                       error={touched[item.name] && Boolean(errors[item.name])}
                       helperText={touched[item.name] && errors[item.name]}
                       disabled={item.name === 'country'}
+                      sx={{
+                        width: '100%',
+                        '& .MuiInputBase-input': {
+                          color: 'grey.600'
+                        }
+                      }}
                     />
                   </>
                 )}
@@ -478,22 +531,42 @@ export default function BusinessProfileComponnet({ businessDetails = {}, postTyp
         {busineesprofileFields.bank_details.map((item) => (
           <Grid2 size={{ xs: 12, sm: 6 }} key={item.name}>
             <FormControl fullWidth>
-              <Typography sx={{ mb: 1 }}>{item.label}</Typography>{' '}
+              {/* <Typography sx={{ mb: 1 }}>{item.label}</Typography>{' '} */}
+              <Typography component="label" sx={{ mb: 1 }}>
+                {getLabelWithAsterisk(item.label, item.required)}
+              </Typography>
               <TextField
                 name={item.name}
                 value={values[item.name]}
                 size="small"
                 onChange={(e) => {
-                  if (item.name === 'pan' || item.name === 'ifsc_code' || item.name === 'bank_name' || item.name === 'swift_code') {
-                    setFieldValue(item.name, e.target.value.toUpperCase());
+                  const value = e.target.value;
+                  if (item.name === 'pan' || item.name === 'ifsc_code' || item.name === 'swift_code') {
+                    setFieldValue(item.name, value.toUpperCase());
+                  } else if (item.name === 'bank_name') {
+                    // Only allow letters and spaces for bank name, convert to uppercase
+                    const letterOnlyValue = value.replace(/[^A-Za-z\s]/g, '');
+                    setFieldValue(item.name, letterOnlyValue.toUpperCase());
+                  } else if (item.name === 'account_number') {
+                    // Only allow digits for account number
+                    const numericValue = value.replace(/\D/g, '');
+                    if (numericValue.length <= 18) {
+                      setFieldValue(item.name, numericValue);
+                    }
                   } else {
-                    setFieldValue(item.name, e.target.value);
+                    setFieldValue(item.name, value);
                   }
                 }}
                 onBlur={handleBlur}
                 error={touched[item.name] && Boolean(errors[item.name])}
                 helperText={touched[item.name] && errors[item.name]}
                 required
+                sx={{
+                  width: '100%',
+                  '& .MuiInputBase-input': {
+                    color: 'grey.600'
+                  }
+                }}
               />
             </FormControl>
           </Grid2>
@@ -502,7 +575,7 @@ export default function BusinessProfileComponnet({ businessDetails = {}, postTyp
 
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mt: 4 }}>
         <Stack direction="row" spacing={2}>
-        <div className="INV-Step-3">
+          <div className="INV-Step-3">
             <Button variant="contained" onClick={handleSubmit}>
               Save & Continue
             </Button>

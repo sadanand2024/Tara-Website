@@ -34,6 +34,10 @@ export default function PayrollStatusSummary({ payrollId, financialYear, monthWi
       setFinancial_year_summary([]);
     }
   };
+  const formatNumberIN = (value) => {
+    if (value === null || value === undefined || value === '' || isNaN(Number(value))) return 'NA';
+    return Number(value).toLocaleString('en-IN');
+  };
 
   useEffect(() => {
     if (payrollId && financialYear) {
@@ -90,7 +94,7 @@ export default function PayrollStatusSummary({ payrollId, financialYear, monthWi
                         if (header === 'CTC') {
                           return (
                             <TableCell key={month} align="center">
-                              {data.ctc || 'NA'}
+                              {formatNumberIN(data.ctc) || 'NA'}
                             </TableCell>
                           );
                         } else if (header === 'Status') {
@@ -114,7 +118,7 @@ export default function PayrollStatusSummary({ payrollId, financialYear, monthWi
                                     onClick={() => {
                                       if (businessDetails?.payroll_id) {
                                         navigate(
-                                          `/payroll/employee-dashboard?payrollid=${businessDetails?.payroll_id}&month=${selectedMonth}&financialYear=${financialYear}&monthwisedata=${encodeURIComponent(JSON.stringify(monthWiseData))}&tabvalue=1`
+                                          `/app/payroll/employee-dashboard?payrollid=${businessDetails?.payroll_id}&month=${selectedMonth}&financialYear=${financialYear}&monthwisedata=${encodeURIComponent(JSON.stringify(monthWiseData))}&tabvalue=1`
                                         );
                                       }
                                     }}

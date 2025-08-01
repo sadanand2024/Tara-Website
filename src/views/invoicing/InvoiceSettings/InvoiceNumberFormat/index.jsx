@@ -372,7 +372,7 @@ const InvoiceNumberFormatComponent = ({ businessDetails, handleBack, handleNext 
   }
 
   return (
-    <MainCard title="Invoice Number Format" subtitle="Manage your invoice number format for invoice generation and business operations">
+    <MainCard>
       <FormControlLabel
         control={
           <Checkbox

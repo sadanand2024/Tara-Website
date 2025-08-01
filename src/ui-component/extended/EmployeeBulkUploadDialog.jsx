@@ -1,22 +1,73 @@
 import React, { useRef, useState } from 'react';
-import { Button, Box, Stack, Typography, Radio, RadioGroup, FormControlLabel, FormLabel, Paper, Link, LinearProgress } from '@mui/material';
+import {
+  Button,
+  Box,
+  Stack,
+  Typography,
+  Radio,
+  RadioGroup,
+  FormControlLabel,
+  FormLabel,
+  Paper,
+  Link,
+  LinearProgress,
+  Tabs,
+  Tab,
+  Alert,
+  Chip
+} from '@mui/material';
 import Modal from 'ui-component/extended/Modal';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
 import Factory from 'utils/Factory';
+
+// TabPanel component for MUI tabs
+function TabPanel(props) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`bulk-upload-tabpanel-${index}`}
+      aria-labelledby={`bulk-upload-tab-${index}`}
+      {...other}
+    >
+      {value === index && <Box sx={{ py: 2 }}>{children}</Box>}
+    </div>
+  );
+}
+
+// Accessibility props for tabs
+function a11yProps(index) {
+  return {
+    id: `bulk-upload-tab-${index}`,
+    'aria-controls': `bulk-upload-tabpanel-${index}`
+  };
+}
 
 export default function BulkUploadDialog({ open, handleClose, getData, payrollid, bulkUploadUrl, xlsxTemplateUrl, csvTemplateUrl, type }) {
   const [uploading, setUploading] = useState(false);
   const [file, setFile] = useState(null);
   const [salaryFile, setSalaryFile] = useState(null);
   const [duplicateHandling, setDuplicateHandling] = useState('overwrite');
-  const [currentStep, setCurrentStep] = useState(1); // 1: Employee upload, 2: Salary upload
+  const [activeTab, setActiveTab] = useState(0); // 0: Employee upload, 1: Salary upload
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [employeeUploadCompleted, setEmployeeUploadCompleted] = useState(false);
+  const [salaryUploadCompleted, setSalaryUploadCompleted] = useState(false);
+  const [employeeUploadError, setEmployeeUploadError] = useState(null);
+  const [salaryUploadError, setSalaryUploadError] = useState(null);
   const fileInputRef = useRef(null);
   const salaryFileInputRef = useRef(null);
   const dispatch = useDispatch();
   const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15 MB
+
+  const handleTabChange = (event, newValue) => {
+    // Allow free navigation between tabs
+    setActiveTab(newValue);
+  };
 
   const handleDownload = async (type) => {
     const url = type === 'csv' ? csvTemplateUrl : xlsxTemplateUrl;
@@ -113,6 +164,7 @@ export default function BulkUploadDialog({ open, handleClose, getData, payrollid
       }
 
       setFile(selected);
+      setEmployeeUploadError(null);
     }
   };
 
@@ -147,6 +199,7 @@ export default function BulkUploadDialog({ open, handleClose, getData, payrollid
       }
 
       setSalaryFile(selected);
+      setSalaryUploadError(null);
     }
   };
 
@@ -184,6 +237,7 @@ export default function BulkUploadDialog({ open, handleClose, getData, payrollid
       }
 
       setFile(droppedFile);
+      setEmployeeUploadError(null);
     }
 
     if (fileInputRef.current) {
@@ -225,6 +279,7 @@ export default function BulkUploadDialog({ open, handleClose, getData, payrollid
       }
 
       setSalaryFile(droppedFile);
+      setSalaryUploadError(null);
     }
 
     if (salaryFileInputRef.current) {
@@ -278,7 +333,7 @@ export default function BulkUploadDialog({ open, handleClose, getData, payrollid
     }
   };
 
-  const handleUpload = async () => {
+  const handleEmployeeUpload = async () => {
     if (!file) {
       dispatch(
         openSnackbar({
@@ -292,7 +347,54 @@ export default function BulkUploadDialog({ open, handleClose, getData, payrollid
       return;
     }
 
-    if (currentStep === 2 && !salaryFile) {
+    setUploading(true);
+    setUploadProgress(0);
+
+    try {
+      setUploadProgress(25);
+      await uploadEmployeeData();
+
+      setEmployeeUploadCompleted(true);
+      setEmployeeUploadError(null);
+
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Employee data uploaded successfully! Moving to salary upload...',
+          variant: 'alert',
+          alert: { color: 'success' },
+          close: false
+        })
+      );
+
+      // Automatically navigate to step 2 after successful upload
+      setTimeout(() => {
+        setActiveTab(1);
+      }, 1000);
+    } catch (error) {
+      setEmployeeUploadError(error.message);
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: error.message || 'Error uploading employee file',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
+
+      // Clear uploaded data on error
+      setFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleSalaryUpload = async () => {
+    if (!salaryFile) {
       dispatch(
         openSnackbar({
           open: true,
@@ -309,53 +411,34 @@ export default function BulkUploadDialog({ open, handleClose, getData, payrollid
     setUploadProgress(0);
 
     try {
-      // Step 1: Upload employee data
-      if (currentStep === 1) {
-        setUploadProgress(25);
-        await uploadEmployeeData();
+      setUploadProgress(75);
+      await uploadSalaryData();
 
-        dispatch(
-          openSnackbar({
-            open: true,
-            message: 'Employee data uploaded successfully! Now please upload salary template data.',
-            variant: 'alert',
-            alert: { color: 'success' },
-            close: false
-          })
-        );
+      setSalaryUploadCompleted(true);
+      setSalaryUploadError(null);
 
-        setCurrentStep(2);
-        setUploading(false);
-        return;
-      }
-
-      // Step 2: Upload salary data
-      if (currentStep === 2) {
-        setUploadProgress(75);
-        await uploadSalaryData();
-
-        dispatch(
-          openSnackbar({
-            open: true,
-            message: 'Salary template data uploaded successfully!',
-            variant: 'alert',
-            alert: { color: 'success' },
-            close: false
-          })
-        );
-
-        getData();
-        // Reset and close
-        setTimeout(() => {
-          handleClose();
-          resetDialog();
-        }, 50);
-      }
-    } catch (error) {
       dispatch(
         openSnackbar({
           open: true,
-          message: error.message || 'Error uploading file',
+          message: 'Salary template data uploaded successfully!',
+          variant: 'alert',
+          alert: { color: 'success' },
+          close: false
+        })
+      );
+
+      getData();
+      // Reset and close
+      setTimeout(() => {
+        handleClose();
+        resetDialog();
+      }, 50);
+    } catch (error) {
+      setSalaryUploadError(error.message);
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: error.message || 'Error uploading salary file',
           variant: 'alert',
           alert: { color: 'error' },
           close: false
@@ -363,16 +446,9 @@ export default function BulkUploadDialog({ open, handleClose, getData, payrollid
       );
 
       // Clear uploaded data on error
-      if (currentStep === 1) {
-        setFile(null);
-        if (fileInputRef.current) {
-          fileInputRef.current.value = '';
-        }
-      } else if (currentStep === 2) {
-        setSalaryFile(null);
-        if (salaryFileInputRef.current) {
-          salaryFileInputRef.current.value = '';
-        }
+      setSalaryFile(null);
+      if (salaryFileInputRef.current) {
+        salaryFileInputRef.current.value = '';
       }
     } finally {
       setUploading(false);
@@ -382,8 +458,12 @@ export default function BulkUploadDialog({ open, handleClose, getData, payrollid
   const resetDialog = () => {
     setFile(null);
     setSalaryFile(null);
-    setCurrentStep(1);
+    setActiveTab(0);
     setUploadProgress(0);
+    setEmployeeUploadCompleted(false);
+    setSalaryUploadCompleted(false);
+    setEmployeeUploadError(null);
+    setSalaryUploadError(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -393,123 +473,135 @@ export default function BulkUploadDialog({ open, handleClose, getData, payrollid
   };
 
   const handleCloseDialog = () => {
-    // Prevent closing if we're on step 2 (salary upload step)
-    if (currentStep === 2) {
-      dispatch(
-        openSnackbar({
-          open: true,
-          message: 'Please complete the salary template upload to finish the process.',
-          variant: 'alert',
-          alert: { color: 'warning' },
-          close: false
-        })
-      );
-      return;
-    }
     resetDialog();
     handleClose();
   };
 
-  const renderStepContent = () => {
-    if (currentStep === 1) {
-      return (
-        <Box sx={{ mt: 1 }}>
-          <Typography variant="subtitle1" color="text.secondary" mb={2}>
-            Step 1: Download a sample{' '}
-            <Link component="button" onClick={() => handleDownload('xlsx')}>
-              .xls format
-            </Link>{' '}
-            file and compare it with your import file to ensure that the file is ready to import.
-          </Typography>
-          <Paper
-            variant="outlined"
-            sx={{
-              p: 3,
-              mb: 2,
-              textAlign: 'center',
-              borderStyle: 'dashed',
-              cursor: 'pointer',
-              backgroundColor: '#fafafa'
-            }}
-            onClick={() => fileInputRef.current?.click()}
-            onDrop={handleDrop}
-            onDragOver={handleDragOver}
-          >
-            <CloudUploadIcon sx={{ fontSize: 40, color: 'primary.main' }} />
-            <Typography mt={1} mb={1}>
-              {file ? file.name : 'Drop employee file here or click here to upload'}
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              Maximum File Size: 15 MB | File Format: XLSX
-            </Typography>
-            <input type="file" ref={fileInputRef} onChange={handleFileChange} accept=".xlsx,.csv" style={{ display: 'none' }} />
-          </Paper>
-        </Box>
-      );
-    }
+  const renderEmployeeUploadTab = () => (
+    <Box>
+      <Typography variant="subtitle1" color="text.secondary">
+        Step 1: Download a sample{' '}
+        <Link component="button" onClick={() => handleDownload('xlsx')}>
+          .xls format
+        </Link>{' '}
+        file and compare it with your import file to ensure that the file is ready to import.
+      </Typography>
+      <Paper
+        variant="outlined"
+        sx={{
+          p: 3,
+          mb: 2,
+          textAlign: 'center',
+          borderStyle: 'dashed',
+          cursor: employeeUploadCompleted ? 'default' : 'pointer',
+          backgroundColor: employeeUploadCompleted ? '#f0f8f0' : '#fafafa',
+          opacity: employeeUploadCompleted ? 0.7 : 1
+        }}
+        onClick={employeeUploadCompleted ? undefined : () => fileInputRef.current?.click()}
+        onDrop={employeeUploadCompleted ? undefined : handleDrop}
+        onDragOver={handleDragOver}
+      >
+        <CloudUploadIcon sx={{ fontSize: 40, color: employeeUploadCompleted ? 'success.darker' : 'primary.main' }} />
+        <Typography mt={1} mb={1}>
+          {file ? file.name : 'Drop employee file here or click here to upload'}
+        </Typography>
+        <Typography variant="caption" color="text.secondary">
+          Maximum File Size: 15 MB | File Format: XLSX
+        </Typography>
+        <input type="file" ref={fileInputRef} onChange={handleFileChange} accept=".xlsx,.csv" style={{ display: 'none' }} />
+      </Paper>
 
-    if (currentStep === 2) {
-      return (
-        <Box sx={{ mt: 1 }}>
-          <Typography variant="subtitle1" color="text.secondary" mb={2}>
-            Step 2: Download a sample{' '}
-            <Link component="button" onClick={handleSalaryTemplateDownload}>
-              salary template
-            </Link>{' '}
-            file and compare it with your import file to ensure that the file is ready to import.
-          </Typography>
-          <Paper
-            variant="outlined"
-            sx={{
-              p: 3,
-              mb: 2,
-              textAlign: 'center',
-              borderStyle: 'dashed',
-              cursor: 'pointer',
-              backgroundColor: '#fafafa'
-            }}
-            onClick={() => salaryFileInputRef.current?.click()}
-            onDrop={handleSalaryDrop}
-            onDragOver={handleDragOver}
-          >
-            <CloudUploadIcon sx={{ fontSize: 40, color: 'primary.main' }} />
-            <Typography mt={1} mb={1}>
-              {salaryFile ? salaryFile.name : 'Drop salary template file here or click here to upload'}
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              Maximum File Size: 15 MB | File Format: XLSX
-            </Typography>
-            <input type="file" ref={salaryFileInputRef} onChange={handleSalaryFileChange} accept=".xlsx,.csv" style={{ display: 'none' }} />
-          </Paper>
-        </Box>
-      );
-    }
-  };
+      <Button
+        onClick={handleEmployeeUpload}
+        variant="contained"
+        color="primary"
+        disabled={uploading || !file || employeeUploadCompleted}
+        fullWidth
+      >
+        {uploading ? 'Uploading...' : employeeUploadCompleted ? 'Uploaded Successfully' : 'Upload Employees'}
+      </Button>
+    </Box>
+  );
+
+  const renderSalaryUploadTab = () => (
+    <Box>
+      <Typography variant="subtitle1" color="text.secondary">
+        Step 2: Download a sample{' '}
+        <Link component="button" onClick={handleSalaryTemplateDownload}>
+          salary template
+        </Link>{' '}
+        file and compare it with your import file to ensure that the file is ready to import.
+      </Typography>
+
+      {salaryUploadCompleted && (
+        <Alert severity="success" sx={{ mb: 2 }}>
+          <Stack direction="row" spacing={1} alignItems="center">
+            <CheckCircleIcon />
+            <Typography>Salary template data uploaded successfully!</Typography>
+          </Stack>
+        </Alert>
+      )}
+
+      {salaryUploadError && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          <Typography>{salaryUploadError}</Typography>
+        </Alert>
+      )}
+
+      <Paper
+        variant="outlined"
+        sx={{
+          p: 3,
+          mb: 2,
+          textAlign: 'center',
+          borderStyle: 'dashed',
+          cursor: salaryUploadCompleted ? 'default' : 'pointer',
+          backgroundColor: salaryUploadCompleted ? '#f0f8f0' : '#fafafa',
+          opacity: salaryUploadCompleted ? 0.7 : 1
+        }}
+        onClick={salaryUploadCompleted ? undefined : () => salaryFileInputRef.current?.click()}
+        onDrop={salaryUploadCompleted ? undefined : handleSalaryDrop}
+        onDragOver={handleDragOver}
+      >
+        <CloudUploadIcon sx={{ fontSize: 40, color: salaryUploadCompleted ? 'success.darker' : 'primary.main' }} />
+        <Typography mt={1} mb={1}>
+          {salaryFile ? salaryFile.name : 'Drop salary template file here or click here to upload'}
+        </Typography>
+        <Typography variant="caption" color="text.secondary">
+          Maximum File Size: 15 MB | File Format: XLSX
+        </Typography>
+        <input type="file" ref={salaryFileInputRef} onChange={handleSalaryFileChange} accept=".xlsx,.csv" style={{ display: 'none' }} />
+      </Paper>
+
+      <Button
+        onClick={handleSalaryUpload}
+        variant="contained"
+        color="primary"
+        disabled={uploading || !salaryFile || salaryUploadCompleted}
+        fullWidth
+      >
+        {uploading ? 'Uploading...' : salaryUploadCompleted ? 'Uploaded Successfully' : 'Upload Salary Data'}
+      </Button>
+    </Box>
+  );
 
   return (
     <Modal
       open={open}
-      showClose={currentStep === 1}
+      showClose={true}
       handleClose={handleCloseDialog}
       maxWidth="sm"
-      title={`Bulk Upload ${type} - Step ${currentStep} of 2`}
+      title={`Bulk Upload ${type}`}
       footer={
         <Stack direction="row" sx={{ width: 1, justifyContent: 'space-between', gap: 2 }}>
-          <Button
-            onClick={handleCloseDialog}
-            variant="outlined"
-            color="error"
-            disabled={uploading || currentStep === 2}
-            sx={{
-              opacity: currentStep === 2 ? 0.5 : 1,
-              cursor: currentStep === 2 ? 'not-allowed' : 'pointer'
-            }}
-          >
+          <Button onClick={handleCloseDialog} variant="outlined" color="error" disabled={uploading}>
             Cancel
           </Button>
-          <Button onClick={handleUpload} variant="contained" color="primary" disabled={uploading}>
-            {uploading ? 'Uploading...' : currentStep === 1 ? 'Upload Employees' : 'Upload Salary Data'}
-          </Button>
+          <Stack direction="row" spacing={1}>
+            {employeeUploadCompleted && salaryUploadCompleted && (
+              <Chip label="All Steps Completed" color="success" icon={<CheckCircleIcon />} variant="outlined" />
+            )}
+          </Stack>
         </Stack>
       }
     >
@@ -522,15 +614,47 @@ export default function BulkUploadDialog({ open, handleClose, getData, payrollid
         </Box>
       )}
 
-      {renderStepContent()}
+      {/* Tabs */}
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          borderBottom: 1,
+          borderColor: 'divider',
+          mb: 2
+        }}
+      >
+        <Tabs value={activeTab} onChange={handleTabChange} aria-label="bulk upload tabs">
+          <Tab
+            label={
+              <Stack direction="row" spacing={1} alignItems="center" sx={{ justifyContent: 'center' }}>
+                <Typography variant="h5">Step 1: Employee Upload</Typography>
+                {employeeUploadCompleted && <CheckCircleIcon fontSize="small" />}
+              </Stack>
+            }
+            {...a11yProps(0)}
+            disabled={uploading}
+          />
+          <Tab
+            label={
+              <Stack direction="row" spacing={1} alignItems="center" sx={{ justifyContent: 'center' }}>
+                <Typography variant="h5">Step 2: Salary Upload</Typography>
+                {salaryUploadCompleted && <CheckCircleIcon fontSize="small" />}
+              </Stack>
+            }
+            {...a11yProps(1)}
+            disabled={uploading}
+          />
+        </Tabs>
+      </Box>
 
-      {currentStep === 2 && (
-        <Box sx={{ mt: 2, p: 2, bgcolor: 'warning.light', borderRadius: 1 }}>
-          <Typography variant="body2" color="warning.dark" sx={{ fontWeight: 500 }}>
-            ⚠️ Please complete the salary template upload to finish the bulk upload process.
-          </Typography>
-        </Box>
-      )}
+      {/* Tab Panels */}
+      <TabPanel value={activeTab} index={0}>
+        {renderEmployeeUploadTab()}
+      </TabPanel>
+      <TabPanel value={activeTab} index={1}>
+        {renderSalaryUploadTab()}
+      </TabPanel>
     </Modal>
   );
 }

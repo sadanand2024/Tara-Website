@@ -14,14 +14,13 @@ import { openSnackbar } from 'store/slices/snackbar';
 import EmptyDataPlaceholder from 'ui-component/extended/EmptyDataPlaceholder';
 import MainCard from 'ui-component/cards/MainCard';
 
-export default function GoodsServicesComponent({ businessDetails, handleNext, handleBack }) {
-  const [open, setOpen] = useState(false);
+export default function GoodsServicesComponent({ businessDetails, handleNext, handleBack, addDialogOpen, setAddDialogOpen }) {
   const [items, setItems] = useState([]);
   const [type, setType] = useState('');
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const handleOpen = () => setAddDialogOpen(true);
+  const handleClose = () => setAddDialogOpen(false);
 
   const fetchItems = async () => {
     const url = `/invoicing/goods-services/${businessDetails.invoicing_profile_id}`;
@@ -47,8 +46,6 @@ export default function GoodsServicesComponent({ businessDetails, handleNext, ha
 
   return (
     <MainCard
-      title="Goods & Services"
-      subtitle="Manage your business goods and services for invoice generation and business operations"
       action={
         <Button
           variant="contained"
@@ -67,7 +64,7 @@ export default function GoodsServicesComponent({ businessDetails, handleNext, ha
     >
       <AddItem
         businessDetailsData={businessDetails}
-        open={open}
+        open={addDialogOpen}
         setType={setType}
         handleOpen={handleOpen}
         handleClose={handleClose}
@@ -75,7 +72,7 @@ export default function GoodsServicesComponent({ businessDetails, handleNext, ha
       />
       <ItemList
         type={type}
-        open={open}
+        open={addDialogOpen}
         handleOpen={handleOpen}
         handleClose={handleClose}
         setType={setType}

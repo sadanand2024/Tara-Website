@@ -83,10 +83,16 @@ export default function Dashboard() {
 
   useEffect(() => {
     setTimeout(() => {
+      // Check if user is an employee (has employee record)
+      if (user.employee) {
+        navigate('/app/employee-portal/dashboard');
+        return;
+      }
+
       if (user.user.is_super_admin) navigate('/dashboard/super-admin');
       // navigate('/dashboard/business');
-      else if (user.all_contexts.length === 0) setAccDialog(true);
-      else if (user.active_context === null) switchContext(user.all_contexts[0].id);
+      else if (user.all_contexts?.length === 0) setAccDialog(true);
+      else if (user.active_context === null && user.all_contexts?.length > 0) switchContext(user.all_contexts[0].id);
       else if (user.active_context?.context_type === 'business') navigate('/dashboard/business');
       else if (user.active_context?.context_type === 'personal') navigate('/dashboard/personal');
     }, 1000);

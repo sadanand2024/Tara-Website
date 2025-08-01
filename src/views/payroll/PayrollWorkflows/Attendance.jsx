@@ -68,12 +68,6 @@ export default function Attendance({
     if (financialYear) setFinancialYear(financialYear);
   }, [searchParams]);
 
-  useEffect(() => {
-    if (payrollid && financialYear && month) {
-      fetchAttendance(); // Use parent-controlled fetch function
-    }
-  }, [payrollid, financialYear, month]);
-
   const handleEdit = async (item) => {
     let url = `/payroll/employee-attendance/${item.id}`;
     const { res } = await Factory('get', url, {});

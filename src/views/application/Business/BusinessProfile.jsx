@@ -78,11 +78,12 @@ const entityTypeMapping = {
 
 const validationSchema = Yup.object({
   nameOfBusiness: Yup.string().required('Business name is required'),
+  legal_name: Yup.string().required('Legal name is required'),
   business_nature: Yup.string().required('Industry is required'),
   pan: Yup.string()
     .matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN Number')
     .required('Business PAN is required'),
-  registrationNumber: Yup.string().required('Registration No. is required'),
+  // registrationNumber: Yup.string().required('Registration No. is required'),
   entityType: Yup.string().required('Entity type is required'),
   dob_or_incorp_date: Yup.date().required('Date of Incorporation is required'),
   email: Yup.string().email('Invalid email format').required('Email is required'),
@@ -125,7 +126,13 @@ const validationSchema = Yup.object({
 const businessProfileFields = [
   {
     name: 'nameOfBusiness',
-    label: 'Business Name',
+    label: 'Business or Trade Name',
+    type: 'text',
+    required: true
+  },
+  {
+    name: 'legal_name',
+    label: 'Legal Name',
     type: 'text',
     required: true
   },
@@ -145,7 +152,7 @@ const businessProfileFields = [
     name: 'registrationNumber',
     label: 'Registration Number',
     type: 'text',
-    required: true
+    required: false
   },
   {
     name: 'entityType',
@@ -287,6 +294,7 @@ const BusinessProfile = ({ tabChange, tabval }) => {
 
   const [initialValues, setInitialValues] = useState({
     nameOfBusiness: '',
+    legal_name: '',
     business_nature: '',
     pan: '',
     registrationNumber: '',
@@ -303,40 +311,39 @@ const BusinessProfile = ({ tabChange, tabval }) => {
     },
     is_msme_registered: 'no',
     msme_registration_type: '',
-    msme_registration_number: '',
-    trade_name: ''
+    msme_registration_number: ''
+    // trade_name: ''
   });
 
   // Fetch initial data
   useEffect(() => {
     const fetchAllData = async () => {
-      try {
-        setIsLoading(true);
-        const profileResponse = await Factory('get', `/user_management/businesses/${user.active_context.business_id}/`, {}, {});
-        if (profileResponse.res.status_cd === 0) {
-          const profileData = profileResponse.res.data;
-          setInitialValues({
-            nameOfBusiness: profileData.nameOfBusiness || '',
-            business_nature: profileData.business_nature || '',
-            pan: profileData.pan || '',
-            registrationNumber: profileData.registrationNumber || '',
-            entityType: profileData.entityType || '',
-            dob_or_incorp_date: profileData.dob_or_incorp_date || '',
-            email: profileData.email || '',
-            mobile_number: profileData.mobile_number || '',
-            headOffice: {
-              address_line1: profileData.headOffice?.address_line1 || '',
-              address_line2: profileData.headOffice?.address_line2 || '',
-              city: profileData.headOffice?.city || '',
-              state: profileData.headOffice?.state || '',
-              pincode: profileData.headOffice?.pincode || ''
-            },
-            is_msme_registered: profileData.is_msme_registered || 'no',
-            msme_registration_type: profileData.msme_registration_type || '',
-            msme_registration_number: profileData.msme_registration_number || '',
-            trade_name: profileData.trade_name || ''
-          });
-        }
+      setIsLoading(true);
+      const profileResponse = await Factory('get', `/user_management/businesses/${user.active_context.business_id}/`, {}, {});
+      if (profileResponse.res.status_cd === 0) {
+        const profileData = profileResponse.res.data;
+        setInitialValues({
+          nameOfBusiness: profileData.nameOfBusiness || '',
+          legal_name: profileData.legal_name || '',
+          business_nature: profileData.business_nature || '',
+          pan: profileData.pan || '',
+          registrationNumber: profileData.registrationNumber || '',
+          entityType: profileData.entityType || '',
+          dob_or_incorp_date: profileData.dob_or_incorp_date || '',
+          email: profileData.email || '',
+          mobile_number: profileData.mobile_number || '',
+          headOffice: {
+            address_line1: profileData.headOffice?.address_line1 || '',
+            address_line2: profileData.headOffice?.address_line2 || '',
+            city: profileData.headOffice?.city || '',
+            state: profileData.headOffice?.state || '',
+            pincode: profileData.headOffice?.pincode || ''
+          },
+          is_msme_registered: profileData.is_msme_registered || 'no',
+          msme_registration_type: profileData.msme_registration_type || '',
+          msme_registration_number: profileData.msme_registration_number || ''
+          // trade_name: profileData.trade_name || ''
+        });
 
         const branchesResponse = await Factory('get', `/user_management/branches/${user.active_context.business_id}/`, {}, {});
         if (branchesResponse.res.status_cd === 0) {
@@ -356,21 +363,28 @@ const BusinessProfile = ({ tabChange, tabval }) => {
         } else {
           setLogoUrlDetails(null);
           setLogoposttype('post');
+          dispatch(
+            openSnackbar({
+              open: true,
+              message: 'Logo not found',
+              variant: 'alert',
+              alert: { color: 'error' },
+              close: false
+            })
+          );
         }
-      } catch (error) {
-        console.error('Error fetching data:', error);
+      } else {
         dispatch(
           openSnackbar({
             open: true,
-            message: 'Failed to load data',
+            message: JSON.stringify(profileResponse.message) || 'Failed to load data',
             variant: 'alert',
             alert: { color: 'error' },
             close: false
           })
         );
-      } finally {
-        setIsLoading(false);
       }
+      setIsLoading(false);
     };
 
     fetchAllData();
@@ -483,21 +497,19 @@ const BusinessProfile = ({ tabChange, tabval }) => {
       }
     }
   };
- const getLabelWithAsterisk = (label, isRequired) => {
-  return (
-    <span>
-      {label}
-      {isRequired && <span style={{ color: 'red', fontSize: '1.3em' }}> *</span>}
-    </span>
-  );
-};
-
+  const getLabelWithAsterisk = (label, isRequired) => {
+    return (
+      <span>
+        {label}
+        {isRequired && <span style={{ color: 'red', fontSize: '1em' }}> *</span>}
+      </span>
+    );
+  };
 
   const renderField = (field) => {
     const getNestedValue = (obj, path) => {
       return path.split('.').reduce((acc, part) => (acc ? acc[part] : undefined), obj);
     };
-    
 
     const commonTextFieldProps = {
       fullWidth: true,
@@ -539,7 +551,6 @@ const BusinessProfile = ({ tabChange, tabval }) => {
                 name={field.name}
                 // label={field.label}
                 label={getLabelWithAsterisk(field.label, field.required)}
-
                 error={touched[field.name] && Boolean(errors[field.name])}
                 helperText={touched[field.name] && errors[field.name] ? errors[field.name] : ''}
               />
@@ -551,8 +562,7 @@ const BusinessProfile = ({ tabChange, tabval }) => {
           <TextField
             {...commonTextFieldProps}
             name={field.name}
-           label={getLabelWithAsterisk(field.label, field.required)}
-
+            label={getLabelWithAsterisk(field.label, field.required)}
             value={getNestedValue(values, field.name)}
             onChange={(e) => {
               if (field.name === 'pan') {
@@ -577,7 +587,6 @@ const BusinessProfile = ({ tabChange, tabval }) => {
             name={field.name}
             // label={field.label}
             label={getLabelWithAsterisk(field.label, field.required)}
-
             value={getNestedValue(values, field.name)}
             onChange={(e) => setFieldValue(field.name, e.target.value)}
             onBlur={handleBlur}
@@ -773,10 +782,10 @@ const BusinessProfile = ({ tabChange, tabval }) => {
               <CardContent sx={{ p: 3 }}>
                 <Box sx={{ mb: 3 }}>
                   <Typography variant="subtitle1" color="text.primary" fontWeight={500} gutterBottom>
-                     <span>
-                       Is your business MSME Registered?
-                       <span style={{ color: 'red', fontSize: '1.2em' }}> *</span>
-                          </span>
+                    <span>
+                      Is your business MSME Registered?
+                      <span style={{ color: 'red', fontSize: '1.2em' }}> *</span>
+                    </span>
                   </Typography>
                   <RadioGroup row name="is_msme_registered" value={values.is_msme_registered} onChange={handleChange} sx={{ mt: 1 }}>
                     <FormControlLabel value="yes" control={<Radio size="small" />} label="Yes" sx={{ mr: 4 }} />
@@ -964,7 +973,23 @@ const BusinessProfile = ({ tabChange, tabval }) => {
                                   </Typography>
                                 </TableCell>
                                 <TableCell>
-                                  <Chip label={branch.branch_code} size="small" color="primary" variant="outlined" />
+                                  {/* <Chip label={branch.branch_code} size="small" color="primary" variant="outlined" /> */}
+                                  <Typography
+                                    variant="body2"
+                                    // sx={{
+                                    //   px: 1,
+                                    //   py: 0.3,
+                                    //   display: 'inline-block',
+                                    //   border: '1px solid',
+                                    //   borderColor: 'primary.main',
+                                    //   color: 'primary.main',
+                                    //   borderRadius: '8px',
+                                    //   fontSize: '0.75rem',
+                                    //   fontWeight: 500
+                                    // }}
+                                  >
+                                    {branch.branch_code}
+                                  </Typography>
                                 </TableCell>
                                 <TableCell align="center">
                                   <Stack direction="row" spacing={1} justifyContent="center">

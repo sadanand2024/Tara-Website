@@ -77,6 +77,7 @@ const Header = ({ hamburgerDisplay = 'block' }) => {
   };
 
   const handleOptionChange = async (event, newValue) => {
+    if (newValue.id === selectedOption.id) return;
     if (newValue?.isAddOption) {
       setOpenAddDialog(true);
       return;
@@ -109,22 +110,23 @@ const Header = ({ hamburgerDisplay = 'block' }) => {
     setOpenAddDialog(false);
   };
 
-  const hasPersonalContext = userData.all_contexts.some((context) => context.context_type === 'personal');
+  // Handle case where all_contexts might be undefined (for employee users)
+  const hasPersonalContext = userData.all_contexts?.some((context) => context.context_type === 'personal') || false;
 
   const options = [
-    ...userData.all_contexts
+    ...(userData.all_contexts || [])
       .filter((context) => context.context_type === 'personal')
       .map((context) => ({
         ...context,
         isPersonal: true
       })),
-    ...userData.all_contexts
+    ...(userData.all_contexts || [])
       .filter((context) => context.context_type !== 'personal')
       .map((context) => ({
         ...context,
         isPersonal: false,
         personalContext:
-          userData.all_contexts.find((pc) => pc.type === 'personal' && pc.id === context.personal_context_id)?.name || 'Personal'
+          (userData.all_contexts || []).find((pc) => pc.type === 'personal' && pc.id === context.personal_context_id)?.name || 'Personal'
       })),
     {
       id: 'add_options',
@@ -173,7 +175,6 @@ const Header = ({ hamburgerDisplay = 'block' }) => {
         });
       }
     } catch (error) {
-      console.error('Error submitting personal KYC:', error);
       enqueueSnackbar('Failed to add personal details', {
         variant: 'error',
         anchorOrigin: { vertical: 'top', horizontal: 'right' }
@@ -182,7 +183,6 @@ const Header = ({ hamburgerDisplay = 'block' }) => {
       setIsSubmitting(false);
     }
   };
-
   return (
     <>
       {/* logo & toggler button */}
@@ -204,7 +204,7 @@ const Header = ({ hamburgerDisplay = 'block' }) => {
           }}
         >
           {/* <LogoSection /> */}
-          <Link to="/dashboard/business">
+          <Link to={userData.employee ? '/app/employee-portal/dashboard' : '/dashboard/business'}>
             <CardMedia component="img" src={Tarafirstlogo_png} alt="Tara First Logo" sx={{ width: 150 }} />
           </Link>
         </Box>
@@ -259,126 +259,127 @@ const Header = ({ hamburgerDisplay = 'block' }) => {
         <FullScreenSection />
       </Box>
 
-      {/* business selector */}
-
-      <Box sx={{ display: { xs: 'block', sm: 'block' }, mx: 2, width: 300 }}>
-        <Autocomplete
-          value={selectedOption}
-          onChange={handleOptionChange}
-          options={options}
-          getOptionLabel={(option) => option.name || option.context_name || 'Unnamed Option'}
-          size="small"
-          sx={{
-            '& .MuiOutlinedInput-root': {
-              '& fieldset': {
-                borderColor: 'primary.light'
-              },
-              '&:hover fieldset': {
-                borderColor: 'primary.main'
-              },
-              '&.Mui-focused fieldset': {
-                borderColor: 'primary.main'
+      {/* business selector - hide for employee users */}
+      {!userData.employee && (
+        <Box sx={{ display: { xs: 'block', sm: 'block' }, mx: 2, width: 300 }}>
+          <Autocomplete
+            value={selectedOption}
+            onChange={handleOptionChange}
+            options={options}
+            getOptionLabel={(option) => option.name || option.context_name || 'Unnamed Option'}
+            size="small"
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': {
+                  borderColor: 'primary.light'
+                },
+                '&:hover fieldset': {
+                  borderColor: 'primary.main'
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: 'primary.main'
+                }
               }
-            }
-          }}
-          renderOption={(props, option) => {
-            const { key, ...otherProps } = props;
+            }}
+            renderOption={(props, option) => {
+              const { key, ...otherProps } = props;
 
-            if (option.isAddOption) {
-              return [
-                <Divider key="divider" sx={{ my: 1 }} />,
-                <Box
-                  {...otherProps}
-                  component="li"
-                  key={option.id}
-                  sx={{
-                    p: 1,
-                    display: 'flex',
-                    gap: 1,
-                    justifyContent: 'center'
-                  }}
-                >
-                  {!hasPersonalContext && (
+              if (option.isAddOption) {
+                return [
+                  <Divider key="divider" sx={{ my: 1 }} />,
+                  <Box
+                    {...otherProps}
+                    component="li"
+                    key={option.id}
+                    sx={{
+                      p: 1,
+                      display: 'flex',
+                      gap: 1,
+                      justifyContent: 'center'
+                    }}
+                  >
+                    {!hasPersonalContext && (
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        startIcon={<AddCircleOutlineIcon />}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setOpenPersonalKYC(true);
+                        }}
+                        sx={{ flex: 1 }}
+                      >
+                        Add Personal
+                      </Button>
+                    )}
                     <Button
                       variant="outlined"
                       size="small"
-                      startIcon={<AddCircleOutlineIcon />}
+                      startIcon={<BusinessIcon />}
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        setOpenPersonalKYC(true);
+                        setOpenAddDialog(true);
                       }}
                       sx={{ flex: 1 }}
                     >
-                      Add Personal
+                      Add Business
                     </Button>
-                  )}
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    startIcon={<BusinessIcon />}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      setOpenAddDialog(true);
-                    }}
-                    sx={{ flex: 1 }}
-                  >
-                    Add Business
-                  </Button>
-                </Box>
-              ];
-            }
+                  </Box>
+                ];
+              }
 
-            return (
-              <Box {...otherProps} component="li" key={option.id} sx={{ p: 1 }}>
-                {option.isPersonal ? (
-                  <Stack direction="row" alignItems="center" sx={{ justifyContent: 'space-between', width: '100%' }}>
-                    <Stack direction="row" alignItems="center">
-                      <Avatar
-                        sx={{
-                          width: 24,
-                          height: 24,
-                          mr: 1,
-                          py: 2,
-                          bgcolor: 'secondary.light',
-                          color: 'secondary.dark'
-                        }}
-                      >
-                        {option.name?.charAt(0) || 'P'}
-                      </Avatar>
-                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                        {option.name || option.context_name || 'Personal'}
-                      </Typography>
-                    </Stack>
-                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                      Personal
-                    </Typography>
-                  </Stack>
-                ) : (
-                  <Stack direction="column" sx={{ width: '100%', py: 0.8 }}>
+              return (
+                <Box {...otherProps} component="li" key={option.id} sx={{ p: 1 }}>
+                  {option.isPersonal ? (
                     <Stack direction="row" alignItems="center" sx={{ justifyContent: 'space-between', width: '100%' }}>
                       <Stack direction="row" alignItems="center">
-                        <BusinessIcon fontSize="small" sx={{ mr: 1, color: 'primary.main' }} />
-                        <Typography variant="body2">{option.name || option.context_name || 'Unnamed Business'}</Typography>
+                        <Avatar
+                          sx={{
+                            width: 24,
+                            height: 24,
+                            mr: 1,
+                            py: 2,
+                            bgcolor: 'secondary.light',
+                            color: 'secondary.dark'
+                          }}
+                        >
+                          {option.name?.charAt(0) || 'P'}
+                        </Avatar>
+                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                          {option.name || option.context_name || 'Personal'}
+                        </Typography>
                       </Stack>
                       <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                        Business
+                        Personal
                       </Typography>
                     </Stack>
-                  </Stack>
-                )}
-              </Box>
-            );
-          }}
-          renderInput={(params) => <TextField {...params} size="small" placeholder="Select or Add Business" />}
-          disableClearable
-          ListboxProps={{
-            sx: { maxHeight: 250 }
-          }}
-          isOptionEqualToValue={(option, value) => option.id === value.id}
-        />
-      </Box>
+                  ) : (
+                    <Stack direction="column" sx={{ width: '100%', py: 0.8 }}>
+                      <Stack direction="row" alignItems="center" sx={{ justifyContent: 'space-between', width: '100%' }}>
+                        <Stack direction="row" alignItems="center">
+                          <BusinessIcon fontSize="small" sx={{ mr: 1, color: 'primary.main' }} />
+                          <Typography variant="body2">{option.name || option.context_name || 'Unnamed Business'}</Typography>
+                        </Stack>
+                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                          Business
+                        </Typography>
+                      </Stack>
+                    </Stack>
+                  )}
+                </Box>
+              );
+            }}
+            renderInput={(params) => <TextField {...params} size="small" placeholder="Select or Add Business" />}
+            disableClearable
+            ListboxProps={{
+              sx: { maxHeight: 250 }
+            }}
+            isOptionEqualToValue={(option, value) => option.id === value.id}
+          />
+        </Box>
+      )}
 
       {/* profile */}
       <ProfileSection />
@@ -389,13 +390,15 @@ const Header = ({ hamburgerDisplay = 'block' }) => {
       </Box> */}
 
       {/* Add Business Dialog */}
-      <AddBusiness
-        open={openAddDialog}
-        onClose={handleAddDialogClose}
-        userData={userData}
-        setUserData={setUserData}
-        getContext={getContext}
-      />
+      {userData && userData.user && !userData.employee && (
+        <AddBusiness
+          open={openAddDialog}
+          onClose={handleAddDialogClose}
+          userData={userData}
+          setUserData={setUserData}
+          getContext={getContext}
+        />
+      )}
 
       {/* Personal KYC Dialog */}
       <Personal

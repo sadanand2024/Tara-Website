@@ -1,18 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import { Box, Typography, TextField, Grid2, Autocomplete, Button, Card, Stack } from '@mui/material';
+import { Autocomplete, Box, Button, Card, Grid2, Stack, TextField, Typography } from '@mui/material';
 import { useFormik } from 'formik';
-import * as Yup from 'yup';
+import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { openSnackbar } from 'store/slices/snackbar';
-import Factory from 'utils/Factory';
 import { useSearchParams } from 'react-router-dom';
+import { openSnackbar } from 'store/slices/snackbar';
 import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
-import DeleteIcon from '@mui/icons-material/Delete';
-import DownloadIcon from '@mui/icons-material/Download';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import RaiseRequest from '../../RaiseRequest';
-import GetActionButtons from '../../FormHelpers';
 import CircularProgressComponent from 'utils/CircularProgressComponent';
+import { industries } from 'utils/industries';
+import Factory from 'utils/Factory';
+import * as Yup from 'yup';
+import GetActionButtons from '../../FormHelpers';
+import RaiseRequest from '../../RaiseRequest';
 
 
 const typeOfBusinessOptions = [
@@ -43,28 +41,6 @@ const categoryOfEstablishmentOptions = [
   'Media & Entertainment',
   'Others'
 ];
-const natureOfBusinessOptions = [
-  'Manufacturing / Production',
-  'Construction and Civil Works',
-  'Trading / Retail / Wholesale',
-  'IT / Software / BPO Services',
-  'Hospitality and Food Services',
-  'Security Services',
-  'Housekeeping / Facility Management',
-  'Logistics and Transportation',
-  'Educational Institutions',
-  'Healthcare and Medical Services',
-  'Administrative / Clerical Services',
-  'Electrical / Mechanical Maintenance',
-  'Marketing and Sales Activities',
-  'Mining and Quarrying',
-  'Event Management Services',
-  'Agriculture and Farming Operations',
-  'Real Estate and Property Management',
-  'Financial and Insurance Services',
-  'Printing and Publishing Services',
-  'Media and Entertainment Services'
-];
 
 const fields = [
   {
@@ -91,7 +67,7 @@ const fields = [
     label: 'Nature of Business',
     name: 'nature_of_business',
     type: 'autocomplete',
-    options: natureOfBusinessOptions,
+    options: industries,
     required: true
   },
   {
@@ -111,11 +87,17 @@ const BusinessIdentityStructureSection = ({ taskId }) => {
   const [searchParams] = useSearchParams();
   const service_id = searchParams.get('service_id');
   const dispatch = useDispatch();
-    const [isLoading, setIsLoading] = useState(false); 
+  const [isLoading, setIsLoading] = useState(false);
 
   const [businessIdentityposttype, setBusinessIdentityposttype] = useState('post');
   const [businessInfo, setBusinessInfo] = useState({
     taskId: null
+  });
+  const [personsEmployed, setPersonsEmployed] = useState({
+    male: '',
+    female: '',
+    others: '',
+    total: ''
   });
 
   const formik = useFormik({
@@ -141,10 +123,12 @@ const BusinessIdentityStructureSection = ({ taskId }) => {
       nature_of_business: Yup.string().required('Nature of Business is required')
     }),
     onSubmit: async (values) => {
-        setIsLoading(true); 
+      setIsLoading(true);
 
       const url =
-        businessIdentityposttype === 'put' ? `/labourlicense/business-identity/${values.id}/` : `/labourlicense/business-identity/`;
+        businessIdentityposttype === 'put'
+          ? `/labourlicense/business-identity/${values.id}/`
+          : `/labourlicense/business-identity/`;
 
       const formData = new FormData();
       formData.append('service_request', service_id);
@@ -155,6 +139,9 @@ const BusinessIdentityStructureSection = ({ taskId }) => {
       formData.append('category_of_establishment', values.category_of_establishment);
       formData.append('classification_of_establishment', values.classification_of_establishment);
       formData.append('status', 'in progress');
+
+      // Add this line to send number_of_employees as JSON
+      formData.append('number_of_employees', JSON.stringify(personsEmployed));
 
       if (values.business_pan && typeof values.business_pan !== 'string') {
         formData.append('business_pan', values.business_pan);
@@ -187,12 +174,14 @@ const BusinessIdentityStructureSection = ({ taskId }) => {
       setIsLoading(false);
     }
   });
-    const getLabelWithAsterisk = (label, isRequired = true) => (
-  <span>
-    {label}
-    {isRequired && <span style={{ color: 'red', fontSize: '1.3em' }}> *</span>}
-  </span>
-);
+  const getLabelWithAsterisk = (label, isRequired = true) => (
+    <span>
+      {label}
+
+      {isRequired && <span style={{ color: 'red' }}> *</span>}
+
+    </span>
+  );
   const renderField = (field) => {
     switch (field.type) {
       case 'autocomplete':
@@ -282,12 +271,10 @@ const BusinessIdentityStructureSection = ({ taskId }) => {
   };
   const { values, setValues, handleChange, errors, touched, handleSubmit, handleBlur, resetForm, setFieldValue } = formik;
   const getBusinessIdentity = async () => {
-   
     const url = `/labourlicense/business-identity/by-request-or-task?service_request_id=${service_id}`;
     const { res } = await Factory('get', url);
     if (res.status_cd === 0) {
       // Map API response to form fields
-
       const responseData = {
         id: res.data.id || '',
         service_type: res.data.service_type || '',
@@ -306,6 +293,26 @@ const BusinessIdentityStructureSection = ({ taskId }) => {
       setValues(responseData);
       setBusinessInfo(res?.data);
       setBusinessIdentityposttype('put');
+
+      // Set personsEmployed from API if available
+      if (res.data.number_of_employees) {
+        try {
+          // If it's a stringified JSON, parse it
+          const parsed = typeof res.data.number_of_employees === 'string'
+            ? JSON.parse(res.data.number_of_employees)
+            : res.data.number_of_employees;
+          setPersonsEmployed({
+            male: parsed.male || '',
+            female: parsed.female || '',
+            others: parsed.others || '',
+            total: parsed.total || ''
+          });
+        } catch (e) {
+          setPersonsEmployed({ male: '', female: '', others: '', total: '' });
+        }
+      } else {
+        setPersonsEmployed({ male: '', female: '', others: '', total: '' });
+      }
     }
     if (res.status_cd === 1) {
       dispatch(
@@ -319,12 +326,11 @@ const BusinessIdentityStructureSection = ({ taskId }) => {
       );
       setBusinessIdentityposttype('post');
     }
-    
   };
   useEffect(() => {
     getBusinessIdentity();
   }, []);
-   if (isLoading) {
+  if (isLoading) {
     return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading business identity...'} />;
   }
 
@@ -360,11 +366,75 @@ const BusinessIdentityStructureSection = ({ taskId }) => {
                 {field.label}
               </Typography> */}
               <Typography variant="subtitle1" mb={1}>
-    {getLabelWithAsterisk(field.label, field.required)}
-  </Typography>
+                {getLabelWithAsterisk(field.label, field.required)}
+              </Typography>
               {renderField(field)}
             </Grid2>
           ))}
+          <Grid2 item xs={12} sx={{ maxWidth: 'none', width: '100%' }}>
+            <Typography variant="subtitle1" mb={1}>
+              {getLabelWithAsterisk('Number of persons employed')}
+            </Typography>
+            <Box display="flex" gap={2}>
+              <TextField
+                label="Male"
+                type="number"
+                size="small"
+                value={personsEmployed.male}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/[^0-9]/g, '');
+                  setPersonsEmployed((pe) => ({
+                    ...pe,
+                    male: val,
+                    total: String(Number(val || 0) + Number(pe.female || 0) + Number(pe.others || 0))
+                  }));
+                }}
+                sx={{ flex: 1 }}
+                InputLabelProps={{ shrink: true }}
+              />
+              <TextField
+                label="Female"
+                type="number"
+                size="small"
+                value={personsEmployed.female}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/[^0-9]/g, '');
+                  setPersonsEmployed((pe) => ({
+                    ...pe,
+                    female: val,
+                    total: String(Number(pe.male || 0) + Number(val || 0) + Number(pe.others || 0))
+                  }));
+                }}
+                sx={{ flex: 1 }}
+                InputLabelProps={{ shrink: true }}
+              />
+              <TextField
+                label="Others"
+                type="number"
+                size="small"
+                value={personsEmployed.others}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/[^0-9]/g, '');
+                  setPersonsEmployed((pe) => ({
+                    ...pe,
+                    others: val,
+                    total: String(Number(pe.male || 0) + Number(pe.female || 0) + Number(val || 0))
+                  }));
+                }}
+                sx={{ flex: 1 }}
+                InputLabelProps={{ shrink: true }}
+              />
+              <TextField
+                label="Total"
+                type="number"
+                size="small"
+                value={personsEmployed.total}
+                InputProps={{ readOnly: true }}
+                sx={{ flex: 1 }}
+                InputLabelProps={{ shrink: true }}
+              />
+            </Box>
+          </Grid2>
         </Grid2>
         <Stack direction="row" spacing={1} sx={{ mt: 3, justifyContent: 'flex-end' }}>
           <Button variant="contained" color="primary" type="submit">

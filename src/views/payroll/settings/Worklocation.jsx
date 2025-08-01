@@ -1,38 +1,34 @@
-import React, { useEffect, useState } from 'react';
+import { Delete, Edit } from '@mui/icons-material';
+import AddIcon from '@mui/icons-material/Add';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import {
+  Box,
+  Button,
+  IconButton,
+  Pagination,
+  Paper,
+  Stack,
   Table,
+  TableBody,
+  TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  TableCell,
-  TableBody,
-  Paper,
-  Button,
-  Stack,
-  Box,
-  Pagination,
-  Grid2,
   Typography
 } from '@mui/material';
-import MainCard from 'ui-component/cards/MainCard';
-import ActionCell from '../../../ui-component/extended/ActionCell';
-import WorkLocationDialog from './WorkLocationDialog';
-import { useNavigate, useSearchParams } from 'react-router-dom';
 import CircularProgress from '@mui/material/CircularProgress';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
-import Factory from 'utils/Factory';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
-import EmptyDataPlaceholder from 'ui-component/extended/EmptyDataPlaceholder';
-import DeleteDialog from '../../../ui-component/extended/DeleteDialog'; // adjust path accordingly
-import { IconButton, Tooltip } from '@mui/material'; // Add these if not already
-import { Edit, Delete } from '@mui/icons-material';
 import BulkUploadDialog from 'ui-component/extended/BulkUploadDialog';
-import AddIcon from '@mui/icons-material/Add';
+import EmptyDataPlaceholder from 'ui-component/extended/EmptyDataPlaceholder';
+import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
+import Factory from 'utils/Factory';
+import DeleteDialog from '../../../ui-component/extended/DeleteDialog';
+import WorkLocationDialog from './WorkLocationDialog';
 
-function Worklocation({ handleBack, handleNext }) {
-  const [openDialog, setOpenDialog] = useState(false);
+function Worklocation({ handleBack, handleNext, searchQuery = '', openDialog = false, setOpenDialog }) {
   const [workLocations, setWorkLocations] = useState([]);
   const [payrollid, setPayrollId] = useState(null);
   const [postType, setPostType] = useState('');
@@ -43,10 +39,19 @@ function Worklocation({ handleBack, handleNext }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [currentPage, setCurrentPage] = useState(1);
-  const paginatedData = workLocations.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+
+  // Filter workLocations based on searchQuery from props
+  const filteredWorkLocations = workLocations.filter((location) => {
+    const query = searchQuery.toLowerCase();
+    return (
+      location.location_name?.toLowerCase().includes(query) ||
+      location.location_code?.toLowerCase().includes(query) ||
+      location.address?.toLowerCase().includes(query)
+    );
+  });
+  const paginatedData = filteredWorkLocations.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
   const handlePageChange = (event, value) => setCurrentPage(value);
 
-  const handleOpenDialog = () => setOpenDialog(true);
   const handleCloseDialog = () => setOpenDialog(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
@@ -79,7 +84,13 @@ function Worklocation({ handleBack, handleNext }) {
     const { res, error } = await Factory('get', url, {});
     setLoading(false);
     if (res?.status_cd === 0 && Array.isArray(res?.data)) {
-      setWorkLocations(res.data);
+      // Move the last record (head office) to the first position
+      const data = [...res.data];
+      if (data.length > 0) {
+        const lastRecord = data.pop(); // Remove the last record
+        data.unshift(lastRecord); // Add it to the beginning
+      }
+      setWorkLocations(data);
     } else {
       setWorkLocations([]);
       dispatch(
@@ -97,7 +108,7 @@ function Worklocation({ handleBack, handleNext }) {
   const handleEdit = (location) => {
     setPostType('edit');
     setSelectedRecord(location);
-    handleOpenDialog();
+    setOpenDialog(true);
   };
 
   const handleDelete = async (location) => {
@@ -146,25 +157,7 @@ function Worklocation({ handleBack, handleNext }) {
     );
   }
   return (
-    <MainCard
-      title="Work Location"
-      subtitle="Manage your work locations for seamless operations"
-      action={
-        <Button
-          variant="contained"
-          size="small"
-          startIcon={<AddIcon />}
-          onClick={handleOpenDialog}
-          sx={{
-            textTransform: 'none',
-            fontWeight: 600,
-            fontSize: '0.9rem'
-          }}
-        >
-          Add Work Location
-        </Button>
-      }
-    >
+    <Box>
       <BulkUploadDialog
         open={openBulkDialog}
         handleClose={closeBulkDialog}
@@ -245,7 +238,7 @@ function Worklocation({ handleBack, handleNext }) {
                   <TableCell align="center">{location.address_state || 'N/A'}</TableCell>
                   <TableCell align="center">{location.employee_count || 0}</TableCell>
                   <TableCell align="center">
-                    {index !== 0 && (
+                    {(currentPage - 1) * rowsPerPage + index !== 0 && (
                       <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
                         <IconButton size="small" color="primary" onClick={() => handleEdit(location)}>
                           <Edit />
@@ -268,7 +261,7 @@ function Worklocation({ handleBack, handleNext }) {
           dialogData={{
             title: 'Delete Record',
             heading: 'Are you sure?',
-            description: 'This action will permanently delete the record.'
+            description: 'You want to delete this addess'
           }}
         />
       </TableContainer>
@@ -278,7 +271,7 @@ function Worklocation({ handleBack, handleNext }) {
         </Button>
         {workLocations.length > 0 && (
           <Pagination
-            count={Math.ceil(workLocations.length / rowsPerPage)}
+            count={Math.ceil(filteredWorkLocations.length / rowsPerPage)}
             page={currentPage}
             onChange={handlePageChange}
             shape="rounded"
@@ -289,7 +282,7 @@ function Worklocation({ handleBack, handleNext }) {
           Next
         </Button>
       </Box>
-    </MainCard>
+    </Box>
   );
 }
 

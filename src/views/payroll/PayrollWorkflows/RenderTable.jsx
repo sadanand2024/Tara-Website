@@ -31,8 +31,6 @@ const RenderTable = ({
   body_keys,
   handleEdit,
   handleDelete,
-  openDialog,
-  handleCloseDialog,
   from,
   handleBack,
   handleNext
@@ -45,6 +43,7 @@ const RenderTable = ({
   const [selectedRow, setSelectedRow] = useState(null);
   const [month, setMonth] = useState(null);
   const [financial_year, setFinancialYear] = useState(null);
+  const [lock_payroll, setLockPayroll] = useState(false);
   const handleOpenDeleteDialog = (row) => {
     setSelectedRow(row);
     setOpenDeleteDialog(true);
@@ -59,9 +58,11 @@ const RenderTable = ({
     const id = searchParams.get('payrollid');
     const month = searchParams.get('month');
     const financial_year = searchParams.get('financial_year');
+    const lock_payroll = searchParams.get('lock_payroll');
     if (id) setPayrollId(id);
     if (month) setMonth(month);
     if (financial_year) setFinancialYear(financial_year);
+    if (lock_payroll === 'true') setLockPayroll(true);
   }, [searchParams]);
 
   const handlePageChange = (_, value) => {
@@ -112,28 +113,41 @@ const RenderTable = ({
                     ))}
                     <TableCell align="center">
                       {from === 'Salary Revisions' ? (
-                        <Button
-                          variant="outlined"
-                          size="small"
-                          onClick={() => {
-                            if (row.employee_id !== '' && row.employee_id !== null) {
-                              navigate(
-                                `/app/payroll/settings/add-employee?employee_id=${row.employee_id}&payrollid=${payrollId}&from=${'Salary Revisions'}&tabValue=${Number(1)}&month=${month}&financial_year=${financial_year}`
-                              );
-                            }
-                          }}
-                        >
-                          Edit Pay Structure
-                        </Button>
+                        <Tooltip title={lock_payroll ? 'Cannot edit - Payroll is locked' : 'Edit record'}>
+                          <span>
+                            <Button
+                              variant="outlined"
+                              size="small"
+                              onClick={() => {
+                                if (row.employee_id !== '' && row.employee_id !== null) {
+                                  navigate(
+                                    `/app/payroll/settings/add-employee?employee_id=${row.employee_id}&payrollid=${payrollId}&from=${'Salary Revisions'}&tabValue=${Number(1)}&month=${month}&financial_year=${financial_year}`
+                                  );
+                                }
+                              }}
+                              disabled={lock_payroll}
+                            >
+                              Edit Pay Structure
+                            </Button>
+                          </span>
+                        </Tooltip>
                       ) : (
                         <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
-                          <IconButton size="small" color="primary" onClick={() => handleEdit(row)}>
-                            <Edit />
-                          </IconButton>
-                          {from !== 'Tds' ? (
-                            <IconButton size="small" color="error" onClick={() => handleOpenDeleteDialog(row)}>
-                              <Delete />
-                            </IconButton>
+                          <Tooltip title={lock_payroll ? 'Cannot edit - Payroll is locked' : 'Edit record'}>
+                            <span>
+                              <IconButton size="small" color="primary" onClick={() => handleEdit(row)} disabled={lock_payroll}>
+                                <Edit />
+                              </IconButton>
+                            </span>
+                          </Tooltip>
+                          {from !== 'Tds' && from !== 'Adhoc Bonus & Incentives' ? (
+                            <Tooltip title={lock_payroll ? 'Cannot delete - Payroll is locked' : 'Delete record'}>
+                              <span>
+                                <IconButton size="small" color="error" onClick={() => handleOpenDeleteDialog(row)} disabled={lock_payroll}>
+                                  <Delete />
+                                </IconButton>
+                              </span>
+                            </Tooltip>
                           ) : null}
                         </Box>
                       )}
@@ -175,8 +189,14 @@ const RenderTable = ({
         )}
         <Box>
           {from === 'Tds' ? (
-            <Button variant="contained" color="primary" onClick={() => navigate('/app/payroll')}>
-              Proceed to Dashboard
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() =>
+                navigate(`/app/payroll/employee-dashboard?payrollid=${payrollId}&month=${month}&financialYear=${financial_year}`)
+              }
+            >
+              Proceed to Monthly Payroll Dashboard
             </Button>
           ) : (
             <Button variant="contained" color="primary" onClick={() => handleNext()}>
