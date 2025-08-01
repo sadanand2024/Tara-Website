@@ -45,7 +45,7 @@ import {
   IconEye,
   IconPlus
 } from '@tabler/icons-react';
-import TaxTDSInfo from './TaxTDSInfo';
+import TaxTDSInfo from './components/TaxTDSInfo';
 
 const EmployeePortalDashboard = () => {
   const user = useSelector((state) => state.accountReducer.user);

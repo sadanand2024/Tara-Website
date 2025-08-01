@@ -16,7 +16,13 @@ import {
   IconFileText,
   IconPlus,
   IconClockHour4,
-  IconHistory
+  IconHistory,
+  IconReceipt,
+  IconCalculator,
+  IconPlane,
+  IconUserCheck,
+  IconFileInvoice,
+  IconShieldCheck
 } from '@tabler/icons-react';
 
 // constant
@@ -37,7 +43,13 @@ const icons = {
   IconFileText,
   IconPlus,
   IconClockHour4,
-  IconHistory
+  IconHistory,
+  IconReceipt,
+  IconCalculator,
+  IconPlane,
+  IconUserCheck,
+  IconFileInvoice,
+  IconShieldCheck
 };
 
 // Should Only work for Admin
@@ -56,115 +68,62 @@ const EmployeePortal = {
       breadcrumbs: false
     },
     {
-      id: 'leave-management',
-      title: 'Leaves',
-      type: 'collapse',
-      icon: icons.IconCalendarEvent,
-      children: [
-        {
-          id: 'apply-leave',
-          title: 'My Leaves',
-          type: 'item',
-          url: '/app/employee-portal/leave-management',
-          breadcrumbs: false
-        },
-        {
-          id: 'leave-balance',
-          title: 'Leave Balances',
-          type: 'item',
-          url: '/app/employee-portal/leave-balance',
-          breadcrumbs: false
-        },
-        {
-          id: 'leave-calendar',
-          title: 'Leave Calendar',
-          type: 'item',
-          url: '/app/employee-portal/leave-calendar',
-          breadcrumbs: false
-        },
-        {
-          id: 'holiday-calendar',
-          title: 'Holiday Calendar',
-          type: 'item',
-          url: '/app/employee-portal/holiday-calendar',
-          breadcrumbs: false
-        },
-        {
-          id: 'team-on-leave',
-          title: 'Team on Leave',
-          type: 'item',
-          url: '/app/employee-portal/team-on-leave',
-          breadcrumbs: false
-        }
-      ]
+      id: 'pay-slips',
+      title: 'Pay Slips',
+      type: 'item',
+      url: '/app/employee-portal/pay-slips',
+      icon: icons.IconReceipt,
+      breadcrumbs: false
     },
     {
-      id: 'attendance-management',
+      id: 'tax-tds',
+      title: 'Tax & TDS',
+      type: 'item',
+      url: '/app/employee-portal/tax-tds',
+      icon: icons.IconCalculator,
+      breadcrumbs: false
+    },
+    {
+      id: 'apply-leave',
+      title: 'Leave Tracker',
+      type: 'item',
+      url: '/app/employee-portal/leave-management',
+      icon: icons.IconPlane,
+      breadcrumbs: false
+    },
+    {
+      id: 'attendance',
       title: 'Attendance',
       type: 'item',
-      url: '/app/employee-portal/attendance-management',
+      url: '/app/employee-portal/attendance',
       icon: icons.IconClock,
       breadcrumbs: false
     },
     {
-      id: 'salary-management',
-      title: 'Salary',
-      type: 'collapse',
-      icon: icons.IconCurrencyDollar,
-      children: [
-        {
-          id: 'pay-slips',
-          title: 'Pay Slips',
-          type: 'item',
-          url: '/app/employee-portal/pay-slips',
-          breadcrumbs: false
-        },
-        {
-          id: 'ytd-reports',
-          title: 'YTD Reports',
-          type: 'item',
-          url: '/app/employee-portal/ytd-reports',
-          breadcrumbs: false
-        },
-        {
-          id: 'it-statements',
-          title: 'IT Statements',
-          type: 'item',
-          url: '/app/employee-portal/it-statements',
-          breadcrumbs: false
-        },
-        {
-          id: 'it-declaration',
-          title: 'IT Declaration',
-          type: 'item',
-          url: '/app/employee-portal/it-declaration',
-          breadcrumbs: false
-        },
-        {
-          id: 'loan-statement',
-          title: 'Loan Statement',
-          type: 'item',
-          url: '/app/employee-portal/loan-statement',
-          breadcrumbs: false
-        }
-      ]
-    },
-    {
-      id: 'upcoming-events',
-      title: 'Upcoming Events',
+      id: 'my-earnings',
+      title: 'My Earnings',
       type: 'item',
-      url: '/app/employee-portal/upcoming-events',
-      icon: icons.IconCalendarEvent,
+      url: '/app/employee-portal/my-earnings',
+      icon: icons.IconCurrencyDollar,
       breadcrumbs: false
     },
     {
-      id: 'documents',
-      title: 'Documents',
+      id: 'declarations',
+      title: 'Declarations',
       type: 'item',
-      url: '/app/employee-portal/documents',
+      url: '/app/employee-portal/declarations',
       icon: icons.IconFileText,
       breadcrumbs: false
+    },
+    {
+      id: 'form-16',
+      title: 'Form 16 & Compliances',
+      type: 'item',
+      url: '/app/employee-portal/form-16',
+      icon: icons.IconShieldCheck,
+      breadcrumbs: false
     }
+
     // {
     //   id: 'service-summary',
     //   title: 'service-summary',
