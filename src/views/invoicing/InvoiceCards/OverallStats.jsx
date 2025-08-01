@@ -56,6 +56,10 @@ const overallStatsData = [
   }
 ];
 const OverallStats = ({ theme, title, setTitle, dashboardData, getInvoices, getStatsData, businessId }) => {
+  const formatNumberIN = (value) => {
+    if (value === null || value === undefined || value === '' || isNaN(Number(value))) return 'NA';
+    return Number(value).toLocaleString('en-IN');
+  };
   return (
     <Grid2 container spacing={2} sx={{ mb: 4 }}>
       {overallStatsData.map((item, index) => (
@@ -100,7 +104,7 @@ const OverallStats = ({ theme, title, setTitle, dashboardData, getInvoices, getS
               <Typography variant="h4" color="text.secondary">
                 {item.title}
               </Typography>
-              <Typography variant="h3">₹&nbsp;{dashboardData[item.id] || 0}</Typography>
+              <Typography variant="h3">₹&nbsp;{formatNumberIN(dashboardData[item.id] || 0)}</Typography>
             </Stack>
           </SubCard>
         </Grid2>

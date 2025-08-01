@@ -175,7 +175,6 @@ const Header = ({ hamburgerDisplay = 'block' }) => {
         });
       }
     } catch (error) {
-      console.error('Error submitting personal KYC:', error);
       enqueueSnackbar('Failed to add personal details', {
         variant: 'error',
         anchorOrigin: { vertical: 'top', horizontal: 'right' }
@@ -184,7 +183,6 @@ const Header = ({ hamburgerDisplay = 'block' }) => {
       setIsSubmitting(false);
     }
   };
-
   return (
     <>
       {/* logo & toggler button */}
@@ -206,7 +204,7 @@ const Header = ({ hamburgerDisplay = 'block' }) => {
           }}
         >
           {/* <LogoSection /> */}
-          <Link to="/dashboard/business">
+          <Link to={userData.employee ? '/app/employee-portal/dashboard' : '/dashboard/business'}>
             <CardMedia component="img" src={Tarafirstlogo_png} alt="Tara First Logo" sx={{ width: 150 }} />
           </Link>
         </Box>
