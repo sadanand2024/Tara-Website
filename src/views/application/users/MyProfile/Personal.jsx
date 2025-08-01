@@ -1,12 +1,16 @@
+import React, { useEffect, useState } from 'react';
 import { Autocomplete, Box, Button, Card, Grid2, Stack, TextField, Typography } from '@mui/material';
 import { useFormik } from 'formik';
-import React from 'react';
 import * as Yup from 'yup';
 import { useSelector } from 'react-redux';
 import MainCard from 'ui-component/cards/MainCard';
+import Factory from 'utils/Factory';
 const PersonalInfo = () => {
-  const user = useSelector((state) => state.accountReducer.user);
-  const personal = user?.employee?.personal_details || {};
+ const user = useSelector((state) => state.accountReducer.user);
+  const profileId = user?.employee?.personal_details?.id;
+
+  const [personalInfo, setPersonalInfo] = useState({});
+  const [isLoading, setIsLoading] = useState(true);
 
   const mainFields = [
     {
@@ -69,15 +73,15 @@ const PersonalInfo = () => {
 
   const formik = useFormik({
     initialValues: {
-      dob: personal.dob || '',
-      blood_group: personal.blood_group || '',
-      nationality: personal.nationality || '',
-      marital_status: personal.marital_status || '',
-      place_of_birth: personal.place_of_birth || '',
-      residential_status: personal.residential_status || '',
-      father_name: personal.guardian_name || '',
-      religion: personal.religion || '',
-      physically_challenged: personal.physically_challenged || ''
+      dob:  '',
+      blood_group: '',
+      nationality:  'Indian',
+      marital_status:  '',
+      place_of_birth: '',
+      residential_status: '',
+      father_name:  '',
+      religion:  '',
+      physically_challenged: ''
     },
     validationSchema: Yup.object({
       dob: Yup.string().required('Date of birth is required'),
@@ -97,11 +101,46 @@ const PersonalInfo = () => {
   });
 
   const { values, setFieldValue, handleChange, handleBlur, errors, touched, handleSubmit } = formik;
+const getPersonalInfo = async () => {
+  setIsLoading(true);
+  const url = `/payroll/employee-profile/`;
+
+  try {
+    const { res } = await Factory('get', url);
+    if (res?.status_cd === 0 && res?.data?.personal_details) {
+      const data = res.data.personal_details;
+
+      formik.setValues({
+        dob: data?.dob || '',
+        blood_group: data?.blood_group || '',
+        nationality: data?.nationality || 'Indian',
+        marital_status: data?.marital_status || '',
+        place_of_birth: data?.place_of_birth || '',
+        residential_status: data?.residential_status || '',
+        father_name: data?.guardian_name || '',
+        religion: data?.religion || '',
+        physically_challenged: data?.physically_challenged || ''
+      });
+
+      setPersonalInfo(data);
+    }
+  } catch (error) {
+    console.error('Failed to fetch personal info:', error);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+
+
+   useEffect(() => {
+    getPersonalInfo();
+  }, []);
 
   const getLabelWithAsterisk = (label, isRequired = true) => (
     <Typography variant="subtitle1" mb={1} fontWeight={500}>
       {label}
-      {isRequired && <span style={{ color: 'red', fontSize: '1.2em' }}> *</span>}
+      {isRequired && <span style={{ color: 'red' }}> *</span>}
     </Typography>
   );
 

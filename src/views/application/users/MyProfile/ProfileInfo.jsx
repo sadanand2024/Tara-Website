@@ -1,18 +1,23 @@
 import { Avatar, Box, Button, Card, Grid2, Stack, TextField, Typography } from '@mui/material';
 import { useFormik } from 'formik';
-import React, { useEffect } from 'react';
+import React, { useEffect,useState } from 'react';
 import * as Yup from 'yup';
 import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
 import { useSelector } from 'react-redux';
 import MainCard from 'ui-component/cards/MainCard';
+import Factory from 'utils/Factory';
 const ProfileInfo = () => {
-  const employee = useSelector((state) => state.accountReducer.user?.employee);
+  // const employee = useSelector((state) => state.accountReducer.user?.employee);
+    const employee = useSelector((state) => state.accountReducer.user?.employee);
+  const profileId = employee?.profile?.id;
+  const [isLoading, setIsLoading] = useState(true);
+const [profileData, setProfileData] = useState(null);
 
   const mainFields = [
     // { label: 'Profile', name: 'profile', type: 'file', required: true },
     { label: 'Name', name: 'name', type: 'text', required: true },
     { label: 'Employee ID', name: 'associate_id', type: 'text', required: true },
-    { label: 'work_location', name: 'work_location', type: 'text', required: true },
+    { label: 'Work Location', name: 'work_location', type: 'text', required: true },
     { label: 'Company mail', name: 'work_email', type: 'text', required: true },
     { label: 'Mobile Number', name: 'mobile_number', type: 'text', required: true }
   ];
@@ -43,24 +48,43 @@ const ProfileInfo = () => {
 
   const { values, setFieldValue, handleChange, handleBlur, touched, errors, handleSubmit } = formik;
 
-  // Pre-fill form using Redux data
-  useEffect(() => {
-    if (employee) {
-      const profileData = employee.profile || {};
 
-      setFieldValue('name', `${profileData.first_name || ''} ${profileData.last_name || ''}`);
-      setFieldValue('associate_id', profileData.associate_id || '');
-      setFieldValue('work_location', profileData.work_location?.toString() || '');
-      setFieldValue('work_email', profileData.work_email || '');
-      setFieldValue('mobile_number', profileData.mobile_number || '');
-      setFieldValue('profile', employee.photo || '');
+
+const getProfileInfo = async () => {
+  setIsLoading(true);
+  const url = `/payroll/employee-profile/`;
+
+  try {
+    const { res } = await Factory('get', url);
+    if (res?.status_cd === 0 && res?.data?.profile) {
+      const data = res.data.profile;
+
+      formik.setValues({
+         name: `${data?.first_name || ''} ${data?.last_name || ''}`.trim(),
+        associate_id: data?.associate_id || '',
+        work_location: data?.work_location || '',
+        work_email: data?.work_email || '',
+        mobile_number: data?.mobile_number || ''
+       
+      });
+
+      setProfileInfo(data);
     }
-  }, [employee, setFieldValue]);
+  } catch (error) {
+    console.error('Failed to fetch personal info:', error);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+ useEffect(() => {
+  getProfileInfo();
+}, []);
 
   const getLabelWithAsterisk = (label, isRequired) => (
     <Typography variant="subtitle1" mb={1} fontWeight={500}>
       {label}
-      {isRequired && <span style={{ color: 'red', fontSize: '1.2em' }}> *</span>}
+      {isRequired && <span style={{ color: 'red' }}> *</span>}
     </Typography>
   );
 

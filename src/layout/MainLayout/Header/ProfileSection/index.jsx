@@ -347,7 +347,7 @@ export default function ProfileSection() {
                           <>
                             <ListItemButton
                               sx={{ borderRadius: `${borderRadius}px` }}
-                              selected={selectedIndex === 0}
+                              selected={selectedIndex === 3}
                               onClick={(event) => handleListItemClick(event, 3, '/apps/user/MyProfile')}
                             >
                               <ListItemIcon>
@@ -357,7 +357,7 @@ export default function ProfileSection() {
                                 primary={
                                   <Typography variant="body2">
                                     {/* <FormattedMessage id="my-profile" /> */}
-                                     <FormattedMessage id="my-profile" defaultMessage="My Profile" />
+                                    <FormattedMessage id="my-profile" defaultMessage="My Profile" />
                                   </Typography>
                                 }
                               />
@@ -423,7 +423,9 @@ export default function ProfileSection() {
                         )}
 
                         {/* Always visible Logout */}
-                        <ListItemButton sx={{ borderRadius: `${borderRadius}px` }} selected={selectedIndex === 3} onClick={handleLogout}>
+                        <ListItemButton sx={{ borderRadius: `${borderRadius}px` }} selected={selectedIndex === 4} onClick={handleLogout}>
+                    
+
                           <ListItemIcon>
                             <IconLogout stroke={1.5} size="20px" />
                           </ListItemIcon>
