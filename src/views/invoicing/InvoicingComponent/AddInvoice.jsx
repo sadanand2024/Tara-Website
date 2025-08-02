@@ -391,7 +391,8 @@ const InvoiceDetails = ({
       // console.log(businessDetailsData);
       const supplierStateDetails = (businessDetailsData.gst_details || []).find((item) => item.gstin);
 
-      const supplierState = normalizeState(supplierStateDetails.state);
+      // const supplierState = normalizeState(supplierStateDetails.state);
+      const supplierState = normalizeState(supplierStateDetails?.state);
 
       const placeOfSupply = normalizeState(values.place_of_supply);
       const billingState = normalizeState(values.billing_address.state);
