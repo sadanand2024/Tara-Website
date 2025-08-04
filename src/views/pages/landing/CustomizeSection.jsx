@@ -1,12 +1,5 @@
 // material-ui
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import CardMedia from '@mui/material/CardMedia';
-import Container from '@mui/material/Container';
-import Grid from '@mui/material/Grid2';
-// import Stack from '@mui/material/Stack';
-import {Stack, useTheme } from '@mui/material';
-import Typography from '@mui/material/Typography';
+import { Box, Button, CardMedia, Container, Grid2, Stack, Typography, useTheme } from '@mui/material';
 import Document from 'assets/images/landing/Document.png';
 import invoicing from 'assets/images/landing/invoicing.png';
 import payroll from 'assets/images/landing/payroll.png';
@@ -14,7 +7,6 @@ import Virtualcfo from 'assets/images/landing/Virtualcfo.png';
 
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-
 
 // assets
 
@@ -30,7 +22,6 @@ export default function CustomizeSection() {
   const moduleId = searchParams.get('id');
   const type = searchParams.get('type');
   const context = searchParams.get('context');
-
 
   const [hoveredCard, setHoveredCard] = useState(null);
 
@@ -58,18 +49,15 @@ export default function CustomizeSection() {
   ];
 
   return (
-    <Container sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: -25, }}>
-      <Grid container spacing={{ xs:1.5, sm: 2.5, md: 3, lg:5 }} sx={{ justifyContent: 'center', alignItems: 'center' }}>
-        {/* Section title */}
-
-        {/* New Card Section */}
-        <Grid size={12} sx={{ mt: { xs:10, md: 10,lg:10 }, ml: { xs:1, lg:2 } }}>
-          <Grid container spacing={{ xs:0, sm: 3, md: 10, lg:7}} justifyContent="center">
+    <Container sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: -25 }}>
+      <Grid2 container spacing={{ xs: 1.5, sm: 2.5, md: 3, lg: 5 }} sx={{ justifyContent: 'center', alignItems: 'center' }}>
+        <Grid2 size={{ xs: 12, sm: 12, md: 12, lg: 12 }} sx={{ mt: { xs: 10, md: 10, lg: 10 }, ml: { xs: 1, lg: 2 } }}>
+          <Grid2 container spacing={{ xs: 0, sm: 3, md: 10, lg: 7 }} justifyContent="center">
             {serviceCards.map((card, index) => (
-              <Grid
+              <Grid2
                 key={index}
-                size={{ xs: 6, sm: 6, md: 3,lg:3 }}
-                sx={{ 
+                size={{ xs: 12, sm: 6, md: 3, lg: 3 }}
+                sx={{
                   textAlign: 'center',
                   display: 'flex',
                   justifyContent: 'center'
@@ -77,156 +65,155 @@ export default function CustomizeSection() {
                 onMouseEnter={() => setHoveredCard(index)}
                 onMouseLeave={() => setHoveredCard(null)}
               >
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    p: 0,
+                    borderRadius: '8px',
+                    bgcolor: '#fff',
+                    boxShadow: 1,
+                    width: { xs: '181px', sm: '280px', md: '280px', lg: '280px' },
+                    height: { xs: '387px', sm: '413px', md: '413px', lg: '413px' },
+                    ml: { xs: 0, sm: -4 },
+                    mt: { xs: '30px', sm: 0 },
+                    transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
+                    position: 'relative',
+                    border: '1px solid #e0e0e0',
+                    overflow: 'hidden',
+                    '&:hover': {
+                      transform: 'translateY(-10px)',
+                      boxShadow: 4
+                    }
+                  }}
+                >
+                  <CardMedia
+                    component="img"
+                    image={card.image}
+                    alt={card.title}
+                    sx={{
+                      width: { xs: '181px', sm: '280px', md: '280px', lg: '280px' },
+                      height: { xs: '229px', sm: '289px', md: '289px', lg: '289px' },
+                      objectFit: 'cover',
+                      display: 'block',
+                      borderTopLeftRadius: '8px',
+                      borderTopRightRadius: '8px'
+                    }}
+                  />
                   <Box
                     sx={{
+                      transition: 'transform 0.3s ease-in-out',
+                      transform: hoveredCard === index ? 'translateY(-70px)' : 'translateY(0)',
+                      bgcolor: '#fff',
+                      padding: '20px',
+                      position: 'absolute',
+                      alignItems: { xs: 'flex-start', sm: 'center', md: 'flex-start', lg: 'flex-start' }, // Fix here
+                      width: { xs: '181px', sm: '280px', md: '280px', lg: '280px' },
+                      height: { xs: '158px', sm: '115px', md: '115px', lg: '123px' },
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      zIndex: 1,
+                      // width: '100%',
                       display: 'flex',
                       flexDirection: 'column',
-                      alignItems: 'center',
-                      p: 0,
-                      borderRadius: '8px',
-                      bgcolor: '#fff',
-                      boxShadow: 1,
-                      width: { xs: '181px', sm: '280px', md: '280px', lg: '280px' },
-                      height: { xs: '387px', sm: '413px', md: '413px', lg: '413px' },
-                      ml: { xs: 0, sm: -4 },
-                      mt: { xs: '30px', sm: 0 },
-                      transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
-                      position: 'relative',
-                      border: '1px solid #e0e0e0',
-                      overflow: 'hidden',
-                      '&:hover': {
-                        transform: 'translateY(-10px)',
-                        boxShadow: 4
-                      }
+                      // alignItems: 'flex-start', // ✅ Ensure left alignment
+                      textAlign: 'left',
+                      fontWeight: 600,
+
+                      borderRadius: '0 0 8px 8px',
+                      boxSizing: 'border-box'
+                      // height: '115px'
                     }}
                   >
-                    <CardMedia
-                      component="img"
-                      image={card.image}
-                      alt={card.title}
-                      sx={{
-                        width: { xs: '181px', sm: '280px', md: '280px', lg: '280px' },
-                        height: { xs: '229px', sm: '289px', md: '289px', lg: '289px' },
-                        objectFit: 'cover',
-                        display: 'block',
-                        borderTopLeftRadius: '8px',
-                        borderTopRightRadius: '8px'
-                      }}
-                    />
-                    <Box
-                      sx={{
-                        transition: 'transform 0.3s ease-in-out',
-                        transform: hoveredCard === index ? 'translateY(-70px)' : 'translateY(0)',
-                        bgcolor: '#fff',
-                        padding: '20px',
-                        position: 'absolute',
-                        alignItems: { xs: 'flex-start', sm: 'center', md: 'flex-start', lg: 'flex-start' }, // Fix here
-                        width: { xs: '181px', sm: '280px', md: '280px', lg: '280px' },
-                        height: { xs: '158px', sm: '115px', md: '115px', lg: '123px' },
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        zIndex: 1,
-                        // width: '100%',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        // alignItems: 'flex-start', // ✅ Ensure left alignment
-                        textAlign: 'left',
-                        fontWeight: 600,
+                    <Typography variant="h3" sx={{ mt: -1, mb: 1, color: '#0023AF', textAlign: 'left' }}>
+                      {card.title}
+                    </Typography>
 
-                        borderRadius: '0 0 8px 8px',
-                        boxSizing: 'border-box',
-                        // height: '115px'
+                    <Typography
+                      variant="h5"
+                      sx={{
+                        mt: 0,
+                        mb: 2,
+                        fontWeight: 400,
+                        color: 'text.secondary',
+                        fontStyle: 'Inter',
+                        WebkitLineClamp: 3,
+                        WebkitBoxOrient: 'vertical',
+                        alignItems: { xs: 'flex-start', sm: 'center', md: 'flex-start', lg: 'flex-start' } // Fix here
                       }}
                     >
-                      <Typography variant="h3" sx={{ mt:-1, mb: 1, color: '#0023AF', textAlign: 'left' }}>
-                        {card.title}
-                      </Typography>
-                        
-                      <Typography
-                        variant="h5"
+                      {card.description}
+                    </Typography>
+                    <Stack direction="row" spacing={2} alignItems="flex-start" justifyContent="flex-start" sx={{ mt: 1 }}>
+                      <Box
                         sx={{
-                          mt: 0,
-                          mb: 2,
-                          fontWeight: 400,
-                          color: 'text.secondary',
-                          fontStyle: 'Inter',
-                          WebkitLineClamp: 3,
-                          WebkitBoxOrient: 'vertical',
+                          display: { xs: 'block', sm: 'none' },
                           alignItems: { xs: 'flex-start', sm: 'center', md: 'flex-start', lg: 'flex-start' } // Fix here
                         }}
                       >
-                        {card.description}
-                      </Typography>
-                      <Stack direction="row" spacing={2} alignItems="flex-start" justifyContent="flex-start"sx={{mt:1}} >
-                        <Box sx={{ display: { xs: 'block', sm: 'none' }, alignItems: { xs: 'flex-start', sm: 'center', md: 'flex-start', lg: 'flex-start' } // Fix here
-}}>
-                          <Typography
+                        <Typography
                           onClick={() => navigate(`/register?id=${moduleId}&context=${context}&type=${type}`)}
-
-                            variant="h5"
-                            sx={{
-                              mt: 0,
-                              color: '#0023AF',
-                              fontWeight: 500,
-                              cursor: 'pointer',
-                              '&:hover': {
-                                textDecoration: 'underline'
-                              }
-                            }}
-                          >
-                            Sign Up &rarr;
-                          </Typography>
-                        </Box>
-                        <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
-                      <Button
-                      onClick={() => navigate(`/register?id=${moduleId}&context=${context}&type=${type}`)}
-
-                        variant="contained"
-                        color="secondary"
+                          variant="h5"
                           sx={{
-                          textTransform: 'none',
-                          fontWeight: 500,
+                            mt: 0,
+                            color: '#0023AF',
+                            fontWeight: 500,
+                            cursor: 'pointer',
+                            '&:hover': {
+                              textDecoration: 'underline'
+                            }
+                          }}
+                        >
+                          Sign Up &rarr;
+                        </Typography>
+                      </Box>
+                      <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
+                        <Button
+                          onClick={() => navigate(`/register?id=${moduleId}&context=${context}&type=${type}`)}
+                          variant="contained"
+                          color="secondary"
+                          sx={{
+                            textTransform: 'none',
+                            fontWeight: 500,
                             width: '115px',
                             height: '31px',
-                            ml:-2,
+                            ml: -2,
                             padding: '8px 20px',
-                              borderRadius: '4px', // You can customize this
-                            minWidth: 'unset', // Optional: remove default minWidth from MUI
-                      }}
+                            borderRadius: '4px', // You can customize this
+                            minWidth: 'unset' // Optional: remove default minWidth from MUI
+                          }}
                         >
-                    Try Now
-                    </Button>
+                          Try Now
+                        </Button>
 
-                          <Button
-                          
-                      onClick={() => navigate(`/book-consultation?id=${moduleId}&context=${context}&type=${type}`)}
-
+                        <Button
+                          onClick={() => navigate(`/book-consultation?id=${moduleId}&context=${context}&type=${type}`)}
                           variant="Outlined"
                           color="primary"
                           sx={{
-                          textTransform: 'none',
-                          fontWeight: 500,
+                            textTransform: 'none',
+                            fontWeight: 500,
                             width: '115px',
                             height: '31px',
-                            ml:1,
+                            ml: 1,
                             padding: '8px 20px',
-                              borderRadius: '4px', // You can customize this
-                            minWidth: 'unset', // Optional: remove default minWidth from MUI
-                            }}
-                          >
-                            Know More
-                          </Button>
-                        </Box>
-                      </Stack>
-                    </Box>
+                            borderRadius: '4px', // You can customize this
+                            minWidth: 'unset' // Optional: remove default minWidth from MUI
+                          }}
+                        >
+                          Know More
+                        </Button>
+                      </Box>
+                    </Stack>
                   </Box>
-                
-              </Grid>
+                </Box>
+              </Grid2>
             ))}
-          </Grid>
-        </Grid>
-      </Grid>
+          </Grid2>
+        </Grid2>
+      </Grid2>
     </Container>
   );
 }
