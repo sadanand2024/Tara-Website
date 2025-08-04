@@ -1,6 +1,5 @@
 import {
   Autocomplete,
-  Box,
   CircularProgress,
   Pagination,
   Paper,
@@ -12,22 +11,33 @@ import {
   TableHead,
   TableRow,
   TextField,
-  Typography
+  Typography,
+  Box
 } from '@mui/material';
+import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import EmptyDataPlaceholder from 'ui-component/extended/EmptyDataPlaceholder';
 import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
+import Factory from 'utils/Factory';
 import { generateFinancialYears } from 'utils/FinancialYearsList';
 import MainCard from '../../../../ui-component/cards/MainCard';
-import Factory from 'utils/factory';
+let baseURL = import.meta.env.VITE_APP_BASE_URL;
+
+const getCurrentFinancialYear = () => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth() + 1;
+  return month < 4 ? `${year - 1}-${year}` : `${year}-${year + 1}`;
+};
 
 const PaySlips = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [paySlips, setPaySlips] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchParams] = useSearchParams();
-  const [selectedFinancialYear, setSelectedFinancialYear] = useState(null);
+  // const [selectedFinancialYear, setSelectedFinancialYear] = useState(null);
+  const [selectedFinancialYear, setSelectedFinancialYear] = useState(getCurrentFinancialYear());
 
   const financialYearOptions = generateFinancialYears(10);
 
@@ -97,8 +107,21 @@ const PaySlips = () => {
 
       const { res } = await Factory('get', `/payroll/employee-payslips-by-financial-year/?financial_year=${financialYear}`, {});
 
-      if (res?.status_cd === 0 && Array.isArray(res?.data)) {
-        setPaySlips(res.data);
+      if (res?.status_cd === 0 && Array.isArray(res.data)) {
+        // Transform data to expected frontend shape
+        const formatted = res.data.map((item) => ({
+          id: item.id,
+          employee: item.employee,
+          month_year: item.month_year,
+          month: item.month,
+          financial_year: item.financial_year,
+          gross_salary: item.gross_salary,
+          deduction: item.deduction,
+          tds: item.tds,
+          net_salary: item.net_salary
+        }));
+        setPaySlips(formatted);
+
       } else {
         setPaySlips([]);
       }
@@ -116,10 +139,7 @@ const PaySlips = () => {
       const response = await axios.get(
         `${baseURL}/payroll/employee-monthly-salary-template?employee_id=${employee_id}&month=${month}&financial_year=${financial_year}&year=${new Date().getFullYear()}`,
         {
-          responseType: 'arraybuffer',
-          headers: {
-            Authorization: `Bearer ${tokens.access_token}`
-          }
+          responseType: 'arraybuffer'
         }
       );
       if (response.data.byteLength > 0) {
@@ -134,10 +154,26 @@ const PaySlips = () => {
       console.error('Error fetching payslip:', error);
     }
   };
+  useEffect(() => {
+    const year = searchParams.get('financialYear') || getCurrentFinancialYear();
+    setSelectedFinancialYear(year);
+    fetchPaySlips(year);
+  }, []);
 
   return (
-    <MainCard>
+    <Box sx={{ p: 3 }}>
       <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between">
+        <Stack spacing={1} sx={{ mb: 3 }}>
+          {/* Title */}
+          <Typography variant="h4" gutterBottom>
+            PaySlips
+          </Typography>
+
+          {/* Subtitle / Description */}
+          <Typography variant="body1" color="textSecondary">
+            View and download your monthly payslips with complete salary and tax details.
+          </Typography>
+        </Stack>
         <Stack direction="row" spacing={2} alignItems="center">
           <Typography variant="h5" sx={{ fontWeight: 500, color: 'text.primary' }}>
             Select Financial Year
@@ -164,92 +200,80 @@ const PaySlips = () => {
           />
         </Stack>
       </Stack>
-
-      {/* Pay Slips Table */}
-      <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 1, mt: 4 }}>
-        <Table size="small">
-          <TableHead
-            sx={{
-              backgroundColor: 'primary.main',
-              '& .MuiTableCell-root': {
-                color: '#ffffff !important'
-              }
-            }}
-          >
-            <TableRow>
-              <TableCell>Pay Period</TableCell>
-              <TableCell>Gross Pay</TableCell>
-              <TableCell>Deductions</TableCell>
-              <TableCell>Income Tax (TDS)</TableCell>
-              <TableCell>Net Pay</TableCell>
-              <TableCell>Action</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {loading ? (
+      <MainCard sx={{ mt: 2 }}>
+        <Typography variant="h5" color="textSecondary">
+         Yearly Pay Slip Summary – {selectedFinancialYear}
+        </Typography>
+        {/* Pay Slips Table */}
+        <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 1, mt: 2 }}>
+          <Table size="small">
+            <TableHead
+              sx={{
+                backgroundColor: 'primary.main',
+                '& .MuiTableCell-root': {
+                  color: '#ffffff !important'
+                }
+              }}
+            >
               <TableRow>
-                <TableCell colSpan={6} align="center" sx={{ height: 300 }}>
-                  <CircularProgress />
-                </TableCell>
+                <TableCell>Pay Period</TableCell>
+                <TableCell>Gross Pay</TableCell>
+                <TableCell>Deductions</TableCell>
+                <TableCell>Income Tax (TDS)</TableCell>
+                <TableCell>Net Pay</TableCell>
+                <TableCell>Action</TableCell>
               </TableRow>
-            ) : paginatedData.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={6} align="center" sx={{ height: 300 }}>
-                  <EmptyDataPlaceholder title="No Pay Slips Found" subtitle="Select a financial year to view your pay slips." />
-                </TableCell>
-              </TableRow>
-            ) : (
-              paginatedData.map((paySlip) => (
-                <TableRow key={paySlip.id}>
-                  <TableCell>{paySlip.month}</TableCell>
-                  <TableCell>{paySlip.gross_pay}</TableCell>
-                  <TableCell>{paySlip.deductions}</TableCell>
-                  <TableCell>{paySlip.income}</TableCell>
-                  <TableCell>{paySlip.net_pay}</TableCell>
-                  {/* <TableCell>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        cursor: 'pointer',
-                        color: 'primary.main',
-                        textDecoration: 'underline',
-                        whiteSpace: 'nowrap'
-                      }}
-                      onClick={() => downloadPaySlip(paySlip.download_url)}
-                    >
-                      Download
-                    </Typography>
-                  </TableCell> */}
-                  <TableCell>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        cursor: 'pointer',
-                        color: 'primary.main',
-                        textDecoration: 'underline',
-                        whiteSpace: 'nowrap',
-                        textAlign: 'left'
-                      }}
-                      onClick={() => {
-                        viewPayslip(paySlip.employee, paySlip.month, selectedFinancialYear);
-                      }}
-                    >
-                      View / Download
-                    </Typography>
+            </TableHead>
+            <TableBody>
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={6} align="center" sx={{ height: 300 }}>
+                    <CircularProgress />
                   </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+              ) : paginatedData.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} align="center" sx={{ height: 300 }}>
+                    <EmptyDataPlaceholder title="No Pay Slips Found" subtitle="Select a financial year to view your pay slips." />
+                  </TableCell>
+                </TableRow>
+              ) : (
+                paginatedData.map((paySlip) => (
+                  <TableRow key={paySlip.id}>
+                    <TableCell>{paySlip.month_year}</TableCell>
+                    <TableCell>{paySlip.gross_salary}</TableCell>
+                    <TableCell>{paySlip.deduction}</TableCell>
+                    <TableCell>{paySlip.tds}</TableCell>
+                    <TableCell>{paySlip.net_salary}</TableCell>
+                    <TableCell>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          cursor: 'pointer',
+                          color: 'primary.main',
+                          textDecoration: 'underline',
+                          whiteSpace: 'nowrap',
+                          textAlign: 'left'
+                        }}
+                        onClick={() => viewPayslip(paySlip.employee, paySlip.month, paySlip.financial_year)}
+                      >
+                        View / Download
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
 
-      {paySlips.length > 0 && (
-        <Stack direction="row" justifyContent="center" alignItems="center" sx={{ py: 2 }}>
-          <Pagination count={totalPages} page={currentPage} onChange={handlePageChange} shape="rounded" color="primary" />
-        </Stack>
-      )}
-    </MainCard>
+        {paySlips.length > 0 && (
+          <Stack direction="row" justifyContent="center" alignItems="center" sx={{ py: 2 }}>
+            <Pagination count={totalPages} page={currentPage} onChange={handlePageChange} shape="rounded" color="primary" />
+          </Stack>
+        )}
+      </MainCard>
+    </Box>
   );
 };
 
