@@ -60,7 +60,7 @@ const TaxTDS = () => {
   };
 
   return (
-    <Box sx={{ p: 3 }}>
+    <Box sx={{ p: 1 }}>
       <Typography variant="h4" gutterBottom>
         Tax & TDS
       </Typography>

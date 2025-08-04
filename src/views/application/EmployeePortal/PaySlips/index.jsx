@@ -104,6 +104,7 @@ const PaySlips = () => {
   const fetchPaySlips = async (financialYear) => {
     try {
       setLoading(true);
+
       const { res } = await Factory('get', `/payroll/employee-payslips-by-financial-year/?financial_year=${financialYear}`, {});
 
       if (res?.status_cd === 0 && Array.isArray(res.data)) {
@@ -120,6 +121,7 @@ const PaySlips = () => {
           net_salary: item.net_salary
         }));
         setPaySlips(formatted);
+
       } else {
         setPaySlips([]);
       }
