@@ -91,28 +91,24 @@ const PaySlips = () => {
   //     setLoading(false);
   //   }
   // };
-const fetchPaySlips = async (financialYear) => {
-  try {
-    setLoading(true);
-    
-    const { res } = await Factory(
-      'get',
-      `/payroll/employee-payslips-by-financial-year/?financial_year=${financialYear}`,
-      {}
-    );
+  const fetchPaySlips = async (financialYear) => {
+    try {
+      setLoading(true);
 
-    if (res?.status_cd === 0 && Array.isArray(res?.data)) {
-      setPaySlips(res.data);
-    } else {
+      const { res } = await Factory('get', `/payroll/employee-payslips-by-financial-year/?financial_year=${financialYear}`, {});
+
+      if (res?.status_cd === 0 && Array.isArray(res?.data)) {
+        setPaySlips(res.data);
+      } else {
+        setPaySlips([]);
+      }
+    } catch (error) {
+      console.error('Error fetching pay slips:', error);
       setPaySlips([]);
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.error('Error fetching pay slips:', error);
-    setPaySlips([]);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   const viewPayslip = async (employee_id, month, financial_year) => {
     try {
