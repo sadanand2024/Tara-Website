@@ -294,6 +294,7 @@ const Header = ({ hamburgerDisplay = 'block' }) => {
                     sx={{
                       p: 1,
                       display: 'flex',
+                      flexWrap: 'wrap',
                       gap: 1,
                       justifyContent: 'center'
                     }}
