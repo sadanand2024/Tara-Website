@@ -16,13 +16,14 @@ import {
 } from '@mui/material';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import EmptyDataPlaceholder from 'ui-component/extended/EmptyDataPlaceholder';
 import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
 import Factory from 'utils/Factory';
 import { generateFinancialYears } from 'utils/FinancialYearsList';
 import MainCard from '../../../../ui-component/cards/MainCard';
 let baseURL = import.meta.env.VITE_APP_BASE_URL;
+
 
 const getCurrentFinancialYear = () => {
   const today = new Date();
@@ -38,6 +39,7 @@ const PaySlips = () => {
   const [searchParams] = useSearchParams();
   // const [selectedFinancialYear, setSelectedFinancialYear] = useState(null);
   const [selectedFinancialYear, setSelectedFinancialYear] = useState(getCurrentFinancialYear());
+  const navigate = useNavigate();
 
   const financialYearOptions = generateFinancialYears(10);
 
@@ -245,7 +247,7 @@ const PaySlips = () => {
                     <TableCell>{paySlip.deduction}</TableCell>
                     <TableCell>{paySlip.tds}</TableCell>
                     <TableCell>{paySlip.net_salary}</TableCell>
-                    <TableCell>
+                    {/* <TableCell>
                       <Typography
                         variant="body2"
                         sx={{
@@ -259,6 +261,37 @@ const PaySlips = () => {
                       >
                         View / Download
                       </Typography>
+                    </TableCell> */}
+                     <TableCell>
+                      <Stack direction="row" spacing={1}>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            cursor: 'pointer',
+                            color: 'primary.main',
+                            textDecoration: 'underline'
+                          }}
+                          onClick={() =>
+                            navigate(
+                              `/app/employee-portal/payslipview?employee_id=${paySlip.employee}&month=${paySlip.month}&financial_year=${paySlip.financial_year}`
+                            )
+                          }
+                        >
+                          View
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: 'primary.main' }}>/</Typography>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            cursor: 'pointer',
+                            color: 'primary.main',
+                            textDecoration: 'underline'
+                          }}
+                          onClick={() => viewPayslip(paySlip.employee, paySlip.month, paySlip.financial_year)}
+                        >
+                          Download
+                        </Typography>
+                      </Stack>
                     </TableCell>
                   </TableRow>
                 ))
