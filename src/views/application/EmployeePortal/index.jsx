@@ -24,7 +24,9 @@ import {
   TableRow,
   Dialog,
   DialogContent,
-  alpha
+  alpha,
+  Autocomplete,
+  TextField
 } from '@mui/material';
 import { useSelector } from 'store';
 import {
@@ -41,13 +43,29 @@ import {
   IconPlus
 } from '@tabler/icons-react';
 import TaxTDSInfo from './components/TaxTDSInfo';
+import { useNavigate } from 'react-router-dom';
+import MainCard from 'ui-component/cards/MainCard';
+import { generateFinancialYears } from 'utils/FinancialYearsList';
 
 const EmployeePortalDashboard = () => {
+  const navigate = useNavigate();
   const user = useSelector((state) => state.accountReducer.user);
   const [showTaxDetails, setShowTaxDetails] = useState(false);
 
   // Static check-in time to avoid re-renders
   const checkInTime = '09:00 AM';
+  
+  const getCurrentFinancialYear = () => {
+    const currentYear = new Date().getFullYear();
+    return `${currentYear}-${currentYear + 1}`;
+  };
+
+  const years = generateFinancialYears(10);
+  const [selectedYear, setSelectedYear] = useState(getCurrentFinancialYear());
+
+  const handleYearChange = (event, newValue) => {
+    setSelectedYear(newValue);
+  };
 
   // Safety check - if user is not an employee, show a message
   if (!user?.employee) {
@@ -86,31 +104,19 @@ const EmployeePortalDashboard = () => {
   });
 
   return (
-    <Box sx={{ p: 1, background: '#f8fafc', minHeight: '100vh' }}>
-      {/* Header Section */}
-      <Card
-        sx={{
-          mb: 1,
-          p: 1,
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          color: 'white',
-          boxShadow: '0 8px 32px rgba(102, 126, 234, 0.3)',
-          borderRadius: 2,
-          transition: 'all 0.3s ease',
-          '&:hover': {
-            transform: 'translateY(-2px)',
-            boxShadow: '0 12px 40px rgba(102, 126, 234, 0.4)'
-          }
-        }}
-      >
-        <Typography variant="h6" sx={{ fontWeight: 600, color: 'white', mb: 0.25 }}>
-          Welcome, {userName}! 👋
-        </Typography>
-        <Typography variant="body2" sx={{ fontSize: '0.9rem', opacity: 0.9 }}>
-          April 2024 ▼
-        </Typography>
-      </Card>
-
+    <MainCard 
+      title={`Welcome, ${userName}! 👋`}   
+      secondary={
+        <Stack direction="row" spacing={2} alignItems="center">
+          <Autocomplete
+            value={selectedYear}
+            onChange={handleYearChange}
+            options={years}
+            renderInput={(params) => <TextField {...params} label="Financial Year" size="small" sx={{ minWidth: 200 }} />}
+          />
+        </Stack>
+      }
+    >
       <Grid2 container spacing={1} sx={{ mb: 1 }}>
         {/* Welcome and Check-in */}
         <Grid2 size={{ xs: 12, md: 4 }}>
@@ -118,7 +124,7 @@ const EmployeePortalDashboard = () => {
             elevation={0}
             sx={{
               borderRadius: 3,
-              height: 200,
+              height: 220,
               width: '100%',
               border: `1.5px solid #E5EAF2`,
               boxShadow: '0 2px 8px 0 rgba(24, 39, 75, 0.05)',
@@ -205,7 +211,7 @@ const EmployeePortalDashboard = () => {
             elevation={0}
             sx={{
               borderRadius: 3,
-              height: 200,
+              height: 220,
               width: '100%',
               border: `1.5px solid #E5EAF2`,
               boxShadow: '0 2px 8px 0 rgba(24, 39, 75, 0.05)',
@@ -245,22 +251,20 @@ const EmployeePortalDashboard = () => {
 
             {/* Row 2: Description/Paragraph */}
             <Box sx={{ width: '100%' }}>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+              <Typography variant="h5" sx={{ mb: 1, }}>
                 This month: ₹98,262
               </Typography>
-              <Typography variant="body2" sx={{ mb: 2, fontSize: '0.8rem', fontWeight: 500 }}>
+              <Typography variant="h5" sx={{ mb: 2, }}>
                 YTD: ₹6,20,000
               </Typography>
             </Box>
 
             {/* Row 3: Count and View Button */}
-            <Box display="flex" alignItems="center" justifyContent="space-between" mt={0}>
-              <Typography variant="h4" fontWeight={700} sx={{ color: '#0A1F44', mb: 0 }}>
-                ₹98K
-              </Typography>
+            <Box display="flex" alignItems="center" justifyContent="center" mt={0}>
               <Button
                 variant="contained"
                 disableElevation
+                onClick={() => navigate('/app/employee-portal/my-earnings')}
                 sx={{
                   background: '#E6FAF0',
                   color: '#10b981',
@@ -280,7 +284,7 @@ const EmployeePortalDashboard = () => {
                   }
                 }}
               >
-                View
+                View Salary Breakdown
               </Button>
             </Box>
           </Paper>
@@ -292,7 +296,7 @@ const EmployeePortalDashboard = () => {
             elevation={0}
             sx={{
               borderRadius: 3,
-              height: 200,
+              height: 220,
               width: '100%',
               border: `1.5px solid #E5EAF2`,
               boxShadow: '0 2px 8px 0 rgba(24, 39, 75, 0.05)',
@@ -330,21 +334,42 @@ const EmployeePortalDashboard = () => {
               </Typography>
             </Box>
 
-            {/* Row 2: Description/Paragraph */}
+            {/* Row 2: Payslip List */}
             <Box sx={{ width: '100%' }}>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                April 2024, March 2024, Feb 2024
-              </Typography>
+              <Box sx={{ mb: 1 }}>
+                <Box display="flex" alignItems="center" justifyContent="space-between">
+                  <Typography variant="body2" fontWeight={600} sx={{ color: '#0A1F44', fontSize: '0.9rem' }}>
+                    April 2024
+                  </Typography>
+                  <IconDownload size={16} style={{ color: '#6b7280', cursor: 'pointer' }} />
+                </Box>
+              </Box>
+
+              <Box sx={{ mb: 1 }}>
+                <Box display="flex" alignItems="center" justifyContent="space-between">
+                  <Typography variant="body2" fontWeight={600} sx={{ color: '#0A1F44', fontSize: '0.9rem' }}>
+                    March 2024
+                  </Typography>
+                  <IconDownload size={16} style={{ color: '#6b7280', cursor: 'pointer' }} />
+                </Box>
+              </Box>
+
+              <Box sx={{ mb: 2 }}>
+                <Box display="flex" alignItems="center" justifyContent="space-between">
+                  <Typography variant="body2" fontWeight={600} sx={{ color: '#0A1F44', fontSize: '0.9rem' }}>
+                    Feb 2024
+                  </Typography>
+                  <IconDownload size={16} style={{ color: '#6b7280', cursor: 'pointer' }} />
+                </Box>
+              </Box>
             </Box>
 
             {/* Row 3: Count and View Button */}
-            <Box display="flex" alignItems="center" justifyContent="space-between" mt={0}>
-              <Typography variant="h4" fontWeight={700} sx={{ color: '#0A1F44', mb: 0 }}>
-                03
-              </Typography>
+            <Box display="flex" alignItems="center" justifyContent="center" mt={0}>
               <Button
                 variant="contained"
                 disableElevation
+                onClick={() => navigate('/app/employee-portal/pay-slips')}
                 sx={{
                   background: '#FFF7E3',
                   color: '#f59e0b',
@@ -364,7 +389,7 @@ const EmployeePortalDashboard = () => {
                   }
                 }}
               >
-                View
+                View All
               </Button>
             </Box>
           </Paper>
@@ -379,7 +404,7 @@ const EmployeePortalDashboard = () => {
             elevation={0}
             sx={{
               borderRadius: 3,
-              height: 200,
+              height: 220,
               width: '100%',
               border: `1.5px solid #E5EAF2`,
               boxShadow: '0 2px 8px 0 rgba(24, 39, 75, 0.05)',
@@ -417,44 +442,83 @@ const EmployeePortalDashboard = () => {
               </Typography>
             </Box>
 
-            {/* Row 2: Description/Paragraph */}
+            {/* Row 2: Leave Table */}
             <Box sx={{ width: '100%' }}>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                This month: 2 Paid leaves, 1 LoP
-              </Typography>
-              <Typography variant="body2" sx={{ mb: 2, fontSize: '0.8rem', fontWeight: 500 }}>
-                YTD: 5 Paid leaves, 3 LoP
-              </Typography>
+              <TableContainer>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell sx={{ border: 'none', p: 0.5, fontSize: '0.75rem', fontWeight: 600, color: '#6b7280' }}>Type</TableCell>
+                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.75rem', fontWeight: 600, color: '#6b7280' }}>Paid leaves</TableCell>
+                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.75rem', fontWeight: 600, color: '#6b7280' }}>LoPs</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', color: '#374151' }}>This month</TableCell>
+                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', fontWeight: 600, color: '#0A1F44' }}>2</TableCell>
+                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', fontWeight: 600, color: '#0A1F44' }}>1</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', color: '#374151' }}>YTD</TableCell>
+                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', fontWeight: 600, color: '#0A1F44' }}>5</TableCell>
+                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', fontWeight: 600, color: '#0A1F44' }}>3</TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </TableContainer>
             </Box>
 
-            {/* Row 3: Count and View Button */}
-            <Box display="flex" alignItems="center" justifyContent="space-between" mt={0}>
-              <Typography variant="h4" fontWeight={700} sx={{ color: '#0A1F44', mb: 0 }}>
-                08
-              </Typography>
+            {/* Row 3: Buttons */}
+            <Box display="flex" alignItems="center" justifyContent="space-between" mt={1}>
               <Button
-                variant="contained"
+                variant="outlined"
                 disableElevation
                 sx={{
-                  background: '#F3E8FF',
+                  border: '1px solid #8b5cf6',
                   color: '#8b5cf6',
                   fontWeight: 500,
                   borderRadius: 2,
                   textTransform: 'none',
                   boxShadow: 'none',
-                  minWidth: 48,
+                  minWidth: 80,
                   height: 32,
-                  fontSize: 14,
-                  px: 2,
+                  fontSize: 12,
+                  px: 1.5,
                   py: 0.5,
                   transition: 'background 0.2s, color 0.2s',
                   '&:hover': {
                     background: '#8b5cf6',
-                    color: '#fff'
+                    color: '#fff',
+                    borderColor: '#8b5cf6'
                   }
                 }}
               >
-                View
+                View Leave Ledger
+              </Button>
+              <Button
+                variant="contained"
+                disableElevation
+                startIcon={<IconPlus size={16} />}
+                sx={{
+                  background: '#ef4444',
+                  color: '#fff',
+                  fontWeight: 500,
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  boxShadow: 'none',
+                  minWidth: 80,
+                  height: 32,
+                  fontSize: 12,
+                  px: 1.5,
+                  py: 0.5,
+                  transition: 'background 0.2s, color 0.2s',
+                  '&:hover': {
+                    background: '#dc2626'
+                  }
+                }}
+              >
+                + APPLY
               </Button>
             </Box>
           </Paper>
@@ -466,7 +530,7 @@ const EmployeePortalDashboard = () => {
             elevation={0}
             sx={{
               borderRadius: 3,
-              height: 200,
+              height: 220,
               width: '100%',
               border: `1.5px solid #E5EAF2`,
               boxShadow: '0 2px 8px 0 rgba(24, 39, 75, 0.05)',
@@ -516,19 +580,16 @@ const EmployeePortalDashboard = () => {
 
             {/* Row 2: Description/Paragraph */}
             <Box sx={{ width: '100%' }}>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+              <Typography variant="h5" sx={{ mb: 1 }}>
                 This month: ₹24,600
               </Typography>
-              <Typography variant="body2" sx={{ mb: 2, fontSize: '0.8rem', fontWeight: 500 }}>
+              <Typography variant="h5" sx={{ mb: 2 }}>
                 YTD: ₹1,800
               </Typography>
             </Box>
 
             {/* Row 3: Count and View Button */}
-            <Box display="flex" alignItems="center" justifyContent="space-between" mt={0}>
-              <Typography variant="h4" fontWeight={700} sx={{ color: '#0A1F44', mb: 0 }}>
-                ₹26K
-              </Typography>
+            <Box display="flex" alignItems="center" justifyContent="center" mt={0}>
               <Button
                 variant="contained"
                 disableElevation
@@ -564,7 +625,7 @@ const EmployeePortalDashboard = () => {
             elevation={0}
             sx={{
               borderRadius: 3,
-              height: 200,
+              height: 220,
               width: '100%',
               border: `1.5px solid #E5EAF2`,
               boxShadow: '0 2px 8px 0 rgba(24, 39, 75, 0.05)',
@@ -610,10 +671,7 @@ const EmployeePortalDashboard = () => {
             </Box>
 
             {/* Row 3: Count and View Button */}
-            <Box display="flex" alignItems="center" justifyContent="space-between" mt={0}>
-              <Typography variant="h4" fontWeight={700} sx={{ color: '#0A1F44', mb: 0 }}>
-                00
-              </Typography>
+            <Box display="flex" alignItems="center" justifyContent="center" mt={0}>
               <Button
                 variant="contained"
                 disableElevation
@@ -651,7 +709,7 @@ const EmployeePortalDashboard = () => {
             elevation={0}
             sx={{
               borderRadius: 3,
-              height: 200,
+              height: 220,
               width: '100%',
               border: `1.5px solid #E5EAF2`,
               boxShadow: '0 2px 8px 0 rgba(24, 39, 75, 0.05)',
@@ -661,74 +719,92 @@ const EmployeePortalDashboard = () => {
               flexDirection: 'column',
               justifyContent: 'space-between',
               cursor: 'pointer',
-              background: 'linear-gradient(135deg, #FDF2F8 0%, #fff 100%)',
+              background: 'linear-gradient(135deg, #F1F5F9 0%, #fff 100%)',
               '&:hover': {
                 boxShadow: '0 4px 16px 0 rgba(64, 66, 74, 0.18)',
                 borderColor: '#ec4899',
-                background: 'linear-gradient(135deg, #FDF2F8 0%, #fff 100%)'
+                background: 'linear-gradient(135deg, #F1F5F9 0%, #fff 100%)'
               }
             }}
           >
             {/* Row 1: Icon and Heading */}
-            <Box display="flex" alignItems="center" gap={2} mb={1}>
-              <Avatar
-                variant="circular"
-                sx={{
-                  width: 44,
-                  height: 44,
-                  bgcolor: '#fff',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-              >
-                <IconCalendar size={28} style={{ color: '#ec4899' }} />
-              </Avatar>
-              <Typography variant="h6" fontWeight={800} fontSize={15} sx={{ color: '#0A1F44', mb: 0 }}>
-                My Attendance
-              </Typography>
-            </Box>
-
-            {/* Row 2: Description/Paragraph */}
-            <Box sx={{ width: '100%' }}>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                This month: 19 Present, 1 LoP, 2 Paid leaves
-              </Typography>
-              <Typography variant="body2" sx={{ mb: 2, fontSize: '0.8rem', fontWeight: 500 }}>
-                YTD: 124 Present, 3 LoP, 5 Paid leaves
-              </Typography>
-            </Box>
-
-            {/* Row 3: Count and View Button */}
-            <Box display="flex" alignItems="center" justifyContent="space-between" mt={0}>
-              <Typography variant="h4" fontWeight={700} sx={{ color: '#0A1F44', mb: 0 }}>
-                22
-              </Typography>
+            <Box display="flex" alignItems="center" justifyContent="space-between" mb={1}>
+              <Box display="flex" alignItems="center" gap={2}>
+                <Avatar
+                  variant="circular"
+                  sx={{
+                    width: 44,
+                    height: 44,
+                    bgcolor: '#fff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <IconCalendar size={28} style={{ color: '#ec4899' }} />
+                </Avatar>
+                <Typography variant="h6" fontWeight={800} fontSize={15} sx={{ color: '#0A1F44', mb: 0 }}>
+                  My Attendance
+                </Typography>
+              </Box>
               <Button
                 variant="contained"
+                size="small"
                 disableElevation
+                startIcon={<IconEye size={14} />}
                 sx={{
-                  background: '#FDF2F8',
-                  color: '#ec4899',
-                  fontWeight: 500,
-                  borderRadius: 2,
+                  background: '#3b82f6',
+                  color: '#fff',
                   textTransform: 'none',
                   boxShadow: 'none',
-                  minWidth: 48,
-                  height: 32,
-                  fontSize: 14,
-                  px: 2,
-                  py: 0.5,
                   transition: 'background 0.2s, color 0.2s',
                   '&:hover': {
-                    background: '#ec4899',
-                    color: '#fff'
+                    background: '#2563eb'
                   }
                 }}
               >
-                View
+                View Full Attendance
               </Button>
             </Box>
+
+            {/* Row 2: Attendance Table */}
+            <Box sx={{ width: '100%' }}>
+              <TableContainer>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell sx={{ border: 'none', p: 0.5, fontSize: '0.75rem', fontWeight: 600, color: '#6b7280' }}></TableCell>
+                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.75rem', fontWeight: 600, color: '#6b7280' }}>This month</TableCell>
+                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.75rem', fontWeight: 600, color: '#6b7280' }}>YTD</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', color: '#374151' }}>Working days</TableCell>
+                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', fontWeight: 600, color: '#0A1F44' }}>22</TableCell>
+                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', fontWeight: 600, color: '#0A1F44' }}>132</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', color: '#374151' }}>Present</TableCell>
+                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', fontWeight: 600, color: '#0A1F44' }}>19</TableCell>
+                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', fontWeight: 600, color: '#0A1F44' }}>124</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', color: '#374151' }}>LoP</TableCell>
+                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', fontWeight: 600, color: '#0A1F44' }}>1</TableCell>
+                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', fontWeight: 600, color: '#0A1F44' }}>3</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', color: '#374151' }}>Paid leaves</TableCell>
+                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', fontWeight: 600, color: '#0A1F44' }}>2</TableCell>
+                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', fontWeight: 600, color: '#0A1F44' }}>5</TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Box>
+
+
           </Paper>
         </Grid2>
 
@@ -738,7 +814,7 @@ const EmployeePortalDashboard = () => {
             elevation={0}
             sx={{
               borderRadius: 3,
-              height: 200,
+              height: 220,
               width: '100%',
               border: `1.5px solid #E5EAF2`,
               boxShadow: '0 2px 8px 0 rgba(24, 39, 75, 0.05)',
@@ -774,12 +850,12 @@ const EmployeePortalDashboard = () => {
               <Typography variant="h6" fontWeight={800} fontSize={15} sx={{ color: '#0A1F44', mb: 0 }}>
                 My PF Contribution
               </Typography>
-              EPF Tracker (Employee + Employer Contribution)
+
             </Box>
 
             {/* Row 2: Description/Paragraph */}
             <Box sx={{ width: '100%' }}>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+              <Typography variant="body2" sx={{ mb: 1 }}>
                 EPF Tracker (Employee + Employer Contribution)
               </Typography>
               <Typography variant="body2" sx={{ mb: 1 }}>
@@ -791,10 +867,8 @@ const EmployeePortalDashboard = () => {
             </Box>
 
             {/* Row 3: Count and View Button */}
-            <Box display="flex" alignItems="center" justifyContent="space-between" mt={0}>
-              <Typography variant="h4" fontWeight={700} sx={{ color: '#0A1F44', mb: 0 }}>
-                ₹43K
-              </Typography>
+            <Box display="flex" alignItems="center" justifyContent="center" mt={0}>
+
               <Button
                 variant="contained"
                 disableElevation
@@ -829,7 +903,7 @@ const EmployeePortalDashboard = () => {
             elevation={0}
             sx={{
               borderRadius: 3,
-              height: 200,
+              height: 220,
               width: '100%',
               border: `1.5px solid #E5EAF2`,
               boxShadow: '0 2px 8px 0 rgba(24, 39, 75, 0.05)',
@@ -869,19 +943,28 @@ const EmployeePortalDashboard = () => {
 
             {/* Row 2: Description/Paragraph */}
             <Box sx={{ width: '100%' }}>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                Applied: ₹12,500 | Approved: ₹10,200
-              </Typography>
-              <Typography variant="body2" sx={{ mb: 2, fontSize: '0.8rem', fontWeight: 500 }}>
-                Processed: ₹8,750 | Pending: ₹1,800
-              </Typography>
+              <Box display="flex" alignItems="center" justifyContent="space-between">
+                <Typography variant="h5" sx={{ mb: 1 }}>
+                  Applied: ₹12,500
+                </Typography>
+                <Typography variant="h5" sx={{ mb: 1 }}>
+                  Approved: ₹10,200
+                </Typography>
+              </Box>
+
+              <Box display="flex" alignItems="center" justifyContent="space-between">
+                <Typography variant="h5" sx={{ mb: 1 }}>
+                  Processed: ₹8,750
+                </Typography>
+                <Typography variant="h5" sx={{ mb: 2, }}>
+                  Pending: ₹1,800
+                </Typography>
+              </Box>
+
             </Box>
 
             {/* Row 3: Count and View Button */}
-            <Box display="flex" alignItems="center" justifyContent="space-between" mt={0}>
-              <Typography variant="h4" fontWeight={700} sx={{ color: '#0A1F44', mb: 0 }}>
-                ₹33K
-              </Typography>
+            <Box display="flex" alignItems="center" justifyContent="center" mt={0}>
               <Button
                 variant="contained"
                 disableElevation
@@ -917,7 +1000,7 @@ const EmployeePortalDashboard = () => {
           <TaxTDSInfo onClose={() => setShowTaxDetails(false)} />
         </DialogContent>
       </Dialog>
-    </Box>
+    </MainCard>
   );
 };
 
