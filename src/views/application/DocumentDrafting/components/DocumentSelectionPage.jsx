@@ -1,5 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Typography, Button, Paper, Grid2, TextField } from '@mui/material';
+import React, { useState, useEffect, useRef } from 'react';
+import {
+  Box,
+  Typography,
+  Button,
+  Paper,
+  Grid2,
+  TextField,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow
+} from '@mui/material';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import FavoriteIcon from '@mui/icons-material/Favorite';
@@ -10,15 +23,12 @@ import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import { useSelector, useDispatch } from 'react-redux';
 import { openSnackbar } from 'store/slices/snackbar';
-import DraftingActionCell from './DraftingActionCell';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import SearchIcon from '@mui/icons-material/Search';
-import InputAdornment from '@mui/material/InputAdornment';
 import CircularProgressComponent from 'utils/CircularProgressComponent';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import Autocomplete from '@mui/material/Autocomplete';
-
+import { Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 
 export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, search = '' }) {
   const { contextId } = useParams();
@@ -42,6 +52,11 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
   const [fileUrl, setFileUrl] = useState(null); // Store file URL for download
   const [favoriteStates, setFavoriteStates] = useState({});
   const [favouriteIdMap, setFavouriteIdMap] = useState({}); // Map documentId -> favouriteId
+  // Add dialog state for table editing
+  const [tableDialogOpen, setTableDialogOpen] = useState(false);
+  const [tableDialogData, setTableDialogData] = useState(null);
+  const [tableDialogTableId, setTableDialogTableId] = useState(null);
+
   // Add: API call to add to favourites
   const handleToggleFavorite = async (id) => {
     // If already favorite, delete via API
@@ -57,30 +72,36 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
               delete newMap[id];
               return newMap;
             });
-            dispatch(openSnackbar({
-              open: true,
-              message: 'Removed from favourites',
-              variant: 'alert',
-              alert: { color: 'success' },
-              close: false
-            }));
+            dispatch(
+              openSnackbar({
+                open: true,
+                message: 'Removed from favourites',
+                variant: 'alert',
+                alert: { color: 'success' },
+                close: false
+              })
+            );
           } else {
-            dispatch(openSnackbar({
+            dispatch(
+              openSnackbar({
+                open: true,
+                message: result.message || 'Failed to remove from favourites',
+                variant: 'alert',
+                alert: { color: 'error' },
+                close: false
+              })
+            );
+          }
+        } catch (err) {
+          dispatch(
+            openSnackbar({
               open: true,
-              message: result.message || 'Failed to remove from favourites',
+              message: 'Failed to remove from favourites',
               variant: 'alert',
               alert: { color: 'error' },
               close: false
-            }));
-          }
-        } catch (err) {
-          dispatch(openSnackbar({
-            open: true,
-            message: 'Failed to remove from favourites',
-            variant: 'alert',
-            alert: { color: 'error' },
-            close: false
-          }));
+            })
+          );
         }
       }
       return;
@@ -92,30 +113,36 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
       if (result.res && result.res.status_cd === 0) {
         setFavoriteStates((prev) => ({ ...prev, [id]: true }));
         setFavouriteIdMap((prev) => ({ ...prev, [id]: result.res.id }));
-        dispatch(openSnackbar({
-          open: true,
-          message: 'Added to favourites',
-          variant: 'alert',
-          alert: { color: 'success' },
-          close: false
-        }));
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'Added to favourites',
+            variant: 'alert',
+            alert: { color: 'success' },
+            close: false
+          })
+        );
       } else {
-        dispatch(openSnackbar({
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: result.message || 'Failed to add to favourites',
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
+      }
+    } catch (err) {
+      dispatch(
+        openSnackbar({
           open: true,
-          message: result.message || 'Failed to add to favourites',
+          message: 'Failed to add to favourites',
           variant: 'alert',
           alert: { color: 'error' },
           close: false
-        }));
-      }
-    } catch (err) {
-      dispatch(openSnackbar({
-        open: true,
-        message: 'Failed to add to favourites',
-        variant: 'alert',
-        alert: { color: 'error' },
-        close: false
-      }));
+        })
+      );
     }
   };
 
@@ -123,12 +150,12 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
   useEffect(() => {
     if (!contextId) return;
     Factory('get', `/documentdrafting/favourites/by-draft/${contextId}/`, {}, {})
-      .then(response => {
+      .then((response) => {
         const data = response?.res?.data || response?.res || response;
         // Build a map of { [documentId]: true } and { [documentId]: favouriteId }
         const favMap = {};
         const favIdMap = {};
-        (data || []).forEach(fav => {
+        (data || []).forEach((fav) => {
           const docId = typeof fav.document === 'object' ? fav.document.id : fav.document;
           favMap[docId] = true;
           favIdMap[docId] = fav.id;
@@ -156,7 +183,9 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
             const draftDetailIdFromApi = draft_info && draft_info.length > 0 ? draft_info[0].id : null;
             setDraftDetailId(draftDetailIdFromApi);
             setFields(fields || []);
-            setFormValues(draft_data || (fields ? Object.fromEntries(fields.filter(f => f.field_name).map(f => [f.field_name, ''])) : {}));
+            setFormValues(
+              draft_data || (fields ? Object.fromEntries(fields.filter((f) => f.field_name).map((f) => [f.field_name, ''])) : {})
+            );
             try {
               const resp = await fetch(template);
               if (!resp.ok) throw new Error('Failed to fetch template HTML');
@@ -181,7 +210,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
       setLoading(true);
       setError(null);
       Factory('get', `/documentdrafting/documents/?draft_id=${contextId}`)
-        .then(result => {
+        .then((result) => {
           if (result.res && result.res.status_cd === 0) {
             const docs = result.res.data?.results || result.res.data || [];
             setTemplates(docs);
@@ -213,30 +242,36 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
         const contextEventId = result.res.id;
         // Navigate to split view route
         navigate(`/app/drafting/fill/${contextEventId}`);
-        dispatch(openSnackbar({
-          open: true,
-          message: 'Drafting context created',
-          variant: 'alert',
-          alert: { color: 'success' },
-          close: false
-        }));
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'Drafting context created',
+            variant: 'alert',
+            alert: { color: 'success' },
+            close: false
+          })
+        );
       } else {
-        dispatch(openSnackbar({
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: result.message || 'Failed to create document drafting context',
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
+      }
+    } catch (err) {
+      dispatch(
+        openSnackbar({
           open: true,
-          message: result.message || 'Failed to create document drafting context',
+          message: 'Failed to create document drafting context',
           variant: 'alert',
           alert: { color: 'error' },
           close: false
-        }));
-      }
-    } catch (err) {
-      dispatch(openSnackbar({
-        open: true,
-        message: 'Failed to create document drafting context',
-        variant: 'alert',
-        alert: { color: 'error' },
-        close: false
-      }));
+        })
+      );
     }
   };
 
@@ -251,20 +286,36 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
     html = html.replace(/\{\%[\s\S]*?\%\}/g, '');
     // Use formik.values in splitView, otherwise formValues
     const valuesToUse = splitView && formik ? formik.values : formValues;
+
     Object.entries(valuesToUse).forEach(([key, value]) => {
-      let displayValue = value;
-      // If this key is a date field, format it
-      const field = fields.find(f => f.field_name === key);
-      if (field && field.field_type === 'date' && value) {
-        // Format YYYY-MM-DD to DD-MM-YYYY if value is in that format
-        if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-          const [yyyy, mm, dd] = value.split('-');
-          displayValue = `${dd}-${mm}-${yyyy}`;
+      // Handle array values (for table columns)
+      if (Array.isArray(value)) {
+        // For array fields like years, turn_overs, etc.
+        const field = fields.find((f) => f.field_name === key);
+        if (field && field.metadata && field.metadata.type === 'table-column') {
+          // Replace array placeholders like {{years[i]}} with actual values
+          value.forEach((item, index) => {
+            const placeholder = `{{${key}[${index}]}}`;
+            const highlighted = `<span id="preview-field-${key}-${index}" style="background:rgba(54, 80, 174, 0.24); border-radius: 4px; padding: 0 4px;">${item || ''}</span>`;
+            html = html.replaceAll(placeholder, highlighted);
+          });
         }
+      } else {
+        // Handle regular string/number values
+        let displayValue = value;
+        // If this key is a date field, format it
+        const field = fields.find((f) => f.field_name === key);
+        if (field && field.field_type === 'date' && value) {
+          // Format YYYY-MM-DD to DD-MM-YYYY if value is in that format
+          if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+            const [yyyy, mm, dd] = value.split('-');
+            displayValue = `${dd}-${mm}-${yyyy}`;
+          }
+        }
+        // Wrap in highlight span with id for scroll sync
+        const highlighted = `<span id="preview-field-${key}" style="background:rgba(54, 80, 174, 0.24); border-radius: 4px; padding: 0 4px;">${displayValue}</span>`;
+        html = html.replaceAll(new RegExp(`\{\{\s*${key}\s*\}\}`, 'g'), value ? highlighted : '');
       }
-      // Wrap in highlight span with id for scroll sync
-      const highlighted = `<span id="preview-field-${key}" style="background:rgba(54, 80, 174, 0.24); border-radius: 4px; padding: 0 4px;">${displayValue}</span>`;
-      html = html.replaceAll(new RegExp(`\{\{\s*${key}\s*\}\}`, 'g'), value ? highlighted : '');
     });
     // Extract and scope <style> tags from the HTML
     let scopedStyles = '';
@@ -319,32 +370,46 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
     }
   };
 
-  // Utility to format date from YYYY-MM-DD to DD-MM-YYYY
+  // Utility to format date from YYYY-MM-DD to DD/MM/YYYY
   function formatDateToDDMMYYYY(dateStr) {
-    if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+    if (typeof dateStr !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
     const [yyyy, mm, dd] = dateStr.split('-');
-    return `${dd}-${mm}-${yyyy}`;
+    return `${dd}/${mm}/${yyyy}`;
   }
 
   // Save Draft handler
   const handleSaveDraft = async () => {
     // Build a validation schema that ignores is_required, only checks metadata validations
     const draftValidationShape = {};
-    fields.forEach(field => {
-      let validator = Yup.string();
-      if (field.metadata && field.metadata.validations && field.metadata.validations.regex) {
-        validator = validator
-          .notRequired()
-          .test(
-            'matches-regex-if-not-empty',
-            field.metadata.validations.error_message || 'Invalid value',
-            value => {
-              if (!value) return true; // allow empty
-              return new RegExp(field.metadata.validations.regex).test(value);
-            }
+    fields.forEach((field) => {
+      // Handle table columns (arrays)
+      if (field.metadata && field.metadata.type === 'table-column') {
+        let validator = Yup.array().of(Yup.string());
+        // If regex, apply to each element
+        if (field.metadata.validations && field.metadata.validations.regex) {
+          validator = Yup.array().of(
+            Yup.string()
+              .notRequired()
+              .test('matches-regex-if-not-empty', field.metadata.validations.error_message || 'Invalid value', (value) => {
+                if (!value) return true;
+                return new RegExp(field.metadata.validations.regex).test(value);
+              })
           );
+        }
+        draftValidationShape[field.field_name] = validator;
+      } else {
+        // Regular fields
+        let validator = Yup.string();
+        if (field.metadata && field.metadata.validations && field.metadata.validations.regex) {
+          validator = validator
+            .notRequired()
+            .test('matches-regex-if-not-empty', field.metadata.validations.error_message || 'Invalid value', (value) => {
+              if (!value) return true;
+              return new RegExp(field.metadata.validations.regex).test(value);
+            });
+        }
+        draftValidationShape[field.field_name] = validator;
       }
-      draftValidationShape[field.field_name] = validator;
     });
     const draftValidationSchema = Yup.object().shape(draftValidationShape);
     try {
@@ -353,37 +418,53 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
       // Only mark fields with metadata validations as touched and set errors
       const errors = {};
       const touched = {};
-      validationError.inner.forEach(err => {
+      validationError.inner.forEach((err) => {
         errors[err.path] = err.message;
         touched[err.path] = true;
       });
       formik.setTouched(touched);
       formik.setErrors(errors);
-      dispatch(openSnackbar({
-        open: true,
-        message: 'Please fix the highlighted fields with format errors before saving draft.',
-        variant: 'alert',
-        alert: { color: 'error' },
-        close: false
-      }));
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Please fix the highlighted fields with format errors before saving draft.',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
       return; // Do not save if not valid
     }
     if (!contextEventId) {
-      dispatch(openSnackbar({
-        open: true,
-        message: 'Context event ID missing. Please try again.',
-        variant: 'alert',
-        alert: { color: 'error' },
-        close: false
-      }));
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Context event ID missing. Please try again.',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
       return;
     }
     setSavingDraft(true);
     // Format all date fields before sending
     const formattedFormValues = { ...formik.values };
-    fields.forEach(field => {
+    fields.forEach((field) => {
       if (field.field_type === 'date' && formattedFormValues[field.field_name]) {
-        formattedFormValues[field.field_name] = formatDateToDDMMYYYY(formattedFormValues[field.field_name]);
+        if (Array.isArray(formattedFormValues[field.field_name])) {
+          // Handle date arrays (for table columns)
+          formattedFormValues[field.field_name] = formattedFormValues[field.field_name].map((dateStr) => {
+            if (dateStr && /^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+              const [yyyy, mm, dd] = dateStr.split('-');
+              return `${dd}/${mm}/${yyyy}`;
+            }
+            return dateStr;
+          });
+        } else {
+          // Handle single date fields
+          formattedFormValues[field.field_name] = formatDateToDDMMYYYY(formattedFormValues[field.field_name]);
+        }
       }
     });
     const payload = {
@@ -403,21 +484,25 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
           } else {
             fetchAndSetFileUrl(result.res.id);
           }
-          dispatch(openSnackbar({
-            open: true,
-            message: 'Draft saved successfully',
-            variant: 'alert',
-            alert: { color: 'success' },
-            close: false
-          }));
+          dispatch(
+            openSnackbar({
+              open: true,
+              message: 'Draft saved successfully',
+              variant: 'alert',
+              alert: { color: 'success' },
+              close: false
+            })
+          );
         } else {
-          dispatch(openSnackbar({
-            open: true,
-            message: result.message || 'Failed to save draft',
-            variant: 'alert',
-            alert: { color: 'error' },
-            close: false
-          }));
+          dispatch(
+            openSnackbar({
+              open: true,
+              message: result.message || 'Failed to save draft',
+              variant: 'alert',
+              alert: { color: 'error' },
+              close: false
+            })
+          );
         }
       } else {
         // Subsequent: PUT
@@ -428,31 +513,37 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
           } else {
             fetchAndSetFileUrl(draftDetailId);
           }
-          dispatch(openSnackbar({
-            open: true,
-            message: 'Draft updated successfully',
-            variant: 'alert',
-            alert: { color: 'success' },
-            close: false
-          }));
+          dispatch(
+            openSnackbar({
+              open: true,
+              message: 'Draft updated successfully',
+              variant: 'alert',
+              alert: { color: 'success' },
+              close: false
+            })
+          );
         } else {
-          dispatch(openSnackbar({
-            open: true,
-            message: result.message || 'Failed to update draft',
-            variant: 'alert',
-            alert: { color: 'error' },
-            close: false
-          }));
+          dispatch(
+            openSnackbar({
+              open: true,
+              message: result.message || 'Failed to update draft',
+              variant: 'alert',
+              alert: { color: 'error' },
+              close: false
+            })
+          );
         }
       }
     } catch (err) {
-      dispatch(openSnackbar({
-        open: true,
-        message: 'Failed to save draft',
-        variant: 'alert',
-        alert: { color: 'error' },
-        close: false
-      }));
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Failed to save draft',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     }
     setSavingDraft(false);
   };
@@ -461,18 +552,40 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
   const handleFinalize = async () => {
     // Build a validation schema that checks both is_required and metadata validations
     const finalizeValidationShape = {};
-    fields.forEach(field => {
-      let validator = Yup.string();
-      if (field.is_required) {
-        validator = validator.required(`${field.label || field.field_name} is required`);
+    fields.forEach((field) => {
+      if (field.metadata && field.metadata.type === 'table-column') {
+        // Get the number of rows required from the control field
+        const tableGroup = tableGroups.find((g) => g.columns.some((c) => c.field_name === field.field_name));
+        const noOfRows =
+          tableGroup && tableGroup.control
+            ? formik.values[tableGroup.control.field_name] || tableGroup.control.metadata.default_value || 1
+            : 1;
+        let validator = Yup.array().of(Yup.string());
+        if (field.is_required) {
+          validator = validator.min(noOfRows, `Please fill all ${noOfRows} rows`).of(Yup.string().required(`${field.label} is required`));
+        }
+        if (field.metadata.validations && field.metadata.validations.regex) {
+          validator = validator.of(
+            Yup.string()
+              .required(`${field.label} is required`)
+              .matches(new RegExp(field.metadata.validations.regex), field.metadata.validations.error_message || 'Invalid value')
+          );
+        }
+        finalizeValidationShape[field.field_name] = validator;
+      } else {
+        // Regular fields
+        let validator = Yup.string();
+        if (field.is_required) {
+          validator = validator.required(`${field.label || field.field_name} is required`);
+        }
+        if (field.metadata && field.metadata.validations && field.metadata.validations.regex) {
+          validator = validator.matches(
+            new RegExp(field.metadata.validations.regex),
+            field.metadata.validations.error_message || 'Invalid value'
+          );
+        }
+        finalizeValidationShape[field.field_name] = validator;
       }
-      if (field.metadata && field.metadata.validations && field.metadata.validations.regex) {
-        validator = validator.matches(
-          new RegExp(field.metadata.validations.regex),
-          field.metadata.validations.error_message || 'Invalid value'
-        );
-      }
-      finalizeValidationShape[field.field_name] = validator;
     });
     const finalizeValidationSchema = Yup.object().shape(finalizeValidationShape);
     try {
@@ -481,57 +594,77 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
       // Mark only relevant fields as touched and set errors
       const errors = {};
       const touched = {};
-      validationError.inner.forEach(err => {
+      validationError.inner.forEach((err) => {
         errors[err.path] = err.message;
         touched[err.path] = true;
       });
       formik.setTouched(touched);
       formik.setErrors(errors);
-      dispatch(openSnackbar({
-        open: true,
-        message: 'Please fill all required fields and fix format errors before finalizing.',
-        variant: 'alert',
-        alert: { color: 'error' },
-        close: false
-      }));
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Please fill all required fields and fix format errors before finalizing.',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
       setFinalizing(false);
       return; // Do not finalize if not valid
     }
     if (!contextEventId) {
-      dispatch(openSnackbar({
-        open: true,
-        message: 'Context event ID missing. Please try again.',
-        variant: 'alert',
-        alert: { color: 'error' },
-        close: false
-      }));
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Context event ID missing. Please try again.',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
       return;
     }
     // Only check required fields
-    const emptyFieldFinalize = (fields || []).find(f => f.is_required && (!formik.values[f.field_name] || String(formik.values[f.field_name]).trim() === ''));
+    const emptyFieldFinalize = (fields || []).find(
+      (f) => f.is_required && (!formik.values[f.field_name] || String(formik.values[f.field_name]).trim() === '')
+    );
     if (emptyFieldFinalize) {
-      dispatch(openSnackbar({
-        open: true,
-        message: `Please fill all required fields before finalizing. Missing: ${emptyFieldFinalize.label || emptyFieldFinalize.field_name}`,
-        variant: 'alert',
-        alert: { color: 'error' },
-        close: false
-      }));
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: `Please fill all required fields before finalizing. Missing: ${emptyFieldFinalize.label || emptyFieldFinalize.field_name}`,
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
       return;
     }
     setFinalizing(true);
     // Format all date fields before sending
     const formattedFormValues = { ...formik.values };
-    fields.forEach(field => {
+    fields.forEach((field) => {
       if (field.field_type === 'date' && formattedFormValues[field.field_name]) {
-        formattedFormValues[field.field_name] = formatDateToDDMMYYYY(formattedFormValues[field.field_name]);
+        if (Array.isArray(formattedFormValues[field.field_name])) {
+          // Handle date arrays (for table columns)
+          formattedFormValues[field.field_name] = formattedFormValues[field.field_name].map((dateStr) => {
+            if (dateStr && /^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+              const [yyyy, mm, dd] = dateStr.split('-');
+              return `${dd}/${mm}/${yyyy}`;
+            }
+            return dateStr;
+          });
+        } else {
+          // Handle single date fields
+          formattedFormValues[field.field_name] = formatDateToDDMMYYYY(formattedFormValues[field.field_name]);
+        }
       }
     });
     const payload = {
       draft: contextEventId,
       draft_data: formattedFormValues,
       file_name: formik.values.file_name,
-      status: 'completed',
+      status: 'completed'
     };
     try {
       if (!draftDetailId) {
@@ -544,21 +677,25 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
           } else {
             fetchAndSetFileUrl(result.res.id);
           }
-          dispatch(openSnackbar({
-            open: true,
-            message: 'Document finalized successfully',
-            variant: 'alert',
-            alert: { color: 'success' },
-            close: false
-          }));
+          dispatch(
+            openSnackbar({
+              open: true,
+              message: 'Document finalized successfully',
+              variant: 'alert',
+              alert: { color: 'success' },
+              close: false
+            })
+          );
         } else {
-          dispatch(openSnackbar({
-            open: true,
-            message: result.message || 'Failed to finalize',
-            variant: 'alert',
-            alert: { color: 'error' },
-            close: false
-          }));
+          dispatch(
+            openSnackbar({
+              open: true,
+              message: result.message || 'Failed to finalize',
+              variant: 'alert',
+              alert: { color: 'error' },
+              close: false
+            })
+          );
         }
       } else {
         // Subsequent: PUT
@@ -569,31 +706,37 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
           } else {
             fetchAndSetFileUrl(draftDetailId);
           }
-          dispatch(openSnackbar({
-            open: true,
-            message: 'Document finalized successfully',
-            variant: 'alert',
-            alert: { color: 'success' },
-            close: false
-          }));
+          dispatch(
+            openSnackbar({
+              open: true,
+              message: 'Document finalized successfully',
+              variant: 'alert',
+              alert: { color: 'success' },
+              close: false
+            })
+          );
         } else {
-          dispatch(openSnackbar({
-            open: true,
-            message: result.message || 'Failed to finalize',
-            variant: 'alert',
-            alert: { color: 'error' },
-            close: false
-          }));
+          dispatch(
+            openSnackbar({
+              open: true,
+              message: result.message || 'Failed to finalize',
+              variant: 'alert',
+              alert: { color: 'error' },
+              close: false
+            })
+          );
         }
       }
     } catch (err) {
-      dispatch(openSnackbar({
-        open: true,
-        message: 'Failed to finalize',
-        variant: 'alert',
-        alert: { color: 'error' },
-        close: false
-      }));
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Failed to finalize',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     }
     setFinalizing(false);
   };
@@ -601,13 +744,15 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
   // Download handler (presigned URL logic)
   const handleDownload = async () => {
     if (!fileUrl) {
-      dispatch(openSnackbar({
-        open: true,
-        message: 'No file available for download. Please finalize the document first.',
-        variant: 'alert',
-        alert: { color: 'error' },
-        close: false
-      }));
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'No file available for download. Please finalize the document first.',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
       return;
     }
     try {
@@ -617,30 +762,36 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
       if (result.res && result.res.status_cd === 0 && result.res.data && presignedUrl) {
         // Open the presigned URL in a new tab (temporary workaround for CORS)
         window.open(presignedUrl, '_blank');
-        dispatch(openSnackbar({
-          open: true,
-          message: 'Download started',
-          variant: 'alert',
-          alert: { color: 'success' },
-          close: false
-        }));
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'Download started',
+            variant: 'alert',
+            alert: { color: 'success' },
+            close: false
+          })
+        );
       } else {
-        dispatch(openSnackbar({
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: result.message || 'Failed to get presigned URL',
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
+      }
+    } catch (err) {
+      dispatch(
+        openSnackbar({
           open: true,
-          message: result.message || 'Failed to get presigned URL',
+          message: 'Failed to download file',
           variant: 'alert',
           alert: { color: 'error' },
           close: false
-        }));
-      }
-    } catch (err) {
-      dispatch(openSnackbar({
-        open: true,
-        message: 'Failed to download file',
-        variant: 'alert',
-        alert: { color: 'error' },
-        close: false
-      }));
+        })
+      );
       console.error('Download error:', err);
     }
   };
@@ -648,19 +799,24 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
   // Reset All handler
   const handleResetAll = () => {
     // Reset all form fields to empty using formik
-    const resetValues = (fields || []).reduce((acc, field) => {
-      acc[field.field_name] = '';
-      return acc;
-    }, { file_name: '' });
+    const resetValues = (fields || []).reduce(
+      (acc, field) => {
+        acc[field.field_name] = '';
+        return acc;
+      },
+      { file_name: '' }
+    );
     formik.resetForm({ values: resetValues });
     setFormValues(resetValues);
-    dispatch(openSnackbar({
-      open: true,
-      message: 'All fields reset',
-      variant: 'alert',
-      alert: { color: 'success' },
-      close: false
-    }));
+    dispatch(
+      openSnackbar({
+        open: true,
+        message: 'All fields reset',
+        variant: 'alert',
+        alert: { color: 'success' },
+        close: false
+      })
+    );
   };
 
   const handleDeleteDocument = async (row) => {
@@ -668,13 +824,15 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
     try {
       const result = await Factory('delete', `/documentdrafting/context-wise-event-document/${row.id}/`);
       if (result.res && result.res.status_cd === 0) {
-        dispatch(openSnackbar({
-          open: true,
-          message: 'Document deleted successfully',
-          variant: 'alert',
-          alert: { color: 'success' },
-          close: false
-        }));
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'Document deleted successfully',
+            variant: 'alert',
+            alert: { color: 'success' },
+            close: false
+          })
+        );
         // Refresh the list (implement as needed, e.g., re-fetch or filter out deleted row)
         if (typeof getDocuments === 'function') {
           getDocuments();
@@ -682,33 +840,61 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
           setTemplates((prev) => prev.filter((doc) => doc.id !== row.id));
         }
       } else {
-        dispatch(openSnackbar({
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: result.message || 'Failed to delete document',
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
+      }
+    } catch (err) {
+      dispatch(
+        openSnackbar({
           open: true,
-          message: result.message || 'Failed to delete document',
+          message: 'Failed to delete document',
           variant: 'alert',
           alert: { color: 'error' },
           close: false
-        }));
-      }
-    } catch (err) {
-      dispatch(openSnackbar({
-        open: true,
-        message: 'Failed to delete document',
-        variant: 'alert',
-        alert: { color: 'error' },
-        close: false
-      }));
+        })
+      );
     }
   };
 
   // Always build formik, but use empty fields/validation if not splitView
-  const dynamicFields = splitView ? (fields || []) : [];
+  const dynamicFields = splitView ? fields || [] : [];
   const initialValues = { file_name: '' };
   const validationShape = {};
+
   if (splitView) {
     initialValues.file_name = formValues.file_name || '';
   }
-  dynamicFields.forEach(field => {
+
+  // Group fields by table_identifier for dynamic table handling
+  const tableGroups = React.useMemo(() => {
+    if (!fields) return [];
+    const groups = {};
+    fields.forEach((f) => {
+      if (f.metadata && f.metadata.table_identifier) {
+        const id = f.metadata.table_identifier;
+        if (!groups[id]) groups[id] = { control: null, columns: [] };
+        if (f.metadata.type === 'table-control') groups[id].control = f;
+        if (f.metadata.type === 'table-column') groups[id].columns.push(f);
+      }
+    });
+    return Object.entries(groups).map(([id, group]) => ({ ...group, tableId: id }));
+  }, [fields]);
+
+  // Compute regularFields: all fields not in any table group
+  const tableFieldNames = new Set(
+    tableGroups.flatMap((g) => [g.control?.field_name, ...g.columns.map((c) => c.field_name)]).filter(Boolean)
+  );
+  const regularFields = fields.filter((f) => !tableFieldNames.has(f.field_name));
+
+  // Process regular fields
+  regularFields.forEach((field) => {
     let value = formValues[field.field_name] || '';
     if (field.field_type === 'date' && value) {
       // Convert DD-MM-YYYY to YYYY-MM-DD if needed
@@ -731,6 +917,43 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
     }
     validationShape[field.field_name] = validator;
   });
+
+  // Process table fields
+  Object.entries(tableGroups).forEach(([tableId, tableGroup]) => {
+    if (tableGroup.control) {
+      const controlField = tableGroup.control;
+      const defaultValue = controlField.metadata.default_value || 1;
+      const currentValue = formValues[controlField.field_name] || defaultValue;
+
+      initialValues[controlField.field_name] = currentValue;
+      validationShape[controlField.field_name] = Yup.number()
+        .required(`${controlField.label} is required`)
+        .min(1, 'At least 1 row is required')
+        .max(50, 'Maximum 50 rows allowed');
+
+      // Initialize arrays for table columns
+      tableGroup.columns.forEach((columnField) => {
+        const existingArray = formValues[columnField.field_name] || [];
+        const newArray = Array(Math.max(currentValue, existingArray.length))
+          .fill('')
+          .map((_, index) => {
+            const value = existingArray[index] || '';
+            // Convert DD/MM/YYYY to YYYY-MM-DD for date fields
+            if (columnField.field_type === 'date' && value && /^\d{2}\/\d{2}\/\d{4}$/.test(value)) {
+              const [dd, mm, yyyy] = value.split('/');
+              return `${yyyy}-${mm}-${dd}`;
+            }
+            return value;
+          });
+        initialValues[columnField.field_name] = newArray;
+
+        // Validation for array fields
+        validationShape[columnField.field_name] = Yup.array()
+          .of(Yup.string().required(`${columnField.label} is required`))
+          .min(currentValue, `Please fill all ${currentValue} rows`);
+      });
+    }
+  });
   // Do NOT add file_name to validationShape
   const validationSchema = Yup.object().shape(validationShape);
   const formik = useFormik({
@@ -739,11 +962,321 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
     validationSchema,
     onSubmit: (values) => {
       setFormValues(values);
-    },
+    }
   });
 
   // Add the previewContainerRef hook at the top level
   const previewContainerRef = React.useRef(null);
+
+  // Dynamic Table Component
+  const DynamicTableInput = ({ tableGroup, formik, tableId, previewContainerRef }) => {
+    const controlField = tableGroup.control;
+    const columnFields = tableGroup.columns;
+    const effectiveNoOfRows = Math.max(1, formik.values[controlField.field_name] || controlField.metadata.default_value || 1);
+    const prevNoOfRowsRef = useRef(effectiveNoOfRows);
+    const noOfColumns = controlField.metadata.no_of_columns || columnFields.length;
+
+    // Local state for No. of Rows field - moved outside callback
+    const [localNoOfRows, setLocalNoOfRows] = React.useState(formik.values[controlField.field_name] || '');
+
+    React.useEffect(() => {
+      setLocalNoOfRows(formik.values[controlField.field_name] || '');
+      // eslint-disable-next-line
+    }, [formik.values[controlField.field_name]]);
+
+    const handleNoOfRowsChange = (e) => {
+      // Allow empty input temporarily
+      formik.setFieldValue(controlField.field_name, e.target.value);
+    };
+
+    const handleNoOfRowsBlur = () => {
+      const value = formik.values[controlField.field_name];
+      const numRows = Math.max(1, Math.min(50, parseInt(value) || 1));
+
+      // Only update if the value needs to be clamped or defaulted
+      if (parseInt(value) !== numRows) {
+        formik.setFieldValue(controlField.field_name, numRows);
+      }
+
+      // Only update arrays if the number of rows actually changed
+      if (numRows !== prevNoOfRowsRef.current) {
+        columnFields.forEach((columnField) => {
+          const currentArray = formik.values[columnField.field_name] || [];
+          const newArray = Array(numRows)
+            .fill('')
+            .map((_, index) => currentArray[index] || '');
+          formik.setFieldValue(columnField.field_name, newArray);
+        });
+        prevNoOfRowsRef.current = numRows;
+      }
+    };
+
+    // --- New TableRowFields component for each row ---
+    const TableRowFields = ({ rowIndex }) => {
+      // Local state for each cell in this row
+      const [cellValues, setCellValues] = React.useState(() =>
+        Object.fromEntries(columnFields.map((cf) => [cf.field_name, formik.values[cf.field_name]?.[rowIndex] || '']))
+      );
+      // Ref to track input elements to prevent cursor jumping
+      const inputRefs = React.useRef({});
+
+      React.useEffect(() => {
+        setCellValues(Object.fromEntries(columnFields.map((cf) => [cf.field_name, formik.values[cf.field_name]?.[rowIndex] || ''])));
+        // eslint-disable-next-line
+      }, [JSON.stringify(columnFields.map((cf) => formik.values[cf.field_name]?.[rowIndex]))]);
+
+      return (
+        <Grid2 container spacing={2} sx={{ mb: 2 }}>
+          {columnFields.map((columnField) => (
+            <Grid2 size={{ xs: 12, sm: 6 }} key={columnField.field_name}>
+              <TextField
+                fullWidth
+                size="small"
+                label={columnField.label}
+                name={`${columnField.field_name}[${rowIndex}]`}
+                value={cellValues[columnField.field_name]}
+                inputRef={(el) => (inputRefs.current[columnField.field_name] = el)}
+                onChange={(e) => {
+                  setCellValues((v) => ({ ...v, [columnField.field_name]: e.target.value }));
+                  // Update Formik with minimal delay for real-time preview
+                  setTimeout(() => {
+                    const arr = Array.isArray(formik.values[columnField.field_name]) ? [...formik.values[columnField.field_name]] : [];
+                    arr[rowIndex] = e.target.value;
+                    formik.setFieldValue(columnField.field_name, arr, false);
+                  }, 5);
+                  // Auto-scroll to preview field
+                  setTimeout(() => {
+                    const el = document.getElementById(`preview-field-${columnField.field_name}-${rowIndex}`);
+                    const container = previewContainerRef.current;
+                    if (el && container) {
+                      const elRect = el.getBoundingClientRect();
+                      const containerRect = container.getBoundingClientRect();
+                      const scrollTop =
+                        container.scrollTop + (elRect.top - containerRect.top) - container.clientHeight / 2 + el.offsetHeight / 2;
+                      container.scrollTo({ top: scrollTop, behavior: 'smooth' });
+                    }
+                  }, 100);
+                }}
+                onBlur={(e) => {
+                  const arr = Array.isArray(formik.values[columnField.field_name]) ? [...formik.values[columnField.field_name]] : [];
+                  arr[rowIndex] = cellValues[columnField.field_name];
+                  formik.setFieldValue(columnField.field_name, arr, false);
+                  formik.handleBlur(e);
+                  // Scroll preview to this field
+                  setTimeout(() => {
+                    const el = document.getElementById(`preview-field-${columnField.field_name}-${rowIndex}`);
+                    const container = previewContainerRef.current;
+                    if (el && container) {
+                      const elRect = el.getBoundingClientRect();
+                      const containerRect = container.getBoundingClientRect();
+                      const scrollTop =
+                        container.scrollTop + (elRect.top - containerRect.top) - container.clientHeight / 2 + el.offsetHeight / 2;
+                      container.scrollTo({ top: scrollTop, behavior: 'smooth' });
+                    }
+                  }, 100);
+                }}
+                error={
+                  formik.touched[columnField.field_name] &&
+                  formik.errors[columnField.field_name] &&
+                  formik.errors[columnField.field_name][rowIndex]
+                }
+                helperText={
+                  formik.touched[columnField.field_name] &&
+                  formik.errors[columnField.field_name] &&
+                  formik.errors[columnField.field_name][rowIndex]
+                }
+                type={columnField.field_type === 'date' ? 'date' : 'text'}
+                variant="outlined"
+                slotProps={{ inputLabel: { shrink: true } }}
+                placeholder={columnField.field_type === 'date' ? 'DD/MM/YYYY' : ''}
+              />
+            </Grid2>
+          ))}
+        </Grid2>
+      );
+    };
+
+    if (noOfColumns === 2) {
+      // Render two fields per row directly below No. of Rows, side by side using TableRowFields
+      return (
+        <Box sx={{ mb: 3 }}>
+          {/* No. of Rows Input */}
+          <Grid2 size={{ xs: 12 }} sx={{ mb: 2 }}>
+            <TextField
+              fullWidth
+              size="small"
+              label={controlField.label}
+              name={controlField.field_name}
+              value={localNoOfRows}
+              onChange={(e) => {
+                setLocalNoOfRows(e.target.value);
+                handleNoOfRowsChange(e);
+                // Scroll to preview field
+                setTimeout(() => {
+                  const el = document.getElementById(`preview-field-${controlField.field_name}`);
+                  const container = previewContainerRef.current;
+                  if (el && container) {
+                    const elRect = el.getBoundingClientRect();
+                    const containerRect = container.getBoundingClientRect();
+                    const scrollTop =
+                      container.scrollTop + (elRect.top - containerRect.top) - container.clientHeight / 2 + el.offsetHeight / 2;
+                    container.scrollTo({ top: scrollTop, behavior: 'smooth' });
+                  }
+                }, 100);
+              }}
+              onBlur={handleNoOfRowsBlur}
+              error={formik.touched[controlField.field_name] && Boolean(formik.errors[controlField.field_name])}
+              helperText={formik.touched[controlField.field_name] && formik.errors[controlField.field_name]}
+              type="number"
+              inputProps={{ min: 1, max: 50 }}
+            />
+          </Grid2>
+          {/* Render rows of two fields each, side by side using TableRowFields */}
+          {Array.from({ length: effectiveNoOfRows }).map((_, rowIndex) => (
+            <TableRowFields key={rowIndex} rowIndex={rowIndex} />
+          ))}
+        </Box>
+      );
+    }
+
+    // Memoized TableRow to prevent unnecessary re-renders and cursor loss
+    const MemoizedTableRow = React.memo(({ rowIndex }) => {
+      // Local state for each cell in this row
+      const [cellValues, setCellValues] = React.useState(() =>
+        Object.fromEntries(columnFields.map((cf) => [cf.field_name, formik.values[cf.field_name]?.[rowIndex] || '']))
+      );
+
+      React.useEffect(() => {
+        // Sync local state if Formik values change (e.g., on reset)
+        setCellValues(Object.fromEntries(columnFields.map((cf) => [cf.field_name, formik.values[cf.field_name]?.[rowIndex] || ''])));
+        // eslint-disable-next-line
+      }, [JSON.stringify(columnFields.map((cf) => formik.values[cf.field_name]?.[rowIndex]))]);
+
+      return (
+        <TableRow key={rowIndex}>
+          <TableCell>{rowIndex + 1}</TableCell>
+          {columnFields.map((columnField) => (
+            <TableCell key={`${columnField.field_name}-${rowIndex}`}>
+              <TextField
+                fullWidth
+                size="small"
+                label={columnField.label}
+                name={`${columnField.field_name}[${rowIndex}]`}
+                value={cellValues[columnField.field_name]}
+                onFocus={() =>
+                  setCellValues((v) => ({ ...v, [columnField.field_name]: formik.values[columnField.field_name]?.[rowIndex] || '' }))
+                }
+                onChange={(e) => {
+                  setCellValues((v) => ({ ...v, [columnField.field_name]: e.target.value }));
+                  // Update Formik with minimal delay for real-time preview
+                  setTimeout(() => {
+                    const arr = Array.isArray(formik.values[columnField.field_name]) ? [...formik.values[columnField.field_name]] : [];
+                    arr[rowIndex] = e.target.value;
+                    formik.setFieldValue(columnField.field_name, arr, false);
+                  }, 5);
+                  // Auto-scroll to preview field
+                  setTimeout(() => {
+                    const el = document.getElementById(`preview-field-${columnField.field_name}-${rowIndex}`);
+                    const container = previewContainerRef.current;
+                    if (el && container) {
+                      const elRect = el.getBoundingClientRect();
+                      const containerRect = container.getBoundingClientRect();
+                      const scrollTop =
+                        container.scrollTop + (elRect.top - containerRect.top) - container.clientHeight / 2 + el.offsetHeight / 2;
+                      container.scrollTo({ top: scrollTop, behavior: 'smooth' });
+                    }
+                  }, 100);
+                }}
+                onBlur={(e) => {
+                  const arr = Array.isArray(formik.values[columnField.field_name]) ? [...formik.values[columnField.field_name]] : [];
+                  arr[rowIndex] = cellValues[columnField.field_name];
+                  formik.setFieldValue(columnField.field_name, arr, false);
+                  formik.handleBlur(e);
+                }}
+                error={
+                  formik.touched[columnField.field_name] &&
+                  formik.errors[columnField.field_name] &&
+                  formik.errors[columnField.field_name][rowIndex]
+                }
+                helperText={
+                  formik.touched[columnField.field_name] &&
+                  formik.errors[columnField.field_name] &&
+                  formik.errors[columnField.field_name][rowIndex]
+                }
+                type={columnField.field_type === 'date' ? 'date' : 'text'}
+                variant="outlined"
+                slotProps={{ inputLabel: { shrink: true } }}
+                placeholder={columnField.field_type === 'date' ? 'DD/MM/YYYY' : ''}
+              />
+            </TableCell>
+          ))}
+        </TableRow>
+      );
+    });
+
+    return (
+      <Box sx={{ mb: 3 }}>
+        {/* No. of Rows Input */}
+        <Grid2 size={{ xs: 12 }} sx={{ mb: 2 }}>
+          <TextField
+            fullWidth
+            label={controlField.label}
+            name={controlField.field_name}
+            type="number"
+            value={localNoOfRows}
+            onFocus={() => setLocalNoOfRows(formik.values[controlField.field_name] || '')}
+            onChange={(e) => {
+              const value = e.target.value;
+              setLocalNoOfRows(value);
+              const num = parseInt(value, 10);
+              if (!isNaN(num) && num >= 1 && num <= 50) {
+                formik.setFieldValue(controlField.field_name, num);
+              }
+            }}
+            onBlur={(e) => {
+              const value = localNoOfRows;
+              const numRows = Math.max(1, Math.min(50, parseInt(value) || 1));
+              if (parseInt(value) !== numRows) {
+                formik.setFieldValue(controlField.field_name, numRows);
+              } else {
+                formik.setFieldValue(controlField.field_name, value);
+              }
+              formik.handleBlur(e);
+            }}
+            error={formik.touched[controlField.field_name] && Boolean(formik.errors[controlField.field_name])}
+            helperText={formik.touched[controlField.field_name] && formik.errors[controlField.field_name]}
+            variant="outlined"
+            slotProps={{ inputLabel: { shrink: true } }}
+            inputProps={{ min: 1, max: 50 }}
+          />
+          <Button
+            variant="outlined"
+            sx={{ mt: 2, width: '100%' }}
+            onClick={() => {
+              // Prepare dialog data
+              const noOfRows = formik.values[controlField.field_name] || controlField.metadata.default_value || 1;
+              const values = {};
+              columnFields.forEach((col) => {
+                values[col.field_name] = Array.from({ length: noOfRows }, (_, i) => formik.values[col.field_name]?.[i] || '');
+              });
+              setTableDialogData({
+                columns: columnFields,
+                values,
+                noOfRows,
+                controlField
+              });
+              setTableDialogTableId(tableId);
+              setTableDialogOpen(true);
+            }}
+          >
+            Edit Table Rows
+          </Button>
+        </Grid2>
+
+        {/* Remove the dynamic table rendering - it should only be in the dialog */}
+      </Box>
+    );
+  };
 
   if (splitView) {
     // Only render the split view, no header/tabs, with a full white background
@@ -755,10 +1288,9 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
           width: '100%',
           boxSizing: 'border-box',
           backgroundColor: 'white', // set app background
-          borderRadius: '8px',
+          borderRadius: '8px'
         }}
       >
-
         <Typography variant="h5" fontWeight={600} sx={{ mb: 2, fontSize: { xs: 18, sm: 22 } }}>
           Document Drafting
         </Typography>
@@ -770,42 +1302,62 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
             flexWrap: { xs: 'wrap', md: 'nowrap' }, // Wrap on small screens, side-by-side on md+
             gap: 3, // space between the papers
             justifyContent: 'center', // center the row
-            width: '100%',
+            width: '100%'
           }}
         >
           {/* Left: Dynamic Form */}
-          <Paper elevation={2} sx={{ flex: 1, minWidth: { xs: '100%', sm: 320, md: 400 }, maxWidth: 400, height: 620, maxHeight: 1000, display: 'flex', flexDirection: 'column', pb: 2, mr: { xs: 0, md: 3 }, overflow: 'hidden' }}>
+          <Paper
+            elevation={2}
+            sx={{
+              flex: 1,
+              minWidth: { xs: '100%', sm: 320, md: 400 },
+              maxWidth: 400,
+              height: 620,
+              maxHeight: 1000,
+              display: 'flex',
+              flexDirection: 'column',
+              pb: 2,
+              mr: { xs: 0, md: 3 },
+              overflow: 'hidden'
+            }}
+          >
             {/* Progress Bar */}
             {fields.length > 0 && (
               <Box sx={{ width: '100%', mb: 2, position: 'relative' }}>
                 {(() => {
                   const totalFields = fields.length;
-                  const filledFields = fields.filter(f => formik.values[f.field_name] && String(formik.values[f.field_name]).trim() !== '').length;
+                  const filledFields = fields.filter(
+                    (f) => formik.values[f.field_name] && String(formik.values[f.field_name]).trim() !== ''
+                  ).length;
                   const progress = totalFields > 0 ? (filledFields / totalFields) * 100 : 0;
-                  return <>
-                    <LinearProgress
-                      variant="determinate"
-                      value={progress}
-                      sx={{
-                        height: 8,
-                        borderRadius: 4,
-                        backgroundColor: '#E3EAFE',
-                        '& .MuiLinearProgress-bar': {
-                          backgroundColor: '#3650AE',
-                          transition: 'none', // Remove animation
-                        },
-                        transition: 'none', // Remove animation
-                      }}
-                    />
-                    <Typography variant="caption" sx={{ position: 'absolute', right: 16, top: 4, color: '#3650AE', fontWeight: 600 }}>
-                      {/* {Math.round(progress)}% */}
-                    </Typography>
-                  </>;
+                  return (
+                    <>
+                      <LinearProgress
+                        variant="determinate"
+                        value={progress}
+                        sx={{
+                          height: 8,
+                          borderRadius: 4,
+                          backgroundColor: '#E3EAFE',
+                          '& .MuiLinearProgress-bar': {
+                            backgroundColor: '#3650AE',
+                            transition: 'none' // Remove animation
+                          },
+                          transition: 'none' // Remove animation
+                        }}
+                      />
+                      <Typography variant="caption" sx={{ position: 'absolute', right: 16, top: 4, color: '#3650AE', fontWeight: 600 }}>
+                        {/* {Math.round(progress)}% */}
+                      </Typography>
+                    </>
+                  );
                 })()}
               </Box>
             )}
             {/* Fixed Fill Details Heading */}
-            <Typography variant="h5" fontWeight={700} mb={2} sx={{ p: 2, pb: 0 }}>Fill Details</Typography>
+            <Typography variant="h5" fontWeight={700} mb={2} sx={{ p: 2, pb: 0 }}>
+              Fill Details
+            </Typography>
             <Box sx={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
               <ScrollableCard showArrows>
                 <Box sx={{ p: 2.5, pb: 2 }}>
@@ -827,7 +1379,8 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
                       </Grid2>
                       {(fields || []).length > 0 ? (
                         <Grid2 container spacing={2}>
-                          {fields.map((field, idx) => (
+                          {/* Render regular fields first */}
+                          {regularFields.map((field, idx) => (
                             <Grid2 size={{ xs: 12 }} key={field.field_name}>
                               {/* Render Autocomplete if field_type is select and metadata.options exists */}
                               {field.field_type === 'select' && field.metadata && Array.isArray(field.metadata.options) ? (
@@ -837,16 +1390,21 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
                                   value={formik.values[field.field_name] || ''}
                                   onChange={(_, value) => {
                                     formik.setFieldValue(field.field_name, value);
+                                    // Scroll to preview field
                                     setTimeout(() => {
                                       const el = document.getElementById(`preview-field-${field.field_name}`);
                                       const container = previewContainerRef.current;
                                       if (el && container) {
                                         const elRect = el.getBoundingClientRect();
                                         const containerRect = container.getBoundingClientRect();
-                                        const scrollTop = container.scrollTop + (elRect.top - containerRect.top) - container.clientHeight / 2 + el.offsetHeight / 2;
+                                        const scrollTop =
+                                          container.scrollTop +
+                                          (elRect.top - containerRect.top) -
+                                          container.clientHeight / 2 +
+                                          el.offsetHeight / 2;
                                         container.scrollTo({ top: scrollTop, behavior: 'smooth' });
                                       }
-                                    }, 0);
+                                    }, 100);
                                   }}
                                   onBlur={formik.handleBlur}
                                   renderInput={(params) => (
@@ -867,18 +1425,23 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
                                   label={field.label || field.field_name}
                                   name={field.field_name}
                                   value={formik.values[field.field_name] || ''}
-                                  onChange={e => {
+                                  onChange={(e) => {
                                     formik.handleChange(e);
+                                    // Scroll to preview field
                                     setTimeout(() => {
                                       const el = document.getElementById(`preview-field-${field.field_name}`);
                                       const container = previewContainerRef.current;
                                       if (el && container) {
                                         const elRect = el.getBoundingClientRect();
                                         const containerRect = container.getBoundingClientRect();
-                                        const scrollTop = container.scrollTop + (elRect.top - containerRect.top) - container.clientHeight / 2 + el.offsetHeight / 2;
+                                        const scrollTop =
+                                          container.scrollTop +
+                                          (elRect.top - containerRect.top) -
+                                          container.clientHeight / 2 +
+                                          el.offsetHeight / 2;
                                         container.scrollTo({ top: scrollTop, behavior: 'smooth' });
                                       }
-                                    }, 0);
+                                    }, 100);
                                   }}
                                   onBlur={formik.handleBlur}
                                   error={formik.touched[field.field_name] && Boolean(formik.errors[field.field_name])}
@@ -889,6 +1452,18 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
                                   placeholder={field.placeholder || (field.field_type === 'date' ? 'DD-MM-YYYY' : '')}
                                 />
                               )}
+                            </Grid2>
+                          ))}
+
+                          {/* Render dynamic tables */}
+                          {Object.entries(tableGroups).map(([tableId, tableGroup]) => (
+                            <Grid2 size={{ xs: 12 }} key={tableId}>
+                              <DynamicTableInput
+                                tableGroup={tableGroup}
+                                formik={formik}
+                                tableId={tableId}
+                                previewContainerRef={previewContainerRef}
+                              />
                             </Grid2>
                           ))}
                         </Grid2>
@@ -902,89 +1477,191 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
             </Box>
           </Paper>
           {/* Right: Live Template Preview */}
-          <Paper elevation={2} sx={{ position: 'relative', flex: 1, minWidth: { xs: '100%', sm: 320, md: 400 }, maxWidth: 900, height: 620, maxHeight: 1000, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          <Paper
+            elevation={2}
+            sx={{
+              position: 'relative',
+              flex: 1,
+              minWidth: { xs: '100%', sm: 320, md: 400 },
+              maxWidth: 900,
+              height: 620,
+              maxHeight: 1000,
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden'
+            }}
+          >
             {/* Progress Bar (same as left) */}
             {fields.length > 0 && (
               <Box sx={{ width: '100%', mb: 2, position: 'relative' }}>
                 {(() => {
                   const totalFields = fields.length;
-                  const filledFields = fields.filter(f => formik.values[f.field_name] && String(formik.values[f.field_name]).trim() !== '').length;
+                  const filledFields = fields.filter(
+                    (f) => formik.values[f.field_name] && String(formik.values[f.field_name]).trim() !== ''
+                  ).length;
                   const progress = totalFields > 0 ? (filledFields / totalFields) * 100 : 0;
-                  return <>
-                    <LinearProgress
-                      variant="determinate"
-                      value={progress}
-                      sx={{
-                        height: 8,
-                        borderRadius: 4,
-                        backgroundColor: '#E3EAFE',
-                        '& .MuiLinearProgress-bar': {
-                          backgroundColor: '#3650AE',
-                        },
-                      }}
-                    />
-                    <Typography variant="caption" sx={{ position: 'absolute', right: 16, top: 4, color: '#3650AE', fontWeight: 600 }}>
-                      {/* {Math.round(progress)}% */}
-                    </Typography>
-                  </>;
+                  return (
+                    <>
+                      <LinearProgress
+                        variant="determinate"
+                        value={progress}
+                        sx={{
+                          height: 8,
+                          borderRadius: 4,
+                          backgroundColor: '#E3EAFE',
+                          '& .MuiLinearProgress-bar': {
+                            backgroundColor: '#3650AE'
+                          }
+                        }}
+                      />
+                      <Typography variant="caption" sx={{ position: 'absolute', right: 16, top: 4, color: '#3650AE', fontWeight: 600 }}>
+                        {/* {Math.round(progress)}% */}
+                      </Typography>
+                    </>
+                  );
                 })()}
               </Box>
             )}
-            {(() => {
-              return (
-                <ScrollableCard showArrows={true} containerRef={previewContainerRef}>
-                  <Typography variant="h5" fontWeight={700} mb={2} sx={{ pl: 3, pt: 2 }}>Document Preview</Typography>
-                  <Box
-                    ref={previewContainerRef}
-                    sx={{
-                      flex: 1,
-                      p: 1,
-                      height: '100%',
-                      maxHeight: 530,
-                      overflow: 'auto',
-                      width: '100%',
-                      maxWidth: '100%',
-                      background: 'transparent',
-                      borderRadius: 0,
-                      boxSizing: 'border-box',
-                      // Custom scrollbar styles
-                      '&::-webkit-scrollbar': {
-                        width: 8,
-                        backgroundColor: '#E3EAFE',
-                        borderRadius: 4,
-                      },
-                      '&::-webkit-scrollbar-thumb': {
-                        backgroundColor: '#3650AE',
-                        borderRadius: 4,
-                      },
-                      '&::-webkit-scrollbar-thumb:hover': {
-                        backgroundColor: '#00329E',
-                      },
-                      scrollbarWidth: 'thin',
-                      scrollbarColor: '#3650AE #E3EAFE',
-                      '& .offer-letter-preview': {
-                        width: '100%',
-                        marginTop: 2,
-                        marginBottom: 2,
-                        padding: 2,
-                      },
-                      '& *': {
-                        maxWidth: '100%',
-                        wordBreak: 'break-word',
-                      },
-                    }}
-                  >
-                    {templateLoading ? (
-                      <Typography>Loading template...</Typography>
-                    ) : templateError ? (
-                      <Typography color="error">{templateError}</Typography>
-                    ) : (
-                      <div dangerouslySetInnerHTML={{ __html: renderTemplateWithValues() }} />
-                    )}
-                  </Box>
-                </ScrollableCard>
-              );
-            })()}
+            {/* Custom React Table Previews for all dynamic tables - REMOVED FROM TOP */}
+            {/* Inline React Table in Template Preview */}
+            <ScrollableCard showArrows={true} containerRef={previewContainerRef}>
+              <Typography variant="h5" fontWeight={700} mb={2} sx={{ pl: 3, pt: 2 }}>
+                Document Preview
+              </Typography>
+              <Box
+                ref={previewContainerRef}
+                sx={{
+                  flex: 1,
+                  p: 3,
+                  height: '100%',
+                  maxHeight: 530,
+                  overflow: 'auto',
+                  width: '100%',
+                  maxWidth: '100%',
+                  background: 'transparent',
+                  borderRadius: 0,
+                  boxSizing: 'border-box',
+                  // Custom scrollbar styles
+                  '&::-webkit-scrollbar': {
+                    width: 8,
+                    backgroundColor: '#E3EAFE',
+                    borderRadius: 4
+                  },
+                  '&::-webkit-scrollbar-thumb': {
+                    backgroundColor: '#3650AE',
+                    borderRadius: 4
+                  },
+                  '&::-webkit-scrollbar-thumb:hover': {
+                    backgroundColor: '#00329E'
+                  },
+                  scrollbarWidth: 'thin',
+                  scrollbarColor: '#3650AE #E3EAFE',
+                  '& .offer-letter-preview': {
+                    width: '100%',
+
+                    marginBottom: 2,
+                    padding: 2
+                  },
+                  '& *': {
+                    maxWidth: '100%',
+                    wordBreak: 'break-word'
+                  },
+                  '& p, & div': {
+                    marginBottom: '16px',
+                    lineHeight: '1.6'
+                  },
+                  '& table': {
+                    marginBottom: '20px'
+                  }
+                }}
+              >
+                {templateLoading ? (
+                  <Typography>Loading template...</Typography>
+                ) : templateError ? (
+                  <Typography color="error">{templateError}</Typography>
+                ) : (
+                  (() => {
+                    // Replace each dynamic table in the template with the React-rendered table
+                    let html = renderTemplateWithValues();
+                    // Find all <table>...</table> blocks
+                    const tableRegex = /<table[\s\S]*?<\/table>/gi;
+                    let lastIndex = 0;
+                    let result = [];
+                    let match;
+                    let keyCount = 0;
+                    while ((match = tableRegex.exec(html)) !== null) {
+                      const tableHtml = match[0];
+                      // Check if this table matches any dynamic table group
+                      const groupEntry = Object.entries(tableGroups).find(([tableId, group]) => {
+                        if (tableHtml.includes(group.control.field_name)) return true;
+                        return group.columns.some((col) => tableHtml.includes(col.field_name));
+                      });
+                      // Push the HTML before this table
+                      result.push(<span key={keyCount++} dangerouslySetInnerHTML={{ __html: html.slice(lastIndex, match.index) }} />);
+                      if (groupEntry) {
+                        // Render the React table for this group
+                        const [tableId, group] = groupEntry;
+                        result.push(
+                          <Box sx={{ my: 2, mb: 3, ml: 0.5 }} key={keyCount++}>
+                            <TableContainer component={Paper}>
+                              <Table size="small">
+                                <TableHead>
+                                  <TableRow>
+                                    <TableCell sx={{ fontWeight: 'bold', padding: '8px 20px' }}>Sr. No</TableCell>
+                                    {group.columns.map((col) => (
+                                      <TableCell key={col.field_name} sx={{ fontWeight: 'bold', padding: '8px 20px' }}>
+                                        {col.label}
+                                      </TableCell>
+                                    ))}
+                                  </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                  {Array.from({
+                                    length: formik.values[group.control.field_name] || group.control.metadata.default_value || 1
+                                  }).map((_, i) => (
+                                    <TableRow key={i}>
+                                      <TableCell sx={{ padding: '8px 20px' }}>{i + 1}</TableCell>
+                                      {group.columns.map((col) => (
+                                        <TableCell key={col.field_name + i} sx={{ padding: '8px 20px' }}>
+                                          <span
+                                            id={`preview-field-${col.field_name}-${i}`}
+                                            style={{ background: 'rgba(54, 80, 174, 0.24)', borderRadius: '4px', padding: '0 4px' }}
+                                          >
+                                            {col.field_type === 'date' && formik.values[col.field_name]?.[i]
+                                              ? (() => {
+                                                  const val = formik.values[col.field_name][i];
+                                                  if (/^\d{4}-\d{2}-\d{2}$/.test(val)) {
+                                                    const [yyyy, mm, dd] = val.split('-');
+                                                    return `${dd}-${mm}-${yyyy}`;
+                                                  }
+                                                  return val;
+                                                })()
+                                              : formik.values[col.field_name]?.[i] || ''}
+                                          </span>
+                                        </TableCell>
+                                      ))}
+                                    </TableRow>
+                                  ))}
+                                </TableBody>
+                              </Table>
+                            </TableContainer>
+                          </Box>
+                        );
+                      } else {
+                        // Not a dynamic table, just render as HTML
+                        result.push(<span key={keyCount++} dangerouslySetInnerHTML={{ __html: tableHtml }} />);
+                      }
+                      lastIndex = match.index + tableHtml.length;
+                    }
+                    // Push the rest of the HTML
+                    result.push(
+                      <span key={keyCount++} dangerouslySetInnerHTML={{ __html: html.slice(lastIndex) }} style={{ marginLeft: '4px' }} />
+                    );
+                    return result;
+                  })()
+                )}
+              </Box>
+            </ScrollableCard>
           </Paper>
         </Box>
 
@@ -996,7 +1673,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
             gap: 2,
             mt: 6,
             justifyContent: { xs: 'center', sm: 'space-between' },
-            alignItems: { xs: 'stretch', sm: 'center' },
+            alignItems: { xs: 'stretch', sm: 'center' }
           }}
         >
           <Button
@@ -1012,7 +1689,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
               width: { xs: '100%', sm: 'auto' },
               mb: { xs: 1, sm: 0 },
 
-              '&:hover': { borderColor: '#00329E', background: 'rgba(0,50,158,0.04)' },
+              '&:hover': { borderColor: '#00329E', background: 'rgba(0,50,158,0.04)' }
             }}
             startIcon={<ArrowBackIcon />}
             onClick={() => navigate(`/app/drafting`)}
@@ -1033,7 +1710,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
                 color: '#fff',
                 width: { xs: '100%', sm: 'auto' },
                 mb: { xs: 1, sm: 0 },
-                '&:hover': { background: '#002266' },
+                '&:hover': { background: '#002266' }
               }}
               onClick={handleSaveDraft}
               disabled={savingDraft}
@@ -1053,7 +1730,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
                 color: '#fff',
                 width: { xs: '100%', sm: 'auto' },
                 mb: { xs: 1, sm: 0 },
-                '&:hover': { background: '#002266' },
+                '&:hover': { background: '#002266' }
               }}
               onClick={handleFinalize}
               disabled={finalizing}
@@ -1077,8 +1754,8 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
                 '&.Mui-disabled': {
                   backgroundColor: '#b0b8c4',
                   color: '#fff',
-                  opacity: 1,
-                },
+                  opacity: 1
+                }
               }}
               onClick={handleDownload}
               disabled={!fileUrl}
@@ -1098,7 +1775,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
                 color: '#00329E',
                 width: { xs: '100%', sm: 'auto' },
                 mb: { xs: 1, sm: 0 },
-                '&:hover': { borderColor: '#00329E', background: 'rgba(0,50,158,0.04)' },
+                '&:hover': { borderColor: '#00329E', background: 'rgba(0,50,158,0.04)' }
               }}
               onClick={handleResetAll}
             >
@@ -1107,12 +1784,99 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
           </Box>
         </Box>
 
+        {/* Table Editing Dialog */}
+        <Dialog open={tableDialogOpen} onClose={() => setTableDialogOpen(false)} maxWidth="md" fullWidth>
+          <DialogTitle>Edit Table Rows</DialogTitle>
+          <DialogContent>
+            {tableDialogData && (
+              <Box sx={{ mt: 2 }}>
+                <TableContainer component={Paper}>
+                  <Table size="small">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell sx={{ fontWeight: 'bold', padding: '12px 16px' }}>Sr. No</TableCell>
+                        {tableDialogData.columns.map((columnField) => (
+                          <TableCell key={columnField.field_name} sx={{ fontWeight: 'bold', padding: '12px 16px' }}>
+                            {columnField.label}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {Array.from({ length: tableDialogData.noOfRows }).map((_, rowIndex) => (
+                        <TableRow key={rowIndex}>
+                          <TableCell sx={{ padding: '12px 16px' }}>{rowIndex + 1}</TableCell>
+                          {tableDialogData.columns.map((columnField) => (
+                            <TableCell key={`${columnField.field_name}-${rowIndex}`} sx={{ padding: '12px 16px' }}>
+                              <TextField
+                                fullWidth
+                                size="small"
+                                label={columnField.label}
+                                value={tableDialogData.values[columnField.field_name]?.[rowIndex] || ''}
+                                onChange={(e) => {
+                                  const newValues = { ...tableDialogData.values };
+                                  if (!newValues[columnField.field_name]) {
+                                    newValues[columnField.field_name] = [];
+                                  }
+                                  newValues[columnField.field_name][rowIndex] = e.target.value;
+                                  setTableDialogData({ ...tableDialogData, values: newValues });
+                                  // Update Formik immediately for real-time preview
+                                  formik.setFieldValue(columnField.field_name, newValues[columnField.field_name], false);
+                                  // Scroll to preview field
+                                  setTimeout(() => {
+                                    const el = document.getElementById(`preview-field-${columnField.field_name}-${rowIndex}`);
+                                    const container = previewContainerRef.current;
+                                    if (el && container) {
+                                      const elRect = el.getBoundingClientRect();
+                                      const containerRect = container.getBoundingClientRect();
+                                      const scrollTop =
+                                        container.scrollTop +
+                                        (elRect.top - containerRect.top) -
+                                        container.clientHeight / 2 +
+                                        el.offsetHeight / 2;
+                                      container.scrollTo({ top: scrollTop, behavior: 'smooth' });
+                                    }
+                                  }, 100);
+                                }}
+                                type={columnField.field_type === 'date' ? 'date' : 'text'}
+                                variant="outlined"
+                                slotProps={{ inputLabel: { shrink: true } }}
+                                placeholder={columnField.field_type === 'date' ? 'DD/MM/YYYY' : ''}
+                              />
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </Box>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setTableDialogOpen(false)}>Cancel</Button>
+            <Button
+              onClick={() => {
+                // Save the edited values back to Formik
+                if (tableDialogData) {
+                  Object.entries(tableDialogData.values).forEach(([fieldName, values]) => {
+                    formik.setFieldValue(fieldName, values);
+                  });
+                }
+                setTableDialogOpen(false);
+              }}
+              variant="contained"
+            >
+              Save
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
     );
   }
 
   // Filter templates by search string (case-insensitive, title or description)
-  const filteredTemplates = (templates || []).filter(template => {
+  const filteredTemplates = (templates || []).filter((template) => {
     if (!search) return true;
     const s = search.toLowerCase();
     return (
@@ -1140,17 +1904,23 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
             // minHeight: '70%',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
+            justifyContent: 'center'
           }}
         >
-          <CircularProgressComponent isLoading displayContent={'Loading Templates...'} />
+          <CircularProgressComponent isLoading displayContent={'Loading ...'} />
         </Box>
       ) : error ? (
         <Box sx={{ textAlign: 'center', color: 'red', my: 4 }}>{error}</Box>
       ) : (
         <>
           {/* Responsive Card Grid */}
-          <Grid2 container spacing={{ xs: 2, sm: 4, md: 6 }} sx={{ width: '100%', mx: 'auto', }} alignItems="flex-start" justifyContent="flex-start">
+          <Grid2
+            container
+            spacing={{ xs: 2, sm: 4, md: 6 }}
+            sx={{ width: '100%', mx: 'auto' }}
+            alignItems="flex-start"
+            justifyContent="flex-start"
+          >
             {filteredTemplates.map((template) => (
               <Grid2 size={{ xs: 12, sm: 6, md: 3 }} key={template.id} sx={{ mb: { xs: 2, md: 0 } }}>
                 <Paper
@@ -1183,9 +1953,9 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
                       border: '1.5px solid #00329E',
                       boxShadow: '0 6px 24px rgba(2, 78, 153, 0.15)',
                       transform: 'scale(1.03)',
-                      zIndex: 2,
+                      zIndex: 2
                     },
-                    mr: { xs: 0, sm: 2, md: 3 },
+                    mr: { xs: 0, sm: 2, md: 3 }
                   }}
                 >
                   {/* Love (heart) icon at top right */}
@@ -1197,18 +1967,14 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
                       zIndex: 3,
                       cursor: 'pointer',
                       transition: 'color 0.2s',
-                      color: favoriteStates[template.id] ? '#00329E' : '#b0b8c4',
+                      color: favoriteStates[template.id] ? '#00329E' : '#b0b8c4'
                     }}
-                    onClick={e => {
+                    onClick={(e) => {
                       e.stopPropagation();
                       handleToggleFavorite(template.id);
                     }}
                   >
-                    {favoriteStates[template.id] ? (
-                      <FavoriteIcon sx={{ fontSize: 23 }} />
-                    ) : (
-                      <FavoriteBorderIcon sx={{ fontSize: 23 }} />
-                    )}
+                    {favoriteStates[template.id] ? <FavoriteIcon sx={{ fontSize: 23 }} /> : <FavoriteBorderIcon sx={{ fontSize: 23 }} />}
                   </Box>
                   {/* Content (heading + paragraph) */}
                   <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', minHeight: 0 }}>
@@ -1224,7 +1990,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
                         WebkitLineClamp: 2,
                         WebkitBoxOrient: 'vertical',
                         lineHeight: 1.2,
-                        minHeight: '2.6em',
+                        minHeight: '2.6em'
                       }}
                       title={template.document_name || template.title || template.file_name}
                     >
@@ -1317,7 +2083,7 @@ function ScrollableCard({ children, showArrows, containerRef: externalRef }) {
               outline: 'none',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
+              justifyContent: 'center'
             }}
           >
             <ArrowUpwardIcon fontSize="small" sx={{ bgcolor: '#fff', borderRadius: '50%', boxShadow: 1, p: 0.2 }} />
@@ -1325,27 +2091,36 @@ function ScrollableCard({ children, showArrows, containerRef: externalRef }) {
         </Box>
       )}
       {/* Only attach ref to direct child if not provided externally */}
-      {externalRef ? children : <Box ref={containerRef} sx={{
-        height: '100%',
-        width: '100%',
-        overflowY: 'auto',
-        pr: 1,
-        // Custom scrollbar styles
-        '&::-webkit-scrollbar': {
-          width: 8,
-          backgroundColor: '#E3EAFE',
-          borderRadius: 4,
-        },
-        '&::-webkit-scrollbar-thumb': {
-          backgroundColor: '#3650AE',
-          borderRadius: 4,
-        },
-        '&::-webkit-scrollbar-thumb:hover': {
-          backgroundColor: '#00329E',
-        },
-        scrollbarWidth: 'thin',
-        scrollbarColor: '#3650AE #E3EAFE',
-      }}>{children}</Box>}
+      {externalRef ? (
+        children
+      ) : (
+        <Box
+          ref={containerRef}
+          sx={{
+            height: '100%',
+            width: '100%',
+            overflowY: 'auto',
+            pr: 1,
+            // Custom scrollbar styles
+            '&::-webkit-scrollbar': {
+              width: 8,
+              backgroundColor: '#E3EAFE',
+              borderRadius: 4
+            },
+            '&::-webkit-scrollbar-thumb': {
+              backgroundColor: '#3650AE',
+              borderRadius: 4
+            },
+            '&::-webkit-scrollbar-thumb:hover': {
+              backgroundColor: '#00329E'
+            },
+            scrollbarWidth: 'thin',
+            scrollbarColor: '#3650AE #E3EAFE'
+          }}
+        >
+          {children}
+        </Box>
+      )}
       {showArrows && showDown && (
         <Box sx={{ position: 'absolute', bottom: 8, left: 0, right: 0, display: 'flex', justifyContent: 'center', zIndex: 2 }}>
           <Box
@@ -1360,7 +2135,7 @@ function ScrollableCard({ children, showArrows, containerRef: externalRef }) {
               outline: 'none',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
+              justifyContent: 'center'
             }}
           >
             <ArrowDownwardIcon fontSize="small" sx={{ bgcolor: '#fff', borderRadius: '50%', boxShadow: 1, p: 0.2 }} />
@@ -1368,6 +2143,5 @@ function ScrollableCard({ children, showArrows, containerRef: externalRef }) {
         </Box>
       )}
     </Box>
-
   );
-} 
+}
