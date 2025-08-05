@@ -28,17 +28,11 @@ import {
 } from '@mui/material';
 import { useSelector } from 'store';
 import {
-  IconSearch,
-  IconHelp,
-  IconBell,
-  IconArrowRight,
   IconClock,
   IconCalendar,
   IconFileText,
   IconReceipt,
   IconChartPie,
-  IconUser,
-  IconHome,
   IconCalendarEvent,
   IconCurrencyDollar,
   IconFileDescription,
@@ -120,189 +114,260 @@ const EmployeePortalDashboard = () => {
       <Grid2 container spacing={1} sx={{ mb: 1 }}>
         {/* Welcome and Check-in */}
         <Grid2 size={{ xs: 12, md: 4 }}>
-          <Card
+          <Paper
+            elevation={0}
             sx={{
-              height: '100%',
-              transition: 'all 0.3s ease',
-              boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-              borderRadius: 2,
+              borderRadius: 3,
+              height: 200,
+              width: '100%',
+              border: `1.5px solid #E5EAF2`,
+              boxShadow: '0 2px 8px 0 rgba(24, 39, 75, 0.05)',
+              transition: 'box-shadow 0.2s, border-color 0.2s',
+              p: 3,
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              cursor: 'pointer',
+              background: 'linear-gradient(135deg, #E3EAFE 0%, #fff 100%)',
               '&:hover': {
-                transform: 'translateY(-4px)',
-                boxShadow: '0 8px 30px rgba(0,0,0,0.15)'
+                boxShadow: '0 4px 16px 0 rgba(64, 66, 74, 0.18)',
+                borderColor: '#667eea',
+                background: 'linear-gradient(135deg, #E3EAFE 0%, #fff 100%)'
               }
             }}
           >
-            <CardContent
-              sx={{ p: 1, textAlign: 'center', display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '100%' }}
-            >
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 1 }}>
-                <IconClock size={18} style={{ marginRight: 4, color: '#667eea' }} />
-                <Typography variant="subtitle1" sx={{ fontWeight: 600, fontSize: '0.9rem' }}>
-                  Today's Status
-                </Typography>
-              </Box>
-              <Typography variant="body2" sx={{ mb: 0.25, fontSize: '0.8rem', color: 'text.secondary' }}>
+            {/* Row 1: Icon and Heading */}
+            <Box display="flex" alignItems="center" gap={2} mb={1}>
+              <Avatar
+                variant="circular"
+                sx={{
+                  width: 44,
+                  height: 44,
+                  bgcolor: '#fff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <IconClock size={28} style={{ color: '#667eea' }} />
+              </Avatar>
+              <Typography variant="h6" fontWeight={800} fontSize={15} sx={{ color: '#0A1F44', mb: 0 }}>
+                Today's Status
+              </Typography>
+            </Box>
+
+            {/* Row 2: Description/Paragraph */}
+            <Box sx={{ width: '100%' }}>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                 {currentDate}
               </Typography>
-              <Typography variant="body2" sx={{ mb: 1, fontSize: '0.8rem', fontWeight: 500 }}>
+              <Typography variant="body2" sx={{ mb: 2, fontSize: '0.8rem', fontWeight: 500 }}>
                 Checked in at {checkInTime}
+              </Typography>
+            </Box>
+
+            {/* Row 3: Count and View Button */}
+            <Box display="flex" alignItems="center" justifyContent="space-between" mt={0}>
+              <Typography variant="h4" fontWeight={700} sx={{ color: '#0A1F44', mb: 0 }}>
+                Active
               </Typography>
               <Button
                 variant="contained"
-                color="primary"
-                size="small"
+                disableElevation
                 sx={{
-                  borderRadius: 1.5,
+                  background: '#E3EAFE',
+                  color: '#667eea',
+                  fontWeight: 500,
+                  borderRadius: 2,
                   textTransform: 'none',
-                  fontWeight: 600,
-                  boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)',
-                  width: 'fit-content',
-                  mx: 'auto',
+                  boxShadow: 'none',
+                  minWidth: 48,
+                  height: 32,
+                  fontSize: 14,
+                  px: 2,
+                  py: 0.5,
+                  transition: 'background 0.2s, color 0.2s',
                   '&:hover': {
-                    boxShadow: '0 6px 20px rgba(102, 126, 234, 0.4)',
-                    transform: 'translateY(-1px)'
+                    background: '#667eea',
+                    color: '#fff'
                   }
                 }}
               >
                 Check-out
               </Button>
-            </CardContent>
-          </Card>
+            </Box>
+          </Paper>
         </Grid2>
 
         {/* My Earnings */}
         <Grid2 size={{ xs: 12, md: 4 }}>
-          <Card
+          <Paper
+            elevation={0}
             sx={{
-              height: '100%',
-              transition: 'all 0.3s ease',
-              boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-              borderRadius: 2,
+              borderRadius: 3,
+              height: 200,
+              width: '100%',
+              border: `1.5px solid #E5EAF2`,
+              boxShadow: '0 2px 8px 0 rgba(24, 39, 75, 0.05)',
+              transition: 'box-shadow 0.2s, border-color 0.2s',
+              p: 3,
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              cursor: 'pointer',
+              background: 'linear-gradient(135deg, #E6FAF0 0%, #fff 100%)',
               '&:hover': {
-                transform: 'translateY(-4px)',
-                boxShadow: '0 8px 30px rgba(0,0,0,0.15)'
+                boxShadow: '0 4px 16px 0 rgba(64, 66, 74, 0.18)',
+                borderColor: '#10b981',
+                background: 'linear-gradient(135deg, #E6FAF0 0%, #fff 100%)'
               }
             }}
           >
-            <CardContent sx={{ p: 1 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
-                <IconCurrencyDollar size={18} style={{ marginRight: 4, color: '#10b981' }} />
-                <Typography variant="subtitle1" sx={{ fontWeight: 600, fontSize: '0.9rem' }}>
-                  My Earnings (Net pay)
-                </Typography>
-              </Box>
-
-              <Box sx={{ mb: 1.5 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
-                  <Typography variant="h5" color="text.secondary">
-                    This month:
-                  </Typography>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#10b981', fontSize: '1.1rem' }}>
-                    ₹98,262
-                  </Typography>
-                </Box>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Typography variant="h5" color="text.secondary">
-                    YTD:
-                  </Typography>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#10b981', fontSize: '1.1rem' }}>
-                    ₹6,20,000
-                  </Typography>
-                </Box>
-              </Box>
-              <Button
-                variant="outlined"
-                size="small"
+            {/* Row 1: Icon and Heading */}
+            <Box display="flex" alignItems="center" gap={2} mb={1}>
+              <Avatar
+                variant="circular"
                 sx={{
-                  borderRadius: 1.5,
-                  textTransform: 'none',
-                  fontWeight: 600,
-                  borderColor: '#10b981',
+                  width: 44,
+                  height: 44,
+                  bgcolor: '#fff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <IconCurrencyDollar size={28} style={{ color: '#10b981' }} />
+              </Avatar>
+              <Typography variant="h6" fontWeight={800} fontSize={15} sx={{ color: '#0A1F44', mb: 0 }}>
+                My Earnings (Net pay)
+              </Typography>
+            </Box>
+
+            {/* Row 2: Description/Paragraph */}
+            <Box sx={{ width: '100%' }}>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                This month: ₹98,262
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 2, fontSize: '0.8rem', fontWeight: 500 }}>
+                YTD: ₹6,20,000
+              </Typography>
+            </Box>
+
+            {/* Row 3: Count and View Button */}
+            <Box display="flex" alignItems="center" justifyContent="space-between" mt={0}>
+              <Typography variant="h4" fontWeight={700} sx={{ color: '#0A1F44', mb: 0 }}>
+                ₹98K
+              </Typography>
+              <Button
+                variant="contained"
+                disableElevation
+                sx={{
+                  background: '#E6FAF0',
                   color: '#10b981',
-                  width: 'fit-content',
-                  mx: 'auto',
-                  display: 'block',
+                  fontWeight: 500,
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  boxShadow: 'none',
+                  minWidth: 48,
+                  height: 32,
+                  fontSize: 14,
+                  px: 2,
+                  py: 0.5,
+                  transition: 'background 0.2s, color 0.2s',
                   '&:hover': {
-                    borderColor: '#059669',
-                    backgroundColor: alpha('#10b981', 0.1)
+                    background: '#10b981',
+                    color: '#fff'
                   }
                 }}
               >
-                View Salary Breakdown
+                View
               </Button>
-            </CardContent>
-          </Card>
+            </Box>
+          </Paper>
         </Grid2>
 
         {/* My Payslips */}
         <Grid2 size={{ xs: 12, md: 4 }}>
-          <Card
+          <Paper
+            elevation={0}
             sx={{
-              height: '100%',
-              transition: 'all 0.3s ease',
-              boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-              borderRadius: 2,
+              borderRadius: 3,
+              height: 200,
+              width: '100%',
+              border: `1.5px solid #E5EAF2`,
+              boxShadow: '0 2px 8px 0 rgba(24, 39, 75, 0.05)',
+              transition: 'box-shadow 0.2s, border-color 0.2s',
+              p: 3,
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              cursor: 'pointer',
+              background: 'linear-gradient(135deg, #FFF7E3 0%, #fff 100%)',
               '&:hover': {
-                transform: 'translateY(-4px)',
-                boxShadow: '0 8px 30px rgba(0,0,0,0.15)'
+                boxShadow: '0 4px 16px 0 rgba(64, 66, 74, 0.18)',
+                borderColor: '#f59e0b',
+                background: 'linear-gradient(135deg, #FFF7E3 0%, #fff 100%)'
               }
             }}
           >
-            <CardContent sx={{ p: 1 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                <IconFileDescription size={18} style={{ marginRight: 4, color: '#f59e0b' }} />
-                <Typography variant="subtitle1" sx={{ fontWeight: 600, fontSize: '0.9rem' }}>
-                  My Payslips
-                </Typography>
-              </Box>
-              <List dense sx={{ py: 0 }}>
-                {['April 2024', 'March 2024', 'Feb 2024'].map((month, index) => (
-                  <ListItem
-                    key={index}
-                    sx={{
-                      px: 0,
-                      py: 0.2,
-                      borderRadius: 1,
-                      transition: 'all 0.2s ease',
-                      '&:hover': {
-                        backgroundColor: alpha('#f59e0b', 0.1),
-                        transform: 'translateX(4px)'
-                      }
-                    }}
-                  >
-                    <ListItemText
-                      primary={month}
-                      secondary="View/Download"
-                      primaryTypographyProps={{ fontSize: '0.8rem', fontWeight: 500 }}
-                      secondaryTypographyProps={{ fontSize: '0.7rem', color: 'text.secondary' }}
-                    />
-                    <IconDownload size={14} style={{ color: '#f59e0b', cursor: 'pointer' }} />
-                  </ListItem>
-                ))}
-              </List>
-              <Button
-                variant="outlined"
-                size="small"
+            {/* Row 1: Icon and Heading */}
+            <Box display="flex" alignItems="center" gap={2} mb={1}>
+              <Avatar
+                variant="circular"
                 sx={{
-                  mt: 0.5,
-                  borderRadius: 1.5,
-                  textTransform: 'none',
-                  fontWeight: 600,
-                  borderColor: '#f59e0b',
+                  width: 44,
+                  height: 44,
+                  bgcolor: '#fff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <IconFileDescription size={28} style={{ color: '#f59e0b' }} />
+              </Avatar>
+              <Typography variant="h6" fontWeight={800} fontSize={15} sx={{ color: '#0A1F44', mb: 0 }}>
+                My Payslips
+              </Typography>
+            </Box>
+
+            {/* Row 2: Description/Paragraph */}
+            <Box sx={{ width: '100%' }}>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                April 2024, March 2024, Feb 2024
+              </Typography>
+            </Box>
+
+            {/* Row 3: Count and View Button */}
+            <Box display="flex" alignItems="center" justifyContent="space-between" mt={0}>
+              <Typography variant="h4" fontWeight={700} sx={{ color: '#0A1F44', mb: 0 }}>
+                03
+              </Typography>
+              <Button
+                variant="contained"
+                disableElevation
+                sx={{
+                  background: '#FFF7E3',
                   color: '#f59e0b',
-                  width: 'fit-content',
-                  mx: 'auto',
-                  display: 'block',
+                  fontWeight: 500,
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  boxShadow: 'none',
+                  minWidth: 48,
+                  height: 32,
+                  fontSize: 14,
+                  px: 2,
+                  py: 0.5,
+                  transition: 'background 0.2s, color 0.2s',
                   '&:hover': {
-                    borderColor: '#d97706',
-                    backgroundColor: alpha('#f59e0b', 0.1)
+                    background: '#f59e0b',
+                    color: '#fff'
                   }
                 }}
               >
-                View ALL
+                View
               </Button>
-            </CardContent>
-          </Card>
+            </Box>
+          </Paper>
         </Grid2>
       </Grid2>
 
@@ -310,202 +375,271 @@ const EmployeePortalDashboard = () => {
       <Grid2 container spacing={1} sx={{ mb: 1 }}>
         {/* Leave & LoP */}
         <Grid2 size={{ xs: 12, md: 4 }}>
-          <Card
+          <Paper
+            elevation={0}
             sx={{
-              height: '100%',
-              transition: 'all 0.3s ease',
-              boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-              borderRadius: 2,
+              borderRadius: 3,
+              height: 200,
+              width: '100%',
+              border: `1.5px solid #E5EAF2`,
+              boxShadow: '0 2px 8px 0 rgba(24, 39, 75, 0.05)',
+              transition: 'box-shadow 0.2s, border-color 0.2s',
+              p: 3,
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              cursor: 'pointer',
+              background: 'linear-gradient(135deg, #F3E8FF 0%, #fff 100%)',
               '&:hover': {
-                transform: 'translateY(-4px)',
-                boxShadow: '0 8px 30px rgba(0,0,0,0.15)'
+                boxShadow: '0 4px 16px 0 rgba(64, 66, 74, 0.18)',
+                borderColor: '#8b5cf6',
+                background: 'linear-gradient(135deg, #F3E8FF 0%, #fff 100%)'
               }
             }}
           >
-            <CardContent sx={{ p: 1 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                <IconCalendarEvent size={18} style={{ marginRight: 4, color: '#8b5cf6' }} />
-                <Typography variant="subtitle1" sx={{ fontWeight: 600, fontSize: '0.9rem' }}>
-                  Leave & LoP
-                </Typography>
-              </Box>
-              <TableContainer>
-                <Table size="small">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell sx={{ fontSize: '0.7rem', fontWeight: 600, py: 0.3, color: 'text.primary' }}>Type</TableCell>
-                      <TableCell sx={{ fontSize: '0.7rem', fontWeight: 600, py: 0.3, color: 'text.primary' }}>Paid leaves</TableCell>
-                      <TableCell sx={{ fontSize: '0.7rem', fontWeight: 600, py: 0.3, color: 'text.primary' }}>LoPs</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    <TableRow sx={{ '&:hover': { backgroundColor: alpha('#8b5cf6', 0.05) } }}>
-                      <TableCell sx={{ fontSize: '0.75rem', py: 0.3, fontWeight: 500 }}>This month</TableCell>
-                      <TableCell sx={{ fontSize: '0.75rem', py: 0.3, color: '#10b981', fontWeight: 600 }}>2</TableCell>
-                      <TableCell sx={{ fontSize: '0.75rem', py: 0.3, color: '#ef4444', fontWeight: 600 }}>1</TableCell>
-                    </TableRow>
-                    <TableRow sx={{ '&:hover': { backgroundColor: alpha('#8b5cf6', 0.05) } }}>
-                      <TableCell sx={{ fontSize: '0.75rem', py: 0.3, fontWeight: 500 }}>YTD</TableCell>
-                      <TableCell sx={{ fontSize: '0.75rem', py: 0.3, color: '#10b981', fontWeight: 600 }}>5</TableCell>
-                      <TableCell sx={{ fontSize: '0.75rem', py: 0.3, color: '#ef4444', fontWeight: 600 }}>3</TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </TableContainer>
+            {/* Row 1: Icon and Heading */}
+            <Box display="flex" alignItems="center" gap={2} mb={1}>
+              <Avatar
+                variant="circular"
+                sx={{
+                  width: 44,
+                  height: 44,
+                  bgcolor: '#fff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <IconCalendarEvent size={28} style={{ color: '#8b5cf6' }} />
+              </Avatar>
+              <Typography variant="h6" fontWeight={800} fontSize={15} sx={{ color: '#0A1F44', mb: 0 }}>
+                Leave & LoP
+              </Typography>
+            </Box>
 
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1, gap: 1 }}>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  sx={{
-                    borderRadius: 1.5,
-                    textTransform: 'none',
-                    fontWeight: 600,
-                    borderColor: '#8b5cf6',
-                    color: '#8b5cf6',
-                    '&:hover': {
-                      borderColor: '#7c3aed',
-                      backgroundColor: alpha('#8b5cf6', 0.1)
-                    }
-                  }}
-                >
-                  View Leave Ledger
-                </Button>
-                <Button
-                  variant="contained"
-                  color="error"
-                  size="small"
-                  startIcon={<IconPlus />}
-                  sx={{
-                    borderRadius: 1.5,
-                    textTransform: 'none',
-                    fontWeight: 600,
-                    boxShadow: '0 4px 12px rgba(239, 68, 68, 0.3)',
-                    '&:hover': {
-                      boxShadow: '0 6px 20px rgba(239, 68, 68, 0.4)',
-                      transform: 'translateY(-1px)'
-                    }
-                  }}
-                >
-                  APPLY
-                </Button>
-              </Box>
-            </CardContent>
-          </Card>
+            {/* Row 2: Description/Paragraph */}
+            <Box sx={{ width: '100%' }}>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                This month: 2 Paid leaves, 1 LoP
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 2, fontSize: '0.8rem', fontWeight: 500 }}>
+                YTD: 5 Paid leaves, 3 LoP
+              </Typography>
+            </Box>
+
+            {/* Row 3: Count and View Button */}
+            <Box display="flex" alignItems="center" justifyContent="space-between" mt={0}>
+              <Typography variant="h4" fontWeight={700} sx={{ color: '#0A1F44', mb: 0 }}>
+                08
+              </Typography>
+              <Button
+                variant="contained"
+                disableElevation
+                sx={{
+                  background: '#F3E8FF',
+                  color: '#8b5cf6',
+                  fontWeight: 500,
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  boxShadow: 'none',
+                  minWidth: 48,
+                  height: 32,
+                  fontSize: 14,
+                  px: 2,
+                  py: 0.5,
+                  transition: 'background 0.2s, color 0.2s',
+                  '&:hover': {
+                    background: '#8b5cf6',
+                    color: '#fff'
+                  }
+                }}
+              >
+                View
+              </Button>
+            </Box>
+          </Paper>
         </Grid2>
 
         {/* Tax Deducted */}
         <Grid2 size={{ xs: 12, md: 4 }}>
-          <Card
+          <Paper
+            elevation={0}
             sx={{
-              height: '100%',
-              transition: 'all 0.3s ease',
-              boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-              borderRadius: 2,
+              borderRadius: 3,
+              height: 200,
+              width: '100%',
+              border: `1.5px solid #E5EAF2`,
+              boxShadow: '0 2px 8px 0 rgba(24, 39, 75, 0.05)',
+              transition: 'box-shadow 0.2s, border-color 0.2s',
+              p: 3,
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              cursor: 'pointer',
+              background: 'linear-gradient(135deg, #E0F7FA 0%, #fff 100%)',
               '&:hover': {
-                transform: 'translateY(-4px)',
-                boxShadow: '0 8px 30px rgba(0,0,0,0.15)'
+                boxShadow: '0 4px 16px 0 rgba(64, 66, 74, 0.18)',
+                borderColor: '#06b6d4',
+                background: 'linear-gradient(135deg, #E0F7FA 0%, #fff 100%)'
               }
             }}
           >
-            <CardContent sx={{ p: 1 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                <IconReceipt size={18} style={{ marginRight: 4, color: '#06b6d4' }} />
-                <Typography variant="subtitle1" sx={{ fontWeight: 600, fontSize: '0.9rem' }}>
-                  Tax Deducted (TDS)
-                </Typography>
-              </Box>
+            {/* Row 1: Icon and Heading */}
+            <Box display="flex" alignItems="center" gap={2} mb={1}>
+              <Avatar
+                variant="circular"
+                sx={{
+                  width: 44,
+                  height: 44,
+                  bgcolor: '#fff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <IconReceipt size={28} style={{ color: '#06b6d4' }} />
+              </Avatar>
+              <Typography variant="h6" fontWeight={800} fontSize={15} sx={{ color: '#0A1F44', mb: 0 }}>
+                Tax Deducted (TDS)
+              </Typography>{' '}
               <Chip
                 label="Regime: New"
                 size="small"
                 sx={{
-                  mb: 0.5,
                   backgroundColor: alpha('#06b6d4', 0.1),
                   color: '#06b6d4',
                   fontWeight: 600,
                   fontSize: '0.7rem'
                 }}
               />
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
-                <Typography variant="h5" color="text.secondary">
-                  This month :
-                </Typography>
-                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#06b6d4', fontSize: '1.1rem' }}>
-                  ₹24,600
-                </Typography>
-              </Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
-                <Typography variant="h5" color="text.secondary">
-                  YTD :
-                </Typography>
-                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#06b6d4', fontSize: '1.1rem' }}>
-                  ₹1,800
-                </Typography>
-              </Box>
+            </Box>
 
+            {/* Row 2: Description/Paragraph */}
+            <Box sx={{ width: '100%' }}>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                This month: ₹24,600
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 2, fontSize: '0.8rem', fontWeight: 500 }}>
+                YTD: ₹1,800
+              </Typography>
+            </Box>
+
+            {/* Row 3: Count and View Button */}
+            <Box display="flex" alignItems="center" justifyContent="space-between" mt={0}>
+              <Typography variant="h4" fontWeight={700} sx={{ color: '#0A1F44', mb: 0 }}>
+                ₹26K
+              </Typography>
               <Button
-                variant="outlined"
-                size="small"
+                variant="contained"
+                disableElevation
                 onClick={() => setShowTaxDetails(true)}
                 sx={{
-                  borderRadius: 1.5,
-                  textTransform: 'none',
-                  fontWeight: 600,
-                  borderColor: '#06b6d4',
+                  background: '#E0F7FA',
                   color: '#06b6d4',
+                  fontWeight: 500,
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  boxShadow: 'none',
+                  minWidth: 48,
+                  height: 32,
+                  fontSize: 14,
+                  px: 2,
+                  py: 0.5,
+                  transition: 'background 0.2s, color 0.2s',
                   '&:hover': {
-                    borderColor: '#0891b2',
-                    backgroundColor: alpha('#06b6d4', 0.1)
-                  },
-                  width: 'fit-content',
-                  mx: 'auto',
-                  display: 'block'
+                    background: '#06b6d4',
+                    color: '#fff'
+                  }
                 }}
               >
-                View Details
+                View
               </Button>
-            </CardContent>
-          </Card>
+            </Box>
+          </Paper>
         </Grid2>
 
         {/* Tax Declaration */}
         <Grid2 size={{ xs: 12, md: 4 }}>
-          <Card
+          <Paper
+            elevation={0}
             sx={{
-              height: '100%',
-              transition: 'all 0.3s ease',
-              boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-              borderRadius: 2,
+              borderRadius: 3,
+              height: 200,
+              width: '100%',
+              border: `1.5px solid #E5EAF2`,
+              boxShadow: '0 2px 8px 0 rgba(24, 39, 75, 0.05)',
+              transition: 'box-shadow 0.2s, border-color 0.2s',
+              p: 3,
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              cursor: 'pointer',
+              background: 'linear-gradient(135deg, #F0FDF4 0%, #fff 100%)',
               '&:hover': {
-                transform: 'translateY(-4px)',
-                boxShadow: '0 8px 30px rgba(0,0,0,0.15)'
+                boxShadow: '0 4px 16px 0 rgba(64, 66, 74, 0.18)',
+                borderColor: '#84cc16',
+                background: 'linear-gradient(135deg, #F0FDF4 0%, #fff 100%)'
               }
             }}
           >
-            <CardContent sx={{ p: 1 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                <IconFileText size={18} style={{ marginRight: 4, color: '#84cc16' }} />
-                <Typography variant="subtitle1" sx={{ fontWeight: 600, fontSize: '0.9rem' }}>
-                  Tax Declaration
-                </Typography>
-              </Box>
-              <Box
+            {/* Row 1: Icon and Heading */}
+            <Box display="flex" alignItems="center" gap={2} mb={1}>
+              <Avatar
+                variant="circular"
                 sx={{
-                  height: 45,
+                  width: 44,
+                  height: 44,
+                  bgcolor: '#fff',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundColor: alpha('#84cc16', 0.05),
-                  borderRadius: 1.5,
-                  border: `2px dashed ${alpha('#84cc16', 0.3)}`
+                  justifyContent: 'center'
                 }}
               >
-                <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.75rem', textAlign: 'center' }}>
-                  Tax declaration details will appear here
-                </Typography>
-              </Box>
-            </CardContent>
-          </Card>
+                <IconFileText size={28} style={{ color: '#84cc16' }} />
+              </Avatar>
+              <Typography variant="h6" fontWeight={800} fontSize={15} sx={{ color: '#0A1F44', mb: 0 }}>
+                Tax Declaration
+              </Typography>
+            </Box>
+
+            {/* Row 2: Description/Paragraph */}
+            <Box sx={{ width: '100%' }}>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                Tax declaration details will appear here
+              </Typography>
+            </Box>
+
+            {/* Row 3: Count and View Button */}
+            <Box display="flex" alignItems="center" justifyContent="space-between" mt={0}>
+              <Typography variant="h4" fontWeight={700} sx={{ color: '#0A1F44', mb: 0 }}>
+                00
+              </Typography>
+              <Button
+                variant="contained"
+                disableElevation
+                sx={{
+                  background: '#F0FDF4',
+                  color: '#84cc16',
+                  fontWeight: 500,
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  boxShadow: 'none',
+                  minWidth: 48,
+                  height: 32,
+                  fontSize: 14,
+                  px: 2,
+                  py: 0.5,
+                  transition: 'background 0.2s, color 0.2s',
+                  '&:hover': {
+                    background: '#84cc16',
+                    color: '#fff'
+                  }
+                }}
+              >
+                View
+              </Button>
+            </Box>
+          </Paper>
         </Grid2>
       </Grid2>
 
@@ -513,177 +647,267 @@ const EmployeePortalDashboard = () => {
       <Grid2 container spacing={1}>
         {/* My Attendance */}
         <Grid2 size={{ xs: 12, md: 4 }}>
-          <Card
+          <Paper
+            elevation={0}
             sx={{
-              height: '100%',
-              transition: 'all 0.3s ease',
-              boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-              borderRadius: 2,
+              borderRadius: 3,
+              height: 200,
+              width: '100%',
+              border: `1.5px solid #E5EAF2`,
+              boxShadow: '0 2px 8px 0 rgba(24, 39, 75, 0.05)',
+              transition: 'box-shadow 0.2s, border-color 0.2s',
+              p: 3,
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              cursor: 'pointer',
+              background: 'linear-gradient(135deg, #FDF2F8 0%, #fff 100%)',
               '&:hover': {
-                transform: 'translateY(-4px)',
-                boxShadow: '0 8px 30px rgba(0,0,0,0.15)'
+                boxShadow: '0 4px 16px 0 rgba(64, 66, 74, 0.18)',
+                borderColor: '#ec4899',
+                background: 'linear-gradient(135deg, #FDF2F8 0%, #fff 100%)'
               }
             }}
           >
-            <CardContent sx={{ p: 1 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                <IconCalendar size={18} style={{ marginRight: 4, color: '#ec4899' }} />
-                <Typography variant="subtitle1" sx={{ fontWeight: 600, fontSize: '0.9rem' }}>
-                  My Attendance
-                </Typography>
-              </Box>
-              <TableContainer>
-                <Table size="small">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell sx={{ fontSize: '0.7rem', fontWeight: 600, py: 0.3, color: 'text.primary' }}>This month</TableCell>
-                      <TableCell sx={{ fontSize: '0.7rem', fontWeight: 600, py: 0.3, color: 'text.primary' }}>YTD</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {[
-                      { label: 'Working days', thisMonth: '22', ytd: '132' },
-                      { label: 'Present', thisMonth: '19', ytd: '124' },
-                      { label: 'LoP', thisMonth: '1', ytd: '3' },
-                      { label: 'Paid leaves', thisMonth: '2', ytd: '5' }
-                    ].map((row, index) => (
-                      <TableRow key={index} sx={{ '&:hover': { backgroundColor: alpha('#ec4899', 0.05) } }}>
-                        <TableCell sx={{ fontSize: '0.75rem', py: 0.3, fontWeight: 500 }}>{row.label}</TableCell>
-                        <TableCell sx={{ fontSize: '0.75rem', py: 0.3, fontWeight: 600, color: '#ec4899' }}>{row.thisMonth}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-              <Button
-                variant="outlined"
-                size="small"
-                startIcon={<IconEye />}
+            {/* Row 1: Icon and Heading */}
+            <Box display="flex" alignItems="center" gap={2} mb={1}>
+              <Avatar
+                variant="circular"
                 sx={{
-                  mt: 0.5,
-                  borderRadius: 1.5,
-                  textTransform: 'none',
-                  fontWeight: 600,
-                  borderColor: '#ec4899',
+                  width: 44,
+                  height: 44,
+                  bgcolor: '#fff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <IconCalendar size={28} style={{ color: '#ec4899' }} />
+              </Avatar>
+              <Typography variant="h6" fontWeight={800} fontSize={15} sx={{ color: '#0A1F44', mb: 0 }}>
+                My Attendance
+              </Typography>
+            </Box>
+
+            {/* Row 2: Description/Paragraph */}
+            <Box sx={{ width: '100%' }}>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                This month: 19 Present, 1 LoP, 2 Paid leaves
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 2, fontSize: '0.8rem', fontWeight: 500 }}>
+                YTD: 124 Present, 3 LoP, 5 Paid leaves
+              </Typography>
+            </Box>
+
+            {/* Row 3: Count and View Button */}
+            <Box display="flex" alignItems="center" justifyContent="space-between" mt={0}>
+              <Typography variant="h4" fontWeight={700} sx={{ color: '#0A1F44', mb: 0 }}>
+                22
+              </Typography>
+              <Button
+                variant="contained"
+                disableElevation
+                sx={{
+                  background: '#FDF2F8',
                   color: '#ec4899',
+                  fontWeight: 500,
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  boxShadow: 'none',
+                  minWidth: 48,
+                  height: 32,
+                  fontSize: 14,
+                  px: 2,
+                  py: 0.5,
+                  transition: 'background 0.2s, color 0.2s',
                   '&:hover': {
-                    borderColor: '#db2777',
-                    backgroundColor: alpha('#ec4899', 0.1)
+                    background: '#ec4899',
+                    color: '#fff'
                   }
                 }}
               >
-                View Full Attendance
+                View
               </Button>
-            </CardContent>
-          </Card>
+            </Box>
+          </Paper>
         </Grid2>
 
         {/* My PF Contribution */}
         <Grid2 size={{ xs: 12, md: 4 }}>
-          <Card
+          <Paper
+            elevation={0}
             sx={{
-              height: '100%',
-              transition: 'all 0.3s ease',
-              boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-              borderRadius: 2,
+              borderRadius: 3,
+              height: 200,
+              width: '100%',
+              border: `1.5px solid #E5EAF2`,
+              boxShadow: '0 2px 8px 0 rgba(24, 39, 75, 0.05)',
+              transition: 'box-shadow 0.2s, border-color 0.2s',
+              p: 3,
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              cursor: 'pointer',
+              background: 'linear-gradient(135deg, #FFF7ED 0%, #fff 100%)',
               '&:hover': {
-                transform: 'translateY(-4px)',
-                boxShadow: '0 8px 30px rgba(0,0,0,0.15)'
+                boxShadow: '0 4px 16px 0 rgba(64, 66, 74, 0.18)',
+                borderColor: '#f97316',
+                background: 'linear-gradient(135deg, #FFF7ED 0%, #fff 100%)'
               }
             }}
           >
-            <CardContent sx={{ p: 1 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                <IconChartPie size={18} style={{ marginRight: 4, color: '#f97316' }} />
-                <Typography variant="subtitle1" sx={{ fontWeight: 600, fontSize: '0.9rem' }}>
-                  My PF Contribution
-                </Typography>
-              </Box>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 0.25, fontSize: '0.75rem' }}>
-                EPF Tracker (Employee + Employer Contribution)
-              </Typography>
-
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
-                <Typography variant="h5" color="text.secondary">
-                  This month :
-                </Typography>
-                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#f97316', fontSize: '1.1rem' }}>
-                  ₹3,600
-                </Typography>
-              </Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
-                <Typography variant="h5" color="text.secondary">
-                  YTD :
-                </Typography>
-                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#f97316', fontSize: '1.1rem' }}>
-                  ₹43,200
-                </Typography>
-              </Box>
-
-              <Button
-                variant="outlined"
-                size="small"
+            {/* Row 1: Icon and Heading */}
+            <Box display="flex" alignItems="center" gap={2} mb={1}>
+              <Avatar
+                variant="circular"
                 sx={{
-                  borderRadius: 1.5,
-                  textTransform: 'none',
-                  fontWeight: 600,
-                  borderColor: '#f97316',
-                  color: '#f97316',
-                  '&:hover': {
-                    borderColor: '#ea580c',
-                    backgroundColor: alpha('#f97316', 0.1)
-                  },
-                  width: 'fit-content',
-                  mx: 'auto',
-                  display: 'block'
+                  width: 44,
+                  height: 44,
+                  bgcolor: '#fff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
                 }}
               >
-                View PF Passbook
+                <IconChartPie size={28} style={{ color: '#f97316' }} />
+              </Avatar>
+              <Typography variant="h6" fontWeight={800} fontSize={15} sx={{ color: '#0A1F44', mb: 0 }}>
+                My PF Contribution
+              </Typography>
+              EPF Tracker (Employee + Employer Contribution)
+            </Box>
+
+            {/* Row 2: Description/Paragraph */}
+            <Box sx={{ width: '100%' }}>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                EPF Tracker (Employee + Employer Contribution)
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 1 }}>
+                This month: ₹3,600
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 2, fontSize: '0.8rem', fontWeight: 500 }}>
+                YTD: ₹43,200
+              </Typography>
+            </Box>
+
+            {/* Row 3: Count and View Button */}
+            <Box display="flex" alignItems="center" justifyContent="space-between" mt={0}>
+              <Typography variant="h4" fontWeight={700} sx={{ color: '#0A1F44', mb: 0 }}>
+                ₹43K
+              </Typography>
+              <Button
+                variant="contained"
+                disableElevation
+                sx={{
+                  background: '#FFF7ED',
+                  color: '#f97316',
+                  fontWeight: 500,
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  boxShadow: 'none',
+                  minWidth: 48,
+                  height: 32,
+                  fontSize: 14,
+                  px: 2,
+                  py: 0.5,
+                  transition: 'background 0.2s, color 0.2s',
+                  '&:hover': {
+                    background: '#f97316',
+                    color: '#fff'
+                  }
+                }}
+              >
+                View
               </Button>
-            </CardContent>
-          </Card>
+            </Box>
+          </Paper>
         </Grid2>
 
         {/* Reimbursements */}
         <Grid2 size={{ xs: 12, md: 4 }}>
-          <Card
+          <Paper
+            elevation={0}
             sx={{
-              height: '100%',
-              transition: 'all 0.3s ease',
-              boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-              borderRadius: 2,
+              borderRadius: 3,
+              height: 200,
+              width: '100%',
+              border: `1.5px solid #E5EAF2`,
+              boxShadow: '0 2px 8px 0 rgba(24, 39, 75, 0.05)',
+              transition: 'box-shadow 0.2s, border-color 0.2s',
+              p: 3,
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              cursor: 'pointer',
+              background: 'linear-gradient(135deg, #EEF2FF 0%, #fff 100%)',
               '&:hover': {
-                transform: 'translateY(-4px)',
-                boxShadow: '0 8px 30px rgba(0,0,0,0.15)'
+                boxShadow: '0 4px 16px 0 rgba(64, 66, 74, 0.18)',
+                borderColor: '#6366f1',
+                background: 'linear-gradient(135deg, #EEF2FF 0%, #fff 100%)'
               }
             }}
           >
-            <CardContent sx={{ p: 1 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                <IconReceipt size={18} style={{ marginRight: 4, color: '#6366f1' }} />
-                <Typography variant="subtitle1" sx={{ fontWeight: 600, fontSize: '0.9rem' }}>
-                  Reimbursements
-                </Typography>
-              </Box>
-              <List dense sx={{ py: 0 }}>
-                {[
-                  { label: 'Applied', value: '₹12,500', color: '#6366f1' },
-                  { label: 'Approved', value: '₹10,200', color: '#10b981' },
-                  { label: 'Processed', value: '₹8,750', color: '#f59e0b' },
-                  { label: 'Pending', value: '₹1,800', color: '#ef4444' }
-                ].map((item, index) => (
-                  <Box key={index} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
-                    <Typography variant="h5" color="text.secondary">
-                      {item.label} :
-                    </Typography>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 700, color: item.color, fontSize: '1.1rem' }}>
-                      {item.value}
-                    </Typography>
-                  </Box>
-                ))}
-              </List>
-            </CardContent>
-          </Card>
+            {/* Row 1: Icon and Heading */}
+            <Box display="flex" alignItems="center" gap={2} mb={1}>
+              <Avatar
+                variant="circular"
+                sx={{
+                  width: 44,
+                  height: 44,
+                  bgcolor: '#fff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <IconReceipt size={28} style={{ color: '#6366f1' }} />
+              </Avatar>
+              <Typography variant="h6" fontWeight={800} fontSize={15} sx={{ color: '#0A1F44', mb: 0 }}>
+                Reimbursements
+              </Typography>
+            </Box>
+
+            {/* Row 2: Description/Paragraph */}
+            <Box sx={{ width: '100%' }}>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                Applied: ₹12,500 | Approved: ₹10,200
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 2, fontSize: '0.8rem', fontWeight: 500 }}>
+                Processed: ₹8,750 | Pending: ₹1,800
+              </Typography>
+            </Box>
+
+            {/* Row 3: Count and View Button */}
+            <Box display="flex" alignItems="center" justifyContent="space-between" mt={0}>
+              <Typography variant="h4" fontWeight={700} sx={{ color: '#0A1F44', mb: 0 }}>
+                ₹33K
+              </Typography>
+              <Button
+                variant="contained"
+                disableElevation
+                sx={{
+                  background: '#EEF2FF',
+                  color: '#6366f1',
+                  fontWeight: 500,
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  boxShadow: 'none',
+                  minWidth: 48,
+                  height: 32,
+                  fontSize: 14,
+                  px: 2,
+                  py: 0.5,
+                  transition: 'background 0.2s, color 0.2s',
+                  '&:hover': {
+                    background: '#6366f1',
+                    color: '#fff'
+                  }
+                }}
+              >
+                View
+              </Button>
+            </Box>
+          </Paper>
         </Grid2>
       </Grid2>
 
