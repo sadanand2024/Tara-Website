@@ -81,7 +81,7 @@ export default function Login() {
                   <Grid size={12}>
                     <Divider />
                   </Grid>
-                  <Grid size={12}>
+                  {/* <Grid size={12}>
                     <Grid container direction="column" sx={{ alignItems: 'center' }} size={12}>
                       <Typography variant="subtitle1" sx={{ textDecoration: 'none', color: 'text.primary' }}>
                         Don&apos;t have an account?{' '}
@@ -90,7 +90,7 @@ export default function Login() {
                         </Link>
                       </Typography>
                     </Grid>
-                  </Grid>
+                  </Grid> */}
                 </Grid>
               </AuthCardWrapper>
               {/* {!isLoggedIn && (

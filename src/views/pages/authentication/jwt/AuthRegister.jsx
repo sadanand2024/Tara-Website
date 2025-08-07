@@ -434,7 +434,7 @@ export default function JWTRegister({ ...others }) {
 
             <Box sx={{ mt: 2 }}>
               <AnimateButton>
-                <Button disableElevation disabled={isSubmitting} fullWidth size="large" type="submit" variant="contained" color="secondary">
+                <Button disableElevation disabled={true} fullWidth size="large" type="submit" variant="contained" color="secondary">
                   {showOTPField ? 'Complete Registration' : 'Sign up'}
                 </Button>
               </AnimateButton>
