@@ -26,13 +26,7 @@ import Tarafirstlogo_png from 'assets/images/Tarafirstlogo_png.png'; // Tarafirs
 
 // assets
 import MenuIcon from '@mui/icons-material/Menu';
-import {
-  IconApps,
-  IconBrain,
-  IconBuildingSkyscraper,
-  IconBuildingStore,
-  IconCalendarTime
-} from '@tabler/icons-react';
+import { IconApps, IconBrain, IconBuildingSkyscraper, IconBuildingStore, IconCalendarTime } from '@tabler/icons-react';
 import ProductsPanel from './ProductsPanel';
 import ServicesPanel from './ServicesPanel';
 function ElevationScroll({ children, window, pathname }) {
@@ -43,7 +37,7 @@ function ElevationScroll({ children, window, pathname }) {
     target: window
   });
 
-   const getBackgroundColor = () => {
+  const getBackgroundColor = () => {
     if (trigger) {
       return '#FFFFFF';
     }
@@ -89,7 +83,7 @@ export default function AppBar({ ...others }) {
     <ElevationScroll {...others} pathname={pathname}>
       <MuiAppBar>
         {/* <Container> */}
-        <Toolbar sx={{ py:0.5, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Toolbar sx={{ py: 0.5, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           {/* Left: Logo */}
           <Box>
             <RouterLink to="/">
@@ -114,7 +108,7 @@ export default function AppBar({ ...others }) {
               Products
             </Button>
             <Button color="inherit" component={Link} href="/company">
-            company
+              company
             </Button>
             <Button color="inherit" component={Link} href="/knowledge">
               Knowledge
@@ -176,7 +170,7 @@ export default function AppBar({ ...others }) {
                       <ListItemIcon>
                         <IconBuildingSkyscraper />
                       </ListItemIcon>
-                      <ListItemText primary="company"/>
+                      <ListItemText primary="company" />
                     </ListItemButton>
 
                     <ListItemButton component={Link} href="/knowledge">
@@ -195,12 +189,12 @@ export default function AppBar({ ...others }) {
 
                     <Box
                       sx={{
-                        pt: 2,
                         borderTop: 1,
                         borderColor: 'divider',
                         display: 'flex',
                         justifyContent: 'center',
-                        gap: 2
+                        gap: 2,
+                        p: 2
                       }}
                     >
                       <Button
@@ -249,4 +243,3 @@ export default function AppBar({ ...others }) {
     </ElevationScroll>
   );
 }
-

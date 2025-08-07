@@ -77,6 +77,8 @@ const ServiceSummary = Loadable(lazy(() => import('views/SuperAdmin/ServiceManag
 //employee Portal
 const EmployeePortal = Loadable(lazy(() => import('views/application/EmployeePortal')));
 const PaySlips = Loadable(lazy(() => import('views/application/EmployeePortal/PaySlips')));
+const PaySlipView = Loadable(lazy(() => import('views/application/EmployeePortal/components/PayslipView')));
+
 const TaxTDS = Loadable(lazy(() => import('views/application/EmployeePortal/TaxTDS')));
 const LeaveManagement = Loadable(lazy(() => import('views/application/EmployeePortal/LeaveManagement')));
 const Attendance = Loadable(lazy(() => import('views/application/EmployeePortal/Attendance')));
@@ -245,6 +247,11 @@ const MainRoutes = {
       path: '/app/employee-portal/pay-slips',
       element: <PaySlips />
     },
+    {
+      path: '/app/employee-portal/payslipview',
+      element: <PaySlipView />
+    },
+
     {
       path: '/app/employee-portal/tax-tds',
       element: <TaxTDS />

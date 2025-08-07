@@ -24,9 +24,10 @@ import {
   ListItem,
   ListItemText,
   ListItemIcon,
-  ListItemSecondaryAction,
   Divider,
-  Alert
+  Alert,
+  CircularProgress,
+  Stack
 } from '@mui/material';
 import {
   IconShieldCheck,
@@ -161,16 +162,16 @@ const Form16Compliances = () => {
 
   return (
     <Box sx={{ p: 3 }}>
-      <Typography variant="h4" gutterBottom>
+      <Typography variant="h4" gutterBottom component="div">
         Form 16 & Compliances
       </Typography>
-      <Typography variant="body1" color="textSecondary" sx={{ mb: 3 }}>
+      <Typography variant="body1" color="textSecondary" sx={{ mb: 3 }} component="div">
         Access your Form 16 and compliance documents for tax filing
       </Typography>
 
       {/* Compliance Status Alert */}
       <Alert severity="info" sx={{ mb: 3 }}>
-        <Typography variant="body2">
+        <Typography variant="body2" component="div">
           <strong>Tax Filing Deadline:</strong> {formatDate(complianceStatus.taxFilingDue)} |<strong> Last Compliance Check:</strong>{' '}
           {formatDate(complianceStatus.lastComplianceCheck)}
         </Typography>
@@ -183,14 +184,14 @@ const Form16Compliances = () => {
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                 <IconShieldCheck size={24} color="#1976d2" />
-                <Typography variant="h6" sx={{ ml: 1 }}>
+                <Typography variant="h6" sx={{ ml: 1 }} component="div">
                   Form 16 Status
                 </Typography>
               </Box>
-              <Typography variant="h4" color="success.main">
+              <Typography variant="h4" color="success.main" component="div">
                 Available
               </Typography>
-              <Typography variant="body2" color="textSecondary">
+              <Typography variant="body2" color="textSecondary" component="div">
                 FY 2023-24
               </Typography>
             </CardContent>
@@ -199,13 +200,13 @@ const Form16Compliances = () => {
         <Grid item xs={12} sm={6} md={3}>
           <Card>
             <CardContent>
-              <Typography variant="h6" gutterBottom>
+              <Typography variant="h6" gutterBottom component="div">
                 Documents Ready
               </Typography>
-              <Typography variant="h4" color="primary">
+              <Typography variant="h4" color="primary" component="div">
                 {complianceStatus.documentsComplete}/{complianceStatus.totalDocuments}
               </Typography>
-              <Typography variant="body2" color="textSecondary">
+              <Typography variant="body2" color="textSecondary" component="div">
                 {Math.round((complianceStatus.documentsComplete / complianceStatus.totalDocuments) * 100)}% complete
               </Typography>
             </CardContent>
@@ -214,13 +215,13 @@ const Form16Compliances = () => {
         <Grid item xs={12} sm={6} md={3}>
           <Card>
             <CardContent>
-              <Typography variant="h6" gutterBottom>
+              <Typography variant="h6" gutterBottom component="div">
                 Tax Filing Due
               </Typography>
-              <Typography variant="h4" color="warning.main">
+              <Typography variant="h4" color="warning.main" component="div">
                 {formatDate(complianceStatus.taxFilingDue)}
               </Typography>
-              <Typography variant="body2" color="textSecondary">
+              <Typography variant="body2" color="textSecondary" component="div">
                 Last date to file ITR
               </Typography>
             </CardContent>
@@ -229,13 +230,13 @@ const Form16Compliances = () => {
         <Grid item xs={12} sm={6} md={3}>
           <Card>
             <CardContent>
-              <Typography variant="h6" gutterBottom>
+              <Typography variant="h6" gutterBottom component="div">
                 Last Updated
               </Typography>
-              <Typography variant="h4" color="info.main">
+              <Typography variant="h4" color="info.main" component="div">
                 {formatDate(complianceStatus.lastComplianceCheck)}
               </Typography>
-              <Typography variant="body2" color="textSecondary">
+              <Typography variant="body2" color="textSecondary" component="div">
                 Compliance check
               </Typography>
             </CardContent>
@@ -274,7 +275,7 @@ const Form16Compliances = () => {
       {/* Form 16 Details */}
       <Card sx={{ mb: 3 }}>
         <CardContent>
-          <Typography variant="h6" gutterBottom>
+          <Typography variant="h6" gutterBottom component="div">
             Form 16 Details
           </Typography>
           <TableContainer component={Paper} variant="outlined">
@@ -332,7 +333,7 @@ const Form16Compliances = () => {
       {/* Compliance Documents */}
       <Card>
         <CardContent>
-          <Typography variant="h6" gutterBottom>
+          <Typography variant="h6" gutterBottom component="div">
             Compliance Documents
           </Typography>
           <List>
@@ -343,7 +344,7 @@ const Form16Compliances = () => {
                   <ListItemText
                     primary={
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Typography variant="subtitle1" fontWeight="bold">
+                        <Typography variant="subtitle1" fontWeight="bold" component="div">
                           {doc.documentType}
                         </Typography>
                         <Chip label={doc.financialYear} size="small" variant="outlined" />
@@ -351,10 +352,10 @@ const Form16Compliances = () => {
                     }
                     secondary={
                       <Box>
-                        <Typography variant="body2" color="textSecondary">
+                        <Typography variant="body2" color="textSecondary" component="div">
                           {doc.description}
                         </Typography>
-                        <Typography variant="caption" color="textSecondary">
+                        <Typography variant="caption" color="textSecondary" component="div">
                           Last updated: {formatDate(doc.lastUpdated)}
                         </Typography>
                       </Box>

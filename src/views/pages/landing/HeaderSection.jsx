@@ -2,19 +2,19 @@ import { useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 // material-ui
-import { Stack, useTheme } from '@mui/material';
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Container from '@mui/material/Container';
-import Grid from '@mui/material/Grid2';
+import { Stack, useTheme, Box, Button, Container, Grid2 } from '@mui/material';
+// import Box from '@mui/material/Box';
+// import Button from '@mui/material/Button';
+// import Container from '@mui/material/Container';
+// import Grid from '@mui/material/Grid2';
+
 import { styled } from '@mui/material/styles';
+
 import Typography from '@mui/material/Typography';
 import Icon1 from 'assets/images/icons/Icon1.svg';
 import Icon2 from 'assets/images/icons/Icon2.svg';
 import Icon3 from 'assets/images/icons/Icon3.svg';
-// import { ThemeMode } from 'config';
 
-// third party
 import { motion } from 'framer-motion';
 
 // project imports
@@ -85,7 +85,7 @@ export default function HeaderSection() {
         px: { xs: 2, sm: 3, md: 4 }
       }}
     >
-      <Grid
+      <Grid2
         container
         spacing={{ xs: 3, sm: 4, md: 2 }}
         sx={{
@@ -95,9 +95,9 @@ export default function HeaderSection() {
           mb: { xs: 3, sm: 4, md: 10 }
         }}
       >
-        <Grid size={{ xs: 12, md: 4 }}>
-          <Grid container spacing={{ xs: 2, sm: 3, md: 6 }} sx={{ mt: { xs: 2, sm: 3, md: 5 }, ml: { xs: 0, sm: 0, md: 2, lg: -8 } }}>
-            <Grid size={12}>
+        <Grid2 size={{ xs: 12, md: 4 }}>
+          <Grid2 container spacing={{ xs: 2, sm: 3, md: 6 }} sx={{ mt: { xs: 2, sm: 3, md: 5 }, ml: { xs: 0, sm: 0, md: 2, lg: -8 } }}>
+            <Grid2 size={{ xs: 12, sm: 12, md: 12, lg: 12 }}>
               <motion.div
                 initial={{ opacity: 0, translateY: 550 }}
                 animate={{ opacity: 1, translateY: 0 }}
@@ -118,7 +118,7 @@ export default function HeaderSection() {
                     variant="h1"
                     sx={{
                       ...headerSX,
-                      fontWeight: 700,
+                      fontWeight: 600,
                       lineHeight: '50px',
                       display: 'block',
 
@@ -132,16 +132,16 @@ export default function HeaderSection() {
                     variant="h1"
                     sx={{
                       ...headerSX,
-                      fontWeight: 700,
+                      fontWeight: 600,
                       lineHeight: 1.0,
                       display: 'block',
-                      fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem', lg: '42px' },
-                      whiteSpace: { xs: 'nowrap', md: 'nowrap' }
+                      fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem', lg: '42px' }
+                      // whiteSpace: { xs: 'nowrap', md: 'nowrap' }
                     }}
                   >
-                    Invoicing, Payroll, ITR, GST,
+                    Invoicing, Payroll, ITR, GST, Accounting & More
                   </Typography>
-                  <Typography
+                  {/* <Typography
                     variant="h1"
                     sx={{
                       ...headerSX,
@@ -153,17 +153,17 @@ export default function HeaderSection() {
                     }}
                   >
                     Accounting & More
-                  </Typography>
+                  </Typography> */}
                 </Box>
               </motion.div>
-            </Grid>
-            <Grid
+            </Grid2>
+            <Grid2
               sx={{
                 mt: { xs: 0, md: -2.5 },
                 textAlign: { xs: 'center', sm: 'center', md: 'left' },
                 mr: { xs: 'center', sm: 'flex-start', md: 'flex-start', lg: 'flex-start' }
               }}
-              size={12}
+              size={{ xs: 12, sm: 12, md: 12, lg: 12 }}
             >
               <motion.div
                 initial={{ opacity: 0, translateY: 550 }}
@@ -177,14 +177,14 @@ export default function HeaderSection() {
                     textAlign: { xs: 'center', sm: 'center', md: 'left' },
                     color: 'text.secondary',
                     fontSize: { xs: '0.875rem', sm: '1rem', md: '1.125rem' },
-                    mb: { xs: 2, sm: 2.5, md: 3 },
-                    lineHeight: 0.5,
+                    // mb: { xs: 2, sm: 2.5, md: 3 },
+                    // lineHeight: 0.5,
                     fontStyle: 'Inter',
                     // ml: { xs:'flex-start', sm:'flex-start', md:'flex-start', lg:'flex-start'},
 
-                    fontWeight: 500,
-                    px: { xs: 1, sm: 2, md: 0 },
-                    whiteSpace: { xs: 'nowrap', md: 'nowrap' }
+                    fontWeight: 500
+                    // px: { xs: 1, sm: 2, md: 0 }
+                    // whiteSpace: { xs: 'nowrap', md: 'nowrap' }
                   }}
                 >
                   No more juggling tools—just one simple platform.A complete
@@ -196,20 +196,20 @@ export default function HeaderSection() {
                     textAlign: { xs: 'center', sm: 'center', md: 'left' },
                     color: 'text.secondary',
                     fontSize: { xs: '0.875rem', sm: '1rem', md: '1.125rem' },
-                    mb: { xs: 2, sm: 2.5, md: 3 },
-                    lineHeight: 0.5,
+                    // mb: { xs: 2, sm: 2.5, md: 3 },
+                    // lineHeight: 0.5,
                     fontWeight: 500,
                     fontStyle: 'Inter',
-                    px: { xs: 1, sm: 2, md: 0 },
-                    whiteSpace: { xs: 'nowrap', md: 'nowrap' }
+                    px: { xs: 1, sm: 2, md: 0 }
+                    // whiteSpace: { xs: 'nowrap', md: 'nowrap' }
                   }}
                 >
                   financial suite for all your Business + Personal finance needs.
                 </Typography>
               </motion.div>
-            </Grid>
+            </Grid2>
 
-            <Grid size={12} sx={{ mt: { xs: 2, sm: 3, md: 0 } }}>
+            <Grid2 size={{ xs: 12, sm: 12, md: 12, lg: 12 }} sx={{ mt: { xs: 2, sm: 3, md: 0 } }}>
               <motion.div
                 initial={{ opacity: 0, translateY: 550 }}
                 animate={{ opacity: 1, translateY: 0 }}
@@ -217,11 +217,11 @@ export default function HeaderSection() {
               >
                 <Stack
                   direction={{ xs: 'row', sm: 'row' }}
-                  spacing={{ xs: 2, sm: 4 }}
+                  spacing={{ xs: 1, sm: 2 }}
                   sx={{
                     alignItems: 'center',
                     justifyContent: { xs: 'center', sm: 'center', md: 'flex-start' },
-                    mb: { xs: 3, sm: 4, md: 5 },
+                    mb: { xs: 2, sm: 2, md: 2 },
                     mt: { xs: -2, sm: -3, md: -4 }
                   }}
                 >
@@ -258,67 +258,68 @@ export default function HeaderSection() {
                   </Box>
                 </Stack>
               </motion.div>
-            </Grid>
+            </Grid2>
 
-            <Grid size={12}>
+            <Grid2 size={{ xs: 12, sm: 12, md: 12, lg: 12 }}>
               <motion.div
                 initial={{ opacity: 0, translateY: 550 }}
                 animate={{ opacity: 1, translateY: 0 }}
                 transition={{ type: 'spring', stiffness: 150, damping: 30, delay: 0.4 }}
               >
-                <Grid
-                  container
-                  spacing={2}
+                <Stack
+                  direction={{ xs: 'column', sm: 'row' }}
+                  spacing={{ xs: 2, sm: 2, md: 2 }}
                   sx={{
                     justifyContent: { xs: 'center', sm: 'center', md: 'flex-start' },
-                    mb: { xs: 3, sm: 4, md: 5 },
-                    mt: { xs: -2, sm: -3, md: -4 }
+                    // mb: { xs: 3, sm: 4, md: 5 },
+                    mt: { xs: -2, sm: -3, md: -4 },
+                    width: '100%'
                   }}
                 >
-                  <Grid>
-                    <AnimateButton>
-                      <Button
-                        onClick={() => navigate(`/register?id=${moduleId}&context=${context}&type=${type}`)}
-                        size="large"
-                        variant="outlined"
-                        color="secondary"
-                        sx={{
-                          width: { xs: '100%', sm: 'auto', lg: '100%' },
-                          fontSize: { xs: '0.875rem', sm: '1rem' },
-                          mt: { xs: 0, sm: 0, md: 0, lg: -1 },
-                          borderColor: ' #0023af',
-                          color: '#0023af'
-                        }}
-                      >
-                        Get started for free
-                      </Button>
-                    </AnimateButton>
-                  </Grid>
-                  <Grid>
-                    <AnimateButton>
-                      <Button
-                        onClick={() => navigate(`/book-consultation?id=${moduleId}&context=${context}&type=${type}`)}
-                        size="large"
-                        variant="contained"
-                        color="secondary"
-                        sx={{
-                          width: { xs: '100%', sm: 'auto', lg: '120%' },
-                          fontSize: { xs: '0.875rem', sm: '1rem', lg: '16px' },
-                          mt: { xs: 0, sm: 0, md: 0, lg: -1 },
-                          backgroundColor: '#0023af',
-                          color: '#ffd600'
-                        }}
-                      >
-                        Book Consultation
-                      </Button>
-                    </AnimateButton>
-                  </Grid>
-                </Grid>
+                  <AnimateButton sx={{ width: { xs: '100%', sm: 'auto' } }}>
+                    <Button
+                      onClick={() => navigate(`/register?id=${moduleId}&context=${context}&type=${type}`)}
+                      size="small"
+                      variant="outlined"
+                      color="secondary"
+                      fullWidth={false}
+                      sx={{
+                        width: { xs: '100%', sm: 'auto' },
+                        fontSize: { xs: '0.875rem', sm: '1rem' },
+                        borderColor: '#0023af',
+                        color: '#0023af',
+                        py: { xs: 1, sm: 1, md: 1.5 },
+                        px: { xs: 2, sm: 2, md: 3 }
+                      }}
+                    >
+                      Get started for free
+                    </Button>
+                  </AnimateButton>
+                  <AnimateButton sx={{ width: { xs: '100%', sm: 'auto' } }}>
+                    <Button
+                      onClick={() => navigate(`/book-consultation?id=${moduleId}&context=${context}&type=${type}`)}
+                      size="small"
+                      variant="contained"
+                      color="secondary"
+                      fullWidth={false}
+                      sx={{
+                        width: { xs: '100%', sm: 'auto' },
+                        fontSize: { xs: '0.875rem', sm: '1rem' },
+                        backgroundColor: '#0023af',
+                        color: '#ffd600',
+                        py: { xs: 1, sm: 1, md: 1.5 },
+                        px: { xs: 2, sm: 2, md: 3 }
+                      }}
+                    >
+                      Book Consultation
+                    </Button>
+                  </AnimateButton>
+                </Stack>
               </motion.div>
-            </Grid>
-          </Grid>
-        </Grid>
-        <Grid size={{ xs: 12, md: 8 }} sx={{ mb: { xs: 3, sm: 4, md: 15 } }}>
+            </Grid2>
+          </Grid2>
+        </Grid2>
+        <Grid2 size={{ xs: 12, md: 8 }} sx={{ mb: { xs: 3, sm: 4, md: 15 } }}>
           <Box
             sx={{
               position: 'relative',
@@ -343,8 +344,8 @@ export default function HeaderSection() {
               }}
             />
           </Box>
-        </Grid>
-      </Grid>
+        </Grid2>
+      </Grid2>
     </Container>
   );
 }

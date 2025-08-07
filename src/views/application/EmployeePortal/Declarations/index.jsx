@@ -4,15 +4,7 @@ import {
   Card,
   CardContent,
   Typography,
-  Grid,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Chip,
+  Grid2,
   Button,
   TextField,
   FormControl,
@@ -25,88 +17,86 @@ import {
   DialogActions,
   IconButton,
   Tooltip,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails
+  Avatar,
+  Paper,
+  Chip,
+  alpha
 } from '@mui/material';
-import { IconFileText, IconPlus, IconEdit, IconTrash, IconDownload, IconEye, IconCheck, IconX, IconChevronDown } from '@tabler/icons-react';
+import { 
+  IconFileText, 
+  IconPlus, 
+  IconEdit, 
+  IconTrash, 
+  IconDownload, 
+  IconEye, 
+  IconCheck, 
+  IconX, 
+  IconChevronRight,
+  IconCalculator,
+  IconHome,
+  IconStethoscope,
+  IconBuilding,
+  IconReceipt
+} from '@tabler/icons-react';
+import MainCard from 'ui-component/cards/MainCard';
 
 const Declarations = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('');
-  const [declarations, setDeclarations] = useState([
-    {
-      id: 1,
-      category: 'House Rent Allowance',
-      subCategory: 'Rent Paid',
-      amount: 120000,
-      documents: ['Rent Agreement', 'Rent Receipts'],
-      status: 'Submitted',
-      submittedDate: '2024-01-15',
-      approvedAmount: 120000,
-      remarks: 'Approved'
-    },
-    {
-      id: 2,
-      category: 'Medical Insurance',
-      subCategory: 'Health Insurance Premium',
-      amount: 25000,
-      documents: ['Insurance Policy', 'Premium Receipts'],
-      status: 'Pending',
-      submittedDate: '2024-01-20',
-      approvedAmount: 0,
-      remarks: 'Under Review'
-    },
-    {
-      id: 3,
-      category: 'Home Loan Interest',
-      subCategory: 'Home Loan Interest',
-      amount: 150000,
-      documents: ['Loan Statement', 'Interest Certificate'],
-      status: 'Rejected',
-      submittedDate: '2024-01-10',
-      approvedAmount: 0,
-      remarks: 'Documentation incomplete'
-    }
-  ]);
 
   const declarationCategories = [
     {
-      name: 'House Rent Allowance',
-      maxLimit: 60000,
-      subCategories: ['Rent Paid', 'Municipal Taxes']
-    },
-    {
-      name: 'Medical Insurance',
-      maxLimit: 25000,
-      subCategories: ['Health Insurance Premium', 'Medical Expenses']
-    },
-    {
-      name: 'Home Loan Interest',
-      maxLimit: 200000,
-      subCategories: ['Home Loan Interest', 'Principal Repayment']
-    },
-    {
-      name: 'Section 80C',
+      id: 'sec80c',
+      title: 'Sec 80C',
+      icon: IconFileText,
+      declaredAmount: 20000,
       maxLimit: 150000,
-      subCategories: ['ELSS', 'PPF', 'NPS', 'Life Insurance']
+      color: '#667eea',
+      gradient: 'linear-gradient(135deg, #E3EAFE 0%, #fff 100%)',
+      hasArrow: true
+    },
+    {
+      id: 'otherDeductions',
+      title: 'Other chapter VIA Deductions',
+      icon: IconCalculator,
+      declaredAmount: 50000,
+      maxLimit: null,
+      color: '#10b981',
+      gradient: 'linear-gradient(135deg, #E6FAF0 0%, #fff 100%)',
+      hasArrow: false
+    },
+    {
+      id: 'hra',
+      title: 'House Rent Allowance',
+      icon: IconHome,
+      declaredAmount: 144000,
+      maxLimit: null,
+      color: '#f59e0b',
+      gradient: 'linear-gradient(135deg, #FFF7E3 0%, #fff 100%)',
+      hasArrow: true
+    },
+    {
+      id: 'medical',
+      title: 'Medical (Sec 80D)',
+      icon: IconStethoscope,
+      declaredAmount: 5000,
+      maxLimit: null,
+      color: '#8b5cf6',
+      gradient: 'linear-gradient(135deg, #F3E8FF 0%, #fff 100%)',
+      hasArrow: true
+    },
+    {
+      id: 'houseProperty',
+      title: 'Income/Loss from House property',
+      icon: IconBuilding,
+      declaredAmount: 0,
+      maxLimit: null,
+      color: '#06b6d4',
+      gradient: 'linear-gradient(135deg, #E0F7FA 0%, #fff 100%)',
+      hasArrow: false,
+      isAddButton: true
     }
   ];
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'Submitted':
-        return 'info';
-      case 'Pending':
-        return 'warning';
-      case 'Approved':
-        return 'success';
-      case 'Rejected':
-        return 'error';
-      default:
-        return 'default';
-    }
-  };
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-IN', {
@@ -116,233 +106,205 @@ const Declarations = () => {
     }).format(amount);
   };
 
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
+  const calculateNetTax = () => {
+    return declarationCategories
+      .filter(cat => !cat.isAddButton)
+      .reduce((sum, cat) => sum + cat.declaredAmount, 0);
   };
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4" gutterBottom>
-        Declarations
-      </Typography>
-      <Typography variant="body1" color="textSecondary" sx={{ mb: 3 }}>
-        Submit and manage your tax-saving declarations
-      </Typography>
+    <MainCard title="IT Declaration" subtitle="My Tax Planner">
 
-      {/* Summary Cards */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <IconFileText size={24} color="#1976d2" />
-                <Typography variant="h6" sx={{ ml: 1 }}>
-                  Total Declared
+      {/* Declaration Categories Grid */}
+      <Grid2 container spacing={1} sx={{ mb: 1 }}>
+        {declarationCategories.map((category, index) => (
+          <Grid2 size={{ xs: 12, sm: 6, md: 4 }} key={category.id}>
+            <Paper
+              elevation={0}
+              sx={{
+                borderRadius: 3,
+                height: 180,
+                width: '100%',
+                border: `1.5px solid #E5EAF2`,
+                boxShadow: '0 2px 8px 0 rgba(24, 39, 75, 0.05)',
+                transition: 'box-shadow 0.2s, border-color 0.2s',
+                p: 3,
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                cursor: 'pointer',
+                background: category.gradient,
+                position: 'relative',
+                '&:hover': {
+                  boxShadow: '0 4px 16px 0 rgba(64, 66, 74, 0.18)',
+                  borderColor: category.color,
+                  background: category.gradient
+                }
+              }}
+            >
+              {/* Arrow indicator */}
+              {category.hasArrow && (
+                <IconChevronRight 
+                  size={20} 
+                  style={{ 
+                    position: 'absolute', 
+                    top: 12, 
+                    right: 12, 
+                    color: category.color 
+                  }} 
+                />
+              )}
+
+              {/* Row 1: Icon and Title */}
+              <Box display="flex" alignItems="center" gap={2} mb={1}>
+                <Avatar
+                  variant="circular"
+                  sx={{
+                    width: 44,
+                    height: 44,
+                    bgcolor: '#fff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <category.icon size={28} style={{ color: category.color }} />
+                </Avatar>
+                <Typography variant="h6" fontWeight={800} fontSize={15} sx={{ color: '#0A1F44', mb: 0 }}>
+                  {category.title}
                 </Typography>
               </Box>
-              <Typography variant="h4" color="primary">
-                {formatCurrency(295000)}
-              </Typography>
-              <Typography variant="body2" color="textSecondary">
-                FY 2024-25
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                Approved Amount
-              </Typography>
-              <Typography variant="h4" color="success.main">
-                {formatCurrency(120000)}
-              </Typography>
-              <Typography variant="body2" color="textSecondary">
-                40.7% of declared
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                Pending Review
-              </Typography>
-              <Typography variant="h4" color="warning.main">
-                {formatCurrency(25000)}
-              </Typography>
-              <Typography variant="body2" color="textSecondary">
-                1 declaration
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                Rejected
-              </Typography>
-              <Typography variant="h4" color="error.main">
-                {formatCurrency(150000)}
-              </Typography>
-              <Typography variant="body2" color="textSecondary">
-                1 declaration
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
 
-      {/* Action Buttons */}
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
-          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-            <Button variant="contained" startIcon={<IconPlus />} onClick={() => setOpenDialog(true)}>
-              Add Declaration
-            </Button>
-            <Button variant="outlined" startIcon={<IconDownload />}>
-              Download Summary
-            </Button>
-            <Button variant="outlined" startIcon={<IconEye />}>
-              View Guidelines
-            </Button>
-          </Box>
-        </CardContent>
-      </Card>
-
-      {/* Declaration Categories */}
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
-          <Typography variant="h6" gutterBottom>
-            Declaration Categories & Limits
-          </Typography>
-          <Grid container spacing={2}>
-            {declarationCategories.map((category, index) => (
-              <Grid item xs={12} sm={6} md={3} key={index}>
-                <Accordion>
-                  <AccordionSummary expandIcon={<IconChevronDown />}>
-                    <Box>
-                      <Typography variant="subtitle1" fontWeight="bold">
-                        {category.name}
-                      </Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        Max: {formatCurrency(category.maxLimit)}
-                      </Typography>
-                    </Box>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <Typography variant="body2" color="textSecondary" gutterBottom>
-                      Sub-categories:
+              {/* Row 2: Content */}
+              <Box sx={{ width: '100%' }}>
+                {category.isAddButton ? (
+                  <Typography variant="body2" sx={{ mb: 2, fontSize: '0.9rem', fontWeight: 500, textDecoration: 'underline' }}>
+                    Add to Declaration
+                  </Typography>
+                ) : (
+                  <>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1, fontSize: '0.8rem' }}>
+                      {category.maxLimit ? 'Declared Amount/max limit' : 'Declared Amount'}
                     </Typography>
-                    {category.subCategories.map((subCat, subIndex) => (
-                      <Typography key={subIndex} variant="body2" sx={{ ml: 2 }}>
-                        • {subCat}
-                      </Typography>
-                    ))}
-                  </AccordionDetails>
-                </Accordion>
-              </Grid>
-            ))}
-          </Grid>
-        </CardContent>
-      </Card>
+                    <Typography variant="h5" sx={{ mb: 0, fontWeight: 600, color: '#0A1F44' }}>
+                      {category.maxLimit 
+                        ? `₹ ${category.declaredAmount.toLocaleString('en-IN')} / ${category.maxLimit.toLocaleString('en-IN')}`
+                        : `₹ ${category.declaredAmount.toLocaleString('en-IN')}`
+                      }
+                    </Typography>
+                  </>
+                )}
+              </Box>
+            </Paper>
+          </Grid2>
+        ))}
+      </Grid2>
 
-      {/* Declarations Table */}
-      <Card>
-        <CardContent>
-          <Typography variant="h6" gutterBottom>
-            My Declarations
+      {/* Bottom Section - Net Tax and Actions */}
+      <Paper
+        elevation={0}
+        sx={{
+          borderRadius: 3,
+          width: '100%',
+          border: `1.5px solid #E5EAF2`,
+          boxShadow: '0 2px 8px 0 rgba(24, 39, 75, 0.05)',
+          p: 3,
+          background: 'linear-gradient(135deg, #F0FDF4 0%, #fff 100%)',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Typography variant="h6" fontWeight={600} sx={{ color: '#0A1F44' }}>
+            Net Tax:
           </Typography>
-          <TableContainer component={Paper} variant="outlined">
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Category</TableCell>
-                  <TableCell>Sub-Category</TableCell>
-                  <TableCell align="right">Declared Amount</TableCell>
-                  <TableCell align="right">Approved Amount</TableCell>
-                  <TableCell align="center">Status</TableCell>
-                  <TableCell>Submitted Date</TableCell>
-                  <TableCell>Remarks</TableCell>
-                  <TableCell align="center">Actions</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {declarations.map((row) => (
-                  <TableRow key={row.id}>
-                    <TableCell>{row.category}</TableCell>
-                    <TableCell>{row.subCategory}</TableCell>
-                    <TableCell align="right">{formatCurrency(row.amount)}</TableCell>
-                    <TableCell align="right">{formatCurrency(row.approvedAmount)}</TableCell>
-                    <TableCell align="center">
-                      <Chip label={row.status} color={getStatusColor(row.status)} size="small" />
-                    </TableCell>
-                    <TableCell>{formatDate(row.submittedDate)}</TableCell>
-                    <TableCell>{row.remarks}</TableCell>
-                    <TableCell align="center">
-                      <Box sx={{ display: 'flex', gap: 1 }}>
-                        <Tooltip title="View Details">
-                          <IconButton size="small" color="primary">
-                            <IconEye size={16} />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Edit">
-                          <IconButton size="small" color="info">
-                            <IconEdit size={16} />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Delete">
-                          <IconButton size="small" color="error">
-                            <IconTrash size={16} />
-                          </IconButton>
-                        </Tooltip>
-                      </Box>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </CardContent>
-      </Card>
+          <Typography variant="h5" fontWeight={700} sx={{ color: '#84cc16' }}>
+            ₹ {calculateNetTax().toLocaleString('en-IN')}
+          </Typography>
+        </Box>
+        
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <Button
+            variant="contained"
+            disableElevation
+            sx={{
+              background: '#F0FDF4',
+              color: '#84cc16',
+              fontWeight: 500,
+              borderRadius: 2,
+              textTransform: 'none',
+              boxShadow: 'none',
+              minWidth: 80,
+              height: 36,
+              fontSize: 14,
+              px: 2,
+              py: 0.5,
+              transition: 'background 0.2s, color 0.2s',
+              '&:hover': {
+                background: '#84cc16',
+                color: '#fff'
+              }
+            }}
+          >
+            Preview
+          </Button>
+          <Button
+            variant="contained"
+            disableElevation
+            sx={{
+              background: '#84cc16',
+              color: '#fff',
+              fontWeight: 500,
+              borderRadius: 2,
+              textTransform: 'none',
+              boxShadow: 'none',
+              minWidth: 80,
+              height: 36,
+              fontSize: 14,
+              px: 2,
+              py: 0.5,
+              transition: 'background 0.2s, color 0.2s',
+              '&:hover': {
+                background: '#65a30d'
+              }
+            }}
+          >
+            Submit
+          </Button>
+        </Box>
+      </Paper>
 
       {/* Add Declaration Dialog */}
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="md" fullWidth>
         <DialogTitle>Add New Declaration</DialogTitle>
         <DialogContent>
-          <Grid container spacing={2} sx={{ mt: 1 }}>
-            <Grid item xs={12}>
+          <Grid2 container spacing={2} sx={{ mt: 1 }}>
+            <Grid2 size={{ xs: 12 }}>
               <FormControl fullWidth>
                 <InputLabel>Declaration Category</InputLabel>
                 <Select value={selectedCategory} label="Declaration Category" onChange={(e) => setSelectedCategory(e.target.value)}>
-                  {declarationCategories.map((category, index) => (
-                    <MenuItem key={index} value={category.name}>
-                      {category.name} (Max: {formatCurrency(category.maxLimit)})
+                  {declarationCategories.filter(cat => !cat.isAddButton).map((category, index) => (
+                    <MenuItem key={index} value={category.title}>
+                      {category.title} {category.maxLimit && `(Max: ${formatCurrency(category.maxLimit)})`}
                     </MenuItem>
                   ))}
                 </Select>
               </FormControl>
-            </Grid>
-            <Grid item xs={12}>
+            </Grid2>
+            <Grid2 size={{ xs: 12 }}>
               <TextField fullWidth label="Amount" type="number" placeholder="Enter amount" />
-            </Grid>
-            <Grid item xs={12}>
+            </Grid2>
+            <Grid2 size={{ xs: 12 }}>
               <TextField fullWidth label="Description" multiline rows={3} placeholder="Provide details about your declaration" />
-            </Grid>
-            <Grid item xs={12}>
+            </Grid2>
+            <Grid2 size={{ xs: 12 }}>
               <Button variant="outlined" component="label" fullWidth>
                 Upload Documents
                 <input type="file" hidden multiple />
               </Button>
-            </Grid>
-          </Grid>
+            </Grid2>
+          </Grid2>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
@@ -351,7 +313,7 @@ const Declarations = () => {
           </Button>
         </DialogActions>
       </Dialog>
-    </Box>
+    </MainCard>
   );
 };
 

@@ -214,6 +214,7 @@ const PunchInOutCard = ({ onAttendanceUpdate }) => {
       setIsGettingLocation(true);
       // Get location first
       const locationData = await getCurrentLocation();
+      console.log('locationData', locationData);
 
       const now = new Date();
       const timeString = now.toLocaleTimeString('en-US', {
@@ -268,7 +269,7 @@ const PunchInOutCard = ({ onAttendanceUpdate }) => {
       dispatch(
         openSnackbar({
           open: true,
-          message: JSON.stringify('Failed to check in. Please try again.'),
+          message: JSON.stringify(error.message || 'Failed to check in. Please try again.'),
           variant: 'alert',
           alert: { color: 'error' },
           close: false
@@ -437,7 +438,12 @@ const PunchInOutCard = ({ onAttendanceUpdate }) => {
             )}
 
             {/* Check-in time and location display */}
-            {isCheckedIn && checkInTime && (
+      
+          </Box>
+
+          {/* Right side - Action button */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          {isCheckedIn && checkInTime && (
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                 <Chip
                   icon={<IconClock size={16} />}
@@ -480,10 +486,6 @@ const PunchInOutCard = ({ onAttendanceUpdate }) => {
                 )}
               </Box>
             )}
-          </Box>
-
-          {/* Right side - Action button */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Button
               variant="contained"
               size="small"

@@ -105,14 +105,14 @@ const MainCard = forwardRef(function MainCard(
           title={
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               {/* {finalIcon && typeof finalIcon === 'object' && finalIcon} */}
-              <Typography variant={darkTitle ? 'h3' : 'subtitle1'} fontWeight={600} color="text.primary">
+              <Typography variant={darkTitle ? 'h3' : 'h4'} color="text.primary" component="div">
                 {title}
               </Typography>
             </Box>
           }
           subheader={
             subtitle && (
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 0 }}>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 0 }} component="div">
                 {subtitle}
               </Typography>
             )
