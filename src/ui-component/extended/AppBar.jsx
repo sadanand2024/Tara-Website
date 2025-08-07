@@ -197,7 +197,7 @@ export default function AppBar({ ...others }) {
                         p: 2
                       }}
                     >
-                      <Button
+                      {/* <Button
                         component={RouterLink}
                         to="/register"
                         disableElevation
@@ -207,7 +207,7 @@ export default function AppBar({ ...others }) {
                         sx={{ maxWidth: 200 }}
                       >
                         Signup
-                      </Button>
+                      </Button> */}
                       <Button component={RouterLink} to="/login" variant="contained" color="secondary" fullWidth sx={{ maxWidth: 200 }}>
                         Login
                       </Button>
@@ -219,9 +219,9 @@ export default function AppBar({ ...others }) {
           </Box>
           {/* Right: Auth Buttons */}
           <Stack direction="row" spacing={1} sx={{ flexShrink: 0, display: { xs: 'none', md: 'flex' } }}>
-            <Button component={RouterLink} to="/register" disableElevation color="secondary" variant="outlined">
+            {/* <Button component={RouterLink} to="/register" disableElevation color="secondary" variant="outlined">
               Signup
-            </Button>
+            </Button> */}
             <Button component={RouterLink} to="/login" variant="contained" color="secondary">
               Login
             </Button>
