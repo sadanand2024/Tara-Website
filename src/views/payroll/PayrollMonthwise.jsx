@@ -144,7 +144,13 @@ export default function PayrollMonthwise({ payrollId, financialYear }) {
               </Stack>
             </Stack>
           </Stack>
-          <PayrollSummaryGrid data={monthWiseData} config={ServicesData} />
+          <PayrollSummaryGrid
+            data={monthWiseData}
+            config={ServicesData}
+            month={months[selectedMonth - 1]}
+            financialYear={financialYear}
+            payrollId={payrollId}
+          />
         </Stack>
       </MainCard>
     </Stack>

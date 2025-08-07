@@ -54,7 +54,7 @@ const EmployeePortalDashboard = () => {
 
   // Static check-in time to avoid re-renders
   const checkInTime = '09:00 AM';
-  
+
   const getCurrentFinancialYear = () => {
     const currentYear = new Date().getFullYear();
     return `${currentYear}-${currentYear + 1}`;
@@ -104,8 +104,8 @@ const EmployeePortalDashboard = () => {
   });
 
   return (
-    <MainCard 
-      title={`Welcome, ${userName}! 👋`}   
+    <MainCard
+      title={`Welcome, ${userName}! 👋`}
       secondary={
         <Stack direction="row" spacing={2} alignItems="center">
           <Autocomplete
@@ -251,10 +251,10 @@ const EmployeePortalDashboard = () => {
 
             {/* Row 2: Description/Paragraph */}
             <Box sx={{ width: '100%' }}>
-              <Typography variant="h5" sx={{ mb: 1, }}>
+              <Typography variant="h5" sx={{ mb: 1 }}>
                 This month: ₹98,262
               </Typography>
-              <Typography variant="h5" sx={{ mb: 2, }}>
+              <Typography variant="h5" sx={{ mb: 2 }}>
                 YTD: ₹6,20,000
               </Typography>
             </Box>
@@ -449,20 +449,32 @@ const EmployeePortalDashboard = () => {
                   <TableHead>
                     <TableRow>
                       <TableCell sx={{ border: 'none', p: 0.5, fontSize: '0.75rem', fontWeight: 600, color: '#6b7280' }}>Type</TableCell>
-                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.75rem', fontWeight: 600, color: '#6b7280' }}>Paid leaves</TableCell>
-                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.75rem', fontWeight: 600, color: '#6b7280' }}>LoPs</TableCell>
+                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.75rem', fontWeight: 600, color: '#6b7280' }}>
+                        Paid leaves
+                      </TableCell>
+                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.75rem', fontWeight: 600, color: '#6b7280' }}>
+                        LoPs
+                      </TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     <TableRow>
                       <TableCell sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', color: '#374151' }}>This month</TableCell>
-                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', fontWeight: 600, color: '#0A1F44' }}>2</TableCell>
-                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', fontWeight: 600, color: '#0A1F44' }}>1</TableCell>
+                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', fontWeight: 600, color: '#0A1F44' }}>
+                        2
+                      </TableCell>
+                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', fontWeight: 600, color: '#0A1F44' }}>
+                        1
+                      </TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', color: '#374151' }}>YTD</TableCell>
-                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', fontWeight: 600, color: '#0A1F44' }}>5</TableCell>
-                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', fontWeight: 600, color: '#0A1F44' }}>3</TableCell>
+                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', fontWeight: 600, color: '#0A1F44' }}>
+                        5
+                      </TableCell>
+                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', fontWeight: 600, color: '#0A1F44' }}>
+                        3
+                      </TableCell>
                     </TableRow>
                   </TableBody>
                 </Table>
@@ -499,7 +511,6 @@ const EmployeePortalDashboard = () => {
               <Button
                 variant="contained"
                 disableElevation
-                startIcon={<IconPlus size={16} />}
                 sx={{
                   background: '#ef4444',
                   color: '#fff',
@@ -518,7 +529,7 @@ const EmployeePortalDashboard = () => {
                   }
                 }}
               >
-                + APPLY
+                APPLY
               </Button>
             </Box>
           </Paper>
@@ -774,37 +785,55 @@ const EmployeePortalDashboard = () => {
                   <TableHead>
                     <TableRow>
                       <TableCell sx={{ border: 'none', p: 0.5, fontSize: '0.75rem', fontWeight: 600, color: '#6b7280' }}></TableCell>
-                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.75rem', fontWeight: 600, color: '#6b7280' }}>This month</TableCell>
-                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.75rem', fontWeight: 600, color: '#6b7280' }}>YTD</TableCell>
+                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.75rem', fontWeight: 600, color: '#6b7280' }}>
+                        This month
+                      </TableCell>
+                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.75rem', fontWeight: 600, color: '#6b7280' }}>
+                        YTD
+                      </TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     <TableRow>
                       <TableCell sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', color: '#374151' }}>Working days</TableCell>
-                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', fontWeight: 600, color: '#0A1F44' }}>22</TableCell>
-                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', fontWeight: 600, color: '#0A1F44' }}>132</TableCell>
+                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', fontWeight: 600, color: '#0A1F44' }}>
+                        22
+                      </TableCell>
+                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', fontWeight: 600, color: '#0A1F44' }}>
+                        132
+                      </TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', color: '#374151' }}>Present</TableCell>
-                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', fontWeight: 600, color: '#0A1F44' }}>19</TableCell>
-                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', fontWeight: 600, color: '#0A1F44' }}>124</TableCell>
+                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', fontWeight: 600, color: '#0A1F44' }}>
+                        19
+                      </TableCell>
+                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', fontWeight: 600, color: '#0A1F44' }}>
+                        124
+                      </TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', color: '#374151' }}>LoP</TableCell>
-                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', fontWeight: 600, color: '#0A1F44' }}>1</TableCell>
-                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', fontWeight: 600, color: '#0A1F44' }}>3</TableCell>
+                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', fontWeight: 600, color: '#0A1F44' }}>
+                        1
+                      </TableCell>
+                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', fontWeight: 600, color: '#0A1F44' }}>
+                        3
+                      </TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', color: '#374151' }}>Paid leaves</TableCell>
-                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', fontWeight: 600, color: '#0A1F44' }}>2</TableCell>
-                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', fontWeight: 600, color: '#0A1F44' }}>5</TableCell>
+                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', fontWeight: 600, color: '#0A1F44' }}>
+                        2
+                      </TableCell>
+                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', fontWeight: 600, color: '#0A1F44' }}>
+                        5
+                      </TableCell>
                     </TableRow>
                   </TableBody>
                 </Table>
               </TableContainer>
             </Box>
-
-
           </Paper>
         </Grid2>
 
@@ -850,7 +879,6 @@ const EmployeePortalDashboard = () => {
               <Typography variant="h6" fontWeight={800} fontSize={15} sx={{ color: '#0A1F44', mb: 0 }}>
                 My PF Contribution
               </Typography>
-
             </Box>
 
             {/* Row 2: Description/Paragraph */}
@@ -868,7 +896,6 @@ const EmployeePortalDashboard = () => {
 
             {/* Row 3: Count and View Button */}
             <Box display="flex" alignItems="center" justifyContent="center" mt={0}>
-
               <Button
                 variant="contained"
                 disableElevation
@@ -956,11 +983,10 @@ const EmployeePortalDashboard = () => {
                 <Typography variant="h5" sx={{ mb: 1 }}>
                   Processed: ₹8,750
                 </Typography>
-                <Typography variant="h5" sx={{ mb: 2, }}>
+                <Typography variant="h5" sx={{ mb: 2 }}>
                   Pending: ₹1,800
                 </Typography>
               </Box>
-
             </Box>
 
             {/* Row 3: Count and View Button */}

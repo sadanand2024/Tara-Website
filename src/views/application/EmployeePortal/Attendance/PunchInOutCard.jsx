@@ -29,42 +29,38 @@ const PunchInOutCard = ({ onAttendanceUpdate }) => {
   }, []);
 
   const checkCurrentStatus = async () => {
-    try {
-      const { res } = await Factory('get', '/payroll/today/', {});
-      if (res.status_cd === 0 && res.data && res.data.logs && res.data.logs.length > 0) {
-        // Find the latest log that doesn't have a check-out time (currently checked in)
-        const currentLog = res.data.logs.find((log) => log.check_in && !log.check_out);
+    const { res } = await Factory('get', '/payroll/today/', {});
+    if (res.status_cd === 0 && res.data && res.data.logs && res.data.logs.length > 0) {
+      // Find the latest log that doesn't have a check-out time (currently checked in)
+      const currentLog = res.data.logs.find((log) => log.check_in && !log.check_out);
 
-        if (currentLog) {
-          // User is currently checked in
-          const checkInTime = new Date(currentLog.check_in);
-          const timeString = checkInTime.toLocaleTimeString('en-US', {
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: false
+      if (currentLog) {
+        // User is currently checked in
+        const checkInTime = new Date(currentLog.check_in);
+        const timeString = checkInTime.toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false
+        });
+
+        setIsCheckedIn(true);
+        setCheckInTime(timeString);
+
+        // If location data is available, set it
+        if (currentLog.location) {
+          setLocation({
+            latitude: 0,
+            longitude: 0,
+            coordinates: currentLog.location
           });
-
-          setIsCheckedIn(true);
-          setCheckInTime(timeString);
-
-          // If location data is available, set it
-          if (currentLog.location) {
-            setLocation({
-              latitude: 0,
-              longitude: 0,
-              coordinates: currentLog.location
-            });
-          }
-        } else {
-          // User is not currently checked in
-          setIsCheckedIn(false);
-          setCheckInTime(null);
-          setLocation(null);
-          setLocationAddress(null);
         }
+      } else {
+        // User is not currently checked in
+        setIsCheckedIn(false);
+        setCheckInTime(null);
+        setLocation(null);
+        setLocationAddress(null);
       }
-    } catch (error) {
-      console.error('Error checking current status:', error);
     }
   };
 
@@ -438,54 +434,32 @@ const PunchInOutCard = ({ onAttendanceUpdate }) => {
             )}
 
             {/* Check-in time and location display */}
-      
           </Box>
 
           {/* Right side - Action button */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          {isCheckedIn && checkInTime && (
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', flexDirection: 'column', gap: 1 }}>
+            {isCheckedIn && checkInTime && (
+              <Typography variant="h5" fontWeight={500} color="primary.main">
+                Checked in at: {checkInTime}
+              </Typography>
+            )}
+            {/* {location && (
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
                 <Chip
-                  icon={<IconClock size={16} />}
-                  label={`Checked in at: ${checkInTime}`}
+                  icon={<IconMapPin size={16} />}
+                  label={locationAddress?.shortAddress || `${location.latitude.toFixed(6)}, ${location.longitude.toFixed(6)}`}
                   sx={{
-                    bgcolor: 'grey.200',
-                    color: 'text.secondary',
+                    bgcolor: 'primary.50',
+                    color: 'primary.main',
                     fontWeight: 500,
                     '& .MuiChip-icon': {
-                      color: 'text.secondary'
+                      color: 'primary.main'
                     }
                   }}
                   size="small"
                 />
-                {location && (
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                    <Chip
-                      icon={<IconMapPin size={16} />}
-                      label={locationAddress?.shortAddress || `${location.latitude.toFixed(6)}, ${location.longitude.toFixed(6)}`}
-                      sx={{
-                        bgcolor: 'primary.50',
-                        color: 'primary.main',
-                        fontWeight: 500,
-                        '& .MuiChip-icon': {
-                          color: 'primary.main'
-                        }
-                      }}
-                      size="small"
-                    />
-                    {locationAddress && (
-                      <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.7rem', ml: 1 }}>
-                        {locationAddress.city}, {locationAddress.state}
-                      </Typography>
-                    )}
-                    {/* Show coordinates for verification */}
-                    <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.65rem', ml: 1, fontFamily: 'monospace' }}>
-                      📍 {location.latitude.toFixed(6)}, {location.longitude.toFixed(6)}
-                    </Typography>
-                  </Box>
-                )}
               </Box>
-            )}
+            )} */}
             <Button
               variant="contained"
               size="small"
@@ -511,28 +485,6 @@ const PunchInOutCard = ({ onAttendanceUpdate }) => {
             >
               {isGettingLocation ? 'Getting Location...' : isCheckedIn ? 'Check Out' : 'Check In'}
             </Button>
-
-            {locationError && !isGettingLocation && (
-              <Button
-                variant="outlined"
-                size="small"
-                onClick={() => {
-                  setLocationError(null);
-                  if (isCheckedIn) {
-                    handlePunchOut();
-                  } else {
-                    handlePunchIn();
-                  }
-                }}
-                sx={{
-                  px: 2,
-                  py: 1,
-                  fontSize: '0.875rem'
-                }}
-              >
-                Retry
-              </Button>
-            )}
           </Box>
         </Box>
       </CardContent>

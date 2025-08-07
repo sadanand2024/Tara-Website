@@ -33,6 +33,7 @@ import { openSnackbar } from 'store/slices/snackbar';
 import { generateYears } from 'utils/YearsList';
 import PunchInOutCard from './PunchInOutCard';
 import MainCard from 'ui-component/cards/MainCard';
+import WebSocketStatus from './WebSocketStatus';
 const monthOptions = [
   { label: 'January', value: 1 },
   { label: 'February', value: 2 },
@@ -346,6 +347,7 @@ const AttendanceInfoTab = () => {
 
   return (
     <MainCard>
+      <WebSocketStatus />
       <Box sx={{ mb: 4 }}>
         <Typography variant="h4" sx={{ fontWeight: 600, mb: 1 }}>
           Attendance

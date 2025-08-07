@@ -14,11 +14,12 @@ import {
 import { useNavigate } from 'react-router-dom';
 import Factory from 'utils/Factory';
 import MainCard from '../../ui-component/cards/MainCard';
+import { months } from 'utils/MonthsList';
 
 const MONTHS = ['April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December', 'January', 'February', 'March'];
 const TABLE_HEADERS = ['CTC', 'Status', 'Action'];
 
-export default function PayrollStatusSummary({ payrollId, financialYear, monthWiseData, selectedMonth, businessDetails }) {
+export default function PayrollStatusSummary({ payrollId, financialYear, monthWiseData, businessDetails, month }) {
   const navigate = useNavigate();
   const [financialYearSummary, setFinancial_year_summary] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -44,14 +45,6 @@ export default function PayrollStatusSummary({ payrollId, financialYear, monthWi
       get_financialYearData();
     }
   }, [payrollId, financialYear]);
-
-  const handleView = (data) => {
-    console.log('View clicked:', data);
-  };
-
-  const handleDownload = (data) => {
-    console.log('Download clicked:', data);
-  };
 
   return (
     <Stack direction="column" spacing={2}>
@@ -118,7 +111,7 @@ export default function PayrollStatusSummary({ payrollId, financialYear, monthWi
                                     onClick={() => {
                                       if (businessDetails?.payroll_id) {
                                         navigate(
-                                          `/app/payroll/employee-dashboard?payrollid=${businessDetails?.payroll_id}&month=${selectedMonth}&financialYear=${financialYear}&monthwisedata=${encodeURIComponent(JSON.stringify(monthWiseData))}&tabvalue=1`
+                                          `/app/payroll/employee-dashboard?payrollid=${businessDetails?.payroll_id}&month=${months.indexOf(month) + 1}&financialYear=${financialYear}&monthwisedata=${encodeURIComponent(JSON.stringify(monthWiseData))}&tabvalue=1`
                                         );
                                       }
                                     }}
