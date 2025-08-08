@@ -129,7 +129,7 @@ const DetailedPayroll = ({ payrollId, month }) => {
         variant="outlined"
         onClick={async () => {
           const type = 'xlsx'; // or 'csv', or pass this dynamically
-          const url = `/payroll/download-salary-report?payroll_id=22&month=${month}&financial_year=${financialYear}`;
+          const url = `/payroll/download-salary-report?payroll_id=${payrollId}&month=${month}&financial_year=${financialYear}`;
 
           const { res, error } = await Factory('get', url, null, {}, { responseType: 'blob' });
 
