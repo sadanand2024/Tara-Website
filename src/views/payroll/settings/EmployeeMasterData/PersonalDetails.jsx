@@ -195,6 +195,8 @@ const PersonalDetails = ({ fetchEmployeeData, employeeData, createdEmployeeId, s
             value={value ? dayjs(value) : null}
             onChange={(date) => setFieldValue(fieldName, date ? date.format('YYYY-MM-DD') : '')}
             onBlur={handleBlur}
+          format="DD-MM-YYYY" 
+
             error={Boolean(isTouched && error)}
             helperText={isTouched && error}
             sx={{ width: '100%', '& .MuiInputBase-input': { color: 'grey.600' } }}
