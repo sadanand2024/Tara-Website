@@ -168,6 +168,15 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
         setFavouriteIdMap({});
       });
   }, [contextId]);
+  const formatDateToInput = (dateStr) => {
+    if (!dateStr || typeof dateStr !== 'string') return '';
+    const match = dateStr.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    if (match) {
+      const [, dd, mm, yyyy] = match;
+      return `${yyyy}-${mm}-${dd}`; // valid format for type="date"
+    }
+    return dateStr;
+  };
 
   useEffect(() => {
     if (contextEventId) {
@@ -181,11 +190,52 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
             const { fields, template, draft_info } = getResult.res.data;
             const draft_data = draft_info && draft_info.length > 0 ? draft_info[0].draft_data : undefined;
             const draftDetailIdFromApi = draft_info && draft_info.length > 0 ? draft_info[0].id : null;
+            console.log('Draft Data:', draft_data);
+            console.log('Fields:', fields);
             setDraftDetailId(draftDetailIdFromApi);
             setFields(fields || []);
-            setFormValues(
-              draft_data || (fields ? Object.fromEntries(fields.filter((f) => f.field_name).map((f) => [f.field_name, ''])) : {})
-            );
+            // setFormValues(
+            //   draft_data || (fields ? Object.fromEntries(fields.filter((f) => f.field_name).map((f) => [f.field_name, ''])) : {})
+
+            // );
+            //             const formattedValues = {};
+            // (fields || []).forEach((field) => {
+            //   const rawValue = draft_data?.[field.field_name];
+
+            //   if (field.field_type === 'date') {
+            //     if (Array.isArray(rawValue)) {
+            //       formattedValues[field.field_name] = rawValue.map(formatDateToInput);
+            //     } else {
+            //       formattedValues[field.field_name] = formatDateToInput(rawValue);
+            //     }
+            //   } else {
+            //     formattedValues[field.field_name] = rawValue ?? '';
+            //   }
+            // });
+
+            // setFormValues(formattedValues);
+            const formattedValues = {};
+
+            // Add base fields if needed
+            formattedValues.file_name = draft_data?.file_name || '';
+            formattedValues.status = draft_data?.status || 'draft';
+
+            (fields || []).forEach((field) => {
+              const rawValue = draft_data?.[field.field_name];
+
+              if (field.field_type === 'date') {
+                if (Array.isArray(rawValue)) {
+                  formattedValues[field.field_name] = rawValue.map(formatDateToInput);
+                } else {
+                  formattedValues[field.field_name] = formatDateToInput(rawValue);
+                }
+              } else {
+                formattedValues[field.field_name] = rawValue ?? '';
+              }
+            });
+
+            setFormValues(formattedValues);
+
             try {
               const resp = await fetch(template);
               if (!resp.ok) throw new Error('Failed to fetch template HTML');
@@ -1028,7 +1078,14 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
       return (
         <Grid2 container spacing={2} sx={{ mb: 2 }}>
           {columnFields.map((columnField) => (
-            <Grid2 size={{ xs: 12, sm: 6 }} key={columnField.field_name}>
+            // <Grid2 size={{ xs: 12, sm: 6 }} key={columnField.field_name}>
+            <Grid2
+              size={{
+                xs: 12,
+                sm: noOfColumns === 1 ? 12 : 6
+              }}
+              key={columnField.field_name}
+            >
               <TextField
                 fullWidth
                 size="small"
@@ -1039,11 +1096,12 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
                 onChange={(e) => {
                   setCellValues((v) => ({ ...v, [columnField.field_name]: e.target.value }));
                   // Update Formik with minimal delay for real-time preview
-                  setTimeout(() => {
-                    const arr = Array.isArray(formik.values[columnField.field_name]) ? [...formik.values[columnField.field_name]] : [];
-                    arr[rowIndex] = e.target.value;
-                    formik.setFieldValue(columnField.field_name, arr, false);
-                  }, 5);
+                  // setTimeout(() => {
+                  //   const arr = Array.isArray(formik.values[columnField.field_name]) ? [...formik.values[columnField.field_name]] : [];
+                  //   arr[rowIndex] = e.target.value;
+                  //   formik.setFieldValue(columnField.field_name, arr, false);
+                  // }, );
+
                   // Auto-scroll to preview field
                   setTimeout(() => {
                     const el = document.getElementById(`preview-field-${columnField.field_name}-${rowIndex}`);
@@ -1096,13 +1154,13 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
       );
     };
 
-    if (noOfColumns === 2) {
+    if (noOfColumns <= 2) {
       // Render two fields per row directly below No. of Rows, side by side using TableRowFields
       return (
         <Box sx={{ mb: 3 }}>
           {/* No. of Rows Input */}
           <Grid2 size={{ xs: 12 }} sx={{ mb: 2 }}>
-            <TextField
+            {/* <TextField
               fullWidth
               size="small"
               label={controlField.label}
@@ -1124,11 +1182,38 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
                   }
                 }, 100);
               }}
-              onBlur={handleNoOfRowsBlur}
+              // onBlur={handleNoOfRowsBlur}
               error={formik.touched[controlField.field_name] && Boolean(formik.errors[controlField.field_name])}
               helperText={formik.touched[controlField.field_name] && formik.errors[controlField.field_name]}
               type="number"
               inputProps={{ min: 1, max: 50 }}
+            /> */}
+            <TextField
+              fullWidth
+              size="small"
+              label={controlField.label}
+              name={controlField.field_name}
+              value={localNoOfRows}
+              onChange={(e) => {
+                // Update local state only — no formik.setFieldValue here
+                const val = e.target.value;
+                if (/^\d{0,2}$/.test(val)) {
+                  setLocalNoOfRows(val); // max 2 digits (up to 50)
+                }
+              }}
+              onBlur={(e) => {
+                const value = parseInt(localNoOfRows);
+                const clamped = Math.max(1, Math.min(50, value || 1));
+                formik.setFieldValue(controlField.field_name, clamped);
+                handleNoOfRowsBlur(); // Also update the dynamic array fields
+                formik.handleBlur(e);
+              }}
+              error={formik.touched[controlField.field_name] && Boolean(formik.errors[controlField.field_name])}
+              helperText={formik.touched[controlField.field_name] && formik.errors[controlField.field_name]}
+              type="number"
+              inputProps={{ min: 1, max: 50 }}
+              variant="outlined"
+              slotProps={{ inputLabel: { shrink: true } }}
             />
           </Grid2>
           {/* Render rows of two fields each, side by side using TableRowFields */}
@@ -1157,7 +1242,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
           <TableCell>{rowIndex + 1}</TableCell>
           {columnFields.map((columnField) => (
             <TableCell key={`${columnField.field_name}-${rowIndex}`}>
-              <TextField
+              {/* <TextField
                 fullWidth
                 size="small"
                 label={columnField.label}
@@ -1207,6 +1292,63 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
                 variant="outlined"
                 slotProps={{ inputLabel: { shrink: true } }}
                 placeholder={columnField.field_type === 'date' ? 'DD/MM/YYYY' : ''}
+              /> */}
+              <TextField
+                fullWidth
+                size="small"
+                label={columnField.label}
+                name={`${columnField.field_name}[${rowIndex}]`}
+                value={cellValues[columnField.field_name]}
+                inputRef={(el) => (inputRefs.current[columnField.field_name] = el)}
+                onChange={(e) => {
+                  setCellValues((v) => ({ ...v, [columnField.field_name]: e.target.value }));
+
+                  setTimeout(() => {
+                    const arr = Array.isArray(formik.values[columnField.field_name]) ? [...formik.values[columnField.field_name]] : [];
+                    arr[rowIndex] = e.target.value;
+                    formik.setFieldValue(columnField.field_name, arr, false);
+                  }, 5);
+
+                  // Auto-scroll to preview
+                  setTimeout(() => {
+                    const el = document.getElementById(`preview-field-${columnField.field_name}-${rowIndex}`);
+                    const container = previewContainerRef.current;
+                    if (el && container) {
+                      const elRect = el.getBoundingClientRect();
+                      const containerRect = container.getBoundingClientRect();
+                      const scrollTop =
+                        container.scrollTop + (elRect.top - containerRect.top) - container.clientHeight / 2 + el.offsetHeight / 2;
+                      container.scrollTo({ top: scrollTop, behavior: 'smooth' });
+                    }
+                  }, 100);
+                }}
+                onBlur={(e) => {
+                  const arr = Array.isArray(formik.values[columnField.field_name]) ? [...formik.values[columnField.field_name]] : [];
+                  arr[rowIndex] = cellValues[columnField.field_name];
+                  formik.setFieldValue(columnField.field_name, arr, false);
+
+                  // ✅ Explicitly mark the field as touched
+                  formik.setFieldTouched(`${columnField.field_name}[${rowIndex}]`, true, true);
+                  formik.handleBlur(e);
+
+                  setTimeout(() => {
+                    const el = document.getElementById(`preview-field-${columnField.field_name}-${rowIndex}`);
+                    const container = previewContainerRef.current;
+                    if (el && container) {
+                      const elRect = el.getBoundingClientRect();
+                      const containerRect = container.getBoundingClientRect();
+                      const scrollTop =
+                        container.scrollTop + (elRect.top - containerRect.top) - container.clientHeight / 2 + el.offsetHeight / 2;
+                      container.scrollTo({ top: scrollTop, behavior: 'smooth' });
+                    }
+                  }, 100);
+                }}
+                error={Boolean(formik.touched[columnField.field_name]?.[rowIndex] && formik.errors[columnField.field_name]?.[rowIndex])}
+                helperText={formik.touched[columnField.field_name]?.[rowIndex] && formik.errors[columnField.field_name]?.[rowIndex]}
+                type={columnField.field_type === 'date' ? 'date' : 'text'}
+                variant="outlined"
+                slotProps={{ inputLabel: { shrink: true } }}
+                placeholder={columnField.field_type === 'date' ? 'DD/MM/YYYY' : ''}
               />
             </TableCell>
           ))}
@@ -1218,7 +1360,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
       <Box sx={{ mb: 3 }}>
         {/* No. of Rows Input */}
         <Grid2 size={{ xs: 12 }} sx={{ mb: 2 }}>
-          <TextField
+          {/* <TextField
             fullWidth
             label={controlField.label}
             name={controlField.field_name}
@@ -1248,7 +1390,29 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
             variant="outlined"
             slotProps={{ inputLabel: { shrink: true } }}
             inputProps={{ min: 1, max: 50 }}
+          /> */}
+          <TextField
+            fullWidth
+            label={controlField.label}
+            name={controlField.field_name}
+            type="number"
+            value={localNoOfRows}
+            onChange={(e) => {
+              const value = e.target.value;
+              setLocalNoOfRows(value); // just update local state for typing
+            }}
+            onBlur={(e) => {
+              const num = Math.max(1, Math.min(50, parseInt(localNoOfRows) || 1));
+              formik.setFieldValue(controlField.field_name, num);
+              formik.handleBlur(e);
+            }}
+            error={formik.touched[controlField.field_name] && Boolean(formik.errors[controlField.field_name])}
+            helperText={formik.touched[controlField.field_name] && formik.errors[controlField.field_name]}
+            variant="outlined"
+            slotProps={{ inputLabel: { shrink: true } }}
+            inputProps={{ min: 1, max: 50 }}
           />
+
           <Button
             variant="outlined"
             sx={{ mt: 2, width: '100%' }}
@@ -1589,18 +1753,38 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
                     let result = [];
                     let match;
                     let keyCount = 0;
+
                     while ((match = tableRegex.exec(html)) !== null) {
                       const tableHtml = match[0];
                       // Check if this table matches any dynamic table group
-                      const groupEntry = Object.entries(tableGroups).find(([tableId, group]) => {
-                        if (tableHtml.includes(group.control.field_name)) return true;
-                        return group.columns.some((col) => tableHtml.includes(col.field_name));
+                      // Find the best match by checking which table group has the most field matches
+                      let bestMatch = null;
+                      let bestMatchScore = 0;
+
+                      Object.entries(tableGroups).forEach(([tableId, group]) => {
+                        let score = 0;
+                        // Check if control field is mentioned
+                        if (tableHtml.includes(group.control.field_name)) {
+                          score += 2; // Higher weight for control field
+                        }
+                        // Check how many column fields are mentioned
+                        group.columns.forEach((col) => {
+                          if (tableHtml.includes(col.field_name)) {
+                            score += 1;
+                          }
+                        });
+                        // If this table has a higher score, it's a better match
+                        if (score > bestMatchScore) {
+                          bestMatchScore = score;
+                          bestMatch = [tableId, group];
+                        }
                       });
+
                       // Push the HTML before this table
                       result.push(<span key={keyCount++} dangerouslySetInnerHTML={{ __html: html.slice(lastIndex, match.index) }} />);
-                      if (groupEntry) {
+                      if (bestMatch && bestMatchScore > 0) {
                         // Render the React table for this group
-                        const [tableId, group] = groupEntry;
+                        const [tableId, group] = bestMatch;
                         result.push(
                           <Box sx={{ my: 2, mb: 3, ml: 0.5 }} key={keyCount++}>
                             <TableContainer component={Paper}>
@@ -1996,12 +2180,12 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
                     >
                       {template.document_name || template.title || template.file_name}
                     </Box>
-                    <Typography fontSize={14} color="text.secondary">
+                    <Typography fontSize={13.2} color="text.secondary">
                       {template.description}
                     </Typography>
                   </Box>
                   {/* Proceed button pinned to bottom */}
-                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb:-1}}>
                     <Button
                       variant="outlined"
                       endIcon={<ArrowForwardIcon />}
@@ -2011,10 +2195,11 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
                         fontSize: 14,
                         fontWeight: 600,
                         borderRadius: 2,
+                        
                         alignSelf: 'flex-end',
                         borderColor: '#00329E',
                         color: '#00329E',
-                        px: 2,
+                        // px: 2,
                         '&:hover': {
                           borderColor: '#00329E',
                           background: 'rgba(0,50,158,0.04)'
