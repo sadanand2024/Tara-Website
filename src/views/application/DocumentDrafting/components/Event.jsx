@@ -12,6 +12,9 @@ import SearchIcon from '@mui/icons-material/Search';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import PropTypes from 'prop-types';
+import MainCard from 'ui-component/cards/MainCard';
+
+
 import { Translate } from '@mui/icons-material';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
@@ -76,6 +79,7 @@ function DocumentCard({ title, description, isFavorite, isSelected, onFavorite, 
         maxWidth: 400,
         minHeight: 160,
         maxHeight: 180,
+        mt:-2,
 
         boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
         position: 'relative',
@@ -391,16 +395,16 @@ const Event = ({ tab = 'document', contextId }) => {
   const [showFirstCardNote, setShowFirstCardNote] = useState(true);
 
   return (
-    <Box sx={{
-      p: { xs: 2, md: 4 },
-      background: 'white',
-      borderRadius: 2,
-      height: {
-        xs: '100vh',
-        md: '100%'
-      }, // force it to 80% viewport height
-      overflowY: 'auto',
-    }}>
+  <MainCard
+  sx={{
+    p: { xs: 2, md: 4 },
+    height: {
+      xs: '100vh',
+      md: '100%'
+    },
+    overflowY: 'auto',
+  }}
+>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0 }}>
         <Typography variant="h5" fontWeight={600} sx={{ m: 0, fontSize: { xs: 15, sm: 22 } }}>
           Document Drafting
@@ -446,7 +450,7 @@ const Event = ({ tab = 'document', contextId }) => {
         <Box
           sx={{
             width: '100%',
-            mt: { xs: -2, md: -4 },
+            mt: { xs: -2, md: -4.5 },
             display: 'flex',
             alignItems: 'center',
             flexDirection: { xs: 'column', md: 'row' },
@@ -652,7 +656,7 @@ const Event = ({ tab = 'document', contextId }) => {
           )}
         </TabPanel>
       </Paper>
-    </Box>
+    </MainCard>
   );
 };
 
