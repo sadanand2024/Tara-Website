@@ -14,12 +14,7 @@ const Index = () => {
   useEffect(() => {
     if (user?.active_context?.id && !draftId) {
       const fetchDraftExists = async () => {
-        const response = await Factory(
-          'get',
-          `/documentdrafting/document-drafts-exists/${user.active_context.id}/`,
-          {},
-          {}
-        );
+        const response = await Factory('get', `/documentdrafting/document-drafts-exists/${user.active_context.id}/`, {}, {});
         if (response.res?.status === 200) {
           setExists(true);
           // Extract id from response
@@ -28,12 +23,7 @@ const Index = () => {
         } else if (response.res?.status === 404) {
           setExists(false);
           // If GET returns 404, call POST
-          const postRes = await Factory(
-            'post',
-            '/documentdrafting/document-drafts-create',
-            { context: user.active_context.id },
-            {}
-          );
+          const postRes = await Factory('post', '/documentdrafting/document-drafts-create', { context: user.active_context.id }, {});
           // Extract id from POST response if available
           const id = postRes.res?.data?.id;
           setDraftId(id);
@@ -59,7 +49,7 @@ const Index = () => {
   }
   if (tab === 'document' && contextId) {
     // Document selection tab only
-    return <Drafting id={draftId} tab="document" contextId={contextId} />;
+    return <DocumentSelectionPage id={draftId} tab="document" contextId={contextId} />;
   }
   if (tab === 'event' && contextId) {
     // Event creation tab only
