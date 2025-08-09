@@ -147,10 +147,12 @@ const PayrollWorkflows = ({ type }) => {
       setExitsData([]);
     }
   };
+  
 
   const fetchLoansData = async () => {
     setLoading(true);
-    const url = `/payroll/payroll-advance-summary?payroll_id=${payrollId}`;
+      const year = financialYear ? financialYear.split('-')[0] : '';
+     const url = `/payroll/payroll-advance-summary?payroll_id=${payrollId}&month=${month}&year=${year}`;
     const { res } = await Factory('get', url, {});
     setLoading(false);
     if (res?.status_cd === 0) {
@@ -159,6 +161,18 @@ const PayrollWorkflows = ({ type }) => {
       setLoansData([]);
     }
   };
+// const fetchLoansData = async () => {
+//   setLoading(true);
+//   const year = financialYear ? financialYear.split('-')[0] : '';
+//   const url = `/payroll/payroll-advance-summary?payroll_id=${payrollId}&month=${month}&year=${year}`;
+//   const { res } = await Factory('get', url, {});
+//   setLoading(false);
+//   if (res?.status_cd === 0) {
+//     setLoansData(res.data || []);
+//   } else {
+//     setLoansData([]);
+//   }
+// };
 
   const fetchBonusData = async () => {
     setLoading(true);
