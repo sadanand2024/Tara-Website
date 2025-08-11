@@ -149,6 +149,21 @@ function Organizationdetails({ handleNext }) {
       const { res, error } = await Factory('post', url, postData);
       setLoading(false);
       if (res.status_cd === 0) {
+        // Get the current payrollid from URL params
+        const currentPayrollId = searchParams.get('payrollid');
+
+        // If payrollid is 'null' or doesn't exist, update the URL with the new payroll ID
+        if (currentPayrollId === 'null' || !currentPayrollId) {
+          // Extract the new payroll ID from the response
+          const newPayrollId = res?.payroll_id || res?.id;
+          console.log(newPayrollId);
+          if (newPayrollId) {
+            // Update the URL with the new payroll ID
+            const newUrl = `${window.location.pathname}?business-id=${businessId}&payrollid=${newPayrollId}`;
+            window.history.replaceState({}, '', newUrl);
+          }
+        }
+
         dispatch(
           openSnackbar({
             open: true,

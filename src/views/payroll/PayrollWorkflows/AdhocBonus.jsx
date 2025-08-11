@@ -112,7 +112,6 @@ export default function AdhocBonus({
         setOpenDialog={setOpenDialog}
         fields={fields}
         selectedRecord={selectedRecord}
-        setData={() => {}}
         setLoading={setLoading}
         employeeMasterData={employeeMasterData}
         getData={fetchData}

@@ -147,12 +147,11 @@ const PayrollWorkflows = ({ type }) => {
       setExitsData([]);
     }
   };
-  
 
   const fetchLoansData = async () => {
     setLoading(true);
-      const year = financialYear ? financialYear.split('-')[0] : '';
-     const url = `/payroll/payroll-advance-summary?payroll_id=${payrollId}&month=${month}&year=${year}`;
+    const year = financialYear ? financialYear.split('-')[0] : '';
+    const url = `/payroll/payroll-advance-summary?payroll_id=${payrollId}&month=${month}&year=${year}`;
     const { res } = await Factory('get', url, {});
     setLoading(false);
     if (res?.status_cd === 0) {
@@ -161,18 +160,18 @@ const PayrollWorkflows = ({ type }) => {
       setLoansData([]);
     }
   };
-// const fetchLoansData = async () => {
-//   setLoading(true);
-//   const year = financialYear ? financialYear.split('-')[0] : '';
-//   const url = `/payroll/payroll-advance-summary?payroll_id=${payrollId}&month=${month}&year=${year}`;
-//   const { res } = await Factory('get', url, {});
-//   setLoading(false);
-//   if (res?.status_cd === 0) {
-//     setLoansData(res.data || []);
-//   } else {
-//     setLoansData([]);
-//   }
-// };
+  // const fetchLoansData = async () => {
+  //   setLoading(true);
+  //   const year = financialYear ? financialYear.split('-')[0] : '';
+  //   const url = `/payroll/payroll-advance-summary?payroll_id=${payrollId}&month=${month}&year=${year}`;
+  //   const { res } = await Factory('get', url, {});
+  //   setLoading(false);
+  //   if (res?.status_cd === 0) {
+  //     setLoansData(res.data || []);
+  //   } else {
+  //     setLoansData([]);
+  //   }
+  // };
 
   const fetchBonusData = async () => {
     setLoading(true);
@@ -545,11 +544,17 @@ const PayrollWorkflows = ({ type }) => {
               fetchData={
                 tab.label === 'Exits'
                   ? fetchExitsData
-                  : tab.label === 'Adhoc Bonus & Incentives'
-                    ? fetchAdhocBonusData
-                    : tab.label === 'Variable Bonus'
-                      ? fetchBonusData
-                      : undefined
+                  : tab.label === 'Loans & Advances'
+                    ? fetchLoansData
+                    : tab.label === 'Adhoc Bonus & Incentives'
+                      ? fetchAdhocBonusData
+                      : tab.label === 'Variable Bonus'
+                        ? fetchBonusData
+                        : tab.label === 'Salary Revisions'
+                          ? fetchSalaryRevisionData
+                          : tab.label === 'Tds'
+                            ? fetchTdsData
+                            : undefined
               }
               fetchAttendance={tab.label === 'Attendance' ? getAttandanceData : undefined}
               attendanceData={tab.label === 'Attendance' ? getFilteredData() : undefined}

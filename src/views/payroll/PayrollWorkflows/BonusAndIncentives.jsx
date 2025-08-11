@@ -1,4 +1,4 @@
-import { } from '@mui/material';
+import {} from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useDispatch } from 'store';
@@ -162,7 +162,6 @@ export default function BonusAndIncentives({
         setOpenDialog={setOpenDialog}
         fields={fields}
         selectedRecord={selectedRecord}
-        setData={() => {}}
         setLoading={setLoading}
         employeeMasterData={employeeMasterData}
         getData={fetchData}

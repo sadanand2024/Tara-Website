@@ -113,10 +113,11 @@ const PayrollSetup = () => {
       } else if (payrollDetails?.payroll_id) {
         navigate(`${routeBase}?payrollid=${payrollDetails.payroll_id}`);
       } else {
+        // Show error for other steps when payroll ID is not available
         dispatch(
           openSnackbar({
             open: true,
-            message: 'Payroll ID not available. Please complete the previous steps first.',
+            message: 'Payroll ID not available. Please complete the Business profile step first.',
             variant: 'alert',
             alert: { color: 'error' },
             close: false
