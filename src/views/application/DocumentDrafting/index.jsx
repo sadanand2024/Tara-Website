@@ -49,8 +49,7 @@ const Index = () => {
   }
   if (tab === 'document' && contextId) {
     // Document selection tab only
-    return <DocumentSelectionPage id={draftId} tab="document" contextId={contextId} />;
-  }
+    return <Drafting id={draftId} tab="document" contextId={contextId} />;  }
   if (tab === 'event' && contextId) {
     // Event creation tab only
     return <Drafting id={draftId} tab="event" contextId={contextId} />;
