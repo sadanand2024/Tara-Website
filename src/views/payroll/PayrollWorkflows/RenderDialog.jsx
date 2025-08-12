@@ -335,6 +335,7 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
         postData.payroll = payrollid;
         const { res, error } = await Factory(method, url, postData);
         setLoading(false);
+        console.log(res);
         if (res.status_cd === 0) {
           dispatch(
             openSnackbar({
@@ -346,6 +347,7 @@ export default function RenderDialog({ from, openDialog, fields, setOpenDialog, 
             })
           );
           getData();
+          resetForm();
           setOpenDialog(false);
         } else {
           dispatch(

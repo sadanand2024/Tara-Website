@@ -102,7 +102,6 @@ export default function SalaryRevisions({
         setOpenDialog={setOpenDialog}
         fields={fields}
         selectedRecord={selectedRecord}
-        setData={() => {}}
         setLoading={setLoading}
         employeeMasterData={employeeMasterData}
         getData={fetchData}

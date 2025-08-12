@@ -85,7 +85,6 @@ export default function LoansAndAdvances({
         setOpenDialog={setOpenDialog}
         fields={fields}
         selectedRecord={selectedRecord}
-        setData={() => {}}
         setLoading={setLoading}
         employeeMasterData={employeeMasterData}
         getData={fetchData}

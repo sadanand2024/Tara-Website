@@ -364,15 +364,16 @@ const PayrollSettingsLayout = () => {
 
   const handleChange = useCallback(
     (event, newValue) => {
+      const params = new URLSearchParams(window.location.search);
+      // console.log(Object.fromEntries(params));
+      const payrollId = params.get('payrollid') || payrollDetails.payroll_id;
       const step = steps[newValue];
       if (!step) return;
-
       const routeBase = `${step.path}`;
-
-      if (!payrollDetails?.payroll_id && step.nameKey === 'Business profile') {
+      if (!payrollId && step.nameKey === 'Business profile') {
         navigate(`${routeBase}?business-id=${businessId}`);
-      } else if (payrollDetails?.payroll_id) {
-        navigate(`${routeBase}?payrollid=${payrollDetails.payroll_id}`);
+      } else if (payrollId) {
+        navigate(`${routeBase}?payrollid=${payrollId}`);
       } else {
         dispatch(
           openSnackbar({
