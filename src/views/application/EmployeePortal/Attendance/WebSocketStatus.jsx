@@ -8,7 +8,6 @@ const WebSocketStatus = () => {
     onError: (e) => console.log('⚠️ WebSocket Error:', e),
     shouldReconnect: () => true // Auto-reconnect on close
   });
-  console.log(socketState);
 
   const connectionStatus = {
     0: '🟡 Connecting',
@@ -16,7 +15,7 @@ const WebSocketStatus = () => {
     2: '🟠 Closing',
     3: '🔴 Closed'
   }[socketState.readyState];
-  console.log(socketState.readyState);
+  // console.log(socketState.readyState);
   return (
     <div style={{ padding: 20 }}>
       <h2>WebSocket Status</h2>

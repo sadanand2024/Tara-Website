@@ -23,7 +23,8 @@ import {
   TextField,
   Autocomplete,
   Stack,
-  CircularProgress
+  CircularProgress,
+  Alert
 } from '@mui/material';
 import { IconDownload, IconEye, IconChevronDown, IconChevronUp } from '@tabler/icons-react';
 import MainCard from '../../../../ui-component/cards/MainCard';
@@ -32,16 +33,30 @@ import Factory from 'utils/Factory';
 import { months } from 'utils/MonthsList';
 import { useDispatch, useSelector } from 'react-redux';
 import { openSnackbar } from 'store/slices/snackbar';
+
 const MyEarnings = () => {
   const dispatch = useDispatch();
-  // Get current month and year
+
+  // Get current month and year with fallback logic
   const getCurrentMonth = () => {
-    return months[new Date().getMonth()];
+    const today = new Date();
+    const currentMonthIndex = today.getMonth();
+    const currentDay = today.getDate();
+
+    // If current month is accessible (after 26th), use it
+    if (currentDay >= 26) {
+      return months[currentMonthIndex];
+    } else {
+      // If before 26th, return previous month
+      const previousMonthIndex = currentMonthIndex === 0 ? 11 : currentMonthIndex - 1;
+      return months[previousMonthIndex];
+    }
   };
 
   const getCurrentFinancialYear = () => {
     const currentYear = new Date().getFullYear();
     const currentMonth = new Date().getMonth() + 1; // 1-12
+
     // Financial year starts from April (month 4)
     if (currentMonth >= 4) {
       return `${currentYear}-${currentYear + 1}`;
@@ -50,12 +65,73 @@ const MyEarnings = () => {
     }
   };
 
+  // Helper function to check if a month is accessible
+  const isMonthAccessible = (month) => {
+    const today = new Date();
+    const currentMonthIndex = today.getMonth();
+    const currentDay = today.getDate();
+    const selectedMonthIndex = months.indexOf(month);
+
+    // If it's a future month, not accessible
+    if (selectedMonthIndex > currentMonthIndex) {
+      return false;
+    }
+
+    // If it's current month but before 26th, not accessible
+    if (selectedMonthIndex === currentMonthIndex && currentDay < 26) {
+      return false;
+    }
+
+    return true;
+  };
+
+  // Helper function to get the appropriate month for API calls
+  const getApiMonth = (month) => {
+    const today = new Date();
+    const currentMonthIndex = today.getMonth();
+    const currentDay = today.getDate();
+    const selectedMonthIndex = months.indexOf(month);
+
+    // If selected month is current month but before 26th, use previous month
+    if (selectedMonthIndex === currentMonthIndex && currentDay < 26) {
+      const previousMonthIndex = currentMonthIndex === 0 ? 12 : currentMonthIndex;
+      return previousMonthIndex;
+    }
+
+    // If selected month is future month, use current accessible month
+    if (selectedMonthIndex > currentMonthIndex) {
+      if (currentDay >= 26) {
+        return currentMonthIndex + 1; // Current month if accessible
+      } else {
+        const previousMonthIndex = currentMonthIndex === 0 ? 12 : currentMonthIndex;
+        return previousMonthIndex; // Previous month if current not accessible
+      }
+    }
+
+    // Return selected month index (1-based for API)
+    return selectedMonthIndex + 1;
+  };
+
   const [selectedMonth, setSelectedMonth] = useState(getCurrentMonth());
   const [selectedYear, setSelectedYear] = useState(getCurrentFinancialYear());
   const [breakdownType, setBreakdownType] = useState(0);
   const [loading, setLoading] = useState(false);
   const [salaryData, setSalaryData] = useState(null);
   const [pfData, setPfData] = useState(null);
+  const [fallbackInfo, setFallbackInfo] = useState(() => {
+    // Set initial fallback info if current month is not accessible
+    const today = new Date();
+    const currentMonthIndex = today.getMonth();
+    const currentDay = today.getDate();
+
+    if (currentDay < 26) {
+      return {
+        type: 'current',
+        message: `Current month data is not yet available (accessible after 26th). Showing previous month data instead.`
+      };
+    }
+    return null;
+  });
 
   const years = generateFinancialYears(10);
 
@@ -77,6 +153,29 @@ const MyEarnings = () => {
   const handleMonthChange = (event, newValue) => {
     if (newValue) {
       setSelectedMonth(newValue);
+
+      // Set fallback information if month is not accessible
+      if (!isMonthAccessible(newValue)) {
+        const today = new Date();
+        const currentMonthIndex = today.getMonth();
+        const currentDay = today.getDate();
+        const selectedMonthIndex = months.indexOf(newValue);
+
+        if (selectedMonthIndex > currentMonthIndex) {
+          setFallbackInfo({
+            type: 'future',
+            message: `Future month data is not available. Showing the most recent available month data instead.`
+          });
+        } else if (selectedMonthIndex === currentMonthIndex && currentDay < 26) {
+          setFallbackInfo({
+            type: 'current',
+            message: `Current month data is not yet available (accessible after 26th). Showing previous month data instead.`
+          });
+        }
+      } else {
+        setFallbackInfo(null);
+      }
+
       getSalaryBreakdown(selectedYear, newValue);
       if (breakdownType === 1) {
         getPFBreakdown(selectedYear, newValue);
@@ -87,6 +186,7 @@ const MyEarnings = () => {
   const handleYearChange = (event, newValue) => {
     if (newValue) {
       setSelectedYear(newValue);
+      setFallbackInfo(null); // Clear fallback info when year changes
       getSalaryBreakdown(newValue, selectedMonth);
       if (breakdownType === 1) {
         getPFBreakdown(newValue, selectedMonth);
@@ -96,7 +196,8 @@ const MyEarnings = () => {
 
   const getSalaryBreakdown = async (financialYear, month = selectedMonth) => {
     setLoading(true);
-    let url = `/payroll/employee-ytd-details/?financial_year=${financialYear}&month=${months.indexOf(month) + 1}`;
+    const apiMonth = getApiMonth(month);
+    let url = `/payroll/employee-ytd-details/?financial_year=${financialYear}&month=${apiMonth}`;
     const { res } = await Factory('get', url, {});
     if (res?.status_cd === 0) {
       setSalaryData(res.data);
@@ -117,7 +218,8 @@ const MyEarnings = () => {
 
   const getPFBreakdown = async (financialYear, month = selectedMonth) => {
     setLoading(true);
-    let url = `/payroll/pf-breakdown/?financial_year=${financialYear}&month=${months.indexOf(month) + 1}`;
+    const apiMonth = getApiMonth(month);
+    let url = `/payroll/pf-breakdown/?financial_year=${financialYear}&month=${apiMonth}`;
     const { res } = await Factory('get', url, {});
     if (res?.status_cd === 0) {
       setPfData(res.data);
@@ -330,11 +432,37 @@ const MyEarnings = () => {
             value={selectedMonth}
             onChange={handleMonthChange}
             options={months}
+            getOptionLabel={(option) => {
+              if (!isMonthAccessible(option)) {
+                return `${option} (Data Not Available)`;
+              }
+              return option;
+            }}
+            renderOption={(props, option) => (
+              <Box
+                component="li"
+                {...props}
+                sx={{
+                  opacity: isMonthAccessible(option) ? 1 : 0.6,
+                  color: isMonthAccessible(option) ? 'text.primary' : 'text.disabled'
+                }}
+              >
+                {option} {!isMonthAccessible(option) && '(Data Not Available)'}
+              </Box>
+            )}
             renderInput={(params) => <TextField {...params} label="Month" size="small" sx={{ minWidth: 200 }} />}
           />
         </Stack>
       }
     >
+      {/* Show fallback information when displaying data from a different month */}
+      {fallbackInfo && (
+        <Box sx={{ mb: 2 }}>
+          <Alert severity={fallbackInfo.type === 'future' ? 'warning' : 'info'} sx={{ mb: 2 }} onClose={() => setFallbackInfo(null)}>
+            {fallbackInfo.message}
+          </Alert>
+        </Box>
+      )}
       <Paper
         elevation={2}
         sx={{
