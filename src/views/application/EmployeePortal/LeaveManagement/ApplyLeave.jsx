@@ -187,6 +187,7 @@ const ApplyLeave = () => {
                   options={leaveTypes}
                   value={formik.values.leave_type}
                   onChange={(event, newValue) => formik.setFieldValue('leave_type', newValue)}
+                  getOptionLabel={(option) => option || ''}
                   renderInput={(params) => (
                     <TextField
                       {...params}
@@ -251,6 +252,7 @@ const ApplyLeave = () => {
                   options={reasonTypes}
                   value={formik.values.reason}
                   onChange={(event, newValue) => formik.setFieldValue('reason', newValue)}
+                  getOptionLabel={(option) => option || ''}
                   renderInput={(params) => (
                     <TextField
                       {...params}
@@ -282,7 +284,7 @@ const ApplyLeave = () => {
                   fullWidth
                   size="small"
                   options={reviewerOptions}
-                  getOptionLabel={(option) => option.name}
+                  getOptionLabel={(option) => (option && typeof option === 'object' && option.name) || ''}
                   value={formik.values.reviewer}
                   onChange={(event, newValue) => formik.setFieldValue('reviewer', newValue)}
                   renderInput={(params) => (
@@ -330,8 +332,8 @@ const ApplyLeave = () => {
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
                     <Autocomplete
                       options={ccOptions}
-                      getOptionLabel={(option) => option.name}
-                      value={selectedCC}
+                      getOptionLabel={(option) => (option && typeof option === 'object' && option.name) || ''}
+                      value={selectedCC ? ccOptions.find((cc) => cc.id === selectedCC) : null}
                       onChange={(event, newValue) => setSelectedCC(newValue ? newValue.id : '')}
                       renderInput={(params) => <TextField {...params} label="CC to" size="small" />}
                       sx={{ flexGrow: 1 }}

@@ -239,12 +239,14 @@
   "Attendance": "Attendance",
   "Salary": "Salary",
   "Leave Balances": "Leave Balances",
-  "Pay Slips": "Pay Slips",
   "YTD Reports": "YTD Reports",
   "IT Statements": "IT Statements",
   "IT Declaration": "IT Declaration",
   "Loan Statement": "Loan Statement",
   "My Earnings": "My Earnings",
   "Declarations": "Declarations",
-  "Form 16 & Compliances": "Form 16 & Compliances"
+  "Form 16 & Compliances": "Form 16 & Compliances",
+  "Tax & TDS": "Tax & TDS",
+  "Leave Tracker": "Leave Tracker",
+  "Pay Slips": "Pay Slips"
 }

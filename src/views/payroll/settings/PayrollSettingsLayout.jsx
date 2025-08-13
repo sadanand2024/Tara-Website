@@ -4,19 +4,13 @@ import {
   Box,
   Stack,
   Typography,
-  LinearProgress,
   Button,
   CircularProgress,
-  Paper,
   Tabs,
   Tab,
   Card,
-  CardHeader,
-  CardContent,
-  Divider,
   useMediaQuery,
   useTheme,
-  Chip,
   Autocomplete,
   TextField
 } from '@mui/material';
@@ -239,15 +233,17 @@ const PayrollSettingsLayout = () => {
 
   const businessId = user.active_context.business_id;
   const handleBack = () => {
+    const params = new URLSearchParams(window.location.search);
+    const payrollId = params.get('payrollid') || payrollDetails.payroll_id;
     const prevIndex = value - 1;
     if (prevIndex >= 0) {
       const prevStep = steps[prevIndex];
       if (prevStep) {
         const routeBase = `${prevStep.path}`;
-        if (!payrollDetails?.payroll_id && prevStep.nameKey === 'Business profile') {
+        if (!payrollId && prevStep.nameKey === 'Business profile') {
           navigate(`${routeBase}?business-id=${businessId}`);
-        } else if (payrollDetails?.payroll_id) {
-          navigate(`${routeBase}?payrollid=${payrollDetails.payroll_id}`);
+        } else if (payrollId) {
+          navigate(`${routeBase}?payrollid=${payrollId}`);
         } else {
           dispatch(
             openSnackbar({
@@ -263,15 +259,17 @@ const PayrollSettingsLayout = () => {
     }
   };
   const handleNext = () => {
+    const params = new URLSearchParams(window.location.search);
+    const payrollId = params.get('payrollid') || payrollDetails.payroll_id;
     const nextIndex = value + 1;
     if (nextIndex < steps.length) {
       const nextStep = steps[nextIndex];
       if (nextStep) {
         const routeBase = `${nextStep.path}`;
-        if (!payrollDetails?.payroll_id && nextStep.nameKey === 'Business profile') {
+        if (!payrollId && nextStep.nameKey === 'Business profile') {
           navigate(`${routeBase}?business-id=${businessId}`);
-        } else if (payrollDetails?.payroll_id) {
-          navigate(`${routeBase}?payrollid=${payrollDetails.payroll_id}`);
+        } else if (payrollId) {
+          navigate(`${routeBase}?payrollid=${payrollId}`);
         } else {
           dispatch(
             openSnackbar({

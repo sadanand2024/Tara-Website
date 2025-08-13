@@ -1,492 +1,307 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Card, CardContent, Typography, Button, Chip, Alert, CircularProgress } from '@mui/material';
-import { IconClock, IconMapPin, IconAlertCircle } from '@tabler/icons-react';
-import Factory from 'utils/Factory';
-import { useDispatch, useSelector } from 'react-redux';
+import { Box, Card, CardContent, Typography, Button, Chip, Alert, CircularProgress, Stack, Tooltip } from '@mui/material';
+import { IconClock, IconMapPin, IconAlertCircle, IconInfoCircle } from '@tabler/icons-react';
+import { useDispatch } from 'react-redux';
 import { openSnackbar } from 'store/slices/snackbar';
+import Factory from 'utils/Factory';
+const GoogleAPIKey = import.meta.env.VITE_APP_GOOGLE_API_KEY;
+
 const PunchInOutCard = ({ onAttendanceUpdate }) => {
   const dispatch = useDispatch();
-  const [isCheckedIn, setIsCheckedIn] = useState(false);
-  const [checkInTime, setCheckInTime] = useState(null);
+  const [attendanceStatus, setAttendanceStatus] = useState({
+    isCheckedIn: false,
+    checkInTime: null,
+    location: null,
+    locationAddress: null
+  });
+  const [loading, setLoading] = useState({
+    statusCheck: true,
+    location: false,
+    action: false
+  });
+  const [error, setError] = useState(null);
   const [currentDate, setCurrentDate] = useState('');
-  const [location, setLocation] = useState(null);
-  const [locationAddress, setLocationAddress] = useState(null);
-  const [isGettingLocation, setIsGettingLocation] = useState(false);
-  const [locationError, setLocationError] = useState(null);
 
+  // Format date on component mount
   useEffect(() => {
-    // Get current date in the format shown in the image
     const today = new Date();
-    const options = {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric'
-    };
-    setCurrentDate(today.toLocaleDateString('en-US', options));
+    setCurrentDate(
+      today.toLocaleDateString('en-US', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+      })
+    );
 
-    // Check current check-in status
     checkCurrentStatus();
   }, []);
 
   const checkCurrentStatus = async () => {
-    const { res } = await Factory('get', '/payroll/today/', {});
-    if (res.status_cd === 0 && res.data && res.data.logs && res.data.logs.length > 0) {
-      // Find the latest log that doesn't have a check-out time (currently checked in)
-      const currentLog = res.data.logs.find((log) => log.check_in && !log.check_out);
+    try {
+      const { res } = await Factory('get', '/payroll/today/');
 
-      if (currentLog) {
-        // User is currently checked in
-        const checkInTime = new Date(currentLog.check_in);
-        const timeString = checkInTime.toLocaleTimeString('en-US', {
-          hour: '2-digit',
-          minute: '2-digit',
-          hour12: false
-        });
+      if (res.status_cd === 0 && res.data?.logs?.length > 0) {
+        const activeSession = res.data.logs.find((log) => log.check_in && !log.check_out);
 
-        setIsCheckedIn(true);
-        setCheckInTime(timeString);
+        if (activeSession) {
+          const checkInTime = new Date(activeSession.check_in);
+          const timeString = checkInTime.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+          });
 
-        // If location data is available, set it
-        if (currentLog.location) {
-          setLocation({
-            latitude: 0,
-            longitude: 0,
-            coordinates: currentLog.location
+          let locationAddress = null;
+          if (activeSession.location) {
+            const [lat, lng] = activeSession.location.split(',').map(Number);
+            locationAddress = await getAddressFromCoordinates(lat, lng);
+          }
+
+          setAttendanceStatus({
+            isCheckedIn: true,
+            checkInTime: timeString,
+            location: activeSession.location,
+            locationAddress
           });
         }
-      } else {
-        // User is not currently checked in
-        setIsCheckedIn(false);
-        setCheckInTime(null);
-        setLocation(null);
-        setLocationAddress(null);
       }
+    } catch (err) {
+      setError('Failed to load attendance data');
+    } finally {
+      setLoading((prev) => ({ ...prev, statusCheck: false }));
     }
   };
 
   const getAddressFromCoordinates = async (latitude, longitude) => {
     try {
-      // Try multiple geocoding services for better accuracy
-      const services = [
-        // OpenStreetMap Nominatim
-        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=16&addressdetails=1`
-        // Google Geocoding API (if you have API key)
-        // `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=YOUR_API_KEY`
-      ];
+      const apiKey = GoogleAPIKey;
+      const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${apiKey}`);
 
-      for (const serviceUrl of services) {
-        try {
-          const response = await fetch(serviceUrl);
-          const data = await response.json();
-          console.log('Geocoding response:', data);
+      const data = await response.json();
+      console.log('data', data);
+      if (data.status === 'OK' && data.results.length > 0) {
+        const address = data.results[0];
+        const components = address.address_components.reduce((acc, component) => {
+          if (component.types.includes('street_number')) acc.streetNumber = component.long_name;
+          if (component.types.includes('route')) acc.route = component.long_name;
+          if (component.types.includes('locality')) acc.locality = component.long_name;
+          if (component.types.includes('administrative_area_level_1')) acc.state = component.long_name;
+          if (component.types.includes('country')) acc.country = component.long_name;
+          return acc;
+        }, {});
 
-          if (data.display_name) {
-            // Extract relevant address components
-            const addressParts = data.display_name.split(', ');
-
-            // Try to find more specific location information
-            let shortAddress = '';
-            let city = '';
-            let state = '';
-
-            // Look for specific landmarks or areas
-            if (data.address) {
-              // Check for specific area names
-              const area = data.address.suburb || data.address.neighbourhood || data.address.quarter || '';
-              const road = data.address.road || '';
-              const postcode = data.address.postcode || '';
-
-              if (area && road) {
-                shortAddress = `${area}, ${road}`;
-              } else if (area) {
-                shortAddress = area;
-              } else if (road) {
-                shortAddress = road;
-              } else {
-                shortAddress = addressParts.slice(0, 2).join(', ');
-              }
-
-              city = data.address.city || data.address.town || data.address.village || data.address.county || 'Unknown';
-              state = data.address.state || 'Unknown';
-            } else {
-              shortAddress = addressParts.slice(0, 2).join(', ');
-              city = 'Unknown';
-              state = 'Unknown';
-            }
-
-            return {
-              fullAddress: data.display_name,
-              shortAddress: shortAddress,
-              city: city,
-              state: state,
-              country: data.address?.country || 'Unknown',
-              coordinates: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
-            };
-          }
-        } catch (serviceError) {
-          console.error('Service error:', serviceError);
-          continue; // Try next service
-        }
+        return {
+          full: address.formatted_address,
+          short: `${components.streetNumber || ''} ${components.route || ''}`.trim(),
+          locality: components.locality,
+          state: components.state,
+          country: components.country,
+          coordinates: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
+        };
       }
-
-      // If all services fail, return coordinates-based address
+      throw new Error(data.error_message || 'No address found');
+    } catch (err) {
       return {
-        fullAddress: `Location at ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
-        shortAddress: `Coordinates: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`,
-        city: 'Location',
-        state: 'Unknown',
-        country: 'Unknown',
-        coordinates: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
-      };
-    } catch (error) {
-      console.error('Error getting address:', error);
-      return {
-        fullAddress: `Location at ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
-        shortAddress: `Coordinates: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`,
-        city: 'Location',
-        state: 'Unknown',
-        country: 'Unknown',
+        full: `Location at ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
+        short: 'Current location',
+        locality: 'Unknown area',
         coordinates: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
       };
     }
   };
 
-  const getCurrentLocation = () => {
-    return new Promise((resolve, reject) => {
-      if (!navigator.geolocation) {
-        reject(new Error('Geolocation is not supported by this browser.'));
-        return;
-      }
+  const getCurrentLocation = async () => {
+    setLoading((prev) => ({ ...prev, location: true }));
+    setError(null);
 
-      setIsGettingLocation(true);
-      setLocationError(null);
-
-      // Simple approach like the HTML example - directly request location
-      // This will trigger the browser's permission popup
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          const { latitude, longitude } = position.coords;
-          setLocation({ latitude, longitude });
-
-          // Get address from coordinates
-          const address = await getAddressFromCoordinates(latitude, longitude);
-          setLocationAddress(address);
-
-          setIsGettingLocation(false);
-          resolve({ latitude, longitude, address });
-        },
-        (error) => {
-          setIsGettingLocation(false);
-          let errorMessage = 'Unable to retrieve your location.';
-
-          switch (error.code) {
-            case error.PERMISSION_DENIED:
-              errorMessage = 'Location access denied. Please allow location access when prompted by your browser.';
-              break;
-            case error.POSITION_UNAVAILABLE:
-              errorMessage = 'Location information is unavailable. Please try again.';
-              break;
-            case error.TIMEOUT:
-              errorMessage = 'Location request timed out. Please try again.';
-              break;
-            default:
-              errorMessage = 'An unknown error occurred while getting location.';
-          }
-
-          setLocationError(errorMessage);
-          reject(error);
-        },
-        {
+    try {
+      const position = await new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
           enableHighAccuracy: true,
-          timeout: 20000, // 20 seconds to give user time to respond to popup
-          maximumAge: 60000
-        }
-      );
-    });
-  };
-
-  const handlePunchIn = async () => {
-    try {
-      setIsGettingLocation(true);
-      // Get location first
-      const locationData = await getCurrentLocation();
-      console.log('locationData', locationData);
-
-      const now = new Date();
-      const timeString = now.toLocaleTimeString('en-US', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false
-      });
-
-      // Prepare API payload
-      const payload = {
-        location: locationData?.coordinates || '',
-        device_info: navigator.userAgent,
-        check_in_type: 'manual'
-      };
-
-      // Make API call to manual check-in
-      const { res } = await Factory('post', '/payroll/manual-checkin/', payload);
-
-      if (res.status_cd === 0) {
-        // Success - update local state
-        setCheckInTime(timeString);
-        setIsCheckedIn(true);
-        setLocation(locationData);
-        setLocationAddress(locationData);
-        dispatch(
-          openSnackbar({
-            open: true,
-            message: 'Successfully checked in.',
-            variant: 'alert',
-            alert: { color: 'success' },
-            close: false
-          })
-        );
-        // Update parent component with attendance data
-        if (onAttendanceUpdate) {
-          onAttendanceUpdate('checkIn', timeString, locationData);
-        }
-      } else {
-        // API error
-        dispatch(
-          openSnackbar({
-            open: true,
-            message: `Check-in failed: ${res.data?.message || 'Unknown error'}`,
-            variant: 'alert',
-            alert: { color: 'error' },
-            close: false
-          })
-        );
-      }
-    } catch (error) {
-      console.error('Error during punch in:', error);
-      dispatch(
-        openSnackbar({
-          open: true,
-          message: JSON.stringify(error.message || 'Failed to check in. Please try again.'),
-          variant: 'alert',
-          alert: { color: 'error' },
-          close: false
-        })
-      );
-    } finally {
-      setIsGettingLocation(false);
-    }
-  };
-
-  const handlePunchOut = async () => {
-    try {
-      setIsGettingLocation(true);
-      // Get location for punch out as well
-      const locationData = await getCurrentLocation();
-
-      const now = new Date();
-      const timeString = now.toLocaleTimeString('en-US', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false
-      });
-
-      // Prepare API payload
-      const payload = {
-        location: locationData?.coordinates || '',
-        device_info: navigator.userAgent
-      };
-
-      // Make API call to manual check-out
-      const { res } = await Factory('post', '/payroll/manual-checkout/', payload);
-
-      if (res.status_cd === 0) {
-        // Success - update local state
-        setIsCheckedIn(false);
-        setCheckInTime(null);
-        setLocation(null);
-        setLocationAddress(null);
-        dispatch(
-          openSnackbar({
-            open: true,
-            message: 'Successfully checked out.',
-            variant: 'alert',
-            alert: { color: 'success' },
-            close: false
-          })
-        );
-
-        // Update parent component with attendance data
-        if (onAttendanceUpdate) {
-          onAttendanceUpdate('checkOut', timeString, locationData);
-        }
-      } else {
-        // API error
-        dispatch(
-          openSnackbar({
-            open: true,
-            message: JSON.stringify(`Check-out failed: ${res.data?.message || 'Unknown error'}`),
-            variant: 'alert',
-            alert: { color: 'error' },
-            close: false
-          })
-        );
-      }
-    } catch (error) {
-      console.error('Error during punch out:', error);
-      dispatch(
-        openSnackbar({
-          open: true,
-          message: JSON.stringify('Failed to check out. Please try again.'),
-          variant: 'alert',
-          alert: { color: 'error' },
-          close: false
-        })
-      );
-
-      // Still allow punch out even if location fails
-      setIsCheckedIn(false);
-      setCheckInTime(null);
-      setLocation(null);
-      setLocationAddress(null);
-
-      // Update parent component even if location fails
-      if (onAttendanceUpdate) {
-        const now = new Date();
-        const time = now.toLocaleTimeString('en-US', {
-          hour: '2-digit',
-          minute: '2-digit',
-          hour12: false
+          timeout: 15000,
+          maximumAge: 0
         });
-        onAttendanceUpdate('checkOut', time, null);
+      });
+
+      const { latitude, longitude } = position.coords;
+      const address = await getAddressFromCoordinates(latitude, longitude);
+
+      return {
+        coordinates: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
+        address
+      };
+    } catch (err) {
+      let message = 'Location access denied';
+      if (err.code === err.PERMISSION_DENIED) {
+        message = 'Please enable location services in your browser settings';
+      } else if (err.code === err.TIMEOUT) {
+        message = 'Location request timed out';
       }
+      setError(message);
+      throw err;
     } finally {
-      setIsGettingLocation(false);
+      setLoading((prev) => ({ ...prev, location: false }));
     }
   };
 
+  const handleAttendanceAction = async () => {
+    setLoading((prev) => ({ ...prev, action: true }));
+
+    try {
+      const locationData = await getCurrentLocation();
+      const now = new Date();
+      const timeString = now.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      });
+
+      const endpoint = attendanceStatus.isCheckedIn ? '/payroll/manual-checkout/' : '/payroll/manual-checkin/';
+
+      const { res } = await Factory('post', endpoint, {
+        location: locationData.coordinates,
+        device_info: navigator.userAgent
+      });
+
+      if (res.status_cd === 0) {
+        const newStatus = !attendanceStatus.isCheckedIn;
+        setAttendanceStatus({
+          isCheckedIn: newStatus,
+          checkInTime: newStatus ? timeString : null,
+          location: newStatus ? locationData.coordinates : null,
+          locationAddress: newStatus ? locationData.address : null
+        });
+
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: `Successfully ${newStatus ? 'checked in' : 'checked out'}`,
+            variant: 'alert',
+            alert: { color: 'success' },
+            close: false
+          })
+        );
+
+        if (onAttendanceUpdate) {
+          onAttendanceUpdate(newStatus ? 'checkIn' : 'checkOut', timeString, locationData);
+        }
+      } else {
+        throw new Error(res.data?.message || 'Action failed');
+      }
+    } catch (err) {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: err.message || 'Attendance action failed',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
+    } finally {
+      setLoading((prev) => ({ ...prev, action: false }));
+    }
+  };
+
+  if (loading.statusCheck) {
+    return (
+      <Card sx={{ p: 3, textAlign: 'center' }}>
+        <CircularProgress />
+        <Typography variant="body2" mt={2}>
+          Loading attendance data...
+        </Typography>
+      </Card>
+    );
+  }
   return (
     <Card
       sx={{
-        bgcolor: 'grey.100',
+        bgcolor: 'background.paper',
         borderRadius: 2,
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-        position: 'relative',
-        overflow: 'visible'
+        boxShadow: 2
       }}
     >
       <CardContent>
-        {/* Location Error Alert */}
-        {locationError && (
-          <Alert severity="warning" icon={<IconAlertCircle />} sx={{ mb: 2 }} onClose={() => setLocationError(null)}>
-            <Box>
-              <Typography variant="body2" sx={{ mb: 1 }}>
-                {locationError}
-              </Typography>
-              {locationError.includes('Location access denied') && (
-                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                  To enable location: Click the location icon in your browser's address bar, or go to Settings → Privacy → Location and
-                  allow access for this site.
-                </Typography>
-              )}
-            </Box>
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
+            {error}
           </Alert>
         )}
 
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-          {/* Left side - Text content */}
-          <Box sx={{ flex: 1, mr: 2 }}>
-            <Typography
-              variant="h4"
-              sx={{
-                fontWeight: 700,
-                color: 'text.primary',
-                mb: 1
-              }}
-            >
-              Mark attendance for today ({currentDate})
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="space-between">
+          <Box>
+            <Typography variant="h6" fontWeight={600} gutterBottom>
+              Today's Attendance ({currentDate})
             </Typography>
-
-            <Typography
-              variant="body2"
-              sx={{
-                color: 'text.secondary',
-                mb: 0.5
-              }}
-            >
-              {isCheckedIn ? 'You have checked in today.' : 'Please check in to start your work day.'}
+            Please don't forget to checkout at the end of the day.
+            <Typography variant="body1" color="text.secondary" mb={2}>
+              {attendanceStatus.isCheckedIn ? 'You are currently checked in' : 'Ready to check in for your shift'}
             </Typography>
-
-            <Typography
-              variant="h6"
-              sx={{
-                color: 'text.secondary',
-                mb: 2
-              }}
-            >
-              {isCheckedIn
-                ? "Please don't forget to checkout at the end of the day."
-                : 'Click the Check In button to mark your arrival. Your location will be requested for attendance verification.'}
-            </Typography>
-
-            {!isCheckedIn && (
-              <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.7rem' }}>
-                💡 Location accuracy may vary. Exact coordinates will be shown for verification.
-              </Typography>
-            )}
-
-            {/* Check-in time and location display */}
           </Box>
 
-          {/* Right side - Action button */}
-          <Box sx={{ display: 'flex', alignItems: 'center', flexDirection: 'column', gap: 1 }}>
-            {isCheckedIn && checkInTime && (
-              <Typography variant="h5" fontWeight={500} color="primary.main">
-                Checked in at: {checkInTime}
-              </Typography>
+          <Box alignSelf="center" sx={{ display: 'flex', flexDirection: 'column', alignItems: 'left' }}>
+            {attendanceStatus.isCheckedIn && (
+              <>
+                <Stack direction="row" spacing={1} alignItems="center" mb={1}>
+                  <IconClock size={18} />
+                  <Typography>
+                    Checked in at: <strong>{attendanceStatus.checkInTime}</strong>
+                  </Typography>
+                </Stack>
+                {attendanceStatus.locationAddress && (
+                  <Stack direction="row" spacing={1} alignItems="flex-start">
+                    <IconMapPin size={18} style={{ marginTop: 2 }} />
+                    <Box>
+                      {(() => {
+                        const address = attendanceStatus.locationAddress.full;
+                        const parts = address.split(',');
+                        const result = [];
+
+                        for (let i = 0; i < parts.length; i += 3) {
+                          const group = parts.slice(i, i + 3).join(',');
+                          if (group.trim()) {
+                            result.push(group.trim());
+                          }
+                        }
+
+                        return result.map((part, index) => (
+                          <Typography variant="body2" key={index}>
+                            {part}
+                          </Typography>
+                        ));
+                      })()}
+                    </Box>
+                    <Tooltip
+                      title="The location shown here is reported by the employee's browser and can be inaccurate, depending on their device and software."
+                      placement="top"
+                      arrow
+                    >
+                      <IconInfoCircle size={16} style={{ marginTop: 2, color: '#666', cursor: 'help' }} />
+                    </Tooltip>
+                  </Stack>
+                )}
+              </>
             )}
-            {/* {location && (
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                <Chip
-                  icon={<IconMapPin size={16} />}
-                  label={locationAddress?.shortAddress || `${location.latitude.toFixed(6)}, ${location.longitude.toFixed(6)}`}
-                  sx={{
-                    bgcolor: 'primary.50',
-                    color: 'primary.main',
-                    fontWeight: 500,
-                    '& .MuiChip-icon': {
-                      color: 'primary.main'
-                    }
-                  }}
-                  size="small"
-                />
-              </Box>
-            )} */}
             <Button
               variant="contained"
-              size="small"
-              startIcon={isGettingLocation ? <CircularProgress size={16} color="inherit" /> : <IconClock size={20} />}
-              onClick={isCheckedIn ? handlePunchOut : handlePunchIn}
-              disabled={isGettingLocation}
+              size="large"
+              color={attendanceStatus.isCheckedIn ? 'error' : 'primary'}
+              startIcon={loading.action || loading.location ? <CircularProgress size={20} color="inherit" /> : <IconClock size={20} />}
+              onClick={handleAttendanceAction}
+              disabled={loading.action || loading.location}
               sx={{
-                bgcolor: isCheckedIn ? 'error.main' : 'primary.main',
-                color: 'white',
-                px: 3,
-                py: 1,
-                borderRadius: 2,
+                minWidth: 160,
+                maxWidth: 'fit-content',
+                alignSelf: 'flex-start',
                 fontWeight: 600,
                 textTransform: 'none',
-                fontSize: '1rem',
-                '&:hover': {
-                  bgcolor: isCheckedIn ? 'error.dark' : 'primary.dark'
-                },
-                '&:disabled': {
-                  bgcolor: 'grey.400'
-                }
+                marginTop: 2
               }}
             >
-              {isGettingLocation ? 'Getting Location...' : isCheckedIn ? 'Check Out' : 'Check In'}
+              {loading.action || loading.location ? 'Processing...' : attendanceStatus.isCheckedIn ? 'Check Out' : 'Check In'}
             </Button>
           </Box>
-        </Box>
+        </Stack>
       </CardContent>
     </Card>
   );
