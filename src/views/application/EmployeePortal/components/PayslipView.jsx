@@ -14,11 +14,10 @@ import MainCard from '../../../../ui-component/cards/MainCard';
 import axios from 'axios';
 let baseURL = import.meta.env.VITE_APP_BASE_URL;
 
-
 const PaySlips = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-   const [employeeId, setEmployeeId] = useState(null);
+  const [employeeId, setEmployeeId] = useState(null);
   const [month, setMonth] = useState(null);
   const [financialYear, setFinancialYear] = useState(null);
   const dispatch = useDispatch();
@@ -26,7 +25,7 @@ const PaySlips = () => {
 
   // State management
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
-//   const [financialYear, setFinancialYear] = useState(null);
+  //   const [financialYear, setFinancialYear] = useState(null);
   const [paySlipData, setPaySlipData] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -187,7 +186,6 @@ const PaySlips = () => {
 
     if (res?.status_cd === 0 && res?.data && res?.status === 200) {
       const data = res.data;
-      
 
       // Dynamically build non-zero earnings
       const earnings = [];
@@ -336,10 +334,11 @@ const PaySlips = () => {
     // }
   };
   const viewPayslip = async (employee_id, month, financial_year) => {
+    let selected_year = financial_year.split('-')[0];
     try {
       const tokens = JSON.parse(localStorage.getItem('user'));
       const response = await axios.get(
-        `${baseURL}/payroll/employee-monthly-salary-template?employee_id=${employeeId}&month=${month}&financial_year=${financial_year}&year=${new Date().getFullYear()}`,
+        `${baseURL}/payroll/employee-monthly-salary-template?employee_id=${employeeId}&month=${month}&financial_year=${financial_year}&year=${selected_year}`,
         {
           responseType: 'arraybuffer'
         }
@@ -540,10 +539,15 @@ const PaySlips = () => {
               }
             }}
           /> */}
-          <Button variant="outlined" startIcon={<IconDownload size={20} />} sx={{ borderColor: 'primary.main', color: 'primary.main' }} onClick={() => viewPayslip(paySlipData?.employeeId, selectedMonth, financialYear)}>
+          <Button
+            variant="outlined"
+            startIcon={<IconDownload size={20} />}
+            sx={{ borderColor: 'primary.main', color: 'primary.main' }}
+            onClick={() => viewPayslip(paySlipData?.employeeId, selectedMonth, financialYear)}
+          >
             Download
           </Button>
-         {/* <Typography
+          {/* <Typography
   variant="body2"
   sx={{
     cursor: 'pointer',
