@@ -69,6 +69,7 @@ export default function SimpleTabs() {
   const [branchesAddDialogOpen, setBranchesAddDialogOpen] = useState(false);
   const [customersAddDialogOpen, setCustomersAddDialogOpen] = useState(false);
   const [goodsServicesAddDialogOpen, setGoodsServicesAddDialogOpen] = useState(false);
+  const [invoicingProfileId, setInvoicingProfileId] = useState(null);
   const getInvoicingUsage = async () => {
     //   const moduleUsageRes = await Factory('post', `/user_management/usage-summary/${}`, {});
     //   if (moduleUsageRes.res.status_cd === 0) {
@@ -93,10 +94,23 @@ export default function SimpleTabs() {
   }, [searchParams]);
 
   const handleChange = (event, newValue) => {
-    setValue(newValue);
-    const params = new URLSearchParams(searchParams);
-    params.set('tabValue', newValue);
-    navigate({ search: params.toString() }, { replace: true });
+    if (newValue > 0 && !invoicingProfileId) {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Please complete Business Profile first',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
+      return;
+    } else {
+      setValue(newValue);
+      const params = new URLSearchParams(searchParams);
+      params.set('tabValue', newValue);
+      navigate({ search: params.toString() }, { replace: true });
+    }
   };
 
   const handleNext = () => {
@@ -162,7 +176,7 @@ export default function SimpleTabs() {
         invoice_format: invoicingProfile.invoice_format || [],
         signature: invoicingProfile.signature || null
       };
-
+      setInvoicingProfileId(invoicingProfile.id);
       setBusinessDetails(normalized);
       setPostType('put');
       getCustomersData(invoicingProfile.id);
@@ -217,7 +231,7 @@ export default function SimpleTabs() {
       icon: <IconFileDescription />
     }
   ];
-
+  console.log(invoicingProfileId);
   return (
     <>
       {invoiceOnboarding && <InvoiceOnboarding onFinish={() => setInvoiceOnboarding(false)} />}
