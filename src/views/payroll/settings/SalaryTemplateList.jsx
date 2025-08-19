@@ -37,10 +37,17 @@ function SalaryTemplateList({ handleBack, handleNext, searchQuery = '' }) {
   const [selectedRow, setSelectedRow] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-  // Filter salaryTemplates based on searchQuery from props
+  // Filter salaryTemplates based on searchQuery from props (search across all relevant fields)
   const filteredTemplates = salaryTemplates.filter((template) => {
-    const query = searchQuery.toLowerCase();
-    return template.template_name?.toLowerCase().includes(query) || template.description?.toLowerCase().includes(query);
+    const query = (searchQuery || '').trim().toLowerCase();
+    if (!query) return true;
+    const fieldsToSearch = [
+      template.template_name,
+      template.description,
+      template.status === true ? 'active' : template.status === false ? 'inactive' : template.status,
+      template.id
+    ];
+    return fieldsToSearch.some((field) => String(field ?? '').toLowerCase().includes(query));
   });
   const paginatedData = filteredTemplates.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 
@@ -95,6 +102,11 @@ function SalaryTemplateList({ handleBack, handleNext, searchQuery = '' }) {
   useEffect(() => {
     if (payrollid) fetchSalaryTemplates();
   }, [payrollid]);
+
+  // Reset pagination when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
   if (isLoading) {
     return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading Salary Template Data'} />;
   }

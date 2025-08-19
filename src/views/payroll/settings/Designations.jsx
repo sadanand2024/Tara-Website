@@ -61,10 +61,17 @@ function Designations({
   const [searchParams] = useSearchParams();
   const payrollid = searchParams.get('payrollid');
 
-  // Filter designations based on searchQuery from props
+  // Filter designations based on searchQuery from props (search across all relevant fields)
   const filteredDesignations = designations.filter((designation) => {
-    const query = searchQuery.toLowerCase();
-    return designation.designation_name?.toLowerCase().includes(query);
+    const query = (searchQuery || '').trim().toLowerCase();
+    if (!query) return true;
+    const fieldsToSearch = [
+      designation.designation_name,
+      designation.description,
+      designation.employee_count,
+      designation.id
+    ];
+    return fieldsToSearch.some((field) => String(field ?? '').toLowerCase().includes(query));
   });
   const paginatedData = filteredDesignations.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 
@@ -73,6 +80,11 @@ function Designations({
   }, [payrollid]);
 
   const handlePageChange = (event, value) => setCurrentPage(value);
+
+  // Reset pagination when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
 
   const handleCloseDialog = () => setOpenDialog(false);
 
