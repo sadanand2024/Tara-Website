@@ -40,17 +40,30 @@ function Worklocation({ handleBack, handleNext, searchQuery = '', openDialog = f
   const dispatch = useDispatch();
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Filter workLocations based on searchQuery from props
+  // Filter workLocations based on searchQuery from props (search across all relevant fields)
   const filteredWorkLocations = workLocations.filter((location) => {
-    const query = searchQuery.toLowerCase();
-    return (
-      location.location_name?.toLowerCase().includes(query) ||
-      location.location_code?.toLowerCase().includes(query) ||
-      location.address?.toLowerCase().includes(query)
-    );
+    const query = (searchQuery || '').trim().toLowerCase();
+    if (!query) return true;
+    const fieldsToSearch = [
+      location.location_name,
+      location.location_code,
+      location.address_line1,
+      location.address_line2,
+      location.address_state,
+      location.address_city,
+      location.address_pincode,
+      location.employee_count,
+      location.id
+    ];
+    return fieldsToSearch.some((field) => String(field ?? '').toLowerCase().includes(query));
   });
   const paginatedData = filteredWorkLocations.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
   const handlePageChange = (event, value) => setCurrentPage(value);
+
+  // Reset to first page whenever the search query changes to show relevant results from the beginning
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
 
   const handleCloseDialog = () => setOpenDialog(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
