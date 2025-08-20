@@ -278,30 +278,6 @@ const PayrollSetup = () => {
         </Grid2>
         <Grid2 size={{ xs: 12 }}></Grid2>
       </Grid2>
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
-        <Button
-          startIcon={<ArrowBackIcon />}
-          variant="contained"
-          onClick={() => navigate('/app/payroll')}
-          sx={{
-            background: 'linear-gradient(45deg, #3b82f6 0%, #1d4ed8 100%)',
-            borderRadius: 2,
-            px: 3,
-            py: 1,
-            fontSize: '0.9rem',
-            fontWeight: 500,
-            boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)',
-            '&:hover': {
-              background: 'linear-gradient(45deg, #2563eb 0%, #1e40af 100%)',
-              boxShadow: '0 6px 16px rgba(59, 130, 246, 0.4)',
-              transform: 'translateY(-1px)'
-            },
-            transition: 'all 0.2s ease'
-          }}
-        >
-          Back to Payroll Dashboard
-        </Button>
-      </Box>
     </Box>
   );
 };
