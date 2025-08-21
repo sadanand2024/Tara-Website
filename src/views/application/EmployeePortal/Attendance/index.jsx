@@ -347,7 +347,7 @@ const AttendanceInfoTab = () => {
 
   return (
     <MainCard>
-      {/* <WebSocketStatus /> */}
+      <WebSocketStatus />
       <Box sx={{ mb: 4 }}>
         <Typography variant="h4" sx={{ fontWeight: 600, mb: 1 }}>
           Attendance

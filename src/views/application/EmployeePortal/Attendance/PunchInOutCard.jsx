@@ -78,7 +78,6 @@ const PunchInOutCard = ({ onAttendanceUpdate }) => {
       const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${apiKey}`);
 
       const data = await response.json();
-      console.log('data', data);
       if (data.status === 'OK' && data.results.length > 0) {
         const address = data.results[0];
         const components = address.address_components.reduce((acc, component) => {

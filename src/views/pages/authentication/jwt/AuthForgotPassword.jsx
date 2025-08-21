@@ -58,7 +58,7 @@ export default function AuthForgotPassword({ link, ...others }) {
                     openSnackbar({
                       open: true,
                       anchorOrigin: { vertical: 'top', horizontal: 'right' },
-                      message: 'Check mail for reset password link',
+                      message: 'Check Your Mail for Reset Password Link',
                       variant: 'alert',
                       alert: {
                         color: 'success'
@@ -74,7 +74,7 @@ export default function AuthForgotPassword({ link, ...others }) {
                     openSnackbar({
                       open: true,
                       anchorOrigin: { vertical: 'top', horizontal: 'right' },
-                      message: 'Failed to send reset password link',
+                      message: error.error || 'Failed to send reset password link',
                       variant: 'alert',
                       alert: {
                         color: 'error'
