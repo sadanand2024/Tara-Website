@@ -2,7 +2,7 @@ import React from 'react';
 import useWebSocket from 'react-use-websocket';
 
 const WebSocketStatus = () => {
-  const socketUrl = 'ws://dev-backend.tarafirst.com:8000/ws/attendance/2/';
+  const socketUrl = 'ws://dev-backend.tarafirst.com:8000/ws/attedance/2/';
   const {
     sendMessage,
     sendJsonMessage,
