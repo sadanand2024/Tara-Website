@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Card, CardContent, Typography, Button, Chip, Alert, CircularProgress, Stack, Tooltip } from '@mui/material';
-import { IconClock, IconMapPin, IconAlertCircle, IconInfoCircle } from '@tabler/icons-react';
+import { IconClock, IconMapPin, IconInfoCircle } from '@tabler/icons-react';
 import { useDispatch } from 'react-redux';
 import { openSnackbar } from 'store/slices/snackbar';
 import Factory from 'utils/Factory';
+import useWebSocket from 'react-use-websocket';
+import { useSelector } from 'react-redux';
 const GoogleAPIKey = import.meta.env.VITE_APP_GOOGLE_API_KEY;
 
-const PunchInOutCard = ({ onAttendanceUpdate }) => {
+const PunchInOutCard = ({ onAttendanceUpdate, }) => {
   const dispatch = useDispatch();
+  const user = useSelector((state) => state.accountReducer.user);
+
   const [attendanceStatus, setAttendanceStatus] = useState({
     isCheckedIn: false,
     checkInTime: null,
@@ -21,6 +25,93 @@ const PunchInOutCard = ({ onAttendanceUpdate }) => {
   });
   const [error, setError] = useState(null);
   const [currentDate, setCurrentDate] = useState('');
+  const [wsConnected, setWsConnected] = useState(false);
+
+  // WebSocket connection
+  const socketUrl = `ws://dev-backend.tarafirst.com:8000/ws/attendance/${user.id}/`;
+  const {
+    sendJsonMessage,
+    lastMessage,
+    readyState,
+    getWebSocket,
+  } = useWebSocket(socketUrl, {
+    onOpen: () => {
+      console.log('WebSocket connected');
+      setWsConnected(true);
+    },
+    onMessage: (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        console.log('WebSocket message received:', data);
+        handleWebSocketMessage(data);
+      } catch (error) {
+        console.error('Error parsing WebSocket message:', error);
+      }
+    },
+    onClose: () => {
+      console.log('WebSocket disconnected');
+      setWsConnected(false);
+    },
+    onError: (error) => {
+      console.log('WebSocket error:', error);
+      setWsConnected(false);
+    },
+    shouldReconnect: (closeEvent) => true,
+  });
+
+  // Handle WebSocket messages
+  const handleWebSocketMessage = (data) => {
+    switch (data.type) {
+      case 'ws_connected':
+        console.log('WebSocket connected for employee:', data.employee_id);
+        break;
+      case 'attendance_update':
+        handleAttendanceUpdate(data);
+        break;
+      default:
+        console.log('Unknown WebSocket message type:', data.type);
+    }
+  };
+
+  // Handle attendance updates from WebSocket
+  const handleAttendanceUpdate = (data) => {
+    const { action, record } = data;
+
+    if (action === 'check_in' || action === 'check_out') {
+      const isCheckedIn = action === 'check_in';
+      const checkInTime = record.check_in ? new Date(record.check_in).toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      }) : null;
+
+      setAttendanceStatus(prev => ({
+        ...prev,
+        isCheckedIn,
+        checkInTime: isCheckedIn ? checkInTime : null,
+        location: record.location || null
+      }));
+
+      // Show notification
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: `Attendance ${action === 'check_in' ? 'check-in' : 'check-out'} recorded successfully`,
+          variant: 'alert',
+          alert: { color: 'success' },
+          close: false
+        })
+      );
+
+      // Call parent callback if provided
+      if (onAttendanceUpdate) {
+        onAttendanceUpdate(action === 'check_in' ? 'checkIn' : 'checkOut', checkInTime, {
+          coordinates: record.location,
+          verified: record.verified
+        });
+      }
+    }
+  };
 
   // Format date on component mount
   useEffect(() => {
@@ -36,6 +127,7 @@ const PunchInOutCard = ({ onAttendanceUpdate }) => {
     checkCurrentStatus();
   }, []);
 
+  // Get the current attendance status from the API
   const checkCurrentStatus = async () => {
     try {
       const { res } = await Factory('get', '/payroll/today/');
@@ -72,6 +164,7 @@ const PunchInOutCard = ({ onAttendanceUpdate }) => {
     }
   };
 
+  // Get the address from the coordinates
   const getAddressFromCoordinates = async (latitude, longitude) => {
     try {
       const apiKey = GoogleAPIKey;
@@ -109,6 +202,7 @@ const PunchInOutCard = ({ onAttendanceUpdate }) => {
     }
   };
 
+  // Get the user's current location
   const getCurrentLocation = async () => {
     setLoading((prev) => ({ ...prev, location: true }));
     setError(null);
@@ -143,6 +237,7 @@ const PunchInOutCard = ({ onAttendanceUpdate }) => {
     }
   };
 
+  // Handle attendance action (check in or check out)
   const handleAttendanceAction = async () => {
     setLoading((prev) => ({ ...prev, action: true }));
 
@@ -164,6 +259,19 @@ const PunchInOutCard = ({ onAttendanceUpdate }) => {
 
       if (res.status_cd === 0) {
         const newStatus = !attendanceStatus.isCheckedIn;
+
+        // Send WebSocket message
+        const wsMessage = {
+          type: 'attendance_action',
+          action: newStatus ? 'check_in' : 'check_out',
+          employee_id: employeeId,
+          location: locationData.coordinates,
+          device_info: navigator.userAgent,
+          timestamp: new Date().toISOString()
+        };
+        sendJsonMessage(wsMessage);
+
+        // Update local state immediately
         setAttendanceStatus({
           isCheckedIn: newStatus,
           checkInTime: newStatus ? timeString : null,
@@ -171,6 +279,7 @@ const PunchInOutCard = ({ onAttendanceUpdate }) => {
           locationAddress: newStatus ? locationData.address : null
         });
 
+        // Show success notification
         dispatch(
           openSnackbar({
             open: true,
@@ -184,8 +293,6 @@ const PunchInOutCard = ({ onAttendanceUpdate }) => {
         if (onAttendanceUpdate) {
           onAttendanceUpdate(newStatus ? 'checkIn' : 'checkOut', timeString, locationData);
         }
-      } else {
-        throw new Error(res.data?.message || 'Action failed');
       }
     } catch (err) {
       dispatch(
@@ -203,41 +310,33 @@ const PunchInOutCard = ({ onAttendanceUpdate }) => {
   };
 
   if (loading.statusCheck) {
-    return (
-      <Card sx={{ p: 3, textAlign: 'center' }}>
-        <CircularProgress />
-        <Typography variant="body2" mt={2}>
-          Loading attendance data...
-        </Typography>
-      </Card>
-    );
+    return <CircularProgress />;
   }
-  return (
-    <Card
-      sx={{
-        bgcolor: 'background.paper',
-        borderRadius: 2,
-        boxShadow: 2
-      }}
-    >
-      <CardContent>
-        {error && (
-          <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
-            {error}
-          </Alert>
-        )}
 
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="space-between">
-          <Box>
-            <Typography variant="h6" fontWeight={600} gutterBottom>
+  return (
+    <Card>
+      <CardContent>
+        <Box display="flex" justifyContent="space-between" alignItems="flex-start">
+          {/* Left side - Title and status */}
+          <Box flex={1}>
+            <Typography variant="h5" gutterBottom>
               Today's Attendance ({currentDate})
             </Typography>
-            Please don't forget to checkout at the end of the day.
-            <Typography variant="body1" color="text.secondary" mb={2}>
-              {attendanceStatus.isCheckedIn ? 'You are currently checked in' : 'Ready to check in for your shift'}
+            <Typography variant="body2" color="text.secondary" paragraph>
+              Please don't forget to checkout at the end of the day.
             </Typography>
+            {attendanceStatus.isCheckedIn ? (
+              <Typography variant="body2" color="success.main" fontWeight="medium">
+                You are currently checked in
+              </Typography>
+            ) : (
+              <Typography variant="body2" color="text.secondary">
+                You are not checked in
+              </Typography>
+            )}
           </Box>
 
+          {/* Right side - Time, location, and action button */}
           <Box alignSelf="center" sx={{ display: 'flex', flexDirection: 'column', alignItems: 'left' }}>
             {attendanceStatus.isCheckedIn && (
               <>
@@ -300,7 +399,13 @@ const PunchInOutCard = ({ onAttendanceUpdate }) => {
               {loading.action || loading.location ? 'Processing...' : attendanceStatus.isCheckedIn ? 'Check Out' : 'Check In'}
             </Button>
           </Box>
-        </Stack>
+        </Box>
+
+        {error && (
+          <Alert severity="error" sx={{ mt: 2 }}>
+            {error}
+          </Alert>
+        )}
       </CardContent>
     </Card>
   );

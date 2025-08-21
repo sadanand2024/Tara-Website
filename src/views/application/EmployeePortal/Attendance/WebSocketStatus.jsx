@@ -2,7 +2,7 @@ import React from 'react';
 import useWebSocket from 'react-use-websocket';
 
 const WebSocketStatus = () => {
-  const socketUrl = 'ws://dev-backend.tarafirst.com:8000/ws/attedance/2/';
+  const socketUrl = 'ws://dev-backend.tarafirst.com:8000/ws/attendance/2/';
   const {
     sendMessage,
     sendJsonMessage,
@@ -12,7 +12,7 @@ const WebSocketStatus = () => {
     getWebSocket,
   } = useWebSocket(socketUrl, {
     onOpen: () => console.log('opened'),
-    onMessage: (event) => console.log('message', event),
+    onMessage: (event) => console.log(JSON.parse(event.data)),
     onClose: () => console.log('closed'),
     onError: (error) => console.log('error', error),
     shouldReconnect: (closeEvent) => true,
