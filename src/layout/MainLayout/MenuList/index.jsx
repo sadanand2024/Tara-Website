@@ -30,6 +30,7 @@ function MenuList() {
 
   const user = useSelector((state) => state.accountReducer.user);
   const subscriptions = user?.module_subscriptions || [];
+  console.log('MenuList - user:', user, 'subscriptions:', subscriptions);
   const menu = useMemo(() => menuItems(user, subscriptions), [user, subscriptions]);
   const [selectedID, setSelectedID] = useState('');
 
@@ -107,12 +108,12 @@ function MenuList() {
   });
 
   return !isHorizontal ? (
-    <Box key={user.active_context?.id} {...(drawerOpen && { sx: { mt: 1.5 } })}>
+    <Box key={`${user.active_context?.id}-${subscriptions.length}`} {...(drawerOpen && { sx: { mt: 1.5 } })}>
       {navItems}
     </Box>
   ) : (
-    <Box key={user.active_context?.id}>{navItems}</Box>
+    <Box key={`${user.active_context?.id}-${subscriptions.length}`}>{navItems}</Box>
   );
 }
 
-export default memo(MenuList);
+export default MenuList;
