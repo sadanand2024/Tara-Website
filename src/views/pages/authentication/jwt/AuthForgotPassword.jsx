@@ -73,7 +73,11 @@ export default function AuthForgotPassword({ link, ...others }) {
                       close: false
                     })
                   );
-                  navigate('/login');
+                  if (urlPath === '/employee-login/forgot-password') {
+                    navigate('/employee-login');
+                  } else {
+                    navigate('/login');
+                  }
                 })
                 .catch((error) => {
                   console.log(error);
