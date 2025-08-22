@@ -96,3 +96,5 @@ const useAttendanceWebSocket = (employeeId, onAttendanceUpdate) => {
 };
 
 export default useAttendanceWebSocket;
+
+
