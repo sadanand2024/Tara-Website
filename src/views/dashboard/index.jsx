@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Dialog, DialogTitle, DialogContent, Typography, Box, Grid, Button, Paper } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, Typography, Box, Grid2, Button, Paper } from '@mui/material';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
 import { useTheme } from '@mui/material/styles';
@@ -36,6 +36,12 @@ export default function Dashboard() {
 
   function closeDiag() {
     setAccDialog(() => false);
+  }
+
+  function handleBack() {
+    setPersonalKYCDialog(false);
+    setBusinessKYCDialog(false);
+    setAccDialog(true);
   }
 
   const switchContext = async (context_id) => {
@@ -101,8 +107,8 @@ export default function Dashboard() {
   return (
     <>
       <ChooseAccountDialog open={accDialog} onContinue={onContinue} />
-      <Personal open={personalKYCDialog} onClose={() => setPersonalKYCDialog(false)} onSubmit={handleKYCSubmit} />
-      <Business open={businessKYCDialog} onClose={() => setBusinessKYCDialog(false)} onSubmit={handleKYCSubmit} />
+      <Personal open={personalKYCDialog} onClose={handleBack} onSubmit={handleKYCSubmit} />
+      <Business open={businessKYCDialog} onClose={handleBack} onSubmit={handleKYCSubmit} />
     </>
   );
 }
@@ -146,9 +152,9 @@ const ChooseAccountDialog = ({ open, onContinue }) => {
           Tell us what kind of user you are to proceed.
         </Typography>
 
-        <Grid container spacing={2}>
+        <Grid2 container spacing={2}>
           {options.map((opt) => (
-            <Grid item xs={6} key={opt.key}>
+            <Grid2 size={{ xs: 6 }} key={opt.key}>
               <Paper
                 elevation={selected === opt.key ? 4 : 1}
                 onClick={() => setSelected(opt.key)}
@@ -170,9 +176,9 @@ const ChooseAccountDialog = ({ open, onContinue }) => {
                   </Typography>
                 </Box>
               </Paper>
-            </Grid>
+            </Grid2>
           ))}
-        </Grid>
+        </Grid2>
 
         <Button fullWidth variant="contained" color="secondary" sx={{ mt: 3 }} onClick={() => onContinue(selected)}>
           Continue

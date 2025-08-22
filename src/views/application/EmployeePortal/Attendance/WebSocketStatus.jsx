@@ -12,7 +12,7 @@ const WebSocketStatus = () => {
     getWebSocket,
   } = useWebSocket(socketUrl, {
     onOpen: () => console.log('opened'),
-    onMessage: (event) => console.log('message', event),
+    onMessage: (event) => console.log(JSON.parse(event.data)),
     onClose: () => console.log('closed'),
     onError: (error) => console.log('error', error),
     shouldReconnect: (closeEvent) => true,

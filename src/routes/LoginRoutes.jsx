@@ -48,7 +48,15 @@ const LoginRoutes = {
       element: <AuthForgotPassword />
     },
     {
+      path: '/employee-login/forgot-password',
+      element: <AuthForgotPassword />
+    },
+    {
       path: '/reset-password',
+      element: <AuthResetPassword />
+    },
+    {
+      path: '/employee-login/reset-password',
       element: <AuthResetPassword />
     },
     {

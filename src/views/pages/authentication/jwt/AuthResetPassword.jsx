@@ -81,10 +81,15 @@ export default function AuthResetPassword({ link, ...others }) {
           .test('confirmPassword', 'Both Password must be match!', (confirmPassword, yup) => yup.parent.password === confirmPassword)
       })}
       onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
+        console.log(values);
+        let url = `/user_management/reset-password?uid=${uid}&token=${token}`;
+        if (urlPath === '/employee-login/forgot-password') {
+          url = `/payroll/employee/change-password/?uid=${uid}&token=${token}`;
+        }
         try {
           // password reset
           axios
-            .post(`${import.meta.env.VITE_APP_BASE_URL}/user_management/reset-password?uid=${uid}&token=${token}`, {
+            .post(`${import.meta.env.VITE_APP_BASE_URL}${url}`, {
               password: values.password
             })
             .then((response) => {

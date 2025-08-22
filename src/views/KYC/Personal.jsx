@@ -28,6 +28,7 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { states } from 'utils/constants';
 import Modal from 'ui-component/extended/Modal';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 const Personal = ({ open, onClose, onSubmit, isSubmitting, cancel }) => {
   const fields = [
@@ -252,7 +253,7 @@ const Personal = ({ open, onClose, onSubmit, isSubmitting, cancel }) => {
       }
     }
   });
-  const { values, setValues, errors, touched, handleSubmit, handleBlur, setFieldValue } = formik;
+  const { values, setValues, errors, touched, handleSubmit, handleBlur, setFieldValue, resetForm } = formik;
   return (
     <Modal
       open={open}
@@ -261,20 +262,22 @@ const Personal = ({ open, onClose, onSubmit, isSubmitting, cancel }) => {
       title="Add Personal Details"
       handleClose={
         // onClose
-        () => {}
+        () => { }
       }
       footer={
-        <Stack direction="row" sx={{ width: 1, justifyContent: 'flex-end', gap: 2 }}>
-          {/* <Button
+        <Stack direction="row" sx={{ width: 1, justifyContent: 'space-between', gap: 2 }}>
+          <Button
             onClick={() => {
+              resetForm();
               onClose();
             }}
             variant="outlined"
-            color="error"
+            color="secondary"
+            startIcon={<ArrowBackIcon />}
           >
-            Cancel
-          </Button> */}
-          <Button onClick={handleSubmit} type="submit" variant="contained" color="primary">
+            Back
+          </Button>
+          <Button onClick={handleSubmit} type="submit" variant="contained" color="secondary">
             Save
           </Button>
         </Stack>

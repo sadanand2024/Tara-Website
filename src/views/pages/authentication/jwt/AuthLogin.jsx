@@ -179,7 +179,9 @@ export default function JWTLogin({ ...others }) {
                     ? '/pages/forgot-password/forgot-password3'
                     : authParam
                       ? `/forgot-password?auth=${authParam}`
-                      : '/forgot-password'
+                      : urlPath === '/employee-login'
+                        ? '/employee-login/forgot-password'
+                        : '/forgot-password'
                 }
                 color="secondary"
                 sx={{ textDecoration: 'none' }}
