@@ -24,6 +24,8 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'; // Profile Info
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined'; // Personal Information
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined'; // Address Information
 import SchoolOutlinedIcon from '@mui/icons-material/SchoolOutlined'; // Educational Information
+import VpnKeyTwoToneIcon from '@mui/icons-material/VpnKeyTwoTone'; // Change Password
+import ChangePassword from '../Account/ChangePassword';
 
 import ProfileInfo from './ProfileInfo';
 import Personal from './Personal';
@@ -69,6 +71,11 @@ const tabsOption = [
     label: 'Educational Information',
     icon: <SchoolOutlinedIcon />,
     caption: 'Academic background and certificates'
+  },
+  {
+    label: 'Change Password',
+    icon: <VpnKeyTwoToneIcon />,
+    caption: 'Update Profile Security'
   }
 ];
 
@@ -123,7 +130,9 @@ export default function Profile2() {
                 ? 'Address Information'
                 : value === 3
                   ? 'Educational Information'
-                  : ''
+                  : value === 4
+                    ? 'Change Password'
+                    : ''
         }
       />
       <Divider />
@@ -222,9 +231,12 @@ export default function Profile2() {
             <TabPanel value={value} index={2}>
               <AddressInfo user={user} handleNext={handleNext} handleBack={handleBack} tabChange={handleChange} tabval={value} />
             </TabPanel>
-          
+
             <TabPanel value={value} index={3}>
               <EducationInfo user={user} handleNext={handleNext} handleBack={handleBack} tabChange={handleChange} tabval={value} />
+            </TabPanel>
+            <TabPanel value={value} index={4}>
+              <ChangePassword user={user} handleNext={handleNext} handleBack={handleBack} tabChange={handleChange} tabval={value} />
             </TabPanel>
           </CardContent>
         </Box>

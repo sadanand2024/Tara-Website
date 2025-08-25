@@ -15,10 +15,11 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import AnimateButton from 'ui-component/extended/AnimateButton';
 import { gridSpacing } from 'store/constant';
 import Factory from 'utils/Factory';
+import MainCard from 'ui-component/cards/MainCard';
 
 // ==============================|| PROFILE 2 - CHANGE PASSWORD ||============================== //
 
-export default function ChangePassword() {
+export default function ChangePassword({ user }) {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -31,6 +32,14 @@ export default function ChangePassword() {
   const handleSnackbarClose = () => setSnackbar({ ...snackbar, open: false });
 
   const handleChangePassword = async () => {
+    let type = 'put'
+    if (user.hasOwnProperty("employee")) {
+      type = 'post'
+    }
+    let url = '/user_management/change-password/'
+    if (user.hasOwnProperty("employee")) {
+      url = '/payroll/employee/change-password/'
+    }
     if (!currentPassword || !newPassword || !confirmPassword) {
       setSnackbar({ open: true, message: 'All fields are required.', severity: 'error' });
       return;
@@ -45,7 +54,7 @@ export default function ChangePassword() {
     }
     setLoading(true);
     try {
-      const res = await Factory('put', '/user_management/change-password/', {
+      const res = await Factory(type, url, {
         old_password: currentPassword,
         new_password: newPassword
       });
@@ -66,7 +75,7 @@ export default function ChangePassword() {
   };
 
   return (
-    <>
+    <MainCard>
       <Grid container spacing={gridSpacing}>
         <Grid size={{ xs: 12, sm: 6 }}>
           <TextField
@@ -146,6 +155,6 @@ export default function ChangePassword() {
           {snackbar.message}
         </Alert>
       </Snackbar>
-    </>
+    </MainCard>
   );
 }

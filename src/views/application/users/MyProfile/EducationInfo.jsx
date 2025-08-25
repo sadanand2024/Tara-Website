@@ -28,11 +28,11 @@ const StepTwo = ({ step, setStep }) => {
   // const user = useSelector((state) => state.accountReducer.user);
   // const employeeEducation = user?.employee?.education_details?.[0] || {};
   const user = useSelector((state) => state.accountReducer.user);
-    const profileId = user?.employee?.education_details?.id;
-  
-    const [AddressInfo, setAddressInfo] = useState({});
-    const [isLoading, setIsLoading] = useState(true);
-  
+  const profileId = user?.employee?.education_details?.id;
+
+  const [AddressInfo, setAddressInfo] = useState({});
+  const [isLoading, setIsLoading] = useState(true);
+
 
   const [saveIndex, setSaveIndex] = useState(null);
 
@@ -55,34 +55,34 @@ const StepTwo = ({ step, setStep }) => {
         })
       )
     }),
-    onSubmit: () => {}
+    onSubmit: () => { }
   });
 
   const { values, errors, touched, handleChange, handleBlur, setFieldValue } = formik;
 
-const getEducationInfo = async () => {
-  const url = `/payroll/employee-profile/`;
+  const getEducationInfo = async () => {
+    const url = `/payroll/employee-profile/`;
 
-  try {
-    const { res } = await Factory('get', url);
-    if (res?.status_cd === 0 && res?.data?.education_details?.length > 0) {
-      const data = res.data.education_details;
+    try {
+      const { res } = await Factory('get', url);
+      if (res?.status_cd === 0 && res?.data?.education_details?.length > 0) {
+        const data = res.data.education_details;
 
-      const formatted = data.map((item) => ({
-        qualification: item?.qualification || '',
-        year_of_passing: item?.year_of_passing?.toString() || '',
-        certificate: item?.upload_certificate || null
-      }));
+        const formatted = data.map((item) => ({
+          qualification: item?.qualification || '',
+          year_of_passing: item?.year_of_passing?.toString() || '',
+          certificate: item?.upload_certificate || null
+        }));
 
-      formik.setFieldValue('education', formatted);
+        formik.setFieldValue('education', formatted);
+      }
+    } catch (error) {
+      console.error('Error fetching education info:', error);
     }
-  } catch (error) {
-    console.error('Error fetching education info:', error);
-  }
-};
-useEffect(() => {
-  getEducationInfo();
-}, []);
+  };
+  useEffect(() => {
+    getEducationInfo();
+  }, []);
 
   const addPromoter = () => {
     setFieldValue('education', [
@@ -111,11 +111,8 @@ useEffect(() => {
   );
 
   return (
-
-       <MainCard> 
-            <form onSubmit={formik.handleSubmit}>
-       
-
+    <MainCard>
+      <form onSubmit={formik.handleSubmit}>
         <Box display="flex" alignItems="center" mb={2}>
           <Typography>No. of Entries</Typography>
           <Button variant="outlined" size="small" sx={{ ml: 2 }} onClick={removePromoter}>
@@ -151,7 +148,7 @@ useEffect(() => {
                 <TableRow key={idx}>
                   <TableCell>
                     <Autocomplete
-                   sx={{width:'100%',mt:1}}
+                      sx={{ width: '100%', mt: 1 }}
                       size="small"
                       options={['12th', 'B.Tech', 'M.Tech', 'MBA', 'Other']}
                       value={promoter.qualification || ''}
@@ -171,8 +168,8 @@ useEffect(() => {
 
                   <TableCell>
                     <TextField
-                      
-                      sx={{width:'100%',mt:1}}
+
+                      sx={{ width: '100%', mt: 1 }}
                       size="small"
                       label={getLabelWithAsterisk("Year Of Passing")}
                       name={`education[${idx}].year_of_passing`}
@@ -222,11 +219,11 @@ useEffect(() => {
             </TableBody>
           </Table>
         </TableContainer>
-         </form>
-       </MainCard>
+      </form>
+    </MainCard>
 
-    
-   
+
+
   );
 };
 
