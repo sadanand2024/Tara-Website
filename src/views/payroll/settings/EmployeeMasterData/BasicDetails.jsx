@@ -25,8 +25,17 @@ const employeeFields = [
   { name: 'gender', label: 'Gender', required: true },
   { name: 'work_location', label: 'Work Location', required: true },
   { name: 'designation', label: 'Designation', required: true },
-  { name: 'department', label: 'Department', required: true }
+  { name: 'department', label: 'Department', required: true },
+  { name: 'employee_level', label: 'Employee Level', required: true }
 ];
+const employeeLevels = [
+  '0 - CEO / Director / Executive',
+  '1 - Vice President / General Manager',
+  '2 - HR Manager',
+  '3 - Department Manager',
+  '4 - Team Lead / Project Lead',
+  '5 - Employee / Trainee / Intern',
+]
 function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, onNext, setSubmitRef }) {
   const [loading, setLoading] = useState(false); // State for loader
   const dispatch = useDispatch();
@@ -82,7 +91,7 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
     work_location: Yup.string().required('Work Location is required'),
     designation: Yup.string().required('Designation is required'),
     department: Yup.string().required('Department is required'),
-
+    employee_level: Yup.string().required('Employee Level is required'),
     statutory_components: Yup.object().shape({
       epf_enabled: Yup.boolean(),
       esi_enabled: Yup.boolean(),
@@ -92,15 +101,15 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
         return Yup.object().shape({
           pf_account_number: parent?.epf_enabled
             ? Yup.string()
-                // .nullable()
-                .required('Pf Account Number is required')
-                .matches(/^[A-Z]{5}\d{10,14}$/, 'Invalid PF Account Number. Format: 5 letters followed by 10–14 digits')
+              // .nullable()
+              .required('Pf Account Number is required')
+              .matches(/^[A-Z]{5}\d{10,14}$/, 'Invalid PF Account Number. Format: 5 letters followed by 10–14 digits')
             : Yup.string().nullable(),
 
           uan: parent?.epf_enabled
             ? Yup.string()
-                .required('UAN is required')
-                .matches(/^[0-9]{12}$/, 'UAN must be a 12-digit number')
+              .required('UAN is required')
+              .matches(/^[0-9]{12}$/, 'UAN must be a 12-digit number')
             : Yup.string().nullable()
         });
       }),
@@ -109,8 +118,8 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
         return Yup.object().shape({
           esi_number: parent?.esi_enabled
             ? Yup.string()
-                .required('ESI Number is required')
-                .matches(/^[0-9]{10}$/, 'ESI Number must be 10 digits')
+              .required('ESI Number is required')
+              .matches(/^[0-9]{10}$/, 'ESI Number must be 10 digits')
             : Yup.string().nullable()
         });
       })
@@ -130,6 +139,7 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
       work_location: '',
       designation: '',
       department: '',
+      employee_level: '',
       enable_portal_access: false,
       statutory_components: {
         epf_enabled: false,
@@ -150,6 +160,13 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
       const postData = { ...values };
       postData.payroll = Number(payrollid);
       postData.gender = values.gender.toLowerCase();
+
+      // Extract numeric value from employee_level string
+      if (postData.employee_level && typeof postData.employee_level === 'string') {
+        const levelMatch = postData.employee_level.match(/^(\d+)/);
+        postData.employee_level = levelMatch ? Number(levelMatch[1]) : 0;
+      }
+
       const url = employeeData?.id ? `/payroll/employees/${employeeData?.id}` : `/payroll/employees`;
       const { res, error } = await Factory(employeeData?.id ? 'put' : 'post', url, postData);
       setLoading(false);
@@ -195,7 +212,7 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
       <Grid2 key={field.name} size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
         {/* <Typography variant="subtitle1">{field.label}</Typography> */}
         <Typography variant="subtitle1">{getLabelWithAsterisk(field.label, field.required)}</Typography>
-        {field.name === 'gender' || field.name === 'work_location' || field.name === 'designation' || field.name === 'department' ? (
+        {field.name === 'gender' || field.name === 'work_location' || field.name === 'designation' || field.name === 'department' || field.name === 'employee_level' ? (
           <CustomAutocomplete
             value={
               field.name === 'work_location'
@@ -233,7 +250,9 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
                     ? designations
                     : field.name === 'department'
                       ? departments
-                      : []
+                      : field.name === 'employee_level'
+                        ? employeeLevels
+                        : []
             }
             error={touched[field.name] && Boolean(errors[field.name])}
             helperText={touched[field.name] && errors[field.name]}
@@ -246,6 +265,38 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
             ListboxProps={
               field.name === 'designation'
                 ? {
+                  style: { maxHeight: 250 },
+                  component: React.forwardRef(function CustomListboxComponent(props, ref) {
+                    const { children, ...rest } = props;
+                    return (
+                      <ul ref={ref} {...rest}>
+                        {children}
+                        <li style={{ padding: '8px 16px' }}>
+                          <Button
+                            startIcon={<IconPlus />}
+                            variant="contained"
+                            fullWidth
+                            size="small"
+                            sx={{
+                              bgcolor: 'primary.main',
+                              '&:hover': {
+                                bgcolor: 'primary.dark'
+                              }
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpenDesignationDialog();
+                            }}
+                          >
+                            Add Designation
+                          </Button>
+                        </li>
+                      </ul>
+                    );
+                  })
+                }
+                : field.name === 'department'
+                  ? {
                     style: { maxHeight: 250 },
                     component: React.forwardRef(function CustomListboxComponent(props, ref) {
                       const { children, ...rest } = props;
@@ -266,48 +317,16 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
                               }}
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleOpenDesignationDialog();
+                                handleOpenDepartmentDialog();
                               }}
                             >
-                              Add Designation
+                              Add Department
                             </Button>
                           </li>
                         </ul>
                       );
                     })
                   }
-                : field.name === 'department'
-                  ? {
-                      style: { maxHeight: 250 },
-                      component: React.forwardRef(function CustomListboxComponent(props, ref) {
-                        const { children, ...rest } = props;
-                        return (
-                          <ul ref={ref} {...rest}>
-                            {children}
-                            <li style={{ padding: '8px 16px' }}>
-                              <Button
-                                startIcon={<IconPlus />}
-                                variant="contained"
-                                fullWidth
-                                size="small"
-                                sx={{
-                                  bgcolor: 'primary.main',
-                                  '&:hover': {
-                                    bgcolor: 'primary.dark'
-                                  }
-                                }}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleOpenDepartmentDialog();
-                                }}
-                              >
-                                Add Department
-                              </Button>
-                            </li>
-                          </ul>
-                        );
-                      })
-                    }
                   : undefined
             }
           />
@@ -442,6 +461,14 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
 
   useEffect(() => {
     if (employeeData) {
+      // Convert numeric employee_level to display format
+      let employeeLevelDisplay = '';
+      if (employeeData.employee_level !== null && employeeData.employee_level !== undefined) {
+        const levelNum = Number(employeeData.employee_level);
+        const levelOption = employeeLevels.find(level => level.startsWith(`${levelNum} -`));
+        employeeLevelDisplay = levelOption || '';
+      }
+
       setValues((prev) => ({
         ...prev,
         first_name: employeeData.first_name || '',
@@ -455,6 +482,7 @@ function BasicDetails({ fetchEmployeeData, employeeData, setCreatedEmployeeId, o
         work_location: employeeData.work_location || '',
         designation: employeeData.designation || '',
         department: employeeData.department || '',
+        employee_level: employeeLevelDisplay,
         enable_portal_access: employeeData.enable_portal_access || false,
         statutory_components: {
           epf_enabled: employeeData.statutory_components?.epf_enabled || false,
