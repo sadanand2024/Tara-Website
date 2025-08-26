@@ -30,7 +30,6 @@ function MenuList() {
 
   const user = useSelector((state) => state.accountReducer.user);
   const subscriptions = user?.module_subscriptions || [];
-  console.log('MenuList - user:', user, 'subscriptions:', subscriptions);
   const menu = useMemo(() => menuItems(user, subscriptions), [user, subscriptions]);
   const [selectedID, setSelectedID] = useState('');
 
