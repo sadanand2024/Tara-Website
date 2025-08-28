@@ -5,6 +5,10 @@ import { useSearchParams } from 'react-router-dom';
 import ApplyLeave from './ApplyLeave';
 import PendingLeaves from './PendingLeaves';
 import LeaveHistory from './LeaveHistory';
+import WebSocketStatus from './WebSocketStatus';
+import MainCard from 'ui-component/cards/MainCard';
+
+
 
 // TabPanel component
 function TabPanel({ children, value, index, ...other }) {
@@ -57,7 +61,10 @@ const LeaveManagement = () => {
   }
 
   return (
-    <Box sx={{ display: 'flex', height: '100vh', p: 2 }}>
+    <MainCard>
+      
+      <WebSocketStatus />
+      
       {/* Main Content Area */}
       <Box sx={{ flexGrow: 1 }}>
         {/* Tabs */}
@@ -80,7 +87,8 @@ const LeaveManagement = () => {
           <LeaveHistory />
         </TabPanel>
       </Box>
-    </Box>
+    
+    </MainCard>
   );
 };
 

@@ -1,29 +1,23 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 // material-ui
-import { useTheme } from '@mui/material/styles';
-import useMediaQuery from '@mui/material/useMediaQuery';
+import Autocomplete from '@mui/material/Autocomplete';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
-import Divider from '@mui/material/Divider';
-import Typography from '@mui/material/Typography';
-import Autocomplete from '@mui/material/Autocomplete';
-import TextField from '@mui/material/TextField';
-import IconButton from '@mui/material/IconButton';
 import Button from '@mui/material/Button';
 import CardMedia from '@mui/material/CardMedia';
+import Divider from '@mui/material/Divider';
+import { useTheme } from '@mui/material/styles';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import Tarafirstlogo_png from 'assets/images/Tarafirstlogo_png.png'; // Tarafirstlogo_png
 import { Link } from 'react-router-dom';
 // project imports
-import LogoSection from '../LogoSection';
-import SearchSection from './SearchSection';
-import MobileSection from './MobileSection';
-import ProfileSection from './ProfileSection';
-import LocalizationSection from './LocalizationSection';
-import MegaMenuSection from './MegaMenuSection';
+import { useDispatch as useReduxDispatch } from 'react-redux';
+import AddBusiness from './AddBusiness';
 import FullScreenSection from './FullScreenSection';
 import NotificationSection from './NotificationSection';
-import AddBusiness from './AddBusiness';
-import { useDispatch as useReduxDispatch } from 'react-redux';
+import ProfileSection from './ProfileSection';
 
 import { handlerDrawerOpen, useGetMenuMaster } from 'api/menu';
 import { MenuOrientation, ThemeMode } from 'config';
@@ -31,19 +25,20 @@ import useConfig from 'hooks/useConfig';
 import Factory from 'utils/Factory';
 
 // assets
-import { IconMenu2 } from '@tabler/icons-react';
-import BusinessIcon from '@mui/icons-material/Business';
-import EditIcon from '@mui/icons-material/Edit';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
-import { storeUser } from 'store/slices/account'; // redux slice
-import { useDispatch } from 'store';
+import BusinessIcon from '@mui/icons-material/Business';
+import { IconMenu2 } from '@tabler/icons-react';
 import { useSnackbar } from 'notistack';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'store';
+import { storeUser } from 'store/slices/account'; // redux slice
 // ==============================|| MAIN NAVBAR / HEADER ||============================== //
 
-import { useSelector } from 'store';
 import { Stack } from '@mui/material';
+import { useSelector } from 'store';
+import WebSocketStatus from 'views/application/EmployeePortal/LeaveManagement/WebSocketStatus';
 import Personal from 'views/KYC/Personal';
+
 
 const Header = ({ hamburgerDisplay = 'block' }) => {
   const dispatch = useDispatch();
@@ -185,6 +180,12 @@ const Header = ({ hamburgerDisplay = 'block' }) => {
   };
   return (
     <>
+     {user?.employee && (
+        <div style={{ display: 'none' }}>
+          <WebSocketStatus />
+        </div>
+      )}
+
       {/* logo & toggler button */}
       <Box
         sx={{
@@ -252,7 +253,7 @@ const Header = ({ hamburgerDisplay = 'block' }) => {
       </Box> */}
 
       {/* notification */}
-      {/* <NotificationSection /> */}
+      <NotificationSection />
 
       {/* full screen toggler */}
       <Box sx={{ display: { xs: 'none', lg: 'block' } }}>
