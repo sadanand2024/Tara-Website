@@ -1,9 +1,7 @@
-import React, { useEffect, useState } from 'react';
 import {
   Autocomplete,
   Box,
   Button,
-  Card,
   Paper,
   Stack,
   Table,
@@ -16,78 +14,104 @@ import {
   Typography
 } from '@mui/material';
 import { useFormik } from 'formik';
-import * as Yup from 'yup';
-import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { useDispatch } from 'store';
+import { openSnackbar } from 'store/slices/snackbar';
 import MainCard from 'ui-component/cards/MainCard';
+import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
 import Factory from 'utils/Factory';
+import * as Yup from 'yup';
+
+const rowSchema = Yup.object({
+  qualification: Yup.string().required('Qualification is required'),
+  year_of_passing: Yup.string().required('Year of Passing is required'),
+
+upload_certificate: Yup.mixed().nullable() // optional to allow saving without file
+});
 
 const StepTwo = ({ step, setStep }) => {
-  // const user = useSelector((state) => state.accountReducer.user);
-  // const employeeEducation = user?.employee?.education_details?.[0] || {};
   const user = useSelector((state) => state.accountReducer.user);
-    const profileId = user?.employee?.education_details?.id;
-  
-    const [AddressInfo, setAddressInfo] = useState({});
-    const [isLoading, setIsLoading] = useState(true);
-  
+  const [isLoading, setIsLoading] = useState(true);
+  const [employeeId, setEmployeeId] = useState(null);
 
   const [saveIndex, setSaveIndex] = useState(null);
+  const dispatch = useDispatch();
 
   const formik = useFormik({
     initialValues: {
       education: [
         {
+          id: undefined,
           qualification: '',
           year_of_passing: '',
-          certificate: null
+          upload_certificate: null
         }
       ]
     },
     validationSchema: Yup.object({
+      // Keep overall validation lenient; per-row Save will validate clicked row
       education: Yup.array().of(
         Yup.object({
-          qualification: Yup.string().required('Qualification is required'),
-          year_of_passing: Yup.string().required('Year of Passing is required'),
-          certificate: Yup.mixed().required('Certificate is required')
+          qualification: Yup.string().nullable(),
+          year_of_passing: Yup.string().nullable(),
+          upload_certificate: Yup.mixed().nullable()
         })
       )
     }),
-    onSubmit: () => {}
+    onSubmit: async () => {
+      // Unused now; we validate and save per-row in saveRow()
+    }
   });
 
   const { values, errors, touched, handleChange, handleBlur, setFieldValue } = formik;
 
-const getEducationInfo = async () => {
-  const url = `/payroll/employee-profile/`;
+  const getEducationInfo = async () => {
+    const url = `/payroll/employee-profile/`;
 
-  try {
-    const { res } = await Factory('get', url);
-    if (res?.status_cd === 0 && res?.data?.education_details?.length > 0) {
-      const data = res.data.education_details;
+    try {
+      const { res } = await Factory('get', url);
+      if (res?.status_cd === 0) {
+        if (typeof res?.data?.id !== 'undefined' && res.data.id !== null) {
+          setEmployeeId(res.data.id);
+        }
+        if (res?.data?.education_details?.length > 0) {
+          const data = res.data.education_details;
 
-      const formatted = data.map((item) => ({
-        qualification: item?.qualification || '',
-        year_of_passing: item?.year_of_passing?.toString() || '',
-        certificate: item?.upload_certificate || null
-      }));
+          const formatted = data.map((item) => ({
+            id: item?.id,
+            qualification: item?.qualification || '',
+            year_of_passing: item?.year_of_passing?.toString() || '',
+            upload_certificate: item?.upload_certificate || null
+          }));
 
-      formik.setFieldValue('education', formatted);
+          formik.setFieldValue('education', formatted);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching education info:', error);
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Failed to fetch education info',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
+    } finally {
+      setIsLoading(false);
     }
-  } catch (error) {
-    console.error('Error fetching education info:', error);
-  }
-};
-useEffect(() => {
-  getEducationInfo();
-}, []);
+  };
+
+  useEffect(() => {
+    getEducationInfo();
+  }, []);
 
   const addPromoter = () => {
     setFieldValue('education', [
       ...values.education,
-      { qualification: '', year_of_passing: '', certificate: null }
+      { id: undefined, qualification: '', year_of_passing: '',upload_certificate: null }
     ]);
   };
 
@@ -97,10 +121,121 @@ useEffect(() => {
     }
   };
 
-  const handleIndividualDelete = (index) => {
+  const handleIndividualDelete = async (index) => {
+    const item = values.education[index];
+    if (!item) return;
+    try {
+      if (item.id) {
+        const url = `/payroll/employee-education/${item.id}/`;
+        const { res } = await Factory('delete', url);
+        if (res?.status_cd === 0) {
+          dispatch(
+            openSnackbar({
+              open: true,
+              message: 'Education deleted successfully',
+              variant: 'alert',
+              alert: { color: 'success' },
+              close: false
+            })
+          );
+          await getEducationInfo();
+          return;
+        } else {
+          console.error('Education delete failed', res);
+          dispatch(
+            openSnackbar({
+              open: true,
+              message: 'Failed to delete education',
+              variant: 'alert',
+              alert: { color: 'error' },
+              close: false
+            })
+          );
+        }
+      }
+    } catch (e) {
+      console.error('Education delete error', e);
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Failed to delete education',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
+    }
+    // Fallback: remove locally if no id or delete failed
     const updated = [...values.education];
     updated.splice(index, 1);
     setFieldValue('education', updated);
+  };
+
+  const saveRow = async (idx) => {
+    const item = values.education[idx];
+    if (!item) return;
+    try {
+      // Validate only this row
+      await rowSchema.validate(item, { abortEarly: false });
+
+      const hasId = !!item.id;
+      const url = hasId ? `/payroll/employee-education/${item.id}/` : `/payroll/employee-education/`;
+
+      const formData = new FormData();
+      if (!hasId && employeeId) {
+        formData.append('employee', String(employeeId));
+      }
+      formData.append('qualification', item.qualification || '');
+      formData.append('year_of_passing', item.year_of_passing || '');
+      if (item.upload_certificate && typeof item.upload_certificate !== 'string') {
+        formData.append('upload_certificate', item.upload_certificate);
+      }
+
+      const { res } = await Factory(hasId ? 'put' : 'post', url, formData);
+      if (res?.status_cd === 0) {
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'Education saved successfully',
+            variant: 'alert',
+            alert: { color: 'success' },
+            close: false
+          })
+        );
+        await getEducationInfo();
+      } else {
+        console.error('Education save failed', res);
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'Failed to save education',
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
+      }
+    } catch (e) {
+      if (e?.inner?.length) {
+        // Map per-field errors to Formik touched/errors for this row
+        e.inner.forEach((err) => {
+          const path = `education[${idx}].${err.path}`;
+          formik.setFieldError(path, err.message);
+          formik.setFieldTouched(path, true, false);
+        });
+      } else {
+        console.error('Education save error', e);
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'Failed to save education',
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
+      }
+    }
   };
 
   const getLabelWithAsterisk = (label, isRequired = true) => (
@@ -111,11 +246,8 @@ useEffect(() => {
   );
 
   return (
-
-       <MainCard> 
-            <form onSubmit={formik.handleSubmit}>
-       
-
+    <MainCard>
+      <form onSubmit={(e) => e.preventDefault()}>
         <Box display="flex" alignItems="center" mb={2}>
           <Typography>No. of Entries</Typography>
           <Button variant="outlined" size="small" sx={{ ml: 2 }} onClick={removePromoter}>
@@ -151,7 +283,7 @@ useEffect(() => {
                 <TableRow key={idx}>
                   <TableCell>
                     <Autocomplete
-                   sx={{width:'100%',mt:1}}
+                      sx={{width:'100%',mt:1}}
                       size="small"
                       options={['12th', 'B.Tech', 'M.Tech', 'MBA', 'Other']}
                       value={promoter.qualification || ''}
@@ -171,7 +303,6 @@ useEffect(() => {
 
                   <TableCell>
                     <TextField
-                      
                       sx={{width:'100%',mt:1}}
                       size="small"
                       label={getLabelWithAsterisk("Year Of Passing")}
@@ -186,12 +317,12 @@ useEffect(() => {
 
                   <TableCell>
                     <RenderFileUpload
-                      label={getLabelWithAsterisk("Upload Certificate")}
-                      fieldName={`education[${idx}].certificate`}
-                      file={promoter.certificate}
+                      label={getLabelWithAsterisk("Upload Certificate", false)}
+                      fieldName={`education[${idx}].upload_certificate`}
+                      file={promoter.upload_certificate}
                       setFieldValue={setFieldValue}
-                      touched={touched.education?.[idx]?.certificate}
-                      errors={errors.education?.[idx]?.certificate}
+                      touched={touched.education?.[idx]?.upload_certificate}
+                      errors={errors.education?.[idx]?.upload_certificate}
                     />
                   </TableCell>
 
@@ -200,10 +331,7 @@ useEffect(() => {
                       <Button
                         variant="contained"
                         size="small"
-                        onClick={() => {
-                          setSaveIndex(idx);
-                          formik.handleSubmit();
-                        }}
+                        onClick={() => saveRow(idx)}
                       >
                         Save
                       </Button>
@@ -222,11 +350,8 @@ useEffect(() => {
             </TableBody>
           </Table>
         </TableContainer>
-         </form>
-       </MainCard>
-
-    
-   
+      </form>
+    </MainCard>
   );
 };
 

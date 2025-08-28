@@ -26,7 +26,7 @@ import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined'; // 
 import SchoolOutlinedIcon from '@mui/icons-material/SchoolOutlined'; // Educational Information
 
 import ProfileInfo from './ProfileInfo';
-import Personal from './Personal';
+// import Personal from './Personal';
 import AddressInfo from './AddressInfo';
 import EducationInfo from './EducationInfo';
 import SettingsIcon from '@mui/icons-material/Settings';
@@ -55,11 +55,11 @@ const tabsOption = [
     icon: <InfoOutlinedIcon />,
     caption: 'Basic employee profile data'
   },
-  {
-    label: 'Personal Information',
-    icon: <PersonOutlineOutlinedIcon />,
-    caption: 'Personal identity and info'
-  },
+  // {
+  //   label: 'Personal Information',
+  //   icon: <PersonOutlineOutlinedIcon />,
+  //   caption: 'Personal identity and info'
+  // },
   {
     label: 'Address Information',
     icon: <LocationOnOutlinedIcon />,
@@ -117,11 +117,10 @@ export default function Profile2() {
         subheader={
           value === 0
             ? 'Profile Information'
-            : value === 1
-              ? 'Personal Information'
-              : value === 2
+            
+              : value === 1
                 ? 'Address Information'
-                : value === 3
+                : value === 2
                   ? 'Educational Information'
                   : ''
         }
@@ -216,14 +215,14 @@ export default function Profile2() {
             <TabPanel value={value} index={0}>
               <ProfileInfo user={user} tabChange={handleChange} tabval={value} />
             </TabPanel>
-            <TabPanel value={value} index={1}>
+            {/* <TabPanel value={value} index={1}>
               <Personal user={user} handleNext={handleNext} handleBack={handleBack} tabChange={handleChange} tabval={value} />
-            </TabPanel>
-            <TabPanel value={value} index={2}>
+            </TabPanel> */}
+            <TabPanel value={value} index={1}>
               <AddressInfo user={user} handleNext={handleNext} handleBack={handleBack} tabChange={handleChange} tabval={value} />
             </TabPanel>
           
-            <TabPanel value={value} index={3}>
+            <TabPanel value={value} index={2}>
               <EducationInfo user={user} handleNext={handleNext} handleBack={handleBack} tabChange={handleChange} tabval={value} />
             </TabPanel>
           </CardContent>
