@@ -470,7 +470,12 @@ const ManageSubscriptions = () => {
           }}
         >
           <Table size="small">
-            <TableHead sx={{ '& .MuiTableCell-root': { bgcolor: 'primary.main', color: 'white' } }}>
+            <TableHead sx={{
+              '& .MuiTableCell-root': {
+                bgcolor: 'primary.main',
+                color: '#fff !important'
+              }
+            }}>
               <TableRow>
                 <TableCell sx={{ pl: 3 }}>S.No</TableCell>
                 <TableCell>Task ID</TableCell>
@@ -599,7 +604,7 @@ const ManageSubscriptions = () => {
           }}
         >
           <Table size="small">
-            <TableHead sx={{ '& .MuiTableCell-root': { bgcolor: 'primary.main', color: 'white' } }}>
+            <TableHead sx={{ '& .MuiTableCell-root': { bgcolor: 'primary.main', color: '#fff !important' } }}>
               <TableRow>
                 <TableCell>Paid Date</TableCell>
                 <TableCell>Plan</TableCell>

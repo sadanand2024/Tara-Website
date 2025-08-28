@@ -7,6 +7,7 @@ import LoginRoutes from './LoginRoutes';
 import MainRoutes from './MainRoutes';
 import Loadable from 'ui-component/Loadable';
 import SimpleRoutes from './SimpleRoutes';
+import ErrorBoundary from 'components/ErrorBoundary';
 
 // ==============================|| ROUTING RENDER ||============================== //
 const PagesLanding = Loadable(lazy(() => import('views/pages/landing')));
@@ -14,7 +15,8 @@ const PagesLanding = Loadable(lazy(() => import('views/pages/landing')));
 const router = createBrowserRouter(
   [{ path: '/', element: <PagesLanding /> }, LoginRoutes, SimpleRoutes, MainRoutes, AuthenticationRoutes],
   {
-    basename: import.meta.env.VITE_APP_BASE_NAME
+    basename: import.meta.env.VITE_APP_BASE_NAME,
+    errorElement: <ErrorBoundary />
   }
 );
 
