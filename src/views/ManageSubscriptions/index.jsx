@@ -44,6 +44,7 @@ import ReceiptIcon from '@mui/icons-material/Receipt';
 import { useSelector } from 'react-redux';
 import NoSubscriptionsIcon from '@mui/icons-material/WorkspacePremium';
 import Factory from '../../utils/Factory';
+import MainCard from 'ui-component/cards/MainCard';
 
 const getStatusColor = (status) => {
   if (status === 'active') return 'success';
@@ -298,7 +299,7 @@ const ManageSubscriptions = () => {
   };
 
   return (
-    <Stack spacing={{ xs: 2, sm: 3, md: 4 }}>
+    <MainCard>
       {/* Header Section */}
       <Box
         sx={{
@@ -369,7 +370,7 @@ const ManageSubscriptions = () => {
       </Box>
 
       {/* Active Subscriptions */}
-      <Box>
+      <Box sx={{ mt: 2 }}>
         <Typography
           variant={isMobile ? 'h4' : 'h3'}
           sx={{
@@ -423,7 +424,7 @@ const ManageSubscriptions = () => {
       </Box>
 
       {/* Services Purchased */}
-      <Box sx={{ overflow: 'auto' }}>
+      <Box sx={{ overflow: 'auto', mt: 2 }}>
         <Typography
           variant={isMobile ? 'h4' : 'h3'}
           sx={{
@@ -469,7 +470,7 @@ const ManageSubscriptions = () => {
           }}
         >
           <Table size="small">
-            <TableHead>
+            <TableHead sx={{ '& .MuiTableCell-root': { bgcolor: 'primary.main', color: 'white' } }}>
               <TableRow>
                 <TableCell sx={{ pl: 3 }}>S.No</TableCell>
                 <TableCell>Task ID</TableCell>
@@ -552,7 +553,7 @@ const ManageSubscriptions = () => {
       </Box>
 
       {/* Payment History */}
-      <Box sx={{ overflow: 'auto' }}>
+      <Box sx={{ overflow: 'auto', mt: 2 }}>
         <Typography
           variant={isMobile ? 'h4' : 'h3'}
           sx={{
@@ -597,8 +598,8 @@ const ManageSubscriptions = () => {
             }
           }}
         >
-          <Table>
-            <TableHead>
+          <Table size="small">
+            <TableHead sx={{ '& .MuiTableCell-root': { bgcolor: 'primary.main', color: 'white' } }}>
               <TableRow>
                 <TableCell>Paid Date</TableCell>
                 <TableCell>Plan</TableCell>
@@ -694,7 +695,7 @@ const ManageSubscriptions = () => {
         }}
         selectedTask={selectedServiceRequest}
       />
-    </Stack>
+    </MainCard>
   );
 };
 

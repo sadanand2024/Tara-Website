@@ -32,6 +32,7 @@ upload_certificate: Yup.mixed().nullable() // optional to allow saving without f
 
 const StepTwo = ({ step, setStep }) => {
   const user = useSelector((state) => state.accountReducer.user);
+
   const [isLoading, setIsLoading] = useState(true);
   const [employeeId, setEmployeeId] = useState(null);
 
@@ -59,9 +60,11 @@ const StepTwo = ({ step, setStep }) => {
         })
       )
     }),
+
     onSubmit: async () => {
       // Unused now; we validate and save per-row in saveRow()
     }
+
   });
 
   const { values, errors, touched, handleChange, handleBlur, setFieldValue } = formik;
@@ -71,6 +74,7 @@ const StepTwo = ({ step, setStep }) => {
 
     try {
       const { res } = await Factory('get', url);
+
       if (res?.status_cd === 0) {
         if (typeof res?.data?.id !== 'undefined' && res.data.id !== null) {
           setEmployeeId(res.data.id);
@@ -103,6 +107,7 @@ const StepTwo = ({ step, setStep }) => {
       setIsLoading(false);
     }
   };
+
 
   useEffect(() => {
     getEducationInfo();
@@ -247,7 +252,9 @@ const StepTwo = ({ step, setStep }) => {
 
   return (
     <MainCard>
+
       <form onSubmit={(e) => e.preventDefault()}>
+
         <Box display="flex" alignItems="center" mb={2}>
           <Typography>No. of Entries</Typography>
           <Button variant="outlined" size="small" sx={{ ml: 2 }} onClick={removePromoter}>
@@ -283,7 +290,9 @@ const StepTwo = ({ step, setStep }) => {
                 <TableRow key={idx}>
                   <TableCell>
                     <Autocomplete
+
                       sx={{width:'100%',mt:1}}
+
                       size="small"
                       options={['12th', 'B.Tech', 'M.Tech', 'MBA', 'Other']}
                       value={promoter.qualification || ''}
@@ -303,7 +312,9 @@ const StepTwo = ({ step, setStep }) => {
 
                   <TableCell>
                     <TextField
+
                       sx={{width:'100%',mt:1}}
+
                       size="small"
                       label={getLabelWithAsterisk("Year Of Passing")}
                       name={`education[${idx}].year_of_passing`}
