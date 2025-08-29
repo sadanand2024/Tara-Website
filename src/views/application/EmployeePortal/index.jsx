@@ -181,8 +181,8 @@ const EmployeePortalDashboard = () => {
                 variant="contained"
                 disableElevation
                 sx={{
-                  background: '#E3EAFE',
-                  color: '#667eea',
+                  background: 'error.main',
+                  color: '#fff',
                   fontWeight: 500,
                   borderRadius: 2,
                   textTransform: 'none',
@@ -194,7 +194,7 @@ const EmployeePortalDashboard = () => {
                   py: 0.5,
                   transition: 'background 0.2s, color 0.2s',
                   '&:hover': {
-                    background: '#667eea',
+                    background: '#b91c1c', // darker error color for hover
                     color: '#fff'
                   }
                 }}
@@ -260,7 +260,7 @@ const EmployeePortalDashboard = () => {
             </Box>
 
             {/* Row 3: Count and View Button */}
-            <Box display="flex" alignItems="center" justifyContent="center" mt={0}>
+            <Box display="flex" alignItems="flex-end" justifyContent="flex-end" mt={0}>
               <Button
                 variant="contained"
                 disableElevation
@@ -365,7 +365,7 @@ const EmployeePortalDashboard = () => {
             </Box>
 
             {/* Row 3: Count and View Button */}
-            <Box display="flex" alignItems="center" justifyContent="center" mt={0}>
+            <Box display="flex" alignItems="center" justifyContent="flex-end" mt={0}>
               <Button
                 variant="contained"
                 disableElevation
@@ -600,7 +600,7 @@ const EmployeePortalDashboard = () => {
             </Box>
 
             {/* Row 3: Count and View Button */}
-            <Box display="flex" alignItems="center" justifyContent="center" mt={0}>
+            <Box display="flex" alignItems="center" justifyContent="flex-end" mt={0}>
               <Button
                 variant="contained"
                 disableElevation
@@ -682,7 +682,7 @@ const EmployeePortalDashboard = () => {
             </Box>
 
             {/* Row 3: Count and View Button */}
-            <Box display="flex" alignItems="center" justifyContent="center" mt={0}>
+            <Box display="flex" alignItems="center" justifyContent="flex-end" mt={0}>
               <Button
                 variant="contained"
                 disableElevation
@@ -895,7 +895,7 @@ const EmployeePortalDashboard = () => {
             </Box>
 
             {/* Row 3: Count and View Button */}
-            <Box display="flex" alignItems="center" justifyContent="center" mt={0}>
+            <Box display="flex" alignItems="center" justifyContent="flex-end" mt={0}>
               <Button
                 variant="contained"
                 disableElevation
@@ -990,7 +990,7 @@ const EmployeePortalDashboard = () => {
             </Box>
 
             {/* Row 3: Count and View Button */}
-            <Box display="flex" alignItems="center" justifyContent="center" mt={0}>
+            <Box display="flex" alignItems="center" justifyContent="flex-end" mt={0}>
               <Button
                 variant="contained"
                 disableElevation
