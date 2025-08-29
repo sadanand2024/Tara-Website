@@ -5,6 +5,7 @@ import MainLayout from 'layout/MainLayout';
 import Loadable from 'ui-component/Loadable';
 import AuthGuard from 'utils/route-guard/AuthGuard';
 import DocumentSelectionPage from 'views/application/DocumentDrafting/components/DocumentSelectionPage';
+import ErrorBoundary from 'components/ErrorBoundary';
 // import RoleGuard from 'utils/route-guard/roleguard';
 // payroll module
 const PayrollDashboard = Loadable(lazy(() => import('views/payroll'))); // ✅ works because index.jsx exists
@@ -367,6 +368,10 @@ const MainRoutes = {
     {
       path: '/app/create-event/:contextId',
       element: <Event />
+    },
+    {
+      path: '*',
+      element: <ErrorBoundary />
     }
   ]
 };

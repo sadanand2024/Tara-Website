@@ -14,6 +14,7 @@ import Notistack from 'ui-component/third-party/Notistack';
 
 import ThemeCustomization from 'themes';
 import { ServicesProvider } from 'contexts/ServicesContext';
+import ErrorBoundary from 'components/ErrorBoundary';
 // auth provider
 import { JWTProvider as AuthProvider } from 'contexts/JWTContext';
 // import { FirebaseProvider as AuthProvider } from 'contexts/FirebaseContext';
@@ -25,25 +26,27 @@ import { JWTProvider as AuthProvider } from 'contexts/JWTContext';
 
 export default function App() {
   return (
-    <ThemeCustomization>
-      {/* <RTLLayout> */}
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <Locales>
-          <NavigationScroll>
-            <AuthProvider>
-              <>
-                <Notistack>
-                  <ServicesProvider>
-                    <RouterProvider router={router} />
-                    <Snackbar />
-                  </ServicesProvider>
-                </Notistack>
-              </>
-            </AuthProvider>
-          </NavigationScroll>
-        </Locales>
-      </LocalizationProvider>
-      {/* </RTLLayout> */}
-    </ThemeCustomization>
+    <ErrorBoundary>
+      <ThemeCustomization>
+        {/* <RTLLayout> */}
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <Locales>
+            <NavigationScroll>
+              <AuthProvider>
+                <>
+                  <Notistack>
+                    <ServicesProvider>
+                      <RouterProvider router={router} />
+                      <Snackbar />
+                    </ServicesProvider>
+                  </Notistack>
+                </>
+              </AuthProvider>
+            </NavigationScroll>
+          </Locales>
+        </LocalizationProvider>
+        {/* </RTLLayout> */}
+      </ThemeCustomization>
+    </ErrorBoundary>
   );
 }

@@ -1,11 +1,12 @@
-import React, { useEffect,useState } from 'react';
-import { Autocomplete, Box, Button, Card, Grid2, Stack, TextField, Typography } from '@mui/material';
+import { Box, Button, Grid2, Stack, TextField, Typography } from '@mui/material';
 import { useFormik } from 'formik';
-import * as Yup from 'yup';
-import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
-import { useSelector } from 'store';
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'store';
+import { openSnackbar } from 'store/slices/snackbar';
 import MainCard from 'ui-component/cards/MainCard';
+import RenderFileUpload from 'ui-component/extended/RenderFileUpload';
 import Factory from 'utils/Factory';
+import * as Yup from 'yup';
 const additionalFields = [
   { label: 'Address Line 1', name: 'address_line1', type: 'text', required: true },
   { label: 'Address Line 2', name: 'address_line2', type: 'text', required: true },
@@ -23,9 +24,11 @@ const user = useSelector((state) => state.accountReducer.user);
 
   const [AddressInfo, setAddressInfo] = useState({});
   const [isLoading, setIsLoading] = useState(true);
+  const dispatch = useDispatch();
 
   const formik = useFormik({
     initialValues: {
+      personal_id: '',
       address_line1: '',
       address_line2: '',
       address_city: '',
@@ -34,7 +37,7 @@ const user = useSelector((state) => state.accountReducer.user);
       address_pinCode: '',
       country: '',
       address_proof_additional: null,
-      id: null
+      // id: ''
     },
     validationSchema: Yup.object({
       address_line1: Yup.string().required('Address Line 1 is required'),
@@ -46,14 +49,72 @@ const user = useSelector((state) => state.accountReducer.user);
         .matches(/^[1-9][0-9]{5}$/, 'address_pinCode must be exactly 6 digits')
         .required('address_pinCode is required'),
       country: Yup.string().required('Country is required'),
-      address_proof_additional: Yup.mixed().required('Address proof is required')
+      // Make file optional so submit isn’t blocked by hidden/missing field
+      // address_proof_additional: Yup.mixed().nullable()
     }),
-    onSubmit: (values) => {
-      console.log('Form Submitted:', values);
+    onSubmit: async (values, { setSubmitting }) => {
+  try {
+    setSubmitting(true);
+
+    // Build the endpoint using personal_id
+    const url = `/payroll/employee-profile-update/`;
+
+    // Prepare the payload
+     const body = {
+    
+      personal_details: {
+        address: {
+        address_line1: values.address_line1,
+        address_line2: values.address_line2,
+        address_city: values.address_city,
+        address_state: values.address_state,
+        address_pinCode: values.address_pinCode,
+        country: values.country
+      }
+      }
+    };
+
+    const { res } = await Factory('put', url, body);
+    if (res?.status_cd === 0) {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Address updated successfully',
+          variant: 'alert',
+          alert: { color: 'success' },
+          close: false
+        })
+      );
+    } else {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Failed to update address',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
     }
+  } catch (err) {
+    dispatch(
+      openSnackbar({
+        open: true,
+        message: 'Failed to update address',
+        variant: 'alert',
+        alert: { color: 'error' },
+        close: false
+      })
+    );
+  } finally {
+    setSubmitting(false);
+  }
+}
+
+   
   });
 
-  const { values, setFieldValue, handleChange, errors, touched, handleSubmit, handleBlur } = formik;
+  const { values, setFieldValue, handleChange, errors, touched, handleSubmit, handleBlur, isSubmitting } = formik;
 
 const getAddressInfo = async () => {
   setIsLoading(true);
@@ -67,6 +128,7 @@ const getAddressInfo = async () => {
       const address = data.address || {};
 
       formik.setValues({
+         personal_id: data?.id ?? '',
         address_line1: address?.address_line1 || '',
         address_line2: address?.address_line2 || '',
         address_city: address?.address_city || '',
@@ -78,7 +140,16 @@ const getAddressInfo = async () => {
       setAddressInfo(data);
     }
   } catch (error) {
-    console.error('Failed to fetch personal info:', error);
+   
+    dispatch(
+      openSnackbar({
+        open: true,
+        message: 'Failed to fetch address info',
+        variant: 'alert',
+        alert: { color: 'error' },
+        close: false
+      })
+    );
   } finally {
     setIsLoading(false);
   }
@@ -148,8 +219,8 @@ const getAddressInfo = async () => {
           ))}
         </Grid2>
         <Stack direction="row" spacing={2} sx={{ mt: 3, justifyContent: 'flex-end' }}>
-          <Button variant="contained" color="primary" type="submit">
-            Save
+          <Button variant="contained" color="primary" type="submit" disabled={isSubmitting || isLoading}>
+            {isSubmitting ? 'Saving…' : 'Save'}
           </Button>
         </Stack>
       </form>

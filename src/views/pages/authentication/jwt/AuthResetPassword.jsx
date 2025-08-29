@@ -39,6 +39,7 @@ export default function AuthResetPassword({ link, ...others }) {
   const navigate = useNavigate();
   const scriptedRef = useScriptRef();
 
+  const urlPath = window.location.pathname;
   const [showPassword, setShowPassword] = useState(false);
   const [strength, setStrength] = useState(0);
   const [level, setLevel] = useState();
@@ -81,10 +82,16 @@ export default function AuthResetPassword({ link, ...others }) {
           .test('confirmPassword', 'Both Password must be match!', (confirmPassword, yup) => yup.parent.password === confirmPassword)
       })}
       onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
+        console.log(values);
+        let url = `/user_management/reset-password?uid=${uid}&token=${token}`;
+        console.log(urlPath);
+        if (urlPath === '/employee-login/reset-password') {
+          url = `/payroll/employee/reset-password/?uid=${uid}&token=${token}`;
+        }
         try {
           // password reset
           axios
-            .post(`${import.meta.env.VITE_APP_BASE_URL}/user_management/reset-password?uid=${uid}&token=${token}`, {
+            .post(`${import.meta.env.VITE_APP_BASE_URL}${url}`, {
               password: values.password
             })
             .then((response) => {
@@ -101,7 +108,11 @@ export default function AuthResetPassword({ link, ...others }) {
                   close: false
                 })
               );
-              navigate('/login');
+              if (urlPath === '/employee-login/reset-password') {
+                navigate('/employee-login');
+              } else {
+                navigate('/login');
+              }
             })
             .catch((error) => {
               console.log(error);
@@ -155,7 +166,9 @@ export default function AuthResetPassword({ link, ...others }) {
                   </IconButton>
                 </InputAdornment>
               }
-              inputProps={{}}
+              inputProps={{
+                autoComplete: 'new-password'
+              }}
             />
           </FormControl>
           {touched.password && errors.password && (
@@ -203,7 +216,9 @@ export default function AuthResetPassword({ link, ...others }) {
               label="Confirm Password"
               onBlur={handleBlur}
               onChange={handleChange}
-              inputProps={{}}
+              inputProps={{
+                autoComplete: 'new-password'
+              }}
             />
           </FormControl>
 

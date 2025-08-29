@@ -57,14 +57,18 @@ function Departments({
     handleDelete(selectedRow);
     setOpenDeleteDialog(false);
   };
-  // Filter departments based on searchQuery from props
+  // Filter departments based on searchQuery from props (search across all relevant fields)
   const filteredDepartments = departments.filter((department) => {
-    const query = searchQuery.toLowerCase();
-    return (
-      department.dept_name?.toLowerCase().includes(query) ||
-      department.dept_code?.toLowerCase().includes(query) ||
-      department.description?.toLowerCase().includes(query)
-    );
+    const query = (searchQuery || '').trim().toLowerCase();
+    if (!query) return true;
+    const fieldsToSearch = [
+      department.dept_name,
+      department.dept_code,
+      department.description,
+      department.employee_count,
+      department.id
+    ];
+    return fieldsToSearch.some((field) => String(field ?? '').toLowerCase().includes(query));
   });
   const paginatedData = filteredDepartments.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 
@@ -77,6 +81,11 @@ function Departments({
   }, [payrollid]);
 
   const handlePageChange = (event, value) => setCurrentPage(value);
+
+  // Reset pagination when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
 
   const handleCloseDialog = () => setOpenDialog(false);
 

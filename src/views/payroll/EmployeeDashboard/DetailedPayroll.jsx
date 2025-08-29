@@ -11,8 +11,9 @@ import {
   Pagination,
   Typography,
   Box,
-  Button,
-  CircularProgress
+  CircularProgress,
+  Tooltip,
+  IconButton
 } from '@mui/material';
 import MainCard from '../../../ui-component/cards/MainCard';
 import Factory from 'utils/Factory';
@@ -22,6 +23,9 @@ import axios from 'axios';
 import EmptyDataPlaceholder from 'ui-component/extended/EmptyDataPlaceholder';
 import { useSearchParams } from 'react-router-dom';
 import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
+import { useDispatch } from 'react-redux';
+import { openSnackbar } from 'store/slices/snackbar';
+import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
 const TABLE_HEADERS = [
   'Employee Id',
   'Name',
@@ -63,6 +67,7 @@ const DetailedPayroll = ({ payrollId, month }) => {
   const [loading, setLoading] = useState(false);
   const [searchParams] = useSearchParams();
   const [financialYear, setFinancialYear] = useState(null);
+  const dispatch = useDispatch();
   useEffect(() => {
     const year = searchParams.get('financialYear');
     if (year) setFinancialYear(year);
@@ -124,45 +129,50 @@ const DetailedPayroll = ({ payrollId, month }) => {
     }
   };
   return (
-    <MainCard>
-      <Button
-        sx={{ m: 1 }}
-        variant="outlined"
-        onClick={async () => {
-          const type = 'xlsx'; // or 'csv', or pass this dynamically
-          const url = `/payroll/download-salary-report?payroll_id=${payrollId}&month=${month}&financial_year=${financialYear}`;
+    <MainCard
+      title=" "
+      action={
+        <Tooltip title="Download Detailed Payroll">
+          <IconButton
+            color="primary"
+            onClick={async () => {
+              const type = 'xlsx';
+              const url = `/payroll/download-salary-report?payroll_id=${payrollId}&month=${month}&financial_year=${financialYear}`;
 
-          const { res, error } = await Factory('get', url, null, {}, { responseType: 'blob' });
+              const { res, error } = await Factory('get', url, null, {}, { responseType: 'blob' });
 
-          if (error || !res?.data) {
-            dispatch(
-              openSnackbar({
-                open: true,
-                message: (error && error.message) || 'Error downloading file',
-                variant: 'alert',
-                alert: { color: 'error' },
-                close: false
-              })
-            );
-            return;
-          }
+              if (error || !res?.data) {
+                dispatch(
+                  openSnackbar({
+                    open: true,
+                    message: (error && error.message) || 'Error downloading file',
+                    variant: 'alert',
+                    alert: { color: 'error' },
+                    close: false
+                  })
+                );
+                return;
+              }
 
-          const blob = new Blob([res.data], {
-            type: type === 'csv' ? 'text/csv' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-          });
+              const blob = new Blob([res.data], {
+                type: type === 'csv' ? 'text/csv' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+              });
 
-          const downloadUrl = window.URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.href = downloadUrl;
-          link.setAttribute('download', `salary-report.${type}`);
-          document.body.appendChild(link);
-          link.click();
-          link.remove();
-          window.URL.revokeObjectURL(downloadUrl);
-        }}
-      >
-        Download Detailed Payroll
-      </Button>
+              const downloadUrl = window.URL.createObjectURL(blob);
+              const link = document.createElement('a');
+              link.href = downloadUrl;
+              link.setAttribute('download', `salary-report.${type}`);
+              document.body.appendChild(link);
+              link.click();
+              link.remove();
+              window.URL.revokeObjectURL(downloadUrl);
+            }}
+          >
+            <FileDownloadOutlinedIcon />
+          </IconButton>
+        </Tooltip>
+      }
+    >
 
       <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 1 }}>
         <Table size="small">

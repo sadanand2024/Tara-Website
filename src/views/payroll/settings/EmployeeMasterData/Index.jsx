@@ -62,16 +62,23 @@ function EmployeeList({
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Filter employees based on searchQuery from props
+  // Filter employees based on searchQuery from props (search across all relevant fields)
   const filteredEmployees = employees.filter((employee) => {
-    const query = searchQuery.toLowerCase();
-    return (
-      employee.associate_id?.toLowerCase().includes(query) ||
-      `${employee.first_name || ''} ${employee.last_name || ''}`.toLowerCase().includes(query) ||
-      employee.department_name?.toLowerCase().includes(query) ||
-      employee.designation_name?.toLowerCase().includes(query) ||
-      employee.work_email?.toLowerCase().includes(query)
-    );
+    const query = (searchQuery || '').trim().toLowerCase();
+    if (!query) return true;
+    const fullName = `${employee.first_name || ''} ${employee.last_name || ''}`;
+    const fieldsToSearch = [
+      employee.associate_id,
+      fullName,
+      employee.department_name,
+      employee.designation_name,
+      employee.work_email,
+      employee.work_location_name,
+      employee.phone,
+      employee.status,
+      employee.id
+    ];
+    return fieldsToSearch.some((field) => String(field ?? '').toLowerCase().includes(query));
   });
 
   const paginatedEmployees = filteredEmployees.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
@@ -140,6 +147,12 @@ function EmployeeList({
     params.set('employee_id', item.id);
     navigate({ search: params.toString() });
   };
+
+  // Reset pagination when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
+
   if (isLoading) {
     return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading Employee Data'} />;
   }
@@ -154,7 +167,7 @@ function EmployeeList({
           type="Employees"
           bulkUploadUrl="/payroll/employees/upload/"
           xlsxTemplateUrl={`/payroll/download-template/${payrollId}/`}
-          // csvTemplateUrl="/payroll/download-template/csv?type=employee"
+        // csvTemplateUrl="/payroll/download-template/csv?type=employee"
         />
         <Grid2 container spacing={2}>
           <TableContainer

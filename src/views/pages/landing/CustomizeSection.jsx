@@ -74,7 +74,7 @@ export default function CustomizeSection() {
                     borderRadius: '8px',
                     bgcolor: '#fff',
                     boxShadow: 1,
-                    width: { xs: '181px', sm: '280px', md: '280px', lg: '280px' },
+                    width: { xs: '280px', sm: '280px', md: '280px', lg: '280px' },
                     height: { xs: '387px', sm: '413px', md: '413px', lg: '413px' },
                     ml: { xs: 0, sm: -4 },
                     mt: { xs: '30px', sm: 0 },
@@ -93,7 +93,7 @@ export default function CustomizeSection() {
                     image={card.image}
                     alt={card.title}
                     sx={{
-                      width: { xs: '181px', sm: '280px', md: '280px', lg: '280px' },
+                      width: { xs: '280px', sm: '280px', md: '280px', lg: '280px' },
                       height: { xs: '229px', sm: '289px', md: '289px', lg: '289px' },
                       objectFit: 'cover',
                       display: 'block',
@@ -109,7 +109,7 @@ export default function CustomizeSection() {
                       padding: '20px',
                       position: 'absolute',
                       alignItems: { xs: 'flex-start', sm: 'center', md: 'flex-start', lg: 'flex-start' }, // Fix here
-                      width: { xs: '181px', sm: '280px', md: '280px', lg: '280px' },
+                      width: { xs: '280px', sm: '280px', md: '280px', lg: '280px' },
                       height: { xs: '158px', sm: '115px', md: '115px', lg: '123px' },
                       bottom: 0,
                       left: 0,

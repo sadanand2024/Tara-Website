@@ -33,6 +33,7 @@ export default function AuthForgotPassword({ link, ...others }) {
 
   const [searchParams] = useSearchParams();
   const authParam = searchParams.get('auth');
+  const urlPath = window.location.pathname;
 
   return (
     <Formik
@@ -41,15 +42,21 @@ export default function AuthForgotPassword({ link, ...others }) {
         submit: null
       }}
       validationSchema={Yup.object().shape({
-        email: Yup.string().email('Must be a valid email').max(255).required('Email is required')
+        email: urlPath === '/employee-login/forgot-password' ? Yup.string().max(255).required('Email or Username is required') : Yup.string().email('Must be a valid email').max(255).required('Email is required')
       })}
       onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
+        let url = '/user_management/forgot-password/';
+        if (urlPath === '/employee-login/forgot-password') {
+          url = '/payroll/employee/forgot-password/';
+        }
+        let postData = {};
+        urlPath === '/employee-login/forgot-password' ? (postData.email_or_username = values.email) : (postData.email = values.email);
         try {
           await resetPassword?.(values.email).then(
             () => {
               axios
-                .post(`${import.meta.env.VITE_APP_BASE_URL}/user_management/forgot-password/`, {
-                  email: values.email
+                .post(`${import.meta.env.VITE_APP_BASE_URL}${url}`, {
+                  ...postData
                 })
                 .then((response) => {
                   setStatus({ success: true });
@@ -58,7 +65,7 @@ export default function AuthForgotPassword({ link, ...others }) {
                     openSnackbar({
                       open: true,
                       anchorOrigin: { vertical: 'top', horizontal: 'right' },
-                      message: 'Check mail for reset password link',
+                      message: 'Check Your Mail for Reset Password Link',
                       variant: 'alert',
                       alert: {
                         color: 'success'
@@ -66,7 +73,11 @@ export default function AuthForgotPassword({ link, ...others }) {
                       close: false
                     })
                   );
-                  navigate('/login');
+                  if (urlPath === '/employee-login/forgot-password') {
+                    navigate('/employee-login');
+                  } else {
+                    navigate('/login');
+                  }
                 })
                 .catch((error) => {
                   console.log(error);
@@ -74,7 +85,7 @@ export default function AuthForgotPassword({ link, ...others }) {
                     openSnackbar({
                       open: true,
                       anchorOrigin: { vertical: 'top', horizontal: 'right' },
-                      message: 'Failed to send reset password link',
+                      message: error.error || 'Failed to send reset password link',
                       variant: 'alert',
                       alert: {
                         color: 'error'
@@ -116,15 +127,15 @@ export default function AuthForgotPassword({ link, ...others }) {
       {({ errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values }) => (
         <form noValidate onSubmit={handleSubmit} {...others}>
           <FormControl fullWidth error={Boolean(touched.email && errors.email)} sx={{ ...theme.typography.customInput }}>
-            <InputLabel htmlFor="outlined-adornment-email-forgot">Email Address</InputLabel>
+            <InputLabel htmlFor="outlined-adornment-email-forgot">{urlPath === '/employee-login/forgot-password' ? 'Email or Username' : 'Email Address'}</InputLabel>
             <OutlinedInput
               id="outlined-adornment-email-forgot"
-              type="email"
+              type={urlPath === '/employee-login/forgot-password' ? 'text' : 'email'}
               value={values.email}
               name="email"
               onBlur={handleBlur}
               onChange={handleChange}
-              label="Email Address"
+              label={urlPath === '/employee-login/forgot-password' ? 'Email or Username' : 'Email Address'}
               inputProps={{}}
             />
             {touched.email && errors.email && (

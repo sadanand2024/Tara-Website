@@ -5,6 +5,7 @@ import dayjs from 'dayjs';
 import { entityTypes, businessNatureChoices, states } from '../../utils/constants';
 import Modal from 'ui-component/extended/Modal';
 import { FormControl, FormLabel, Autocomplete, Button, TextField, Grid2, Stack, Box, Typography, CircularProgress } from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 const personalFields = [
   {
@@ -277,7 +278,7 @@ const BusinessKYCDialog = ({ open, onClose, onSubmit, isSubmitting }) => {
     }
   });
 
-  const { values, errors, touched, handleSubmit, handleBlur, setFieldValue } = formik;
+  const { values, errors, touched, handleSubmit, handleBlur, setFieldValue, resetForm } = formik;
 
   return (
     <Modal
@@ -287,18 +288,18 @@ const BusinessKYCDialog = ({ open, onClose, onSubmit, isSubmitting }) => {
       title="Business KYC Details"
       handleClose={
         // onClose
-        () => {}
+        () => { }
       }
       footer={
-        <Stack direction="row" sx={{ justifyContent: 'flex-end', gap: 2 }}>
-          {/* <Button onClick={onClose} variant="outlined" color="error" disabled={isSubmitting}>
-            Cancel
-          </Button> */}
+        <Stack direction="row" sx={{ width: 1, justifyContent: 'space-between', gap: 2 }}>
+          <Button onClick={() => { resetForm(); onClose(); }} variant="outlined" color="secondary" startIcon={<ArrowBackIcon />}>
+            Back
+          </Button>
           <Button
             onClick={handleSubmit}
             type="submit"
             variant="contained"
-            color="primary"
+            color="secondary"
             disabled={isSubmitting}
             startIcon={isSubmitting ? <CircularProgress size={16} /> : null}
           >

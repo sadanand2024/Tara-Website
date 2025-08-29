@@ -1,27 +1,22 @@
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import { Box, Button, Card, CardContent, MenuItem, Select, Stack, Typography, Paper, TextField, InputAdornment } from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import CheckIcon from '@mui/icons-material/Check';
+import SearchIcon from '@mui/icons-material/Search';
+import { Box, Button, InputAdornment, MenuItem, Paper, TextField, Typography } from '@mui/material';
 import Grid2 from '@mui/material/Grid2';
+import Tab from '@mui/material/Tab';
+import Tabs from '@mui/material/Tabs';
+import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useNavigate, useParams } from 'react-router-dom';
-import Factory from 'utils/Factory';
-import SelectedEvent from './SelectedEvent';
-import DocumentSelectionPage from './DocumentSelectionPage';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import SearchIcon from '@mui/icons-material/Search';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
-import PropTypes from 'prop-types';
+import { useNavigate } from 'react-router-dom';
 import MainCard from 'ui-component/cards/MainCard';
+import Factory from 'utils/Factory';
+import DocumentSelectionPage from './DocumentSelectionPage';
 
 
-import { Translate } from '@mui/icons-material';
-import FavoriteIcon from '@mui/icons-material/Favorite';
-import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
-import CircularProgressComponent from 'utils/CircularProgressComponent';
+
 import EventIcon from '@mui/icons-material/Event';
-import IconButton from '@mui/material/IconButton';
-import CloseIcon from '@mui/icons-material/Close';
+import CircularProgressComponent from 'utils/CircularProgressComponent';
 
 
 // const documents = [
@@ -75,8 +70,7 @@ function DocumentCard({ title, description, isFavorite, isSelected, onFavorite, 
         pl: 2,
         pr: 2,
         pt: 2.5,
-        minWidth: 260,
-        maxWidth: 400,
+        width: '100%',
         minHeight: 160,
         maxHeight: 180,
         mt:-2,
@@ -99,7 +93,7 @@ function DocumentCard({ title, description, isFavorite, isSelected, onFavorite, 
       onClick={onClick}
     >
       {/* Content (heading + paragraph) */}
-      <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', minHeight: 0 }}>
+      {/* <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', minHeight: 0 }}>
         <Box
           sx={{
             fontWeight: 700,
@@ -120,9 +114,9 @@ function DocumentCard({ title, description, isFavorite, isSelected, onFavorite, 
         <Typography fontSize={14} color="text.secondary">
           {description}
         </Typography>
-      </Box>
+      </Box> */}
       {/* Check/Selection indicator at bottom right (do not change logic) */}
-      {isSelected && (
+      {/* {isSelected && (
         <Box
           sx={{
             position: 'absolute',
@@ -140,7 +134,81 @@ function DocumentCard({ title, description, isFavorite, isSelected, onFavorite, 
         >
           <CheckCircleIcon sx={{ color: '#fff', fontSize: 22 }} />
         </Box>
-      )}
+      )} */}
+      {/* Content (title+circle row, then description) */}
+<Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+  {/* Title + selection circle */}
+  <Box
+    sx={{
+      display: 'flex',
+      alignItems: 'flex-start',
+      justifyContent: 'space-between',
+      gap: 1,
+      mb: 0.5
+    }}
+  >
+    {/* Title (2-line clamp) */}
+    <Box
+      sx={{
+        fontWeight: 700,
+        fontSize: 14,
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        display: '-webkit-box',
+        WebkitLineClamp: 2,
+        WebkitBoxOrient: 'vertical',
+        lineHeight: 1.2,
+        minHeight: '2.6em',
+        flex: 1,
+        pr: 1
+      }}
+      title={title}
+    >
+      {title}
+    </Box>
+
+    {/* Selection circle (always visible; tick toggles) */}
+   {/* Selection circle — white bg, thin border, smaller size */}
+<Box
+  onClick={(e) => { e.stopPropagation(); onClick?.(); }}
+  sx={(theme) => ({
+    borderRadius: '50%',
+    width: 22,              // smaller than 28
+    height: 22,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+    mt: '2px',              // align with title
+    cursor: 'pointer',
+
+    bgcolor: '#fff',        // always white (like the heart chip)
+    border: '3.5px solid',
+    borderColor: isSelected ? '#00329E' : theme.palette.grey[300],
+
+    boxShadow: isSelected
+      ? '0 1px 2px rgba(0,0,0,0.08)'
+      : '0 1px 2px rgba(0,0,0,0.04)',
+
+    transition: 'border-color .2s, box-shadow .2s, transform .1s',
+    '&:hover': {
+      borderColor: '#00329E',
+      transform: 'scale(1.02)',
+    },
+  })}
+  aria-label={isSelected ? 'Deselect' : 'Select'}
+>
+  {isSelected ? <CheckIcon sx={{ fontSize: 14, color: '#00329E' }} /> : null}
+</Box>
+
+  </Box>
+
+  {/* Description */}
+  <Typography fontSize={14} color="text.secondary">
+    {description}
+  </Typography>
+</Box>
+
       {/* Tooltip note above the checked circle for first card only */}
       {showNote && isSelected && (
         <Box
@@ -231,6 +299,8 @@ const Event = ({ tab = 'document', contextId }) => {
   const [selected, setSelected] = useState([]); // array of selected document IDs
   // Remove local activeTab state
   const [documents, setDocuments] = useState([]);
+  const [docsLoading, setDocsLoading] = useState(false);
+const [docsError, setDocsError] = useState(null);
   const [showSelectedEvent, setShowSelectedEvent] = useState(false);
   const [selectedEventInstanceId, setSelectedEventInstanceId] = useState(null);
   const [search, setSearch] = useState('');
@@ -299,47 +369,80 @@ const Event = ({ tab = 'document', contextId }) => {
   //     setDocuments(docs || []);
   //   });
   // };
-  const handleEventChange = (eventId) => {
-    setEvent(eventId);
+  // const handleEventChange = (eventId) => {
+  //   setEvent(eventId);
 
-    if (!eventId) {
-      setDocuments([]);
-      return;
-    }
+  //   if (!eventId) {
+  //     setDocuments([]);
+  //     return;
+  //   }
 
-    // Build query string dynamically
-    // let queryString = ?event_id=${eventId};
-    // if (category) {
-    //   queryString += &category_id=${category};
-    // }
-    //     let queryString = ?event_id=${eventId};
-    // if (category) {
-    //   queryString += &category_id=${category};
-    // }
-    let queryString = `?event_id=${eventId}`;
-    if (category) {
-      queryString += `&category_id=${category}`;
-    }
+  //   // Build query string dynamically
+  //   // let queryString = ?event_id=${eventId};
+  //   // if (category) {
+  //   //   queryString += &category_id=${category};
+  //   // }
+  //   //     let queryString = ?event_id=${eventId};
+  //   // if (category) {
+  //   //   queryString += &category_id=${category};
+  //   // }
+  //   let queryString = `?event_id=${eventId}`;
+  //   if (category) {
+  //     queryString += `&category_id=${category}`;
+  //   }
 
 
-    // Build payload dynamically
-    const payload = { event_id: eventId };
-    if (category) {
-      payload.category_id = category;
-    }
+  //   // Build payload dynamically
+  //   const payload = { event_id: eventId };
+  //   if (category) {
+  //     payload.category_id = category;
+  //   }
 
-    Factory(
-      'get', `/documentdrafting/category-or-events-wise-document-list/${queryString}`,
+  //   Factory(
+  //     'get', `/documentdrafting/category-or-events-wise-document-list/${queryString}`,
 
+  //     payload,
+  //     {}
+  //   ).then(response => {
+  //     const docs = response?.res?.data || response?.res || response;
+  //     setDocuments(docs || []);
+  //     setSelected([]); // Reset selection after new documents are loaded
+  //   });
+  //   console.log("wertyui", user.user.id)
+  // };
+const handleEventChange = async (eventId) => {
+  setEvent(eventId);
+  setDocuments([]);
+  setSelected([]);
+  setDocsError(null);
+
+  if (!eventId) return;
+
+  // Build query string & payload
+  let queryString = `?event_id=${eventId}`;
+  if (category) queryString += `&category_id=${category}`;
+
+  const payload = { event_id: eventId };
+  if (category) payload.category_id = category;
+
+  try {
+    setDocsLoading(true);
+    const response = await Factory(
+      'get',
+      `/documentdrafting/category-or-events-wise-document-list/${queryString}`,
       payload,
       {}
-    ).then(response => {
-      const docs = response?.res?.data || response?.res || response;
-      setDocuments(docs || []);
-      setSelected([]); // Reset selection after new documents are loaded
-    });
-    console.log("wertyui", user.user.id)
-  };
+    );
+
+    const docs = response?.res?.data || response?.res || response;
+    setDocuments(Array.isArray(docs) ? docs : []);
+  } catch (err) {
+    console.error('Docs fetch failed:', err);
+    setDocsError('Failed to load templates. Please try again.');
+  } finally {
+    setDocsLoading(false);
+  }
+};
 
 
   const handleCardClick = (docId) => {
@@ -397,7 +500,7 @@ const Event = ({ tab = 'document', contextId }) => {
   return (
   <MainCard
   sx={{
-    p: { xs: 2, md: 4 },
+    p: { xs: 2, md:0 },
     height: {
       xs: '100vh',
       md: '100%'
@@ -599,18 +702,10 @@ const Event = ({ tab = 'document', contextId }) => {
                 <>
                   <Grid2
                     container
-                    spacing={{ xs: 2, sm: 6, md: 6 }}
-                    sx={{
-                      mb: 4, mx: 'auto', mt: 4
-                      ,
-                      ml: { xs: 2 },
-                      width: { xs: '93%', sm: '100%', md: '100%' },
-
-                      minWidth: { xs: '93%', sm: 220, md: '100%' },
-                      maxWidth: { xs: '100%', sm: 400, md: '105%' },
-                    }}
+                    spacing={{ xs:4, sm: 4, md: 6 }}
+                    sx={{ mb: 4, mx: 'auto', mt: 4, width: '100%', px: { xs: 1, sm: 2, md: 2 }}}
                     alignItems="flex-start"
-                    justifyContent="flex-start"
+                    justifyContent={{ xs: 'center', md: 'flex-start' }}
                   >
                     {documents.map((doc, idx) => (
                       <Grid2 size={{ xs: 12, sm: 6, md: 3 }} key={doc.id || idx} sx={{ position: 'relative' }}>
