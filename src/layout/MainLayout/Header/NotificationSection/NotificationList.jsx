@@ -38,12 +38,14 @@ function ListItemWrapper({ children }) {
   );
 }
 
-// ==============================|| NOTIFICATION LIST ITEM ||============================== //
-
-export default function NotificationList({ items = [], onItemRead }) {
+export default function NotificationList({ items = [], onItemRead, expandedId, onToggleExpand }) {
   const theme = useTheme();
-  const [expandedId, setExpandedId] = React.useState(null);
-  const toggleExpanded = (id) => setExpandedId((p) => (p === id ? null : id));
+  // const [expandedId, setExpandedId] = React.useState(null);
+  // const toggleExpanded = (id) => setExpandedId((p) => (p === id ? null : id));
+  const [localExpanded, setLocalExpanded] = React.useState(null);
+  const isControlled = typeof expandedId !== 'undefined' && typeof onToggleExpand === 'function';
+  const currentExpanded = isControlled ? expandedId : localExpanded;
+  const toggleExpanded = (id) => (isControlled ? onToggleExpand(id) : setLocalExpanded((p) => (p === id ? null : id)));
 
   return (
     <List sx={{ width: { xs: 300, md: 330 }, maxWidth: 520, py: 0 }}>
@@ -56,8 +58,7 @@ export default function NotificationList({ items = [], onItemRead }) {
       )}
       {items.map((it) => {
         const avatarSrc = it.avatar || User1;
-        // ✅ Prefer backend's display string if available
-        // const displayTime = it.created_at?.display || it.display || '';
+
         const displayTime =
           it.created_at?.display ||
           (it.created_at?.date || it.created_at?.time ? [it.created_at?.date, it.created_at?.time].filter(Boolean).join(' ') : '') ||
@@ -82,72 +83,44 @@ export default function NotificationList({ items = [], onItemRead }) {
           >
             <ListItem alignItems="flex-start" disablePadding>
               <ListItemAvatar>
-                <Avatar alt={it.title || 'Notification'} src={avatarSrc} sx={{mt:2}} />
+                <Avatar alt={it.title || 'Notification'} src={avatarSrc} sx={{ mt: 2 }} />
               </ListItemAvatar>
               <ListItemText
                 primary={
                   <Stack spacing={0.25}>
-                     {/* {displayTime && (
-                      <Typography variant="caption" color="text.secondary" sx={{ flexShrink: 0, ml: 1 }}>
+                    {displayTime && (
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{ ml: 'auto', pl: 1, flexShrink: 0, whiteSpace: 'nowrap', textAlign: 'right' }}
+                      >
                         {displayTime}
                       </Typography>
                     )}
-                    <Typography
-                      variant="subtitle1"
-                      sx={{
-                        fontWeight: 600,
-                        pr: 1,
-                        flex: 1,
-                        minWidth: 0,
-                        cursor: 'pointer',
-                        whiteSpace: isExpanded ? 'normal' : 'nowrap',
-                        overflow: isExpanded ? 'visible' : 'hidden',
-                        textOverflow: isExpanded ? 'unset' : 'ellipsis'
-                      }}
-                      onClick={() => {
-                        toggleExpanded(id);
-                        markRead();
-                      }}
-                    >
-                      {it.title}
-                    </Typography>
-                    {unread && <Box sx={{ width: 8, height: 8, bgcolor: 'secondary.main', borderRadius: '50%' }} />}
-                   
-                  </Stack> */}
-                    {displayTime && (
-        <Typography
-          variant="caption"
-          color="text.secondary"
-          // sx={{ flexShrink: 0, ml: 1, whiteSpace: 'nowrap' }}
-           sx={{ ml: 'auto', pl: 1, flexShrink: 0, whiteSpace: 'nowrap', textAlign: 'right' }}
-        >
-          {displayTime}
-        </Typography>
-      )}
-                   <Box sx={{ display: 'flex', alignItems: 'center', minWidth: 0, flex: 1 }}>
-        <Typography
-          variant="subtitle1"
-          sx={{
-            fontWeight: 600,
-            pr: 1,
-            minWidth: 0,
-            cursor: 'pointer',
-            whiteSpace: isExpanded ? 'normal' : 'nowrap',
-            overflow: isExpanded ? 'visible' : 'hidden',
-            textOverflow: isExpanded ? 'unset' : 'ellipsis'
-          }}
-          onClick={() => { toggleExpanded(id); markRead(); }}
-        >
-          {it.title}
-        </Typography>
-        {unread && (
-          <Box sx={{ ml: 1, width: 8, height: 8, bgcolor: 'secondary.main', borderRadius: '50%', flexShrink: 0 }} />
-        )}
-      </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', minWidth: 0, flex: 1 }}>
+                      <Typography
+                        variant="subtitle1"
+                        sx={{
+                          fontWeight: 600,
+                          pr: 1,
+                          minWidth: 0,
+                          cursor: 'pointer',
+                          whiteSpace: isExpanded ? 'normal' : 'nowrap',
+                          overflow: isExpanded ? 'visible' : 'hidden',
+                          textOverflow: isExpanded ? 'unset' : 'ellipsis'
+                        }}
+                        onClick={() => {
+                          toggleExpanded(id);
+                          markRead();
+                        }}
+                      >
+                        {it.title}
+                      </Typography>
+                      {unread && <Box sx={{ ml: 1, width: 8, height: 8, bgcolor: 'secondary.main', borderRadius: '50%', flexShrink: 0 }} />}
+                    </Box>
 
-      {/* Right: time */}
-    
-    </Stack>
+                    {/* Right: time */}
+                  </Stack>
                 }
                 secondary={
                   <Stack spacing={1} sx={{ pr: 1 }}>
@@ -167,9 +140,6 @@ export default function NotificationList({ items = [], onItemRead }) {
                     >
                       {it.message}
                     </Typography>
-                    {/* {unread && (
-                      <Box sx={{ width: 8, height: 8, bgcolor: 'success.main', borderRadius: '50%' }} />
-                    )} */}
                   </Stack>
                 }
               />
@@ -182,4 +152,9 @@ export default function NotificationList({ items = [], onItemRead }) {
 }
 
 ListItemWrapper.propTypes = { children: PropTypes.node };
-NotificationList.propTypes = { items: PropTypes.array };
+NotificationList.propTypes = {
+  items: PropTypes.array,
+  onItemRead: PropTypes.func,
+  expandedId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  onToggleExpand: PropTypes.func
+};

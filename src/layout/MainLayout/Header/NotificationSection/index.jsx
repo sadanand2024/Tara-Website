@@ -29,7 +29,6 @@ import NotificationList from './NotificationList';
 // assets
 import { IconBell } from '@tabler/icons-react';
 
-// notification status options
 const status = [
   {
     value: 'all',
@@ -44,12 +43,10 @@ const status = [
     label: 'Unread'
   },
   {
-    value: 'other',
+    value: 'read',
     label: 'read'
   }
 ];
-
-// ==============================|| NOTIFICATION ||============================== //
 
 export default function NotificationSection() {
   const theme = useTheme();
@@ -58,25 +55,22 @@ export default function NotificationSection() {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState('all');
   const [unreadCount, setUnreadCount] = useState(0);
-  // const [items, setItems] = useState([]);
+  const [expandedKey, setExpandedKey] = useState(null);
+
   const [items, setItems] = useState([]);
   const [showAll, setShowAll] = useState(false);
 
   const user = useSelector((s) => s?.accountReducer?.user ?? null);
   const anchorRef = useRef(null);
-  // const visibleItems = showAll ? items : items.slice(0, 5);
-  // const canExpand = items.length > 5;
- 
+
   const isTodayNotification = useCallback((it) => {
     const ca = it?.created_at || {};
-    // Backend often sends: { date: "Today"|"Yesterday"|..., time: "1:47 PM" }
+
     const dateLabel = typeof ca.date === 'string' ? ca.date.toLowerCase() : '';
     if (dateLabel === 'today') return true;
 
-    // Many "today" entries only include a time (no date) — treat those as today
     if (!ca.date && ca.time) return true;
 
-    // If only a display time is present (e.g., "1:47 PM"), assume it's today
     if (!ca.date && typeof ca.display === 'string' && /^[0-9]{1,2}:[0-9]{2}\s?(am|pm)$/i.test(ca.display)) {
       return true;
     }
@@ -84,27 +78,96 @@ export default function NotificationSection() {
   }, []);
 
   const isUnread = useCallback((it) => it.unread !== false, []);
-   const filteredItems = useMemo(() => {
+  const isReadItem = useCallback((it) => it.unread === false, []);
+  const getEpoch = useCallback((it) => {
+    const ca = it?.created_at || {};
+    const now = new Date();
+
+    // quick helpers
+    const startOf = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    const parseClock = (s) => {
+      const m = /(\d{1,2}):(\d{2})\s*(am|pm)/i.exec(String(s || ''));
+      if (!m) return null;
+      let h = parseInt(m[1], 10) % 12;
+      if (/pm/i.test(m[3])) h += 12;
+      return { h, m: parseInt(m[2], 10) };
+    };
+
+    if (typeof ca.epoch === 'number') return ca.epoch;
+    if (typeof ca.ts === 'number') return ca.ts;
+
+    if (typeof ca.iso === 'string') {
+      const d = new Date(ca.iso);
+      if (!Number.isNaN(d)) return d.getTime();
+    }
+
+    let base = null;
+    if (typeof ca.date === 'string') {
+      const d = ca.date.toLowerCase().trim();
+      if (d === 'today') base = startOf(now);
+      else if (d === 'yesterday') {
+        const y = startOf(now);
+        y.setDate(y.getDate() - 1);
+        base = y;
+      } else {
+        const parsed = new Date(ca.date);
+        if (!Number.isNaN(parsed)) base = startOf(parsed);
+      }
+    }
+
+    const clock = parseClock(ca.time || ca.display);
+    if (base && clock) {
+      base.setHours(clock.h, clock.m, 0, 0);
+      return base.getTime();
+    }
+    if (base) return base.getTime();
+
+    if (clock) {
+      const b = startOf(now);
+      b.setHours(clock.h, clock.m, 0, 0);
+      return b.getTime();
+    }
+
+    const any = it.created || it.timestamp || it.display;
+    if (any) {
+      const d = new Date(any);
+      if (!Number.isNaN(d)) return d.getTime();
+    }
+
+    return 0;
+  }, []);
+
+  const filteredItems = useMemo(() => {
+    const byCreatedDesc = (a, b) => getEpoch(b) - getEpoch(a);
+    let list;
+
     switch (value) {
       case 'new':
-        return items.filter(isTodayNotification);
+        list = items.filter(isTodayNotification);
+        break;
       case 'unread':
-        return items.filter(isUnread);
-      case 'other':
-        // anything not today and not unread
-        return items.filter((it) => !isTodayNotification(it) && !isUnread(it));
+      list = items.filter(isUnread);
+      
+      if (expandedKey) {
+        const sticky = items.find((it) => (it.notification_id ?? it.id) === expandedKey);
+        if (sticky && !list.some((x) => (x.notification_id ?? x.id) === expandedKey)) {
+          list = [sticky, ...list];
+        }
+      }
+      break;
+      case 'read':
+        list = items.filter((it) => it.unread === false);
+        break;
       case 'all':
       default:
-        return items;
+        list = items;
     }
-  }, [items, value, isTodayNotification, isUnread]);
+    return [...list].sort(byCreatedDesc);
+  }, [items, value, isTodayNotification, isUnread, getEpoch,expandedKey]);
 
   const visibleItems = showAll ? filteredItems : filteredItems.slice(0, 5);
   const canExpand = filteredItems.length > 5;
 
-  // const handleToggle = () => {
-  //   setOpen((prevOpen) => !prevOpen);
-  // };
   const handleToggle = () => {
     setOpen((prevOpen) => {
       const next = !prevOpen;
@@ -112,7 +175,17 @@ export default function NotificationSection() {
       return next;
     });
   };
-  // const normalizeNotification = React.useCallback((src) => {
+  const handleItemRead = useCallback((nidOrId) => {
+  
+    setItems((prev) => prev.map((it) => ((it.notification_id ?? it.id) === nidOrId ? { ...it, unread: false } : it)));
+
+    setUnreadCount((c) => Math.max(0, c - 1));
+
+    if (typeof window.leaveSocketSend === 'function') {
+      window.leaveSocketSend({ type: 'mark_read', notification_id: nidOrId });
+    }
+  }, []);
+
   const normalizeNotification = useCallback((src) => {
     const rawCreatedAt = src?.created_at ?? src?.data?.created_at ?? null;
     let display = '';
@@ -123,7 +196,9 @@ export default function NotificationSection() {
 
     const created_at = typeof rawCreatedAt === 'object' ? { ...rawCreatedAt, display } : { display };
     const id = src?.notification_id ?? src?.id ?? Date.now();
-    const isRead = Boolean(src?.read ?? src?.is_read ?? false);
+
+    const rawIsRead = src?.is_read ?? src?.read ?? false;
+    const isRead = rawIsRead === true || rawIsRead === 1 || rawIsRead === 'true' || rawIsRead === '1';
 
     return {
       id,
@@ -164,81 +239,21 @@ export default function NotificationSection() {
     return () => window.removeEventListener('leave_notification', badgeHandler);
   }, []);
 
-  // list: only while open
-  // useEffect(() => {
-  //   if (!open) {
-  //     setItems([]);
-  //     return;
-  //   }
-  //   const listHandler = (e) => {
-  //     const d = e.detail || {};
-  //     if (!d.title && !d.message) return;
-  //     const rawCreatedAt = d.created_at;
-  //     let display = '';
-  //     if (rawCreatedAt?.display) {
-  //       display = rawCreatedAt.display;
-  //     } else if (rawCreatedAt && typeof rawCreatedAt === 'object' && (rawCreatedAt.date || rawCreatedAt.time)) {
-  //       display = [rawCreatedAt.date, rawCreatedAt.time].filter(Boolean).join(' ');
-  //     } else {
-  //       display = d.display || d.created || d.timestamp || '';
-  //     }
-  //     const created_at = typeof rawCreatedAt === 'object' ? { ...rawCreatedAt, display } : { display };
-  //     setItems((prev) =>
-  //       [
-  //         {
-  //           id: d.notification_id || Date.now(),
-  //           notification_id: d.notification_id,
-  //           title: d.title,
-  //           message: d.message,
-  //           // display: d.created_at?.display || d.display || '',
-  //           message: d.message || '',
-  //           display, // handy top-level
-  //           created_at, // keep {date,
-  //           unread: true
-  //         },
-  //         ...prev
-  //       ].slice(0, 50)
-  //     );
-  //   };
-  //   window.addEventListener('leave_notification', listHandler);
-  //   return () => window.removeEventListener('leave_notification', listHandler);
-  // }, [open]);
-  // useEffect(() => {
-  //   const onWs = (e) => {
-  //     const d = e.detail || {};
-  //     if (!d.title && !d.message) return;
-  //     const n = normalizeNotification(d);
-  //     setItems((prev) => {
-  //       const key = n.notification_id || n.id;
-  //       const idx = prev.findIndex((x) => (x.notification_id || x.id) === key);
-  //       if (idx >= 0) {
-  //         const next = prev.slice();
-  //         next[idx] = { ...prev[idx], ...n };
-  //         return next;
-  //       }
-  //       return [n, ...prev].slice(0, 200);
-  //     });
-  //   };
-  //   window.addEventListener('leave_notification', onWs);
-  //   return () => window.removeEventListener('leave_notification', onWs);
-  // }, [normalizeNotification]);
   useEffect(() => {
     const onWs = (e) => {
       const d = e.detail || {};
 
-      // If a batch slipped through, normalize and merge all
       if (Array.isArray(d.notifications)) {
         const normalized = d.notifications.map(normalizeNotification);
         setItems((prev) => {
           const have = new Set(prev.map((x) => x.notification_id ?? x.id));
           const toAdd = normalized.filter((m) => !have.has(m.notification_id ?? m.id));
-          // Keep WS items already in prev at the top, then add any new from batch after
+
           return [...prev, ...toAdd].slice(0, 200);
         });
         return;
       }
 
-      // Single item path (must have title/message)
       if (!d.title && !d.message) return;
 
       const n = normalizeNotification(d);
@@ -250,7 +265,7 @@ export default function NotificationSection() {
           next[idx] = { ...prev[idx], ...n };
           return next;
         }
-        // Prepend singles so the newest WS item appears as the first row
+
         return [n, ...prev].slice(0, 200);
       });
     };
@@ -259,7 +274,6 @@ export default function NotificationSection() {
     return () => window.removeEventListener('leave_notification', onWs);
   }, [normalizeNotification]);
 
-  // Fetch unread count once for employee users on login/refresh
   useEffect(() => {
     if (!user?.employee) return;
 
@@ -268,15 +282,12 @@ export default function NotificationSection() {
         const res = await Factory('get', '/payroll/unread-notifications-count/', {}, {});
         const count = Number(res?.res?.data?.unread_count ?? res?.res?.data?.count ?? res?.res?.data ?? 0);
         if (!Number.isNaN(count)) setUnreadCount(count);
-      } catch (e) {
-        // ignore transient failures
-      }
+      } catch (e) {}
     };
 
     fetchUnread();
   }, [user?.employee]);
 
-  // Fetch full list via REST when the notification box opens
   useEffect(() => {
     if (!open || !user?.employee) return;
     (async () => {
@@ -290,61 +301,20 @@ export default function NotificationSection() {
         else if (Array.isArray(payload?.notifications)) list = payload.notifications;
         else if (Array.isArray(payload?.items)) list = payload.items;
 
-        // const mapped = Array.isArray(list)
-        //   ? list.map((n) => {
-        //       const id = n?.notification_id ?? n?.id ?? Date.now();
-        //       const title = n?.title || n?.subject || 'Notification';
-        //       const message = n?.message || n?.body || n?.text || '';
-        //       // const display = n?.created_at?.display || n?.display || n?.created || n?.timestamp || '';
-        //       const rawCreatedAt = n?.created_at ?? n?.data?.created_at ?? null;
-
-        //       let display = '';
-        //       if (rawCreatedAt?.display) {
-        //         display = rawCreatedAt.display;
-        //       } else if (rawCreatedAt && typeof rawCreatedAt === 'object' && (rawCreatedAt.date || rawCreatedAt.time)) {
-        //         display = [rawCreatedAt.date, rawCreatedAt.time].filter(Boolean).join(' ');
-        //       } else {
-        //         display = n?.display || n?.created || n?.timestamp || '';
-        //       }
-        //       const created_at =
-        //         typeof rawCreatedAt === 'object'
-        //           ? { ...rawCreatedAt, display } // keep date/time AND add display
-        //           : { display };
-        //       const isRead = Boolean(n?.read ?? n?.is_read ?? false);
-        //       return {
-        //         id,
-        //         notification_id: n?.notification_id ?? n?.id ?? id,
-        //         title,
-        //         message,
-        //         display,
-        //         created_at,
-        //         unread: !isRead
-        //       };
-        //     })
-        //   : [];
-        // // setItems(mapped.slice(0, 200));
-        // setItems(mapped); // store ALL messages
         const mapped = Array.isArray(list)
           ? list.map((n) => {
               const m = normalizeNotification(n);
               return m;
             })
           : [];
-        // Merge: keep existing WS items; add any API items not already present
-        // setItems((prev) => {
-        //   const have = new Set(prev.map((x) => x.notification_id ?? x.id));
-        //   const toAdd = mapped.filter((m) => !have.has(m.notification_id ?? m.id));
-        //   return [...toAdd, ...prev].slice(0, 200);
-        // });
+
         setItems((prev) => {
           const have = new Set(prev.map((x) => x.notification_id ?? x.id));
           const toAdd = mapped.filter((m) => !have.has(m.notification_id ?? m.id));
           return [...prev, ...toAdd].slice(0, 200); // ✅ WS stays first
         });
         setShowAll(false);
-      } catch (e) {
-        // ignore fetch errors on open
-      }
+      } catch (e) {}
     })();
   }, [open, user?.employee]);
 
@@ -462,14 +432,9 @@ export default function NotificationSection() {
                           <NotificationList
                             // items={items}
                             items={visibleItems}
-                            onItemRead={(nid) => {
-                              // Remove blue dot in UI
-                              setItems((prev) => prev.map((it) => (it.notification_id === nid ? { ...it, unread: false } : it)));
-                              // Send mark_read to WS backend
-                              if (typeof window.leaveSocketSend === 'function') {
-                                window.leaveSocketSend({ type: 'mark_read', notification_id: nid });
-                              }
-                            }}
+                            onItemRead={handleItemRead}
+                            expandedId={expandedKey}
+                            onToggleExpand={(id) => setExpandedKey((p) => (p === id ? null : id))}
                           />
                         </Box>
                       </Grid>
@@ -481,9 +446,6 @@ export default function NotificationSection() {
                     </CardActions> */}
                     <CardActions sx={{ p: 1.25, justifyContent: 'center' }}>
                       {!showAll && canExpand && (
-                        // <Button size="small" disableElevation onClick={() => setShowAll(true)}>
-                        //   View All ({items.length})
-                        // </Button>
                         <Button size="small" disableElevation onClick={() => setShowAll(true)}>
                           View All ({filteredItems.length})
                         </Button>
