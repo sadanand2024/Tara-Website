@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 // material-ui
@@ -64,14 +64,14 @@ export default function NotificationSection() {
   const anchorRef = useRef(null);
 
   const isTodayNotification = useCallback((it) => {
-    const ca = it?.created_at || {};
+    const createdAt = it?.created_at || {};
 
-    const dateLabel = typeof ca.date === 'string' ? ca.date.toLowerCase() : '';
+    const dateLabel = typeof createdAt.date === 'string' ? createdAt.date.toLowerCase() : '';
     if (dateLabel === 'today') return true;
 
-    if (!ca.date && ca.time) return true;
+    if (!createdAt.date && createdAt.time) return true;
 
-    if (!ca.date && typeof ca.display === 'string' && /^[0-9]{1,2}:[0-9]{2}\s?(am|pm)$/i.test(ca.display)) {
+    if (!createdAt.date && typeof createdAt.display === 'string' && /^[0-9]{1,2}:[0-9]{2}\s?(am|pm)$/i.test(createdAt.display)) {
       return true;
     }
     return false;
@@ -80,58 +80,58 @@ export default function NotificationSection() {
   const isUnread = useCallback((it) => it.unread !== false, []);
   const isReadItem = useCallback((it) => it.unread === false, []);
   const getEpoch = useCallback((it) => {
-    const ca = it?.created_at || {};
-    const now = new Date();
+    const createdAt = it?.created_at || {};
+    const currentDate = new Date();
 
     // quick helpers
     const startOf = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
     const parseClock = (s) => {
-      const m = /(\d{1,2}):(\d{2})\s*(am|pm)/i.exec(String(s || ''));
-      if (!m) return null;
-      let h = parseInt(m[1], 10) % 12;
-      if (/pm/i.test(m[3])) h += 12;
-      return { h, m: parseInt(m[2], 10) };
+      const match = /(\d{1,2}):(\d{2})\s*(am|pm)/i.exec(String(s || ''));
+      if (!match) return null;
+      let hour = parseInt(match[1], 10) % 12;
+      if (/pm/i.test(match[3])) hour += 12;
+      return { hour, minute: parseInt(match[2], 10) };
     };
 
-    if (typeof ca.epoch === 'number') return ca.epoch;
-    if (typeof ca.ts === 'number') return ca.ts;
+    if (typeof createdAt.epoch === 'number') return createdAt.epoch;
+    if (typeof createdAt.ts === 'number') return createdAt.ts;
 
-    if (typeof ca.iso === 'string') {
-      const d = new Date(ca.iso);
-      if (!Number.isNaN(d)) return d.getTime();
+    if (typeof createdAt.iso === 'string') {
+      const dateObj = new Date(createdAt.iso);
+      if (!Number.isNaN(dateObj)) return dateObj.getTime();
     }
 
-    let base = null;
-    if (typeof ca.date === 'string') {
-      const d = ca.date.toLowerCase().trim();
-      if (d === 'today') base = startOf(now);
-      else if (d === 'yesterday') {
-        const y = startOf(now);
-        y.setDate(y.getDate() - 1);
-        base = y;
+    let baseDate = null;
+    if (typeof createdAt.date === 'string') {
+      const stringValue = createdAt.date.toLowerCase().trim();
+      if (stringValue === 'today') baseDate = startOf(currentDate);
+      else if (stringValue === 'yesterday') {
+        const yesterdayDate = startOf(currentDate);
+        yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+        baseDate = yesterdayDate;
       } else {
-        const parsed = new Date(ca.date);
-        if (!Number.isNaN(parsed)) base = startOf(parsed);
+        const dateObj = new Date(createdAt.date);
+        if (!Number.isNaN(dateObj)) baseDate = startOf(dateObj);
       }
     }
 
-    const clock = parseClock(ca.time || ca.display);
-    if (base && clock) {
-      base.setHours(clock.h, clock.m, 0, 0);
-      return base.getTime();
+    const clockTime = parseClock(createdAt.time || createdAt.display);
+    if (baseDate && clockTime) {
+      baseDate.setHours(clockTime.hour, clockTime.minute, 0, 0);
+      return baseDate.getTime();
     }
-    if (base) return base.getTime();
+    if (baseDate) return baseDate.getTime();
 
-    if (clock) {
-      const b = startOf(now);
-      b.setHours(clock.h, clock.m, 0, 0);
-      return b.getTime();
+    if (clockTime) {
+      const baseDate = startOf(currentDate);
+      baseDate.setHours(clockTime.hour, clockTime.minute, 0, 0);
+      return baseDate.getTime();
     }
 
-    const any = it.created || it.timestamp || it.display;
-    if (any) {
-      const d = new Date(any);
-      if (!Number.isNaN(d)) return d.getTime();
+    const anyDate = it.created || it.timestamp || it.display;
+    if (anyDate) {
+      const dateObj = new Date(anyDate);
+      if (!Number.isNaN(dateObj)) return dateObj.getTime();
     }
 
     return 0;
@@ -139,30 +139,30 @@ export default function NotificationSection() {
 
   const filteredItems = useMemo(() => {
     const byCreatedDesc = (a, b) => getEpoch(b) - getEpoch(a);
-    let list;
+    let notificationList;
 
     switch (value) {
       case 'new':
-        list = items.filter(isTodayNotification);
+        notificationList = items.filter(isTodayNotification);
         break;
       case 'unread':
-      list = items.filter(isUnread);
+      notificationList = items.filter(isUnread);
       
       if (expandedKey) {
         const sticky = items.find((it) => (it.notification_id ?? it.id) === expandedKey);
-        if (sticky && !list.some((x) => (x.notification_id ?? x.id) === expandedKey)) {
-          list = [sticky, ...list];
+        if (sticky && !notificationList.some((x) => (x.notification_id ?? x.id) === expandedKey)) {
+          notificationList = [sticky, ...notificationList];
         }
       }
       break;
       case 'read':
-        list = items.filter((it) => it.unread === false);
+        notificationList = items.filter((it) => it.unread === false);
         break;
       case 'all':
       default:
-        list = items;
+        notificationList = items;
     }
-    return [...list].sort(byCreatedDesc);
+    return [...notificationList].sort(byCreatedDesc);
   }, [items, value, isTodayNotification, isUnread, getEpoch,expandedKey]);
 
   const visibleItems = showAll ? filteredItems : filteredItems.slice(0, 5);
@@ -232,8 +232,8 @@ export default function NotificationSection() {
   useEffect(() => {
     const badgeHandler = (e) => {
       const d = e.detail || {};
-      const n = Number(d.unread_count ?? d.unread ?? d.count);
-      if (!Number.isNaN(n)) setUnreadCount(n);
+      const unreadCount = Number(d.unread_count ?? d.unread ?? d.count);
+      if (!Number.isNaN(unreadCount)) setUnreadCount(unreadCount);
     };
     window.addEventListener('leave_notification', badgeHandler);
     return () => window.removeEventListener('leave_notification', badgeHandler);
@@ -246,27 +246,27 @@ export default function NotificationSection() {
       if (Array.isArray(d.notifications)) {
         const normalized = d.notifications.map(normalizeNotification);
         setItems((prev) => {
-          const have = new Set(prev.map((x) => x.notification_id ?? x.id));
-          const toAdd = normalized.filter((m) => !have.has(m.notification_id ?? m.id));
+          const existingIds = new Set(prev.map((x) => x.notification_id ?? x.id));
+          const notificationsToAdd = normalized.filter((m) => !existingIds.has(m.notification_id ?? m.id));
 
-          return [...prev, ...toAdd].slice(0, 200);
+          return [...prev, ...notificationsToAdd].slice(0, 200);
         });
         return;
       }
 
       if (!d.title && !d.message) return;
 
-      const n = normalizeNotification(d);
+      const notification = normalizeNotification(d);
       setItems((prev) => {
-        const key = n.notification_id || n.id;
-        const idx = prev.findIndex((x) => (x.notification_id || x.id) === key);
-        if (idx >= 0) {
+        const notificationKey = notification.notification_id || notification.id;
+        const index = prev.findIndex((x) => (x.notification_id || x.id) === notificationKey);
+        if (index >= 0) {
           const next = prev.slice();
-          next[idx] = { ...prev[idx], ...n };
+          next[index] = { ...prev[index], ...notification };
           return next;
         }
 
-        return [n, ...prev].slice(0, 200);
+        return [notification, ...prev].slice(0, 200);
       });
     };
 
@@ -279,9 +279,9 @@ export default function NotificationSection() {
 
     const fetchUnread = async () => {
       try {
-        const res = await Factory('get', '/payroll/unread-notifications-count/', {}, {});
-        const count = Number(res?.res?.data?.unread_count ?? res?.res?.data?.count ?? res?.res?.data ?? 0);
-        if (!Number.isNaN(count)) setUnreadCount(count);
+        const response = await Factory('get', '/payroll/unread-notifications-count/', {}, {});
+        const unreadCount = Number(response?.res?.data?.unread_count ?? response?.res?.data?.count ?? response?.res?.data ?? 0);
+        if (!Number.isNaN(unreadCount)) setUnreadCount(unreadCount);
       } catch (e) {}
     };
 
@@ -292,26 +292,26 @@ export default function NotificationSection() {
     if (!open || !user?.employee) return;
     (async () => {
       try {
-        const res = await Factory('get', '/payroll/leave-notifications/', {}, {});
-        const payload = res?.res?.data;
-        let list = [];
-        if (Array.isArray(payload)) list = payload;
-        else if (Array.isArray(payload?.results)) list = payload.results;
-        else if (Array.isArray(payload?.data)) list = payload.data;
-        else if (Array.isArray(payload?.notifications)) list = payload.notifications;
-        else if (Array.isArray(payload?.items)) list = payload.items;
+        const response = await Factory('get', '/payroll/leave-notifications/', {}, {});
+        const payload = response?.res?.data;
+        let notificationList = [];
+        if (Array.isArray(payload)) notificationList = payload;
+        else if (Array.isArray(payload?.results)) notificationList = payload.results;
+        else if (Array.isArray(payload?.data)) notificationList = payload.data;
+        else if (Array.isArray(payload?.notifications)) notificationList = payload.notifications;
+        else if (Array.isArray(payload?.items)) notificationList = payload.items;
 
-        const mapped = Array.isArray(list)
-          ? list.map((n) => {
+        const mapped = Array.isArray(notificationList)
+          ? notificationList.map((n) => {
               const m = normalizeNotification(n);
               return m;
             })
           : [];
 
         setItems((prev) => {
-          const have = new Set(prev.map((x) => x.notification_id ?? x.id));
-          const toAdd = mapped.filter((m) => !have.has(m.notification_id ?? m.id));
-          return [...prev, ...toAdd].slice(0, 200); // ✅ WS stays first
+          const existingIds = new Set(prev.map((x) => x.notification_id ?? x.id));
+          const notificationsToAdd = mapped.filter((m) => !existingIds.has(m.notification_id ?? m.id));
+          return [...prev, ...notificationsToAdd].slice(0, 200); // ✅ WS stays first
         });
         setShowAll(false);
       } catch (e) {}
