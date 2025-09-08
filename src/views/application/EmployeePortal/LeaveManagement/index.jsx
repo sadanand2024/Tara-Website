@@ -5,12 +5,9 @@ import { useSearchParams } from 'react-router-dom';
 import ApplyLeave from './ApplyLeave';
 import PendingLeaves from './PendingLeaves';
 import LeaveHistory from './LeaveHistory';
-import WebSocketStatus from './WebSocketStatus';
 import MainCard from 'ui-component/cards/MainCard';
 
 
-
-// TabPanel component
 function TabPanel({ children, value, index, ...other }) {
   return (
     <div role="tabpanel" hidden={value !== index} id={`leave-tabpanel-${index}`} aria-labelledby={`leave-tab-${index}`} {...other}>
@@ -31,7 +28,6 @@ const LeaveManagement = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [tabValue, setTabValue] = useState(0);
 
-  // Handle URL parameters for tab selection
   useEffect(() => {
     const tabParam = searchParams.get('tab');
     if (tabParam) {
@@ -44,7 +40,7 @@ const LeaveManagement = () => {
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
-    // Update URL parameter
+
     setSearchParams({ tab: newValue.toString() });
   };
 
@@ -62,10 +58,6 @@ const LeaveManagement = () => {
 
   return (
     <MainCard>
-      
-      <WebSocketStatus />
-      
-      {/* Main Content Area */}
       <Box sx={{ flexGrow: 1 }}>
         {/* Tabs */}
         <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
@@ -87,7 +79,6 @@ const LeaveManagement = () => {
           <LeaveHistory />
         </TabPanel>
       </Box>
-    
     </MainCard>
   );
 };
