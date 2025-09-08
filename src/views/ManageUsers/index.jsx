@@ -29,7 +29,7 @@ import { useSelector } from 'store';
 import { IconSearch } from '@tabler/icons-react';
 import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded';
 import AddIcon from '@mui/icons-material/Add';
-
+import { useMediaQuery, useTheme } from '@mui/material';
 // ==============================|| MANAGE USERS ||============================== //
 
 export default function ManageUsers() {
@@ -49,6 +49,8 @@ export default function ManageUsers() {
   const [loading, setLoading] = React.useState(true);
   const [invoiceUsage, setInvoiceUsage] = React.useState({});
   const invoiceId = import.meta.env.VITE_APP_INVOICE_ID;
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const [snackbar, setSnackbar] = React.useState({
     open: false,
@@ -253,7 +255,7 @@ export default function ManageUsers() {
               }}
               size="small"
             >
-              Add User
+              {isMobile ? 'Add' : 'Add User'}
             </Button>
             <OutlinedInput
               id="input-search-list-style1"

@@ -217,9 +217,10 @@ const PermissionsDrawer = ({ open, onClose, selectedUser, selectedPermissions, o
           alignItems: 'center'
         }}
       >
-        <Box sx={{ borderRight: '1px solid #d7d7d791', bgcolor: 'primary.lighter', p: 1, pr: 10, display: 'flex', alignItems: 'center' }}>
+        <Box sx={{ borderRight: '1px solid #d7d7d791', bgcolor: 'primary.lighter', p: 1, pr: 10, alignItems: 'center' }}>
           <Avatar
             sx={{
+              display: { xs: 'none', md: 'flex' },
               width: 42,
               height: 42,
               bgcolor: 'primary.main',
@@ -231,7 +232,7 @@ const PermissionsDrawer = ({ open, onClose, selectedUser, selectedPermissions, o
             {selectedUser?.first_name?.[0] + selectedUser?.last_name?.[0] || 'TU'}
           </Avatar>
           <Box sx={{ flex: 1 }}>
-            <Box sx={{ display: 'flex', alignItems: 'left', gap: 1, mb: 1 }}>
+            <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'left', gap: 1, mb: 1 }}>
               <PersonIcon sx={{ fontSize: '1.2rem', color: 'primary.main' }} />
               <Typography variant="h5" sx={{ fontWeight: 500 }}>
                 {selectedUser?.first_name + selectedUser?.last_name || 'TaraFirst User'}
@@ -241,7 +242,7 @@ const PermissionsDrawer = ({ open, onClose, selectedUser, selectedPermissions, o
               {selectedUser?.email && (
                 <Box sx={{ display: 'flex', alignItems: 'left', gap: 0.5 }}>
                   <EmailIcon sx={{ fontSize: '1.2rem', color: 'text.secondary' }} />
-                  <Typography variant="body1" color="text.secondary">
+                  <Typography variant={{ xs: 'h5', md: 'body1' }} color="text.secondary">
                     {selectedUser.email}
                   </Typography>
                 </Box>
@@ -250,7 +251,7 @@ const PermissionsDrawer = ({ open, onClose, selectedUser, selectedPermissions, o
           </Box>
         </Box>
 
-        <Box>
+        <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
           <Stack direction="row" spacing={1} alignItems="center">
             <InfoIcon sx={{ color: 'info.main', mt: 0.5 }} />
             <Typography variant="subtitle1" sx={{ color: 'info.dark', fontStyle: 'italic', fontWeight: 500, mb: 0.5 }}>
@@ -411,22 +412,22 @@ const PermissionsDrawer = ({ open, onClose, selectedUser, selectedPermissions, o
                         {Object.values(module.services).some((service) =>
                           service.actions.some((action) => !commonActions.includes(action))
                         ) && (
-                          <TableCell
-                            colSpan={extraActions.filter(action => 
-                              Object.values(module.services).some(service => service.actions.includes(action))
-                            ).length}
-                            align="center"
-                            sx={{
-                              fontWeight: 600,
-                              bgcolor: 'secondary.lighter',
-                              borderBottom: '2px solid',
-                              borderColor: 'secondary.main',
-                              py: 0.5
-                            }}
-                          >
-                            Additional Actions
-                          </TableCell>
-                        )}
+                            <TableCell
+                              colSpan={extraActions.filter(action =>
+                                Object.values(module.services).some(service => service.actions.includes(action))
+                              ).length}
+                              align="center"
+                              sx={{
+                                fontWeight: 600,
+                                bgcolor: 'secondary.lighter',
+                                borderBottom: '2px solid',
+                                borderColor: 'secondary.main',
+                                py: 0.5
+                              }}
+                            >
+                              Additional Actions
+                            </TableCell>
+                          )}
                       </TableRow>
                       <TableRow>
                         <TableCell />
