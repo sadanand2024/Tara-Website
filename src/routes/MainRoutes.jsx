@@ -82,6 +82,7 @@ const PaySlipView = Loadable(lazy(() => import('views/application/EmployeePortal
 
 const TaxTDS = Loadable(lazy(() => import('views/application/EmployeePortal/TaxTDS')));
 const LeaveManagement = Loadable(lazy(() => import('views/application/EmployeePortal/LeaveManagement')));
+const LeavePolicy = Loadable(lazy(() => import('views/application/EmployeePortal/LeaveManagement/LeavePolicy')));
 const Attendance = Loadable(lazy(() => import('views/application/EmployeePortal/Attendance')));
 const MyEarnings = Loadable(lazy(() => import('views/application/EmployeePortal/MyEarnings')));
 const Declarations = Loadable(lazy(() => import('views/application/EmployeePortal/Declarations')));
@@ -260,6 +261,10 @@ const MainRoutes = {
     {
       path: '/app/employee-portal/leave-management',
       element: <LeaveManagement />
+    },
+    {
+      path: '/app/employee-portal/leave-management/policy',
+      element: <LeavePolicy />
     },
     {
       path: '/app/employee-portal/attendance',

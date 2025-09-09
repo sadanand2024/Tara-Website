@@ -1,7 +1,7 @@
 import { RouterProvider } from 'react-router-dom';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-
+import CustomErrorComponent from 'views/pages/maintenance/Error';
 // routing
 import router from 'routes';
 
@@ -25,8 +25,11 @@ import { JWTProvider as AuthProvider } from 'contexts/JWTContext';
 // ==============================|| APP ||============================== //
 
 export default function App() {
+  const handleError = (error, errorInfo) => {
+    console.error('Error caught by ErrorBoundary:', error, errorInfo);
+  };
   return (
-    <ErrorBoundary>
+    <ErrorBoundary ErrorComponent={CustomErrorComponent} onError={handleError}>
       <ThemeCustomization>
         {/* <RTLLayout> */}
         <LocalizationProvider dateAdapter={AdapterDayjs}>

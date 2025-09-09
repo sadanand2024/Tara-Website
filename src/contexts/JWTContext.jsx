@@ -62,6 +62,14 @@ export function JWTProvider({ children }) {
         const serviceToken = window.localStorage.getItem('serviceToken');
         let userData = JSON.parse(window.localStorage.getItem('user'));
         if (serviceToken && verifyToken(serviceToken)) {
+          // Check if user should be treated as employee based on stored data or current path
+          if (userData && (userData.employee || urlPath.startsWith('/app/employee-portal'))) {
+            userData = {
+              ...userData,
+              employee: true
+            };
+          }
+
           setSession(serviceToken, userData);
           reduxDispatch(storeUser(userData));
           dispatch({
@@ -86,16 +94,24 @@ export function JWTProvider({ children }) {
 
   const login = async (email, password) => {
     let url = '/user_management/auth/login';
-    if (urlPath === '/employee-login') {
-      url = '/payroll/auth/employee-login/';
-    }
+    // if (urlPath === '/employee-login') {
+    //   url = '/payroll/auth/employee-login/';
+    // }
     let loginPostData = { email, password };
-    if (urlPath === '/employee-login') {
-      loginPostData = { username: email, password };
-    }
+    // if (urlPath === '/employee-login') {
+    //   loginPostData = { username: email, password };
+    // }
     const response = await axios.post(url, loginPostData);
     const serviceToken = response.data.access_token;
-    const user = response.data;
+    let user = response.data;
+
+    // If logging in through employee-login, mark user as employee for navigation
+    if (urlPath === '/employee-login') {
+      user = {
+        ...user,
+        employee: true // This ensures EmployeePortal navigation is shown
+      };
+    }
 
     setSession(serviceToken, user);
 

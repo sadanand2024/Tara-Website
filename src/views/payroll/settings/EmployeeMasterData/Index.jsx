@@ -11,7 +11,10 @@ import {
   TableRow,
   Paper,
   Pagination,
-  Grid2
+  Grid2,
+  Autocomplete,
+  TextField,
+  CircularProgress
 } from '@mui/material';
 import { rowsPerPage } from 'ui-component/extended/RowsPerPage';
 import Factory from 'utils/Factory';
@@ -43,6 +46,11 @@ function EmployeeList({
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [reportingTo, setReportingTo] = useState({});
+  const [headOfDepartment, setHeadOfDepartment] = useState({});
+  const [reportingEmployees, setReportingEmployees] = useState({});
+  const [headsOfDepartment, setHeadsOfDepartment] = useState({});
+  const [loadingReporting, setLoadingReporting] = useState({});
   const closeBulkDialog = () => {
     setOpenBulkDialog(false);
   };
@@ -78,7 +86,11 @@ function EmployeeList({
       employee.status,
       employee.id
     ];
-    return fieldsToSearch.some((field) => String(field ?? '').toLowerCase().includes(query));
+    return fieldsToSearch.some((field) =>
+      String(field ?? '')
+        .toLowerCase()
+        .includes(query)
+    );
   });
 
   const paginatedEmployees = filteredEmployees.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
@@ -94,7 +106,29 @@ function EmployeeList({
     const { res } = await Factory('get', url, {});
     setIsLoading(false);
     if (res?.status_cd === 0) {
-      setEmployees(res?.data || []);
+      const employeesData = res?.data || [];
+      setEmployees(employeesData);
+
+      // Extract and set existing reporting manager data
+      const reportingToData = {};
+      const headOfDepartmentData = {};
+
+      employeesData.forEach((employee) => {
+        if (employee.employee_reporting_manager) {
+          // Set reporting manager if exists
+          if (employee.employee_reporting_manager.reporting_manager) {
+            reportingToData[employee.id] = employee.employee_reporting_manager.reporting_manager;
+          }
+
+          // Set head of department if exists
+          if (employee.employee_reporting_manager.head_of_department) {
+            headOfDepartmentData[employee.id] = employee.employee_reporting_manager.head_of_department;
+          }
+        }
+      });
+
+      setReportingTo(reportingToData);
+      setHeadOfDepartment(headOfDepartmentData);
     } else {
       dispatch(
         openSnackbar({
@@ -153,6 +187,56 @@ function EmployeeList({
     setCurrentPage(1);
   }, [searchQuery]);
 
+  const fetchReportingEmployees = async (employeeId) => {
+    // Check if already loaded
+    if (reportingEmployees[employeeId] && headsOfDepartment[employeeId]) {
+      return { reportingEmployees: reportingEmployees[employeeId], headsOfDepartment: headsOfDepartment[employeeId] };
+    }
+
+    setLoadingReporting((prev) => ({ ...prev, [employeeId]: true }));
+
+    try {
+      const url = `/payroll/employee-reporting-manager?payroll_id=${payrollId}&employee_id=${employeeId}`;
+      const { res } = await Factory('get', url, {});
+
+      if (res?.status_cd === 0) {
+        // Extract both reporting_managers and heads_of_department from the API response
+        const responseData = res?.data || {};
+        console.log('API Response for employee', employeeId, ':', responseData);
+
+        let reportingData = responseData.reporting_managers || [];
+        if (!Array.isArray(reportingData)) {
+          reportingData = [];
+        }
+
+        let headsData = responseData.heads_of_department || [];
+        if (!Array.isArray(headsData)) {
+          headsData = [];
+        }
+
+        console.log('Reporting managers for employee', employeeId, ':', reportingData);
+        console.log('Heads of department for employee', employeeId, ':', headsData);
+
+        setReportingEmployees((prev) => ({ ...prev, [employeeId]: reportingData }));
+        setHeadsOfDepartment((prev) => ({ ...prev, [employeeId]: headsData }));
+        setLoadingReporting((prev) => ({ ...prev, [employeeId]: false }));
+
+        return { reportingEmployees: reportingData, headsOfDepartment: headsData };
+      } else {
+        setReportingEmployees((prev) => ({ ...prev, [employeeId]: [] }));
+        setHeadsOfDepartment((prev) => ({ ...prev, [employeeId]: [] }));
+        setLoadingReporting((prev) => ({ ...prev, [employeeId]: false }));
+        return { reportingEmployees: [], headsOfDepartment: [] };
+      }
+    } catch (error) {
+      console.error('Error fetching reporting employees:', error);
+      setReportingEmployees((prev) => ({ ...prev, [employeeId]: [] }));
+      setHeadsOfDepartment((prev) => ({ ...prev, [employeeId]: [] }));
+      setLoadingReporting((prev) => ({ ...prev, [employeeId]: false }));
+      return { reportingEmployees: [], headsOfDepartment: [] };
+    }
+  };
+
   if (isLoading) {
     return <CircularProgressComponent isLoading={isLoading} displayContent={'Loading Employee Data'} />;
   }
@@ -167,7 +251,7 @@ function EmployeeList({
           type="Employees"
           bulkUploadUrl="/payroll/employees/upload/"
           xlsxTemplateUrl={`/payroll/download-template/${payrollId}/`}
-        // csvTemplateUrl="/payroll/download-template/csv?type=employee"
+          // csvTemplateUrl="/payroll/download-template/csv?type=employee"
         />
         <Grid2 container spacing={2}>
           <TableContainer
@@ -182,7 +266,17 @@ function EmployeeList({
             <Table size="small">
               <TableHead sx={{ backgroundColor: 'primary.main' }}>
                 <TableRow>
-                  {['S No', 'Employee ID', 'Name', 'Department', 'Designation', 'Email', 'Actions'].map((header, idx) => (
+                  {[
+                    'S No',
+                    'Employee ID',
+                    'Name',
+                    'Department',
+                    'Designation',
+                    // 'Email',
+                    'Reporting to',
+                    'Head of Department',
+                    'Actions'
+                  ].map((header, idx) => (
                     <TableCell
                       key={idx}
                       align={['S No', 'Actions'].includes(header) ? 'center' : 'left'}
@@ -208,7 +302,105 @@ function EmployeeList({
                       <TableCell>{`${employee.first_name || ''} ${employee.last_name || ''}`.trim() || 'N/A'}</TableCell>
                       <TableCell>{employee.department_name || 'N/A'}</TableCell>
                       <TableCell>{employee.designation_name || 'N/A'}</TableCell>
-                      <TableCell>{employee.work_email || 'N/A'}</TableCell>
+                      {/* <TableCell>{employee.work_email || 'N/A'}</TableCell> */}
+                      <TableCell>
+                        <Autocomplete
+                          options={(() => {
+                            const currentOptions = Array.isArray(reportingEmployees[employee.id]) ? reportingEmployees[employee.id] : [];
+                            const currentValue = reportingTo[employee.id];
+
+                            // If we have a current value but it's not in options, add it to show the selected value
+                            if (currentValue && !currentOptions.find((opt) => opt.id === currentValue.id)) {
+                              return [currentValue, ...currentOptions];
+                            }
+                            return currentOptions;
+                          })()}
+                          value={reportingTo[employee.id] || null}
+                          getOptionLabel={(option) => option?.name || 'Self'}
+                          getOptionKey={(option) => option?.id || Math.random()}
+                          isOptionEqualToValue={(option, value) => option?.id === value?.id}
+                          loading={loadingReporting[employee.id] || false}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              placeholder="Select Reporting To"
+                              InputProps={{
+                                ...params.InputProps,
+                                endAdornment: (
+                                  <>
+                                    {loadingReporting[employee.id] ? <CircularProgress size={20} /> : null}
+                                    {params.InputProps.endAdornment}
+                                  </>
+                                )
+                              }}
+                            />
+                          )}
+                          fullWidth
+                          size="small"
+                          onOpen={() => {
+                            if (!reportingEmployees[employee.id] && !loadingReporting[employee.id]) {
+                              fetchReportingEmployees(employee.id);
+                            }
+                          }}
+                          onFocus={() => {
+                            if (!reportingEmployees[employee.id] && !loadingReporting[employee.id]) {
+                              fetchReportingEmployees(employee.id);
+                            }
+                          }}
+                          onChange={(event, value) => {
+                            setReportingTo((prev) => ({ ...prev, [employee.id]: value }));
+                          }}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Autocomplete
+                          options={(() => {
+                            const currentOptions = Array.isArray(headsOfDepartment[employee.id]) ? headsOfDepartment[employee.id] : [];
+                            const currentValue = headOfDepartment[employee.id];
+
+                            // If we have a current value but it's not in options, add it to show the selected value
+                            if (currentValue && !currentOptions.find((opt) => opt.id === currentValue.id)) {
+                              return [currentValue, ...currentOptions];
+                            }
+                            return currentOptions;
+                          })()}
+                          value={headOfDepartment[employee.id] || null}
+                          loading={loadingReporting[employee.id] || false}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              placeholder="Select Head of Department"
+                              InputProps={{
+                                ...params.InputProps,
+                                endAdornment: (
+                                  <>
+                                    {loadingReporting[employee.id] ? <CircularProgress size={20} /> : null}
+                                    {params.InputProps.endAdornment}
+                                  </>
+                                )
+                              }}
+                            />
+                          )}
+                          getOptionLabel={(option) => option?.name || 'Self'}
+                          onChange={(event, value) => {
+                            setHeadOfDepartment((prev) => ({ ...prev, [employee.id]: value }));
+                          }}
+                          getOptionKey={(option) => option?.id || Math.random()}
+                          isOptionEqualToValue={(option, value) => option?.id === value?.id}
+                          fullWidth
+                          size="small"
+                          onOpen={() => {
+                            if (!headsOfDepartment[employee.id] && !loadingReporting[employee.id]) {
+                              fetchReportingEmployees(employee.id);
+                            }
+                          }}
+                          onFocus={() => {
+                            if (!headsOfDepartment[employee.id] && !loadingReporting[employee.id]) {
+                              fetchReportingEmployees(employee.id);
+                            }
+                          }}
+                        />
+                      </TableCell>
                       <TableCell align="center">
                         <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
                           <IconButton size="small" color="primary" onClick={() => handleEdit(employee)}>
