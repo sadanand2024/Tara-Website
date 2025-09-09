@@ -217,9 +217,10 @@ const PermissionsDrawer = ({ open, onClose, selectedUser, selectedPermissions, o
           alignItems: 'center'
         }}
       >
-        <Box sx={{ borderRight: '1px solid #d7d7d791', bgcolor: 'primary.lighter', p: 1, pr: 10, display: 'flex', alignItems: 'center' }}>
+        <Stack direction="row" spacing={1} alignItems="center" sx={{ borderRight: '1px solid #d7d7d791', bgcolor: 'primary.lighter', p: 1, pr: 10, alignItems: 'center' }}>
           <Avatar
             sx={{
+              display: { xs: 'none', sm: 'flex' },
               width: 42,
               height: 42,
               bgcolor: 'primary.main',
@@ -231,7 +232,7 @@ const PermissionsDrawer = ({ open, onClose, selectedUser, selectedPermissions, o
             {selectedUser?.first_name?.[0] + selectedUser?.last_name?.[0] || 'TU'}
           </Avatar>
           <Box sx={{ flex: 1 }}>
-            <Box sx={{ display: 'flex', alignItems: 'left', gap: 1, mb: 1 }}>
+            <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'left', gap: 1, mb: 1 }}>
               <PersonIcon sx={{ fontSize: '1.2rem', color: 'primary.main' }} />
               <Typography variant="h5" sx={{ fontWeight: 500 }}>
                 {selectedUser?.first_name + selectedUser?.last_name || 'TaraFirst User'}
@@ -241,16 +242,16 @@ const PermissionsDrawer = ({ open, onClose, selectedUser, selectedPermissions, o
               {selectedUser?.email && (
                 <Box sx={{ display: 'flex', alignItems: 'left', gap: 0.5 }}>
                   <EmailIcon sx={{ fontSize: '1.2rem', color: 'text.secondary' }} />
-                  <Typography variant="body1" color="text.secondary">
+                  <Typography variant={{ xs: 'h5', md: 'body1' }} color="text.secondary">
                     {selectedUser.email}
                   </Typography>
                 </Box>
               )}
             </Box>
           </Box>
-        </Box>
+        </Stack>
 
-        <Box>
+        <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
           <Stack direction="row" spacing={1} alignItems="center">
             <InfoIcon sx={{ color: 'info.main', mt: 0.5 }} />
             <Typography variant="subtitle1" sx={{ color: 'info.dark', fontStyle: 'italic', fontWeight: 500, mb: 0.5 }}>
@@ -272,197 +273,166 @@ const PermissionsDrawer = ({ open, onClose, selectedUser, selectedPermissions, o
           </Typography>
         </Box>
       </Box>
-      {!hasPermissions ? (
-        <Box sx={{ p: 3, textAlign: 'center' }}>
-          <Typography variant="h6" color="text.secondary">
-            No permissions available
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            There are no subscribed modules with permissions to display.
-          </Typography>
-        </Box>
-      ) : (
-        <Box sx={{ overflow: 'auto', flex: 1, px: 2 }}>
-          {transformedPermissions.map((module) => (
-            <Accordion
-              key={module.module}
-              expanded={expandedModule === module.module}
-              onChange={() => handleModuleChange(module.module)}
-              sx={{
-                '&:before': { display: 'none' },
-                boxShadow: 'none',
-                borderRadius: 1,
-                mb: 1,
-                border: 1,
-                borderColor: 'divider'
-              }}
-            >
-              <AccordionSummary
-                expandIcon={
-                  <ExpandMoreIcon
-                    sx={{
-                      color: 'primary.main',
-                      transform: expandedModule === module.module ? 'rotate(180deg)' : 'rotate(0deg)',
-                      transition: 'transform 0.3s ease-in-out'
-                    }}
-                  />
-                }
+      {
+        !hasPermissions ? (
+          <Box sx={{ p: 3, textAlign: 'center' }}>
+            <Typography variant="h6" color="text.secondary">
+              No permissions available
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+              There are no subscribed modules with permissions to display.
+            </Typography>
+          </Box>
+        ) : (
+          <Box sx={{ overflow: 'auto', flex: 1, px: 2 }}>
+            {transformedPermissions.map((module) => (
+              <Accordion
+                key={module.module}
+                expanded={expandedModule === module.module}
+                onChange={() => handleModuleChange(module.module)}
                 sx={{
-                  bgcolor: expandedModule === module.module ? 'primary.lighter' : 'background.neutral',
-                  transition: 'background-color 0.3s ease-in-out',
-                  '&:hover': {
-                    bgcolor: 'primary.lighter'
-                  },
-                  '& .MuiAccordionSummary-content': {
-                    m: 0
-                  }
+                  '&:before': { display: 'none' },
+                  boxShadow: 'none',
+                  borderRadius: 1,
+                  mb: 1,
+                  border: 1,
+                  borderColor: 'divider'
                 }}
               >
-                <Box
-                  sx={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    width: '100%',
-                    gap: 2
-                  }}
-                >
-                  <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, py: 2 }}>
-                    <Typography
-                      variant="h4"
+                <AccordionSummary
+                  expandIcon={
+                    <ExpandMoreIcon
                       sx={{
-                        fontWeight: 600,
-                        color: 'primary.dark',
-                        mb: 0.5
-                      }}
-                    >
-                      {module.module_name}
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical',
-                        overflow: 'hidden',
-                        lineHeight: '1.4'
-                      }}
-                    >
-                      {module.module_description}
-                    </Typography>
-                  </Box>
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'flex-end',
-                      minWidth: 100
-                    }}
-                  >
-                    <Chip
-                      label={module.subscription_status.toUpperCase()}
-                      size="small"
-                      color={module.subscription_status === 'trial' ? 'warning' : 'success'}
-                      sx={{
-                        fontWeight: 500,
-                        '& .MuiChip-label': {
-                          px: 1
-                        }
+                        color: 'primary.main',
+                        transform: expandedModule === module.module ? 'rotate(180deg)' : 'rotate(0deg)',
+                        transition: 'transform 0.3s ease-in-out'
                       }}
                     />
-                    <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
-                      {Object.keys(module.services).length} Services
-                    </Typography>
-                  </Box>
-                </Box>
-              </AccordionSummary>
-              <AccordionDetails sx={{ p: 0.5 }}>
-                <TableContainer
-                  component={Paper}
-                  variant="outlined"
+                  }
                   sx={{
-                    '& .MuiTableCell-root': {
-                      p: 0.5,
-                      '&:first-of-type': {
-                        pl: 1
-                      }
+                    bgcolor: expandedModule === module.module ? 'primary.lighter' : 'background.neutral',
+                    transition: 'background-color 0.3s ease-in-out',
+                    '&:hover': {
+                      bgcolor: 'primary.lighter'
+                    },
+                    '& .MuiAccordionSummary-content': {
+                      m: 0
                     }
                   }}
                 >
-                  <Table size="small">
-                    <TableHead>
-                      <TableRow>
-                        <TableCell sx={{ fontWeight: 600, minWidth: 160 }}>Services</TableCell>
-                        <TableCell
-                          colSpan={4}
-                          align="center"
-                          sx={{
-                            fontWeight: 600,
-                            bgcolor: 'primary.lighter',
-                            borderBottom: '2px solid',
-                            borderColor: 'primary.main',
-                            py: 0.5
-                          }}
-                        >
-                          Common Actions
-                        </TableCell>
-                        {Object.values(module.services).some((service) =>
-                          service.actions.some((action) => !commonActions.includes(action))
-                        ) && (
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      width: '100%',
+                      gap: 2
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, py: 2 }}>
+                      <Typography
+                        variant="h4"
+                        sx={{
+                          fontWeight: 600,
+                          color: 'primary.dark',
+                          mb: 0.5
+                        }}
+                      >
+                        {module.module_name}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                          lineHeight: '1.4'
+                        }}
+                      >
+                        {module.module_description}
+                      </Typography>
+                    </Box>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'flex-end',
+                        minWidth: 100
+                      }}
+                    >
+                      <Chip
+                        label={module.subscription_status.toUpperCase()}
+                        size="small"
+                        color={module.subscription_status === 'trial' ? 'warning' : 'success'}
+                        sx={{
+                          fontWeight: 500,
+                          '& .MuiChip-label': {
+                            px: 1
+                          }
+                        }}
+                      />
+                      <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
+                        {Object.keys(module.services).length} Services
+                      </Typography>
+                    </Box>
+                  </Box>
+                </AccordionSummary>
+                <AccordionDetails sx={{ p: 0.5 }}>
+                  <TableContainer
+                    component={Paper}
+                    variant="outlined"
+                    sx={{
+                      '& .MuiTableCell-root': {
+                        p: 0.5,
+                        '&:first-of-type': {
+                          pl: 1
+                        }
+                      }
+                    }}
+                  >
+                    <Table size="small">
+                      <TableHead>
+                        <TableRow>
+                          <TableCell sx={{ fontWeight: 600, minWidth: 160 }}>Services</TableCell>
                           <TableCell
-                            colSpan={extraActions.filter(action => 
-                              Object.values(module.services).some(service => service.actions.includes(action))
-                            ).length}
+                            colSpan={4}
                             align="center"
                             sx={{
                               fontWeight: 600,
-                              bgcolor: 'secondary.lighter',
+                              bgcolor: 'primary.lighter',
                               borderBottom: '2px solid',
-                              borderColor: 'secondary.main',
+                              borderColor: 'primary.main',
                               py: 0.5
                             }}
                           >
-                            Additional Actions
+                            Common Actions
                           </TableCell>
-                        )}
-                      </TableRow>
-                      <TableRow>
-                        <TableCell />
-                        {commonActions.map((action) => (
-                          <TableCell
-                            key={action}
-                            align="center"
-                            sx={{
-                              fontWeight: 500,
-                              fontSize: '0.8rem',
-                              py: 0.5,
-                              px: 0.5
-                            }}
-                          >
-                            <Box
-                              sx={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'center',
-                                gap: 0.25
-                              }}
-                            >
-                              <Checkbox
-                                size="small"
-                                onChange={(e) => handleSelectAllAction(module.module, action, e.target.checked)}
-                                checked={isActionAllSelected(module.module, action)}
-                                indeterminate={isActionIndeterminate(module.module, action)}
-                                color="secondary"
-                              />
-                              {actionLabels[action]}
-                            </Box>
-                          </TableCell>
-                        ))}
-                        {extraActions
-                          .filter(action => Object.values(module.services).some(service => service.actions.includes(action)))
-                          .map((action) => (
+                          {Object.values(module.services).some((service) =>
+                            service.actions.some((action) => !commonActions.includes(action))
+                          ) && (
+                              <TableCell
+                                colSpan={extraActions.filter(action =>
+                                  Object.values(module.services).some(service => service.actions.includes(action))
+                                ).length}
+                                align="center"
+                                sx={{
+                                  fontWeight: 600,
+                                  bgcolor: 'secondary.lighter',
+                                  borderBottom: '2px solid',
+                                  borderColor: 'secondary.main',
+                                  py: 0.5
+                                }}
+                              >
+                                Additional Actions
+                              </TableCell>
+                            )}
+                        </TableRow>
+                        <TableRow>
+                          <TableCell />
+                          {commonActions.map((action) => (
                             <TableCell
                               key={action}
                               align="center"
@@ -470,8 +440,7 @@ const PermissionsDrawer = ({ open, onClose, selectedUser, selectedPermissions, o
                                 fontWeight: 500,
                                 fontSize: '0.8rem',
                                 py: 0.5,
-                                px: 0.5,
-                                bgcolor: 'secondary.lighter'
+                                px: 0.5
                               }}
                             >
                               <Box
@@ -493,58 +462,73 @@ const PermissionsDrawer = ({ open, onClose, selectedUser, selectedPermissions, o
                               </Box>
                             </TableCell>
                           ))}
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {Object.entries(module.services).map(([serviceKey, service]) => (
-                        <TableRow
-                          key={serviceKey}
-                          sx={{
-                            '&:last-child td, &:last-child th': { border: 0 },
-                            '&:hover': {
-                              bgcolor: 'action.hover'
-                            }
-                          }}
-                        >
-                          <TableCell
-                            component="th"
-                            scope="row"
+                          {extraActions
+                            .filter(action => Object.values(module.services).some(service => service.actions.includes(action)))
+                            .map((action) => (
+                              <TableCell
+                                key={action}
+                                align="center"
+                                sx={{
+                                  fontWeight: 500,
+                                  fontSize: '0.8rem',
+                                  py: 0.5,
+                                  px: 0.5,
+                                  bgcolor: 'secondary.lighter'
+                                }}
+                              >
+                                <Box
+                                  sx={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    gap: 0.25
+                                  }}
+                                >
+                                  <Checkbox
+                                    size="small"
+                                    onChange={(e) => handleSelectAllAction(module.module, action, e.target.checked)}
+                                    checked={isActionAllSelected(module.module, action)}
+                                    indeterminate={isActionIndeterminate(module.module, action)}
+                                    color="secondary"
+                                  />
+                                  {actionLabels[action]}
+                                </Box>
+                              </TableCell>
+                            ))}
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {Object.entries(module.services).map(([serviceKey, service]) => (
+                          <TableRow
+                            key={serviceKey}
                             sx={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: 0.5,
-                              bgcolor: 'background.paper',
-                              fontSize: '0.9rem'
+                              '&:last-child td, &:last-child th': { border: 0 },
+                              '&:hover': {
+                                bgcolor: 'action.hover'
+                              }
                             }}
                           >
-                            <Checkbox
-                              size="small"
-                              onChange={(e) => handleSelectAllService(module.module, serviceKey, e.target.checked)}
-                              checked={isServiceAllSelected(serviceKey, service)}
-                              indeterminate={isServiceIndeterminate(serviceKey, service)}
-                              color="secondary"
-                            />
-                            {service.name}
-                          </TableCell>
-                          {commonActions.map((action) => (
-                            <TableCell key={action} align="center" sx={{ py: 0.25, px: 0.5 }}>
-                              {service.actions.includes(action) ? (
-                                <Checkbox
-                                  size="small"
-                                  checked={selectedPermissions[getPermissionKey(serviceKey, action)] || false}
-                                  onChange={(e) => onPermissionChange(getPermissionKey(serviceKey, action), e.target.checked)}
-                                  color="secondary"
-                                />
-                              ) : (
-                                <Typography variant="body2" color="text.primary" sx={{ opacity: 0.7, fontSize: '1.75rem' }}>
-                                  -
-                                </Typography>
-                              )}
+                            <TableCell
+                              component="th"
+                              scope="row"
+                              sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 0.5,
+                                bgcolor: 'background.paper',
+                                fontSize: '0.9rem'
+                              }}
+                            >
+                              <Checkbox
+                                size="small"
+                                onChange={(e) => handleSelectAllService(module.module, serviceKey, e.target.checked)}
+                                checked={isServiceAllSelected(serviceKey, service)}
+                                indeterminate={isServiceIndeterminate(serviceKey, service)}
+                                color="secondary"
+                              />
+                              {service.name}
                             </TableCell>
-                          ))}
-                          {extraActions
-                            .filter(action => Object.values(module.services).some(s => s.actions.includes(action)))
-                            .map((action) => (
+                            {commonActions.map((action) => (
                               <TableCell key={action} align="center" sx={{ py: 0.25, px: 0.5 }}>
                                 {service.actions.includes(action) ? (
                                   <Checkbox
@@ -554,22 +538,41 @@ const PermissionsDrawer = ({ open, onClose, selectedUser, selectedPermissions, o
                                     color="secondary"
                                   />
                                 ) : (
-                                  <Typography variant="h5" color="text.secondary" sx={{ opacity: 0.7, fontSize: '1.75rem' }}>
+                                  <Typography variant="body2" color="text.primary" sx={{ opacity: 0.7, fontSize: '1.75rem' }}>
                                     -
                                   </Typography>
                                 )}
                               </TableCell>
                             ))}
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </AccordionDetails>
-            </Accordion>
-          ))}
-        </Box>
-      )}
+                            {extraActions
+                              .filter(action => Object.values(module.services).some(s => s.actions.includes(action)))
+                              .map((action) => (
+                                <TableCell key={action} align="center" sx={{ py: 0.25, px: 0.5 }}>
+                                  {service.actions.includes(action) ? (
+                                    <Checkbox
+                                      size="small"
+                                      checked={selectedPermissions[getPermissionKey(serviceKey, action)] || false}
+                                      onChange={(e) => onPermissionChange(getPermissionKey(serviceKey, action), e.target.checked)}
+                                      color="secondary"
+                                    />
+                                  ) : (
+                                    <Typography variant="h5" color="text.secondary" sx={{ opacity: 0.7, fontSize: '1.75rem' }}>
+                                      -
+                                    </Typography>
+                                  )}
+                                </TableCell>
+                              ))}
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </AccordionDetails>
+              </Accordion>
+            ))}
+          </Box>
+        )
+      }
       <Box
         sx={{
           mt: 2,
@@ -610,7 +613,7 @@ const PermissionsDrawer = ({ open, onClose, selectedUser, selectedPermissions, o
           Save Changes
         </Button>
       </Box>
-    </Drawer>
+    </Drawer >
   );
 };
 
