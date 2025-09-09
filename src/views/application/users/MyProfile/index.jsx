@@ -124,14 +124,14 @@ export default function Profile2() {
         subheader={
           value === 0
             ? 'Profile Information'
-            
-              : value === 1
-                ? 'Address Information'
-                : value === 2
-                  ? 'Educational Information'
-                  : value === 4
-                    ? 'Change Password'
-                    : ''
+
+            : value === 1
+              ? 'Address Information'
+              : value === 2
+                ? 'Educational Information'
+                : value === 4
+                  ? 'Change Password'
+                  : ''
         }
       />
       <Divider />
@@ -231,12 +231,12 @@ export default function Profile2() {
               <AddressInfo user={user} handleNext={handleNext} handleBack={handleBack} tabChange={handleChange} tabval={value} />
             </TabPanel>
 
-          
+
             <TabPanel value={value} index={2}>
 
               <EducationInfo user={user} handleNext={handleNext} handleBack={handleBack} tabChange={handleChange} tabval={value} />
             </TabPanel>
-            <TabPanel value={value} index={4}>
+            <TabPanel value={value} index={3}>
               <ChangePassword user={user} handleNext={handleNext} handleBack={handleBack} tabChange={handleChange} tabval={value} />
             </TabPanel>
           </CardContent>
