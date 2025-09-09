@@ -8,7 +8,25 @@ import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import EventIcon from '@mui/icons-material/Event';
 import PersonIcon from '@mui/icons-material/Person';
 import SearchIcon from '@mui/icons-material/Search';
-import { Box, Button, Chip, Grid2, IconButton, InputAdornment, MenuItem, Paper, Stack, Table, TableBody, TableCell, TableHead, TableRow, TextField, Typography, Avatar } from '@mui/material';
+import {
+  Box,
+  Button,
+  Chip,
+  Grid2,
+  IconButton,
+  InputAdornment,
+  MenuItem,
+  Paper,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography,
+  Avatar
+} from '@mui/material';
 import Pagination from '@mui/material/Pagination';
 import React, { useEffect, useState } from 'react';
 import Factory from 'utils/Factory';
@@ -36,18 +54,14 @@ const filters = [
   { label: 'Documents', options: ['All', 'Doc1', 'Doc2'] },
   { label: 'Status', options: ['All', 'Processed', 'Completed'] },
   { label: 'Creator', options: ['All', 'Srinivas', 'Surya'] },
-  { label: 'Date', options: ['All', '23/12/22', '12/09/22'] },
+  { label: 'Date', options: ['All', '23/12/22', '12/09/22'] }
 ];
 
 const statusChip = (status) => {
-  if (status === 'Processed')
-    return <Chip label="Processed" sx={{ bgcolor: '#FFF9C4', color: '#FBC02D', fontWeight: 500 }} />;
-  if (status === 'Completed')
-    return <Chip label="Completed" sx={{ bgcolor: '#C8E6C9', color: '#388E3C', fontWeight: 500 }} />;
-  if (status === 'Yet to Start')
-    return <Chip label="Yet to Start" sx={{ bgcolor: '#FFF1F0', color: '#FF4D4F', fontWeight: 500 }} />;
-  if (status === 'Draft')
-    return <Chip label="Draft" sx={{ bgcolor: '#FFF7E3', color: '#FAAD14', fontWeight: 500, width: 90 }} />;
+  if (status === 'Processed') return <Chip label="Processed" sx={{ bgcolor: '#FFF9C4', color: '#FBC02D', fontWeight: 500 }} />;
+  if (status === 'Completed') return <Chip label="Completed" sx={{ bgcolor: '#C8E6C9', color: '#388E3C', fontWeight: 500 }} />;
+  if (status === 'Yet to Start') return <Chip label="Yet to Start" sx={{ bgcolor: '#FFF1F0', color: '#FF4D4F', fontWeight: 500 }} />;
+  if (status === 'Draft') return <Chip label="Draft" sx={{ bgcolor: '#FFF7E3', color: '#FAAD14', fontWeight: 500, width: 90 }} />;
   return <Chip label={status} />;
 };
 
@@ -97,7 +111,7 @@ export default function Drafting({ id, tab = 'document', contextId }) {
     { label: 'Completed', value: 'completed' },
     { label: 'In Progress', value: 'in_progress' },
     { label: 'Draft', value: 'draft' },
-    { label: 'All', value: 'All' },
+    { label: 'All', value: 'All' }
   ];
 
   // Helper to build query string from selected filters
@@ -108,7 +122,8 @@ export default function Drafting({ id, tab = 'document', contextId }) {
     if (selectedEvent && selectedEvent !== 'All') params.push(`event_name=${encodeURIComponent(selectedEvent)}`);
     if (selectedDocument && selectedDocument !== 'All') params.push(`document_name=${encodeURIComponent(selectedDocument)}`);
     if (selectedCreator && selectedCreator !== 'All') params.push(`created_by=${encodeURIComponent(selectedCreator)}`);
-    if (selectedDate) params.push(`created_at=${encodeURIComponent(selectedDate.format ? selectedDate.format('YYYY-MM-DD') : selectedDate)}`);
+    if (selectedDate)
+      params.push(`created_at=${encodeURIComponent(selectedDate.format ? selectedDate.format('YYYY-MM-DD') : selectedDate)}`);
     return params.length > 0 ? `?${params.join('&')}` : '';
   };
 
@@ -117,12 +132,18 @@ export default function Drafting({ id, tab = 'document', contextId }) {
     setLoading(true);
     let url = `/documentdrafting/filtered-documents/${id}/` + buildQueryString();
     console.log('Fetching with filters:', {
-      selectedCategory, selectedEvent, selectedDocument, selectedStatus, selectedCreator, selectedDate, url
+      selectedCategory,
+      selectedEvent,
+      selectedDocument,
+      selectedStatus,
+      selectedCreator,
+      selectedDate,
+      url
     });
     Factory('get', url, {}, {})
-      .then(response => {
+      .then((response) => {
         const resData = response?.res?.data || response?.res || response;
-        const rows = (resData?.results || resData || []).map(item => ({
+        const rows = (resData?.results || resData || []).map((item) => ({
           name: item?.file_name || item?.document?.name || '-',
 
           category: item.category?.name || '-',
@@ -131,7 +152,7 @@ export default function Drafting({ id, tab = 'document', contextId }) {
           lastEdited: item.last_edited || item.created_date || '-',
           creator: item.creator || '-',
           id: item.id,
-          file: item.file || null,
+          file: item.file || null
         }));
         setTableRows(rows);
       })
@@ -144,8 +165,7 @@ export default function Drafting({ id, tab = 'document', contextId }) {
     setStatsLoading(true);
     // Factory('get', /documentdrafting/documents-summary-by-context/?doc_draft_id=${id}, {}, {})
     Factory('get', `/documentdrafting/documents-summary-by-context/?doc_draft_id=${id}`, {}, {})
-
-      .then(response => {
+      .then((response) => {
         const resData = response?.res?.data || response?.res || response;
         // Convert object to array of { label, value }
         const statsArr = Object.entries(resData || {}).map(([label, value]) => ({ label, value }));
@@ -159,7 +179,7 @@ export default function Drafting({ id, tab = 'document', contextId }) {
     if (!id) return;
     setFavouritesLoading(true);
     Factory('get', `/documentdrafting/favourites/by-draft/${id}/`, {}, {})
-      .then(response => {
+      .then((response) => {
         const data = response?.res?.data || response?.res || response;
         setFavourites(data || []);
       })
@@ -171,7 +191,7 @@ export default function Drafting({ id, tab = 'document', contextId }) {
     if (!id) return;
     setRecentDocumentsLoading(true);
     Factory('get', `/documentdrafting/context/${id}/recent-documents/`, {}, {})
-      .then(response => {
+      .then((response) => {
         const data = response?.res?.data || response?.res || response;
         setRecentDocuments(data || []);
       })
@@ -183,7 +203,7 @@ export default function Drafting({ id, tab = 'document', contextId }) {
     if (!id) return;
     setRecentEventsLoading(true);
     Factory('get', `/documentdrafting/context/${id}/recent-events/`, {}, {})
-      .then(response => {
+      .then((response) => {
         const data = response?.res?.data || response?.res || response;
         setRecentEvents(data || []);
       })
@@ -192,27 +212,35 @@ export default function Drafting({ id, tab = 'document', contextId }) {
   }, [id]);
 
   useEffect(() => {
+    if (!id) return;
     setFilterOptionsLoading(true);
-    Factory('get', '/documentdrafting/filter-dropdown-data/', {}, {})
-      .then(response => {
+    Factory('get', `/documentdrafting/filter-dropdown-data/?context_id=${id}`, {}, {})
+        
+    .then((response) => {
         const data = response?.res?.data || response?.res || response;
         setFilterOptions({
           category_names: data.category_names || [],
           event_names: data.event_names || [],
           document_names: data.document_names || [],
           statuses: data.statuses || [],
-          created_by: data.created_by || []
+          created_by: (data.created_by || []).map((c) => ({
+            id: c.id,
+            name: c.name
+          }))
         });
       })
-      .catch(() => setFilterOptions({
-        category_names: [],
-        event_names: [],
-        document_names: [],
-        statuses: [],
-        created_by: []
-      }))
+      .catch(() =>
+        setFilterOptions({
+          category_names: [],
+          event_names: [],
+          document_names: [],
+          statuses: [],
+          created_by: []
+        })
+      )
       .finally(() => setFilterOptionsLoading(false));
-  }, []);
+  }, [id]);
+  
 
   useEffect(() => {
     if (location.state?.showEvent) {
@@ -246,36 +274,36 @@ export default function Drafting({ id, tab = 'document', contextId }) {
   };
 
   const statIcons = {
-    "Total Document": <DescriptionOutlinedIcon color="primary" fontSize="large" />,
-    "Draft": <DraftsOutlinedIcon color="warning" fontSize="large" />,
-    "Finalized": <CheckCircleOutlineIcon color="success" fontSize="large" />,
-    "Action Pending": <ErrorOutlineIcon color="error" fontSize="large" />,
+    'Total Document': <DescriptionOutlinedIcon color="primary" fontSize="large" />,
+    Draft: <DraftsOutlinedIcon color="warning" fontSize="large" />,
+    Finalized: <CheckCircleOutlineIcon color="success" fontSize="large" />,
+    'Action Pending': <ErrorOutlineIcon color="error" fontSize="large" />
   };
 
   const statStyles = {
-    "Total Document": {
-      iconBg: "#E3EAFE",
-      iconColor: "#2F54EB",
-      buttonBg: "#E3EAFE",
-      buttonColor: "#2F54EB"
+    'Total Document': {
+      iconBg: '#E3EAFE',
+      iconColor: '#2F54EB',
+      buttonBg: '#E3EAFE',
+      buttonColor: '#2F54EB'
     },
-    "Draft": {
-      iconBg: "#FFF7E3",
-      iconColor: "#FAAD14",
-      buttonBg: "#F0F0F0",
-      buttonColor: "#595959"
+    Draft: {
+      iconBg: '#FFF7E3',
+      iconColor: '#FAAD14',
+      buttonBg: '#F0F0F0',
+      buttonColor: '#595959'
     },
-    "Finalized": {
-      iconBg: "#E6FAF0",
-      iconColor: "#52C41A",
-      buttonBg: "#F0F0F0",
-      buttonColor: "#595959"
+    Finalized: {
+      iconBg: '#E6FAF0',
+      iconColor: '#52C41A',
+      buttonBg: '#F0F0F0',
+      buttonColor: '#595959'
     },
-    "Action Pending": {
-      iconBg: "#FFF1F0",
-      iconColor: "#FF4D4F",
-      buttonBg: "#F0F0F0",
-      buttonColor: "#595959"
+    'Action Pending': {
+      iconBg: '#FFF1F0',
+      iconColor: '#FF4D4F',
+      buttonBg: '#F0F0F0',
+      buttonColor: '#595959'
     }
   };
 
@@ -288,31 +316,37 @@ export default function Drafting({ id, tab = 'document', contextId }) {
     try {
       const result = await Factory('delete', `/documentdrafting/context-wise-event-document/${row.id}/`);
       if (result.res && result.res.status_cd === 0) {
-        dispatch(openSnackbar({
-          open: true,
-          message: 'Document deleted successfully',
-          variant: 'alert',
-          alert: { color: 'success' },
-          close: false
-        }));
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'Document deleted successfully',
+            variant: 'alert',
+            alert: { color: 'success' },
+            close: false
+          })
+        );
         setTableRows((prev) => prev.filter((doc) => doc.id !== row.id));
       } else {
-        dispatch(openSnackbar({
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: result.message || 'Failed to delete document',
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
+      }
+    } catch (err) {
+      dispatch(
+        openSnackbar({
           open: true,
-          message: result.message || 'Failed to delete document',
+          message: 'Failed to delete document',
           variant: 'alert',
           alert: { color: 'error' },
           close: false
-        }));
-      }
-    } catch (err) {
-      dispatch(openSnackbar({
-        open: true,
-        message: 'Failed to delete document',
-        variant: 'alert',
-        alert: { color: 'error' },
-        close: false
-      }));
+        })
+      );
     }
   };
 
@@ -330,30 +364,36 @@ export default function Drafting({ id, tab = 'document', contextId }) {
       const result = await Factory('post', '/documentdrafting/context-wise-event-document-create/', payload);
       if (result.res && result.res.status_cd === 0 && result.res.id) {
         navigate(`/app/drafting/fill/${result.res.id}`);
-        dispatch(openSnackbar({
-          open: true,
-          message: 'Drafting context created',
-          variant: 'alert',
-          alert: { color: 'success' },
-          close: false
-        }));
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'Drafting context created',
+            variant: 'alert',
+            alert: { color: 'success' },
+            close: false
+          })
+        );
       } else {
-        dispatch(openSnackbar({
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: result.message || 'Failed to create document drafting context',
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
+      }
+    } catch (err) {
+      dispatch(
+        openSnackbar({
           open: true,
-          message: result.message || 'Failed to create document drafting context',
+          message: 'Failed to create document drafting context',
           variant: 'alert',
           alert: { color: 'error' },
           close: false
-        }));
-      }
-    } catch (err) {
-      dispatch(openSnackbar({
-        open: true,
-        message: 'Failed to create document drafting context',
-        variant: 'alert',
-        alert: { color: 'error' },
-        close: false
-      }));
+        })
+      );
     }
   };
 
@@ -369,7 +409,6 @@ export default function Drafting({ id, tab = 'document', contextId }) {
     setConfirmDialogOpen(false);
     setSelectedFavourite(null);
   };
-
 
   // Card click handler
   const handleCardClick = (card) => {
@@ -403,11 +442,7 @@ export default function Drafting({ id, tab = 'document', contextId }) {
         gap={2}
         width="100%"
       >
-        <Typography
-          variant="h5"
-          fontWeight={600}
-          sx={{ m: 0, mb: { xs: 2, md: 0 }, fontSize: { xs: 18, sm: 22 } }}
-        >
+        <Typography variant="h5" fontWeight={600} sx={{ m: 0, mb: { xs: 2, md: 0 }, fontSize: { xs: 18, sm: 22 } }}>
           Document Drafting
         </Typography>
         <Stack
@@ -472,12 +507,14 @@ export default function Drafting({ id, tab = 'document', contextId }) {
             size="small"
             sx={{ bgcolor: '#F5F7FA' }}
             value={selectedCategory}
-            onChange={e => setSelectedCategory(e.target.value)}
+            onChange={(e) => setSelectedCategory(e.target.value)}
             disabled={filterOptionsLoading}
           >
             <MenuItem value="All">All</MenuItem>
-            {filterOptions.category_names.map(option => (
-              <MenuItem key={option} value={option}>{option}</MenuItem>
+            {filterOptions.category_names.map((option) => (
+              <MenuItem key={option} value={option}>
+                {option}
+              </MenuItem>
             ))}
           </TextField>
         </Grid2>
@@ -490,12 +527,14 @@ export default function Drafting({ id, tab = 'document', contextId }) {
             size="small"
             sx={{ bgcolor: '#F5F7FA' }}
             value={selectedEvent}
-            onChange={e => setSelectedEvent(e.target.value)}
+            onChange={(e) => setSelectedEvent(e.target.value)}
             disabled={filterOptionsLoading}
           >
             <MenuItem value="All">All</MenuItem>
-            {filterOptions.event_names.map(option => (
-              <MenuItem key={option} value={option}>{option}</MenuItem>
+            {filterOptions.event_names.map((option) => (
+              <MenuItem key={option} value={option}>
+                {option}
+              </MenuItem>
             ))}
           </TextField>
         </Grid2>
@@ -508,12 +547,14 @@ export default function Drafting({ id, tab = 'document', contextId }) {
             size="small"
             sx={{ bgcolor: '#F5F7FA' }}
             value={selectedDocument}
-            onChange={e => setSelectedDocument(e.target.value)}
+            onChange={(e) => setSelectedDocument(e.target.value)}
             disabled={filterOptionsLoading}
           >
             <MenuItem value="All">All</MenuItem>
-            {filterOptions.document_names.map(option => (
-              <MenuItem key={option} value={option}>{option}</MenuItem>
+            {filterOptions.document_names.map((option) => (
+              <MenuItem key={option} value={option}>
+                {option}
+              </MenuItem>
             ))}
           </TextField>
         </Grid2>
@@ -526,11 +567,19 @@ export default function Drafting({ id, tab = 'document', contextId }) {
             size="small"
             sx={{ bgcolor: '#F5F7FA' }}
             value={selectedStatus}
-            onChange={e => setSelectedStatus(e.target.value)}
+            onChange={(e) => setSelectedStatus(e.target.value)}
             disabled={filterOptionsLoading}
           >
-            {statusOptions.map(option => (
-              <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
+            <MenuItem value="All">All</MenuItem>
+            {/* {statusOptions.map((option) => (
+              <MenuItem key={option.value} value={option.value}>
+                {option.label}
+              </MenuItem>
+            ))} */}
+             {filterOptions.statuses.map((option) => (
+              <MenuItem key={option} value={option}>
+                {option}
+              </MenuItem>
             ))}
           </TextField>
         </Grid2>
@@ -543,12 +592,20 @@ export default function Drafting({ id, tab = 'document', contextId }) {
             size="small"
             sx={{ bgcolor: '#F5F7FA' }}
             value={selectedCreator}
-            onChange={e => setSelectedCreator(e.target.value)}
+            onChange={(e) => setSelectedCreator(e.target.value)}
             disabled={filterOptionsLoading}
           >
+            {/* <MenuItem value="All">All</MenuItem>
+            {filterOptions.created_by.map((option) => (
+              <MenuItem key={option} value={option}>
+                {option}
+              </MenuItem>
+            ))} */}
             <MenuItem value="All">All</MenuItem>
-            {filterOptions.created_by.map(option => (
-              <MenuItem key={option} value={option}>{option}</MenuItem>
+            {filterOptions.created_by.map((option) => (
+              <MenuItem key={option.id} value={option.id}>
+                {option.name}
+              </MenuItem>
             ))}
           </TextField>
         </Grid2>
@@ -558,13 +615,13 @@ export default function Drafting({ id, tab = 'document', contextId }) {
             <DatePicker
               label="Date"
               value={selectedDate}
-              onChange={newValue => setSelectedDate(newValue)}
+              onChange={(newValue) => setSelectedDate(newValue)}
               slotProps={{
                 textField: {
                   fullWidth: true,
                   size: 'small',
                   sx: { bgcolor: '#F5F7FA' },
-                  InputLabelProps: { shrink: true },
+                  InputLabelProps: { shrink: true }
                 }
               }}
             />
@@ -578,7 +635,9 @@ export default function Drafting({ id, tab = 'document', contextId }) {
       ) : (
         <Grid2 container spacing={3} mb={4}>
           {stats.length === 0 ? (
-            <Grid2 size={{ xs: 12 }}><Typography align="center">No stats found</Typography></Grid2>
+            <Grid2 size={{ xs: 12 }}>
+              <Typography align="center">No stats found</Typography>
+            </Grid2>
           ) : (
             stats.map((stat) => {
               let cardKey = 'all';
@@ -608,20 +667,23 @@ export default function Drafting({ id, tab = 'document', contextId }) {
                       '&:hover': {
                         boxShadow: '0 4px 16px 0 rgba(64, 66, 74, 0.18)',
                         borderColor: style.iconColor,
-                        background: cardBgGradient,
-                      },
+                        background: cardBgGradient
+                      }
                     }}
                     onClick={() => handleCardClick(cardKey)}
                   >
                     {/* Row 1: Icon and Heading */}
                     <Box display="flex" alignItems="center" gap={2} mb={1}>
-                      <Avatar variant="circular" sx={{ width: 44, height: 44, bgcolor: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Avatar
+                        variant="circular"
+                        sx={{ width: 44, height: 44, bgcolor: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                      >
                         {React.cloneElement(statIcons[stat.label] || <DescriptionOutlinedIcon />, {
                           style: { color: style.iconColor, fontSize: 28 }
                         })}
                       </Avatar>
                       <Typography variant="h6" fontWeight={800} fontSize={15} sx={{ color: '#0A1F44', mb: 0 }}>
-                        {stat.label === "Total Document" ? "Total Documents" : stat.label}
+                        {stat.label === 'Total Document' ? 'Total Documents' : stat.label}
                       </Typography>
                     </Box>
                     {/* Row 2: Description/Paragraph */}
@@ -643,8 +705,8 @@ export default function Drafting({ id, tab = 'document', contextId }) {
                         variant="contained"
                         disableElevation
                         sx={{
-                          background: (selectedStatus && selectedStatus.toLowerCase() === cardKey) ? style.iconColor : '#F0F0F0',
-                          color: (selectedStatus && selectedStatus.toLowerCase() === cardKey) ? '#fff' : '#595959',
+                          background: selectedStatus && selectedStatus.toLowerCase() === cardKey ? style.iconColor : '#F0F0F0',
+                          color: selectedStatus && selectedStatus.toLowerCase() === cardKey ? '#fff' : '#595959',
                           fontWeight: 500,
                           borderRadius: 2,
                           textTransform: 'none',
@@ -657,10 +719,13 @@ export default function Drafting({ id, tab = 'document', contextId }) {
                           transition: 'background 0.2s, color 0.2s',
                           '&:hover': {
                             background: style.iconColor,
-                            color: '#fff',
+                            color: '#fff'
                           }
                         }}
-                        onClick={e => { e.stopPropagation(); handleCardView(cardKey); }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCardView(cardKey);
+                        }}
                       >
                         View
                       </Button>
@@ -670,14 +735,15 @@ export default function Drafting({ id, tab = 'document', contextId }) {
               );
             })
           )}
-          <Table sx={{
-            minWidth: 600, borderBottom: '2px solid rgb(196, 191, 191)',
-            borderLeft: '0.1px solid #b0b8c4',
-            borderTop: '0.1px solid #b0b8c4',
-            borderRight: '0.1px solid #b0b8c4',
-          }}>
-
-          </Table>
+          <Table
+            sx={{
+              minWidth: 600,
+              borderBottom: '2px solid rgb(196, 191, 191)',
+              borderLeft: '0.1px solid #b0b8c4',
+              borderTop: '0.1px solid #b0b8c4',
+              borderRight: '0.1px solid #b0b8c4'
+            }}
+          ></Table>
         </Grid2>
       )}
 
@@ -687,14 +753,15 @@ export default function Drafting({ id, tab = 'document', contextId }) {
       ) : (
         <Paper elevation={1} sx={{ borderRadius: 3, overflowX: 'auto', width: '100%' }}>
           <Table sx={{ minWidth: 600 }}>
-
-            <TableHead sx={{
-              backgroundColor: 'primary.main',
-              '& .MuiTableCell-root': {
-                color: '#ffffff !important'
-              }
-            }}>
-              <TableRow >
+            <TableHead
+              sx={{
+                backgroundColor: 'primary.main',
+                '& .MuiTableCell-root': {
+                  color: '#ffffff !important'
+                }
+              }}
+            >
+              <TableRow>
                 <TableCell>Name</TableCell>
                 <TableCell>Category</TableCell>
                 <TableCell>Event</TableCell>
@@ -709,10 +776,7 @@ export default function Drafting({ id, tab = 'document', contextId }) {
                 <TableRow>
                   {/* <TableCell colSpan={7} align="center">No data found</TableCell> */}
                   <TableCell colSpan={7} align="center" sx={{ py: 6 }}>
-                    <EmptyDataPlaceholder
-                      title="No Data Found"
-                      subtitle="There is no content to display."
-                    />
+                    <EmptyDataPlaceholder title="No Data Found" subtitle="There is no content to display." />
                   </TableCell>
                 </TableRow>
               ) : (
@@ -734,13 +798,15 @@ export default function Drafting({ id, tab = 'document', contextId }) {
                             // 1. Fetch draft details to get file_url
                             const fileUrl = row.file;
                             if (!fileUrl) {
-                              dispatch(openSnackbar({
-                                open: true,
-                                message: 'No file available for download. Please finalize the document first.',
-                                variant: 'alert',
-                                alert: { color: 'error' },
-                                close: false
-                              }));
+                              dispatch(
+                                openSnackbar({
+                                  open: true,
+                                  message: 'No file available for download. Please finalize the document first.',
+                                  variant: 'alert',
+                                  alert: { color: 'error' },
+                                  close: false
+                                })
+                              );
                               return;
                             }
                             // 2. Get presigned URL
@@ -748,30 +814,36 @@ export default function Drafting({ id, tab = 'document', contextId }) {
                             const presignedUrl = presigned?.res?.data?.presigned_url || presigned?.res?.data?.url;
                             if (presigned?.res && presigned?.res?.status_cd === 0 && presignedUrl) {
                               window.open(presignedUrl, '_blank');
-                              dispatch(openSnackbar({
-                                open: true,
-                                message: 'Download started',
-                                variant: 'alert',
-                                alert: { color: 'success' },
-                                close: false
-                              }));
+                              dispatch(
+                                openSnackbar({
+                                  open: true,
+                                  message: 'Download started',
+                                  variant: 'alert',
+                                  alert: { color: 'success' },
+                                  close: false
+                                })
+                              );
                             } else {
-                              dispatch(openSnackbar({
+                              dispatch(
+                                openSnackbar({
+                                  open: true,
+                                  message: presigned?.res?.message || 'Failed to get presigned URL',
+                                  variant: 'alert',
+                                  alert: { color: 'error' },
+                                  close: false
+                                })
+                              );
+                            }
+                          } catch (err) {
+                            dispatch(
+                              openSnackbar({
                                 open: true,
-                                message: presigned?.res?.message || 'Failed to get presigned URL',
+                                message: 'Failed to download file',
                                 variant: 'alert',
                                 alert: { color: 'error' },
                                 close: false
-                              }));
-                            }
-                          } catch (err) {
-                            dispatch(openSnackbar({
-                              open: true,
-                              message: 'Failed to download file',
-                              variant: 'alert',
-                              alert: { color: 'error' },
-                              close: false
-                            }));
+                              })
+                            );
                           }
                         }}
                         onDelete={handleDeleteDocument}
@@ -790,22 +862,14 @@ export default function Drafting({ id, tab = 'document', contextId }) {
           {/* Pagination Controls */}
           {!loading && pageCount > 1 && (
             <Box display="flex" justifyContent="center" alignItems="center" mt={3} mb={3}>
-              <Pagination
-                count={pageCount}
-                page={page}
-                onChange={(e, value) => setPage(value)}
-                color="primary"
-                shape="rounded"
-              />
+              <Pagination count={pageCount} page={page} onChange={(e, value) => setPage(value)} color="primary" shape="rounded" />
             </Box>
           )}
         </Paper>
       )}
 
       {/* Quick Access Panel */}
-      <Paper
-        elevation={1} sx={{ borderRadius: 3, overflowX: 'auto', width: '100%', mt: 4 }}
-      >
+      <Paper elevation={1} sx={{ borderRadius: 3, overflowX: 'auto', width: '100%', mt: 4 }}>
         <Typography
           variant="h3"
           fontWeight={700}
@@ -817,122 +881,132 @@ export default function Drafting({ id, tab = 'document', contextId }) {
             borderTopLeftRadius: '12px',
             borderTopRightRadius: '12px',
             width: '100%',
-            fontSize: { xs: 18, sm: 18 },
+            fontSize: { xs: 18, sm: 18 }
           }}
         >
           Quick Access Panel
         </Typography>
-        {(favouritesLoading || recentDocumentsLoading || recentEventsLoading) ? (
+        {favouritesLoading || recentDocumentsLoading || recentEventsLoading ? (
           <CircularProgressComponent isLoading displayContent={'Loading Quick Access Panel...'} />
+        ) : favourites.length === 0 && recentDocuments.length === 0 && recentEvents.length === 0 ? (
+          <EmptyDataPlaceholder
+            title="No Quick Access Data"
+            subtitle="There are no favourites, recently used documents, or recent events to display."
+          />
         ) : (
-          (favourites.length === 0 && recentDocuments.length === 0 && recentEvents.length === 0) ? (
-            <EmptyDataPlaceholder
-              title="No Quick Access Data"
-              subtitle="There are no favourites, recently used documents, or recent events to display."
-            />
-          ) : (
-            <Box px={{ xs: 2, sm: 0, md: 0 }} py={2}>
-              <Grid2 container spacing={4} marginLeft={{ xs: 0, md: 4 }}>
-                {/* Favourites */}
-                <Grid2 size={{ xs: 12, md: 4 }}>
-                  <Typography fontWeight={500} sx={{ color: '#0A1F44', mb: 1, fontSize: 17 }}>Favourites</Typography>
-                  <Stack spacing={0}>
-                    {favouritesLoading ? (
-                      <Typography>Loading favourites...</Typography>
-                    ) : favourites.length === 0 ? (
-                      <Typography>No favourites found</Typography>
-                    ) : (
-                      favourites.map((favourite) => (
-                        <Box
-                          key={favourite.id}
-                          display="flex"
-                          alignItems="center"
-                          gap={1}
-                          sx={{
-                            cursor: 'pointer',
-                            minWidth: 0,
-                            px: 0,
-                            height: 45,
-                            py: 0.5,
-                            borderRadius: 2,
-                            '&:hover': { background: '#f5f5f5', width: 300, height: 45, }
-                          }}
-                          onClick={() => handleOpenConfirmDialog(favourite)}
-                        >
-                          <Box sx={{ position: 'relative', display: 'inline-flex' }}>
-                            <DescriptionOutlinedIcon sx={{ color: '#A3AED0', fontSize: 28, bgcolor: '#F5F7FA', borderRadius: 2, p: 0.5 }} />
-                            <FavoriteBorderIcon
-                              sx={{
-                                color: '#3B82F6',
-                                fontSize: 14,
-                                position: 'absolute',
-                                top: 2,
-                                right: 2,
-                                bgcolor: '#fff',
-                                borderRadius: '50%',
-                              }}
-                            />
-                          </Box>
-                          <Typography sx={{ color: '#222', wordBreak: 'break-word' }}>{favourite.document?.name || favourite.name || favourite.title || favourite.document_name || 'Unnamed Document'}</Typography>
+          <Box px={{ xs: 2, sm: 0, md: 0 }} py={2}>
+            <Grid2 container spacing={4} marginLeft={{ xs: 0, md: 4 }}>
+              {/* Favourites */}
+              <Grid2 size={{ xs: 12, md: 4 }}>
+                <Typography fontWeight={500} sx={{ color: '#0A1F44', mb: 1, fontSize: 17 }}>
+                  Favourites
+                </Typography>
+                <Stack spacing={0}>
+                  {favouritesLoading ? (
+                    <Typography>Loading favourites...</Typography>
+                  ) : favourites.length === 0 ? (
+                    <Typography>No favourites found</Typography>
+                  ) : (
+                    favourites.map((favourite) => (
+                      <Box
+                        key={favourite.id}
+                        display="flex"
+                        alignItems="center"
+                        gap={1}
+                        sx={{
+                          cursor: 'pointer',
+                          minWidth: 0,
+                          px: 0,
+                          height: 45,
+                          py: 0.5,
+                          borderRadius: 2,
+                          '&:hover': { background: '#f5f5f5', width: 300, height: 45 }
+                        }}
+                        onClick={() => handleOpenConfirmDialog(favourite)}
+                      >
+                        <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+                          <DescriptionOutlinedIcon sx={{ color: '#A3AED0', fontSize: 28, bgcolor: '#F5F7FA', borderRadius: 2, p: 0.5 }} />
+                          <FavoriteBorderIcon
+                            sx={{
+                              color: '#3B82F6',
+                              fontSize: 14,
+                              position: 'absolute',
+                              top: 2,
+                              right: 2,
+                              bgcolor: '#fff',
+                              borderRadius: '50%'
+                            }}
+                          />
                         </Box>
-                      ))
-                    )}
-                  </Stack>
-                </Grid2>
-                {/* Recently Used */}
-                <Grid2 size={{ xs: 12, md: 4 }}>
-                  <Typography fontWeight={500} sx={{ color: '#0A1F44', mb: 2, fontSize: 17 }}>Recently Used Documents</Typography>
-                  <Stack spacing={2}>
-                    {recentDocumentsLoading ? (
-                      <Typography>Loading recent documents...</Typography>
-                    ) : recentDocuments.length === 0 ? (
-                      <Typography>No recent documents found</Typography>
-                    ) : (
-                      recentDocuments.map((document) => (
-                        <Box key={document.id} display="flex" alignItems="center" gap={1}>
-                          <Box sx={{ position: 'relative', display: 'inline-flex' }}>
-                            <DescriptionOutlinedIcon sx={{ color: '#A3AED0', fontSize: 28, bgcolor: '#F5F7FA', borderRadius: 2, p: 0.5 }} />
-                            <HistoryOutlinedIcon
-                              sx={{
-                                color: '#F59E42',
-                                fontSize: 14,
-                                position: 'absolute',
-                                top: 2,
-                                right: 2,
-                                bgcolor: '#fff',
-                                borderRadius: '50%',
-                              }}
-                            />
-                          </Box>
-                          <Typography sx={{ color: '#222' }}>{document.document?.name || document.name || document.title || document.document_name || 'Unnamed Document'}</Typography>
-                        </Box>
-                      ))
-                    )}
-                  </Stack>
-                </Grid2>
-                {/* Recent Events */}
-                <Grid2 size={{ xs: 12, md: 4 }}>
-                  <Typography fontWeight={500} sx={{ color: '#0A1F44', mb: 2, fontSize: 17 }}>Recent Events</Typography>
-                  <Stack spacing={2}>
-                    {recentEventsLoading ? (
-                      <Typography>Loading recent events...</Typography>
-                    ) : recentEvents.length === 0 ? (
-                      <Typography>No recent events found</Typography>
-                    ) : (
-                      recentEvents.map((event) => (
-                        <Box key={event.id} display="flex" alignItems="center" gap={1}>
-                          <Box sx={{ position: 'relative', display: 'inline-flex' }}>
-                            <DescriptionOutlinedIcon sx={{ color: '#A3AED0', fontSize: 28, bgcolor: '#F5F7FA', borderRadius: 2, p: 0.5 }} />
-                          </Box>
-                          <Typography sx={{ color: '#222' }}>{event.event?.name || event.name || event.title || event.event_name || 'Unnamed Event'}</Typography>
-                        </Box>
-                      ))
-                    )}
-                  </Stack>
-                </Grid2>
+                        <Typography sx={{ color: '#222', wordBreak: 'break-word' }}>
+                          {favourite.document?.name || favourite.name || favourite.title || favourite.document_name || 'Unnamed Document'}
+                        </Typography>
+                      </Box>
+                    ))
+                  )}
+                </Stack>
               </Grid2>
-            </Box>
-          )
+              {/* Recently Used */}
+              <Grid2 size={{ xs: 12, md: 4 }}>
+                <Typography fontWeight={500} sx={{ color: '#0A1F44', mb: 2, fontSize: 17 }}>
+                  Recently Used Documents
+                </Typography>
+                <Stack spacing={2}>
+                  {recentDocumentsLoading ? (
+                    <Typography>Loading recent documents...</Typography>
+                  ) : recentDocuments.length === 0 ? (
+                    <Typography>No recent documents found</Typography>
+                  ) : (
+                    recentDocuments.map((document) => (
+                      <Box key={document.id} display="flex" alignItems="center" gap={1}>
+                        <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+                          <DescriptionOutlinedIcon sx={{ color: '#A3AED0', fontSize: 28, bgcolor: '#F5F7FA', borderRadius: 2, p: 0.5 }} />
+                          <HistoryOutlinedIcon
+                            sx={{
+                              color: '#F59E42',
+                              fontSize: 14,
+                              position: 'absolute',
+                              top: 2,
+                              right: 2,
+                              bgcolor: '#fff',
+                              borderRadius: '50%'
+                            }}
+                          />
+                        </Box>
+                        <Typography sx={{ color: '#222' }}>
+                          {document.document?.name || document.name || document.title || document.document_name || 'Unnamed Document'}
+                        </Typography>
+                      </Box>
+                    ))
+                  )}
+                </Stack>
+              </Grid2>
+              {/* Recent Events */}
+              <Grid2 size={{ xs: 12, md: 4 }}>
+                <Typography fontWeight={500} sx={{ color: '#0A1F44', mb: 2, fontSize: 17 }}>
+                  Recent Events
+                </Typography>
+                <Stack spacing={2}>
+                  {recentEventsLoading ? (
+                    <Typography>Loading recent events...</Typography>
+                  ) : recentEvents.length === 0 ? (
+                    <Typography>No recent events found</Typography>
+                  ) : (
+                    recentEvents.map((event) => (
+                      <Box key={event.id} display="flex" alignItems="center" gap={1}>
+                        <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+                          <DescriptionOutlinedIcon sx={{ color: '#A3AED0', fontSize: 28, bgcolor: '#F5F7FA', borderRadius: 2, p: 0.5 }} />
+                        </Box>
+                        <Typography sx={{ color: '#222' }}>
+                          {event.event?.name || event.name || event.title || event.event_name || 'Unnamed Event'}
+                        </Typography>
+                      </Box>
+                    ))
+                  )}
+                </Stack>
+              </Grid2>
+            </Grid2>
+          </Box>
         )}
       </Paper>
       {/* MyEvents section at the bottom of the page */}
@@ -949,10 +1023,6 @@ export default function Drafting({ id, tab = 'document', contextId }) {
         color="primary"
         icon={CheckCircleOutlineIcon}
       />
-
     </Box>
-
-
   );
-
 }

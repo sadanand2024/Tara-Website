@@ -13,6 +13,7 @@ const SaasPageFaqs = Loadable(lazy(() => import('views/pages/saas-pages/Faqs')))
 const SaasPagePrivacyPolicy = Loadable(lazy(() => import('views/pages/saas-pages/PrivacyPolicy')));
 const ServicePage = Loadable(lazy(() => import('views/pages/services/ServicePage')));
 const ServiceCategory = Loadable(lazy(() => import('views/pages/services/ServiceCategory')));
+const DocumentDrafting = Loadable(lazy(() => import('views/pages/DocumentDrafting')));
 // const PayrollPage = Loadable(lazy(() => import('views/pages/products/Payroll')));
 // const InvoicingPage = Loadable(lazy(() => import('views/pages/products/invoicing/InvoicingPage')));
 const KnowledgePage = Loadable(lazy(() => import('views/pages/knowledge')));
@@ -60,10 +61,15 @@ const SimpleRoutes = {
       path: '/book-consultation',
       element: <BookConsultationPage />
     },
+     {
+      path: '/document-drafting',
+      element: <DocumentDrafting />
+    },
     {
       path: 'services/:category',
       element: <ServiceCategory />
     },
+
 
     {
       path: 'services/:category/:slug',

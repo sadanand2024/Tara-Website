@@ -19,7 +19,6 @@ import Toolbar from '@mui/material/Toolbar';
 import useScrollTrigger from '@mui/material/useScrollTrigger';
 
 // project imports
-import { ThemeMode } from 'config';
 // import Logo from 'ui-component/Logo';
 import CardMedia from '@mui/material/CardMedia';
 import Tarafirstlogo_png from 'assets/images/Tarafirstlogo_png.png'; // Tarafirstlogo_png
@@ -29,6 +28,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import { IconApps, IconBrain, IconBuildingSkyscraper, IconBuildingStore, IconCalendarTime } from '@tabler/icons-react';
 import ProductsPanel from './ProductsPanel';
 import ServicesPanel from './ServicesPanel';
+import QuickAcessPanel from './QuickAcessPanel';
 function ElevationScroll({ children, window, pathname }) {
   const theme = useTheme();
   const trigger = useScrollTrigger({
@@ -62,6 +62,7 @@ export default function AppBar({ ...others }) {
   const [drawerToggle, setDrawerToggle] = useState(false);
   const [openServices, setOpenServices] = useState(false);
   const [openProducts, setOpenProducts] = useState(false);
+  const [openQuickAcess, setOpenQuickAcess] = useState(false);
   const theme = useTheme();
   const location = useLocation();
   const { pathname } = location;
@@ -71,6 +72,8 @@ export default function AppBar({ ...others }) {
 
   const handleProductsToggle = () => setOpenProducts(!openProducts);
   const handleProductsClose = () => setOpenProducts(false);
+  const handleQuickAcessToggle = () => setOpenQuickAcess(!openQuickAcess);
+  const handleQuickAcessClose = () => setOpenQuickAcess(false);
 
   const drawerToggler = (open) => (event) => {
     if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
@@ -115,6 +118,9 @@ export default function AppBar({ ...others }) {
             </Button>
             <Button color="inherit" component={Link} href="/book-consultation">
               Book Consultation
+            </Button>
+            <Button color="inherit" onClick={handleQuickAcessToggle}>
+              Quick Acess
             </Button>
           </Stack>
 
@@ -165,6 +171,24 @@ export default function AppBar({ ...others }) {
                         <ProductsPanel onClose={() => setOpenProducts(false)} />
                       </Box>
                     )}
+                     <ListItemButton
+                      onClick={() => {
+                        setOpenQuickAcess(!openQuickAcess);
+                        setOpenServices(false);
+                        setOpenProducts(false);
+                      }}
+                    >
+                      <ListItemIcon>
+                        <IconApps />
+                      </ListItemIcon>
+                      <ListItemText primary="QuickAcess" />
+                    </ListItemButton>
+                    {openQuickAcess && (
+                      <Box sx={{ pl: 2, bgcolor: 'background.default' }}>
+                        <QuickAcessPanel onClose={() => setOpenQuickAcess(false)} />
+                      </Box>
+                    )} 
+
 
                     <ListItemButton component={Link} href="/company">
                       <ListItemIcon>
@@ -236,6 +260,11 @@ export default function AppBar({ ...others }) {
         {openProducts && (
           <Box sx={{ position: 'absolute', top: '100%', left: 0, right: 0 }}>
             <ProductsPanel onClose={handleProductsClose} />
+          </Box>
+        )}
+        {openQuickAcess && (
+          <Box sx={{ position: 'absolute', top: '100%', left: 0, right: 0 }}>
+            <QuickAcessPanel onClose={handleQuickAcessClose} />
           </Box>
         )}
         {/* </Container> */}
