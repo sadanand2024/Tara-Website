@@ -10,23 +10,15 @@ import { useDispatch } from 'store';
 import { openSnackbar } from 'store/slices/snackbar';
 import * as Yup from 'yup';
 import Factory from 'utils/Factory';
+import Modal from 'ui-component/extended/Modal';
 
-const ApplyLeaveSimple = ({ onSuccess }) => {
+const ApplyLeaveSimple = ({ open, onSuccess }) => {
   const dispatch = useDispatch();
   const [leaveDuration, setLeaveDuration] = useState('full_day');
   const [leaveTypes, setLeaveTypes] = useState([]);
   const [employeeInfo, setEmployeeInfo] = useState(null);
-  // Sample leave balance data - replace with actual API data
-  const [leaveBalance] = useState({
-    available: 18,
-    applied: 6,
-    lop: 2
-  });
-
-  // Sample leave types and managers - replace with actual API data
   const [managers, setManagers] = useState([]);
 
-  // Function to check if the leave application is backdated
   const isBackdated = () => {
     if (!formik.values.start_date) return false;
 
@@ -38,7 +30,7 @@ const ApplyLeaveSimple = ({ onSuccess }) => {
 
   const formik = useFormik({
     initialValues: {
-      employee: '', // optional fallback; we will use logged-in employee id
+      employee: '',
       leave_type: null, // Changed to null to work with Autocomplete objects
       start_date: null,
       end_date: null,
@@ -49,18 +41,15 @@ const ApplyLeaveSimple = ({ onSuccess }) => {
       attach_file: null
     },
     validationSchema: Yup.object({
-      // employee is auto-set; leave validation off
       leave_type: Yup.object().nullable().required('Leave type is required'),
       start_date: Yup.date().required('Start date is required'),
       end_date: Yup.date().required('End date is required').min(Yup.ref('start_date'), 'End date must be after start date'),
-      reason: Yup.string().required('Reason is required'),
-      contact_details: Yup.string().required('Contact details are required').min(5, 'Contact details must be at least 5 characters')
+      reason: Yup.string().required('Reason is required')
     }),
     onSubmit: async (values) => {
       try {
         const formData = new FormData();
 
-        // Prefer logged-in employee id
         const employeeId = employeeInfo?.employee_id;
 
         if (!employeeId) {
@@ -76,7 +65,7 @@ const ApplyLeaveSimple = ({ onSuccess }) => {
           return;
         }
         formData.append('employee', employeeId);
-        formData.append('leave_type', values.leave_type?.id || ''); // Use leave type ID
+        formData.append('leave_type', values.leave_type?.id || '');
         formData.append('start_date', dayjs(values.start_date).format('YYYY-MM-DD'));
         formData.append('end_date', dayjs(values.end_date).format('YYYY-MM-DD'));
         formData.append('reason', values.reason);
@@ -134,12 +123,14 @@ const ApplyLeaveSimple = ({ onSuccess }) => {
 
     if (res?.status_cd === 0) {
       const responseData = res?.data || {};
-      console.log('Leave Types API Response:', responseData);
-
-      // Extract employee info and leave types from the new response structure
       setEmployeeInfo({
         employee_id: responseData.employee_id,
-        employee_name: responseData.employee_name
+        employee_name: responseData.employee_name,
+        applied_leave: responseData.applied_leave,
+        available_leave: responseData.available_leave,
+        leave_types: responseData.leave_types,
+        lop: responseData.lop,
+        reporting_manager: responseData.reporting_manager
       });
       setLeaveTypes(responseData.leave_types || []);
     } else {
@@ -158,38 +149,69 @@ const ApplyLeaveSimple = ({ onSuccess }) => {
   useEffect(() => {
     getLeaveTypes();
   }, []);
+  const { values, setValues, handleChange, handleBlur, errors, touched, handleSubmit, resetForm } = formik;
   return (
-    <Box>
-      {/* Backdated Notice - Only show when dates are in the past */}
-      {isBackdated() && (
-        <Box sx={{ mb: 2, p: 2, bgcolor: '#fff3e0', border: '1px solid #ffcc02', borderRadius: 1 }}>
-          <Typography variant="body2" color="error" sx={{ fontWeight: 600, mb: 1 }}>
-            **Backdated Leave Application
-          </Typography>
-          <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
-            You are applying for leave on dates that have already passed. This may require additional approval and could be subject to LOP
-            (Loss of Pay) depending on company policy.
-          </Typography>
-        </Box>
-      )}
+    <Modal
+      open={open}
+      showClose={true}
+      title={`Apply Leave`}
+      handleClose={() => {
+        resetForm();
+        onSuccess(); // <- this closes the modal
+      }}
+      maxWidth="md"
+      header={{ title: `Apply Leave`, subheader: '' }}
+      footer={
+        <Stack direction="row" justifyContent="space-between" sx={{ width: 1, gap: 2 }}>
+          <Button
+            variant="outlined"
+            color="error"
+            onClick={() => {
+              resetForm();
+              onSuccess();
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => {
+              handleSubmit();
+            }}
+          >
+            Apply
+          </Button>
+        </Stack>
+      }
+    >
+      <Box component="form" onSubmit={handleSubmit} sx={{ pt: 2 }}>
+        {isBackdated() && (
+          <Box sx={{ mb: 2, p: 2, bgcolor: '#fff3e0', border: '1px solid #ffcc02', borderRadius: 1 }}>
+            <Typography variant="body2" color="error" sx={{ fontWeight: 600, mb: 1 }}>
+              **Backdated Leave Application
+            </Typography>
+            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+              You are applying for leave on dates that have already passed. This may require additional approval and could be subject to LOP
+              (Loss of Pay) depending on company policy.
+            </Typography>
+          </Box>
+        )}
 
-      <form onSubmit={formik.handleSubmit}>
         <Grid2 container spacing={3}>
-          {/* Left Column - Form Fields */}
           <Grid2 size={{ xs: 12, md: 8 }}>
             <Grid2 container spacing={2}>
-              {/* Date Fields */}
               <Grid2 size={{ xs: 12, md: 6 }}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DatePicker
                     label="From"
-                    value={formik.values.start_date}
+                    value={values.start_date}
                     onChange={(value) => formik.setFieldValue('start_date', value)}
                     slotProps={{
                       textField: {
                         fullWidth: true,
                         size: 'small',
-                        error: formik.touched.start_date && Boolean(formik.errors.start_date),
+                        error: touched.start_date && Boolean(errors.start_date),
                         helperText: formik.touched.start_date && formik.errors.start_date
                       }
                     }}
@@ -201,7 +223,7 @@ const ApplyLeaveSimple = ({ onSuccess }) => {
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DatePicker
                     label="To"
-                    value={formik.values.end_date}
+                    value={values.end_date}
                     onChange={(value) => formik.setFieldValue('end_date', value)}
                     slotProps={{
                       textField: {
@@ -379,27 +401,13 @@ const ApplyLeaveSimple = ({ onSuccess }) => {
               </Grid2>
 
               <Grid2 size={{ xs: 12, md: 6 }}>
-                <Autocomplete
+                <TextField
                   fullWidth
                   size="small"
-                  options={managers}
-                  value={formik.values.manager}
-                  onChange={(event, value) => {
-                    formik.setFieldValue('manager', value);
-                  }}
-                  getOptionLabel={(option) => option?.name_of_manager || ''}
-                  getOptionKey={(option) => option?.id || Math.random()}
-                  isOptionEqualToValue={(option, value) => option?.id === value?.id}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="Manager Name"
-                      name="manager"
-                      error={formik.touched.manager && Boolean(formik.errors.manager)}
-                      helperText={formik.touched.manager && formik.errors.manager}
-                    />
-                  )}
-                  onBlur={() => formik.setFieldTouched('manager', true)}
+                  label="Reporting Manager"
+                  value={employeeInfo?.reporting_manager || ''}
+                  InputLabelProps={{ shrink: !!employeeInfo?.reporting_manager }}
+                  disabled
                 />
               </Grid2>
 
@@ -423,24 +431,6 @@ const ApplyLeaveSimple = ({ onSuccess }) => {
                   }}
                 />
               </Grid2>
-
-              {/* Apply Button */}
-              <Grid2 size={{ xs: 12 }}>
-                <Button
-                  variant="contained"
-                  type="submit"
-                  disabled={formik.isSubmitting}
-                  sx={{
-                    bgcolor: '#1976d2',
-                    px: 4,
-                    py: 1,
-                    textTransform: 'none',
-                    fontWeight: 600
-                  }}
-                >
-                  {formik.isSubmitting ? 'Applying...' : 'Apply'}
-                </Button>
-              </Grid2>
             </Grid2>
           </Grid2>
 
@@ -460,7 +450,7 @@ const ApplyLeaveSimple = ({ onSuccess }) => {
                   Available Leaves
                 </Typography>
                 <Typography variant="h5" sx={{ fontWeight: 600, color: '#1976d2', mb: 0.5 }}>
-                  {leaveBalance.available}
+                  {employeeInfo?.available_leave}
                 </Typography>
               </Paper>
 
@@ -477,7 +467,7 @@ const ApplyLeaveSimple = ({ onSuccess }) => {
                   Applied leaves
                 </Typography>
                 <Typography variant="h5" sx={{ fontWeight: 600, color: '#7b1fa2', mb: 0.5 }}>
-                  {leaveBalance.applied}
+                  {employeeInfo?.applied_leave}
                 </Typography>
               </Paper>
 
@@ -494,14 +484,14 @@ const ApplyLeaveSimple = ({ onSuccess }) => {
                   Lop
                 </Typography>
                 <Typography variant="h5" sx={{ fontWeight: 600, color: '#f57c00', mb: 0.5 }}>
-                  {leaveBalance.lop}
+                  {employeeInfo?.lop}
                 </Typography>
               </Paper>
             </Stack>
           </Grid2>
         </Grid2>
-      </form>
-    </Box>
+      </Box>
+    </Modal>
   );
 };
 

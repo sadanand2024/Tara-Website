@@ -95,7 +95,7 @@ const KPICards = ({ onApplyLeaveClick }) => {
       title: 'Attendance Approval',
       subtitle: 'Approve team attendance',
       icon: <ApprovalIcon />,
-      action: () => console.log('Attendance Approval clicked')
+      action: () => navigate('/app/employee-portal/attendance-approval')
     },
     {
       title: 'Encash Leave',
@@ -132,8 +132,11 @@ const KPICards = ({ onApplyLeaveClick }) => {
             Leaves Summary
           </Typography>
           {loading ? (
-            <Box display="flex" justifyContent="center" alignItems="center" sx={{ minHeight: 200 }}>
-              <CircularProgress size={40} />
+            <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" sx={{ minHeight: 200 }}>
+              <CircularProgress />
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }} align="center">
+                Loading leave summary...
+              </Typography>
             </Box>
           ) : (
             <Grid2 container spacing={2}>

@@ -84,6 +84,7 @@ const TaxTDS = Loadable(lazy(() => import('views/application/EmployeePortal/TaxT
 const LeaveManagement = Loadable(lazy(() => import('views/application/EmployeePortal/LeaveManagement')));
 const LeavePolicy = Loadable(lazy(() => import('views/application/EmployeePortal/LeaveManagement/LeavePolicy')));
 const Attendance = Loadable(lazy(() => import('views/application/EmployeePortal/Attendance')));
+const AttendanceApproval = Loadable(lazy(() => import('views/application/EmployeePortal/AttendanceApproval')));
 const MyEarnings = Loadable(lazy(() => import('views/application/EmployeePortal/MyEarnings')));
 const Declarations = Loadable(lazy(() => import('views/application/EmployeePortal/Declarations')));
 const Form16Compliances = Loadable(lazy(() => import('views/application/EmployeePortal/Form16Compliances')));
@@ -269,6 +270,10 @@ const MainRoutes = {
     {
       path: '/app/employee-portal/attendance',
       element: <Attendance />
+    },
+    {
+      path: '/app/employee-portal/attendance-approval',
+      element: <AttendanceApproval />
     },
     {
       path: '/app/employee-portal/my-earnings',

@@ -7,6 +7,7 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
+  Autocomplete,
   DialogActions,
   Button,
   IconButton,
@@ -39,14 +40,6 @@ const LeaveManagement = () => {
   const [leaveRequests, setLeaveRequests] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Leave type mapping - you might want to fetch this from API or maintain as constants
-  const leaveTypeMapping = {
-    79: 'Annual Leave',
-    81: 'Sick Leave',
-    80: 'Casual Leave'
-    // Add more mappings as needed
-  };
-
   // Helper function to format dates
   const formatDate = (dateString) => {
     if (!dateString) return '-';
@@ -57,12 +50,6 @@ const LeaveManagement = () => {
     });
   };
 
-  // Helper function to get leave type name
-  const getLeaveTypeName = (leaveTypeId) => {
-    return leaveTypeMapping[leaveTypeId] || `Leave Type ${leaveTypeId}`;
-  };
-
-  // Helper function to format days with half-day info
   const formatDays = (days, isHalfDay, halfDaySession) => {
     if (isHalfDay && halfDaySession) {
       return `${days} day (${halfDaySession})`;
@@ -98,14 +85,11 @@ const LeaveManagement = () => {
       let url = `/payroll/applied-leave-retrieval/?status=${status}`;
       const { res } = await Factory('get', url, {});
       if (res?.status_cd === 0) {
-        console.log('Leave Requests API Response:', res?.data.results);
         setLeaveRequests(res?.data.results || []);
       } else {
-        console.error('API Error:', res?.message);
         setLeaveRequests([]);
       }
     } catch (error) {
-      console.error('Error fetching leave requests:', error);
       setLeaveRequests([]);
     } finally {
       setLoading(false);
@@ -116,7 +100,6 @@ const LeaveManagement = () => {
     getLeaveRequests(filterStatus);
   }, [filterStatus]);
 
-  // Safety check - if user is not an employee, show a message
   if (!user?.employee) {
     return (
       <Card sx={{ p: 2 }}>
@@ -127,22 +110,19 @@ const LeaveManagement = () => {
       </Card>
     );
   }
-  console.log(leaveRequests);
   return (
     <MainCard>
       <KPICards onApplyLeaveClick={handleOpenApplyLeaveDialog} />
 
-      {/* Filters and Search */}
       <Box sx={{ mb: 3, display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
-        <FormControl size="small" sx={{ minWidth: 150 }}>
-          <InputLabel>Status</InputLabel>
-          <Select value={filterStatus} label="Status" onChange={(e) => setFilterStatus(e.target.value)}>
-            <MenuItem value="">All</MenuItem>
-            <MenuItem value="pending">Pending</MenuItem>
-            <MenuItem value="approved">Approved</MenuItem>
-            <MenuItem value="rejected">Rejected</MenuItem>
-          </Select>
-        </FormControl>
+        <Autocomplete
+          options={['', 'Pending', 'Approved', 'Rejected']}
+          value={filterStatus}
+          onChange={(e, val) => setFilterStatus(val || '')}
+          getOptionLabel={(option) => (option === '' ? 'All' : option)}
+          renderInput={(params) => <TextField {...params} label="Status" size="small" />}
+          sx={{ width: 200 }}
+        />
       </Box>
       {/* Leave Requests Table */}
       <TableContainer
@@ -242,19 +222,7 @@ const LeaveManagement = () => {
       </TableContainer>
 
       {/* Apply Leave Dialog */}
-      <Dialog open={applyLeaveDialogOpen} onClose={handleCloseApplyLeaveDialog} maxWidth="md" fullWidth>
-        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="h5" component="div">
-            Apply Leave
-          </Typography>
-          <IconButton aria-label="close" onClick={handleCloseApplyLeaveDialog} sx={{ color: 'grey.500' }}>
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-        <DialogContent dividers>
-          <ApplyLeaveSimple onSuccess={handleCloseApplyLeaveDialog} />
-        </DialogContent>
-      </Dialog>
+      <ApplyLeaveSimple open={applyLeaveDialogOpen} onSuccess={handleCloseApplyLeaveDialog} />
     </MainCard>
   );
 };
