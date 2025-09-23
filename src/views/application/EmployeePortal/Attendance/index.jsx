@@ -147,7 +147,9 @@ const AttendanceInfoTab = () => {
         checkOutLocation: checkOutLocation,
         sessions: dayReport.sessions || [],
         totalHours: dayReport.total_hours || '0:00:00',
-        sessionCount: dayReport.session_count || 0
+        sessionCount: dayReport.session_count || 0,
+        netHours: calculateNetHours(dayReport.total_hours || '0:00:00'),
+        grossHours: calculateGrossHours(dayReport.total_hours || '0:00:00')
       };
     });
   };
@@ -174,7 +176,10 @@ const AttendanceInfoTab = () => {
           duration: '-',
           remarks: '-',
           checkInLocation: null,
-          checkOutLocation: null
+          checkOutLocation: null,
+          totalHours: '0:00:00',
+          netHours: '-',
+          grossHours: '-'
         });
       }
     }
@@ -222,6 +227,62 @@ const AttendanceInfoTab = () => {
 
     if (totalMinutes < 0) {
       totalMinutes += 24 * 60; // Add 24 hours if check-out is next day
+    }
+
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+  };
+
+  // Calculate net hours (total hours minus break time)
+  const calculateNetHours = (totalHours, breakTime = '01:00') => {
+    if (totalHours === '-' || totalHours === '0:00:00') return '-';
+
+    const [breakHour, breakMin] = breakTime.split(':').map(Number);
+    const breakMinutes = breakHour * 60 + breakMin;
+
+    // Parse total hours from API format
+    let totalMinutes = 0;
+    if (totalHours.includes('days')) {
+      const parts = totalHours.split(', ');
+      const days = parseInt(parts[0].split(' ')[0]) || 0;
+      const timeParts = parts[1] ? parts[1].split(':') : ['0', '0', '0'];
+      const hours = parseInt(timeParts[0]) || 0;
+      const minutes = parseInt(timeParts[1]) || 0;
+      totalMinutes = days * 24 * 60 + hours * 60 + minutes;
+    } else {
+      const timeParts = totalHours.split(':');
+      const hours = parseInt(timeParts[0]) || 0;
+      const minutes = parseInt(timeParts[1]) || 0;
+      totalMinutes = hours * 60 + minutes;
+    }
+
+    const netMinutes = Math.max(0, totalMinutes - breakMinutes);
+    const hours = Math.floor(netMinutes / 60);
+    const minutes = netMinutes % 60;
+
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+  };
+
+  // Calculate gross hours (total hours including overtime)
+  const calculateGrossHours = (totalHours) => {
+    if (totalHours === '-' || totalHours === '0:00:00') return '-';
+
+    // For now, gross hours = total hours (can be modified to include overtime calculations)
+    let totalMinutes = 0;
+    if (totalHours.includes('days')) {
+      const parts = totalHours.split(', ');
+      const days = parseInt(parts[0].split(' ')[0]) || 0;
+      const timeParts = parts[1] ? parts[1].split(':') : ['0', '0', '0'];
+      const hours = parseInt(timeParts[0]) || 0;
+      const minutes = parseInt(timeParts[1]) || 0;
+      totalMinutes = days * 24 * 60 + hours * 60 + minutes;
+    } else {
+      const timeParts = totalHours.split(':');
+      const hours = parseInt(timeParts[0]) || 0;
+      const minutes = parseInt(timeParts[1]) || 0;
+      totalMinutes = hours * 60 + minutes;
     }
 
     const hours = Math.floor(totalMinutes / 60);
@@ -345,9 +406,43 @@ const AttendanceInfoTab = () => {
     return attendanceData.filter((record) => record.status === 'Present').length;
   };
 
+  const calculateTotalNetHours = () => {
+    const presentRecords = attendanceData.filter((record) => record.status === 'Present' && record.netHours && record.netHours !== '-');
+    if (presentRecords.length === 0) return '0hr 0mins';
+
+    const totalMinutes = presentRecords.reduce((sum, record) => {
+      const timeStr = record.netHours;
+      const timeParts = timeStr.split(':');
+      const hours = parseInt(timeParts[0]) || 0;
+      const minutes = parseInt(timeParts[1]) || 0;
+      return sum + (hours * 60 + minutes);
+    }, 0);
+
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    return `${hours}hr ${minutes}mins`;
+  };
+
+  const calculateTotalGrossHours = () => {
+    const presentRecords = attendanceData.filter((record) => record.status === 'Present' && record.grossHours && record.grossHours !== '-');
+    if (presentRecords.length === 0) return '0hr 0mins';
+
+    const totalMinutes = presentRecords.reduce((sum, record) => {
+      const timeStr = record.grossHours;
+      const timeParts = timeStr.split(':');
+      const hours = parseInt(timeParts[0]) || 0;
+      const minutes = parseInt(timeParts[1]) || 0;
+      return sum + (hours * 60 + minutes);
+    }, 0);
+
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    return `${hours}hr ${minutes}mins`;
+  };
+
   return (
     <MainCard>
-      <WebSocketStatus />
+      {/* <WebSocketStatus /> */}
       <Box sx={{ mb: 4 }}>
         <Typography variant="h4" sx={{ fontWeight: 600, mb: 1 }}>
           Attendance
@@ -359,12 +454,9 @@ const AttendanceInfoTab = () => {
       <Box sx={{ mb: 2 }}>
         <PunchInOutCard onAttendanceUpdate={handleAttendanceUpdate} />
       </Box>
-      {/* Attendance Header */}
+      {/* Attendance Controls */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-          <Typography variant="h4" sx={{ fontWeight: 700, color: 'text.primary', mb: 1 }}>
-            Attendance
-          </Typography>
           <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
             To update your attendance data, please click on the edit button next to each date.
           </Typography>
@@ -414,9 +506,11 @@ const AttendanceInfoTab = () => {
             <TableRow>
               <TableCell sx={{ fontWeight: 600 }}>Date</TableCell>
               <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Check In</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Check Out</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>First Check In</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>Last Check Out</TableCell>
               <TableCell sx={{ fontWeight: 600 }}>Duration</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>Net Hours</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>Gross Hours</TableCell>
               <TableCell sx={{ fontWeight: 600 }}>Remarks</TableCell>
               <TableCell sx={{ fontWeight: 600 }}>Action</TableCell>
             </TableRow>
@@ -481,21 +575,28 @@ const AttendanceInfoTab = () => {
                     </Typography>
                   </TableCell>
                   <TableCell>
+                    <Typography
+                      variant="body2"
+                      sx={{ fontWeight: 600, color: record.netHours === '-' ? 'text.secondary' : 'success.main' }}
+                    >
+                      {record.netHours}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography
+                      variant="body2"
+                      sx={{ fontWeight: 600, color: record.grossHours === '-' ? 'text.secondary' : 'primary.main' }}
+                    >
+                      {record.grossHours}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
                     <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                       {record.remarks}
                     </Typography>
                   </TableCell>
                   <TableCell>
-                    <IconButton
-                      size="small"
-                      onClick={() => handleEditClick(record)}
-                      sx={{
-                        color: 'primary.main',
-                        '&:hover': { bgcolor: 'primary.50' }
-                      }}
-                    >
-                      <IconEdit size={16} />
-                    </IconButton>
+                    <Button onClick={() => handleEditClick(record)}>View History</Button>
                   </TableCell>
                 </TableRow>
               );
@@ -505,7 +606,7 @@ const AttendanceInfoTab = () => {
       </TableContainer>
       {/* Summary Boxes */}
       <Grid2 container spacing={3} sx={{ mt: 3 }}>
-        <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
           <Card sx={{ bgcolor: 'primary.50', height: '100%' }}>
             <CardContent sx={{ textAlign: 'center', p: 3 }}>
               <IconClock size={32} style={{ color: '#1976d2', marginBottom: 8 }} />
@@ -518,7 +619,7 @@ const AttendanceInfoTab = () => {
             </CardContent>
           </Card>
         </Grid2>
-        <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
           <Card sx={{ bgcolor: 'success.50', height: '100%' }}>
             <CardContent sx={{ textAlign: 'center', p: 3 }}>
               <IconCalendar size={32} style={{ color: '#2e7d32', marginBottom: 8 }} />
@@ -531,7 +632,20 @@ const AttendanceInfoTab = () => {
             </CardContent>
           </Card>
         </Grid2>
-        <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+          <Card sx={{ bgcolor: 'info.50', height: '100%' }}>
+            <CardContent sx={{ textAlign: 'center', p: 3 }}>
+              <IconCheck size={32} style={{ color: '#0288d1', marginBottom: 8 }} />
+              <Typography variant="h4" sx={{ fontWeight: 700, color: 'info.main', mb: 1 }}>
+                {calculateTotalNetHours()}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                Total Net Hrs
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid2>
+        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
           <Card sx={{ bgcolor: 'warning.50', height: '100%' }}>
             <CardContent sx={{ textAlign: 'center', p: 3 }}>
               <IconAlertTriangle size={32} style={{ color: '#ed6c02', marginBottom: 8 }} />

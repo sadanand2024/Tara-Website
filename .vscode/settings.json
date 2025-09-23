@@ -1,0 +1,12 @@
+{
+  "explorer.autoReveal": true,
+  "explorer.openEditors.visible": 0,
+  "workbench.editor.enablePreview": false,
+  "workbench.editor.enablePreviewFromQuickOpen": false,
+  "workbench.editor.enablePreviewFromCodeNavigation": false,
+  "workbench.editor.revealIfOpen": true,
+  "workbench.editor.focusRecentEditorAfterClose": true,
+  "workbench.editor.restoreViewState": true,
+  "workbench.editor.autoSave": "afterDelay",
+  "workbench.editor.autoSaveDelay": 1000
+}

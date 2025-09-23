@@ -58,10 +58,12 @@ const PayrollSummary = ({ payrollId, month, financialYear }) => {
   };
 
   const viewPayslip = async (employee_id, month, financial_year) => {
+    console.log(financial_year);
+    let selected_year = financial_year.split('-')[0];
     try {
       const tokens = JSON.parse(localStorage.getItem('user'));
       const response = await axios.get(
-        `${baseURL}/payroll/employee-monthly-salary-template?employee_id=${employee_id}&month=${month}&financial_year=${financial_year}&year=${new Date().getFullYear()}`,
+        `${baseURL}/payroll/employee-monthly-salary-template?employee_id=${employee_id}&month=${month}&financial_year=${financial_year}&year=${selected_year}`,
         {
           responseType: 'arraybuffer',
           headers: {

@@ -1,21 +1,25 @@
 import React from 'react';
 import useWebSocket from 'react-use-websocket';
+import { useSelector } from 'react-redux';
 
 const WebSocketStatus = () => {
-  const socketUrl = 'ws://dev-backend.tarafirst.com:8000/ws/attendance/2/';
-  const {
-    sendMessage,
-    sendJsonMessage,
-    lastMessage,
-    lastJsonMessage,
-    readyState,
-    getWebSocket,
-  } = useWebSocket(socketUrl, {
-    onOpen: () => console.log('opened'),
-    onMessage: (event) => console.log(JSON.parse(event.data)),
-    onClose: () => console.log('closed'),
-    onError: (error) => console.log('error', error),
-    shouldReconnect: (closeEvent) => true,
+  const user = useSelector((state) => state.accountReducer.user);
+  const socketUrl = user?.id ? `ws://dev-backend.tarafirst.com:8000/ws/attendance/${user.id}/` : null;
+
+  const { sendMessage, sendJsonMessage, lastMessage, lastJsonMessage, readyState, getWebSocket } = useWebSocket(socketUrl, {
+    onOpen: () => console.log('WebSocket opened for user:', user?.id),
+    onMessage: (event) => {
+      try {
+        console.log('WebSocket message received:', JSON.parse(event.data));
+      } catch (error) {
+        console.error('Error parsing WebSocket message:', error);
+      }
+    },
+    onClose: (event) => console.log('WebSocket closed:', event.code, event.reason),
+    onError: (error) => console.error('WebSocket error:', error),
+    shouldReconnect: (closeEvent) => user?.id && closeEvent.code !== 1000,
+    reconnectAttempts: 5,
+    reconnectInterval: 3000
   });
 
   const connectionStatus = {

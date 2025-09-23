@@ -8,7 +8,7 @@ import useWebSocket from 'react-use-websocket';
 import { useSelector } from 'react-redux';
 const GoogleAPIKey = import.meta.env.VITE_APP_GOOGLE_API_KEY;
 
-const PunchInOutCard = ({ onAttendanceUpdate, }) => {
+const PunchInOutCard = ({ onAttendanceUpdate }) => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.accountReducer.user);
 
@@ -28,48 +28,41 @@ const PunchInOutCard = ({ onAttendanceUpdate, }) => {
   const [wsConnected, setWsConnected] = useState(false);
 
   // WebSocket connection
-  const socketUrl = `ws://dev-backend.tarafirst.com:8000/ws/attendance/${user.id}/`;
-  const {
-    sendJsonMessage,
-    lastMessage,
-    readyState,
-    getWebSocket,
-  } = useWebSocket(socketUrl, {
+  const socketUrl = user?.id ? `ws://dev-backend.tarafirst.com:8000/ws/attendance/${user.id}/` : null;
+  const { sendJsonMessage, lastMessage, readyState, getWebSocket } = useWebSocket(socketUrl, {
     onOpen: () => {
-      console.log('WebSocket connected');
       setWsConnected(true);
     },
     onMessage: (event) => {
       try {
         const data = JSON.parse(event.data);
-        console.log('WebSocket message received:', data);
         handleWebSocketMessage(data);
-      } catch (error) {
-        console.error('Error parsing WebSocket message:', error);
-      }
+      } catch (error) {}
     },
-    onClose: () => {
-      console.log('WebSocket disconnected');
+    onClose: (event) => {
       setWsConnected(false);
     },
     onError: (error) => {
-      console.log('WebSocket error:', error);
       setWsConnected(false);
     },
-    shouldReconnect: (closeEvent) => true,
+    shouldReconnect: (closeEvent) => {
+      // Only reconnect if user is available and it's not a manual close
+      return user?.id && closeEvent.code !== 1000;
+    },
+    reconnectAttempts: 5,
+    reconnectInterval: 3000
   });
 
   // Handle WebSocket messages
   const handleWebSocketMessage = (data) => {
     switch (data.type) {
       case 'ws_connected':
-        console.log('WebSocket connected for employee:', data.employee_id);
         break;
       case 'attendance_update':
         handleAttendanceUpdate(data);
         break;
       default:
-        console.log('Unknown WebSocket message type:', data.type);
+        break;
     }
   };
 
@@ -79,13 +72,15 @@ const PunchInOutCard = ({ onAttendanceUpdate, }) => {
 
     if (action === 'check_in' || action === 'check_out') {
       const isCheckedIn = action === 'check_in';
-      const checkInTime = record.check_in ? new Date(record.check_in).toLocaleTimeString('en-US', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false
-      }) : null;
+      const checkInTime = record.check_in
+        ? new Date(record.check_in).toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+          })
+        : null;
 
-      setAttendanceStatus(prev => ({
+      setAttendanceStatus((prev) => ({
         ...prev,
         isCheckedIn,
         checkInTime: isCheckedIn ? checkInTime : null,
@@ -256,20 +251,21 @@ const PunchInOutCard = ({ onAttendanceUpdate, }) => {
         location: locationData.coordinates,
         device_info: navigator.userAgent
       });
-
       if (res.status_cd === 0) {
         const newStatus = !attendanceStatus.isCheckedIn;
 
         // Send WebSocket message
-        const wsMessage = {
-          type: 'attendance_action',
-          action: newStatus ? 'check_in' : 'check_out',
-          employee_id: employeeId,
-          location: locationData.coordinates,
-          device_info: navigator.userAgent,
-          timestamp: new Date().toISOString()
-        };
-        sendJsonMessage(wsMessage);
+        if (user?.id) {
+          const wsMessage = {
+            type: 'attendance_action',
+            action: newStatus ? 'check_in' : 'check_out',
+            employee_id: user.id,
+            location: locationData.coordinates,
+            device_info: navigator.userAgent,
+            timestamp: new Date().toISOString()
+          };
+          sendJsonMessage(wsMessage);
+        }
 
         // Update local state immediately
         setAttendanceStatus({
