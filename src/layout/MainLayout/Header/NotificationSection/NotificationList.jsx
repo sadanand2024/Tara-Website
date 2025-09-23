@@ -56,21 +56,21 @@ export default function NotificationList({ items = [], onItemRead, expandedId, o
           </Typography>
         </ListItemWrapper>
       )}
-      {items.map((it) => {
-        const avatarSrc = it.avatar || User1;
+      {items.map((notification) => {
+        const avatarSrc = notification.avatar || User1;
 
         const displayTime =
-          it.created_at?.display ||
-          (it.created_at?.date || it.created_at?.time ? [it.created_at?.date, it.created_at?.time].filter(Boolean).join(' ') : '') ||
-          it.display ||
+          notification.created_at?.display ||
+          (notification.created_at?.date || notification.created_at?.time ? [notification.created_at?.date, notification.created_at?.time].filter(Boolean).join(' ') : '') ||
+          notification.display ||
           '';
-        const unread = it.unread !== false;
-        const id = it.notification_id || it.id;
+        const unread = notification.unread !== false;
+        const id = notification.notification_id || notification.id;
         const isExpanded = expandedId === id;
 
         const markRead = () => {
-          if (unread && typeof onItemRead === 'function' && it.notification_id) {
-            onItemRead(it.notification_id);
+          if (unread && typeof onItemRead === 'function' && notification.notification_id) {
+            onItemRead(notification.notification_id);
           }
         };
         return (
@@ -83,7 +83,7 @@ export default function NotificationList({ items = [], onItemRead, expandedId, o
           >
             <ListItem alignItems="flex-start" disablePadding>
               <ListItemAvatar>
-                <Avatar alt={it.title || 'Notification'} src={avatarSrc} sx={{ mt: 2 }} />
+                <Avatar alt={notification.title || 'Notification'} src={avatarSrc} sx={{ mt: 2 }} />
               </ListItemAvatar>
               <ListItemText
                 primary={
@@ -114,7 +114,7 @@ export default function NotificationList({ items = [], onItemRead, expandedId, o
                           markRead();
                         }}
                       >
-                        {it.title}
+                        {notification.title}
                       </Typography>
                       {unread && <Box sx={{ ml: 1, width: 8, height: 8, bgcolor: 'secondary.main', borderRadius: '50%', flexShrink: 0 }} />}
                     </Box>
@@ -138,7 +138,7 @@ export default function NotificationList({ items = [], onItemRead, expandedId, o
                       }}
                       style={{ cursor: 'pointer' }}
                     >
-                      {it.message}
+                      {notification.message}
                     </Typography>
                   </Stack>
                 }

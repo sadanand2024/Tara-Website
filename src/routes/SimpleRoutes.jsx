@@ -3,6 +3,7 @@ import { lazy } from 'react';
 // project imports
 import SimpleLayout from 'layout/SimpleLayout';
 import Loadable from 'ui-component/Loadable';
+import DocumentSelectionPage from 'views/application/DocumentDrafting/components/DocumentSelectionPage';
 import ProductPage from 'views/pages/products/ProductPage';
 
 // lazy loaded pages
@@ -13,6 +14,7 @@ const SaasPageFaqs = Loadable(lazy(() => import('views/pages/saas-pages/Faqs')))
 const SaasPagePrivacyPolicy = Loadable(lazy(() => import('views/pages/saas-pages/PrivacyPolicy')));
 const ServicePage = Loadable(lazy(() => import('views/pages/services/ServicePage')));
 const ServiceCategory = Loadable(lazy(() => import('views/pages/services/ServiceCategory')));
+const DocumentDrafting = Loadable(lazy(() => import('views/pages/DocumentDrafting')));
 // const PayrollPage = Loadable(lazy(() => import('views/pages/products/Payroll')));
 // const InvoicingPage = Loadable(lazy(() => import('views/pages/products/invoicing/InvoicingPage')));
 const KnowledgePage = Loadable(lazy(() => import('views/pages/knowledge')));
@@ -60,10 +62,15 @@ const SimpleRoutes = {
       path: '/book-consultation',
       element: <BookConsultationPage />
     },
+     {
+      path: '/document-drafting',
+      element: <DocumentDrafting />
+    },
     {
       path: 'services/:category',
       element: <ServiceCategory />
     },
+
 
     {
       path: 'services/:category/:slug',
@@ -73,6 +80,11 @@ const SimpleRoutes = {
       path: 'products/:category',
       element: <ProductPage />
     },
+    {
+      path: '/app/drafting/fill/',
+      element: <DocumentSelectionPage />
+    },
+
     {
       path: 'products/plans',
       element: <ProductDetails />
