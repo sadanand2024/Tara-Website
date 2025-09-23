@@ -1,472 +1,423 @@
-import CloseIcon from '@mui/icons-material/Close';
-import CreateIcon from '@mui/icons-material/Create';
-import EditIcon from '@mui/icons-material/Edit';
-import PreviewIcon from '@mui/icons-material/Preview';
+import SearchIcon from '@mui/icons-material/Search';
 import Box from '@mui/material/Box';
-import Chip from '@mui/material/Chip';
+import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Container from '@mui/material/Container';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogTitle from '@mui/material/DialogTitle';
-import Divider from '@mui/material/Divider';
 import Grid2 from '@mui/material/Grid2';
-import IconButton from '@mui/material/IconButton';
-import List from '@mui/material/List';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemText from '@mui/material/ListItemText';
+import InputAdornment from '@mui/material/InputAdornment';
+import MenuItem from '@mui/material/MenuItem';
+import Paper from '@mui/material/Paper';
+import Select from '@mui/material/Select';
 import Stack from '@mui/material/Stack';
-import { useTheme } from '@mui/material/styles';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import axios from 'axios';
-import { ThemeMode } from 'config';
-import React, { useEffect } from 'react';
-  const headerSX = { fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem', lg: '2.5rem' } };
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-const categories = [
-  { key: 'ShowBys', label: 'Show By' },
-  { key: 'all', label: 'All' },
-  { key: 'hr', label: 'HR Templates' },
-  { key: 'company', label: 'Company Structure' },
-  { key: 'legal', label: 'Legal, Compliance & Investments' },
-  { key: 'sales', label: 'Sales and Partnerships' },
-  { key: 'pitch', label: 'Startup Pitch Decks' }
-];
+const chipColor = (categoryName) => {
+  const key = (categoryName || '').toLowerCase();
+  switch (key) {
+    case 'business':
+      return { color: '#f59e0b', bg: 'rgba(245,158,11,0.08)' };
+    case 'hr':
+    case 'hr department':
+      return { color: '#10b981', bg: 'rgba(16,185,129,0.08)' };
+    case 'company':
+      return { color: '#a855f7', bg: 'rgba(168,85,247,0.08)' };
+    default:
+      return { color: '#f59e0b', bg: 'rgba(245,158,11,0.08)' };
+  }
+};
+
 
 const FinalSection = () => {
-  const theme = useTheme();
-  const backgroundColor = theme.palette.mode === ThemeMode.DARK ? 'background.default' : 'dark.900';
-  let baseURL = import.meta.env.VITE_APP_BASE_URL;
+  const baseURL = import.meta.env.VITE_APP1_BASE_URL;
 
-  const [activeKey, setActiveKey] = React.useState('all');
-  const [search, setSearch] = React.useState('');
-  const [templates, setTemplates] = React.useState([]);
-  const [loading, setLoading] = React.useState(true);
-  const [previewOpen, setPreviewOpen] = React.useState(false);
-  const [selectedTemplate, setSelectedTemplate] = React.useState(null);
+  const [category, setCategory] = useState('all'); // logical state
+  const [search, setSearch] = useState('');
+  const [templates, setTemplates] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Fetch templates from API using axios
+  const [categories, setCategories] = useState([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
+  const [categoriesError, setCategoriesError] = useState(null);
+
+  const navigate = useNavigate();
+
+  // ----- fetch categories -----
   useEffect(() => {
+    setCategoriesLoading(true);
+    setCategoriesError(null);
+    axios
+      .get(`${baseURL}/documentdrafting/categories-name/`)
+      .then((res) => {
+        let data = res.data?.data;
+        if (!Array.isArray(data)) {
+          data = typeof data === 'object' && data ? Object.values(data) : [];
+        }
+        if (data.length && typeof data[0] === 'string') {
+          data = data.map((str) => ({ key: String(str).toLowerCase().trim(), label: str }));
+        } else if (data.length && typeof data[0] === 'object') {
+          data = data.map((obj) => ({
+            key: (obj.key || obj.label || obj.name || '').toString().toLowerCase().trim(),
+            label: obj.label || obj.name || obj.key || ''
+          }));
+        }
+        setCategories(data);
+        setCategoriesLoading(false);
+      })
+      .catch(() => {
+        setCategoriesError('Failed to load categories');
+        setCategoriesLoading(false);
+      });
+  }, [baseURL]);
+
+  // ----- fetch templates -----
+  useEffect(() => {
+    let mounted = true;
     axios
       .get(`${baseURL}/documentdrafting/documents/`)
       .then((res) => {
         const data = res.data;
         const templatesList = Array.isArray(data) ? data : data?.results || [];
-
-        // Transform API data to match our template structure
-        const transformedTemplates = templatesList.map((item, index) => ({
-          id: item.id || index,
+        const transformed = templatesList.map((item, idx) => ({
+          id: item.id ?? idx,
           title: item.document_name || item.name || item.title || 'Untitled Document',
           popular: item.is_popular || item.popular || false,
-          category: item.category || item.category_name || 'all',
+          category_name: item.category_name || '',
           template: item.template || '',
-          description: item.description || ''
+          description:
+            item.description ||
+            'a formal, legally binding document from an employer to a job candidate that confirms'
         }));
-
-        setTemplates(transformedTemplates);
-        setLoading(false);
+        if (mounted) {
+          setTemplates(transformed);
+          setLoading(false);
+        }
       })
-      .catch((err) => {
-        console.error('Error fetching templates:', err);
-        setTemplates([]);
-        setLoading(false);
+      .catch(() => {
+        if (mounted) {
+          setTemplates([]);
+          setLoading(false);
+        }
       });
-  }, []);
+    return () => {
+      mounted = false;
+    };
+  }, [baseURL]);
 
-  // Filter templates by search and category, then limit to top 6
-  const filteredTemplates = templates
-    .filter((t) => (activeKey === 'all' || t.category === activeKey) && t.title.toLowerCase().includes(search.toLowerCase()))
-    .slice(0, 7);
+  // ----- compute a safe select value that always exists -----
+  const keys = new Set(categories.map((c) => c.key));
+  const selectValue = keys.has(category) ? category : 'all';
 
-  // Handle preview button click
-  const handlePreviewClick = (template) => {
-    setSelectedTemplate(template);
-    setPreviewOpen(true);
-  };
+  // Normalize category whenever options change (prevents out-of-range)
+  useEffect(() => {
+    if (category !== 'all' && !keys.has(category)) {
+      setCategory('all');
+    }
+  }, [category, keys]);
 
-  // Handle close preview
-  const handleClosePreview = () => {
-    setPreviewOpen(false);
-    setSelectedTemplate(null);
+  const filtered = templates.filter((t) => {
+    const byCategory =
+      selectValue === 'all'
+        ? true
+        : t.category_name && t.category_name.toLowerCase() === selectValue.toLowerCase();
+    const bySearch = t.title.toLowerCase().includes(search.toLowerCase());
+    return byCategory && bySearch;
+  });
+  const limitedTemplates = filtered.slice(0, 8);
+
+  const handleCardClick = (tpl) => {
+    try {
+      localStorage.setItem('selectedTemplateId', String(tpl.id));
+      const target = `/app/drafting/fill/?templateId=${encodeURIComponent(tpl.id)}`;
+      localStorage.setItem('postLoginRedirect', target);
+      navigate(target);
+    } catch {
+      navigate(`/app/drafting/fill/?templateId=${encodeURIComponent(tpl.id)}`);
+    }
   };
 
   return (
     <Box
       sx={{
-        mt: { xs: -8, sm: -10, md: -16},
+        mt: 0,
         position: 'relative',
         zIndex: 2,
         width: '100vw',
         left: '50%',
         right: '50%',
-        marginLeft: '-50vw',
-        marginRight: '-50vw',
-        overflow: 'hidden'
+        ml: '-50vw',
+        mr: '-50vw',
+        overflow: 'hidden',
+        bgcolor: '#f0f4ff'
       }}
     >
-      <Box
-        sx={{
-          py: { xs: 6, sm: 8, md: 5.5 },
-          backgroundColor: '#f0f4ff'
-        }}
-      >
-        <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3, md: 4 } }}>
-          {/* --- Add this block for title and description --- */}
-          <Box sx={{ mb: { xs: 4, sm:10 ,md:10} }}>
-            <Typography
-              // variant="h3"
-              // align="center"
-              // sx={{
-              //   fontWeight: 700,
-               
-              //   mb: 2,
-              //   fontSize: { xs: '2rem', sm: '2.5rem', md: '2.75rem' }
-              // }}
-               variant="h2"
-                component="h1"
-                 sx={{
-                      ...headerSX,
-                      fontWeight: 600,
-                      lineHeight: '50px',
-                      display: 'block',
-                       color: '#1b4ca8',
-                      fontSize: { xs: '2rem', sm: '42px', md: '42px', lg: '42px' },
-                      whiteSpace: { xs: 'normal', md: 'nowrap', lg: 'nowrap' }
-                    }}
-            >
-              Document Drafting Templates
-            </Typography>
-            <Typography
-              variant="h6"
-              align="center"
+      <Container maxWidth="lg" sx={{ py: { xs: 5, md: 6 } }}>
+        {/* Controls */}
+        <Grid2 container spacing={2} alignItems="center" sx={{ mb: { xs: 2.5, md: 3.5 } }}>
+          <Grid2 size={{ xs: 12, md: 2.5 }}>
+            <Select
+              fullWidth
+              value={selectValue}                  
+              onChange={(e) => setCategory(e.target.value)}
+              displayEmpty
+              renderValue={(val) => {
+                if (val === '') return 'Select category';
+                if (val === 'all') return 'All';      {/* ✅ show All label */}
+                return categories.find((c) => c.key === val)?.label || 'Select category';
+              }}
               sx={{
-                color: 'text.secondary',
+                bgcolor: 'background.paper',
+                borderRadius: 2,
+                fontFamily: 'Inter',
+                fontSize: { xs: '0.875rem', sm: '1rem' },
                 fontWeight: 400,
-                fontSize: { xs: '1.1rem', sm: '1.25rem', md: '1.35rem' },
-                maxWidth: 700,
-                mx: 'auto'
+                color: '#64748B',
+                '& .MuiSelect-select': {
+                  padding: '12px 14px',
+                  fontSize: { xs: '0.875rem', sm: '1rem' },
+                  fontFamily: 'Roboto, sans-serif',
+                  fontWeight: 500,
+                  color: '#64748B'
+                },
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#E2E8F0',
+                  borderWidth: '1px'
+                },
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#CBD5E0'
+                },
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#3182CE',
+                  borderWidth: '2px'
+                }
               }}
             >
-              Explore ready-to-use legal, HR, and business document templates. Click to preview, edit, and download for your needs.
-            </Typography>
-          </Box>
-          {/* --- End title and description block --- */}
-          <Grid2 container spacing={{ xs: 2, sm: 3, md: 4 }}>
-            {/* Left sidebar: categories */}
-            <Grid2 size={{ xs: 12, sm: 12, md: 3 }}>
-              <Box sx={{ color: 'text.secondary', mt: { xs: 3, md:8 } }}>
-                <List disablePadding>
-                  {categories.map((c) => (
-                    <ListItemButton
-                      key={c.key}
-                      // selected={activeKey === c.key}
-                      // onClick={() => setActiveKey(c.key)}
-                      variant="body1"
-                      sx={{
-                        mt: { xs: 1, sm: 1.5, md: 2 },
-                        textAlign: { xs: 'center', sm: 'center', md: 'left' },
-                        color: 'text.secondary',
-                        fontSize: { xs: '0.875rem', sm: '1rem', md: '1.125rem' },
-                        // mb: { xs: 2, sm: 2.5, md: 3 },
-                        // lineHeight: 0.5,
-                        fontStyle: 'Inter',
-                        // ml: { xs:'flex-start', sm:'flex-start', md:'flex-start', lg:'flex-start'},
+              {/* ✅ Always present "All" option solves out-of-range on first render */}
+              <MenuItem value="all">
+                <em>All</em>
+              </MenuItem>
 
-                        fontWeight: 500
-                        // px: { xs: 1, sm: 2, md: 0 }
-                        // whiteSpace: { xs: 'nowrap', md: 'nowrap' }
+              {categoriesLoading && <MenuItem disabled>Loading...</MenuItem>}
+              {categoriesError && <MenuItem disabled>{categoriesError}</MenuItem>}
+
+              {!categoriesLoading &&
+                !categoriesError &&
+                categories
+                  .filter((c) => c.key && c.key !== 'all')
+                  .map((c) => (
+                    <MenuItem
+                      key={c.key}
+                      value={c.key}
+                      sx={{
+                        fontFamily: 'Inter',
+                        fontSize: { xs: '0.875rem', sm: '1rem' },
+                        fontWeight: 400,
+                        color: '#374151',
+                        '&:hover': { bgcolor: '#F3F4F6' },
+                        '&.Mui-selected': {
+                          bgcolor: '#EBF8FF',
+                          color: '#3182CE',
+                          '&:hover': { bgcolor: '#EBF8FF' }
+                        }
                       }}
                     >
-                      <ListItemText
-                        primary={c.label}
-                        primaryTypographyProps={{
-                          variant: { xs: 'body1', md: 'h6' },
-                          fontSize: { xs: '0.875rem', sm: '1rem', md: '1.1rem' }
-                        }}
-                      />
-                    </ListItemButton>
+                      {c.label}
+                    </MenuItem>
                   ))}
-                </List>
-              </Box>
-            </Grid2>
+            </Select>
+          </Grid2>
 
-            {/* Right: template list */}
-            <Grid2 size={{ xs: 12, sm: 12, md: 9 }}>
-              {/* Search Bar */}
-              <Box sx={{ mb: { xs: 2, sm: 3 } }}>
-                <TextField
-                  fullWidth
-                  variant="outlined"
-                  size="medium"
-                  placeholder="Search templates..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      fontSize: { xs: '0.875rem', sm: '1rem' }
-                    }
-                  }}
-                />
-              </Box>
-              <Box
-                sx={{
-                  bgcolor: 'background.paper',
-                  borderRadius: { xs: 1, md: 2 },
-                  overflow: 'hidden',
-                  border: '1px solid',
-                  borderColor: 'divider',
-                  boxShadow: { xs: 2, md: 4 }
-                }}
-              >
-                {loading ? (
-                  <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: { xs: 3, md: 4 } }}>
-                    <CircularProgress size={{ xs: 24, md: 32 }} />
-                  </Box>
-                ) : filteredTemplates.length === 0 ? (
-                  <Typography sx={{ p: { xs: 3, md: 4 }, textAlign: 'center', color: 'text.secondary' }}>No templates found.</Typography>
-                ) : (
-                  filteredTemplates.map((t, idx) => (
-                    <Box key={t.id}>
-                      <Stack
-                        direction={{ xs: 'column', sm: 'row' }}
-                        alignItems={{ xs: 'flex-start', sm: 'center' }}
-                        spacing={{ xs: 1, sm: 2 }}
+          <Grid2 size={{ xs: 12, md: 8 }}>
+            <TextField
+              fullWidth
+              placeholder='Enter search term, For ex "Legal Agreement"'
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                )
+              }}
+              sx={{
+                bgcolor: 'background.paper',
+                borderRadius: 2,
+                transition: 'all 0.3s ease-in-out',
+                transform: 'scale(1)',
+                '& .MuiInputBase-root': { transition: 'all 0.3s ease-in-out' },
+                '& .MuiInputBase-input': {
+                  fontFamily: 'Roboto, sans-serif',
+                  fontSize: { xs: '0.875rem', sm: '1rem' },
+                  fontWeight: 500,
+                  color: '#374151',
+                  padding: '12px 14px',
+                  transition: 'all 0.3s ease-in-out'
+                },
+                '& .MuiInputBase-input::placeholder': {
+                  fontFamily: 'Roboto, sans-serif',
+                  fontSize: { xs: '0.875rem', sm: '1rem' },
+                  fontWeight: 500,
+                  color: '#64748B',
+                  opacity: 1,
+                  transition: 'all 0.3s ease-in-out'
+                },
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#E2E8F0',
+                  borderWidth: '1px',
+                  transition: 'all 0.3s ease-in-out'
+                },
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#CBD5E0',
+                  transform: 'scale(1.01)'
+                },
+                '&.Mui-focused': {
+                  transform: 'scale(1.02)',
+                  boxShadow: '0 4px 20px rgba(49, 130, 206, 0.15)',
+                  '& .MuiOutlinedInput-notchedOutline': {
+                    borderColor: '#3182CE',
+                    borderWidth: '2px',
+                    boxShadow: '0 0 0 3px rgba(49, 130, 206, 0.1)'
+                  },
+                  '& .MuiInputBase-input::placeholder': {
+                    opacity: 0.7,
+                    transform: 'translateY(-2px)'
+                  }
+                },
+                '& .MuiInputAdornment-root': {
+                  color: '#64748B',
+                  transition: 'all 0.3s ease-in-out'
+                },
+                '&.Mui-focused .MuiInputAdornment-root': {
+                  color: '#3182CE',
+                  transform: 'scale(1.1)'
+                }
+              }}
+            />
+          </Grid2>
+
+          <Grid2 size={{ xs: 12, md: 1.5 }}>
+            <Button
+              fullWidth
+              variant="contained"
+              size="large"
+              sx={{
+                height: 40,
+                borderRadius: 2,
+                fontWeight: 400,
+                fontSize: { xs: '0.95rem', sm: '1rem' },
+                textTransform: 'none',
+                fontFamily: 'Inter',
+                backgroundColor: '#0023AF',
+                color: '#FFFFFF',
+                '&:hover': {
+                  backgroundColor: '#001A8A',
+                  boxShadow: '0 4px 12px rgba(0, 35, 175, 0.3)'
+                },
+                '&:active': { backgroundColor: '#001470' }
+              }}
+              onClick={() => console.log('AI Search', { category: selectValue, search })}
+            >
+              AI Search
+            </Button>
+          </Grid2>
+        </Grid2>
+
+        {loading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
+            <CircularProgress />
+          </Box>
+        ) : filtered.length === 0 ? (
+          <Typography sx={{ textAlign: 'center', py: 6, color: 'text.secondary' }}>
+            No templates found.
+          </Typography>
+        ) : (
+          <Grid2 container spacing={{ xs: 2, sm: 2.5, md: 3 }}>
+            {limitedTemplates.map((t) => {
+              const colors = chipColor(t.category_name);
+              return (
+                <Grid2 key={t.id} size={{ xs: 12, sm: 6, md: 3, lg: 3 }}>
+                  <Paper
+                    variant="outlined"
+                    onClick={() => handleCardClick(t)}
+                    sx={{
+                      width: 282,
+                      height: 176,
+                      p: 2.25,
+                      borderRadius: 2.5,
+                      borderColor: '#e6eaf2',
+                      transition: 'box-shadow .2s ease, transform .1s ease',
+                      '&:hover': { boxShadow: 4, transform: 'translateY(-2px)' },
+                      display: 'flex',
+                      flexDirection: 'column',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <Stack spacing={1.2} sx={{ width: 206, height: 124, flexGrow: 1 }}>
+                      <Typography
+                        variant="body2"
                         sx={{
-                          px: { xs: 2, sm: 2.5 },
-                          py: { xs: 2, sm: 2.25 },
-                          '&:hover': { bgcolor: 'action.hover' }
+                          fontFamily: 'Inter, sans-serif',
+                          fontWeight: 500,
+                          color: colors.color,
+                          fontSize: '0.75rem',
+                          textAlign: 'left',
+                          letterSpacing: '0.02em'
                         }}
                       >
-                        {t.popular && (
-                          <Chip
-                            size="small"
-                            label="MOST POPULAR"
-                            color="primary"
-                            variant="outlined"
-                            sx={{
-                              fontWeight: 600,
-                              minWidth: { xs: 'auto', sm: 120 },
-                              fontSize: { xs: '0.7rem', sm: '0.75rem' },
-                              mb: { xs: 1, sm: 0 }
-                            }}
-                          />
-                        )}
-                        <Typography
-                          variant="h3"
-                          color="#00256B"
-                          fontWeight="400"
-                          fontFamily={'inter'}
-                          mb={4}
-                          sx={{
-                            flex: 1,
-
-                            fontSize: { xs: '1.25rem', sm: '1.5rem', md: '18px' },
-                            lneHeight: 1.4,
-
-                            backgroundColor: 'transparent',
-                            px: 0.5,
-                            py: 0.5,
-                            display: '-webkit-box',
-                            WebkitLineClamp: 2,
-                            WebkitBoxOrient: 'vertical',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'normal',
-                            wordBreak: 'break-word',
-                            textAlign: { xs: 'left', sm: 'left' }
-                          }}
-                        >
-                          {t.title}
-                        </Typography>
-                        <Stack direction="row" spacing={0.5}>
-                          
-                          <IconButton
-                            size="small"
-                            color="primary"
-                            aria-label="create"
-                            sx={{
-                              p: { xs: 0.5, sm: 1 },
-                              '& .MuiSvgIcon-root': { fontSize: { xs: '1.1rem', sm: '1.25rem' } }
-                            }}
-                            // You can add your onClick handler here if needed
-                          >
-                            <CreateIcon />
-                          </IconButton>
-                        </Stack>
-                      </Stack>
-                      {idx < filteredTemplates.length - 1 && <Divider />}
-                    </Box>
-                  ))
-                )}
-              </Box>
-            </Grid2>
+                        {t.category_name}
+                      </Typography>
+                      <Typography
+                        variant="body1"
+                        sx={{
+                          fontFamily: 'Inter, sans-serif',
+                          color: '#111827',
+                          fontWeight: 600,
+                          fontSize: { xs: '1rem', md: '1.125rem' },
+                          lineHeight: 1.3,
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          minHeight: 46,
+                          textAlign: 'left',
+                          letterSpacing: '-0.01em'
+                        }}
+                      >
+                        {t.title}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontFamily: 'Roboto, sans-serif',
+                          color: 'text.secondary',
+                          fontWeight: 400,
+                          fontSize: '0.875rem',
+                          lineHeight: 1.4,
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          minHeight: 38,
+                          textAlign: 'left',
+                          letterSpacing: '0.01em'
+                        }}
+                      >
+                        {t.description}
+                      </Typography>
+                    </Stack>
+                  </Paper>
+                </Grid2>
+              );
+            })}
           </Grid2>
-        </Container>
-      </Box>
-
-      {/* Preview Dialog */}
-      <Dialog
-        open={previewOpen}
-        onClose={handleClosePreview}
-        maxWidth="md"
-        fullWidth={false}
-        sx={{
-          '& .MuiDialog-paper': {
-            width: { xs: '95vw', sm: '85vw', md: '70vw', lg: '60vw' },
-            maxWidth: { xs: 'none', sm: '600px', md: '800px' },
-            maxHeight: { xs: '90vh', sm: '85vh', md: '80vh' },
-            borderRadius: { xs: 1, md: 2 },
-            boxShadow: { xs: '0 5px 20px rgba(0,0,0,0.15)', md: '0 10px 30px rgba(0,0,0,0.2)' },
-            margin: { xs: 1, sm: 2 }
-          }
-        }}
-      >
-        <DialogTitle
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: { xs: 'flex-start', sm: 'center' },
-            flexDirection: { xs: 'column', sm: 'row' },
-            gap: { xs: 1, sm: 0 },
-            bgcolor: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            color: 'white',
-            py: { xs: 1.5, sm: 2 },
-            px: { xs: 2, sm: 3 },
-            borderRadius: { xs: '4px 4px 0 0', md: '8px 8px 0 0' }
-          }}
-        >
-          <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Typography
-              variant="h6"
-              component="div"
-              sx={{
-                fontWeight: 600,
-                fontSize: { xs: '1rem', sm: '1.1rem', md: '1.25rem' },
-                lineHeight: 1.3,
-                wordBreak: 'break-word'
-              }}
-            >
-              {selectedTemplate?.title || 'Template Preview'}
-            </Typography>
-            {selectedTemplate?.description && (
-              <Typography
-                variant="body2"
-                sx={{
-                  opacity: 0.9,
-                  mt: 0.5,
-                  fontSize: { xs: '0.75rem', sm: '0.875rem' },
-                  lineHeight: 1.4
-                }}
-              >
-                {selectedTemplate.description}
-              </Typography>
-            )}
-          </Box>
-          <IconButton
-            aria-label="close"
-            onClick={handleClosePreview}
-            sx={{
-              color: 'white',
-              bgcolor: 'rgba(255,255,255,0.1)',
-              p: { xs: 0.5, sm: 1 },
-              '&:hover': {
-                bgcolor: 'rgba(255,255,255,0.2)'
-              },
-              '& .MuiSvgIcon-root': {
-                fontSize: { xs: '1.1rem', sm: '1.25rem' }
-              }
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-
-        <DialogContent
-          dividers
-          sx={{
-            p: 0,
-            bgcolor: 'background.default',
-            minHeight: { xs: '50vh', sm: '55vh', md: '60vh' }
-          }}
-        >
-          {selectedTemplate?.template ? (
-            <Box
-              sx={{
-                height: { xs: '50vh', sm: '55vh', md: '60vh' },
-                width: '100%'
-              }}
-            >
-              <iframe
-                src={selectedTemplate.template}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  border: 'none'
-                }}
-                title={`Preview of ${selectedTemplate.title}`}
-                onLoad={() => console.log('Iframe loaded successfully')}
-                onError={() => console.log('Iframe failed to load')}
-              />
-            </Box>
-          ) : (
-            <Box
-              sx={{
-                p: { xs: 3, sm: 4 },
-                textAlign: 'center',
-                minHeight: { xs: '50vh', sm: '55vh', md: '60vh' },
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                alignItems: 'center'
-              }}
-            >
-              <PreviewIcon
-                sx={{
-                  fontSize: { xs: 36, sm: 42, md: 48 },
-                  color: 'text.disabled',
-                  mb: 2
-                }}
-              />
-              <Typography
-                variant="h6"
-                color="text.secondary"
-                sx={{
-                  mb: 1,
-                  fontSize: { xs: '1rem', sm: '1.1rem' }
-                }}
-              >
-                No Preview Available
-              </Typography>
-              <Typography variant="body2" color="text.disabled" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
-                This template doesn't have a preview available.
-              </Typography>
-            </Box>
-          )}
-        </DialogContent>
-
-        <DialogActions
-          sx={{
-            bgcolor: 'background.paper',
-            px: { xs: 2, sm: 3 },
-            py: { xs: 1.5, sm: 2 },
-            flexDirection: { xs: 'column', sm: 'row' },
-            gap: { xs: 0.5, sm: 0 }
-          }}
-        >
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            sx={{
-              fontSize: { xs: '0.75rem', sm: '0.875rem' },
-              textAlign: { xs: 'center', sm: 'left' }
-            }}
-          >
-            Live Preview • Click outside to close
-          </Typography>
-        </DialogActions>
-      </Dialog>
+        )}
+      </Container>
     </Box>
   );
 };

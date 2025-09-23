@@ -1,54 +1,70 @@
-import React, { useState, useEffect, useRef } from 'react';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import DownloadIcon from '@mui/icons-material/Download';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import {
   Box,
-  Typography,
   Button,
-  Paper,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Grid2,
-  TextField,
+  Menu,
+  MenuItem,
+  Paper,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
-  TableRow
+  TableRow,
+  TextField,
+  Typography
 } from '@mui/material';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
-import FavoriteIcon from '@mui/icons-material/Favorite';
-import LinearProgress from '@mui/material/LinearProgress';
-import Factory from '/src/utils/Factory.js';
-import { useNavigate, useParams } from 'react-router-dom';
-import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
-import { useSelector, useDispatch } from 'react-redux';
-import { openSnackbar } from 'store/slices/snackbar';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import CircularProgressComponent from 'utils/CircularProgressComponent';
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
 import Autocomplete from '@mui/material/Autocomplete';
-import { Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import LinearProgress from '@mui/material/LinearProgress';
+import axios from 'axios';
+import { useFormik } from 'formik';
+import React, { useEffect, useRef, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate, useParams } from 'react-router-dom';
+import { openSnackbar } from 'store/slices/snackbar';
+import CircularProgressComponent from 'utils/CircularProgressComponent';
+import * as Yup from 'yup';
+import EventTemplate from './EventTemplate';
+import UniversalDocument from './UniversalDocument';
+import Factory from '/src/utils/Factory.js';
 
 export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, search = '' }) {
   const { contextId } = useParams();
+  const [downloadAnchorEl, setDownloadAnchorEl] = useState(null);
+  const baseURL = "http://dev-backend-docdraft.tarafirst.com/";
 
   const dispatch = useDispatch();
   const user = useSelector((state) => state.accountReducer.user);
+  const isLoggedIn = Boolean(user && user.id);
   const { contextEventId } = useParams();
   const navigate = useNavigate();
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [templateLoading, setTemplateLoading] = useState(false);
   const [error, setError] = useState(null);
   const [splitView, setSplitView] = useState(false);
   const [fields, setFields] = useState([]);
-  const [templateHtml, setTemplateHtml] = useState('');
+  const [draftStatus, setDraftStatus] = useState('');
+
+
+
   const [formValues, setFormValues] = useState({});
-  const [templateLoading, setTemplateLoading] = useState(false);
-  const [templateError, setTemplateError] = useState(null);
   const [draftDetailId, setDraftDetailId] = useState(null); // Store draft detail id after first save
   const [savingDraft, setSavingDraft] = useState(false);
   const [finalizing, setFinalizing] = useState(false);
+  const [isDownload, setIsDownload] = useState(false);
   const [fileUrl, setFileUrl] = useState(null); // Store file URL for download
   const [favoriteStates, setFavoriteStates] = useState({});
   const [favouriteIdMap, setFavouriteIdMap] = useState({}); // Map documentId -> favouriteId
@@ -56,6 +72,19 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
   const [tableDialogOpen, setTableDialogOpen] = useState(false);
   const [tableDialogData, setTableDialogData] = useState(null);
   const [tableDialogTableId, setTableDialogTableId] = useState(null);
+  const [selectedDocumentName, setSelectedDocumentName] = useState('');
+  const downloadMenuOpen = Boolean(downloadAnchorEl);
+  const { templateId } = useParams();
+  const selectedTemplateId = templateId || localStorage.getItem('selectedTemplateId');
+  const [templatefield, setTemplate] = useState({});
+  const LS_KEYS = {
+    pendingFinalize: 'pendingDraftFinalize',
+    postLoginRedirect: 'postLoginRedirect'
+  };
+
+  // Add state for custom download menu
+  const [customDownloadAnchorEl, setCustomDownloadAnchorEl] = useState(null);
+  const customDownloadMenuOpen = Boolean(customDownloadAnchorEl);
 
   // Add: API call to add to favourites
   const handleToggleFavorite = async (id) => {
@@ -145,6 +174,27 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
       );
     }
   };
+  const savePendingFinalize = (formattedFormValues) => {
+    try {
+      const minimal = {
+        draft: contextEventId,
+        draft_data: formattedFormValues,
+        file_name: formattedFormValues.file_name || '',
+        //  file_name: formattedFormValues.file_name || formik.values.file_name || '',
+        draftDetailId: draftDetailId || null,
+        ts: Date.now()
+      };
+      localStorage.setItem(LS_KEYS.pendingFinalize, JSON.stringify(minimal));
+      localStorage.setItem(LS_KEYS.postLoginRedirect, '/document/drafting');
+    } catch { }
+  };
+
+  const clearPendingFinalize = () => {
+    try {
+      localStorage.removeItem(LS_KEYS.pendingFinalize);
+    } catch { }
+  };
+
 
   // Fetch favorites on mount to make love symbol persistent
   useEffect(() => {
@@ -170,95 +220,93 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
   }, [contextId]);
   const formatDateToInput = (dateStr) => {
     if (!dateStr || typeof dateStr !== 'string') return '';
-    const match = dateStr.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
-    if (match) {
-      const [, dd, mm, yyyy] = match;
-      return `${yyyy}-${mm}-${dd}`; // valid format for type="date"
+    // If already DD-MM-YYYY, return as is
+    if (/^\d{2}-\d{2}-\d{4}$/.test(dateStr)) return dateStr;
+    // If DD/MM/YYYY, convert to DD-MM-YYYY
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
+      const [dd, mm, yyyy] = dateStr.split('-');
+      return `${dd}-${mm}-${yyyy}`;
+    }
+    // If YYYY-MM-DD, convert to DD-MM-YYYY
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+      const [yyyy, mm, dd] = dateStr.split('-');
+      return `${dd}-${mm}-${yyyy}`;
     }
     return dateStr;
   };
 
   useEffect(() => {
     if (contextEventId) {
-      // If contextEventId is present, fetch fields and template directly (split view mode)
-      setSplitView(true);
-      setTemplateLoading(true);
-      setTemplateError(null);
+
+
       Factory('get', `/documentdrafting/document-fields-and-template/${contextEventId}/`)
-        .then(async (getResult) => {
+        .then((getResult) => {
+          console.log('API Response:', getResult.res && getResult.res.data);
+
           if (getResult.res && getResult.res.status_cd === 0) {
-            const { fields, template, draft_info } = getResult.res.data;
-            const draft_data = draft_info && draft_info.length > 0 ? draft_info[0].draft_data : undefined;
-            const draftDetailIdFromApi = draft_info && draft_info.length > 0 ? draft_info[0].id : null;
-            console.log('Draft Data:', draft_data);
-            console.log('Fields:', fields);
+
+
+            const { fields, draft_info } = getResult.res.data;
+            const draft_data =
+              draft_info && draft_info.length > 0
+                ? draft_info[0].draft_data
+                : undefined;
+            const draftDetailIdFromApi =
+              draft_info && draft_info.length > 0 ? draft_info[0].id : null;
+            if (draft_info && draft_info.length > 0) {
+              if (draft_info[0].status === 'completed') {
+                setIsDownload(true);
+              }
+            }
+            else {
+              setIsDownload(false);
+            }
+
             setDraftDetailId(draftDetailIdFromApi);
             setFields(fields || []);
-            // setFormValues(
-            //   draft_data || (fields ? Object.fromEntries(fields.filter((f) => f.field_name).map((f) => [f.field_name, ''])) : {})
+            // ✅ setTemplate will schedule the update
+            setTemplate((prev) => ({
+              name: getResult.res.data.template.name,
+              html: getResult.res.data.template.html,
+              css: getResult.res.data.template.css,
+            }));
+            setSplitView(true);
 
-            // );
-            //             const formattedValues = {};
-            // (fields || []).forEach((field) => {
-            //   const rawValue = draft_data?.[field.field_name];
 
-            //   if (field.field_type === 'date') {
-            //     if (Array.isArray(rawValue)) {
-            //       formattedValues[field.field_name] = rawValue.map(formatDateToInput);
-            //     } else {
-            //       formattedValues[field.field_name] = formatDateToInput(rawValue);
-            //     }
-            //   } else {
-            //     formattedValues[field.field_name] = rawValue ?? '';
-            //   }
-            // });
-
-            // setFormValues(formattedValues);
             const formattedValues = {};
-
-            // Add base fields if needed
             formattedValues.file_name = draft_data?.file_name || '';
             formattedValues.status = draft_data?.status || 'draft';
 
             (fields || []).forEach((field) => {
               const rawValue = draft_data?.[field.field_name];
-
-              if (field.field_type === 'date') {
+              if (field.field_type && field.field_type.trim().toLowerCase() === 'date') {
                 if (Array.isArray(rawValue)) {
-                  formattedValues[field.field_name] = rawValue.map(formatDateToInput);
+                  formattedValues[field.field_name] = rawValue.map(ddmmyyyyToYyyymmdd);
                 } else {
-                  formattedValues[field.field_name] = formatDateToInput(rawValue);
+                  formattedValues[field.field_name] = ddmmyyyyToYyyymmdd(rawValue);
                 }
               } else {
                 formattedValues[field.field_name] = rawValue ?? '';
               }
             });
+            console.log('Final formattedValues:', formattedValues);
+
+
 
             setFormValues(formattedValues);
-
-            try {
-              const resp = await fetch(template);
-              if (!resp.ok) throw new Error('Failed to fetch template HTML');
-              const html = await resp.text();
-              setTemplateHtml(html);
-            } catch (err) {
-              setTemplateHtml('');
-              setTemplateError('Failed to load template HTML');
-            }
-            setTemplateLoading(false);
-          } else {
-            setTemplateError(getResult.message || 'Failed to load document fields/template');
-            setTemplateLoading(false);
           }
+
         })
+
         .catch(() => {
-          setTemplateError('Failed to load document fields/template');
-          setTemplateLoading(false);
+          setFields([]);
         });
-    } else {
+    }
+    else if (contextId) {
       // No contextEventId, show document selection step
       setLoading(true);
       setError(null);
+
       Factory('get', `/documentdrafting/documents/?draft_id=${contextId}`)
         .then((result) => {
           if (result.res && result.res.status_cd === 0) {
@@ -273,18 +321,48 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
           setError('Failed to load templates');
           setLoading(false);
         });
+    } else if (selectedTemplateId) {
+      setTemplateLoading(true);
+      axios
+        .get(`${baseURL}/documentdrafting/document-fields-template/${selectedTemplateId}/`)
+        .then((result) => {
+          if (result && result.status === 200) {
+
+
+            // ✅ setTemplate will schedule the update
+            setTemplate((prev) => ({
+              ...prev,
+              name: result.data.template.name,
+              html: result.data.template.html,
+              css: result.data.template.css,
+            }));
+
+            setFields(result.data.fields || []);
+          }
+          setSplitView(true);
+          setTemplateLoading(false);
+        })
+        .catch(() => {
+          setFields([]);
+          setTemplate({});
+          setTemplateLoading(false);
+        });
     }
-  }, [contextEventId]);
+  }, [selectedTemplateId, contextEventId, contextId]);
+
+
+  useEffect(() => {
+
+  }, [templatefield]);
+
 
   const handleCardProceed = async (templateId) => {
-    console.log('User:', user);
-    console.log('Context ID:', user.active_context.id);
-    // POST API call to create context-wise event document
+
     const payload = {
-      context: contextId, // use contextId prop passed from parent
+      context: contextId,
       document: templateId,
       status: 'yet_to_start',
-      created_by: user.user.id // TODO: replace with dynamic user id
+      created_by: user.user.id
     };
     try {
       const result = await Factory('post', '/documentdrafting/context-wise-event-document-create/', payload);
@@ -329,84 +407,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
     setFormValues((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Replace placeholders in templateHtml with formValues or formik.values
-  const renderTemplateWithValues = () => {
-    let html = templateHtml;
-    // Remove all {% ... %} blocks
-    html = html.replace(/\{\%[\s\S]*?\%\}/g, '');
-    // Use formik.values in splitView, otherwise formValues
-    const valuesToUse = splitView && formik ? formik.values : formValues;
 
-    Object.entries(valuesToUse).forEach(([key, value]) => {
-      // Handle array values (for table columns)
-      if (Array.isArray(value)) {
-        // For array fields like years, turn_overs, etc.
-        const field = fields.find((f) => f.field_name === key);
-        if (field && field.metadata && field.metadata.type === 'table-column') {
-          // Replace array placeholders like {{years[i]}} with actual values
-          value.forEach((item, index) => {
-            const placeholder = `{{${key}[${index}]}}`;
-            const highlighted = `<span id="preview-field-${key}-${index}" style="background:rgba(54, 80, 174, 0.24); border-radius: 4px; padding: 0 4px;">${item || ''}</span>`;
-            html = html.replaceAll(placeholder, highlighted);
-          });
-        }
-      } else {
-        // Handle regular string/number values
-        let displayValue = value;
-        // If this key is a date field, format it
-        const field = fields.find((f) => f.field_name === key);
-        if (field && field.field_type === 'date' && value) {
-          // Format YYYY-MM-DD to DD-MM-YYYY if value is in that format
-          if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-            const [yyyy, mm, dd] = value.split('-');
-            displayValue = `${dd}-${mm}-${yyyy}`;
-          }
-        }
-        // Wrap in highlight span with id for scroll sync
-        const highlighted = `<span id="preview-field-${key}" style="background:rgba(54, 80, 174, 0.24); border-radius: 4px; padding: 0 4px;">${displayValue}</span>`;
-        html = html.replaceAll(new RegExp(`\{\{\s*${key}\s*\}\}`, 'g'), value ? highlighted : '');
-      }
-    });
-    // Extract and scope <style> tags from the HTML
-    let scopedStyles = '';
-    let offerLetterHtmlNoStyles = html;
-    const styleTagRegex = /<style[\s\S]*?<\/style>/gi;
-    const styleContentRegex = /<style[^>]*>([\s\S]*?)<\/style>/gi;
-    let match;
-    while ((match = styleContentRegex.exec(html)) !== null) {
-      // Prefix all selectors with .offer-letter-preview
-      let css = match[1];
-      css = css.replace(/(^|\})\s*([^@\{\}][^\{\}]*)\{/g, (m, p1, selector) => {
-        const prefixed = selector
-          .split(',')
-          .map((s) => `.offer-letter-preview ${s.trim()}`)
-          .join(', ');
-        return `${p1} ${prefixed} {`;
-      });
-      scopedStyles += css;
-    }
-    // Remove all <style> tags from the HTML
-    offerLetterHtmlNoStyles = html.replace(styleTagRegex, '');
-    // Remove fixed widths
-    const offerLetterHtmlNoWidths = offerLetterHtmlNoStyles.replace(/width\s*:\s*\d+[^;]+;/g, '');
-    // Inject the scoped original styles and our own scoped CSS
-    const styledHtml = `
-      <style>
-        ${scopedStyles}
-        .offer-letter-preview { font-family: 'Roboto', Arial, sans-serif !important; background: #fff !important; color: #222 !important; }
-        .offer-letter-preview h1, .offer-letter-preview h2, .offer-letter-preview h3, .offer-letter-preview h4, .offer-letter-preview h5, .offer-letter-preview h6 { font-family: 'Roboto', Arial, sans-serif !important; }
-        .offer-letter-preview p { margin: 1em 0 !important; line-height: 1.7 !important; }
-        .offer-letter-preview table { width: 100% !important; border-collapse: collapse !important; }
-        .offer-letter-preview td, .offer-letter-preview th { padding: 12px !important; font-size: 1rem !important; }
-        .offer-letter-preview table, .offer-letter-preview tr, .offer-letter-preview td, .offer-letter-preview th { width: auto !important; max-width: 100% !important; }
-        .offer-letter-preview * { box-sizing: border-box !important; }
-      </style>
-      <div class="offer-letter-preview">
-        ${offerLetterHtmlNoWidths}
-      </div>
-    `;
-    return styledHtml;
-  };
 
   // Helper to fetch latest draft details and update fileUrl
   const fetchAndSetFileUrl = async (id) => {
@@ -424,7 +425,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
   function formatDateToDDMMYYYY(dateStr) {
     if (typeof dateStr !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
     const [yyyy, mm, dd] = dateStr.split('-');
-    return `${dd}/${mm}/${yyyy}`;
+    return `${dd}-${mm}-${yyyy}`;
   }
 
   // Save Draft handler
@@ -660,21 +661,9 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
         })
       );
       setFinalizing(false);
-      return; // Do not finalize if not valid
-    }
-    if (!contextEventId) {
-      dispatch(
-        openSnackbar({
-          open: true,
-          message: 'Context event ID missing. Please try again.',
-          variant: 'alert',
-          alert: { color: 'error' },
-          close: false
-        })
-      );
       return;
     }
-    // Only check required fields
+    //
     const emptyFieldFinalize = (fields || []).find(
       (f) => f.is_required && (!formik.values[f.field_name] || String(formik.values[f.field_name]).trim() === '')
     );
@@ -710,94 +699,110 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
         }
       }
     });
-    const payload = {
-      draft: contextEventId,
-      draft_data: formattedFormValues,
-      file_name: formik.values.file_name,
-      status: 'completed'
-    };
-    try {
-      if (!draftDetailId) {
-        // First time: POST
-        const result = await Factory('post', '/documentdrafting/document-drafts-details/', payload);
-        if (result.res && result.res.status_cd === 0 && result.res.id) {
-          setDraftDetailId(result.res.id);
-          if (result.res.file_url || result.res.file) {
-            setFileUrl(result.res.file_url || result.res.file);
+    if (contextEventId) {
+      const payload = {
+        draft: contextEventId,
+        draft_data: formattedFormValues,
+        file_name: formik.values.file_name,
+        status: 'completed'
+      };
+      try {
+        if (!draftDetailId) {
+          // First time: POST
+          const result = await Factory('post', '/documentdrafting/document-drafts-details/', payload);
+          if (result.res && result.res.status_cd === 0 && result.res.id) {
+            setDraftDetailId(result.res.id);
+            if (result.res.file_url || result.res.file) {
+              setFileUrl(result.res.file_url || result.res.file);
+            } else {
+              fetchAndSetFileUrl(result.res.id);
+            }
+            setIsDownload(true);
+            dispatch(
+              openSnackbar({
+                open: true,
+                message: 'Document finalized successfully',
+                variant: 'alert',
+                alert: { color: 'success' },
+                close: false
+              })
+            );
           } else {
-            fetchAndSetFileUrl(result.res.id);
+            dispatch(
+              openSnackbar({
+                open: true,
+                message: result.message || 'Failed to finalize',
+                variant: 'alert',
+                alert: { color: 'error' },
+                close: false
+              })
+            );
           }
-          dispatch(
-            openSnackbar({
-              open: true,
-              message: 'Document finalized successfully',
-              variant: 'alert',
-              alert: { color: 'success' },
-              close: false
-            })
-          );
         } else {
-          dispatch(
-            openSnackbar({
-              open: true,
-              message: result.message || 'Failed to finalize',
-              variant: 'alert',
-              alert: { color: 'error' },
-              close: false
-            })
-          );
-        }
-      } else {
-        // Subsequent: PUT
-        const result = await Factory('put', `/documentdrafting/document-drafts-details/${draftDetailId}/`, payload);
-        if (result.res && result.res.status_cd === 0) {
-          if (result.res.file_url || result.res.file) {
-            setFileUrl(result.res.file_url || result.res.file);
+          // Subsequent: PUT
+          const result = await Factory('put', `/documentdrafting/document-drafts-details/${draftDetailId}/`, payload);
+          if (result.res && result.res.status_cd === 0) {
+            if (result.res.file_url || result.res.file) {
+              setFileUrl(result.res.file_url || result.res.file);
+            } else {
+              fetchAndSetFileUrl(draftDetailId);
+            }
+            setIsDownload(true);
+            dispatch(
+              openSnackbar({
+                open: true,
+                message: 'Document finalized successfully',
+                variant: 'alert',
+                alert: { color: 'success' },
+                close: false
+              })
+            );
           } else {
-            fetchAndSetFileUrl(draftDetailId);
+            dispatch(
+              openSnackbar({
+                open: true,
+                message: result.message || 'Failed to finalize',
+                variant: 'alert',
+                alert: { color: 'error' },
+                close: false
+              })
+            );
           }
-          dispatch(
-            openSnackbar({
-              open: true,
-              message: 'Document finalized successfully',
-              variant: 'alert',
-              alert: { color: 'success' },
-              close: false
-            })
-          );
-        } else {
-          dispatch(
-            openSnackbar({
-              open: true,
-              message: result.message || 'Failed to finalize',
-              variant: 'alert',
-              alert: { color: 'error' },
-              close: false
-            })
-          );
         }
+      } catch (err) {
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: 'Failed to finalize',
+            variant: 'alert',
+            alert: { color: 'error' },
+            close: false
+          })
+        );
       }
-    } catch (err) {
-      dispatch(
-        openSnackbar({
-          open: true,
-          message: 'Failed to finalize',
-          variant: 'alert',
-          alert: { color: 'error' },
-          close: false
-        })
-      );
+    } else if (selectedTemplateId) {
+      const keyFieldsData = formattedFormValues
+
+      // ✅ Store in localStorage
+      localStorage.setItem('pendingFinalizePayload', JSON.stringify(keyFieldsData));
+      localStorage.setItem('file_name', formik.values.file_name); // Save file_name separately
+      setIsDownload(true);
+
+      // (optional) Remember redirect
+      localStorage.setItem('postLoginRedirect', '/document/drafting');
     }
     setFinalizing(false);
   };
 
-  // Download handler (presigned URL logic)
+
+
+
   const handleDownload = async () => {
-    if (!fileUrl) {
+    if (!isDownload) {
       dispatch(
         openSnackbar({
           open: true,
-          message: 'No file available for download. Please finalize the document first.',
+          message: 'No document selected for download.',
           variant: 'alert',
           alert: { color: 'error' },
           close: false
@@ -805,47 +810,230 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
       );
       return;
     }
+
     try {
-      const result = await Factory('get', `/docwallet/generate_presigned_url?url=${encodeURIComponent(fileUrl)}`, {}, {});
-      console.log('Presigned URL response:', result);
-      const presignedUrl = result.res.data.presigned_url || result.res.data.url;
-      if (result.res && result.res.status_cd === 0 && result.res.data && presignedUrl) {
-        // Open the presigned URL in a new tab (temporary workaround for CORS)
-        window.open(presignedUrl, '_blank');
-        dispatch(
-          openSnackbar({
-            open: true,
-            message: 'Download started',
-            variant: 'alert',
-            alert: { color: 'success' },
-            close: false
-          })
-        );
-      } else {
-        dispatch(
-          openSnackbar({
-            open: true,
-            message: result.message || 'Failed to get presigned URL',
-            variant: 'alert',
-            alert: { color: 'error' },
-            close: false
-          })
-        );
+      const html2pdf = (await import('html2pdf.js')).default;
+
+      // Find the actual document content inside the preview container
+      const previewElement =
+        previewContainerRef.current?.querySelector('span') ||
+        previewContainerRef.current?.querySelector('.html-editor') ||
+        previewContainerRef.current;
+
+      if (!previewElement) {
+        throw new Error('Preview content not found');
       }
+
+      if (!contextEventId) {
+        const htmlContent = `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <style>
+              body { font-family: 'Times New Roman', serif; margin: 0; padding: 20px; }
+              * { box-sizing: border-box; }
+            </style>
+          </head>
+          <body>
+            ${previewElement.innerHTML}
+          </body>
+          </html>
+        `;
+
+        const opt = {
+          filename: `${formik.values.file_name || selectedDocumentName}.pdf`,
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        const worker = html2pdf()
+          .set(opt)
+          .from(htmlContent)
+          .toPdf();
+
+        worker.get('pdf').then(function (pdf) {
+          const totalPages = pdf.internal.getNumberOfPages();
+          for (let i = 1; i <= totalPages; i++) {
+            pdf.setPage(i);
+            // Set watermark style
+            pdf.setTextColor(150, 150, 150);
+            pdf.setFontSize(90);
+            pdf.setFont('Times', 'bold');
+            if (pdf.setGState) {
+              pdf.setGState(new pdf.GState({ opacity: 0.15 }));
+            }
+            // Center of A4: 105mm x 148.5mm
+            pdf.text('TaraFirst', 105, 148.5, {
+              align: 'center',
+              angle: 30
+            });
+            if (pdf.setGState) {
+              pdf.setGState(new pdf.GState({ opacity: 1 }));
+            }
+          }
+        }).then(function () {
+          worker.save();
+        });
+      } else {
+        await html2pdf()
+          .set({
+            filename: `${formik.values.file_name || selectedDocumentName}.pdf`,
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+          })
+          .from(previewElement)
+          .save();
+      }
+
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'PDF downloaded successfully',
+          variant: 'alert',
+          alert: { color: 'success' },
+          close: false
+        })
+      );
     } catch (err) {
       dispatch(
         openSnackbar({
           open: true,
-          message: 'Failed to download file',
+          message: 'Failed to generate PDF',
           variant: 'alert',
           alert: { color: 'error' },
           close: false
         })
       );
-      console.error('Download error:', err);
+      console.error('PDF generation error:', err);
     }
   };
 
+  const generateWordDocument = async () => {
+    if (!isDownload) {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'No document selected for download.',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
+      return;
+    }
+
+    try {
+      // Get the document content
+      const previewElement =
+        previewContainerRef.current?.querySelector('span') ||
+        previewContainerRef.current?.querySelector('.html-editor') ||
+        previewContainerRef.current;
+
+      if (!previewElement) {
+        throw new Error('Preview content not found');
+      }
+
+      // Create a blob with HTML content
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body { font-family: 'Times New Roman', serif; margin: 0; padding: 20px; }
+            * { box-sizing: border-box; }
+          </style>
+        </head>
+        <body>
+          ${previewElement.innerHTML}
+        </body>
+        </html>
+      `;
+
+      const blob = new Blob([htmlContent], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+      const url = URL.createObjectURL(blob);
+
+      // Create download link
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${formik.values.file_name || selectedDocumentName}.doc`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Word document downloaded successfully',
+          variant: 'alert',
+          alert: { color: 'success' },
+          close: false
+        })
+      );
+    } catch (err) {
+      dispatch(
+        openSnackbar({
+          open: true,
+          message: 'Failed to generate Word document',
+          variant: 'alert',
+          alert: { color: 'error' },
+          close: false
+        })
+      );
+      console.error('Word generation error:', err);
+    }
+  };
+  // Handle download dropdown
+  const handleDownloadClick = (event) => {
+    if (contextEventId) {
+      setDownloadAnchorEl(event.currentTarget); // Show PDF/Word menu
+    } else {
+      setCustomDownloadAnchorEl(event.currentTarget); // Show Watermark/Login menu
+    }
+  };
+
+  const handleDownloadClose = () => {
+    setDownloadAnchorEl(null);
+  };
+
+  const handleDownloadPDF = () => {
+    handleDownloadClose();
+    handleDownload();
+  };
+
+  const handleDownloadWordFromMenu = () => {
+    handleDownloadClose();
+    generateWordDocument();
+  };
+
+  const handleCustomDownloadClose = () => {
+    setCustomDownloadAnchorEl(null);
+  };
+
+  const [showEventTemplateAfterDownload, setShowEventTemplateAfterDownload] = useState(false);
+
+  // Add at the top with other hooks
+  const eventTemplateRef = React.useRef(null);
+  const [highlightEventTemplate, setHighlightEventTemplate] = useState(false);
+
+  const handleDownloadWithWatermark = async () => {
+    handleCustomDownloadClose();
+    await handleDownload();
+    setShowEventTemplateAfterDownload(true);
+    setTimeout(() => {
+      if (eventTemplateRef.current) {
+        eventTemplateRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setHighlightEventTemplate(true);
+        setTimeout(() => setHighlightEventTemplate(false), 2000);
+      }
+    }, 100); // Delay to ensure EventTemplate is rendered
+  };
+
+  const handleLoginRedirect = () => {
+    handleCustomDownloadClose();
+    localStorage.setItem('download_login_hint', 'true');
+    navigate('/register?id=1&context=business&type=product');
+  };
   // Reset All handler
   const handleResetAll = () => {
     // Reset all form fields to empty using formik
@@ -950,7 +1138,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
       // Convert DD-MM-YYYY to YYYY-MM-DD if needed
       if (/^\d{2}-\d{2}-\d{4}$/.test(value)) {
         const [dd, mm, yyyy] = value.split('-');
-        value = `${yyyy}-${mm}-${dd}`;
+        value = `${dd}-${mm}-${yyyy}`;
       }
       // If already YYYY-MM-DD, keep as is
     }
@@ -991,7 +1179,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
             // Convert DD/MM/YYYY to YYYY-MM-DD for date fields
             if (columnField.field_type === 'date' && value && /^\d{2}\/\d{2}\/\d{4}$/.test(value)) {
               const [dd, mm, yyyy] = value.split('/');
-              return `${yyyy}-${mm}-${dd}`;
+              return `${dd}-${mm}-${yyyy}`;
             }
             return value;
           });
@@ -1095,14 +1283,9 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
                 inputRef={(el) => (inputRefs.current[columnField.field_name] = el)}
                 onChange={(e) => {
                   setCellValues((v) => ({ ...v, [columnField.field_name]: e.target.value }));
-                  // Update Formik with minimal delay for real-time preview
-                  // setTimeout(() => {
-                  //   const arr = Array.isArray(formik.values[columnField.field_name]) ? [...formik.values[columnField.field_name]] : [];
-                  //   arr[rowIndex] = e.target.value;
-                  //   formik.setFieldValue(columnField.field_name, arr, false);
-                  // }, );
 
-                  // Auto-scroll to preview field
+
+
                   setTimeout(() => {
                     const el = document.getElementById(`preview-field-${columnField.field_name}-${rowIndex}`);
                     const container = previewContainerRef.current;
@@ -1160,34 +1343,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
         <Box sx={{ mb: 3 }}>
           {/* No. of Rows Input */}
           <Grid2 size={{ xs: 12 }} sx={{ mb: 2 }}>
-            {/* <TextField
-              fullWidth
-              size="small"
-              label={controlField.label}
-              name={controlField.field_name}
-              value={localNoOfRows}
-              onChange={(e) => {
-                setLocalNoOfRows(e.target.value);
-                handleNoOfRowsChange(e);
-                // Scroll to preview field
-                setTimeout(() => {
-                  const el = document.getElementById(`preview-field-${controlField.field_name}`);
-                  const container = previewContainerRef.current;
-                  if (el && container) {
-                    const elRect = el.getBoundingClientRect();
-                    const containerRect = container.getBoundingClientRect();
-                    const scrollTop =
-                      container.scrollTop + (elRect.top - containerRect.top) - container.clientHeight / 2 + el.offsetHeight / 2;
-                    container.scrollTo({ top: scrollTop, behavior: 'smooth' });
-                  }
-                }, 100);
-              }}
-              // onBlur={handleNoOfRowsBlur}
-              error={formik.touched[controlField.field_name] && Boolean(formik.errors[controlField.field_name])}
-              helperText={formik.touched[controlField.field_name] && formik.errors[controlField.field_name]}
-              type="number"
-              inputProps={{ min: 1, max: 50 }}
-            /> */}
+
             <TextField
               fullWidth
               size="small"
@@ -1242,57 +1398,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
           <TableCell>{rowIndex + 1}</TableCell>
           {columnFields.map((columnField) => (
             <TableCell key={`${columnField.field_name}-${rowIndex}`}>
-              {/* <TextField
-                fullWidth
-                size="small"
-                label={columnField.label}
-                name={`${columnField.field_name}[${rowIndex}]`}
-                value={cellValues[columnField.field_name]}
-                onFocus={() =>
-                  setCellValues((v) => ({ ...v, [columnField.field_name]: formik.values[columnField.field_name]?.[rowIndex] || '' }))
-                }
-                onChange={(e) => {
-                  setCellValues((v) => ({ ...v, [columnField.field_name]: e.target.value }));
-                  // Update Formik with minimal delay for real-time preview
-                  setTimeout(() => {
-                    const arr = Array.isArray(formik.values[columnField.field_name]) ? [...formik.values[columnField.field_name]] : [];
-                    arr[rowIndex] = e.target.value;
-                    formik.setFieldValue(columnField.field_name, arr, false);
-                  }, 5);
-                  // Auto-scroll to preview field
-                  setTimeout(() => {
-                    const el = document.getElementById(`preview-field-${columnField.field_name}-${rowIndex}`);
-                    const container = previewContainerRef.current;
-                    if (el && container) {
-                      const elRect = el.getBoundingClientRect();
-                      const containerRect = container.getBoundingClientRect();
-                      const scrollTop =
-                        container.scrollTop + (elRect.top - containerRect.top) - container.clientHeight / 2 + el.offsetHeight / 2;
-                      container.scrollTo({ top: scrollTop, behavior: 'smooth' });
-                    }
-                  }, 100);
-                }}
-                onBlur={(e) => {
-                  const arr = Array.isArray(formik.values[columnField.field_name]) ? [...formik.values[columnField.field_name]] : [];
-                  arr[rowIndex] = cellValues[columnField.field_name];
-                  formik.setFieldValue(columnField.field_name, arr, false);
-                  formik.handleBlur(e);
-                }}
-                error={
-                  formik.touched[columnField.field_name] &&
-                  formik.errors[columnField.field_name] &&
-                  formik.errors[columnField.field_name][rowIndex]
-                }
-                helperText={
-                  formik.touched[columnField.field_name] &&
-                  formik.errors[columnField.field_name] &&
-                  formik.errors[columnField.field_name][rowIndex]
-                }
-                type={columnField.field_type === 'date' ? 'date' : 'text'}
-                variant="outlined"
-                slotProps={{ inputLabel: { shrink: true } }}
-                placeholder={columnField.field_type === 'date' ? 'DD/MM/YYYY' : ''}
-              /> */}
+
               <TextField
                 fullWidth
                 size="small"
@@ -1360,37 +1466,8 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
       <Box sx={{ mb: 3 }}>
         {/* No. of Rows Input */}
         <Grid2 size={{ xs: 12 }} sx={{ mb: 2 }}>
-          {/* <TextField
-            fullWidth
-            label={controlField.label}
-            name={controlField.field_name}
-            type="number"
-            value={localNoOfRows}
-            onFocus={() => setLocalNoOfRows(formik.values[controlField.field_name] || '')}
-            onChange={(e) => {
-              const value = e.target.value;
-              setLocalNoOfRows(value);
-              const num = parseInt(value, 10);
-              if (!isNaN(num) && num >= 1 && num <= 50) {
-                formik.setFieldValue(controlField.field_name, num);
-              }
-            }}
-            onBlur={(e) => {
-              const value = localNoOfRows;
-              const numRows = Math.max(1, Math.min(50, parseInt(value) || 1));
-              if (parseInt(value) !== numRows) {
-                formik.setFieldValue(controlField.field_name, numRows);
-              } else {
-                formik.setFieldValue(controlField.field_name, value);
-              }
-              formik.handleBlur(e);
-            }}
-            error={formik.touched[controlField.field_name] && Boolean(formik.errors[controlField.field_name])}
-            helperText={formik.touched[controlField.field_name] && formik.errors[controlField.field_name]}
-            variant="outlined"
-            slotProps={{ inputLabel: { shrink: true } }}
-            inputProps={{ min: 1, max: 50 }}
-          /> */}
+
+
           <TextField
             fullWidth
             label={controlField.label}
@@ -1437,10 +1514,27 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
           </Button>
         </Grid2>
 
-        {/* Remove the dynamic table rendering - it should only be in the dialog */}
+
       </Box>
     );
   };
+
+  // Show loading screen while template is loading
+  if (templateLoading) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '100vh',
+          backgroundColor: 'white'
+        }}
+      >
+        <CircularProgressComponent isLoading displayContent={'Loading template...'} />
+      </Box>
+    );
+  }
 
   if (splitView) {
     // Only render the split view, no header/tabs, with a full white background
@@ -1448,6 +1542,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
       <Box
         sx={{
           p: { xs: 2, sm: 2, md: 4 },
+          mt: 4,
           minHeight: '100vh',
           width: '100%',
           boxSizing: 'border-box',
@@ -1455,6 +1550,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
           borderRadius: '8px'
         }}
       >
+
         <Typography variant="h5" fontWeight={600} sx={{ mb: 2, fontSize: { xs: 18, sm: 22 } }}>
           Document Drafting
         </Typography>
@@ -1543,10 +1639,10 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
                       </Grid2>
                       {(fields || []).length > 0 ? (
                         <Grid2 container spacing={2}>
-                          {/* Render regular fields first */}
+
                           {regularFields.map((field, idx) => (
                             <Grid2 size={{ xs: 12 }} key={field.field_name}>
-                              {/* Render Autocomplete if field_type is select and metadata.options exists */}
+
                               {field.field_type === 'select' && field.metadata && Array.isArray(field.metadata.options) ? (
                                 <Autocomplete
                                   fullWidth
@@ -1610,10 +1706,10 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
                                   onBlur={formik.handleBlur}
                                   error={formik.touched[field.field_name] && Boolean(formik.errors[field.field_name])}
                                   helperText={formik.touched[field.field_name] && formik.errors[field.field_name]}
-                                  type={field.field_type || 'text'}
+                                  type={field.field_type && field.field_type.trim().toLowerCase() === 'date' ? 'date' : 'text'}
                                   variant="outlined"
                                   slotProps={{ inputLabel: { shrink: true } }}
-                                  placeholder={field.placeholder || (field.field_type === 'date' ? 'DD-MM-YYYY' : '')}
+                                  placeholder={field.field_type === 'date' ? 'dd-mm-yyyy' : field.placeholder || ''}
                                 />
                               )}
                             </Grid2>
@@ -1655,7 +1751,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
               overflow: 'hidden'
             }}
           >
-            {/* Progress Bar (same as left) */}
+
             {fields.length > 0 && (
               <Box sx={{ width: '100%', mb: 2, position: 'relative' }}>
                 {(() => {
@@ -1686,166 +1782,67 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
                 })()}
               </Box>
             )}
-            {/* Custom React Table Previews for all dynamic tables - REMOVED FROM TOP */}
-            {/* Inline React Table in Template Preview */}
-            <ScrollableCard showArrows={true} containerRef={previewContainerRef}>
-              <Typography variant="h5" fontWeight={700} mb={2} sx={{ pl: 3, pt: 2 }}>
-                Document Preview
-              </Typography>
-              <Box
-                ref={previewContainerRef}
-                sx={{
-                  flex: 1,
-                  p: 3,
-                  height: '100%',
-                  maxHeight: 530,
-                  overflow: 'auto',
+            <Box
+              ref={previewContainerRef}
+              sx={{
+                flex: 1,
+                p: 3,
+                height: '100%',
+                maxHeight: 530,
+                overflow: 'auto',
+                width: '100%',
+                maxWidth: '100%',
+                background: 'transparent',
+                borderRadius: 0,
+                boxSizing: 'border-box',
+                // Custom scrollbar styles
+                '&::-webkit-scrollbar': {
+                  width: 8,
+                  backgroundColor: '#E3EAFE',
+                  borderRadius: 4
+                },
+                '&::-webkit-scrollbar-thumb': {
+                  backgroundColor: '#3650AE',
+                  borderRadius: 4
+                },
+                '&::-webkit-scrollbar-thumb:hover': {
+                  backgroundColor: '#00329E'
+                },
+                scrollbarWidth: 'thin',
+                scrollbarColor: '#3650AE #E3EAFE',
+                '& .offer-letter-preview': {
                   width: '100%',
+                  marginBottom: 2,
+                  padding: 2
+                },
+                '& *': {
                   maxWidth: '100%',
-                  background: 'transparent',
-                  borderRadius: 0,
-                  boxSizing: 'border-box',
-                  // Custom scrollbar styles
-                  '&::-webkit-scrollbar': {
-                    width: 8,
-                    backgroundColor: '#E3EAFE',
-                    borderRadius: 4
-                  },
-                  '&::-webkit-scrollbar-thumb': {
-                    backgroundColor: '#3650AE',
-                    borderRadius: 4
-                  },
-                  '&::-webkit-scrollbar-thumb:hover': {
-                    backgroundColor: '#00329E'
-                  },
-                  scrollbarWidth: 'thin',
-                  scrollbarColor: '#3650AE #E3EAFE',
-                  '& .offer-letter-preview': {
-                    width: '100%',
+                  wordBreak: 'break-word'
+                },
+                '& p, & div': {
+                  marginBottom: '16px',
+                  lineHeight: '1.6'
+                },
+                '& table': {
+                  marginBottom: '20px'
+                }
+              }}
+            >
 
-                    marginBottom: 2,
-                    padding: 2
-                  },
-                  '& *': {
-                    maxWidth: '100%',
-                    wordBreak: 'break-word'
-                  },
-                  '& p, & div': {
-                    marginBottom: '16px',
-                    lineHeight: '1.6'
-                  },
-                  '& table': {
-                    marginBottom: '20px'
-                  }
-                }}
-              >
-                {templateLoading ? (
-                  <Typography>Loading template...</Typography>
-                ) : templateError ? (
-                  <Typography color="error">{templateError}</Typography>
-                ) : (
-                  (() => {
-                    // Replace each dynamic table in the template with the React-rendered table
-                    let html = renderTemplateWithValues();
-                    // Find all <table>...</table> blocks
-                    const tableRegex = /<table[\s\S]*?<\/table>/gi;
-                    let lastIndex = 0;
-                    let result = [];
-                    let match;
-                    let keyCount = 0;
 
-                    while ((match = tableRegex.exec(html)) !== null) {
-                      const tableHtml = match[0];
-                      // Check if this table matches any dynamic table group
-                      // Find the best match by checking which table group has the most field matches
-                      let bestMatch = null;
-                      let bestMatchScore = 0;
+              {
 
-                      Object.entries(tableGroups).forEach(([tableId, group]) => {
-                        let score = 0;
-                        // Check if control field is mentioned
-                        if (tableHtml.includes(group.control.field_name)) {
-                          score += 2; // Higher weight for control field
-                        }
-                        // Check how many column fields are mentioned
-                        group.columns.forEach((col) => {
-                          if (tableHtml.includes(col.field_name)) {
-                            score += 1;
-                          }
-                        });
-                        // If this table has a higher score, it's a better match
-                        if (score > bestMatchScore) {
-                          bestMatchScore = score;
-                          bestMatch = [tableId, group];
-                        }
-                      });
-
-                      // Push the HTML before this table
-                      result.push(<span key={keyCount++} dangerouslySetInnerHTML={{ __html: html.slice(lastIndex, match.index) }} />);
-                      if (bestMatch && bestMatchScore > 0) {
-                        // Render the React table for this group
-                        const [tableId, group] = bestMatch;
-                        result.push(
-                          <Box sx={{ my: 2, mb: 3, ml: 0.5 }} key={keyCount++}>
-                            <TableContainer component={Paper}>
-                              <Table size="small">
-                                <TableHead>
-                                  <TableRow>
-                                    <TableCell sx={{ fontWeight: 'bold', padding: '8px 20px' }}>Sr. No</TableCell>
-                                    {group.columns.map((col) => (
-                                      <TableCell key={col.field_name} sx={{ fontWeight: 'bold', padding: '8px 20px' }}>
-                                        {col.label}
-                                      </TableCell>
-                                    ))}
-                                  </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                  {Array.from({
-                                    length: formik.values[group.control.field_name] || group.control.metadata.default_value || 1
-                                  }).map((_, i) => (
-                                    <TableRow key={i}>
-                                      <TableCell sx={{ padding: '8px 20px' }}>{i + 1}</TableCell>
-                                      {group.columns.map((col) => (
-                                        <TableCell key={col.field_name + i} sx={{ padding: '8px 20px' }}>
-                                          <span
-                                            id={`preview-field-${col.field_name}-${i}`}
-                                            style={{ background: 'rgba(54, 80, 174, 0.24)', borderRadius: '4px', padding: '0 4px' }}
-                                          >
-                                            {col.field_type === 'date' && formik.values[col.field_name]?.[i]
-                                              ? (() => {
-                                                  const val = formik.values[col.field_name][i];
-                                                  if (/^\d{4}-\d{2}-\d{2}$/.test(val)) {
-                                                    const [yyyy, mm, dd] = val.split('-');
-                                                    return `${dd}-${mm}-${yyyy}`;
-                                                  }
-                                                  return val;
-                                                })()
-                                              : formik.values[col.field_name]?.[i] || ''}
-                                          </span>
-                                        </TableCell>
-                                      ))}
-                                    </TableRow>
-                                  ))}
-                                </TableBody>
-                              </Table>
-                            </TableContainer>
-                          </Box>
-                        );
-                      } else {
-                        // Not a dynamic table, just render as HTML
-                        result.push(<span key={keyCount++} dangerouslySetInnerHTML={{ __html: tableHtml }} />);
-                      }
-                      lastIndex = match.index + tableHtml.length;
-                    }
-                    // Push the rest of the HTML
-                    result.push(
-                      <span key={keyCount++} dangerouslySetInnerHTML={{ __html: html.slice(lastIndex) }} style={{ marginLeft: '4px' }} />
-                    );
-                    return result;
-                  })()
-                )}
-              </Box>
-            </ScrollableCard>
+                <UniversalDocument
+                  documentType={selectedDocumentName}
+                  formValues={formik.values}
+                  fields={fields}
+                  contextEventId={contextEventId}
+                  draftDetailId={draftDetailId}
+                  template={templatefield}
+                  onDraftDetailIdChange={setDraftDetailId}
+                  onFileUrlChange={setFileUrl}
+                />}
+            </Box>
           </Paper>
         </Box>
 
@@ -1872,14 +1869,21 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
               color: '#00329E',
               width: { xs: '100%', sm: 'auto' },
               mb: { xs: 1, sm: 0 },
-
-              '&:hover': { borderColor: '#00329E', background: 'rgba(0,50,158,0.04)' }
+              '&:hover': {
+                borderColor: '#00329E',
+                background: 'rgba(0,50,158,0.04)',
+              },
             }}
             startIcon={<ArrowBackIcon />}
-            onClick={() => navigate(`/app/drafting`)}
+            onClick={() =>
+              contextEventId
+                ? navigate(`/app/drafting`)
+                : navigate(`/document-drafting`)
+            }
           >
-            {'Back to Dashboard'}
+            Back to Dashboard
           </Button>
+
           <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, width: { xs: '100%', sm: 'auto' } }}>
             <Button
               variant="contained"
@@ -1924,28 +1928,53 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
             <Button
               variant="contained"
               color="success"
+              startIcon={<DownloadIcon />}
+              endIcon={<ArrowDropDownIcon />}
               sx={{
                 height: 40,
                 minWidth: 120,
                 fontSize: 16,
                 px: 3,
                 py: 0,
-                background: fileUrl ? '#00329E' : '#b0b8c4',
+                background: '#00329E',
                 color: '#fff',
                 width: { xs: '100%', sm: 'auto' },
                 mb: { xs: 1, sm: 0 },
-                '&:hover': { background: fileUrl ? '#002266' : '#b0b8c4' },
+                '&:hover': { background: '#002266' },
                 '&.Mui-disabled': {
                   backgroundColor: '#b0b8c4',
                   color: '#fff',
                   opacity: 1
                 }
               }}
-              onClick={handleDownload}
-              disabled={!fileUrl}
+              onClick={handleDownloadClick}
+              disabled={!isDownload}
             >
               Download
             </Button>
+            <Menu
+              anchorEl={downloadAnchorEl}
+              open={downloadMenuOpen}
+              onClose={handleDownloadClose}
+              MenuListProps={{
+                'aria-labelledby': 'download-button'
+              }}
+            >
+              <MenuItem onClick={handleDownloadPDF}>Save as PDF</MenuItem>
+              <MenuItem onClick={handleDownloadWordFromMenu}>Save as Word</MenuItem>
+            </Menu>
+            {/* Custom menu for not-logged-in users */}
+            <Menu
+              anchorEl={customDownloadAnchorEl}
+              open={customDownloadMenuOpen}
+              onClose={handleCustomDownloadClose}
+              MenuListProps={{
+                'aria-labelledby': 'download-button'
+              }}
+            >
+              <MenuItem onClick={handleDownloadWithWatermark}>Download with Watermark</MenuItem>
+              <MenuItem onClick={handleLoginRedirect}>Login to Download</MenuItem>
+            </Menu>
             <Button
               variant="outlined"
               color="primary"
@@ -1966,7 +1995,14 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
               Reset All
             </Button>
           </Box>
+
         </Box>
+        <Box>
+          {/* {!contextEventId && <EventTemplate />}
+        {console.log(contextEventId)} */}
+
+        </Box>
+
 
         {/* Table Editing Dialog */}
         <Dialog open={tableDialogOpen} onClose={() => setTableDialogOpen(false)} maxWidth="md" fullWidth>
@@ -2004,9 +2040,9 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
                                   }
                                   newValues[columnField.field_name][rowIndex] = e.target.value;
                                   setTableDialogData({ ...tableDialogData, values: newValues });
-                                  // Update Formik immediately for real-time preview
+
                                   formik.setFieldValue(columnField.field_name, newValues[columnField.field_name], false);
-                                  // Scroll to preview field
+
                                   setTimeout(() => {
                                     const el = document.getElementById(`preview-field-${columnField.field_name}-${rowIndex}`);
                                     const container = previewContainerRef.current;
@@ -2041,7 +2077,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
             <Button onClick={() => setTableDialogOpen(false)}>Cancel</Button>
             <Button
               onClick={() => {
-                // Save the edited values back to Formik
+
                 if (tableDialogData) {
                   Object.entries(tableDialogData.values).forEach(([fieldName, values]) => {
                     formik.setFieldValue(fieldName, values);
@@ -2055,11 +2091,42 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
             </Button>
           </DialogActions>
         </Dialog>
+        {/* <Dialog
+  open={showEventTemplateAfterDownload}
+  onClose={() => setShowEventTemplateAfterDownload(false)}
+  maxWidth="md"
+  fullWidth
+>
+  <DialogTitle>Event Template</DialogTitle>
+  <DialogContent dividers>
+    <EventTemplate
+      setShowEventTemplateAfterDownload={setShowEventTemplateAfterDownload}
+      setIsDownload={setIsDownload}
+    />
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={() => setShowEventTemplateAfterDownload(false)}>Close</Button>
+  </DialogActions>
+</Dialog> */}
+        {showEventTemplateAfterDownload && (
+          <Box
+            ref={eventTemplateRef}
+            sx={{
+              mt: 1,
+              // transition: 'background 0.5s',
+              // background: highlightEventTemplate ? 'rgba(255, 255, 0, 0.15)' : 'transparent',
+              borderRadius: 2,
+              // boxShadow: highlightEventTemplate ? '0 0 0 2px #ffe066' : undefined,
+            }}
+          >
+            <EventTemplate setShowEventTemplateAfterDownload={setShowEventTemplateAfterDownload} setIsDownload={setIsDownload} />
+          </Box>
+        )}
       </Box>
     );
   }
 
-  // Filter templates by search string (case-insensitive, title or description)
+
   const filteredTemplates = (templates || []).filter((template) => {
     if (!search) return true;
     const s = search.toLowerCase();
@@ -2071,13 +2138,11 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
     );
   });
 
-  // Debug log
-  console.log('DocumentSelectionPage search:', search, 'filteredTemplates:', filteredTemplates.length);
+
 
   return (
     <Box sx={{ p: { xs: 2, md: 2 } }}>
-      {/* Top Row: Heading and Search - removed, now handled by parent */}
-      {/* Document Cards Grid */}
+
       {loading ? (
         <Box
           sx={{
@@ -2085,7 +2150,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
             p: 4,
             background: '#fff',
             height: '250px',
-            // minHeight: '70%',
+
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center'
@@ -2097,7 +2162,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
         <Box sx={{ textAlign: 'center', color: 'red', my: 4 }}>{error}</Box>
       ) : (
         <>
-          {/* Responsive Card Grid */}
+
           <Grid2
             container
             spacing={{ xs: 2, sm: 4, md: 6 }}
@@ -2142,7 +2207,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
                     mr: { xs: 0, sm: 2, md: 3 }
                   }}
                 >
-                  {/* Love (heart) icon at top right */}
+
                   <Box
                     sx={{
                       position: 'absolute',
@@ -2178,14 +2243,14 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
                       }}
                       title={template.document_name || template.title || template.file_name}
                     >
-                      {template.document_name || template.title || template.file_name}
+                      {template.name || template.title || template.file_name}
                     </Box>
                     <Typography fontSize={13.2} color="text.secondary">
                       {template.description}
                     </Typography>
                   </Box>
-                  {/* Proceed button pinned to bottom */}
-                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb:-1}}>
+
+                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: -1 }}>
                     <Button
                       variant="outlined"
                       endIcon={<ArrowForwardIcon />}
@@ -2195,7 +2260,7 @@ export default function DocumentSelectionPage({ onBreadcrumbClick, onProceed, se
                         fontSize: 14,
                         fontWeight: 600,
                         borderRadius: 2,
-                        
+
                         alignSelf: 'flex-end',
                         borderColor: '#00329E',
                         color: '#00329E',
@@ -2275,7 +2340,7 @@ function ScrollableCard({ children, showArrows, containerRef: externalRef }) {
           </Box>
         </Box>
       )}
-      {/* Only attach ref to direct child if not provided externally */}
+
       {externalRef ? (
         children
       ) : (
@@ -2327,6 +2392,13 @@ function ScrollableCard({ children, showArrows, containerRef: externalRef }) {
           </Box>
         </Box>
       )}
+
     </Box>
   );
+}
+
+function ddmmyyyyToYyyymmdd(dateStr) {
+  if (!dateStr || !/^\d{2}-\d{2}-\d{4}$/.test(dateStr)) return '';
+  const [dd, mm, yyyy] = dateStr.split('-');
+  return `${yyyy}-${mm}-${dd}`;
 }

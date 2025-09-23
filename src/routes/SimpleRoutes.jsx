@@ -3,6 +3,7 @@ import { lazy } from 'react';
 // project imports
 import SimpleLayout from 'layout/SimpleLayout';
 import Loadable from 'ui-component/Loadable';
+import DocumentSelectionPage from 'views/application/DocumentDrafting/components/DocumentSelectionPage';
 import ProductPage from 'views/pages/products/ProductPage';
 
 // lazy loaded pages
@@ -79,6 +80,11 @@ const SimpleRoutes = {
       path: 'products/:category',
       element: <ProductPage />
     },
+    {
+      path: '/app/drafting/fill/',
+      element: <DocumentSelectionPage />
+    },
+
     {
       path: 'products/plans',
       element: <ProductDetails />

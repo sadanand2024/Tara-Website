@@ -63,7 +63,7 @@ const QuickAccessCard = ({ item, onClose }) => (
     {item.is_active ? (
       <Button
         component={RouterLink}
-        to={item.path}
+        to={`${item.path}?id=${item.id}&context=${item.context_type}&type=product`}
         onClick={onClose}
         endIcon={<ArrowForwardIcon sx={{ fontSize: 18 }} />}
         size="small"
