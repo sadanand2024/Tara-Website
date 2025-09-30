@@ -40,13 +40,18 @@ import {
   IconFileDescription,
   IconDownload,
   IconEye,
-  IconPlus
+  IconPlus,
+  IconUserPlus,
+  IconBookmark,
+  IconWallet,
+  IconSettings
 } from '@tabler/icons-react';
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import TaxTDSInfo from './components/TaxTDSInfo';
 import { useNavigate } from 'react-router-dom';
 import MainCard from 'ui-component/cards/MainCard';
 import { generateFinancialYears } from 'utils/FinancialYearsList';
-
+import CheckinCheckoutComponent from './AttendanceInfo/CheckinCheckoutComponent';
 const EmployeePortalDashboard = () => {
   const navigate = useNavigate();
   const user = useSelector((state) => state.accountReducer.user);
@@ -104,928 +109,321 @@ const EmployeePortalDashboard = () => {
   });
 
   return (
-    <MainCard
-      title={`Welcome, ${userName}! 👋`}
-      secondary={
-        <Stack direction="row" spacing={2} alignItems="center">
-          <Autocomplete
-            value={selectedYear}
-            onChange={handleYearChange}
-            options={years}
-            renderInput={(params) => <TextField {...params} label="Financial Year" size="small" sx={{ minWidth: 200 }} />}
-          />
-        </Stack>
-      }
-    >
-      <Grid2 container spacing={1} sx={{ mb: 1 }}>
-        {/* Welcome and Check-in */}
-        <Grid2 size={{ xs: 12, md: 4 }}>
+    <MainCard>
+      {/* Header Section */}
+      <Box sx={{ mb: 3 }}>
+        <Typography variant="h4" sx={{ fontWeight: 600, color: 'text.primary' }}>
+          Welcome {userName}! 👋
+        </Typography>
+      </Box>
+
+      <Grid2 container spacing={3}>
+        {/* Main Content Area */}
+        <Grid2 size={{ xs: 12, lg: 8 }}>
+          {/* Large Placeholder */}
           <Paper
             elevation={0}
             sx={{
               borderRadius: 3,
-              height: 220,
-              width: '100%',
-              border: `1.5px solid #E5EAF2`,
+              height: 300,
+              border: (theme) => `1.5px solid ${theme.palette.divider}`,
               boxShadow: '0 2px 8px 0 rgba(24, 39, 75, 0.05)',
-              transition: 'box-shadow 0.2s, border-color 0.2s',
-              p: 3,
+              mb: 3,
               display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-              cursor: 'pointer',
+              alignItems: 'center',
+              justifyContent: 'center',
               background: 'linear-gradient(135deg, #E3EAFE 0%, #fff 100%)',
+              transition: 'box-shadow 0.2s, border-color 0.2s, transform 0.2s',
               '&:hover': {
                 boxShadow: '0 4px 16px 0 rgba(64, 66, 74, 0.18)',
-                borderColor: '#667eea',
-                background: 'linear-gradient(135deg, #E3EAFE 0%, #fff 100%)'
+                borderColor: 'primary.main',
+                transform: 'translateY(-2px)'
               }
             }}
           >
-            {/* Row 1: Icon and Heading */}
-            <Box display="flex" alignItems="center" gap={2} mb={1}>
-              <Avatar
-                variant="circular"
+            <Typography variant="body1" color="text.secondary">
+              Dashboard Content Area
+            </Typography>
+          </Paper>
+
+          {/* Bottom Three Cards */}
+          <Grid2 container spacing={2}>
+            {/* Leave Report Card */}
+            <Grid2 size={{ xs: 12, md: 4 }}>
+              <Paper
+                elevation={0}
                 sx={{
-                  width: 44,
-                  height: 44,
-                  bgcolor: '#fff',
+                  borderRadius: 3,
+                  border: (theme) => `1.5px solid ${theme.palette.divider}`,
+                  boxShadow: '0 2px 8px 0 rgba(24, 39, 75, 0.05)',
+                  transition: 'box-shadow 0.2s, border-color 0.2s, transform 0.2s',
+                  p: 2.5,
+                  height: 200,
                   display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-              >
-                <IconClock size={28} style={{ color: '#667eea' }} />
-              </Avatar>
-              <Typography variant="h6" fontWeight={800} fontSize={15} sx={{ color: '#0A1F44', mb: 0 }}>
-                Today's Status
-              </Typography>
-            </Box>
-
-            {/* Row 2: Description/Paragraph */}
-            <Box sx={{ width: '100%' }}>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                {currentDate}
-              </Typography>
-              <Typography variant="body2" sx={{ mb: 2, fontSize: '0.8rem', fontWeight: 500 }}>
-                Checked in at {checkInTime}
-              </Typography>
-            </Box>
-
-            {/* Row 3: Count and View Button */}
-            <Box display="flex" alignItems="center" justifyContent="space-between" mt={0}>
-              <Typography variant="h4" fontWeight={700} sx={{ color: '#0A1F44', mb: 0 }}>
-                Active
-              </Typography>
-              <Button
-                variant="contained"
-                disableElevation
-                sx={{
-                  background: 'error.main',
-                  color: '#fff',
-                  fontWeight: 500,
-                  borderRadius: 2,
-                  textTransform: 'none',
-                  boxShadow: 'none',
-                  minWidth: 48,
-                  height: 32,
-                  fontSize: 14,
-                  px: 2,
-                  py: 0.5,
-                  transition: 'background 0.2s, color 0.2s',
+                  flexDirection: 'column',
+                  background: 'linear-gradient(135deg, #FFE8E8 0%, #fff 100%)',
                   '&:hover': {
-                    background: '#b91c1c', // darker error color for hover
-                    color: '#fff'
+                    boxShadow: '0 4px 16px 0 rgba(64, 66, 74, 0.18)',
+                    borderColor: '#ff6b6b',
+                    transform: 'translateY(-2px)'
                   }
                 }}
               >
-                Check-out
-              </Button>
-            </Box>
-          </Paper>
+                <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'text.primary' }}>
+                  Leave Report
+                </Typography>
+                <Stack spacing={1}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <Typography variant="body2" color="text.secondary">
+                      Casual Leave:
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                      07
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <Typography variant="body2" color="text.secondary">
+                      Earned Leave:
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                      07
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <Typography variant="body2" color="text.secondary">
+                      Leave Without Pay:
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                      07
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <Typography variant="body2" color="text.secondary">
+                      Sick Leave:
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                      07
+                    </Typography>
+                  </Box>
+                </Stack>
+              </Paper>
+            </Grid2>
+
+            {/* People On Leave Card */}
+            <Grid2 size={{ xs: 12, md: 4 }}>
+              <Paper
+                elevation={0}
+                sx={{
+                  borderRadius: 3,
+                  border: (theme) => `1.5px solid ${theme.palette.divider}`,
+                  boxShadow: '0 2px 8px 0 rgba(24, 39, 75, 0.05)',
+                  transition: 'box-shadow 0.2s, border-color 0.2s, transform 0.2s',
+                  p: 2.5,
+                  height: 200,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  background: 'linear-gradient(135deg, #E6FAF0 0%, #fff 100%)',
+                  '&:hover': {
+                    boxShadow: '0 4px 16px 0 rgba(64, 66, 74, 0.18)',
+                    borderColor: '#10b981',
+                    transform: 'translateY(-2px)'
+                  }
+                }}
+              >
+                <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'text.primary' }}>
+                  People On Leave
+                </Typography>
+                <Stack spacing={1.5}>
+                  {[1, 2, 3].map((item) => (
+                    <Box key={item} sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                      <Avatar
+                        sx={{
+                          width: 32,
+                          height: 32,
+                          backgroundColor: '#fff',
+                          color: '#10b981',
+                          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                        }}
+                      >
+                        {item}
+                      </Avatar>
+                      <Typography variant="body2" color="text.secondary">
+                        Anand
+                      </Typography>
+                    </Box>
+                  ))}
+                </Stack>
+              </Paper>
+            </Grid2>
+
+            {/* Announcements Card */}
+            <Grid2 size={{ xs: 12, md: 4 }}>
+              <Paper
+                elevation={0}
+                sx={{
+                  borderRadius: 3,
+                  border: (theme) => `1.5px solid ${theme.palette.divider}`,
+                  boxShadow: '0 2px 8px 0 rgba(24, 39, 75, 0.05)',
+                  transition: 'box-shadow 0.2s, border-color 0.2s, transform 0.2s',
+                  p: 2.5,
+                  height: 200,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  background: 'linear-gradient(135deg, #F0E6FF 0%, #fff 100%)',
+                  '&:hover': {
+                    boxShadow: '0 4px 16px 0 rgba(64, 66, 74, 0.18)',
+                    borderColor: '#9b59b6',
+                    transform: 'translateY(-2px)'
+                  }
+                }}
+              >
+                <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'text.primary' }}>
+                  Announcements
+                </Typography>
+                <Stack spacing={1}>
+                  {[1, 2, 3].map((item) => (
+                    <Box key={item} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Box
+                        sx={{
+                          width: 6,
+                          height: 6,
+                          borderRadius: '50%',
+                          backgroundColor: '#9b59b6'
+                        }}
+                      />
+                      <Typography variant="body2" color="text.secondary">
+                        Meeting at 4:00 AM
+                      </Typography>
+                    </Box>
+                  ))}
+                </Stack>
+              </Paper>
+            </Grid2>
+          </Grid2>
         </Grid2>
 
-        {/* My Earnings */}
-        <Grid2 size={{ xs: 12, md: 4 }}>
-          <Paper
-            elevation={0}
-            sx={{
-              borderRadius: 3,
-              height: 220,
-              width: '100%',
-              border: `1.5px solid #E5EAF2`,
-              boxShadow: '0 2px 8px 0 rgba(24, 39, 75, 0.05)',
-              transition: 'box-shadow 0.2s, border-color 0.2s',
-              p: 3,
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-              cursor: 'pointer',
-              background: 'linear-gradient(135deg, #E6FAF0 0%, #fff 100%)',
-              '&:hover': {
-                boxShadow: '0 4px 16px 0 rgba(64, 66, 74, 0.18)',
-                borderColor: '#10b981',
-                background: 'linear-gradient(135deg, #E6FAF0 0%, #fff 100%)'
-              }
-            }}
-          >
-            {/* Row 1: Icon and Heading */}
-            <Box display="flex" alignItems="center" gap={2} mb={1}>
-              <Avatar
-                variant="circular"
-                sx={{
-                  width: 44,
-                  height: 44,
-                  bgcolor: '#fff',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-              >
-                <IconCurrencyDollar size={28} style={{ color: '#10b981' }} />
-              </Avatar>
-              <Typography variant="h6" fontWeight={800} fontSize={15} sx={{ color: '#0A1F44', mb: 0 }}>
-                My Earnings (Net pay)
-              </Typography>
-            </Box>
+        {/* Right Sidebar */}
+        <Grid2 size={{ xs: 12, lg: 4 }}>
+          <Stack spacing={3}>
+            {/* Checked In Widget */}
+            <CheckinCheckoutComponent />
 
-            {/* Row 2: Description/Paragraph */}
-            <Box sx={{ width: '100%' }}>
-              <Typography variant="h5" sx={{ mb: 1 }}>
-                This month: ₹98,262
+            {/* Quick Access */}
+            <Paper
+              elevation={0}
+              sx={{
+                borderRadius: 3,
+                border: (theme) => `1.5px solid ${theme.palette.divider}`,
+                boxShadow: '0 2px 8px 0 rgba(24, 39, 75, 0.05)',
+                transition: 'box-shadow 0.2s, border-color 0.2s, transform 0.2s',
+                p: 2.5,
+                background: 'linear-gradient(135deg, #FFF4E6 0%, #fff 100%)',
+                '&:hover': {
+                  boxShadow: '0 4px 16px 0 rgba(64, 66, 74, 0.18)',
+                  borderColor: 'warning.main',
+                  transform: 'translateY(-2px)'
+                }
+              }}
+            >
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'text.primary' }}>
+                Quick Access
               </Typography>
-              <Typography variant="h5" sx={{ mb: 2 }}>
-                YTD: ₹6,20,000
-              </Typography>
-            </Box>
-
-            {/* Row 3: Count and View Button */}
-            <Box display="flex" alignItems="flex-end" justifyContent="flex-end" mt={0}>
-              <Button
-                variant="contained"
-                disableElevation
-                onClick={() => navigate('/app/employee-portal/my-earnings')}
-                sx={{
-                  background: '#E6FAF0',
-                  color: '#10b981',
-                  fontWeight: 500,
-                  borderRadius: 2,
-                  textTransform: 'none',
-                  boxShadow: 'none',
-                  minWidth: 48,
-                  height: 32,
-                  fontSize: 14,
-                  px: 2,
-                  py: 0.5,
-                  transition: 'background 0.2s, color 0.2s',
-                  '&:hover': {
-                    background: '#10b981',
-                    color: '#fff'
+              <Stack spacing={1.5}>
+                {[
+                  {
+                    title: 'Apply Leave',
+                    icon: <IconUserPlus />,
+                    color: '#667eea',
+                    description: 'Submit new leave request'
+                  },
+                  {
+                    title: 'Booked Leaves',
+                    icon: <IconBookmark />,
+                    color: '#10b981',
+                    description: 'View your leave history'
+                  },
+                  {
+                    title: 'Salary Details',
+                    icon: <IconWallet />,
+                    color: '#f39c12',
+                    description: 'Check salary information'
+                  },
+                  {
+                    title: 'Request Management',
+                    icon: <IconSettings />,
+                    color: '#9b59b6',
+                    description: 'Manage your requests'
                   }
-                }}
-              >
-                View Salary Breakdown
-              </Button>
-            </Box>
-          </Paper>
-        </Grid2>
-
-        {/* My Payslips */}
-        <Grid2 size={{ xs: 12, md: 4 }}>
-          <Paper
-            elevation={0}
-            sx={{
-              borderRadius: 3,
-              height: 220,
-              width: '100%',
-              border: `1.5px solid #E5EAF2`,
-              boxShadow: '0 2px 8px 0 rgba(24, 39, 75, 0.05)',
-              transition: 'box-shadow 0.2s, border-color 0.2s',
-              p: 3,
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-              cursor: 'pointer',
-              background: 'linear-gradient(135deg, #FFF7E3 0%, #fff 100%)',
-              '&:hover': {
-                boxShadow: '0 4px 16px 0 rgba(64, 66, 74, 0.18)',
-                borderColor: '#f59e0b',
-                background: 'linear-gradient(135deg, #FFF7E3 0%, #fff 100%)'
-              }
-            }}
-          >
-            {/* Row 1: Icon and Heading */}
-            <Box display="flex" alignItems="center" gap={2} mb={1}>
-              <Avatar
-                variant="circular"
-                sx={{
-                  width: 44,
-                  height: 44,
-                  bgcolor: '#fff',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-              >
-                <IconFileDescription size={28} style={{ color: '#f59e0b' }} />
-              </Avatar>
-              <Typography variant="h6" fontWeight={800} fontSize={15} sx={{ color: '#0A1F44', mb: 0 }}>
-                My Payslips
-              </Typography>
-            </Box>
-
-            {/* Row 2: Payslip List */}
-            <Box sx={{ width: '100%' }}>
-              <Box sx={{ mb: 1 }}>
-                <Box display="flex" alignItems="center" justifyContent="space-between">
-                  <Typography variant="body2" fontWeight={600} sx={{ color: '#0A1F44', fontSize: '0.9rem' }}>
-                    April 2024
-                  </Typography>
-                  <IconDownload size={16} style={{ color: '#6b7280', cursor: 'pointer' }} />
-                </Box>
-              </Box>
-
-              <Box sx={{ mb: 1 }}>
-                <Box display="flex" alignItems="center" justifyContent="space-between">
-                  <Typography variant="body2" fontWeight={600} sx={{ color: '#0A1F44', fontSize: '0.9rem' }}>
-                    March 2024
-                  </Typography>
-                  <IconDownload size={16} style={{ color: '#6b7280', cursor: 'pointer' }} />
-                </Box>
-              </Box>
-
-              <Box sx={{ mb: 2 }}>
-                <Box display="flex" alignItems="center" justifyContent="space-between">
-                  <Typography variant="body2" fontWeight={600} sx={{ color: '#0A1F44', fontSize: '0.9rem' }}>
-                    Feb 2024
-                  </Typography>
-                  <IconDownload size={16} style={{ color: '#6b7280', cursor: 'pointer' }} />
-                </Box>
-              </Box>
-            </Box>
-
-            {/* Row 3: Count and View Button */}
-            <Box display="flex" alignItems="center" justifyContent="flex-end" mt={0}>
-              <Button
-                variant="contained"
-                disableElevation
-                onClick={() => navigate('/app/employee-portal/pay-slips')}
-                sx={{
-                  background: '#FFF7E3',
-                  color: '#f59e0b',
-                  fontWeight: 500,
-                  borderRadius: 2,
-                  textTransform: 'none',
-                  boxShadow: 'none',
-                  minWidth: 48,
-                  height: 32,
-                  fontSize: 14,
-                  px: 2,
-                  py: 0.5,
-                  transition: 'background 0.2s, color 0.2s',
-                  '&:hover': {
-                    background: '#f59e0b',
-                    color: '#fff'
-                  }
-                }}
-              >
-                View All
-              </Button>
-            </Box>
-          </Paper>
+                ].map((item, index) => (
+                  <Paper
+                    key={index}
+                    elevation={0}
+                    sx={{
+                      borderRadius: 3,
+                      border: (theme) => `1.5px solid ${theme.palette.divider}`,
+                      boxShadow: '0 2px 8px 0 rgba(24, 39, 75, 0.05)',
+                      p: 2,
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease-in-out',
+                      background: 'linear-gradient(135deg, #fff 0%, #f8f9fa 100%)',
+                      '&:hover': {
+                        boxShadow: '0 4px 16px 0 rgba(64, 66, 74, 0.18)',
+                        borderColor: item.color,
+                        transform: 'translateY(-2px)',
+                        background: 'linear-gradient(135deg, #fff 0%, #f0f8ff 100%)'
+                      }
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <Box
+                        sx={{
+                          width: 40,
+                          height: 40,
+                          borderRadius: 2,
+                          backgroundColor: '#fff',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                          border: `1px solid ${item.color}20`
+                        }}
+                      >
+                        {React.cloneElement(item.icon, {
+                          style: { color: item.color, fontSize: 20 }
+                        })}
+                      </Box>
+                      <Box sx={{ flex: 1 }}>
+                        <Typography
+                          variant="subtitle2"
+                          sx={{
+                            fontWeight: 600,
+                            color: 'text.primary',
+                            mb: 0.5
+                          }}
+                        >
+                          {item.title}
+                        </Typography>
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            color: 'text.secondary',
+                            fontSize: '0.75rem'
+                          }}
+                        >
+                          {item.description}
+                        </Typography>
+                      </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <KeyboardArrowRightIcon style={{ color: item.color, fontSize: 28 }} />
+                      </Box>
+                    </Box>
+                  </Paper>
+                ))}
+              </Stack>
+            </Paper>
+          </Stack>
         </Grid2>
       </Grid2>
-
-      {/* Middle Section */}
-      <Grid2 container spacing={1} sx={{ mb: 1 }}>
-        {/* Leave & LoP */}
-        <Grid2 size={{ xs: 12, md: 4 }}>
-          <Paper
-            elevation={0}
-            sx={{
-              borderRadius: 3,
-              height: 220,
-              width: '100%',
-              border: `1.5px solid #E5EAF2`,
-              boxShadow: '0 2px 8px 0 rgba(24, 39, 75, 0.05)',
-              transition: 'box-shadow 0.2s, border-color 0.2s',
-              p: 3,
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-              cursor: 'pointer',
-              background: 'linear-gradient(135deg, #F3E8FF 0%, #fff 100%)',
-              '&:hover': {
-                boxShadow: '0 4px 16px 0 rgba(64, 66, 74, 0.18)',
-                borderColor: '#8b5cf6',
-                background: 'linear-gradient(135deg, #F3E8FF 0%, #fff 100%)'
-              }
-            }}
-          >
-            {/* Row 1: Icon and Heading */}
-            <Box display="flex" alignItems="center" gap={2} mb={1}>
-              <Avatar
-                variant="circular"
-                sx={{
-                  width: 44,
-                  height: 44,
-                  bgcolor: '#fff',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-              >
-                <IconCalendarEvent size={28} style={{ color: '#8b5cf6' }} />
-              </Avatar>
-              <Typography variant="h6" fontWeight={800} fontSize={15} sx={{ color: '#0A1F44', mb: 0 }}>
-                Leave & LoP
-              </Typography>
-            </Box>
-
-            {/* Row 2: Leave Table */}
-            <Box sx={{ width: '100%' }}>
-              <TableContainer>
-                <Table size="small">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell sx={{ border: 'none', p: 0.5, fontSize: '0.75rem', fontWeight: 600, color: '#6b7280' }}>Type</TableCell>
-                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.75rem', fontWeight: 600, color: '#6b7280' }}>
-                        Paid leaves
-                      </TableCell>
-                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.75rem', fontWeight: 600, color: '#6b7280' }}>
-                        LoPs
-                      </TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', color: '#374151' }}>This month</TableCell>
-                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', fontWeight: 600, color: '#0A1F44' }}>
-                        2
-                      </TableCell>
-                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', fontWeight: 600, color: '#0A1F44' }}>
-                        1
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', color: '#374151' }}>YTD</TableCell>
-                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', fontWeight: 600, color: '#0A1F44' }}>
-                        5
-                      </TableCell>
-                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', fontWeight: 600, color: '#0A1F44' }}>
-                        3
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </Box>
-
-            {/* Row 3: Buttons */}
-            <Box display="flex" alignItems="center" justifyContent="space-between" mt={1}>
-              <Button
-                variant="outlined"
-                disableElevation
-                sx={{
-                  border: '1px solid #8b5cf6',
-                  color: '#8b5cf6',
-                  fontWeight: 500,
-                  borderRadius: 2,
-                  textTransform: 'none',
-                  boxShadow: 'none',
-                  minWidth: 80,
-                  height: 32,
-                  fontSize: 12,
-                  px: 1.5,
-                  py: 0.5,
-                  transition: 'background 0.2s, color 0.2s',
-                  '&:hover': {
-                    background: '#8b5cf6',
-                    color: '#fff',
-                    borderColor: '#8b5cf6'
-                  }
-                }}
-              >
-                View Leave Ledger
-              </Button>
-              <Button
-                variant="contained"
-                disableElevation
-                sx={{
-                  background: '#ef4444',
-                  color: '#fff',
-                  fontWeight: 500,
-                  borderRadius: 2,
-                  textTransform: 'none',
-                  boxShadow: 'none',
-                  minWidth: 80,
-                  height: 32,
-                  fontSize: 12,
-                  px: 1.5,
-                  py: 0.5,
-                  transition: 'background 0.2s, color 0.2s',
-                  '&:hover': {
-                    background: '#dc2626'
-                  }
-                }}
-              >
-                APPLY
-              </Button>
-            </Box>
-          </Paper>
-        </Grid2>
-
-        {/* Tax Deducted */}
-        <Grid2 size={{ xs: 12, md: 4 }}>
-          <Paper
-            elevation={0}
-            sx={{
-              borderRadius: 3,
-              height: 220,
-              width: '100%',
-              border: `1.5px solid #E5EAF2`,
-              boxShadow: '0 2px 8px 0 rgba(24, 39, 75, 0.05)',
-              transition: 'box-shadow 0.2s, border-color 0.2s',
-              p: 3,
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-              cursor: 'pointer',
-              background: 'linear-gradient(135deg, #E0F7FA 0%, #fff 100%)',
-              '&:hover': {
-                boxShadow: '0 4px 16px 0 rgba(64, 66, 74, 0.18)',
-                borderColor: '#06b6d4',
-                background: 'linear-gradient(135deg, #E0F7FA 0%, #fff 100%)'
-              }
-            }}
-          >
-            {/* Row 1: Icon and Heading */}
-            <Box display="flex" alignItems="center" gap={2} mb={1}>
-              <Avatar
-                variant="circular"
-                sx={{
-                  width: 44,
-                  height: 44,
-                  bgcolor: '#fff',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-              >
-                <IconReceipt size={28} style={{ color: '#06b6d4' }} />
-              </Avatar>
-              <Typography variant="h6" fontWeight={800} fontSize={15} sx={{ color: '#0A1F44', mb: 0 }}>
-                Tax Deducted (TDS)
-              </Typography>{' '}
-              <Chip
-                label="Regime: New"
-                size="small"
-                sx={{
-                  backgroundColor: alpha('#06b6d4', 0.1),
-                  color: '#06b6d4',
-                  fontWeight: 600,
-                  fontSize: '0.7rem'
-                }}
-              />
-            </Box>
-
-            {/* Row 2: Description/Paragraph */}
-            <Box sx={{ width: '100%' }}>
-              <Typography variant="h5" sx={{ mb: 1 }}>
-                This month: ₹24,600
-              </Typography>
-              <Typography variant="h5" sx={{ mb: 2 }}>
-                YTD: ₹1,800
-              </Typography>
-            </Box>
-
-            {/* Row 3: Count and View Button */}
-            <Box display="flex" alignItems="center" justifyContent="flex-end" mt={0}>
-              <Button
-                variant="contained"
-                disableElevation
-                onClick={() => setShowTaxDetails(true)}
-                sx={{
-                  background: '#E0F7FA',
-                  color: '#06b6d4',
-                  fontWeight: 500,
-                  borderRadius: 2,
-                  textTransform: 'none',
-                  boxShadow: 'none',
-                  minWidth: 48,
-                  height: 32,
-                  fontSize: 14,
-                  px: 2,
-                  py: 0.5,
-                  transition: 'background 0.2s, color 0.2s',
-                  '&:hover': {
-                    background: '#06b6d4',
-                    color: '#fff'
-                  }
-                }}
-              >
-                View
-              </Button>
-            </Box>
-          </Paper>
-        </Grid2>
-
-        {/* Tax Declaration */}
-        <Grid2 size={{ xs: 12, md: 4 }}>
-          <Paper
-            elevation={0}
-            sx={{
-              borderRadius: 3,
-              height: 220,
-              width: '100%',
-              border: `1.5px solid #E5EAF2`,
-              boxShadow: '0 2px 8px 0 rgba(24, 39, 75, 0.05)',
-              transition: 'box-shadow 0.2s, border-color 0.2s',
-              p: 3,
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-              cursor: 'pointer',
-              background: 'linear-gradient(135deg, #F0FDF4 0%, #fff 100%)',
-              '&:hover': {
-                boxShadow: '0 4px 16px 0 rgba(64, 66, 74, 0.18)',
-                borderColor: '#84cc16',
-                background: 'linear-gradient(135deg, #F0FDF4 0%, #fff 100%)'
-              }
-            }}
-          >
-            {/* Row 1: Icon and Heading */}
-            <Box display="flex" alignItems="center" gap={2} mb={1}>
-              <Avatar
-                variant="circular"
-                sx={{
-                  width: 44,
-                  height: 44,
-                  bgcolor: '#fff',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-              >
-                <IconFileText size={28} style={{ color: '#84cc16' }} />
-              </Avatar>
-              <Typography variant="h6" fontWeight={800} fontSize={15} sx={{ color: '#0A1F44', mb: 0 }}>
-                Tax Declaration
-              </Typography>
-            </Box>
-
-            {/* Row 2: Description/Paragraph */}
-            <Box sx={{ width: '100%' }}>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                Tax declaration details will appear here
-              </Typography>
-            </Box>
-
-            {/* Row 3: Count and View Button */}
-            <Box display="flex" alignItems="center" justifyContent="flex-end" mt={0}>
-              <Button
-                variant="contained"
-                disableElevation
-                sx={{
-                  background: '#F0FDF4',
-                  color: '#84cc16',
-                  fontWeight: 500,
-                  borderRadius: 2,
-                  textTransform: 'none',
-                  boxShadow: 'none',
-                  minWidth: 48,
-                  height: 32,
-                  fontSize: 14,
-                  px: 2,
-                  py: 0.5,
-                  transition: 'background 0.2s, color 0.2s',
-                  '&:hover': {
-                    background: '#84cc16',
-                    color: '#fff'
-                  }
-                }}
-              >
-                View
-              </Button>
-            </Box>
-          </Paper>
-        </Grid2>
-      </Grid2>
-
-      {/* Bottom Section */}
-      <Grid2 container spacing={1}>
-        {/* My Attendance */}
-        <Grid2 size={{ xs: 12, md: 4 }}>
-          <Paper
-            elevation={0}
-            sx={{
-              borderRadius: 3,
-              height: 220,
-              width: '100%',
-              border: `1.5px solid #E5EAF2`,
-              boxShadow: '0 2px 8px 0 rgba(24, 39, 75, 0.05)',
-              transition: 'box-shadow 0.2s, border-color 0.2s',
-              p: 3,
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-              cursor: 'pointer',
-              background: 'linear-gradient(135deg, #F1F5F9 0%, #fff 100%)',
-              '&:hover': {
-                boxShadow: '0 4px 16px 0 rgba(64, 66, 74, 0.18)',
-                borderColor: '#ec4899',
-                background: 'linear-gradient(135deg, #F1F5F9 0%, #fff 100%)'
-              }
-            }}
-          >
-            {/* Row 1: Icon and Heading */}
-            <Box display="flex" alignItems="center" justifyContent="space-between" mb={1}>
-              <Box display="flex" alignItems="center" gap={2}>
-                <Avatar
-                  variant="circular"
-                  sx={{
-                    width: 44,
-                    height: 44,
-                    bgcolor: '#fff',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                >
-                  <IconCalendar size={28} style={{ color: '#ec4899' }} />
-                </Avatar>
-                <Typography variant="h6" fontWeight={800} fontSize={15} sx={{ color: '#0A1F44', mb: 0 }}>
-                  My Attendance
-                </Typography>
-              </Box>
-              <Button
-                variant="contained"
-                size="small"
-                disableElevation
-                startIcon={<IconEye size={14} />}
-                sx={{
-                  background: '#3b82f6',
-                  color: '#fff',
-                  textTransform: 'none',
-                  boxShadow: 'none',
-                  transition: 'background 0.2s, color 0.2s',
-                  '&:hover': {
-                    background: '#2563eb'
-                  }
-                }}
-              >
-                View Full Attendance
-              </Button>
-            </Box>
-
-            {/* Row 2: Attendance Table */}
-            <Box sx={{ width: '100%' }}>
-              <TableContainer>
-                <Table size="small">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell sx={{ border: 'none', p: 0.5, fontSize: '0.75rem', fontWeight: 600, color: '#6b7280' }}></TableCell>
-                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.75rem', fontWeight: 600, color: '#6b7280' }}>
-                        This month
-                      </TableCell>
-                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.75rem', fontWeight: 600, color: '#6b7280' }}>
-                        YTD
-                      </TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', color: '#374151' }}>Working days</TableCell>
-                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', fontWeight: 600, color: '#0A1F44' }}>
-                        22
-                      </TableCell>
-                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', fontWeight: 600, color: '#0A1F44' }}>
-                        132
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', color: '#374151' }}>Present</TableCell>
-                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', fontWeight: 600, color: '#0A1F44' }}>
-                        19
-                      </TableCell>
-                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', fontWeight: 600, color: '#0A1F44' }}>
-                        124
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', color: '#374151' }}>LoP</TableCell>
-                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', fontWeight: 600, color: '#0A1F44' }}>
-                        1
-                      </TableCell>
-                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', fontWeight: 600, color: '#0A1F44' }}>
-                        3
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', color: '#374151' }}>Paid leaves</TableCell>
-                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', fontWeight: 600, color: '#0A1F44' }}>
-                        2
-                      </TableCell>
-                      <TableCell align="center" sx={{ border: 'none', p: 0.5, fontSize: '0.8rem', fontWeight: 600, color: '#0A1F44' }}>
-                        5
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </Box>
-          </Paper>
-        </Grid2>
-
-        {/* My PF Contribution */}
-        <Grid2 size={{ xs: 12, md: 4 }}>
-          <Paper
-            elevation={0}
-            sx={{
-              borderRadius: 3,
-              height: 220,
-              width: '100%',
-              border: `1.5px solid #E5EAF2`,
-              boxShadow: '0 2px 8px 0 rgba(24, 39, 75, 0.05)',
-              transition: 'box-shadow 0.2s, border-color 0.2s',
-              p: 3,
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-              cursor: 'pointer',
-              background: 'linear-gradient(135deg, #FFF7ED 0%, #fff 100%)',
-              '&:hover': {
-                boxShadow: '0 4px 16px 0 rgba(64, 66, 74, 0.18)',
-                borderColor: '#f97316',
-                background: 'linear-gradient(135deg, #FFF7ED 0%, #fff 100%)'
-              }
-            }}
-          >
-            {/* Row 1: Icon and Heading */}
-            <Box display="flex" alignItems="center" gap={2} mb={1}>
-              <Avatar
-                variant="circular"
-                sx={{
-                  width: 44,
-                  height: 44,
-                  bgcolor: '#fff',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-              >
-                <IconChartPie size={28} style={{ color: '#f97316' }} />
-              </Avatar>
-              <Typography variant="h6" fontWeight={800} fontSize={15} sx={{ color: '#0A1F44', mb: 0 }}>
-                My PF Contribution
-              </Typography>
-            </Box>
-
-            {/* Row 2: Description/Paragraph */}
-            <Box sx={{ width: '100%' }}>
-              <Typography variant="body2" sx={{ mb: 1 }}>
-                EPF Tracker (Employee + Employer Contribution)
-              </Typography>
-              <Typography variant="body2" sx={{ mb: 1 }}>
-                This month: ₹3,600
-              </Typography>
-              <Typography variant="body2" sx={{ mb: 2, fontSize: '0.8rem', fontWeight: 500 }}>
-                YTD: ₹43,200
-              </Typography>
-            </Box>
-
-            {/* Row 3: Count and View Button */}
-            <Box display="flex" alignItems="center" justifyContent="flex-end" mt={0}>
-              <Button
-                variant="contained"
-                disableElevation
-                sx={{
-                  background: '#FFF7ED',
-                  color: '#f97316',
-                  fontWeight: 500,
-                  borderRadius: 2,
-                  textTransform: 'none',
-                  boxShadow: 'none',
-                  minWidth: 48,
-                  height: 32,
-                  fontSize: 14,
-                  px: 2,
-                  py: 0.5,
-                  transition: 'background 0.2s, color 0.2s',
-                  '&:hover': {
-                    background: '#f97316',
-                    color: '#fff'
-                  }
-                }}
-              >
-                View
-              </Button>
-            </Box>
-          </Paper>
-        </Grid2>
-
-        {/* Reimbursements */}
-        <Grid2 size={{ xs: 12, md: 4 }}>
-          <Paper
-            elevation={0}
-            sx={{
-              borderRadius: 3,
-              height: 220,
-              width: '100%',
-              border: `1.5px solid #E5EAF2`,
-              boxShadow: '0 2px 8px 0 rgba(24, 39, 75, 0.05)',
-              transition: 'box-shadow 0.2s, border-color 0.2s',
-              p: 3,
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-              cursor: 'pointer',
-              background: 'linear-gradient(135deg, #EEF2FF 0%, #fff 100%)',
-              '&:hover': {
-                boxShadow: '0 4px 16px 0 rgba(64, 66, 74, 0.18)',
-                borderColor: '#6366f1',
-                background: 'linear-gradient(135deg, #EEF2FF 0%, #fff 100%)'
-              }
-            }}
-          >
-            {/* Row 1: Icon and Heading */}
-            <Box display="flex" alignItems="center" gap={2} mb={1}>
-              <Avatar
-                variant="circular"
-                sx={{
-                  width: 44,
-                  height: 44,
-                  bgcolor: '#fff',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-              >
-                <IconReceipt size={28} style={{ color: '#6366f1' }} />
-              </Avatar>
-              <Typography variant="h6" fontWeight={800} fontSize={15} sx={{ color: '#0A1F44', mb: 0 }}>
-                Reimbursements
-              </Typography>
-            </Box>
-
-            {/* Row 2: Description/Paragraph */}
-            <Box sx={{ width: '100%' }}>
-              <Box display="flex" alignItems="center" justifyContent="space-between">
-                <Typography variant="h5" sx={{ mb: 1 }}>
-                  Applied: ₹12,500
-                </Typography>
-                <Typography variant="h5" sx={{ mb: 1 }}>
-                  Approved: ₹10,200
-                </Typography>
-              </Box>
-
-              <Box display="flex" alignItems="center" justifyContent="space-between">
-                <Typography variant="h5" sx={{ mb: 1 }}>
-                  Processed: ₹8,750
-                </Typography>
-                <Typography variant="h5" sx={{ mb: 2 }}>
-                  Pending: ₹1,800
-                </Typography>
-              </Box>
-            </Box>
-
-            {/* Row 3: Count and View Button */}
-            <Box display="flex" alignItems="center" justifyContent="flex-end" mt={0}>
-              <Button
-                variant="contained"
-                disableElevation
-                sx={{
-                  background: '#EEF2FF',
-                  color: '#6366f1',
-                  fontWeight: 500,
-                  borderRadius: 2,
-                  textTransform: 'none',
-                  boxShadow: 'none',
-                  minWidth: 48,
-                  height: 32,
-                  fontSize: 14,
-                  px: 2,
-                  py: 0.5,
-                  transition: 'background 0.2s, color 0.2s',
-                  '&:hover': {
-                    background: '#6366f1',
-                    color: '#fff'
-                  }
-                }}
-              >
-                View
-              </Button>
-            </Box>
-          </Paper>
-        </Grid2>
-      </Grid2>
-
-      {/* Tax Details Dialog */}
-      <Dialog open={showTaxDetails} onClose={() => setShowTaxDetails(false)} maxWidth="md" fullWidth>
-        <DialogContent sx={{ p: 0 }}>
-          <TaxTDSInfo onClose={() => setShowTaxDetails(false)} />
-        </DialogContent>
-      </Dialog>
     </MainCard>
   );
 };

@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box,
-  Card,
-  CardContent,
   Typography,
-  Grid2,
   Table,
   TableBody,
   TableCell,
@@ -12,28 +9,25 @@ import {
   TableHead,
   TableRow,
   Paper,
-  Chip,
-  IconButton,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
   Button,
   TextField,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Autocomplete
+  Autocomplete,
+  Switch,
+  FormGroup,
+  FormControlLabel
 } from '@mui/material';
-import { IconClock, IconCalendar, IconCheck, IconX, IconAlertTriangle, IconMapPin, IconEdit } from '@tabler/icons-react';
 import Factory from 'utils/Factory';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { openSnackbar } from 'store/slices/snackbar';
 import { generateYears } from 'utils/YearsList';
 import PunchInOutCard from './PunchInOutCard';
 import MainCard from 'ui-component/cards/MainCard';
-import WebSocketStatus from './WebSocketStatus';
+import AttendanceTableView from './AttendanceTableView';
+import AttendanceCalendarView from './AttendanceCalendarView';
 const monthOptions = [
   { label: 'January', value: 1 },
   { label: 'February', value: 2 },
@@ -53,20 +47,20 @@ const AttendanceInfoTab = () => {
   const yearOptions = generateYears();
   // State for attendance data
   const [attendanceData, setAttendanceData] = useState([]);
+  const [attendanceDataLoading, setAttendanceDataLoading] = useState(false);
   const [sessionsDialogOpen, setSessionsDialogOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState(null);
   const [selectedSessions, setSelectedSessions] = useState([]);
-  const [editForm, setEditForm] = useState({
-    status: '',
-    checkIn: '',
-    checkOut: '',
-    remarks: ''
-  });
-
+  const [selectedDate, setSelectedDate] = useState(null);
   // State for month and year selection
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
+  // State for view toggle
+  const [isCalendarView, setIsCalendarView] = useState(false);
+  const handleDateSelect = (date) => {
+    setSelectedDate(date);
+  };
   // Generate attendance data for the current month
   useEffect(() => {
     getAttendanceReport();
@@ -74,20 +68,24 @@ const AttendanceInfoTab = () => {
 
   const getAttendanceReport = async () => {
     try {
+      setAttendanceDataLoading(true);
       let url = `/payroll/monthly-report/?month=${selectedMonth}&year=${selectedYear}`;
       const { res } = await Factory('get', url, {});
       if (res.status_cd === 0 && res.data && res.data.report) {
         // Transform API response to match our attendance data structure
         const transformedData = transformMonthlyReportToAttendanceData(res.data.report);
         setAttendanceData(transformedData);
+        setAttendanceDataLoading(false);
       } else {
         // If API fails, fall back to generated data
         generateFallbackData();
+        setAttendanceDataLoading(false);
       }
     } catch (error) {
       console.error('Error fetching attendance data:', error);
       // Fall back to generated data on error
       generateFallbackData();
+      setAttendanceDataLoading(false);
     }
   };
 
@@ -147,9 +145,7 @@ const AttendanceInfoTab = () => {
         checkOutLocation: checkOutLocation,
         sessions: dayReport.sessions || [],
         totalHours: dayReport.total_hours || '0:00:00',
-        sessionCount: dayReport.session_count || 0,
-        netHours: calculateNetHours(dayReport.total_hours || '0:00:00'),
-        grossHours: calculateGrossHours(dayReport.total_hours || '0:00:00')
+        sessionCount: dayReport.session_count || 0
       };
     });
   };
@@ -235,62 +231,6 @@ const AttendanceInfoTab = () => {
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
   };
 
-  // Calculate net hours (total hours minus break time)
-  const calculateNetHours = (totalHours, breakTime = '01:00') => {
-    if (totalHours === '-' || totalHours === '0:00:00') return '-';
-
-    const [breakHour, breakMin] = breakTime.split(':').map(Number);
-    const breakMinutes = breakHour * 60 + breakMin;
-
-    // Parse total hours from API format
-    let totalMinutes = 0;
-    if (totalHours.includes('days')) {
-      const parts = totalHours.split(', ');
-      const days = parseInt(parts[0].split(' ')[0]) || 0;
-      const timeParts = parts[1] ? parts[1].split(':') : ['0', '0', '0'];
-      const hours = parseInt(timeParts[0]) || 0;
-      const minutes = parseInt(timeParts[1]) || 0;
-      totalMinutes = days * 24 * 60 + hours * 60 + minutes;
-    } else {
-      const timeParts = totalHours.split(':');
-      const hours = parseInt(timeParts[0]) || 0;
-      const minutes = parseInt(timeParts[1]) || 0;
-      totalMinutes = hours * 60 + minutes;
-    }
-
-    const netMinutes = Math.max(0, totalMinutes - breakMinutes);
-    const hours = Math.floor(netMinutes / 60);
-    const minutes = netMinutes % 60;
-
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-  };
-
-  // Calculate gross hours (total hours including overtime)
-  const calculateGrossHours = (totalHours) => {
-    if (totalHours === '-' || totalHours === '0:00:00') return '-';
-
-    // For now, gross hours = total hours (can be modified to include overtime calculations)
-    let totalMinutes = 0;
-    if (totalHours.includes('days')) {
-      const parts = totalHours.split(', ');
-      const days = parseInt(parts[0].split(' ')[0]) || 0;
-      const timeParts = parts[1] ? parts[1].split(':') : ['0', '0', '0'];
-      const hours = parseInt(timeParts[0]) || 0;
-      const minutes = parseInt(timeParts[1]) || 0;
-      totalMinutes = days * 24 * 60 + hours * 60 + minutes;
-    } else {
-      const timeParts = totalHours.split(':');
-      const hours = parseInt(timeParts[0]) || 0;
-      const minutes = parseInt(timeParts[1]) || 0;
-      totalMinutes = hours * 60 + minutes;
-    }
-
-    const hours = Math.floor(totalMinutes / 60);
-    const minutes = totalMinutes % 60;
-
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-  };
-
   // Edit functionality
   const handleEditClick = (record) => {
     setEditingRecord(record);
@@ -319,153 +259,33 @@ const AttendanceInfoTab = () => {
     }
   };
 
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case 'Present':
-        return IconCheck;
-      case 'Late':
-        return IconAlertTriangle;
-      case 'Absent':
-        return IconX;
-      case 'Half Day':
-        return IconClock;
-      default:
-        return IconClock;
-    }
-  };
-
-  const calculateAverageWorkHours = () => {
-    const presentRecords = attendanceData.filter(
-      (record) => record.status === 'Present' && record.totalHours && record.totalHours !== '0:00:00'
-    );
-    if (presentRecords.length === 0) return '0hr 0mins';
-
-    const totalMinutes = presentRecords.reduce((sum, record) => {
-      // Parse total_hours from API (format: "1:26:27" or "5 days, 0:53:14")
-      const timeStr = record.totalHours;
-      if (timeStr.includes('days')) {
-        // Handle format like "5 days, 0:53:14"
-        const parts = timeStr.split(', ');
-        const days = parseInt(parts[0].split(' ')[0]) || 0;
-        const timeParts = parts[1] ? parts[1].split(':') : ['0', '0', '0'];
-        const hours = parseInt(timeParts[0]) || 0;
-        const minutes = parseInt(timeParts[1]) || 0;
-        return days * 24 * 60 + hours * 60 + minutes;
-      } else {
-        // Handle format like "1:26:27"
-        const timeParts = timeStr.split(':');
-        const hours = parseInt(timeParts[0]) || 0;
-        const minutes = parseInt(timeParts[1]) || 0;
-        return hours * 60 + minutes;
-      }
-    }, 0);
-
-    const avgMinutes = totalMinutes / presentRecords.length;
-    const hours = Math.floor(avgMinutes / 60);
-    const minutes = Math.round(avgMinutes % 60);
-    return `${hours}hr ${minutes}mins`;
-  };
-
-  const calculateAverageActualHours = () => {
-    const presentRecords = attendanceData.filter(
-      (record) => record.status === 'Present' && record.totalHours && record.totalHours !== '0:00:00'
-    );
-    if (presentRecords.length === 0) return '0hrs 0m';
-
-    const totalMinutes = presentRecords.reduce((sum, record) => {
-      // Parse total_hours from API (format: "1:26:27" or "5 days, 0:53:14")
-      const timeStr = record.totalHours;
-      if (timeStr.includes('days')) {
-        // Handle format like "5 days, 0:53:14"
-        const parts = timeStr.split(', ');
-        const days = parseInt(parts[0].split(' ')[0]) || 0;
-        const timeParts = parts[1] ? parts[1].split(':') : ['0', '0', '0'];
-        const hours = parseInt(timeParts[0]) || 0;
-        const minutes = parseInt(timeParts[1]) || 0;
-        return days * 24 * 60 + hours * 60 + minutes;
-      } else {
-        // Handle format like "1:26:27"
-        const timeParts = timeStr.split(':');
-        const hours = parseInt(timeParts[0]) || 0;
-        const minutes = parseInt(timeParts[1]) || 0;
-        return hours * 60 + minutes;
-      }
-    }, 0);
-
-    const avgMinutes = totalMinutes / presentRecords.length;
-    const hours = Math.floor(avgMinutes / 60);
-    const minutes = Math.round(avgMinutes % 60);
-    return `${hours}hrs ${minutes}m`;
-  };
-
-  const getPenaltyDays = () => {
-    return attendanceData.filter((record) => record.status === 'Late' || record.status === 'Absent').length;
-  };
-
-  const getTotalPresentDays = () => {
-    return attendanceData.filter((record) => record.status === 'Present').length;
-  };
-
-  const calculateTotalNetHours = () => {
-    const presentRecords = attendanceData.filter((record) => record.status === 'Present' && record.netHours && record.netHours !== '-');
-    if (presentRecords.length === 0) return '0hr 0mins';
-
-    const totalMinutes = presentRecords.reduce((sum, record) => {
-      const timeStr = record.netHours;
-      const timeParts = timeStr.split(':');
-      const hours = parseInt(timeParts[0]) || 0;
-      const minutes = parseInt(timeParts[1]) || 0;
-      return sum + (hours * 60 + minutes);
-    }, 0);
-
-    const hours = Math.floor(totalMinutes / 60);
-    const minutes = totalMinutes % 60;
-    return `${hours}hr ${minutes}mins`;
-  };
-
-  const calculateTotalGrossHours = () => {
-    const presentRecords = attendanceData.filter((record) => record.status === 'Present' && record.grossHours && record.grossHours !== '-');
-    if (presentRecords.length === 0) return '0hr 0mins';
-
-    const totalMinutes = presentRecords.reduce((sum, record) => {
-      const timeStr = record.grossHours;
-      const timeParts = timeStr.split(':');
-      const hours = parseInt(timeParts[0]) || 0;
-      const minutes = parseInt(timeParts[1]) || 0;
-      return sum + (hours * 60 + minutes);
-    }, 0);
-
-    const hours = Math.floor(totalMinutes / 60);
-    const minutes = totalMinutes % 60;
-    return `${hours}hr ${minutes}mins`;
-  };
-
   return (
-    <MainCard>
-      {/* <WebSocketStatus /> */}
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" sx={{ fontWeight: 600, mb: 1 }}>
-          Attendance
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          Overview of your current attendance and usage
-        </Typography>
-      </Box>
+    <>
       <Box sx={{ mb: 2 }}>
         <PunchInOutCard onAttendanceUpdate={handleAttendanceUpdate} />
       </Box>
       {/* Attendance Controls */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-          <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
-            To update your attendance data, please click on the edit button next to each date.
-          </Typography>
-        </Box>
-
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: { xs: 'column', md: 'row' },
+          justifyContent: 'space-between',
+          alignItems: { xs: 'flex-start', md: 'center' },
+          gap: 2
+        }}
+      >
         {/* Month and Year Selection */}
-        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 2 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: { xs: 'column', sm: 'row' },
+            gap: 2,
+            width: { xs: '100%', md: 'auto' },
+            m: 2
+          }}
+        >
           <Autocomplete
-            sx={{ minWidth: 200 }}
+            sx={{ minWidth: { xs: '100%', sm: 200 } }}
             size="small"
             value={monthOptions.find((option) => option.value === selectedMonth)}
             onChange={(event, newValue) => setSelectedMonth(newValue.value)}
@@ -474,7 +294,7 @@ const AttendanceInfoTab = () => {
           />
 
           <Autocomplete
-            sx={{ minWidth: 200 }}
+            sx={{ minWidth: { xs: '100%', sm: 200 } }}
             size="small"
             value={selectedYear.toString()}
             onChange={(event, newValue) => setSelectedYear(parseInt(newValue))}
@@ -483,182 +303,35 @@ const AttendanceInfoTab = () => {
             disableClearable
           />
         </Box>
-      </Box>
-      {/* Attendance Table */}
-      <TableContainer
-        component={Paper}
-        sx={{
-          width: '100%',
-          borderRadius: 2,
-          boxShadow: 1,
-          overflowX: 'auto'
-        }}
-      >
-        <Table size="small">
-          <TableHead
-            sx={{
-              backgroundColor: 'primary.main',
-              '& .MuiTableCell-root': {
-                color: '#ffffff !important'
-              }
-            }}
-          >
-            <TableRow>
-              <TableCell sx={{ fontWeight: 600 }}>Date</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>First Check In</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Last Check Out</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Duration</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Net Hours</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Gross Hours</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Remarks</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Action</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {attendanceData.map((record) => {
-              const StatusIcon = getStatusIcon(record.status);
-              const isToday = record.date === new Date().toLocaleDateString('en-GB').split('/').reverse().join('/');
 
-              return (
-                <TableRow
-                  key={record.id}
-                  hover
-                  sx={{
-                    bgcolor: isToday ? 'primary.50' : 'inherit',
-                    '&:hover': { bgcolor: 'grey.50' }
-                  }}
-                >
-                  <TableCell>
-                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                      {record.date}
-                    </Typography>
-                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                      {record.dayName}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    {record.status === '-' ? (
-                      <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                        -
-                      </Typography>
-                    ) : (
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <StatusIcon size={16} style={{ color: '#666' }} />
-                        <Chip label={record.status} color={getStatusColor(record.status)} size="small" variant="outlined" />
-                      </Box>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {record.checkIn === '-' ? (
-                      <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                        -
-                      </Typography>
-                    ) : (
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        {record.checkInLocation && <IconMapPin size={14} style={{ color: '#1976d2' }} />}
-                        <Typography variant="body2">{record.checkIn}</Typography>
-                      </Box>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2" sx={{ color: record.checkOut === '-' ? 'text.secondary' : 'text.primary' }}>
-                      {record.checkOut}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography
-                      variant="body2"
-                      sx={{ fontWeight: 600, color: record.duration === '-' ? 'text.secondary' : 'text.primary' }}
-                    >
-                      {record.duration}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography
-                      variant="body2"
-                      sx={{ fontWeight: 600, color: record.netHours === '-' ? 'text.secondary' : 'success.main' }}
-                    >
-                      {record.netHours}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography
-                      variant="body2"
-                      sx={{ fontWeight: 600, color: record.grossHours === '-' ? 'text.secondary' : 'primary.main' }}
-                    >
-                      {record.grossHours}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                      {record.remarks}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Button onClick={() => handleEditClick(record)}>View History</Button>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      {/* Summary Boxes */}
-      <Grid2 container spacing={3} sx={{ mt: 3 }}>
-        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-          <Card sx={{ bgcolor: 'primary.50', height: '100%' }}>
-            <CardContent sx={{ textAlign: 'center', p: 3 }}>
-              <IconClock size={32} style={{ color: '#1976d2', marginBottom: 8 }} />
-              <Typography variant="h4" sx={{ fontWeight: 700, color: 'primary.main', mb: 1 }}>
-                {calculateAverageWorkHours()}
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                Avg work hrs
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid2>
-        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-          <Card sx={{ bgcolor: 'success.50', height: '100%' }}>
-            <CardContent sx={{ textAlign: 'center', p: 3 }}>
-              <IconCalendar size={32} style={{ color: '#2e7d32', marginBottom: 8 }} />
-              <Typography variant="h4" sx={{ fontWeight: 700, color: 'success.main', mb: 1 }}>
-                {calculateAverageActualHours()}
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                Avg Actual Hrs
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid2>
-        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-          <Card sx={{ bgcolor: 'info.50', height: '100%' }}>
-            <CardContent sx={{ textAlign: 'center', p: 3 }}>
-              <IconCheck size={32} style={{ color: '#0288d1', marginBottom: 8 }} />
-              <Typography variant="h4" sx={{ fontWeight: 700, color: 'info.main', mb: 1 }}>
-                {calculateTotalNetHours()}
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                Total Net Hrs
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid2>
-        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-          <Card sx={{ bgcolor: 'warning.50', height: '100%' }}>
-            <CardContent sx={{ textAlign: 'center', p: 3 }}>
-              <IconAlertTriangle size={32} style={{ color: '#ed6c02', marginBottom: 8 }} />
-              <Typography variant="h4" sx={{ fontWeight: 700, color: 'warning.main', mb: 1 }}>
-                {getPenaltyDays()}
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                Penalty Days
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid2>
-      </Grid2>
+        {/* Calendar Mode Switch */}
+        <Box sx={{ display: 'flex', justifyContent: { xs: 'flex-start', md: 'flex-end' } }}>
+          <FormGroup>
+            <FormControlLabel control={<Switch onChange={(e) => setIsCalendarView(e.target.checked)} />} label="Calendar Mode" />
+          </FormGroup>
+        </Box>
+      </Box>
+
+      {/* Conditional Rendering: Table or Calendar View */}
+      {isCalendarView ? (
+        <AttendanceCalendarView
+          attendanceData={attendanceData}
+          attendanceDataLoading={attendanceDataLoading}
+          selectedMonth={selectedMonth}
+          selectedYear={selectedYear}
+          onMonthChange={setSelectedMonth}
+          onYearChange={setSelectedYear}
+          calculateDuration={calculateDuration}
+          onDateSelect={handleDateSelect}
+        />
+      ) : (
+        /* Attendance Table */
+        <AttendanceTableView
+          attendanceData={attendanceData}
+          handleEditClick={handleEditClick}
+          attendanceDataLoading={attendanceDataLoading}
+        />
+      )}
       {/* Sessions Dialog */}
       <Dialog
         open={sessionsDialogOpen}
@@ -824,7 +497,7 @@ const AttendanceInfoTab = () => {
           </Button>
         </DialogActions>
       </Dialog>
-    </MainCard>
+    </>
   );
 };
 

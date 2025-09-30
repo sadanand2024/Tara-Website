@@ -1,0 +1,129 @@
+/* -------- Calendar Container -------- */
+.fc {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  padding: 12px;
+  font-family: 'Inter', 'Roboto', sans-serif;
+}
+
+/* -------- Toolbar -------- */
+.fc-toolbar {
+  margin-bottom: 12px;
+}
+
+.fc-toolbar-title {
+  font-size: 20px !important;
+  font-weight: 600 !important;
+  color: #1a237e;
+}
+
+.fc .fc-button {
+  border-radius: 6px !important;
+  padding: 6px 14px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  text-transform: capitalize !important;
+  box-shadow: none !important;
+  transition: all 0.2s ease-in-out;
+}
+
+.fc .fc-button-primary {
+  background-color: #1976d2 !important;
+  border: none !important;
+}
+
+.fc .fc-button-primary:hover {
+  background-color: #1565c0 !important;
+}
+
+/* -------- Date Cells -------- */
+.fc-daygrid-day {
+  border: 1px solid #f0f0f0 !important;
+  transition: background 0.2s ease-in-out;
+}
+
+.fc-daygrid-day:hover {
+  background: #f9f9f9 !important;
+  cursor: pointer;
+}
+
+.fc .fc-daygrid-day-number {
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  margin: 4px;
+  color: #333;
+}
+
+/* Today Highlight */
+.fc .fc-day-today {
+  background: #e3f2fd !important;
+}
+
+.fc .fc-day-today .fc-daygrid-day-number {
+  background: #1976d2 !important;
+  color: #fff !important;
+  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: auto;
+}
+
+/* -------- Events -------- */
+/* Override default full width */
+.fc-daygrid-event {
+  display: inline-block !important;
+  width: auto !important;
+  min-width: auto !important;
+  max-width: 100% !important;
+}
+
+/* Add chip-like style */
+.fc-event {
+  border-radius: 5px !important;
+  padding: 2px 8px !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  line-height: 1.4;
+  text-align: center;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+/* Prevent event from stretching across */
+.fc-daygrid-day-events {
+  display: flex;
+  justify-content: flex-start; /* or center */
+  gap: 4px; /* spacing if multiple events */
+}
+
+.fc-event:hover {
+  transform: scale(1.05);
+  cursor: pointer;
+}
+
+
+/* -------- Popover (when many events) -------- */
+.fc-popover {
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+}
+
+.fc-popover-header {
+  background: #1976d2 !important;
+  color: #fff !important;
+  font-weight: 600 !important;
+  font-size: 13px !important;
+}
+/* Disable pointer cursor & clicks on events */
+.fc .fc-event {
+  pointer-events: none !important;
+  cursor: default !important;
+}
+
+/* Keep dates clickable */
+.fc .fc-daygrid-day-frame {
+  cursor: pointer !important;
+}

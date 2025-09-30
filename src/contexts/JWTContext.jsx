@@ -190,6 +190,21 @@ export function JWTProvider({ children }) {
     return <Loader />;
   }
 
+  const loginWithGoogle = (access_token, refresh_token, user) => {
+    console.log('🔄 JWT Context: Processing Google login');
+    console.log('📊 Access Token:', access_token ? 'Present' : 'Missing');
+    console.log('👤 User Data:', user);
+
+    setSession(access_token, user);
+    reduxDispatch(storeUser(user));
+    dispatch({
+      type: LOGIN,
+      payload: { isLoggedIn: true, user }
+    });
+
+    console.log('✅ JWT Context: Google login processed successfully');
+  };
+
   return (
     <JWTContext.Provider
       value={{
@@ -198,7 +213,8 @@ export function JWTProvider({ children }) {
         logout,
         register,
         resetPassword,
-        updateProfile
+        updateProfile,
+        loginWithGoogle
       }}
     >
       {children}

@@ -17,6 +17,8 @@ import { ServicesProvider } from 'contexts/ServicesContext';
 import ErrorBoundary from 'components/ErrorBoundary';
 // auth provider
 import { JWTProvider as AuthProvider } from 'contexts/JWTContext';
+// Google OAuth
+import { GoogleOAuthProvider } from '@react-oauth/google';
 // import { FirebaseProvider as AuthProvider } from 'contexts/FirebaseContext';
 // import { Auth0Provider as AuthProvider } from 'contexts/Auth0Context';
 // import { AWSCognitoProvider as AuthProvider } from 'contexts/AWSCognitoContext';
@@ -30,26 +32,30 @@ export default function App() {
   };
   return (
     <ErrorBoundary ErrorComponent={CustomErrorComponent} onError={handleError}>
-      <ThemeCustomization>
-        {/* <RTLLayout> */}
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <Locales>
-            <NavigationScroll>
-              <AuthProvider>
-                <>
-                  <Notistack>
-                    <ServicesProvider>
-                      <RouterProvider router={router} />
-                      <Snackbar />
-                    </ServicesProvider>
-                  </Notistack>
-                </>
-              </AuthProvider>
-            </NavigationScroll>
-          </Locales>
-        </LocalizationProvider>
-        {/* </RTLLayout> */}
-      </ThemeCustomization>
+      <GoogleOAuthProvider
+        clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || '98246926456-u4jq2ch3jjlk09b830668evhhb5umm42.apps.googleusercontent.com'}
+      >
+        <ThemeCustomization>
+          {/* <RTLLayout> */}
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <Locales>
+              <NavigationScroll>
+                <AuthProvider>
+                  <>
+                    <Notistack>
+                      <ServicesProvider>
+                        <RouterProvider router={router} />
+                        <Snackbar />
+                      </ServicesProvider>
+                    </Notistack>
+                  </>
+                </AuthProvider>
+              </NavigationScroll>
+            </Locales>
+          </LocalizationProvider>
+          {/* </RTLLayout> */}
+        </ThemeCustomization>
+      </GoogleOAuthProvider>
     </ErrorBoundary>
   );
 }

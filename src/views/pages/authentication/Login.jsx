@@ -16,6 +16,7 @@ import ViewOnlyAlert from './ViewOnlyAlert';
 
 import Logo from 'ui-component/Logo';
 import AuthFooter from 'ui-component/cards/AuthFooter';
+import GoogleLoginButton from 'components/GoogleLoginButton';
 
 import useAuth from 'hooks/useAuth';
 import { APP_AUTH } from 'config';
@@ -78,6 +79,12 @@ export default function Login() {
                     </Grid>
                   </Grid>
                   <Grid size={12}>{AuthLoginComponent && <AuthLoginComponent />}</Grid>
+                  <Grid size={12}>
+                    <Divider />
+                  </Grid>
+                  <Grid size={12}>
+                    <GoogleLoginButton />
+                  </Grid>
                   <Grid size={12}>
                     <Divider />
                   </Grid>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Card, CardContent, Typography, Button, Chip, Alert, CircularProgress, Stack, Tooltip } from '@mui/material';
+import { Box, Card, CardContent, Typography, Button, Chip, Alert, CircularProgress, Stack, Tooltip, Grid } from '@mui/material';
 import { IconClock, IconMapPin, IconInfoCircle } from '@tabler/icons-react';
 import { useDispatch } from 'react-redux';
 import { openSnackbar } from 'store/slices/snackbar';
@@ -304,101 +304,129 @@ const PunchInOutCard = ({ onAttendanceUpdate }) => {
       setLoading((prev) => ({ ...prev, action: false }));
     }
   };
-
   if (loading.statusCheck) {
-    return <CircularProgress />;
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column', // spinner + text vertically
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: 200 // adjust based on your layout
+        }}
+      >
+        <CircularProgress color="primary" />
+        <Typography variant="body2" sx={{ mt: 1 }}>
+          Checking status...
+        </Typography>
+      </Box>
+    );
   }
 
   return (
     <Card>
       <CardContent>
-        <Box display="flex" justifyContent="space-between" alignItems="flex-start">
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: { xs: 'column', md: 'row' }, // column on mobile, row on desktop
+            justifyContent: 'space-between',
+            gap: 3
+          }}
+        >
           {/* Left side - Title and status */}
           <Box flex={1}>
-            <Typography variant="h5" gutterBottom>
+            <Typography variant="h4" gutterBottom>
               Today's Attendance ({currentDate})
             </Typography>
+
             <Typography variant="body2" color="text.secondary" paragraph>
               Please don't forget to checkout at the end of the day.
             </Typography>
+
             {attendanceStatus.isCheckedIn ? (
-              <Typography variant="body2" color="success.main" fontWeight="medium">
-                You are currently checked in
+              <Typography variant="body2" color="success.darker" fontWeight="medium">
+                ✅ You are currently checked in
               </Typography>
             ) : (
               <Typography variant="body2" color="text.secondary">
-                You are not checked in
+                ⏸️ You are not checked in
               </Typography>
             )}
           </Box>
 
           {/* Right side - Time, location, and action button */}
-          <Box alignSelf="center" sx={{ display: 'flex', flexDirection: 'column', alignItems: 'left' }}>
-            {attendanceStatus.isCheckedIn && (
-              <>
-                <Stack direction="row" spacing={1} alignItems="center" mb={1}>
-                  <IconClock size={18} />
-                  <Typography>
-                    Checked in at: <strong>{attendanceStatus.checkInTime}</strong>
-                  </Typography>
-                </Stack>
-                {attendanceStatus.locationAddress && (
-                  <Stack direction="row" spacing={1} alignItems="flex-start">
-                    <IconMapPin size={18} style={{ marginTop: 2 }} />
-                    <Box>
-                      {(() => {
-                        const address = attendanceStatus.locationAddress.full;
-                        const parts = address.split(',');
-                        const result = [];
-
-                        for (let i = 0; i < parts.length; i += 3) {
-                          const group = parts.slice(i, i + 3).join(',');
-                          if (group.trim()) {
-                            result.push(group.trim());
-                          }
-                        }
-
-                        return result.map((part, index) => (
-                          <Typography variant="body2" key={index}>
-                            {part}
-                          </Typography>
-                        ));
-                      })()}
-                    </Box>
-                    <Tooltip
-                      title="The location shown here is reported by the employee's browser and can be inaccurate, depending on their device and software."
-                      placement="top"
-                      arrow
-                    >
-                      <IconInfoCircle size={16} style={{ marginTop: 2, color: '#666', cursor: 'help' }} />
-                    </Tooltip>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: { xs: 'flex-start', md: 'flex-end' }, // align right on desktop
+              flexShrink: 0
+            }}
+          >
+            <Stack spacing={2} alignItems="flex-start">
+              {attendanceStatus.isCheckedIn && (
+                <>
+                  {/* Check-in time */}
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <IconClock size={18} />
+                    <Typography>
+                      Checked in at: <strong>{attendanceStatus.checkInTime}</strong>
+                    </Typography>
                   </Stack>
-                )}
-              </>
-            )}
-            <Button
-              variant="contained"
-              size="large"
-              color={attendanceStatus.isCheckedIn ? 'error' : 'primary'}
-              startIcon={loading.action || loading.location ? <CircularProgress size={20} color="inherit" /> : <IconClock size={20} />}
-              onClick={handleAttendanceAction}
-              disabled={loading.action || loading.location}
-              sx={{
-                minWidth: 160,
-                maxWidth: 'fit-content',
-                alignSelf: 'flex-start',
-                fontWeight: 600,
-                textTransform: 'none',
-                marginTop: 2
-              }}
-            >
-              {loading.action || loading.location ? 'Processing...' : attendanceStatus.isCheckedIn ? 'Check Out' : 'Check In'}
-            </Button>
+
+                  {/* Location */}
+                  {attendanceStatus.locationAddress && (
+                    <Stack direction="row" spacing={1} alignItems="flex-start">
+                      <IconMapPin size={18} style={{ marginTop: 2 }} />
+                      <Box>
+                        {attendanceStatus.locationAddress.full
+                          .split(',')
+                          .reduce((result, _, i, arr) => {
+                            if (i % 3 === 0) result.push(arr.slice(i, i + 3).join(','));
+                            return result;
+                          }, [])
+                          .map((part, idx) => (
+                            <Typography variant="body2" key={idx}>
+                              {part.trim()}
+                            </Typography>
+                          ))}
+                      </Box>
+                      <Tooltip
+                        title="The location shown here is reported by the employee's browser and may not always be accurate."
+                        placement="top"
+                        arrow
+                      >
+                        <IconInfoCircle size={16} style={{ marginTop: 2, color: '#666', cursor: 'help' }} />
+                      </Tooltip>
+                    </Stack>
+                  )}
+                </>
+              )}
+
+              {/* Check In/Out Button */}
+              <Button
+                variant="contained"
+                size="large"
+                color={attendanceStatus.isCheckedIn ? 'error' : 'primary'}
+                startIcon={loading.action || loading.location ? <CircularProgress size={20} color="inherit" /> : <IconClock size={20} />}
+                onClick={handleAttendanceAction}
+                disabled={loading.action || loading.location}
+                sx={{
+                  minWidth: 160,
+                  fontWeight: 600,
+                  textTransform: 'none'
+                }}
+              >
+                {loading.action || loading.location ? 'Processing...' : attendanceStatus.isCheckedIn ? 'Check Out' : 'Check In'}
+              </Button>
+            </Stack>
           </Box>
         </Box>
 
+        {/* Error Alert */}
         {error && (
-          <Alert severity="error" sx={{ mt: 2 }}>
+          <Alert severity="error" sx={{ mt: 3 }}>
             {error}
           </Alert>
         )}
