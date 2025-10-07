@@ -307,7 +307,6 @@ const ReusableTable = ({
         showExport && (
           <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
             <CSVExport data={selectedValue.length > 0 ? selectedValue : filteredData} filename={exportFilename} header={exportHeaders} />
-            <SecondaryAction link="https://next.material-ui.com/components/tables/" />
           </Stack>
         )
       }

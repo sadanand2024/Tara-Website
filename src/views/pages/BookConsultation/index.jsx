@@ -244,10 +244,10 @@ const BookConsultationPage = () => {
     if (!form.name.trim()) newErrors.name = 'Name is required.';
     if (!form.email.trim()) newErrors.email = 'Email is required.';
     else if (!/^\S+@\S+\.\S+$/.test(form.email)) newErrors.email = 'Enter a valid email address.';
-    if (!form.mobile_number.trim() || form.mobile_number.length !== 10) newErrors.mobile_number = 'Mobile Number is required.';
+    // if (!form.mobile_number.trim() || form.mobile_number.length !== 10) newErrors.mobile_number = 'Mobile Number is required.';
     // Notes validation
-    if (!form.notes || form.notes.length < 30) newErrors.notes = 'Please enter at least 30 characters.';
-    else if (form.notes.length > 200) newErrors.notes = 'Maximum 200 characters allowed.';
+    // if (!form.notes || form.notes.length < 30) newErrors.notes = 'Please enter at least 30 characters.';
+    if (form.notes && form.notes.length > 200) newErrors.notes = 'Maximum 200 characters allowed.';
     return newErrors;
   };
 
@@ -660,21 +660,6 @@ const BookConsultationPage = () => {
             helperText={errors.name}
           />
           <Typography variant="subtitle1" sx={{ textAlign: 'left', mb: 0.5, color: theme.palette.text.primary }}>
-            Mobile Number&nbsp;
-            <Typography variant="caption" sx={{ color: theme.palette.error.main }}>
-              *
-            </Typography>
-          </Typography>
-          <TextField
-            fullWidth
-            size="small"
-            sx={styles.textField}
-            value={form.mobile_number}
-            onChange={handleFormChange('mobile_number')}
-            error={!!errors.mobile_number}
-            helperText={errors.mobile_number}
-          />
-          <Typography variant="subtitle1" sx={{ textAlign: 'left', mb: 0.5, color: theme.palette.text.primary }}>
             Email&nbsp;
             <Typography variant="caption" sx={{ color: theme.palette.error.main }}>
               *
@@ -689,6 +674,28 @@ const BookConsultationPage = () => {
             error={!!errors.email}
             helperText={errors.email}
           />
+          <Typography variant="subtitle1" sx={{ textAlign: 'left', mb: 0.5, color: theme.palette.text.primary }}>
+            Mobile Number&nbsp;
+            {/* <Typography variant="caption" sx={{ color: theme.palette.error.main }}>
+              *
+            </Typography> */}
+          </Typography>
+          <TextField
+            fullWidth
+            size="small"
+            sx={styles.textField}
+            value={form.mobile_number}
+            onChange={(e) => {
+              const value = e.target.value.replace(/\D/g, ''); // Remove non-numeric characters
+              if (value.length <= 10) {
+                handleFormChange('mobile_number')({ target: { value } });
+              }
+            }}
+            error={!!errors.mobile_number}
+            helperText={errors.mobile_number}
+            inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+          />
+
           <Typography variant="subtitle1" sx={{ textAlign: 'left', mb: 0.5, color: theme.palette.text.primary }}>
             Please share anything that will help prepare for our meeting.
           </Typography>
@@ -706,10 +713,8 @@ const BookConsultationPage = () => {
             }}
             error={!!errors.notes}
             helperText={
-              errors.notes
-                ? errors.notes
-                : `${form.notes.length}/200 characters` +
-                  (form.notes.length > 0 && form.notes.length < 30 ? ' (minimum 30 characters)' : '')
+              errors.notes ? errors.notes : `${form.notes.length}/200 characters`
+              // + (form.notes.length > 0 && form.notes.length < 30 ? ' (minimum 30 characters)' : '')
             }
             inputProps={{ maxLength: 200 }}
           />
@@ -777,7 +782,7 @@ const BookConsultationPage = () => {
       >
         <Box sx={{ flex: 1 }}>
           <Typography variant="h1" color="primary.main" gutterBottom>
-            Book a Consultation
+            Book a Free Consultation
           </Typography>
           <Typography color="text.secondary">Let's Talk – Book Your Consultation Now! </Typography>
         </Box>

@@ -97,7 +97,7 @@ const EmployeePortal = {
       id: 'tax-deductions',
       title: 'Tax Deductions',
       type: 'item',
-      url: '/app/employee-portal/tax-deductions',
+      url: '/app/employee-portal/declarations',
       icon: icons.IconCalculator,
       breadcrumbs: false
     },
@@ -166,15 +166,8 @@ const EmployeePortal = {
       url: '/app/employee-portal/attandance-info',
       icon: icons.IconClock,
       breadcrumbs: false
-    },
-    {
-      id: 'declarations',
-      title: 'Declarations',
-      type: 'item',
-      url: '/app/employee-portal/declarations',
-      icon: icons.IconFileText,
-      breadcrumbs: false
     }
+
     // {
     //   id: 'form-16',
     //   title: 'Form 16 & Compliances',

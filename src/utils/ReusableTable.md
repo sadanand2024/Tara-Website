@@ -312,3 +312,4 @@ To migrate from your existing table implementation:
 1. **Large datasets**: Consider implementing server-side pagination
 2. **Slow rendering**: Use `React.memo` for your data array
 3. **Memory leaks**: Clean up event listeners in useEffect cleanup
+
