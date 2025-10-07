@@ -63,8 +63,8 @@ export default function NotificationSection() {
   const user = useSelector((s) => s?.accountReducer?.user ?? null);
   const anchorRef = useRef(null);
 
-  const isTodayNotification = useCallback((it) => {
-    const createdAt = it?.created_at || {};
+  const isTodayNotification = useCallback((notification) => {
+    const createdAt = notification?.created_at || {};
 
     const dateLabel = typeof createdAt.date === 'string' ? createdAt.date.toLowerCase() : '';
     if (dateLabel === 'today') return true;
@@ -77,10 +77,10 @@ export default function NotificationSection() {
     return false;
   }, []);
 
-  const isUnread = useCallback((it) => it.unread !== false, []);
-  const isReadItem = useCallback((it) => it.unread === false, []);
-  const getEpoch = useCallback((it) => {
-    const createdAt = it?.created_at || {};
+  const isUnread = useCallback((notification) => notification.unread !== false, []);
+  const isReadItem = useCallback((notification) => notification.unread === false, []);
+  const getEpoch = useCallback((notification) => {
+    const createdAt = notification?.created_at || {};
     const currentDate = new Date();
 
     // quick helpers
@@ -128,7 +128,7 @@ export default function NotificationSection() {
       return baseDate.getTime();
     }
 
-    const anyDate = it.created || it.timestamp || it.display;
+    const anyDate = notification.created || notification.timestamp || notification.display;
     if (anyDate) {
       const dateObj = new Date(anyDate);
       if (!Number.isNaN(dateObj)) return dateObj.getTime();
@@ -149,14 +149,14 @@ export default function NotificationSection() {
       notificationList = items.filter(isUnread);
       
       if (expandedKey) {
-        const sticky = items.find((it) => (it.notification_id ?? it.id) === expandedKey);
-        if (sticky && !notificationList.some((x) => (x.notification_id ?? x.id) === expandedKey)) {
+        const sticky = items.find((notification) => (notification.notification_id ?? notification.id) === expandedKey);
+        if (sticky && !notificationList.some((notification) => (notification.notification_id ?? notification.id) === expandedKey)) {
           notificationList = [sticky, ...notificationList];
         }
       }
       break;
       case 'read':
-        notificationList = items.filter((it) => it.unread === false);
+        notificationList = items.filter((notification) => notification.unread === false);
         break;
       case 'all':
       default:
@@ -177,7 +177,7 @@ export default function NotificationSection() {
   };
   const handleItemRead = useCallback((nidOrId) => {
   
-    setItems((prev) => prev.map((it) => ((it.notification_id ?? it.id) === nidOrId ? { ...it, unread: false } : it)));
+    setItems((prev) => prev.map((notification) => ((notification.notification_id ?? notification.id) === nidOrId ? { ...notification, unread: false } : notification)));
 
     setUnreadCount((c) => Math.max(0, c - 1));
 
@@ -246,8 +246,8 @@ export default function NotificationSection() {
       if (Array.isArray(d.notifications)) {
         const normalized = d.notifications.map(normalizeNotification);
         setItems((prev) => {
-          const existingIds = new Set(prev.map((x) => x.notification_id ?? x.id));
-          const notificationsToAdd = normalized.filter((m) => !existingIds.has(m.notification_id ?? m.id));
+          const existingIds = new Set(prev.map((notification) => notification.notification_id ?? notification.id));
+          const notificationsToAdd = normalized.filter((notification) => !existingIds.has(notification.notification_id ?? notification.id));
 
           return [...prev, ...notificationsToAdd].slice(0, 200);
         });
@@ -259,7 +259,7 @@ export default function NotificationSection() {
       const notification = normalizeNotification(d);
       setItems((prev) => {
         const notificationKey = notification.notification_id || notification.id;
-        const index = prev.findIndex((x) => (x.notification_id || x.id) === notificationKey);
+        const index = prev.findIndex((notification) => (notification.notification_id || notification.id) === notificationKey);
         if (index >= 0) {
           const next = prev.slice();
           next[index] = { ...prev[index], ...notification };
@@ -302,15 +302,15 @@ export default function NotificationSection() {
         else if (Array.isArray(payload?.items)) notificationList = payload.items;
 
         const mapped = Array.isArray(notificationList)
-          ? notificationList.map((n) => {
-              const m = normalizeNotification(n);
-              return m;
+          ? notificationList.map((notification) => {
+              const mappedNotification = normalizeNotification(notification);
+              return mappedNotification;
             })
           : [];
 
         setItems((prev) => {
-          const existingIds = new Set(prev.map((x) => x.notification_id ?? x.id));
-          const notificationsToAdd = mapped.filter((m) => !existingIds.has(m.notification_id ?? m.id));
+          const existingIds = new Set(prev.map((notification) => notification.notification_id ?? notification.id));
+          const notificationsToAdd = mapped.filter((notification) => !existingIds.has(notification.notification_id ?? notification.id));
           return [...prev, ...notificationsToAdd].slice(0, 200); // ✅ WS stays first
         });
         setShowAll(false);
