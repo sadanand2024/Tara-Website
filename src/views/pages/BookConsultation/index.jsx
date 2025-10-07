@@ -247,7 +247,7 @@ const BookConsultationPage = () => {
     // if (!form.mobile_number.trim() || form.mobile_number.length !== 10) newErrors.mobile_number = 'Mobile Number is required.';
     // Notes validation
     // if (!form.notes || form.notes.length < 30) newErrors.notes = 'Please enter at least 30 characters.';
-    if (form.notes && form.notes.length > 200) newErrors.notes = 'Maximum 200 characters allowed.';
+    // if (form.notes && form.notes.length > 200) newErrors.notes = 'Maximum 200 characters allowed.';
     return newErrors;
   };
 
@@ -285,10 +285,41 @@ const BookConsultationPage = () => {
           handleReset();
         })
         .catch((error) => {
-          enqueueSnackbar('Error booking consultation!', {
+          let message = 'Error booking consultation!';
+
+          if (error.response) {
+            const data = error.response.data;
+
+            // ✅ Handle validation errors like { mobile_number: ["This field may not be blank."] }
+            if (typeof data === 'object' && !Array.isArray(data)) {
+              const entries = Object.entries(data);
+              // Pick the first key-value pair for display
+              if (entries.length > 0) {
+                const [key, value] = entries[0];
+                const fieldError = Array.isArray(value) ? value[0] : value;
+                message = `${key}: ${fieldError}`; // 👉 "mobile_number: This field may not be blank."
+              }
+            }
+
+            // ✅ Handle standard message or error keys
+            else if (data?.message) {
+              message = data.message;
+            } else if (data?.error) {
+              message = data.error;
+            } else {
+              message = `Request failed with status ${error.response.status}`;
+            }
+          } else if (error.request) {
+            message = 'No response from server. Please check your connection.';
+          } else {
+            message = error.message;
+          }
+
+          // ✅ Show message in Snackbar
+          enqueueSnackbar(message, {
             variant: 'error',
             anchorOrigin: { vertical: 'top', horizontal: 'right' },
-            autoHideDuration: 3000
+            autoHideDuration: 4000
           });
         });
     }
@@ -706,17 +737,19 @@ const BookConsultationPage = () => {
             minRows={{ xs: 2, sm: 3 }}
             sx={styles.textField}
             value={form.notes}
-            onChange={(e) => {
-              if (e.target.value.length <= 200) {
-                handleFormChange('notes')(e);
-              }
-            }}
+            onChange={handleFormChange('notes')}
+            // onChange={(e) => {
+            //   if (e.target.value.length <= 200) {
+            //     handleFormChange('notes')(e);
+            //   }
+            // }}
             error={!!errors.notes}
             helperText={
-              errors.notes ? errors.notes : `${form.notes.length}/200 characters`
+              errors.notes ? errors.notes : `${form.notes.length} characters`
+              // Original limits: `${form.notes.length}/200 characters`
               // + (form.notes.length > 0 && form.notes.length < 30 ? ' (minimum 30 characters)' : '')
             }
-            inputProps={{ maxLength: 200 }}
+            // inputProps={{ maxLength: 200 }}
           />
           <Typography variant="caption" sx={{ color: theme.palette.text.secondary, mb: 2, display: 'block' }}>
             By proceeding, you confirm that you have read and agree to{' '}
