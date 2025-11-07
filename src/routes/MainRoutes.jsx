@@ -86,10 +86,13 @@ const LeavePolicy = Loadable(lazy(() => import('views/application/EmployeePortal
 const Attendance = Loadable(lazy(() => import('views/application/EmployeePortal/Attendance')));
 const AttendanceApproval = Loadable(lazy(() => import('views/application/EmployeePortal/AttendanceApproval')));
 const MyEarnings = Loadable(lazy(() => import('views/application/EmployeePortal/MyEarnings')));
+const AttendanceInfo = Loadable(lazy(() => import('views/application/EmployeePortal/AttendanceInfo')));
+const MyRegularizations = Loadable(lazy(() => import('views/application/EmployeePortal/MyRegularizations')));
 const Declarations = Loadable(lazy(() => import('views/application/EmployeePortal/Declarations')));
 const Form16Compliances = Loadable(lazy(() => import('views/application/EmployeePortal/Form16Compliances')));
-
+const Onboarding = Loadable(lazy(() => import('views/application/EmployeePortal/Onboarding')));
 const FaceRecognition = Loadable(lazy(() => import('views/application/AttendanceTest')));
+const RequestManagement = Loadable(lazy(() => import('views/application/EmployeePortal/RequestManagement')));
 // ==============================|| MAIN ROUTING ||============================== //
 
 const MainRoutes = {
@@ -247,6 +250,10 @@ const MainRoutes = {
       element: <EmployeePortal />
     },
     {
+      path: '/app/employee-portal/onboarding',
+      element: <Onboarding />
+    },
+    {
       path: '/app/employee-portal/pay-slips',
       element: <PaySlips />
     },
@@ -280,12 +287,24 @@ const MainRoutes = {
       element: <MyEarnings />
     },
     {
+      path: '/app/employee-portal/attandance-info',
+      element: <AttendanceInfo />
+    },
+    {
+      path: '/app/employee-portal/my-regularizations',
+      element: <MyRegularizations />
+    },
+    {
       path: '/app/employee-portal/declarations',
       element: <Declarations />
     },
     {
       path: '/app/employee-portal/form-16',
       element: <Form16Compliances />
+    },
+    {
+      path: '/app/employee-portal/request-management',
+      element: <RequestManagement />
     },
     {
       path: '/app/subscriptions',

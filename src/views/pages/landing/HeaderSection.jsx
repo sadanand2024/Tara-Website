@@ -305,13 +305,13 @@ export default function HeaderSection() {
                       sx={{
                         width: { xs: '100%', sm: 'auto' },
                         fontSize: { xs: '0.875rem', sm: '1rem' },
-                        backgroundColor: '#0023af',
-                        color: '#ffd600',
+                        backgroundColor: '#673ab7',
+                        // color: '#ffd600',
                         py: { xs: 1, sm: 1, md: 1.5 },
                         px: { xs: 2, sm: 2, md: 3 }
                       }}
                     >
-                      Book Consultation
+                      Book Free Consultation
                     </Button>
                   </AnimateButton>
                 </Stack>

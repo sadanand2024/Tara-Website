@@ -22,7 +22,8 @@ import {
   IconPlane,
   IconUserCheck,
   IconFileInvoice,
-  IconShieldCheck
+  IconShieldCheck,
+  IconSend
 } from '@tabler/icons-react';
 
 // constant
@@ -49,7 +50,8 @@ const icons = {
   IconPlane,
   IconUserCheck,
   IconFileInvoice,
-  IconShieldCheck
+  IconShieldCheck,
+  IconSend
 };
 
 // Should Only work for Admin
@@ -68,24 +70,16 @@ const EmployeePortal = {
       breadcrumbs: false
     },
     {
-      id: 'pay-slips',
-      title: 'Pay Slips',
+      id: 'onboarding',
+      title: 'Onboarding',
       type: 'item',
-      url: '/app/employee-portal/pay-slips',
-      icon: icons.IconReceipt,
+      url: '/app/employee-portal/onboarding',
+      icon: icons.IconBriefcase,
       breadcrumbs: false
     },
     {
-      id: 'tax-tds',
-      title: 'Tax & TDS',
-      type: 'item',
-      url: '/app/employee-portal/tax-tds',
-      icon: icons.IconCalculator,
-      breadcrumbs: false
-    },
-    {
-      id: 'apply-leave',
-      title: 'Leave Tracker',
+      id: 'leave-management',
+      title: 'Leave Management',
       type: 'item',
       url: '/app/employee-portal/leave-management',
       icon: icons.IconPlane,
@@ -100,29 +94,88 @@ const EmployeePortal = {
       breadcrumbs: false
     },
     {
-      id: 'my-earnings',
-      title: 'My Earnings',
-      type: 'item',
-      url: '/app/employee-portal/my-earnings',
-      icon: icons.IconCurrencyDollar,
-      breadcrumbs: false
-    },
-    {
-      id: 'declarations',
-      title: 'Declarations',
+      id: 'tax-deductions',
+      title: 'Tax Deductions',
       type: 'item',
       url: '/app/employee-portal/declarations',
-      icon: icons.IconFileText,
+      icon: icons.IconCalculator,
       breadcrumbs: false
     },
     {
-      id: 'form-16',
-      title: 'Form 16 & Compliances',
+      id: 'pay-slips',
+      title: 'Salary',
       type: 'item',
-      url: '/app/employee-portal/form-16',
-      icon: icons.IconShieldCheck,
+      url: '/app/employee-portal/pay-slips',
+      icon: icons.IconReceipt,
+      breadcrumbs: false
+    },
+    {
+      id: 'request-management',
+      title: 'Request Management',
+      type: 'item',
+      url: '/app/employee-portal/request-management',
+      icon: icons.IconSend,
+      breadcrumbs: false
+    },
+    // {
+    //   id: 'pay-slips',
+    //   title: 'Pay Slips',
+    //   type: 'item',
+    //   url: '/app/employee-portal/pay-slips',
+    //   icon: icons.IconReceipt,
+    //   breadcrumbs: false
+    // },
+    // {
+    //   id: 'tax-tds',
+    //   title: 'Tax & TDS',
+    //   type: 'item',
+    //   url: '/app/employee-portal/tax-tds',
+    //   icon: icons.IconCalculator,
+    //   breadcrumbs: false
+    // },
+    // {
+    //   id: 'apply-leave',
+    //   title: 'Leave Tracker',
+    //   type: 'item',
+    //   url: '/app/employee-portal/leave-management',
+    //   icon: icons.IconPlane,
+    //   breadcrumbs: false
+    // },
+
+    // {
+    //   id: 'tax-tds',
+    //   title: 'Tax & TDS',
+    //   type: 'item',
+    //   url: '/app/employee-portal/tax-tds',
+    //   icon: icons.IconCalculator,
+    //   breadcrumbs: false
+    // },
+
+    // {
+    //   id: 'my-earnings',
+    //   title: 'My Earnings',
+    //   type: 'item',
+    //   url: '/app/employee-portal/my-earnings',
+    //   icon: icons.IconCurrencyDollar,
+    //   breadcrumbs: false
+    // }
+    {
+      id: 'attandance-info',
+      title: 'Attandance Info',
+      type: 'item',
+      url: '/app/employee-portal/attandance-info',
+      icon: icons.IconClock,
       breadcrumbs: false
     }
+
+    // {
+    //   id: 'form-16',
+    //   title: 'Form 16 & Compliances',
+    //   type: 'item',
+    //   url: '/app/employee-portal/form-16',
+    //   icon: icons.IconShieldCheck,
+    //   breadcrumbs: false
+    // }
 
     // {
     //   id: 'service-summary',

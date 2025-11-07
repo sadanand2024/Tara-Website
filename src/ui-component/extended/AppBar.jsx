@@ -116,8 +116,18 @@ export default function AppBar({ ...others }) {
             <Button color="inherit" component={Link} href="/knowledge">
               Knowledge
             </Button>
-            <Button color="inherit" component={Link} href="/book-consultation">
-              Book Consultation
+            <Button
+              variant="contained"
+              color="secondary"
+              size="small"
+              sx={{
+                backgroundColor: '#673ab7'
+                // color: '#ffd600',
+              }}
+              component={Link}
+              href="/book-consultation"
+            >
+              Book Free Consultation
             </Button>
             <Button color="inherit" onClick={handleQuickAcessToggle}>
               Quick Acess
