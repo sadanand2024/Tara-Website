@@ -247,7 +247,7 @@ export default function ManageUsers() {
               variant="contained"
               startIcon={<AddIcon />}
               onClick={() => {
-                if (invoiceUsage && Object.keys(invoiceUsage.users_count).length > 0) {
+                if (invoiceUsage && Object.keys(invoiceUsage?.users_count || {}).length > 0) {
                   if (Number(invoiceUsage.users_count.usage_count) >= Number(invoiceUsage.users_count.actual_count)) {
                     enqueueSnackbar('Usage limit exceeded. Please upgrade your plan!', { variant: 'warning' });
                   } else handleAddDialogOpen();
